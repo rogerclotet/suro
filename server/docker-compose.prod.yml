@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  api:
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    volumes:
+      - /var/log/familia:/var/log/gunicorn
+  
+  db:
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DATABASE=${DB_NAME}
+    volumes:
+      - /var/lib/postgresql/data_familias:/var/lib/postgresql/data
