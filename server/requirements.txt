@@ -9,12 +9,15 @@ asgiref==3.5.2
 django==4.0.5
     # via
     #   -r requirements.in
+    #   django-cors-headers
     #   django-extensions
     #   django-filter
     #   django-use-email-as-username
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   drf-nested-routers
+django-cors-headers==3.13.0
+    # via -r requirements.in
 django-extensions==3.1.5
     # via -r requirements.in
 django-filter==21.1
