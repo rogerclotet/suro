@@ -1,0 +1,23 @@
+_id: req_9076e3640897421a9ada82bd59bb068b
+type: Request
+parentId: fld_4dd7bdd97dd04db9890c6b1ceb06cf7d
+modified: 1655122866230
+created: 1655122834635
+url: "{{ _.api_url }}/families"
+name: Families
+description: ""
+method: GET
+body: {}
+parameters: []
+headers: []
+authentication:
+  type: bearer
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MTIzMDM4LCJpYXQiOjE2NTUxMTA0NjYsImp0aSI6IjcwNmM2ZTliNTlmNjQ0Yjc4NWYxNGUwMDJlM2VmMzI2IiwidXNlcl9pZCI6MX0.2bBAcp3AerRxupV886FAbsELIT668flzMLBmuT5L5bc
+metaSortKey: -1655122834635
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

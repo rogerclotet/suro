@@ -1,0 +1,23 @@
+_id: req_6552f7907fbd47d1a4811a32e9a2d91b
+type: Request
+parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
+modified: 1655123111002
+created: 1655111762055
+url: "{{ _.api_url }}/families/1/lists/"
+name: Lists
+description: ""
+method: GET
+body: {}
+parameters: []
+headers: []
+authentication:
+  type: bearer
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MTIzMzgzLCJpYXQiOjE2NTUxMjMwODMsImp0aSI6ImJjZmFiZDAyNmFmZTRlMTRhZTJjZWM2YmM5ZjhmNWY3IiwidXNlcl9pZCI6MX0.VUvFjXrdtxlG6E0x8ldfkIaRWYZu7Um9rKLDvymbzXY
+metaSortKey: -1655111762055
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global
