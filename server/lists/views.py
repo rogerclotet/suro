@@ -1,10 +1,12 @@
 from rest_framework import viewsets
+from lists.permissions import IsListFamilyMember
 from lists.serializers import ListSerializer
-from . import models
-from rest_framework import permissions
+from lists.models import List
 
 
-class ListViewSet(viewsets.ModelViewSet):
-    queryset = models.List.objects.all().order_by("-updated_at")
+class FamilyListViewSet(viewsets.ModelViewSet):
     serializer_class = ListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsListFamilyMember]
+
+    def get_queryset(self):
+        return List.objects.filter(family=self.kwargs["family_pk"])
