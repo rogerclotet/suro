@@ -12,13 +12,13 @@ import {
   Link,
 } from '@mui/material'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
-import { Logout } from '@mui/icons-material'
+import { ArrowBack, Logout } from '@mui/icons-material'
 import { useAuth } from './auth/AuthProvider'
-import { useTitle } from './TitleProvider'
+import { useHeader } from './HeaderProvider'
 
 function Layout() {
   const { isLoggedIn, logOut } = useAuth()
-  const { title } = useTitle()
+  const { title, backLink } = useHeader()
 
   return (
     <Box
@@ -30,16 +30,26 @@ function Layout() {
       <Container maxWidth="sm" disableGutters css={{ height: '100%' }}>
         <Stack direction="column" css={{ height: '100%' }}>
           <header>
-            <AppBar position="static" css={{ marginBottom: '1em' }}>
-              <Toolbar>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <AppBar position="static">
+              <Toolbar sx={{ gap: 1 }}>
+                {backLink && (
+                  <IconButton component={RouterLink} to={backLink}>
+                    <ArrowBack />
+                  </IconButton>
+                )}
+                <Typography
+                  variant="h6"
+                  component="div"
+                  noWrap
+                  sx={{ flexGrow: 1 }}
+                >
                   <Link
                     component={RouterLink}
                     to="/"
                     color="inherit"
                     underline="none"
                   >
-                    {title}
+                    {title || 'Família'}
                   </Link>
                 </Typography>
                 {isLoggedIn && (

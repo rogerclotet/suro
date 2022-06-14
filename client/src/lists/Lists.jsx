@@ -10,32 +10,36 @@ import {
   Typography,
 } from '@mui/material'
 import LoadingScreen from '../LoadingScreen'
-import { useTitle } from '../TitleProvider'
+import { useHeader } from '../HeaderProvider'
 import { DeleteForever, Favorite, Share } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
+import { useAuth } from '../auth/AuthProvider'
 
 const Lists = () => {
   const [lists, setLists] = useState()
-  const { setTitle } = useTitle()
+  const { setHeader } = useHeader()
+  const { token } = useAuth()
 
   useEffect(() => {
     // TODO use current family id
-    fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/`)
+    fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(res => res.json())
       .catch(e => console.log('Error loading lists', e))
       .then(data => setLists(data))
-  }, [])
+  }, [token])
 
   useEffect(() => {
-    setTitle('Llistes')
-  }, [setTitle])
+    setHeader('Llistes')
+  }, [setHeader])
 
   if (lists === undefined) {
     return <LoadingScreen />
   }
 
   return (
-    <Container>
+    <Container sx={{ py: 2 }}>
       <Grid container spacing={2}>
         {lists.map(list => (
           <Grid item xs={6} key={list.id}>
@@ -47,9 +51,14 @@ const Lists = () => {
                 color="inherit"
               >
                 <CardContent>
-                  <Typography variant="h6" component="h3" noWrap>
+                  <Typography variant="h7" component="h3">
                     {list.name}
                   </Typography>
+                  {list.description && (
+                    <Typography variant="subtitle1" color="text.secondary">
+                      {list.description}
+                    </Typography>
+                  )}
                   <Typography variant="body2">{`${list.items.length} elements`}</Typography>
                 </CardContent>
               </Link>

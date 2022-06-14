@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Button,
   Card,
@@ -12,6 +12,7 @@ import {
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAuth } from './AuthProvider'
+import { useHeader } from '../HeaderProvider'
 
 const validationSchema = yup.object({
   email: yup
@@ -27,6 +28,7 @@ const validationSchema = yup.object({
 
 const Login = () => {
   const { logIn } = useAuth()
+  const { setHeader } = useHeader()
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -35,6 +37,10 @@ const Login = () => {
     validationSchema: validationSchema,
     onSubmit: ({ email, password }) => logIn(email, password),
   })
+
+  useEffect(() => {
+    setHeader(undefined)
+  }, [setHeader])
 
   return (
     <Container sx={{ height: '100%' }}>

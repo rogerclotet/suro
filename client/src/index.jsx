@@ -13,7 +13,7 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { blueGrey, lightGreen } from '@mui/material/colors'
 import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
-import TitleProvider from './TitleProvider'
+import HeaderProvider from './HeaderProvider'
 
 const theme = createTheme({
   palette: {
@@ -33,11 +33,11 @@ root.render(
     <CssBaseline />
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        <TitleProvider>
+        <HeaderProvider>
           <BrowserRouter>
             <App />
           </BrowserRouter>
-        </TitleProvider>
+        </HeaderProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
