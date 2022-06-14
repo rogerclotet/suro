@@ -8,6 +8,11 @@ class FamilyListViewSet(viewsets.ModelViewSet):
     serializer_class = ListSerializer
     permission_classes = [IsListFamilyMember]
 
+    def create(self, request, *args, **kwargs):
+        family = self.kwargs["family_pk"]
+        request.data["family"] = family
+        return super().create(request, *args, **kwargs)
+
     def get_queryset(self):
         return List.objects.filter(family=self.kwargs["family_pk"])
 

@@ -1,7 +1,6 @@
 import {
   Checkbox,
   Container,
-  Divider,
   List,
   ListItem,
   ListItemText,
@@ -62,27 +61,26 @@ const ListDetail = () => {
   return (
     <List>
       {list.items.map(item => (
-        <div key={item.id}>
-          <ListItem
-            secondaryAction={
-              <Checkbox
-                edge="end"
-                onChange={() => {}}
-                checked={item.is_complete}
-              />
-            }
-          >
-            <ListItemText>
-              <Typography
-                color={item.is_complete ? 'text.secondary' : 'inherit'}
-                sx={{ textDecoration: item.is_complete ? 'line-through' : '' }}
-              >
-                {item.name}
-              </Typography>
-            </ListItemText>
-          </ListItem>
-          <Divider component="li" />
-        </div>
+        <ListItem
+          key={item.id}
+          divider
+          secondaryAction={
+            <Checkbox
+              edge="end"
+              onChange={() => {}}
+              checked={item.is_complete}
+            />
+          }
+        >
+          <ListItemText>
+            <Typography
+              color={item.is_complete ? 'text.secondary' : 'inherit'}
+              sx={{ textDecoration: item.is_complete ? 'line-through' : '' }}
+            >
+              {item.name}
+            </Typography>
+          </ListItemText>
+        </ListItem>
       ))}
     </List>
   )

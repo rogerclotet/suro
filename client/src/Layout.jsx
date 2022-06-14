@@ -45,7 +45,7 @@ function Layout() {
                 >
                   <Link
                     component={RouterLink}
-                    to="/"
+                    to={backLink || '/'}
                     color="inherit"
                     underline="none"
                   >
@@ -60,7 +60,7 @@ function Layout() {
               </Toolbar>
             </AppBar>
           </header>
-          <Paper elevation={0} sx={{ flexGrow: 1 }}>
+          <Paper elevation={0} sx={{ flexGrow: 1, overflowY: 'scroll' }}>
             <Outlet />
           </Paper>
         </Stack>
