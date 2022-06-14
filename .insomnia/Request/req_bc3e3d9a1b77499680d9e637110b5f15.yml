@@ -1,0 +1,36 @@
+_id: req_bc3e3d9a1b77499680d9e637110b5f15
+type: Request
+parentId: fld_2c901db19cf548ca836a7c854cd1717b
+modified: 1655234789769
+created: 1655234773055
+url: "{{ _.api_url }}/families/1/lists/5/items/2/"
+name: Update item
+description: ""
+method: PUT
+body:
+  mimeType: application/json
+  text: |-
+    {
+    	"id": 2,
+    	"name": "Element completat",
+    	"order": 1,
+    	"is_complete": true,
+    	"created_at": "2022-06-11T22:54:23.626731Z",
+    	"updated_at": "2022-06-14T18:45:11.180057Z"
+    }
+parameters: []
+headers:
+  - name: Content-Type
+    value: application/json
+    id: pair_5b7087c515664387afa2306ec800f695
+authentication:
+  type: bearer
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MjM1MDA4LCJpYXQiOjE2NTUyMzQ3MDgsImp0aSI6IjQ0YjUwZDA3ZmJkMjQ4MGZhMGU5NjI3YTMwZDEyNjdjIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0._4Qzhh7m22QEoV-iEiOY8dZUadEfeYSAYFrVAi_rUEo
+metaSortKey: -1655110509367.5
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

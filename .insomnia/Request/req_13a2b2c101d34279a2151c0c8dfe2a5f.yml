@@ -1,10 +1,10 @@
-_id: req_e7cb7c0018034deba6fb20392d5c7f68
+_id: req_13a2b2c101d34279a2151c0c8dfe2a5f
 type: Request
-parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
-modified: 1655234718264
-created: 1655129531712
-url: "{{ _.api_url }}/families/1/lists/6/"
-name: List detail
+parentId: fld_2c901db19cf548ca836a7c854cd1717b
+modified: 1655234759791
+created: 1655234734564
+url: "{{ _.api_url }}/families/1/lists/5/items/2/"
+name: Item detail
 description: ""
 method: GET
 body: {}
@@ -13,7 +13,7 @@ headers: []
 authentication:
   type: bearer
   token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MjM1MDA4LCJpYXQiOjE2NTUyMzQ3MDgsImp0aSI6IjQ0YjUwZDA3ZmJkMjQ4MGZhMGU5NjI3YTMwZDEyNjdjIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0._4Qzhh7m22QEoV-iEiOY8dZUadEfeYSAYFrVAi_rUEo
-metaSortKey: -1655111280957
+metaSortKey: -1655110740558.75
 isPrivate: false
 settingStoreCookies: true
 settingSendCookies: true
