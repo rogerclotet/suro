@@ -45,7 +45,7 @@ function Layout() {
                 >
                   <Link
                     component={RouterLink}
-                    to="/"
+                    to={backLink || '/'}
                     color="inherit"
                     underline="none"
                   >

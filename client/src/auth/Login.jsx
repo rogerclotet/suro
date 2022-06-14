@@ -29,6 +29,7 @@ const validationSchema = yup.object({
 const Login = () => {
   const { logIn } = useAuth()
   const { setHeader } = useHeader()
+
   const formik = useFormik({
     initialValues: {
       email: '',
