@@ -1,7 +1,7 @@
 _id: req_e67533c2ec494783889d4a13c0df5058
 type: Request
 parentId: fld_87f614be964a4ee1a514a3d4c6de1ee9
-modified: 1655129056677
+modified: 1655215243774
 created: 1655109910587
 url: "{{ _.api_url }}/token/"
 name: Login
@@ -12,7 +12,7 @@ body:
   text: |-
     {
     	"email": "roger@clotet.dev",
-    	"password": "1234"
+    	"password": "fYRz8lq0"
     }
 parameters: []
 headers:
