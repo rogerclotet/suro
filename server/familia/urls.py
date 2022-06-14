@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from core.views import FamilyViewSet
-from lists.views import FamilyListViewSet
+from lists.views import FamilyListItemViewSet, FamilyListViewSet
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -30,10 +30,16 @@ router.register("families", FamilyViewSet, basename="family")
 families_router = routers.NestedDefaultRouter(router, "families", lookup="family")
 families_router.register("lists", FamilyListViewSet, basename="list")
 
+family_lists_router = routers.NestedDefaultRouter(
+    families_router, "lists", lookup="list"
+)
+family_lists_router.register("items", FamilyListItemViewSet, basename="item")
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include(router.urls)),
     path("", include(families_router.urls)),
+    path("", include(family_lists_router.urls)),
     path("api-auth/", include("rest_framework.urls")),
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

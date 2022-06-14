@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from drf_writable_nested.serializers import WritableNestedModelSerializer
 from core.models import Family
 from . import models
 
@@ -10,9 +9,9 @@ class ListItemSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "order", "is_complete", "created_at", "updated_at")
 
 
-class ListSerializer(WritableNestedModelSerializer):
+class ListSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
-    items = ListItemSerializer(many=True, required=False)
+    items = ListItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.List

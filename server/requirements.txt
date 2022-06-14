@@ -33,8 +33,6 @@ djangorestframework-simplejwt==5.2.0
     # via -r requirements.in
 drf-nested-routers==0.93.4
     # via -r requirements.in
-drf-writable-nested==0.6.3
-    # via -r requirements.in
 markdown==3.3.7
     # via -r requirements.in
 psycopg2==2.9.3
