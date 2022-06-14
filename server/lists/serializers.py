@@ -21,6 +21,7 @@ class ListSerializer(WritableNestedModelSerializer):
             "family",
             "name",
             "description",
+            "is_favorite",
             "is_template",
             "items",
             "created_at",
