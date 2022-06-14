@@ -12,6 +12,8 @@ import '@fontsource/roboto/700.css'
 import { createTheme, ThemeProvider } from '@mui/material'
 import { blueGrey, lightGreen } from '@mui/material/colors'
 import { BrowserRouter } from 'react-router-dom'
+import AuthProvider from './auth/AuthProvider'
+import TitleProvider from './TitleProvider'
 
 const theme = createTheme({
   palette: {
@@ -30,9 +32,13 @@ root.render(
   <React.StrictMode>
     <CssBaseline />
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <AuthProvider>
+        <TitleProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </TitleProvider>
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
 )
