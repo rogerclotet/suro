@@ -47,6 +47,6 @@ statics:
   script:
     - cd server
     - pip install -r requirements.txt
-    - python manage.py collectstatics
+    - python manage.py collectstatic
   only:
     - main
