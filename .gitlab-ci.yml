@@ -23,10 +23,8 @@ client:
     - cd client
     - yarn install --production=false
     - yarn lint
-    - yarn build
   artifacts:
     paths:
-      - client/build/
       - client/node_modules/
   rules:
     - changes:
