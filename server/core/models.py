@@ -8,4 +8,7 @@ class Family(models.Model):
     members = models.ManyToManyField(to=User, related_name="families")
 
     def __str__(self) -> str:
-        return f"{self.name} ({', '.join([member.email for member in self.members.all()])}) [{self.id}]"
+        return f"{self.name} ({', '.join([member.email for member in self.members.all()])})"
+
+    class Meta:
+        verbose_name_plural = "Families"
