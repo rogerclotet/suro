@@ -46,6 +46,7 @@ statics:
   image: python:3.10
   script:
     - cd server
+    - pip install -r requirements.txt
     - python manage.py collectstatics
   only:
     - main
