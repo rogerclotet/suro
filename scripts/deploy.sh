@@ -10,12 +10,12 @@
     cd $SSH_PROJECT_DIRECTORY/server
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
     DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD \
-        SECRET_KEY=$SECRET_KEY STATIC_ROOT=$STATIC_ROOT \
+        SECRET_KEY=$SECRET_KEY \
         docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
     DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD \
-        SECRET_KEY=$SECRET_KEY STATIC_ROOT=$STATIC_ROOT \
+        SECRET_KEY=$SECRET_KEY \
         docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec api python manage.py collectstatic
+    STATIC_ROOT=$STATIC_ROOT docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec api python manage.py collectstatic
 EOF
 )
