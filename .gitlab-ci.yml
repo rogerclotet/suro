@@ -40,13 +40,3 @@ deploy:
     - scripts/deploy.sh
   only:
     - main
-
-statics:
-  stage: deploy
-  image: python:3.10
-  script:
-    - cd server
-    - pip install -r requirements.txt
-    - python manage.py collectstatic
-  only:
-    - main
