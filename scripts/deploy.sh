@@ -11,7 +11,7 @@
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
     DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD \
-    SECRET_KEY=$SECRET_KEY DEBUG+$DEBUG \
+    SECRET_KEY=$SECRET_KEY DEBUG=$DEBUG \
       docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 EOF
 )
