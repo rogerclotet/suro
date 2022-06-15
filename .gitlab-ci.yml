@@ -1,0 +1,44 @@
+stages:
+  - check
+  - deploy
+
+cache:
+  paths:
+    - client/node_modules/
+
+server:
+  stage: check
+  image: python:3.10
+  script:
+    - cd server
+    - pip install -r requirements.txt
+  rules:
+    - changes:
+        - server/**/*
+
+client:
+  stage: check
+  image: node:16-alpine
+  script:
+    - cd client
+    - yarn install --production=false
+    - yarn lint
+    - yarn build
+  artifacts:
+    paths:
+      - client/build/
+      - client/node_modules/
+  rules:
+    - changes:
+        - client/**/*
+
+deploy:
+  stage: deploy
+  image: alpine
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/deploy.sh
+    - scripts/deploy.sh
+  only:
+    - main
