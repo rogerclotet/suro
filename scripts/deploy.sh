@@ -6,7 +6,7 @@
     git pull
     cd $SSH_PROJECT_DIRECTORY/client
     yarn install
-    yarn build
+    REACT_APP_API_URL=$API_URL yarn build
     cd $SSH_PROJECT_DIRECTORY/server
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
     docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop

@@ -12,6 +12,8 @@ services:
       - DB_USER=familia
       - DB_PASSWORD=familia
       - DB_NAME=familia
+      - DEBUG='True'
+      - SECRET_KEY=django-insecure-tc=hna@#b6i)-!w#a&^pv^(scvsngz5li^$kylj3j+4)p_h=fj
     command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
   
   db:
