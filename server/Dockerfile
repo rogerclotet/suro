@@ -8,9 +8,6 @@ RUN pip install pip-tools
 WORKDIR /code
 
 COPY requirements.txt .
-COPY requirements.dev.txt .
-
-ARG REQUIREMENTS_FILES=requirements.txt
-RUN pip-sync ${REQUIREMENTS_FILES}
+RUN pip install -r requirements.txt
 
 COPY . /code
