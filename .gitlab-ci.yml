@@ -40,3 +40,12 @@ deploy:
     - scripts/deploy.sh
   only:
     - main
+
+statics:
+  stage: deploy
+  image: python:3.10
+  script:
+    - cd server
+    - python manage.py collectstatics
+  only:
+    - main
