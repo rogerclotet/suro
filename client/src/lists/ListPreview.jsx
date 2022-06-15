@@ -16,7 +16,7 @@ import {
 import { DeleteForever, Favorite, Share } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { useAuth } from '../auth/AuthProvider'
+import useClient from '../useClient'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {
@@ -55,17 +55,16 @@ DeleteConfirmationDialog.propTypes = {
 
 const ListPreview = ({ list }) => {
   const [isDeleting, setIsDeleting] = useState(false)
-  const { token } = useAuth()
+  const { listRequest } = useClient()
 
-  const deleteList = confirmed => {
+  const handleDeleteDialogClose = confirmed => {
     if (confirmed) {
-      fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/${list.id}/`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      listRequest(list.id, { method: 'DELETE' })
+        .then(() => setIsDeleting(false))
+        .catch(e => console.log('Error deleting list', e))
+    } else {
+      setIsDeleting(false)
     }
-
-    setIsDeleting(false)
   }
 
   return (
@@ -99,7 +98,7 @@ const ListPreview = ({ list }) => {
           <DeleteConfirmationDialog
             list={list}
             open={isDeleting}
-            onClose={deleteList}
+            onClose={handleDeleteDialogClose}
           />
           <DeleteForever />
         </IconButton>

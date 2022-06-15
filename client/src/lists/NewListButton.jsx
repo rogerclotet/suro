@@ -13,8 +13,8 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
-import { useAuth } from '../auth/AuthProvider'
 import PropTypes from 'prop-types'
+import useClient from '../useClient'
 
 const validationSchema = yup.object({
   name: yup.string('Nom de la llista').required('El nom és obligatori'),
@@ -24,7 +24,7 @@ const validationSchema = yup.object({
 const NewListButton = ({ onClose }) => {
   const [open, setOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const { token } = useAuth()
+  const { listsRequest } = useClient()
 
   const formik = useFormik({
     initialValues: {
@@ -34,12 +34,11 @@ const NewListButton = ({ onClose }) => {
     validationSchema: validationSchema,
     onSubmit: data => {
       setIsCreating(true)
-      fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/`, {
+      listsRequest({
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
       })
         .then(() => {

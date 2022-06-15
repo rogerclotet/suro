@@ -8,31 +8,28 @@ import {
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthProvider'
 import LoadingScreen from '../LoadingScreen'
 import { useHeader } from '../HeaderProvider'
+import useClient from '../useClient'
 
 const ListDetail = () => {
   const params = useParams()
   const [list, setList] = useState()
   const { setHeader } = useHeader()
-  const { token } = useAuth()
+  const { listRequest } = useClient()
 
   useEffect(() => {
-    if (!token || !params.listId) {
+    if (!params.listId) {
       return
     }
 
     const listId = params.listId
 
-    // TODO use current family id
-    fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/${listId}/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    listRequest(listId)
       .then(res => res.json())
       .catch(e => console.log('Error loading list detail', e))
       .then(data => setList(data))
-  }, [params, token])
+  }, [params])
 
   useEffect(() => {
     if (list !== undefined) {

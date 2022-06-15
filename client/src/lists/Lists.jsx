@@ -2,30 +2,25 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Container, Grid } from '@mui/material'
 import LoadingScreen from '../LoadingScreen'
 import { useHeader } from '../HeaderProvider'
-import { useAuth } from '../auth/AuthProvider'
 import ListPreview from './ListPreview'
 import NewListButton from './NewListButton'
+import useClient from '../useClient'
 
 const Lists = () => {
   const [lists, setLists] = useState()
   const { setHeader } = useHeader()
-  const { token } = useAuth()
+  const { listsRequest } = useClient()
 
   const refreshLists = useCallback(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    listsRequest()
       .then(res => res.json())
       .catch(e => console.log('Error loading lists', e))
       .then(data => setLists(data))
-  }, [token])
+  }, [listsRequest])
 
   useEffect(() => {
-    // TODO use current family id
-    if (token) {
-      refreshLists()
-    }
-  }, [token, refreshLists])
+    refreshLists()
+  }, [])
 
   useEffect(() => {
     setHeader('Llistes')
