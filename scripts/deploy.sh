@@ -16,6 +16,7 @@
     DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD \
         SECRET_KEY=$SECRET_KEY STATIC_ROOT=$STATIC_ROOT \
         docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-    STATIC_ROOT=$STATIC_ROOT docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api python manage.py collectstatic
+    STATIC_ROOT=$STATIC_ROOT docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
+        exec -T api \python manage.py collectstatic --no-input
 EOF
 )
