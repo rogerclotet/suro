@@ -11,6 +11,7 @@ services:
     ports:
       - 8010:8000
     volumes:
+      - /var/www/familia-static:/var/www/familia-static
       - /var/log/familia:/var/log/gunicorn
   
   db:
