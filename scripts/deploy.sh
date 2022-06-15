@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 (
   sshpass -p $SSH_PASSWORD ssh $SSH_USERNAME@$SSH_IP -o StrictHostKeyChecking=no <<-EOF
