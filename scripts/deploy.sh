@@ -5,6 +5,7 @@
     cd $SSH_PROJECT_DIRECTORY
     git pull
     cd $SSH_PROJECT_DIRECTORY/client
+    nvm use 16
     yarn install
     REACT_APP_API_URL=$API_URL yarn build
     cd $SSH_PROJECT_DIRECTORY/server
