@@ -27,7 +27,11 @@ function Layout() {
         bgcolor: 'background.default',
       }}
     >
-      <Container maxWidth="sm" disableGutters css={{ height: '100%' }}>
+      <Container
+        maxWidth="sm"
+        disableGutters
+        css={{ height: '100%', position: 'relative' }}
+      >
         <Stack direction="column" css={{ height: '100%' }}>
           <header>
             <AppBar position="static">

@@ -31,7 +31,7 @@ const Lists = () => {
   }
 
   return (
-    <Container sx={{ py: 2 }}>
+    <Container sx={{ pt: 2, pb: 11 }}>
       <Grid container direction="column" spacing={2}>
         {lists.map(list => (
           <Grid item key={list.id}>

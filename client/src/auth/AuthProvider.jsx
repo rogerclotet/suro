@@ -43,14 +43,22 @@ const AuthProvider = ({ children }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh: refreshToken }),
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 200) {
+          return res.json()
+        } else {
+          throw new Error('Status', res.status, 'on token refresh')
+        }
+      })
       .catch(e => {
         setIsLoading(false)
         console.log('Error refreshing token', e)
       })
       .then(data => {
-        localStorage.setItem(JWT_TOKEN_KEY, data.access)
-        setToken(data.access)
+        if (data) {
+          localStorage.setItem(JWT_TOKEN_KEY, data.access)
+          setToken(data.access)
+        }
       })
   }, [])
 
@@ -92,7 +100,13 @@ const AuthProvider = ({ children }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 200) {
+          return res.json()
+        } else {
+          throw new Error('Status', res.status, 'on login')
+        }
+      })
       .catch(e => console.log('Error logging in', e))
       .then(data => {
         localStorage.setItem(JWT_TOKEN_KEY, data.access)
