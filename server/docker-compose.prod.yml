@@ -7,7 +7,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
-    command: python manage.py migrate && gunicorn --bind :8000 familia.wsgi --log-file /var/log/gunicorn/gunicorn.log
+    command: sh -c "python manage.py migrate && gunicorn --bind :8000 familia.wsgi --log-file /var/log/gunicorn/gunicorn.log"
     ports:
       - 8010:8000
     volumes:
