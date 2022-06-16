@@ -17,6 +17,7 @@ import { DeleteForever, Favorite, Share } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import useClient from '../useClient'
+import { RWebShare } from 'react-web-share'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {
@@ -109,9 +110,18 @@ const ListPreview = ({ list, onChange }) => {
         >
           <Favorite />
         </IconButton>
-        <IconButton>
-          <Share />
-        </IconButton>
+        <RWebShare
+          data={{
+            text: `${list.name}%0D%0A%0D%0A${
+              list.description ? list.description + '%0D%0A' : ''
+            }Llista amb ${list.items.length} elements.`,
+            url: `${window.location.href}/${list.id}`,
+          }}
+        >
+          <IconButton>
+            <Share />
+          </IconButton>
+        </RWebShare>
         <IconButton onClick={() => setIsDeleting(true)}>
           <DeleteConfirmationDialog
             list={list}
