@@ -7,6 +7,7 @@ import useClient from '../useClient'
 import ListItem from './ListItem'
 import { useCallback } from 'react'
 import ListItemInput from './ListItemInput'
+import { Helmet } from 'react-helmet'
 
 const ListDetail = () => {
   const params = useParams()
@@ -58,19 +59,28 @@ const ListDetail = () => {
   }
 
   return (
-    <List>
-      <MaterialListItem divider>
-        <ListItemInput onChange={handleCreateItem} />
-      </MaterialListItem>
-      {list.items.map(item => (
-        <ListItem
-          key={item.id}
-          list={list}
-          item={item}
-          onChange={refreshList}
+    <>
+      <Helmet>
+        <title>{list.name} - Família</title>
+        <meta
+          name="description"
+          content={`Llista amb ${list.items.length} elements. ${list.description}`}
         />
-      ))}
-    </List>
+      </Helmet>
+      <List>
+        <MaterialListItem divider>
+          <ListItemInput onChange={handleCreateItem} />
+        </MaterialListItem>
+        {list.items.map(item => (
+          <ListItem
+            key={item.id}
+            list={list}
+            item={item}
+            onChange={refreshList}
+          />
+        ))}
+      </List>
+    </>
   )
 }
 

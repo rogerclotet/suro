@@ -5,6 +5,7 @@ import { useHeader } from '../HeaderProvider'
 import ListPreview from './ListPreview'
 import NewListButton from './NewListButton'
 import useClient from '../useClient'
+import { Helmet } from 'react-helmet'
 
 const Lists = () => {
   const [lists, setLists] = useState()
@@ -32,16 +33,22 @@ const Lists = () => {
   }
 
   return (
-    <Container sx={{ pt: 2, pb: 11 }}>
-      <Grid container direction="column" spacing={2}>
-        {lists.map(list => (
-          <Grid item key={list.id}>
-            <ListPreview list={list} onChange={refreshLists} />
-          </Grid>
-        ))}
-      </Grid>
-      <NewListButton onClose={refreshLists} />
-    </Container>
+    <>
+      <Helmet>
+        <title>Llistes - Família</title>
+        <meta name="description" content="Gestor familiar de llistes" />
+      </Helmet>
+      <Container sx={{ pt: 2, pb: 11 }}>
+        <Grid container direction="column" spacing={2}>
+          {lists.map(list => (
+            <Grid item key={list.id}>
+              <ListPreview list={list} onChange={refreshLists} />
+            </Grid>
+          ))}
+        </Grid>
+        <NewListButton onClose={refreshLists} />
+      </Container>
+    </>
   )
 }
 
