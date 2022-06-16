@@ -12,6 +12,7 @@ import {
 import React from 'react'
 import { useState } from 'react'
 import { useAuth } from './auth/AuthProvider'
+import FamilyList from './families/FamiliyList'
 
 const SideMenu = () => {
   const [isFamilyOpen, setIsFamilyOpen] = useState(false)
@@ -19,11 +20,6 @@ const SideMenu = () => {
 
   const handleToggleFamily = () => {
     setIsFamilyOpen(!isFamilyOpen)
-  }
-
-  const handleLogOut = () => {
-    setIsFamilyOpen(false)
-    logOut()
   }
 
   return (
@@ -43,13 +39,9 @@ const SideMenu = () => {
           {isFamilyOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={isFamilyOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton selected sx={{ pl: 4 }}>
-              <ListItemText>Cullell Clotet</ListItemText>
-            </ListItemButton>
-          </List>
+          <FamilyList />
         </Collapse>
-        <ListItemButton onClick={handleLogOut}>
+        <ListItemButton onClick={logOut}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>

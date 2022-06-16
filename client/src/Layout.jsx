@@ -19,6 +19,7 @@ import { useHeader } from './HeaderProvider'
 import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import SideMenu from './SideMenu'
+import { useEffect } from 'react'
 
 const drawerWidth = 240
 
@@ -26,6 +27,12 @@ const Layout = () => {
   const { isLoggedIn } = useAuth()
   const { title, backLink } = useHeader()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsMenuOpen(false)
+    }
+  }, [isLoggedIn])
 
   const handleDrawerToggle = () => {
     setIsMenuOpen(!isMenuOpen)
