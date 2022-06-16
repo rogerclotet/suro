@@ -35,7 +35,7 @@ const Lists = () => {
   return (
     <>
       <Helmet>
-        <title>Llistes - Família</title>
+        <title>Llistes</title>
         <meta name="description" content="Gestor familiar de llistes" />
       </Helmet>
       <Container sx={{ pt: 2, pb: 11 }}>

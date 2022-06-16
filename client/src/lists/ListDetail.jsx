@@ -61,7 +61,7 @@ const ListDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{list.name} - Família</title>
+        <title>{list.name}</title>
         <meta
           name="description"
           content={`Llista amb ${list.items.length} elements. ${list.description}`}
