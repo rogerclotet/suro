@@ -7,7 +7,7 @@ import useClient from '../useClient'
 import ListItem from './ListItem'
 import { useCallback } from 'react'
 import ListItemInput from './ListItemInput'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 
 const ListDetail = () => {
   const params = useParams()

@@ -5,7 +5,7 @@ import { useHeader } from '../HeaderProvider'
 import ListPreview from './ListPreview'
 import NewListButton from './NewListButton'
 import useClient from '../useClient'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 
 const Lists = () => {
   const [lists, setLists] = useState()

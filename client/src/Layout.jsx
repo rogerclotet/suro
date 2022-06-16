@@ -15,7 +15,7 @@ import { Link as RouterLink, Outlet } from 'react-router-dom'
 import { ArrowBack, Logout } from '@mui/icons-material'
 import { useAuth } from './auth/AuthProvider'
 import { useHeader } from './HeaderProvider'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 
 function Layout() {
   const { isLoggedIn, logOut } = useAuth()
