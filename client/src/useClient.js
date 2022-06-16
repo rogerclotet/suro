@@ -28,11 +28,22 @@ const useClient = () => {
   }
 
   // TODO use current family id
+  const itemsRequest = async (listId, options = {}) => {
+    return request(`/families/1/lists/${listId}/items/`, options)
+  }
+
+  // TODO use current family id
   const itemRequest = async (listId, itemId, options = {}) => {
     return request(`/families/1/lists/${listId}/items/${itemId}/`, options)
   }
 
-  return { familiesRequest, listsRequest, listRequest, itemRequest }
+  return {
+    familiesRequest,
+    listsRequest,
+    listRequest,
+    itemsRequest,
+    itemRequest,
+  }
 }
 
 export default useClient

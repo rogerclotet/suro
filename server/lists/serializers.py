@@ -1,12 +1,23 @@
 from rest_framework import serializers
 from core.models import Family
+from lists.models import List
 from . import models
 
 
 class ListItemSerializer(serializers.ModelSerializer):
+    list = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
+
     class Meta:
         model = models.ListItem
-        fields = ("id", "name", "order", "is_complete", "created_at", "updated_at")
+        fields = (
+            "id",
+            "list",
+            "name",
+            "order",
+            "is_complete",
+            "created_at",
+            "updated_at",
+        )
 
 
 class ListSerializer(serializers.ModelSerializer):

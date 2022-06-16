@@ -1,4 +1,9 @@
-import { Container, List, Typography } from '@mui/material'
+import {
+  Container,
+  List,
+  Typography,
+  ListItem as MaterialListItem,
+} from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import LoadingScreen from '../LoadingScreen'
@@ -6,12 +11,13 @@ import { useHeader } from '../HeaderProvider'
 import useClient from '../useClient'
 import ListItem from './ListItem'
 import { useCallback } from 'react'
+import ListItemInput from './ListItemInput'
 
 const ListDetail = () => {
   const params = useParams()
   const [list, setList] = useState()
   const { setHeader } = useHeader()
-  const { listRequest } = useClient()
+  const { listRequest, itemsRequest } = useClient()
 
   const refreshList = useCallback(() => {
     if (!params.listId) {
@@ -56,8 +62,25 @@ const ListDetail = () => {
     )
   }
 
+  const handleCreateItem = name => {
+    itemsRequest(list.id, {
+      method: 'POST',
+      body: JSON.stringify({ name, order: list.items.length }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(res => {
+      if (res.status === 201) {
+        refreshList()
+      } else {
+        console.log('Error creating item', res.status)
+      }
+    })
+  }
+
   return (
     <List>
+      <MaterialListItem divider>
+        <ListItemInput onChange={handleCreateItem} />
+      </MaterialListItem>
       {list.items.map(item => (
         <ListItem
           key={item.id}

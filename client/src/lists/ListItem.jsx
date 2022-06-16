@@ -2,35 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {
   Checkbox,
-  InputBase,
   ListItem as MaterialListItem,
   ListItemText,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
 import useClient from '../useClient'
+import ListItemInput from './ListItemInput'
 
 const ListItem = ({ list, item, onChange }) => {
-  const [name, setName] = useState(item.name)
   const { itemRequest } = useClient()
-
-  const handleChangeName = event => {
-    setName(event.target.value)
-  }
-
-  const saveName = () => {
-    if (name !== item.name) {
-      itemRequest(list.id, item.id, {
-        method: 'PATCH',
-        body: JSON.stringify({ name }),
-        headers: { 'Content-Type': 'application/json' },
-      }).then(res => {
-        if (res.status === 200) {
-          onChange()
-        }
-      })
-    }
-  }
 
   const handleComplete = () => {
     itemRequest(list.id, item.id, {
@@ -40,6 +20,20 @@ const ListItem = ({ list, item, onChange }) => {
     }).then(res => {
       if (res.status === 200) {
         onChange()
+      }
+    })
+  }
+
+  const handleChangeName = () => {
+    itemRequest(list.id, item.id, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(res => {
+      if (res.status === 200) {
+        onChange()
+      } else {
+        console.log('Error saving name', res.status)
       }
     })
   }
@@ -65,12 +59,7 @@ const ListItem = ({ list, item, onChange }) => {
           </Typography>
         </ListItemText>
       ) : (
-        <InputBase
-          value={name}
-          onChange={handleChangeName}
-          fullWidth
-          onBlur={saveName}
-        />
+        <ListItemInput initialValue={item.name} onChange={handleChangeName} />
       )}
     </MaterialListItem>
   )
