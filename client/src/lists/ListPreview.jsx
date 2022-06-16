@@ -53,7 +53,7 @@ DeleteConfirmationDialog.propTypes = {
   onClose: PropTypes.func,
 }
 
-const ListPreview = ({ list }) => {
+const ListPreview = ({ list, onChange }) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const { listRequest } = useClient()
 
@@ -65,6 +65,21 @@ const ListPreview = ({ list }) => {
     } else {
       setIsDeleting(false)
     }
+  }
+
+  const handleToggleFavorite = () => {
+    listRequest(list.id, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_favorite: !list.is_favorite }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(res => {
+      if (res.status === 200) {
+        onChange()
+      } else {
+        console.log('Error toggling favorite')
+        // TODO error feedback
+      }
+    })
   }
 
   return (
@@ -88,7 +103,10 @@ const ListPreview = ({ list }) => {
         </CardContent>
       </Link>
       <CardActions sx={{ justifyContent: 'flex-end' }}>
-        <IconButton color={list.is_favorite ? 'secondary' : 'inherit'}>
+        <IconButton
+          onClick={handleToggleFavorite}
+          color={list.is_favorite ? 'secondary' : 'inherit'}
+        >
           <Favorite />
         </IconButton>
         <IconButton>
@@ -109,6 +127,7 @@ const ListPreview = ({ list }) => {
 
 ListPreview.propTypes = {
   list: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
 
 export default ListPreview

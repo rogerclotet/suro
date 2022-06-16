@@ -35,7 +35,7 @@ const Lists = () => {
       <Grid container direction="column" spacing={2}>
         {lists.map(list => (
           <Grid item key={list.id}>
-            <ListPreview list={list} />
+            <ListPreview list={list} onChange={refreshLists} />
           </Grid>
         ))}
       </Grid>
