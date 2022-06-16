@@ -119,6 +119,7 @@ const ListPreview = ({ list, onChange }) => {
         </IconButton>
         <RWebShare
           data={{
+            title: list.name,
             text: `${list.name}%0D%0A%0D%0A${
               list.description ? list.description + '%0D%0A' : ''
             }Llista amb ${list.items.length} elements.`,
