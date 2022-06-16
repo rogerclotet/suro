@@ -1,9 +1,4 @@
-import {
-  Container,
-  List,
-  Typography,
-  ListItem as MaterialListItem,
-} from '@mui/material'
+import { List, ListItem as MaterialListItem } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import LoadingScreen from '../LoadingScreen'
@@ -46,20 +41,6 @@ const ListDetail = () => {
 
   if (list === undefined) {
     return <LoadingScreen />
-  }
-
-  if (list.items.length === 0) {
-    return (
-      <Container sx={{ py: 2 }}>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ fontStyle: 'italic' }}
-        >
-          No hi ha elements a la llista.
-        </Typography>
-      </Container>
-    )
   }
 
   const handleCreateItem = name => {
