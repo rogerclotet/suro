@@ -10,16 +10,29 @@ import {
   Stack,
   IconButton,
   Link,
+  Drawer,
 } from '@mui/material'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
-import { ArrowBack, Logout } from '@mui/icons-material'
+import { ArrowBack, Menu } from '@mui/icons-material'
 import { useAuth } from './auth/AuthProvider'
 import { useHeader } from './HeaderProvider'
 import { Helmet } from 'react-helmet-async'
+import { useState } from 'react'
+import SideMenu from './SideMenu'
 
-function Layout() {
-  const { isLoggedIn, logOut } = useAuth()
+const drawerWidth = 240
+
+const Layout = () => {
+  const { isLoggedIn } = useAuth()
   const { title, backLink } = useHeader()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const handleDrawerToggle = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const container =
+    window !== undefined ? () => window.document.body : undefined
 
   return (
     <>
@@ -42,6 +55,15 @@ function Layout() {
             <header>
               <AppBar position="static">
                 <Toolbar sx={{ gap: 1 }}>
+                  {isLoggedIn && (
+                    <IconButton
+                      size="large"
+                      edge="start"
+                      onClick={handleDrawerToggle}
+                    >
+                      <Menu />
+                    </IconButton>
+                  )}
                   {backLink && (
                     <IconButton component={RouterLink} to={backLink}>
                       <ArrowBack />
@@ -49,7 +71,7 @@ function Layout() {
                   )}
                   <Typography
                     variant="h6"
-                    component="div"
+                    component="h2"
                     noWrap
                     sx={{ flexGrow: 1 }}
                   >
@@ -62,11 +84,6 @@ function Layout() {
                       {title || 'Família'}
                     </Link>
                   </Typography>
-                  {isLoggedIn && (
-                    <IconButton onClick={logOut}>
-                      <Logout />
-                    </IconButton>
-                  )}
                 </Toolbar>
               </AppBar>
             </header>
@@ -76,6 +93,23 @@ function Layout() {
           </Stack>
         </Container>
       </Box>
+      <Drawer
+        container={container}
+        variant="temporary"
+        open={isMenuOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: drawerWidth,
+          },
+        }}
+      >
+        <SideMenu />
+      </Drawer>
     </>
   )
 }
