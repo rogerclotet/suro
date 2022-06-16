@@ -61,7 +61,14 @@ const ListPreview = ({ list, onChange }) => {
   const handleDeleteDialogClose = confirmed => {
     if (confirmed) {
       listRequest(list.id, { method: 'DELETE' })
-        .then(() => setIsDeleting(false))
+        .then(res => {
+          setIsDeleting(false)
+          if (res.status === 204) {
+            onChange()
+          } else {
+            console.log('Error deleting list', res.status)
+          }
+        })
         .catch(e => console.log('Error deleting list', e))
     } else {
       setIsDeleting(false)
