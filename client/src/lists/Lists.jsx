@@ -10,6 +10,7 @@ import { TabContext, TabList, TabPanel } from '@mui/lab'
 
 const Lists = () => {
   const [lists, setLists] = useState()
+  const [templates, setTemplates] = useState()
   const { setHeader } = useHeader()
   const { listsRequest } = useClient()
   const [tab, setTab] = useState('lists')
@@ -18,7 +19,19 @@ const Lists = () => {
     listsRequest()
       .then(res => res.json())
       .catch(e => console.log('Error loading lists', e))
-      .then(data => setLists(data))
+      .then(data => {
+        const newLists = []
+        const newTemplates = []
+        data.forEach(list => {
+          if (list.is_template) {
+            newTemplates.push(list)
+          } else {
+            newLists.push(list)
+          }
+        })
+        setLists(newLists)
+        setTemplates(newTemplates)
+      })
   }, [listsRequest])
 
   useEffect(() => {
@@ -30,7 +43,7 @@ const Lists = () => {
     setHeader('Llistes')
   }, [setHeader])
 
-  if (lists === undefined) {
+  if (lists === undefined || templates === undefined) {
     return <LoadingScreen />
   }
 
@@ -61,7 +74,15 @@ const Lists = () => {
             ))}
           </Grid>
         </TabPanel>
-        <TabPanel value="templates">Plantilles</TabPanel>
+        <TabPanel value="templates">
+          <Grid container direction="column" spacing={2} sx={{ pb: 8 }}>
+            {templates.map(list => (
+              <Grid item key={list.id}>
+                <ListPreview list={list} onChange={refreshLists} />
+              </Grid>
+            ))}
+          </Grid>
+        </TabPanel>
       </TabContext>
 
       <NewListButton onClose={refreshLists} />
