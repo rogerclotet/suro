@@ -114,9 +114,11 @@ const NewListButton = ({ onClose }) => {
             </Button>
             <LoadingButton
               type="submit"
+              variant="contained"
               loading={isCreating}
               loadingPosition="start"
               startIcon={<Save />}
+              disabled={!formik.dirty || !formik.isValid || isCreating}
             >
               Crear
             </LoadingButton>

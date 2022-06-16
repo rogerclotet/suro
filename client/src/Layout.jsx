@@ -55,19 +55,25 @@ const Layout = () => {
             <header>
               <AppBar position="static">
                 <Toolbar sx={{ gap: 1 }}>
-                  {isLoggedIn && (
+                  {backLink ? (
                     <IconButton
                       size="large"
                       edge="start"
-                      onClick={handleDrawerToggle}
+                      component={RouterLink}
+                      to={backLink}
                     >
-                      <Menu />
-                    </IconButton>
-                  )}
-                  {backLink && (
-                    <IconButton component={RouterLink} to={backLink}>
                       <ArrowBack />
                     </IconButton>
+                  ) : (
+                    isLoggedIn && (
+                      <IconButton
+                        size="large"
+                        edge="start"
+                        onClick={handleDrawerToggle}
+                      >
+                        <Menu />
+                      </IconButton>
+                    )
                   )}
                   <Typography
                     variant="h6"
