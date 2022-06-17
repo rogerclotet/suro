@@ -6,7 +6,10 @@ import {
   DialogContent,
   DialogTitle,
   Fab,
+  FormControlLabel,
+  FormGroup,
   Stack,
+  Switch,
   TextField,
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
@@ -30,6 +33,7 @@ const NewListButton = ({ onClose }) => {
     initialValues: {
       name: '',
       description: '',
+      is_template: false,
     },
     validationSchema: validationSchema,
     onSubmit: data => {
@@ -106,6 +110,19 @@ const NewListButton = ({ onClose }) => {
                   formik.touched.description && formik.errors.description
                 }
               />
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      id="is_template"
+                      name="is_template"
+                      value={formik.values.is_template}
+                      onChange={formik.handleChange}
+                    />
+                  }
+                  label="Plantilla"
+                />
+              </FormGroup>
             </Stack>
           </DialogContent>
           <DialogActions>
