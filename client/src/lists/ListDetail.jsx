@@ -2,7 +2,7 @@ import {
   IconButton,
   List,
   ListItem as MaterialListItem,
-  ListSubheader,
+  Typography,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -14,6 +14,7 @@ import { useCallback } from 'react'
 import ListItemInput from './ListItemInput'
 import { Helmet } from 'react-helmet-async'
 import { Done, Edit } from '@mui/icons-material'
+import ItemCategory from './ItemCategory'
 
 const ListDetail = () => {
   const params = useParams()
@@ -38,7 +39,7 @@ const ListDetail = () => {
       .then(res => res.json())
       .catch(e => console.log('Error loading list detail', e))
       .then(data => {
-        const newItemsByCategory = {}
+        const newItemsByCategory = { '': [] }
         data.items.forEach(item => {
           if (!(item.category in newItemsByCategory)) {
             newItemsByCategory[item.category] = [item]
@@ -75,10 +76,10 @@ const ListDetail = () => {
     return <LoadingScreen />
   }
 
-  const handleCreateItem = name => {
+  const handleCreateItem = (name, category) => {
     itemsRequest(list.id, {
       method: 'POST',
-      body: JSON.stringify({ name, order: list.items.length }),
+      body: JSON.stringify({ name, category, order: list.items.length }),
       headers: { 'Content-Type': 'application/json' },
     }).then(res => {
       if (res.status === 201) {
@@ -87,6 +88,10 @@ const ListDetail = () => {
         console.log('Error creating item', res.status)
       }
     })
+  }
+
+  const handleCreateCategory = name => {
+    setItemsByCategory(itemsByCategory => ({ ...itemsByCategory, [name]: [] }))
   }
 
   return (
@@ -98,35 +103,42 @@ const ListDetail = () => {
           content={`Llista amb ${list.items.length} elements. ${list.description}`}
         />
       </Helmet>
-      <List sx={{ pt: 0 }}>
+      <List sx={{ pt: 0, pb: 8 }}>
         {Object.keys(itemsByCategory).map(category => (
           <div key={category}>
-            <ListSubheader
-              inset
-              sx={{
-                backgroundColor: '#2f2f2f', // Divider color without opacity
-              }}
-            >
-              {category === '' ? 'Sense categoria' : category}
-            </ListSubheader>
+            <ItemCategory name={category} />
 
             {isEditing && (
               <MaterialListItem divider>
-                <ListItemInput onChange={handleCreateItem} />
+                <ListItemInput
+                  onChange={name => handleCreateItem(name, category)}
+                />
               </MaterialListItem>
             )}
 
-            {itemsByCategory[category].map(item => (
-              <ListItem
-                key={item.id}
-                list={list}
-                item={item}
-                isEditing={isEditing}
-                onChange={refreshList}
-              />
-            ))}
+            {itemsByCategory[category].length === 0 ? (
+              <MaterialListItem>
+                <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  No hi ha elements
+                </Typography>
+              </MaterialListItem>
+            ) : (
+              itemsByCategory[category].map(item => (
+                <ListItem
+                  key={item.id}
+                  list={list}
+                  item={item}
+                  isEditing={isEditing}
+                  onChange={refreshList}
+                />
+              ))
+            )}
           </div>
         ))}
+
+        {isEditing && (
+          <ItemCategory name="" editable onChange={handleCreateCategory} />
+        )}
       </List>
     </>
   )
