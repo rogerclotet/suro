@@ -39,10 +39,10 @@ deploy_server:
     - chmod +x scripts/deploy_server.sh
     - scripts/deploy_server.sh
   rules:
+    - if: $CI_COMMIT_REF_NAME =~ "main"
+      when: never
     - changes:
         - server/**/*
-  only:
-    - main
 
 deploy_client:
   stage: deploy
@@ -53,7 +53,7 @@ deploy_client:
     - chmod +x scripts/deploy_client.sh
     - scripts/deploy_client.sh
   rules:
+    - if: $CI_COMMIT_REF_NAME =~ "main"
+      when: never
     - changes:
         - client/**/*
-  only:
-    - main
