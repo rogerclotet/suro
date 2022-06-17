@@ -26,7 +26,9 @@ const AuthProvider = ({ children }) => {
     } else {
       setIsLoading(false)
     }
-  }, [reEvaluateToken])
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const refreshToken = () => {
     const refreshToken = localStorage.getItem(JWT_REFRESH_TOKEN_KEY)
