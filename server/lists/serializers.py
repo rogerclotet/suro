@@ -15,6 +15,7 @@ class ListItemSerializer(serializers.ModelSerializer):
             "name",
             "order",
             "is_complete",
+            "category",
             "created_at",
             "updated_at",
         )

@@ -9,7 +9,7 @@ import {
 import useClient from '../useClient'
 import ListItemInput from './ListItemInput'
 
-const ListItem = ({ list, item, onChange }) => {
+const ListItem = ({ list, item, isEditing, onChange }) => {
   const { itemRequest } = useClient()
 
   const handleComplete = () => {
@@ -49,11 +49,13 @@ const ListItem = ({ list, item, onChange }) => {
         />
       }
     >
-      {item.is_complete ? (
+      {!isEditing || item.is_complete ? (
         <ListItemText>
           <Typography
-            color={'text.secondary'}
-            sx={{ textDecoration: 'line-through' }}
+            color={item.is_complete ? 'text.secondary' : undefined}
+            sx={{
+              textDecoration: item.is_complete ? 'line-through' : undefined,
+            }}
           >
             {item.name}
           </Typography>
@@ -68,6 +70,7 @@ const ListItem = ({ list, item, onChange }) => {
 ListItem.propTypes = {
   list: PropTypes.object.isRequired,
   item: PropTypes.object.isRequired,
+  isEditing: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
 }
 

@@ -24,6 +24,10 @@ class ListItem(models.Model):
     name = models.TextField(blank=False)
     order = models.IntegerField(blank=True, default=1)
     is_complete = models.BooleanField(blank=True, default=False)
+    category = models.CharField(
+        max_length=64,
+        blank=True,
+    )
     list = models.ForeignKey(to=List, related_name="items", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -25,7 +25,7 @@ const drawerWidth = 240
 
 const Layout = () => {
   const { isLoggedIn } = useAuth()
-  const { title, backLink } = useHeader()
+  const { title, backLink, actions } = useHeader()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
@@ -97,6 +97,7 @@ const Layout = () => {
                       {title || 'Família'}
                     </Link>
                   </Typography>
+                  {actions}
                 </Toolbar>
               </AppBar>
             </header>
