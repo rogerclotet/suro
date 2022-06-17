@@ -1,44 +1,51 @@
+import { useCallback } from 'react'
 import { useAuth } from './auth/AuthProvider'
+import { useFamilies } from './families/FamilyProvider'
 
 const API_URL = process.env.REACT_APP_API_URL
 
 const useClient = () => {
   const { token } = useAuth()
+  const { currentFamilyId } = useFamilies()
 
-  const request = async (path, options) => {
-    return fetch(API_URL + path, {
-      ...options,
-      method: options.method || 'GET',
-      headers: { ...options.headers, Authorization: `Bearer ${token}` },
-    })
-  }
+  const request = useCallback(
+    async (path, options) =>
+      fetch(API_URL + path, {
+        ...options,
+        method: options.method || 'GET',
+        headers: { ...options.headers, Authorization: `Bearer ${token}` },
+      }),
+    [token]
+  )
 
-  const familiesRequest = async (options = {}) => {
-    return request('/families/', options)
-  }
+  const listsRequest = useCallback(
+    async (options = {}) =>
+      request(`/families/${currentFamilyId}/lists/`, options),
+    [request, currentFamilyId]
+  )
 
-  // TODO use current family id
-  const listsRequest = async (options = {}) => {
-    return request(`/families/1/lists/`, options)
-  }
+  const listRequest = useCallback(
+    async (listId, options = {}) =>
+      request(`/families/${currentFamilyId}/lists/${listId}/`, options),
+    [request, currentFamilyId]
+  )
 
-  // TODO use current family id
-  const listRequest = async (listId, options = {}) => {
-    return request(`/families/1/lists/${listId}/`, options)
-  }
+  const itemsRequest = useCallback(
+    async (listId, options = {}) =>
+      request(`/families/${currentFamilyId}/lists/${listId}/items/`, options),
+    [request, currentFamilyId]
+  )
 
-  // TODO use current family id
-  const itemsRequest = async (listId, options = {}) => {
-    return request(`/families/1/lists/${listId}/items/`, options)
-  }
-
-  // TODO use current family id
-  const itemRequest = async (listId, itemId, options = {}) => {
-    return request(`/families/1/lists/${listId}/items/${itemId}/`, options)
-  }
+  const itemRequest = useCallback(
+    async (listId, itemId, options = {}) =>
+      request(
+        `/families/${currentFamilyId}/lists/${listId}/items/${itemId}/`,
+        options
+      ),
+    [request, currentFamilyId]
+  )
 
   return {
-    familiesRequest,
     listsRequest,
     listRequest,
     itemsRequest,

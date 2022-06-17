@@ -1,12 +1,7 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useJwt } from 'react-jwt'
+import LoadingScreen from '../LoadingScreen'
 
 const JWT_TOKEN_KEY = 'token'
 const JWT_REFRESH_TOKEN_KEY = 'refresh'
@@ -21,18 +16,19 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState()
   const [isLoading, setIsLoading] = useState(true)
 
-  const { decodedToken, isExpired } = useJwt(token)
+  const { decodedToken, isExpired, reEvaluateToken } = useJwt(token)
 
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem(JWT_TOKEN_KEY)
     if (tokenFromStorage) {
+      reEvaluateToken(tokenFromStorage)
       setToken(tokenFromStorage)
     } else {
       setIsLoading(false)
     }
-  }, [])
+  }, [reEvaluateToken])
 
-  const refreshToken = useCallback(() => {
+  const refreshToken = () => {
     const refreshToken = localStorage.getItem(JWT_REFRESH_TOKEN_KEY)
     if (!refreshToken) {
       return
@@ -42,35 +38,32 @@ const AuthProvider = ({ children }) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh: refreshToken }),
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else {
-          throw new Error('Status', res.status, 'on token refresh')
-        }
-      })
-      .catch(e => {
+    }).then(res => {
+      if (res.status === 200) {
+        return res.json().then(data => {
+          if (data) {
+            localStorage.setItem(JWT_TOKEN_KEY, data.access)
+            setToken(data.access)
+          }
+        })
+      } else {
+        console.log('Error refreshing token', res.status)
         setIsLoading(false)
-        console.log('Error refreshing token', e)
-      })
-      .then(data => {
-        if (data) {
-          localStorage.setItem(JWT_TOKEN_KEY, data.access)
-          setToken(data.access)
-        }
-      })
-  }, [])
+      }
+    })
+  }
 
   useEffect(() => {
     if (!token) {
       return
     }
 
-    if (token && isExpired) {
+    if (isExpired) {
       refreshToken()
+    } else {
+      setIsLoggedIn(true)
     }
-  }, [token, isExpired, refreshToken])
+  }, [token, isExpired])
 
   useEffect(() => {
     if (!decodedToken) {
@@ -90,7 +83,7 @@ const AuthProvider = ({ children }) => {
     }, (decodedToken.exp - Date.now() / 1000 - 5) * 1000)
 
     return () => clearTimeout(timeout)
-  }, [decodedToken, refreshToken])
+  }, [decodedToken])
 
   const logIn = (email, password) => {
     setIsLoading(true)
@@ -102,21 +95,19 @@ const AuthProvider = ({ children }) => {
     })
       .then(res => {
         if (res.status === 200) {
-          return res.json()
+          return res.json().then(data => {
+            localStorage.setItem(JWT_TOKEN_KEY, data.access)
+            localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
+            setToken(data.access)
+          })
         } else {
           throw new Error('Status', res.status, 'on login')
         }
       })
       .catch(e => console.log('Error logging in', e))
-      .then(data => {
-        localStorage.setItem(JWT_TOKEN_KEY, data.access)
-        localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
-        setToken(data.access)
-      })
   }
 
   const logOut = () => {
-    // TODO actually log out
     setIsLoggedIn(false)
     setUser(undefined)
 
@@ -128,7 +119,7 @@ const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{ user, token, isLoggedIn, isLoading, logIn, logOut }}
     >
-      {children}
+      {isLoading ? <LoadingScreen /> : children}
     </AuthContext.Provider>
   )
 }

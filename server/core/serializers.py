@@ -9,4 +9,4 @@ class FamilySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Family
-        fields = ("name", "members")
+        fields = ("id", "name", "members")

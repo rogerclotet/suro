@@ -17,27 +17,27 @@ const Lists = () => {
 
   const refreshLists = useCallback(() => {
     listsRequest()
-      .then(res => res.json())
-      .catch(e => console.log('Error loading lists', e))
-      .then(data => {
-        const newLists = []
-        const newTemplates = []
-        data.forEach(list => {
-          if (list.is_template) {
-            newTemplates.push(list)
-          } else {
-            newLists.push(list)
-          }
+      .then(res =>
+        res.json().then(data => {
+          const newLists = []
+          const newTemplates = []
+          data.forEach(list => {
+            if (list.is_template) {
+              newTemplates.push(list)
+            } else {
+              newLists.push(list)
+            }
+          })
+          setLists(newLists)
+          setTemplates(newTemplates)
         })
-        setLists(newLists)
-        setTemplates(newTemplates)
-      })
+      )
+      .catch(e => console.log('Error loading lists', e))
   }, [listsRequest])
 
   useEffect(() => {
     refreshLists()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [refreshLists])
 
   useEffect(() => {
     setHeader('Llistes')

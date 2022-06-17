@@ -15,6 +15,7 @@ import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
 import HeaderProvider from './HeaderProvider'
 import { HelmetProvider } from 'react-helmet-async'
+import FamilyProvider from './families/FamilyProvider'
 
 const theme = createTheme({
   palette: {
@@ -34,13 +35,15 @@ root.render(
     <CssBaseline />
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        <HelmetProvider>
-          <HeaderProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </HeaderProvider>
-        </HelmetProvider>
+        <FamilyProvider>
+          <HelmetProvider>
+            <HeaderProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </HeaderProvider>
+          </HelmetProvider>
+        </FamilyProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
