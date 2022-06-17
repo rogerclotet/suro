@@ -1,6 +1,13 @@
 import React from 'react'
-import { List, ListItemButton, ListItemText } from '@mui/material'
+import {
+  Badge,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material'
 import { useFamilies } from './FamilyProvider'
+import { PeopleAlt } from '@mui/icons-material'
 
 const FamilyList = () => {
   const { families, currentFamilyId } = useFamilies()
@@ -14,6 +21,11 @@ const FamilyList = () => {
             selected={family.id === currentFamilyId}
             sx={{ pl: 4 }}
           >
+            <ListItemIcon>
+              <Badge badgeContent={family.members.length}>
+                <PeopleAlt />
+              </Badge>
+            </ListItemIcon>
             <ListItemText>{family.name}</ListItemText>
           </ListItemButton>
         ))}
