@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Box, Grid, Tab } from '@mui/material'
+import { Box, Fab, Grid, Tab } from '@mui/material'
 import LoadingScreen from '../LoadingScreen'
 import { useHeader } from '../HeaderProvider'
 import ListPreview from './ListPreview'
-import NewListButton from './NewListButton'
+import EditListDialog from './EditListDialog'
 import useClient from '../useClient'
 import { Helmet } from 'react-helmet-async'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
+import { Add } from '@mui/icons-material'
 
 const Lists = () => {
   const [lists, setLists] = useState()
   const [templates, setTemplates] = useState()
+  const [isCreating, setIsCreating] = useState(false)
   const { setHeader } = useHeader()
   const { listsRequest } = useClient()
   const [tab, setTab] = useState('lists')
@@ -51,6 +53,27 @@ const Lists = () => {
     setTab(value)
   }
 
+  const startCreatingList = () => {
+    setIsCreating(true)
+  }
+
+  const handleCreate = async data => {
+    return listsRequest({
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(() => {
+      setIsCreating(false)
+      refreshLists()
+    })
+  }
+
+  const handleCancelCreating = () => {
+    setIsCreating(false)
+  }
+
   return (
     <>
       <Helmet>
@@ -69,7 +92,11 @@ const Lists = () => {
           <Grid container direction="column" spacing={2} sx={{ pb: 8 }}>
             {lists.map(list => (
               <Grid item key={list.id}>
-                <ListPreview list={list} onChange={refreshLists} />
+                <ListPreview
+                  list={list}
+                  onChange={refreshLists}
+                  onDuplicate={refreshLists}
+                />
               </Grid>
             ))}
           </Grid>
@@ -78,14 +105,30 @@ const Lists = () => {
           <Grid container direction="column" spacing={2} sx={{ pb: 8 }}>
             {templates.map(list => (
               <Grid item key={list.id}>
-                <ListPreview list={list} onChange={refreshLists} />
+                <ListPreview
+                  list={list}
+                  onChange={refreshLists}
+                  onDuplicate={refreshLists}
+                />
               </Grid>
             ))}
           </Grid>
         </TabPanel>
       </TabContext>
 
-      <NewListButton onClose={refreshLists} />
+      <Fab
+        onClick={startCreatingList}
+        color="primary"
+        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+      >
+        <Add />
+      </Fab>
+
+      <EditListDialog
+        open={isCreating}
+        onSave={handleCreate}
+        onCancel={handleCancelCreating}
+      />
     </>
   )
 }

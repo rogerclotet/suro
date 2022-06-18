@@ -13,11 +13,17 @@ import {
   Link,
   Typography,
 } from '@mui/material'
-import { DeleteForever, Favorite, Share } from '@mui/icons-material'
+import {
+  ContentCopy,
+  DeleteForever,
+  Favorite,
+  Share,
+} from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import useClient from '../useClient'
 import { RWebShare } from 'react-web-share'
+import EditListDialog from './EditListDialog'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {
@@ -54,9 +60,10 @@ DeleteConfirmationDialog.propTypes = {
   onClose: PropTypes.func,
 }
 
-const ListPreview = ({ list, onChange }) => {
+const ListPreview = ({ list, onChange, onDuplicate }) => {
   const [isDeleting, setIsDeleting] = useState(false)
-  const { listRequest } = useClient()
+  const [isDuplicating, setIsDuplicating] = useState(false)
+  const { listRequest, listsRequest } = useClient()
 
   const handleDeleteDialogClose = confirmed => {
     if (confirmed) {
@@ -84,6 +91,27 @@ const ListPreview = ({ list, onChange }) => {
       } else {
         console.log('Error toggling favorite')
       }
+    })
+  }
+
+  const handleStartDuplicating = () => {
+    setIsDuplicating(true)
+  }
+
+  const handleCancelDuplicating = () => {
+    setIsDuplicating(false)
+  }
+
+  const handleDuplicate = async data => {
+    return listsRequest({
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(() => {
+      onDuplicate()
+      setIsDuplicating(false)
     })
   }
 
@@ -128,6 +156,9 @@ const ListPreview = ({ list, onChange }) => {
               <Share />
             </IconButton>
           </RWebShare>
+          <IconButton onClick={handleStartDuplicating}>
+            <ContentCopy />
+          </IconButton>
           <IconButton onClick={() => setIsDeleting(true)}>
             <DeleteForever />
           </IconButton>
@@ -138,6 +169,12 @@ const ListPreview = ({ list, onChange }) => {
         open={isDeleting}
         onClose={handleDeleteDialogClose}
       />
+      <EditListDialog
+        initialValues={list}
+        open={isDuplicating}
+        onCancel={handleCancelDuplicating}
+        onSave={handleDuplicate}
+      />
     </>
   )
 }
@@ -145,6 +182,7 @@ const ListPreview = ({ list, onChange }) => {
 ListPreview.propTypes = {
   list: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
 }
 
 export default ListPreview
