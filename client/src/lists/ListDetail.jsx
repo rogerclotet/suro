@@ -62,7 +62,7 @@ const ListDetail = () => {
     if (list !== undefined) {
       setHeader(
         list.name,
-        '/lists',
+        `/lists/${list.is_template ? 'templates' : 'lists'}`,
         list.is_template ? null : (
           <IconButton size="large" edge="end" onClick={toggleIsEditing}>
             {isEditing ? <Done /> : <Edit />}

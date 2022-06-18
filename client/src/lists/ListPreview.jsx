@@ -120,7 +120,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
       <Card>
         <Link
           component={RouterLink}
-          to={`/lists/${list.id}`}
+          to={`/list/${list.id}`}
           underline="none"
           color="inherit"
         >
