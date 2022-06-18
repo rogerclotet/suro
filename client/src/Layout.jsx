@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react'
 import {
   Container,
@@ -44,7 +43,7 @@ const Layout = () => {
   return (
     <>
       <Helmet>
-        <title>Família</title>{' '}
+        <title>Família</title>
         <meta name="description" content="Gestor familiar" />
       </Helmet>
       <Box
@@ -56,9 +55,9 @@ const Layout = () => {
         <Container
           maxWidth="sm"
           disableGutters
-          css={{ height: '100%', position: 'relative' }}
+          sx={{ height: '100%', position: 'relative' }}
         >
-          <Stack direction="column" css={{ height: '100%' }}>
+          <Stack direction="column" sx={{ height: '100%' }}>
             <header>
               <AppBar position="static">
                 <Toolbar sx={{ gap: 1 }}>

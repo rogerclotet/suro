@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { InputBase } from '@mui/material'
@@ -25,7 +26,7 @@ const ListItemInput = ({ initialValue, onChange }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} css={{ width: '100%' }}>
       <InputBase
         value={name}
         onChange={handleChangeName}
