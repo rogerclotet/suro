@@ -2,10 +2,6 @@ stages:
   - check
   - deploy
 
-cache:
-  paths:
-    - client/node_modules/
-
 server:
   stage: check
   image: python:3.10
@@ -19,13 +15,13 @@ server:
 client:
   stage: check
   image: node:16-alpine
+  cache:
+    paths:
+      - client/node_modules/
   script:
     - cd client
     - yarn install --production=false
     - yarn lint
-  artifacts:
-    paths:
-      - client/node_modules/
   rules:
     - changes:
         - client/**/*
