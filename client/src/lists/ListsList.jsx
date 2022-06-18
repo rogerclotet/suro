@@ -42,8 +42,8 @@ const ListsList = ({ type }) => {
     setIsCreating(true)
   }
 
-  const handleCreate = () => {
-    createList().then(() => {
+  const handleCreate = async data => {
+    return createList(data).then(() => {
       setIsCreating(false)
       refreshLists()
     })

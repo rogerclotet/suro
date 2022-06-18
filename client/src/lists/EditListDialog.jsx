@@ -1,21 +1,30 @@
-import React, { useState } from 'react'
-import { Save } from '@mui/icons-material'
+import React, { useMemo, useState } from 'react'
+import { Info, Save } from '@mui/icons-material'
 import {
+  Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
   Stack,
   Switch,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import PropTypes from 'prop-types'
+import { useLists } from './ListsProvider'
 
 const validationSchema = yup.object({
   name: yup.string('Nom de la llista').required('El nom és obligatori'),
@@ -24,17 +33,37 @@ const validationSchema = yup.object({
 
 const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
   const [isCreating, setIsCreating] = useState(false)
+  const { lists } = useLists()
+
+  const templates = useMemo(
+    () => lists.filter(list => list.is_template),
+    [lists]
+  )
 
   const formik = useFormik({
     initialValues: initialValues || {
       name: '',
       description: '',
       is_template: false,
+      imported_templates: [],
     },
     validationSchema: validationSchema,
     onSubmit: data => {
       setIsCreating(true)
-      onSave(data).then(() => {
+
+      const { imported_templates: importedTemplateIds, ...listData } = data
+      listData.items = listData.items || []
+      importedTemplateIds.forEach(templateId =>
+        templates
+          .find(template => template.id === templateId)
+          .items.forEach(item => {
+            // eslint-disable-next-line no-unused-vars
+            const { id, ...itemData } = item
+            listData.items.push(itemData)
+          })
+      )
+
+      onSave(listData).then(() => {
         setIsCreating(false)
         formik.resetForm()
       })
@@ -79,7 +108,14 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
                 formik.touched.description && formik.errors.description
               }
             />
-            <FormGroup>
+            <FormGroup
+              sx={{
+                pl: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
               <FormControlLabel
                 control={
                   <Switch
@@ -89,9 +125,44 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
                     onChange={formik.handleChange}
                   />
                 }
-                label="Plantilla"
+                label="És una plantilla"
               />
+              <Tooltip title="Es crearà una llista amb elements que es poden importar al crear noves llistes.">
+                <Info />
+              </Tooltip>
             </FormGroup>
+            {!formik.values.is_template && (
+              <FormControl>
+                <InputLabel>Plantilles a importar</InputLabel>
+                <Select
+                  multiple
+                  id="imported_templates"
+                  name="imported_templates"
+                  input={<OutlinedInput label="Plantilles" />}
+                  value={formik.values.imported_templates}
+                  onChange={formik.handleChange}
+                  renderValue={selected => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map(value => (
+                        <Chip
+                          key={value}
+                          label={
+                            templates.find(template => template.id === value)
+                              .name
+                          }
+                        />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {templates.map(template => (
+                    <MenuItem key={template.id} value={template.id}>
+                      {template.name} ({template.items.length} elements)
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
