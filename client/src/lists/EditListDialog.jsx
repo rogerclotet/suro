@@ -51,6 +51,11 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
     onSubmit: data => {
       setIsCreating(true)
 
+      if (data.is_template) {
+        // Ignore the field imported templates when creating templates
+        data.imported_templates = []
+      }
+
       const { imported_templates: importedTemplateIds, ...listData } = data
       listData.items = listData.items || []
       importedTemplateIds.forEach(templateId =>
