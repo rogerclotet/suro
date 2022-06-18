@@ -39,7 +39,7 @@ deploy_server:
     - chmod +x scripts/deploy_server.sh
     - scripts/deploy_server.sh
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH != "main"'
       when: never
     - changes:
         - server/**/*
@@ -53,7 +53,7 @@ deploy_client:
     - chmod +x scripts/deploy_client.sh
     - scripts/deploy_client.sh
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH != "main"'
       when: never
     - changes:
         - client/**/*
