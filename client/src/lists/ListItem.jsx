@@ -42,11 +42,13 @@ const ListItem = ({ list, item, isEditing, onChange }) => {
     <MaterialListItem
       divider
       secondaryAction={
-        <Checkbox
-          edge="end"
-          onChange={handleComplete}
-          checked={item.is_complete}
-        />
+        list.is_template ? null : (
+          <Checkbox
+            edge="end"
+            onChange={handleComplete}
+            checked={item.is_complete}
+          />
+        )
       }
     >
       {!isEditing || item.is_complete ? (

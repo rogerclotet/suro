@@ -63,9 +63,11 @@ const ListDetail = () => {
       setHeader(
         list.name,
         '/lists',
-        <IconButton size="large" edge="end" onClick={toggleIsEditing}>
-          {isEditing ? <Done /> : <Edit />}
-        </IconButton>
+        list.is_template ? null : (
+          <IconButton size="large" edge="end" onClick={toggleIsEditing}>
+            {isEditing ? <Done /> : <Edit />}
+          </IconButton>
+        )
       )
     }
 
@@ -108,7 +110,7 @@ const ListDetail = () => {
           <div key={category}>
             <ItemCategory name={category} />
 
-            {isEditing && (
+            {(list.is_template || isEditing) && (
               <MaterialListItem divider>
                 <ListItemInput
                   onChange={name => handleCreateItem(name, category)}
@@ -128,7 +130,7 @@ const ListDetail = () => {
                   key={item.id}
                   list={list}
                   item={item}
-                  isEditing={isEditing}
+                  isEditing={list.is_template || isEditing}
                   onChange={refreshList}
                 />
               ))
@@ -136,7 +138,7 @@ const ListDetail = () => {
           </div>
         ))}
 
-        {isEditing && (
+        {(list.is_template || isEditing) && (
           <ItemCategory name="" editable onChange={handleCreateCategory} />
         )}
       </List>
