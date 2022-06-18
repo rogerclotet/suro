@@ -50,6 +50,7 @@ const AuthProvider = ({ children }) => {
         })
       } else {
         console.log('Error refreshing token', res.status)
+        logOut()
         setIsLoading(false)
       }
     })
@@ -65,6 +66,8 @@ const AuthProvider = ({ children }) => {
     } else {
       setIsLoggedIn(true)
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, isExpired])
 
   useEffect(() => {
@@ -85,6 +88,8 @@ const AuthProvider = ({ children }) => {
     }, (decodedToken.exp - Date.now() / 1000 - 5) * 1000)
 
     return () => clearTimeout(timeout)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decodedToken])
 
   const logIn = (email, password) => {
@@ -110,6 +115,7 @@ const AuthProvider = ({ children }) => {
   }
 
   const logOut = () => {
+    setToken(undefined)
     setIsLoggedIn(false)
     setUser(undefined)
 
