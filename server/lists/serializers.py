@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from core.models import Family
-from lists.models import List
+from lists.models import List, ListItem
 from . import models
 
 
@@ -23,7 +23,19 @@ class ListItemSerializer(serializers.ModelSerializer):
 
 class ListSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
-    items = ListItemSerializer(many=True, read_only=True)
+    items = ListItemSerializer(many=True)
+
+    def create(self, validated_data):
+        items_data = validated_data.pop("items")
+
+        list = super().create(validated_data)
+
+        for item_data in items_data:
+            item_data.pop("list")
+            item_data.pop("is_complete")
+            ListItem.objects.create(**item_data, list=list)
+
+        return list
 
     class Meta:
         model = models.List
