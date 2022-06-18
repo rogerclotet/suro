@@ -22,16 +22,15 @@ const validationSchema = yup.object({
   description: yup.string('Descripció'),
 })
 
-const EditListDialog = ({
-  initialValues = { name: '', description: '', is_template: false },
-  open,
-  onSave,
-  onCancel,
-}) => {
+const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
   const [isCreating, setIsCreating] = useState(false)
 
   const formik = useFormik({
-    initialValues,
+    initialValues: initialValues || {
+      name: '',
+      description: '',
+      is_template: false,
+    },
     validationSchema: validationSchema,
     onSubmit: data => {
       setIsCreating(true)
@@ -51,7 +50,7 @@ const EditListDialog = ({
   return (
     <Dialog open={open} onClose={handleCancel}>
       <form onSubmit={formik.handleSubmit}>
-        <DialogTitle>Llista nova</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <Stack direction="column" gap={2} pt={2}>
             <TextField
@@ -116,6 +115,7 @@ const EditListDialog = ({
 }
 
 EditListDialog.propTypes = {
+  title: PropTypes.string.isRequired,
   initialValues: PropTypes.object,
   open: PropTypes.bool.isRequired,
   onSave: PropTypes.func.isRequired,

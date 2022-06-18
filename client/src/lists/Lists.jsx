@@ -125,6 +125,7 @@ const Lists = () => {
       </Fab>
 
       <EditListDialog
+        title="Llista nova"
         open={isCreating}
         onSave={handleCreate}
         onCancel={handleCancelCreating}

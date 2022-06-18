@@ -170,6 +170,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
         onClose={handleDeleteDialogClose}
       />
       <EditListDialog
+        title="Duplicar llista"
         initialValues={list}
         open={isDuplicating}
         onCancel={handleCancelDuplicating}
