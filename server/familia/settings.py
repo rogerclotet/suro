@@ -178,4 +178,4 @@ if DEBUG:
 
 
 # Simple JWT
-REFRESH_TOKEN_LIFETIME = timedelta.days(30)
+REFRESH_TOKEN_LIFETIME = timedelta(days=30)
