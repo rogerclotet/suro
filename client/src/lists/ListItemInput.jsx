@@ -12,7 +12,7 @@ const ListItemInput = ({ initialValue, onChange }) => {
 
   const saveName = () => {
     if (name !== '' && name !== initialValue) {
-      onChange(name)
+      onChange(name.trim())
 
       if (initialValue === undefined) {
         setName('')

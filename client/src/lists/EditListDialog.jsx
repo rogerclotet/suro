@@ -56,7 +56,14 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
         data.imported_templates = []
       }
 
-      const { imported_templates: importedTemplateIds, ...listData } = data
+      const {
+        imported_templates: importedTemplateIds,
+        name,
+        description,
+        ...listData
+      } = data
+      listData.name = name.trim()
+      listData.description = description.trim()
       listData.items = listData.items || []
       importedTemplateIds.forEach(templateId => {
         const template = templates.find(template => template.id === templateId)

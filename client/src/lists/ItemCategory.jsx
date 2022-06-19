@@ -16,7 +16,7 @@ const ItemCategory = ({ name, editable, onChange }) => {
   }
 
   const handleSaveName = () => {
-    onChange(editingName)
+    onChange(editingName.trim())
     setEditingName('')
   }
 
