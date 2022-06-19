@@ -33,4 +33,4 @@ class ListItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["is_complete", "order"]
+        ordering = ["category", "is_complete", "order"]

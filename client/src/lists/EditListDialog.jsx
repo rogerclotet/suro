@@ -58,15 +58,23 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
 
       const { imported_templates: importedTemplateIds, ...listData } = data
       listData.items = listData.items || []
-      importedTemplateIds.forEach(templateId =>
-        templates
-          .find(template => template.id === templateId)
-          .items.forEach(item => {
-            // eslint-disable-next-line no-unused-vars
-            const { id, ...itemData } = item
-            listData.items.push(itemData)
-          })
-      )
+      importedTemplateIds.forEach(templateId => {
+        const template = templates.find(template => template.id === templateId)
+        const templateName =
+          template.name.length > 20
+            ? template.name.slice(0, 19) + '...'
+            : template.name
+        return template.items.forEach(item => {
+          // eslint-disable-next-line no-unused-vars
+          const { id, ...itemData } = item
+          if (itemData.category !== undefined) {
+            const subcategory =
+              itemData.category === '' ? '' : ` / ${itemData.category}`
+            itemData.category = templateName + subcategory
+          }
+          listData.items.push(itemData)
+        })
+      })
 
       onSave(listData).then(() => {
         setIsCreating(false)

@@ -1,11 +1,7 @@
-import logging
 from rest_framework import viewsets
 from lists.permissions import IsListFamilyMember, IsListItemFamilyMember
 from lists.serializers import ListItemSerializer, ListSerializer
 from lists.models import List, ListItem
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 class FamilyListViewSet(viewsets.ModelViewSet):
