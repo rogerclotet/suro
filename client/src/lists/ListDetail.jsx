@@ -39,7 +39,7 @@ const ListDetail = () => {
       .then(res => res.json())
       .catch(e => console.log('Error loading list detail', e))
       .then(data => {
-        const newItemsByCategory = { '': [] }
+        const newItemsByCategory = {}
         data.items.forEach(item => {
           if (!(item.category in newItemsByCategory)) {
             newItemsByCategory[item.category] = [item]
