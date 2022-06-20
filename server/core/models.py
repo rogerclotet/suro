@@ -1,5 +1,4 @@
 from django.db import models
-
 from custom_user.models import User
 
 
@@ -12,3 +11,8 @@ class Family(models.Model):
 
     class Meta:
         verbose_name_plural = "Families"
+
+
+class Invitation(models.Model):
+    token = models.CharField(max_length=20, primary_key=True, blank=False, null=False)
+    family = models.ForeignKey(to=Family, on_delete=models.CASCADE)

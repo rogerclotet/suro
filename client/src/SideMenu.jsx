@@ -13,8 +13,9 @@ import React from 'react'
 import { useState } from 'react'
 import { useAuth } from './auth/AuthProvider'
 import FamilyList from './families/FamiliyList'
+import PropTypes from 'prop-types'
 
-const SideMenu = () => {
+const SideMenu = ({ onClose }) => {
   const [isFamilyOpen, setIsFamilyOpen] = useState(false)
   const { logOut } = useAuth()
 
@@ -39,7 +40,7 @@ const SideMenu = () => {
           {isFamilyOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={isFamilyOpen} timeout="auto" unmountOnExit>
-          <FamilyList />
+          <FamilyList onClose={onClose} />
         </Collapse>
         <ListItemButton onClick={logOut}>
           <ListItemIcon>
@@ -50,6 +51,10 @@ const SideMenu = () => {
       </List>
     </>
   )
+}
+
+SideMenu.propTypes = {
+  onClose: PropTypes.func.isRequired,
 }
 
 export default SideMenu

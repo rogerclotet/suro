@@ -9,6 +9,7 @@ import ListDetail from './lists/ListDetail'
 import FamilyProvider from './families/FamilyProvider'
 import ListsList from './lists/ListsList'
 import { LIST_TYPE_LISTS, LIST_TYPE_TEMPLATES } from './lists/constants'
+import FamilySettings from './families/FamilySettings'
 
 const App = () => {
   const { isLoggedIn, isLoading } = useAuth()
@@ -52,6 +53,7 @@ const App = () => {
             />
           </Route>
           <Route path="list/:listId" element={<ListDetail />} />
+          <Route path="family/:familyId" element={<FamilySettings />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>

@@ -9,7 +9,7 @@ const useClient = () => {
   const { currentFamilyId } = useFamilies()
 
   const request = useCallback(
-    async (path, options) =>
+    async (path, options = {}) =>
       fetch(API_URL + path, {
         ...options,
         method: options.method || 'GET',
@@ -45,11 +45,25 @@ const useClient = () => {
     [request, currentFamilyId]
   )
 
+  const invitationRequest = useCallback(
+    async (options = {}) =>
+      request(`/families/${currentFamilyId}/invitations/`, options),
+    [request, currentFamilyId]
+  )
+
+  const invitationDataRequest = useCallback(
+    async token =>
+      request(`/families/${currentFamilyId}/invitations/?token=${token}`),
+    [request, currentFamilyId]
+  )
+
   return {
     listsRequest,
     listRequest,
     itemsRequest,
     itemRequest,
+    invitationRequest,
+    invitationDataRequest,
   }
 }
 

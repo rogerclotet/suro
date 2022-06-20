@@ -10,3 +10,11 @@ class FamilySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Family
         fields = ("id", "name", "members")
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    family = FamilySerializer()
+
+    class Meta:
+        model = models.Invitation
+        fields = ("token", "family")

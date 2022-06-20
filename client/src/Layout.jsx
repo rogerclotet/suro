@@ -121,7 +121,7 @@ const Layout = () => {
           },
         }}
       >
-        <SideMenu />
+        <SideMenu onClose={handleDrawerToggle} />
       </Drawer>
     </>
   )

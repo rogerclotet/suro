@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Family
+from .models import Family, Invitation
 
 
 class FamilyAdmin(admin.ModelAdmin):
@@ -11,3 +11,10 @@ class FamilyAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Family, FamilyAdmin)
+
+
+class InvitationAdmin(admin.ModelAdmin):
+    list_display = ("token", "family")
+
+
+admin.site.register(Invitation, InvitationAdmin)
