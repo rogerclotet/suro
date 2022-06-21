@@ -45,16 +45,20 @@ const useClient = () => {
     [request, currentFamilyId]
   )
 
-  const invitationRequest = useCallback(
-    async (options = {}) =>
-      request(`/families/${currentFamilyId}/invitations/`, options),
-    [request, currentFamilyId]
+  const invitationsRequest = useCallback(
+    async (options = {}) => request(`/invitations/`, options),
+    [request]
   )
 
-  const invitationDataRequest = useCallback(
-    async token =>
-      request(`/families/${currentFamilyId}/invitations/?token=${token}`),
-    [request, currentFamilyId]
+  const invitationRequest = useCallback(
+    async token => request(`/invitations/${token}`),
+    [request]
+  )
+
+  const joinFamilyRequest = useCallback(
+    async (familyId, options = {}) =>
+      request(`/families/${familyId}/join/`, options),
+    [request]
   )
 
   return {
@@ -62,8 +66,9 @@ const useClient = () => {
     listRequest,
     itemsRequest,
     itemRequest,
+    invitationsRequest,
     invitationRequest,
-    invitationDataRequest,
+    joinFamilyRequest,
   }
 }
 

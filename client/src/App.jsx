@@ -1,5 +1,5 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
 import Layout from './Layout'
 import Lists from './lists/Lists'
 import Login from './auth/Login'
@@ -13,6 +13,15 @@ import FamilySettings from './families/FamilySettings'
 
 const App = () => {
   const { isLoggedIn, isLoading } = useAuth()
+  const [searchParams] = useSearchParams()
+  const [invitationToken, setInvitationToken] = useState()
+
+  useEffect(() => {
+    const token = searchParams.get('t')
+    if (token) {
+      setInvitationToken(token)
+    }
+  }, [searchParams])
 
   if (isLoading) {
     return (
@@ -53,7 +62,10 @@ const App = () => {
             />
           </Route>
           <Route path="list/:listId" element={<ListDetail />} />
-          <Route path="family/:familyId" element={<FamilySettings />} />
+          <Route
+            path="family/:familyId"
+            element={<FamilySettings invitationToken={invitationToken} />}
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>

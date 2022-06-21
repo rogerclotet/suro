@@ -16,7 +16,7 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState()
   const [isLoading, setIsLoading] = useState(true)
 
-  const { decodedToken, reEvaluateToken } = useJwt(token)
+  const { decodedToken, isExpired, reEvaluateToken } = useJwt(token)
 
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem(JWT_TOKEN_KEY)
@@ -56,6 +56,20 @@ const AuthProvider = ({ children }) => {
       }
     })
   }
+
+  useEffect(() => {
+    if (!token) {
+      return
+    }
+
+    if (isExpired) {
+      refreshToken()
+    } else {
+      setIsLoggedIn(true)
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
 
   useEffect(() => {
     if (!decodedToken) {

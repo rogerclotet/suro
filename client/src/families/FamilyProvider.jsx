@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useContext } from 'react'
 import { createContext } from 'react'
 import PropTypes from 'prop-types'
-import LoadingScreen from '../LoadingScreen'
 import { useAuth } from '../auth/AuthProvider'
 
 const FamilyContext = createContext()
@@ -14,19 +13,25 @@ const FamilyProvider = ({ children }) => {
   const [currentFamilyId, setCurrentFamilyId] = useState()
   const { token } = useAuth()
 
+  const refreshFamilies = useCallback(
+    async () =>
+      fetch(process.env.REACT_APP_API_URL + '/families/', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(res => {
+        if (res.status === 200) {
+          return res.json().then(data => {
+            setFamilies(data)
+          })
+        } else {
+          console.log('Error getting families', res.status)
+        }
+      }),
+    [token]
+  )
+
   useEffect(() => {
-    fetch(process.env.REACT_APP_API_URL + '/families/', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(res => {
-      if (res.status === 200) {
-        return res.json().then(data => {
-          setFamilies(data)
-        })
-      } else {
-        console.log('Error getting families', res.status)
-      }
-    })
+    refreshFamilies()
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -49,9 +54,10 @@ const FamilyProvider = ({ children }) => {
         families,
         currentFamilyId,
         setCurrentFamilyId,
+        refreshFamilies,
       }}
     >
-      {currentFamilyId === undefined ? <LoadingScreen /> : children}
+      {children}
     </FamilyContext.Provider>
   )
 }

@@ -26,10 +26,10 @@ from rest_framework_nested import routers
 
 router = routers.DefaultRouter()
 router.register("families", views.FamilyViewSet, basename="family")
+router.register("invitations", InvitationViewSet, basename="invitation")
 
 families_router = routers.NestedDefaultRouter(router, "families", lookup="family")
 families_router.register("lists", FamilyListViewSet, basename="list")
-families_router.register("invitations", InvitationViewSet, basename="invitation")
 
 family_lists_router = routers.NestedDefaultRouter(
     families_router, "lists", lookup="list"
