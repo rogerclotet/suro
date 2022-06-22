@@ -103,6 +103,7 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
         <DialogContent>
           <Stack direction="column" gap={2} pt={2}>
             <TextField
+              autoFocus
               fullWidth
               id="name"
               name="name"
@@ -186,7 +187,7 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleCancel} disabled={isCreating}>
+          <Button onClick={handleCancel} disabled={isCreating}>
             Canceŀlar
           </Button>
           <LoadingButton
@@ -197,7 +198,7 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
             startIcon={<Save />}
             disabled={!formik.dirty || !formik.isValid || isCreating}
           >
-            Crear
+            Desar
           </LoadingButton>
         </DialogActions>
       </form>

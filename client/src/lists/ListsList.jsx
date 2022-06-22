@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material'
-import { Fab, Grid } from '@mui/material'
+import { Container, Fab, Grid, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useHeader } from '../HeaderProvider'
 import EditListDialog from './EditListDialog'
@@ -60,17 +60,26 @@ const ListsList = ({ type }) => {
         <meta name="description" content="Gestor familiar de llistes" />
       </Helmet>
 
-      <Grid container direction="column" spacing={2} sx={{ p: 2, pb: 8 }}>
-        {lists.map(list => (
-          <Grid item key={list.id}>
-            <ListPreview
-              list={list}
-              onChange={refreshLists}
-              onDuplicate={refreshLists}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      {lists.length === 0 ? (
+        <Container sx={{ mt: 2 }}>
+          <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            No hi ha cap {type === LIST_TYPE_LISTS ? 'llista' : 'plantilla'}, en
+            pots crear amb el botó de baix a la dreta.
+          </Typography>
+        </Container>
+      ) : (
+        <Grid container direction="column" spacing={2} sx={{ p: 2, pb: 8 }}>
+          {lists.map(list => (
+            <Grid item key={list.id}>
+              <ListPreview
+                list={list}
+                onChange={refreshLists}
+                onDuplicate={refreshLists}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       <Fab
         onClick={startCreatingList}

@@ -115,6 +115,19 @@ const AuthProvider = ({ children }) => {
       .catch(e => console.log('Error logging in', e))
   }
 
+  const register = async (email, firstName, lastName, password) => {
+    return fetch(`${process.env.REACT_APP_API_URL}/users/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        password,
+      }),
+    })
+  }
+
   const logOut = () => {
     setToken(undefined)
     setIsLoggedIn(false)
@@ -126,7 +139,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoggedIn, isLoading, logIn, logOut }}
+      value={{ user, token, isLoggedIn, isLoading, logIn, register, logOut }}
     >
       {isLoading ? <LoadingScreen /> : children}
     </AuthContext.Provider>

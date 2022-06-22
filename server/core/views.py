@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
@@ -28,6 +29,18 @@ class FamilyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.request.user.families.all()
+
+    def create(self, request):
+        name = request.data.get("name", None)
+        if name is None:
+            return HttpResponseBadRequest({"error", "Name was not provided"})
+
+        family = Family.objects.create(name=name)
+        family.members.add(request.user)
+
+        serializer = self.get_serializer(family)
+
+        return Response(serializer.data)
 
     @action(
         detail=True,
