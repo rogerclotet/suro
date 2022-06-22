@@ -50,7 +50,7 @@ const ListsList = ({ type }) => {
     return createList(data).then(() => {
       setIsCreating(false)
       refreshLists()
-      enqueueSnackbar('Creada correctament', { variant: 'info' })
+      enqueueSnackbar('Creada correctament')
 
       const targetType = data.is_template
         ? LIST_TYPE_TEMPLATES

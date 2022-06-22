@@ -1,4 +1,5 @@
 import {
+  Container,
   IconButton,
   List,
   ListItem as MaterialListItem,
@@ -105,43 +106,55 @@ const ListDetail = () => {
           content={`Llista amb ${list.items.length} elements. ${list.description}`}
         />
       </Helmet>
-      <List sx={{ pt: 0, pb: 8 }}>
-        {Object.keys(itemsByCategory).map(category => (
-          <div key={category}>
-            <ItemCategory name={category} />
 
-            {(list.is_template || isEditing) && (
-              <MaterialListItem divider>
-                <ListItemInput
-                  onChange={name => handleCreateItem(name, category)}
-                />
-              </MaterialListItem>
-            )}
+      {!(list.is_template || isEditing) && list.items.length === 0 ? (
+        <Container sx={{ mt: 2 }}>
+          <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            No hi ha cap element a la llista
+          </Typography>
+        </Container>
+      ) : (
+        <List sx={{ pt: 0, pb: 8 }}>
+          {Object.keys(itemsByCategory).map(category => (
+            <div key={category}>
+              <ItemCategory name={category} />
 
-            {itemsByCategory[category].length === 0 ? (
-              <MaterialListItem>
-                <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                  No hi ha elements
-                </Typography>
-              </MaterialListItem>
-            ) : (
-              itemsByCategory[category].map(item => (
-                <ListItem
-                  key={item.id}
-                  list={list}
-                  item={item}
-                  isEditing={list.is_template || isEditing}
-                  onChange={refreshList}
-                />
-              ))
-            )}
-          </div>
-        ))}
+              {(list.is_template || isEditing) && (
+                <MaterialListItem divider>
+                  <ListItemInput
+                    onChange={name => handleCreateItem(name, category)}
+                  />
+                </MaterialListItem>
+              )}
 
-        {(list.is_template || isEditing) && (
-          <ItemCategory name="" editable onChange={handleCreateCategory} />
-        )}
-      </List>
+              {itemsByCategory[category].length === 0 ? (
+                <MaterialListItem>
+                  <Typography
+                    color="text.secondary"
+                    sx={{ fontStyle: 'italic' }}
+                  >
+                    No hi ha elements
+                  </Typography>
+                </MaterialListItem>
+              ) : (
+                itemsByCategory[category].map(item => (
+                  <ListItem
+                    key={item.id}
+                    list={list}
+                    item={item}
+                    isEditing={list.is_template || isEditing}
+                    onChange={refreshList}
+                  />
+                ))
+              )}
+            </div>
+          ))}
+
+          {(list.is_template || isEditing) && (
+            <ItemCategory name="" editable onChange={handleCreateCategory} />
+          )}
+        </List>
+      )}
     </>
   )
 }

@@ -12,12 +12,18 @@ const ItemCategory = ({ name, editable, onChange }) => {
 
   const handleSubmit = event => {
     event.preventDefault()
-    handleSaveName()
+    saveName()
   }
 
-  const handleSaveName = () => {
+  const saveName = () => {
     onChange(editingName.trim())
     setEditingName('')
+  }
+
+  const handleBlur = () => {
+    if (editingName !== '') {
+      saveName()
+    }
   }
 
   return (
@@ -32,7 +38,7 @@ const ItemCategory = ({ name, editable, onChange }) => {
             value={editingName}
             onChange={handleChangeName}
             placeholder="Afegeix una categoria"
-            onBlur={handleSaveName}
+            onBlur={handleBlur}
             fullWidth
           />
         </form>

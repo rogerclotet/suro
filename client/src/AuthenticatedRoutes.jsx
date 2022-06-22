@@ -9,11 +9,16 @@ import FamilySettings from './families/FamilySettings'
 import PropTypes from 'prop-types'
 import { useFamilies } from './families/FamilyProvider'
 import NoCurrentFamily from './families/NoCurrentFamily'
+import LoadingScreen from './LoadingScreen'
 
 const AuthenticatedRoutes = ({ invitationToken }) => {
-  const { currentFamilyId } = useFamilies()
+  const { families, isLoading } = useFamilies()
 
-  if (!currentFamilyId) {
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
+  if (families === []) {
     return (
       <Routes>
         <Route path="/" element={<Layout />}>

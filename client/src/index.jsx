@@ -33,17 +33,17 @@ root.render(
   <React.StrictMode>
     <CssBaseline />
     <ThemeProvider theme={theme}>
-      <AuthProvider>
-        <HelmetProvider>
-          <HeaderProvider>
-            <SnackbarProvider maxSnack={3}>
+      <SnackbarProvider maxSnack={3}>
+        <AuthProvider>
+          <HelmetProvider>
+            <HeaderProvider>
               <BrowserRouter>
                 <App />
               </BrowserRouter>
-            </SnackbarProvider>
-          </HeaderProvider>
-        </HelmetProvider>
-      </AuthProvider>
+            </HeaderProvider>
+          </HelmetProvider>
+        </AuthProvider>
+      </SnackbarProvider>
     </ThemeProvider>
   </React.StrictMode>
 )

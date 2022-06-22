@@ -3,13 +3,19 @@ import { Tab, Tabs } from '@mui/material'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import ListsProvider from './ListsProvider'
 
+const getCurrentTab = () => {
+  const pathParts = location.pathname.split('/')
+  return pathParts[pathParts.length - 1] === 'templates' ? 1 : 0
+}
+
 const Lists = () => {
   const location = useLocation()
-  const [tab, setTab] = useState(0)
+  const [tab, setTab] = useState(getCurrentTab)
 
   useEffect(() => {
-    const pathParts = location.pathname.split('/')
-    setTab(pathParts[pathParts.length - 1] === 'templates' ? 1 : 0)
+    setTab(getCurrentTab())
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname])
 
   const handleTabChange = (event, value) => {
