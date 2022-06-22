@@ -10,3 +10,20 @@ class IsFamilyMember(permissions.BasePermission):
         ):
             return False
         return obj in request.user.families.all()
+
+
+class IsInvitationFamilyMemberOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if (
+            not request.user
+            or not request.user.is_authenticated
+            or request.user.is_anonymous
+        ):
+            return False
+        return obj.family in request.user.families.all()

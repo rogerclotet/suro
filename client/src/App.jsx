@@ -1,14 +1,24 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
 import Layout from './Layout'
-import Lists from './lists/Lists'
 import Login from './auth/Login'
 import { useAuth } from './auth/AuthProvider'
 import LoadingScreen from './LoadingScreen'
-import ListDetail from './lists/ListDetail'
+import FamilyProvider from './families/FamilyProvider'
+import Register from './auth/Register'
+import AuthenticatedRoutes from './AuthenticatedRoutes'
 
 const App = () => {
   const { isLoggedIn, isLoading } = useAuth()
+  const [searchParams] = useSearchParams()
+  const [invitationToken, setInvitationToken] = useState()
+
+  useEffect(() => {
+    const token = searchParams.get('t')
+    if (token) {
+      setInvitationToken(token)
+    }
+  }, [searchParams])
 
   if (isLoading) {
     return (
@@ -26,6 +36,7 @@ const App = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="login" replace />} />
           <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>
@@ -33,14 +44,9 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="lists" replace />} />
-        <Route path="lists" element={<Lists />} />
-        <Route path="lists/:listId" element={<ListDetail />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Route>
-    </Routes>
+    <FamilyProvider>
+      <AuthenticatedRoutes invitationToken={invitationToken} />
+    </FamilyProvider>
   )
 }
 

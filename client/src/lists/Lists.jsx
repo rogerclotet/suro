@@ -1,51 +1,33 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Container, Grid } from '@mui/material'
-import LoadingScreen from '../LoadingScreen'
-import { useHeader } from '../HeaderProvider'
-import { useAuth } from '../auth/AuthProvider'
-import ListPreview from './ListPreview'
-import NewListButton from './NewListButton'
+import React, { useState } from 'react'
+import { Tab, Tabs } from '@mui/material'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import ListsProvider from './ListsProvider'
 
 const Lists = () => {
-  const [lists, setLists] = useState()
-  const { setHeader } = useHeader()
-  const { token } = useAuth()
+  const location = useLocation()
+  const [tab, setTab] = useState(() => {
+    const pathParts = location.pathname.split('/')
+    return pathParts[pathParts.length - 1] === 'templates' ? 1 : 0
+  })
 
-  const refreshLists = useCallback(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/families/1/lists/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .catch(e => console.log('Error loading lists', e))
-      .then(data => setLists(data))
-  }, [token])
-
-  useEffect(() => {
-    // TODO use current family id
-    if (token) {
-      refreshLists()
-    }
-  }, [token, refreshLists])
-
-  useEffect(() => {
-    setHeader('Llistes')
-  }, [setHeader])
-
-  if (lists === undefined) {
-    return <LoadingScreen />
+  const handleTabChange = (event, value) => {
+    setTab(value)
   }
 
   return (
-    <Container sx={{ py: 2 }}>
-      <Grid container direction="column" spacing={2}>
-        {lists.map(list => (
-          <Grid item key={list.id}>
-            <ListPreview list={list} />
-          </Grid>
-        ))}
-      </Grid>
-      <NewListButton onClose={refreshLists} />
-    </Container>
+    <ListsProvider>
+      <Tabs
+        value={tab}
+        onChange={handleTabChange}
+        variant="fullWidth"
+        sx={{ backgroundColor: 'divider' }}
+      >
+        <Tab label="Llistes" LinkComponent={Link} to="lists" />
+        <Tab label="Plantilles" LinkComponent={Link} to="templates" />
+      </Tabs>
+
+      <Outlet />
+    </ListsProvider>
   )
 }
 

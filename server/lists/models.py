@@ -13,17 +13,24 @@ class List(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self) -> str:
+        return self.name
+
     class Meta:
         ordering = ["-is_favorite", "-updated_at"]
 
 
 class ListItem(models.Model):
     name = models.TextField(blank=False)
-    order = models.IntegerField(blank=True)
+    order = models.IntegerField(blank=True, default=1)
     is_complete = models.BooleanField(blank=True, default=False)
+    category = models.CharField(
+        max_length=64,
+        blank=True,
+    )
     list = models.ForeignKey(to=List, related_name="items", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["is_complete", "order"]
+        ordering = ["category", "is_complete", "order"]

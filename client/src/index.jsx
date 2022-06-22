@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
@@ -14,6 +13,7 @@ import { blueGrey, lightGreen } from '@mui/material/colors'
 import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
 import HeaderProvider from './HeaderProvider'
+import { HelmetProvider } from 'react-helmet-async'
 
 const theme = createTheme({
   palette: {
@@ -33,11 +33,13 @@ root.render(
     <CssBaseline />
     <ThemeProvider theme={theme}>
       <AuthProvider>
-        <HeaderProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </HeaderProvider>
+        <HelmetProvider>
+          <HeaderProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </HeaderProvider>
+        </HelmetProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>

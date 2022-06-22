@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -21,12 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-tc=hna@#b6i)-!w#a&^pv^(scvsngz5li^$kylj3j+4)p_h=fj"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["api.familia.clotet.dev"]
+if DEBUG:
+    ALLOWED_HOSTS += ["localhost"]
 
 
 # Application definition
@@ -134,6 +137,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATIC_ROOT = os.environ.get("STATIC_ROOT")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -166,3 +171,11 @@ LOGGING = {
 
 
 CORS_ALLOWED_ORIGINS = ["https://familia.clotet.dev", "http://localhost:3000"]
+
+CSRF_TRUSTED_ORIGINS = ["https://api.familia.clotet.dev"]
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += ["http://localhost"]
+
+
+# Simple JWT
+REFRESH_TOKEN_LIFETIME = timedelta(days=30)

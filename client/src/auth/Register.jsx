@@ -20,6 +20,8 @@ const validationSchema = yup.object({
     .string('Introdueix un email')
     .email('Introdueix un email vàlid')
     .required("L'email és obligatori"),
+  first_name: yup.string('Introdueix un nom').required('El nom és obligatori'),
+  last_name: yup.string('Introdueix els cognoms'),
   password: yup
     .string('Introdueix la contrasenya')
     .min(8, 'La contrasenya ha de tenir 8 caràcters com a mínim')
@@ -27,17 +29,32 @@ const validationSchema = yup.object({
     .required('La contrasenya és obligatòria'),
 })
 
-const Login = () => {
-  const { logIn } = useAuth()
+const Register = () => {
+  const { register, logIn } = useAuth()
   const { setHeader } = useHeader()
 
   const formik = useFormik({
     initialValues: {
       email: '',
+      first_name: '',
+      last_name: '',
       password: '',
     },
     validationSchema: validationSchema,
-    onSubmit: ({ email, password }) => logIn(email, password),
+    onSubmit: ({
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      password,
+    }) => {
+      register(email, firstName, lastName, password).then(res => {
+        if (res.status === 200) {
+          logIn(email, password)
+        } else {
+          console.log('Error signing up', res)
+        }
+      })
+    },
   })
 
   useEffect(() => {
@@ -50,12 +67,13 @@ const Login = () => {
         <Card>
           <CardContent>
             <Typography variant="h4" component="h2" marginBottom={2}>
-              Iniciar sessió
+              Registre
             </Typography>
             <form onSubmit={formik.handleSubmit}>
               <Stack direction="column" gap={2}>
                 <TextField
                   fullWidth
+                  type="email"
                   id="email"
                   name="email"
                   label="Email"
@@ -63,6 +81,35 @@ const Login = () => {
                   onChange={formik.handleChange}
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
+                />
+                <TextField
+                  fullWidth
+                  id="first_name"
+                  name="first_name"
+                  label="Nom"
+                  value={formik.values.first_name}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.first_name &&
+                    Boolean(formik.errors.first_name)
+                  }
+                  helperText={
+                    formik.touched.first_name && formik.errors.first_name
+                  }
+                />
+                <TextField
+                  fullWidth
+                  id="last_name"
+                  name="last_name"
+                  label="Cognoms"
+                  value={formik.values.last_name}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.last_name && Boolean(formik.errors.last_name)
+                  }
+                  helperText={
+                    formik.touched.last_name && formik.errors.last_name
+                  }
                 />
                 <TextField
                   fullWidth
@@ -83,13 +130,13 @@ const Login = () => {
                   fullWidth
                   type="submit"
                 >
-                  Iniciar sessió
+                  Registra&apos;t
                 </Button>
 
                 <Typography>
-                  Si no tens compte, pots{' '}
-                  <Link component={RouterLink} to="/register">
-                    registrar-te
+                  Ja tens un compte?{' '}
+                  <Link component={RouterLink} to="/login">
+                    Inicia sessió
                   </Link>
                 </Typography>
               </Stack>
@@ -101,4 +148,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Register

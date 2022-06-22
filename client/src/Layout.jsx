@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React from 'react'
 import {
   Container,
@@ -10,62 +9,121 @@ import {
   Stack,
   IconButton,
   Link,
+  Drawer,
 } from '@mui/material'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
-import { ArrowBack, Logout } from '@mui/icons-material'
+import { ArrowBack, Menu } from '@mui/icons-material'
 import { useAuth } from './auth/AuthProvider'
 import { useHeader } from './HeaderProvider'
+import { Helmet } from 'react-helmet-async'
+import { useState } from 'react'
+import SideMenu from './SideMenu'
+import { useEffect } from 'react'
 
-function Layout() {
-  const { isLoggedIn, logOut } = useAuth()
-  const { title, backLink } = useHeader()
+const drawerWidth = 240
+
+const Layout = () => {
+  const { isLoggedIn } = useAuth()
+  const { title, backLink, actions } = useHeader()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsMenuOpen(false)
+    }
+  }, [isLoggedIn])
+
+  const handleDrawerToggle = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const container =
+    window !== undefined ? () => window.document.body : undefined
 
   return (
-    <Box
-      sx={{
-        height: '100%',
-        bgcolor: 'background.default',
-      }}
-    >
-      <Container maxWidth="sm" disableGutters css={{ height: '100%' }}>
-        <Stack direction="column" css={{ height: '100%' }}>
-          <header>
-            <AppBar position="static">
-              <Toolbar sx={{ gap: 1 }}>
-                {backLink && (
-                  <IconButton component={RouterLink} to={backLink}>
-                    <ArrowBack />
-                  </IconButton>
-                )}
-                <Typography
-                  variant="h6"
-                  component="div"
-                  noWrap
-                  sx={{ flexGrow: 1 }}
-                >
-                  <Link
-                    component={RouterLink}
-                    to={backLink || '/'}
-                    color="inherit"
-                    underline="none"
+    <>
+      <Helmet>
+        <title>Família</title>
+        <meta name="description" content="Gestor familiar" />
+      </Helmet>
+      <Box
+        sx={{
+          height: '100%',
+          bgcolor: 'background.default',
+        }}
+      >
+        <Container
+          maxWidth="sm"
+          disableGutters
+          sx={{ height: '100%', position: 'relative' }}
+        >
+          <Stack direction="column" sx={{ height: '100%' }}>
+            <header>
+              <AppBar position="static">
+                <Toolbar sx={{ gap: 1 }}>
+                  {backLink ? (
+                    <IconButton
+                      size="large"
+                      edge="start"
+                      component={RouterLink}
+                      to={backLink}
+                    >
+                      <ArrowBack />
+                    </IconButton>
+                  ) : (
+                    isLoggedIn && (
+                      <IconButton
+                        size="large"
+                        edge="start"
+                        onClick={handleDrawerToggle}
+                      >
+                        <Menu />
+                      </IconButton>
+                    )
+                  )}
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    noWrap
+                    sx={{ flexGrow: 1 }}
                   >
-                    {title || 'Família'}
-                  </Link>
-                </Typography>
-                {isLoggedIn && (
-                  <IconButton onClick={logOut}>
-                    <Logout />
-                  </IconButton>
-                )}
-              </Toolbar>
-            </AppBar>
-          </header>
-          <Paper elevation={0} sx={{ flexGrow: 1, overflowY: 'scroll' }}>
-            <Outlet />
-          </Paper>
-        </Stack>
-      </Container>
-    </Box>
+                    <Link
+                      component={RouterLink}
+                      to={backLink || '/'}
+                      color="inherit"
+                      underline="none"
+                    >
+                      {title || 'Família'}
+                    </Link>
+                  </Typography>
+                  {actions}
+                </Toolbar>
+              </AppBar>
+            </header>
+            <Paper elevation={0} sx={{ flexGrow: 1, overflowY: 'scroll' }}>
+              <Outlet />
+            </Paper>
+          </Stack>
+        </Container>
+      </Box>
+      <Drawer
+        container={container}
+        variant="temporary"
+        open={isMenuOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: drawerWidth,
+          },
+        }}
+      >
+        <SideMenu onClose={handleDrawerToggle} />
+      </Drawer>
+    </>
   )
 }
 

@@ -8,14 +8,16 @@ export const useHeader = () => useContext(TitleContext)
 const HeaderProvider = ({ children }) => {
   const [title, setTitle] = useState()
   const [backLink, setBackLink] = useState()
+  const [actions, setActions] = useState()
 
-  const setHeader = (title, backLink = undefined) => {
+  const setHeader = (title, backLink = undefined, actions = null) => {
     setTitle(title)
     setBackLink(backLink)
+    setActions(actions)
   }
 
   return (
-    <TitleContext.Provider value={{ title, backLink, setHeader }}>
+    <TitleContext.Provider value={{ title, backLink, actions, setHeader }}>
       {children}
     </TitleContext.Provider>
   )
