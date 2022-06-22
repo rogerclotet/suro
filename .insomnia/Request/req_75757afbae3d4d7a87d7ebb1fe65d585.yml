@@ -1,0 +1,32 @@
+_id: req_75757afbae3d4d7a87d7ebb1fe65d585
+type: Request
+parentId: fld_aa8e3035d1284ec19a59983d9fe7144b
+modified: 1655807258790
+created: 1655733008886
+url: "{{ _.api_url }}/invitations/"
+name: Create invitation
+description: ""
+method: POST
+body:
+  mimeType: application/json
+  text: |-
+    {
+    	"family_id": 1
+    }
+parameters: []
+headers:
+  - name: Content-Type
+    value: application/json
+    id: pair_637f0a94e7cf4d16a4d79140d25d4072
+authentication:
+  type: bearer
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NzY4MzQ0LCJpYXQiOjE2NTU3NjgwNDQsImp0aSI6ImJlZDhiZDU5YmFhZDQwM2NhYjhkMjJiODgwY2M3M2ViIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.JLvg1guthotkExda-kWM4G1JDtxz0xGONFuzBkAbFTU
+  disabled: false
+metaSortKey: -1655275371671.5
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global

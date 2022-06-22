@@ -1,26 +1,28 @@
-_id: req_e67533c2ec494783889d4a13c0df5058
+_id: req_3f69397b3cc74a44ac5406f4967de9e3
 type: Request
 parentId: fld_87f614be964a4ee1a514a3d4c6de1ee9
-modified: 1655890871262
-created: 1655109910587
-url: "{{ _.api_url }}/token/"
-name: JWT Login
+modified: 1655815103102
+created: 1655809628185
+url: "{{ _.api_url }}/users/"
+name: Register
 description: ""
 method: POST
 body:
   mimeType: application/json
   text: |-
     {
-    	"email": "roger@clotet.dev",
+    	"email": "created@example.com",
+    	"first_name": "Created",
+    	"last_name": "User",
     	"password": "fYRz8lq0"
     }
 parameters: []
 headers:
   - name: Content-Type
     value: application/json
-    id: pair_cc0baa1ff474454ea0fd8dcbc740878b
+    id: pair_c3a07291b64c4f68868a947bbe45e368
 authentication: {}
-metaSortKey: -1655110278176.25
+metaSortKey: -1655809628185
 isPrivate: false
 settingStoreCookies: true
 settingSendCookies: true

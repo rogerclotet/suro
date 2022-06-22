@@ -1,10 +1,10 @@
 _id: req_16881085ed6b44bb9512a155e35da83e
 type: Request
 parentId: fld_87f614be964a4ee1a514a3d4c6de1ee9
-modified: 1655215169474
+modified: 1655809612386
 created: 1655110799859
 url: "{{ _.api_url }}/token/refresh/"
-name: Refresh
+name: JWT Refresh
 description: ""
 method: POST
 body:

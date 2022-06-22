@@ -1,9 +1,9 @@
 _id: req_9076e3640897421a9ada82bd59bb068b
 type: Request
 parentId: fld_4dd7bdd97dd04db9890c6b1ceb06cf7d
-modified: 1655130522448
+modified: 1655678910865
 created: 1655122834635
-url: "{{ _.api_url }}/families"
+url: "{{ _.api_url }}/families/"
 name: Families
 description: ""
 method: GET
@@ -12,7 +12,7 @@ parameters: []
 headers: []
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MTMwODEyLCJpYXQiOjE2NTUxMzA1MTIsImp0aSI6ImQzZDUzMDVkNTU0MzRmMWNhNWI4Y2Y2YWFjZGE1OTdkIiwidXNlcl9pZCI6Mn0.KWOZfpSeri4l20-9Wrmbh119NvOpHGMDe9UNCC8I9Po
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1Njc5MTk5LCJpYXQiOjE2NTU2Nzg4OTksImp0aSI6IjgwZDA3NDVkMjQ5MTQyMzQ5ZjI3NjFlNmI5NTkyN2E3IiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IiIsImxhc3RfbmFtZSI6IiJ9.pSEKGK3g3DEAHfnelJiZQ9FhLL7b6gOv5hbmb1x4Ktk
 metaSortKey: -1655122834635
 isPrivate: false
 settingStoreCookies: true
