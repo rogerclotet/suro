@@ -96,9 +96,7 @@ const FamilySettings = ({ invitationToken }) => {
       res
         .json()
         .then(data =>
-          setInvitationLink(
-            `${window.location.host}${location.pathname}?t=${data.token}`
-          )
+          setInvitationLink(`${window.location.href}?t=${data.token}`)
         )
     })
   }
