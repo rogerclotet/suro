@@ -17,7 +17,8 @@ import EditFamilyDialog from './EditFamilyDialog'
 import useClient from '../useClient'
 
 const FamilyList = ({ onClose }) => {
-  const { families, currentFamilyId } = useFamilies()
+  const { families, currentFamilyId, setCurrentFamilyId, refreshFamilies } =
+    useFamilies()
   const [isCreatingFamily, setIsCreatingFamily] = useState(false)
   const { familiesRequest } = useClient()
 
@@ -26,6 +27,15 @@ const FamilyList = ({ onClose }) => {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
+    }).then(res => {
+      if (res.status === 200) {
+        res.json().then(data => {
+          refreshFamilies()
+          setCurrentFamilyId(data.id)
+        })
+      } else {
+        console.log('Error creating family', res)
+      }
     })
   }
 
@@ -45,6 +55,7 @@ const FamilyList = ({ onClose }) => {
             <ListItemButton
               key={family.id}
               selected={family.id === currentFamilyId}
+              onClick={() => setCurrentFamilyId(family.id)}
               sx={{ pl: 4, pr: 1 }}
             >
               <ListItemIcon>
@@ -55,6 +66,7 @@ const FamilyList = ({ onClose }) => {
               <Stack
                 direction="row"
                 justifyContent="space-between"
+                alignItems="center"
                 gap={1}
                 flexGrow={1}
               >

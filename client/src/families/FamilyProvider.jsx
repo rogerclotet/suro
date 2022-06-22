@@ -43,7 +43,7 @@ const FamilyProvider = ({ children }) => {
     }
 
     const familyIds = families.map(family => family.id)
-    if (currentFamilyId === undefined || familyIds.includes(currentFamilyId)) {
+    if (currentFamilyId === undefined) {
       setCurrentFamilyId(familyIds[0])
     }
   }, [families, currentFamilyId])
