@@ -14,7 +14,6 @@ const AuthenticatedRoutes = ({ invitationToken }) => {
   const { currentFamilyId } = useFamilies()
 
   if (!currentFamilyId) {
-    // TODO change LoadingScreen to Family creator / selector
     return (
       <Routes>
         <Route path="/" element={<Layout />}>

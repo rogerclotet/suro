@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import string
@@ -17,7 +18,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from core.models import Family, Invitation
 from custom_user.models import User
 
-INVITATION_LIMIT = 1
+FAMILIES_LIMIT = 5
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -33,7 +34,14 @@ class FamilyViewSet(viewsets.ModelViewSet):
     def create(self, request):
         name = request.data.get("name", None)
         if name is None:
-            return HttpResponseBadRequest({"error", "Name was not provided"})
+            return HttpResponseBadRequest(
+                json.dumps({"error", "Name was not provided"})
+            )
+
+        if request.user.families.count() >= FAMILIES_LIMIT:
+            return HttpResponseBadRequest(
+                json.dumps({"error": "Families limit reached"})
+            )
 
         family = Family.objects.create(name=name)
         family.members.add(request.user)
@@ -72,6 +80,11 @@ class FamilyViewSet(viewsets.ModelViewSet):
             )
 
         user = get_object_or_404(User, pk=user_id)
+
+        if user.families.count() >= FAMILIES_LIMIT:
+            return HttpResponseBadRequest(
+                json.dumps({"code": 1, "error": "Families limit reached"})
+            )
 
         family.members.add(user)
 

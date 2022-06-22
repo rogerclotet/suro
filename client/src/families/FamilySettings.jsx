@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo } from 'react'
 import { GroupAdd, Link, Share } from '@mui/icons-material'
 import {
   Avatar,
@@ -19,7 +20,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import React, { useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useLocation, useParams } from 'react-router-dom'
 import { useHeader } from '../HeaderProvider'
@@ -30,7 +30,7 @@ import { useState } from 'react'
 import { RWebShare } from 'react-web-share'
 import PropTypes from 'prop-types'
 import { useAuth } from '../auth/AuthProvider'
-import { useMemo } from 'react'
+import { useSnackbar } from 'notistack'
 
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
@@ -41,6 +41,7 @@ const FamilySettings = ({ invitationToken }) => {
   const [invitationLink, setInvitationLink] = useState()
   const { user } = useAuth()
   const [family, setFamily] = useState()
+  const { enqueueSnackbar } = useSnackbar()
 
   const isFamilyMember = useMemo(() => {
     if (!family) {
@@ -110,8 +111,17 @@ const FamilySettings = ({ invitationToken }) => {
     }).then(res => {
       if (res.status !== 200) {
         console.log('Error joining family', res)
+        res.json().then(error => {
+          if (error.code === 1) {
+            enqueueSnackbar('No et pots unir a més famílies', {
+              variant: 'error',
+              preventDuplicate: true,
+            })
+          }
+        })
+      } else {
+        refreshFamilies()
       }
-      refreshFamilies()
     })
   }
 

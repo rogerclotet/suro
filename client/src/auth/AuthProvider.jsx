@@ -100,19 +100,17 @@ const AuthProvider = ({ children }) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+    }).then(res => {
+      if (res.status === 200) {
+        return res.json().then(data => {
+          localStorage.setItem(JWT_TOKEN_KEY, data.access)
+          localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
+          setToken(data.access)
+        })
+      } else {
+        console.log('Error logging in', res)
+      }
     })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json().then(data => {
-            localStorage.setItem(JWT_TOKEN_KEY, data.access)
-            localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
-            setToken(data.access)
-          })
-        } else {
-          throw new Error('Status', res.status, 'on login')
-        }
-      })
-      .catch(e => console.log('Error logging in', e))
   }
 
   const register = async (email, firstName, lastName, password) => {

@@ -14,6 +14,7 @@ import { useFormik } from 'formik'
 import { useAuth } from './AuthProvider'
 import { useHeader } from '../HeaderProvider'
 import { Link as RouterLink } from 'react-router-dom'
+import { useSnackbar } from 'notistack'
 
 const validationSchema = yup.object({
   email: yup
@@ -32,6 +33,7 @@ const validationSchema = yup.object({
 const Register = () => {
   const { register, logIn } = useAuth()
   const { setHeader } = useHeader()
+  const { enqueueSnackbar } = useSnackbar()
 
   const formik = useFormik({
     initialValues: {
@@ -51,6 +53,10 @@ const Register = () => {
         if (res.status === 200) {
           logIn(email, password)
         } else {
+          enqueueSnackbar(
+            'Hi ha hagut un problema durant el registre. Sisplau, torna-ho a provar més tard.',
+            { variant: 'error' }
+          )
           console.log('Error signing up', res)
         }
       })

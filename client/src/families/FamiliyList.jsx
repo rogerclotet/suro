@@ -16,6 +16,8 @@ import { useState } from 'react'
 import EditFamilyDialog from './EditFamilyDialog'
 import useClient from '../useClient'
 
+const FAMILIES_LIMIT = 5
+
 const FamilyList = ({ onClose }) => {
   const { families, currentFamilyId, setCurrentFamilyId, refreshFamilies } =
     useFamilies()
@@ -89,12 +91,15 @@ const FamilyList = ({ onClose }) => {
           <ListItemText>Nova família</ListItemText>
         </ListItemButton>
       </List>
-      <EditFamilyDialog
-        title="Nova família"
-        open={isCreatingFamily}
-        onSave={createFamily}
-        onClose={stopCreatingFamily}
-      />
+
+      {families.length < FAMILIES_LIMIT && (
+        <EditFamilyDialog
+          title="Nova família"
+          open={isCreatingFamily}
+          onSave={createFamily}
+          onClose={stopCreatingFamily}
+        />
+      )}
     </>
   )
 }

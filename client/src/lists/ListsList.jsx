@@ -5,15 +5,19 @@ import { useHeader } from '../HeaderProvider'
 import EditListDialog from './EditListDialog'
 import ListPreview from './ListPreview'
 import PropTypes from 'prop-types'
-import { LIST_TYPE_LISTS } from './constants'
+import { LIST_TYPE_LISTS, LIST_TYPE_TEMPLATES } from './constants'
 import { useLists } from './ListsProvider'
 import { Helmet } from 'react-helmet-async'
 import LoadingScreen from '../LoadingScreen'
+import { useNavigate } from 'react-router-dom'
+import { useSnackbar } from 'notistack'
 
 const ListsList = ({ type }) => {
   const [isCreating, setIsCreating] = useState(false)
   const { setHeader } = useHeader()
   const { lists: allLists, refreshLists, createList } = useLists()
+  const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
 
   const title = useMemo(
     () => (type === LIST_TYPE_LISTS ? 'Llistes' : 'Plantilles'),
@@ -46,6 +50,14 @@ const ListsList = ({ type }) => {
     return createList(data).then(() => {
       setIsCreating(false)
       refreshLists()
+      enqueueSnackbar('Creada correctament', { variant: 'info' })
+
+      const targetType = data.is_template
+        ? LIST_TYPE_TEMPLATES
+        : LIST_TYPE_LISTS
+      if (targetType !== type) {
+        navigate(`/lists/${targetType}`)
+      }
     })
   }
 

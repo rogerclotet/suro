@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tab, Tabs } from '@mui/material'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import ListsProvider from './ListsProvider'
 
 const Lists = () => {
   const location = useLocation()
-  const [tab, setTab] = useState(() => {
+  const [tab, setTab] = useState(0)
+
+  useEffect(() => {
     const pathParts = location.pathname.split('/')
-    return pathParts[pathParts.length - 1] === 'templates' ? 1 : 0
-  })
+    setTab(pathParts[pathParts.length - 1] === 'templates' ? 1 : 0)
+  }, [location.pathname])
 
   const handleTabChange = (event, value) => {
     setTab(value)
