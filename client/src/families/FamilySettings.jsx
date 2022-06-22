@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Helmet } from 'react-helmet-async'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useHeader } from '../HeaderProvider'
 import LoadingScreen from '../LoadingScreen'
 import { useFamilies } from './FamilyProvider'
@@ -34,7 +34,6 @@ import { useSnackbar } from 'notistack'
 
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
-  const location = useLocation()
   const { families, refreshFamilies } = useFamilies()
   const { setHeader } = useHeader()
   const { invitationsRequest, joinFamilyRequest } = useClient()
