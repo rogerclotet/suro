@@ -12,7 +12,7 @@ import {
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAuth } from './AuthProvider'
-import { useHeader } from '../HeaderProvider'
+import { useLayout } from '../HeaderProvider'
 import { Link as RouterLink } from 'react-router-dom'
 import { useSnackbar } from 'notistack'
 
@@ -32,7 +32,7 @@ const validationSchema = yup.object({
 
 const Register = () => {
   const { register, logIn } = useAuth()
-  const { setHeader } = useHeader()
+  const { setHeader } = useLayout()
   const { enqueueSnackbar } = useSnackbar()
 
   const formik = useFormik({

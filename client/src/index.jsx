@@ -12,9 +12,8 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { blueGrey, lightGreen } from '@mui/material/colors'
 import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
-import HeaderProvider from './HeaderProvider'
+import LayoutProvider from './HeaderProvider'
 import { HelmetProvider } from 'react-helmet-async'
-import { SnackbarProvider } from 'notistack'
 
 const theme = createTheme({
   palette: {
@@ -33,17 +32,15 @@ root.render(
   <React.StrictMode>
     <CssBaseline />
     <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={3}>
-        <AuthProvider>
-          <HelmetProvider>
-            <HeaderProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
-            </HeaderProvider>
-          </HelmetProvider>
-        </AuthProvider>
-      </SnackbarProvider>
+      <AuthProvider>
+        <HelmetProvider>
+          <LayoutProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </LayoutProvider>
+        </HelmetProvider>
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
 )

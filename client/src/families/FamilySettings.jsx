@@ -22,7 +22,7 @@ import {
 } from '@mui/material'
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
-import { useHeader } from '../HeaderProvider'
+import { useLayout } from '../HeaderProvider'
 import LoadingScreen from '../LoadingScreen'
 import { useFamilies } from './FamilyProvider'
 import useClient from '../useClient'
@@ -35,7 +35,7 @@ import { useSnackbar } from 'notistack'
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
   const { families, refreshFamilies } = useFamilies()
-  const { setHeader } = useHeader()
+  const { setHeader } = useLayout()
   const { invitationsRequest, joinFamilyRequest } = useClient()
   const [invitationLink, setInvitationLink] = useState()
   const { user } = useAuth()

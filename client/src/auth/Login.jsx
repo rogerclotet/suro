@@ -12,7 +12,7 @@ import {
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAuth } from './AuthProvider'
-import { useHeader } from '../HeaderProvider'
+import { useLayout } from '../HeaderProvider'
 import { Link as RouterLink } from 'react-router-dom'
 
 const validationSchema = yup.object({
@@ -29,7 +29,7 @@ const validationSchema = yup.object({
 
 const Login = () => {
   const { logIn } = useAuth()
-  const { setHeader } = useHeader()
+  const { setHeader } = useLayout()
 
   const formik = useFormik({
     initialValues: {

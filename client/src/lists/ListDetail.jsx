@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import LoadingScreen from '../LoadingScreen'
-import { useHeader } from '../HeaderProvider'
+import { useLayout } from '../HeaderProvider'
 import useClient from '../useClient'
 import ListItem from './ListItem'
 import { useCallback } from 'react'
@@ -22,7 +22,7 @@ const ListDetail = () => {
   const [list, setList] = useState()
   const [itemsByCategory, setItemsByCategory] = useState()
   const [isEditing, setIsEditing] = useState(false)
-  const { setHeader } = useHeader()
+  const { setHeader } = useLayout()
   const { listRequest, itemsRequest } = useClient()
 
   const toggleIsEditing = () => {

@@ -14,17 +14,18 @@ import {
 import { Link as RouterLink, Outlet } from 'react-router-dom'
 import { ArrowBack, Menu } from '@mui/icons-material'
 import { useAuth } from './auth/AuthProvider'
-import { useHeader } from './HeaderProvider'
+import { useLayout } from './HeaderProvider'
 import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import SideMenu from './SideMenu'
 import { useEffect } from 'react'
+import { SnackbarProvider } from 'notistack'
 
 const drawerWidth = 240
 
 const Layout = () => {
   const { isLoggedIn } = useAuth()
-  const { title, backLink, actions } = useHeader()
+  const { title, backLink, actions, tabs, fab } = useLayout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
@@ -100,9 +101,28 @@ const Layout = () => {
                 </Toolbar>
               </AppBar>
             </header>
-            <Paper elevation={0} sx={{ flexGrow: 1, overflowY: 'scroll' }}>
-              <Outlet />
-            </Paper>
+
+            {tabs}
+
+            <SnackbarProvider
+              maxSnack={3}
+              classes={
+                fab !== undefined ? { root: 'snackbar-container' } : undefined
+              }
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  flexGrow: 1,
+                  overflowY: 'scroll',
+                  pb: fab !== undefined ? 9 : 0,
+                }}
+              >
+                <Outlet />
+              </Paper>
+            </SnackbarProvider>
+
+            {fab}
           </Stack>
         </Container>
       </Box>
