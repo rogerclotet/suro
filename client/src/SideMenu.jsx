@@ -20,10 +20,13 @@ import { useState } from 'react'
 import { useAuth } from './auth/AuthProvider'
 import FamilyList from './families/FamiliyList'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
+import { useFamilies } from './families/FamilyProvider'
 
 const SideMenu = ({ onClose }) => {
   const [isFamilyOpen, setIsFamilyOpen] = useState(false)
   const { logOut } = useAuth()
+  const { currentFamilyId } = useFamilies()
 
   const handleToggleFamily = () => {
     setIsFamilyOpen(!isFamilyOpen)
@@ -38,12 +41,18 @@ const SideMenu = ({ onClose }) => {
       </Toolbar>
       <Divider />
       <List component="nav">
-        <ListItemButton>
-          <ListItemIcon>
-            <ListAlt />
-          </ListItemIcon>
-          Llistes
-        </ListItemButton>
+        {currentFamilyId !== undefined && (
+          <ListItemButton
+            onClick={onClose}
+            component={Link}
+            to={`/f/${currentFamilyId}/l/lists`}
+          >
+            <ListItemIcon>
+              <ListAlt />
+            </ListItemIcon>
+            Llistes
+          </ListItemButton>
+        )}
         <ListItemButton onClick={handleToggleFamily}>
           <ListItemIcon>
             <PeopleAlt />
