@@ -3,6 +3,7 @@ import {
   Badge,
   IconButton,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -10,7 +11,7 @@ import {
 } from '@mui/material'
 import { useFamilies } from './FamilyProvider'
 import { Add, PeopleAlt, Settings } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 import EditFamilyDialog from './EditFamilyDialog'
@@ -23,6 +24,7 @@ const FamilyList = ({ onClose }) => {
     useFamilies()
   const [isCreatingFamily, setIsCreatingFamily] = useState(false)
   const { familiesRequest } = useClient()
+  const navigate = useNavigate()
 
   const createFamily = async data => {
     familiesRequest({
@@ -32,8 +34,7 @@ const FamilyList = ({ onClose }) => {
     }).then(res => {
       if (res.status === 200) {
         res.json().then(data => {
-          refreshFamilies()
-          setCurrentFamilyId(data.id)
+          refreshFamilies().then(() => navigate(`/f/${data.id}/l`))
         })
       } else {
         console.log('Error creating family', res)
@@ -49,40 +50,58 @@ const FamilyList = ({ onClose }) => {
     setIsCreatingFamily(false)
   }
 
+  const selectFamily = familyId => {
+    setCurrentFamilyId(familyId)
+    navigate(`/f/${familyId}/l`)
+    onClose()
+  }
+
+  const openFamilySettings = familyId => {
+    navigate(`/f/${familyId}`)
+    onClose()
+  }
+
   return (
     <>
       <List component="div" disablePadding>
         {families !== undefined &&
           families.map(family => (
-            <ListItemButton
+            <ListItem
               key={family.id}
+              disablePadding
               selected={family.id === currentFamilyId}
-              onClick={() => setCurrentFamilyId(family.id)}
-              sx={{ pl: 4, pr: 1 }}
+              sx={{ '&:hover': { backgroundColor: 'divider' } }}
             >
-              <ListItemIcon>
-                <Badge badgeContent={family.members.length}>
-                  <PeopleAlt />
-                </Badge>
-              </ListItemIcon>
               <Stack
                 direction="row"
                 justifyContent="space-between"
                 alignItems="center"
-                gap={1}
                 flexGrow={1}
               >
-                <ListItemText>{family.name}</ListItemText>
+                <ListItemButton
+                  onClick={() => selectFamily(family.id)}
+                  sx={{
+                    pl: 4,
+                    pr: 1,
+                    gap: 2,
+                    '&:hover': { backgroundColor: 'inherit' },
+                  }}
+                  component="span"
+                >
+                  <Badge badgeContent={family.members.length}>
+                    <PeopleAlt />
+                  </Badge>
+                  <ListItemText>{family.name}</ListItemText>
+                </ListItemButton>
+
                 <IconButton
                   size="small"
-                  onClick={onClose}
-                  component={Link}
-                  to={`/family/${family.id}`}
+                  onClick={() => openFamilySettings(family.id)}
                 >
                   <Settings />
                 </IconButton>
               </Stack>
-            </ListItemButton>
+            </ListItem>
           ))}
         <ListItemButton sx={{ pl: 4, pr: 1 }} onClick={startCreatingFamily}>
           <ListItemIcon>

@@ -45,8 +45,8 @@ const AuthProvider = ({ children }) => {
       if (res.status === 200) {
         return res.json().then(data => {
           if (data) {
-            localStorage.setItem(JWT_TOKEN_KEY, data.access)
             setToken(data.access)
+            localStorage.setItem(JWT_TOKEN_KEY, data.access)
           }
         })
       } else {
@@ -91,9 +91,9 @@ const AuthProvider = ({ children }) => {
     }).then(res => {
       if (res.status === 200) {
         return res.json().then(data => {
+          setToken(data.access)
           localStorage.setItem(JWT_TOKEN_KEY, data.access)
           localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
-          setToken(data.access)
         })
       } else {
         console.log('Error logging in', res)

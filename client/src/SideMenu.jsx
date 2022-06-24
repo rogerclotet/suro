@@ -1,4 +1,10 @@
-import { ExpandLess, ExpandMore, Logout, PeopleAlt } from '@mui/icons-material'
+import {
+  ExpandLess,
+  ExpandMore,
+  ListAlt,
+  Logout,
+  PeopleAlt,
+} from '@mui/icons-material'
 import {
   Collapse,
   Divider,
@@ -32,6 +38,12 @@ const SideMenu = ({ onClose }) => {
       </Toolbar>
       <Divider />
       <List component="nav">
+        <ListItemButton>
+          <ListItemIcon>
+            <ListAlt />
+          </ListItemIcon>
+          Llistes
+        </ListItemButton>
         <ListItemButton onClick={handleToggleFamily}>
           <ListItemIcon>
             <PeopleAlt />

@@ -35,18 +35,6 @@ const FamilyProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    if (families === undefined || families.length === 0) {
-      setCurrentFamilyId(undefined)
-      return
-    }
-
-    const familyIds = families.map(family => family.id)
-    if (currentFamilyId === undefined) {
-      setCurrentFamilyId(familyIds[0])
-    }
-  }, [families, currentFamilyId])
-
   return (
     <FamilyContext.Provider
       value={{

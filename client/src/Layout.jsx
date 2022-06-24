@@ -104,6 +104,8 @@ const Layout = () => {
 
             {tabs}
 
+            {fab}
+
             <SnackbarProvider
               maxSnack={3}
               classes={
@@ -121,8 +123,6 @@ const Layout = () => {
                 <Outlet />
               </Paper>
             </SnackbarProvider>
-
-            {fab}
           </Stack>
         </Container>
       </Box>

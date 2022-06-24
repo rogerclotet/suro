@@ -18,9 +18,18 @@ const ListsProvider = ({ children }) => {
       return
     }
 
-    listsRequest()
-      .then(res => res.json().then(setLists))
-      .catch(e => console.log('Error loading lists', e))
+    setLists(undefined)
+
+    listsRequest().then(res => {
+      if (res.status !== 200) {
+        console.log('Error getting lists', res)
+        return
+      }
+
+      res.json().then(data => {
+        setLists(data)
+      })
+    })
   }, [listsRequest, currentFamilyId])
 
   useEffect(() => {

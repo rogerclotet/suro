@@ -16,6 +16,7 @@ import ListItemInput from './ListItemInput'
 import { Helmet } from 'react-helmet-async'
 import { Done, Edit } from '@mui/icons-material'
 import ItemCategory from './ItemCategory'
+import { useFamilies } from '../families/FamilyProvider'
 
 const ListDetail = () => {
   const params = useParams()
@@ -24,6 +25,7 @@ const ListDetail = () => {
   const [isEditing, setIsEditing] = useState(false)
   const { setHeader } = useLayout()
   const { listRequest, itemsRequest } = useClient()
+  const { currentFamilyId } = useFamilies()
 
   const toggleIsEditing = () => {
     setIsEditing(!isEditing)
@@ -63,7 +65,7 @@ const ListDetail = () => {
     if (list !== undefined) {
       setHeader(
         list.name,
-        `/lists/${list.is_template ? 'templates' : 'lists'}`,
+        `/f/${currentFamilyId}/l/${list.is_template ? 'templates' : 'lists'}`,
         list.is_template ? null : (
           <IconButton size="large" edge="end" onClick={toggleIsEditing}>
             {isEditing ? <Done /> : <Edit />}

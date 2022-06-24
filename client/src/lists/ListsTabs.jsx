@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Tab, Tabs } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
+import { useFamilies } from '../families/FamilyProvider'
 
 const getCurrentTab = () => {
   const pathParts = location.pathname.split('/')
@@ -10,6 +11,7 @@ const getCurrentTab = () => {
 const ListsTabs = () => {
   const [tab, setTab] = useState(getCurrentTab)
   const location = useLocation()
+  const { currentFamilyId } = useFamilies()
 
   useEffect(() => {
     setTab(getCurrentTab())
@@ -28,8 +30,16 @@ const ListsTabs = () => {
       variant="fullWidth"
       sx={{ backgroundColor: 'divider' }}
     >
-      <Tab label="Llistes" LinkComponent={Link} to="/lists/lists" />
-      <Tab label="Plantilles" LinkComponent={Link} to="/lists/templates" />
+      <Tab
+        label="Llistes"
+        LinkComponent={Link}
+        to={`f/${currentFamilyId}/l/lists`}
+      />
+      <Tab
+        label="Plantilles"
+        LinkComponent={Link}
+        to={`f/${currentFamilyId}/l/templates`}
+      />
     </Tabs>
   )
 }

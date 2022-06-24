@@ -24,6 +24,7 @@ import PropTypes from 'prop-types'
 import useClient from '../useClient'
 import { RWebShare } from 'react-web-share'
 import EditListDialog from './EditListDialog'
+import { useFamilies } from '../families/FamilyProvider'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {
@@ -64,6 +65,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDuplicating, setIsDuplicating] = useState(false)
   const { listRequest, listsRequest } = useClient()
+  const { currentFamilyId } = useFamilies()
 
   const handleDeleteDialogClose = confirmed => {
     if (confirmed) {
@@ -120,7 +122,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
       <Card>
         <Link
           component={RouterLink}
-          to={`/list/${list.id}`}
+          to={`/f/${currentFamilyId}/l/${list.id}`}
           underline="none"
           color="inherit"
         >
