@@ -1,10 +1,5 @@
-import {
-  ExpandLess,
-  ExpandMore,
-  ListAlt,
-  Logout,
-  PeopleAlt,
-} from '@mui/icons-material'
+import React from 'react'
+import { ExpandLess, ExpandMore, Logout, PeopleAlt } from '@mui/icons-material'
 import {
   Collapse,
   Divider,
@@ -15,21 +10,28 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import React from 'react'
 import { useState } from 'react'
 import { useAuth } from './auth/AuthProvider'
 import FamilyList from './families/FamiliyList'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
-import { useFamilies } from './families/FamilyProvider'
+import NavigationMenu from './NavigationMenu'
+import { useLayout } from './HeaderProvider'
 
 const SideMenu = ({ onClose }) => {
   const [isFamilyOpen, setIsFamilyOpen] = useState(false)
-  const { logOut } = useAuth()
-  const { currentFamilyId } = useFamilies()
+  const { isLoggedIn, logOut } = useAuth()
+  const { setTabs, setFab } = useLayout()
 
   const handleToggleFamily = () => {
     setIsFamilyOpen(!isFamilyOpen)
+  }
+
+  const handleLogOut = () => {
+    // To avoid some issues with FamilyProvider not being present
+    setTabs(undefined)
+    setFab(undefined)
+
+    logOut()
   }
 
   return (
@@ -41,18 +43,7 @@ const SideMenu = ({ onClose }) => {
       </Toolbar>
       <Divider />
       <List component="nav">
-        {currentFamilyId !== undefined && (
-          <ListItemButton
-            onClick={onClose}
-            component={Link}
-            to={`/f/${currentFamilyId}/l/lists`}
-          >
-            <ListItemIcon>
-              <ListAlt />
-            </ListItemIcon>
-            Llistes
-          </ListItemButton>
-        )}
+        {isLoggedIn && <NavigationMenu onClose={onClose} />}
         <ListItemButton onClick={handleToggleFamily}>
           <ListItemIcon>
             <PeopleAlt />
@@ -63,7 +54,7 @@ const SideMenu = ({ onClose }) => {
         <Collapse in={isFamilyOpen} timeout="auto" unmountOnExit>
           <FamilyList onClose={onClose} />
         </Collapse>
-        <ListItemButton onClick={logOut}>
+        <ListItemButton onClick={handleLogOut}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
