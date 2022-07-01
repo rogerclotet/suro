@@ -60,6 +60,11 @@ const useClient = () => {
     [request]
   )
 
+  const familyRequest = useCallback(
+    async (options = {}) => request(`/families/${currentFamilyId}/`, options),
+    [request, currentFamilyId]
+  )
+
   const joinFamilyRequest = useCallback(
     async (familyId, options = {}) =>
       request(`/families/${familyId}/join/`, options),
@@ -74,6 +79,7 @@ const useClient = () => {
     invitationsRequest,
     invitationRequest,
     familiesRequest,
+    familyRequest,
     joinFamilyRequest,
   }
 }

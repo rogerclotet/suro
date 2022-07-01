@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { GroupAdd, Link, Share } from '@mui/icons-material'
+import { Edit, GroupAdd, Link, Share } from '@mui/icons-material'
 import {
   Avatar,
   Button,
@@ -31,16 +31,18 @@ import { RWebShare } from 'react-web-share'
 import PropTypes from 'prop-types'
 import { useAuth } from '../auth/AuthProvider'
 import { useSnackbar } from 'notistack'
+import EditFamilyDialog from './EditFamilyDialog'
 
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
   const { families, refreshFamilies } = useFamilies()
   const { setHeader } = useLayout()
-  const { invitationsRequest, joinFamilyRequest } = useClient()
+  const { invitationsRequest, joinFamilyRequest, familyRequest } = useClient()
   const [invitationLink, setInvitationLink] = useState()
   const { user } = useAuth()
   const [family, setFamily] = useState()
   const { enqueueSnackbar } = useSnackbar()
+  const [isEditing, setIsEditing] = useState(false)
 
   const isFamilyMember = useMemo(() => {
     if (!family) {
@@ -75,7 +77,13 @@ const FamilySettings = ({ invitationToken }) => {
 
   useEffect(() => {
     if (family) {
-      setHeader('Família ' + family.name)
+      setHeader(
+        'Família ' + family.name,
+        undefined,
+        <IconButton size="large" edge="end" onClick={() => setIsEditing(true)}>
+          <Edit />
+        </IconButton>
+      )
     }
   }, [setHeader, family])
 
@@ -120,6 +128,14 @@ const FamilySettings = ({ invitationToken }) => {
         refreshFamilies()
       }
     })
+  }
+
+  const handleEdit = async data => {
+    return familyRequest({
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(refreshFamilies)
   }
 
   return (
@@ -218,6 +234,14 @@ const FamilySettings = ({ invitationToken }) => {
           </Stack>
         )}
       </Container>
+
+      <EditFamilyDialog
+        title="Editar família"
+        initialValues={family}
+        open={isEditing}
+        onSave={handleEdit}
+        onClose={() => setIsEditing(false)}
+      />
     </>
   )
 }
