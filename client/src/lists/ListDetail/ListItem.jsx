@@ -6,7 +6,7 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material'
-import useClient from '../useClient'
+import useClient from '../../useClient'
 import ListItemInput from './ListItemInput'
 
 const ListItem = ({ list, item, isEditing, onChange }) => {

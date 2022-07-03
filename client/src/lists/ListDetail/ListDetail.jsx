@@ -7,16 +7,16 @@ import {
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import LoadingScreen from '../LoadingScreen'
-import { useLayout } from '../HeaderProvider'
-import useClient from '../useClient'
+import LoadingScreen from '../../LoadingScreen'
+import { useLayout } from '../../HeaderProvider'
+import useClient from '../../useClient'
 import ListItem from './ListItem'
 import { useCallback } from 'react'
 import ListItemInput from './ListItemInput'
 import { Helmet } from 'react-helmet-async'
 import { Done, Edit } from '@mui/icons-material'
-import ItemCategory from './ItemCategory'
-import { useFamilies } from '../families/FamilyProvider'
+import ItemCategory from '../ItemCategory'
+import { useFamilies } from '../../families/FamilyProvider'
 
 const ListDetail = () => {
   const params = useParams()
