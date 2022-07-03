@@ -32,13 +32,13 @@ const ListDetail = () => {
   }
 
   const refreshList = useCallback(() => {
-    if (!params.listId) {
+    if (!params.listId || currentFamilyId === undefined) {
       return
     }
 
     const listId = params.listId
 
-    listRequest(listId)
+    listRequest(currentFamilyId, listId)
       .then(res => res.json())
       .catch(e => console.log('Error loading list detail', e))
       .then(data => {
@@ -55,7 +55,7 @@ const ListDetail = () => {
       })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.listId])
+  }, [params.listId, currentFamilyId])
 
   useEffect(() => {
     refreshList()
@@ -82,7 +82,7 @@ const ListDetail = () => {
   }
 
   const handleCreateItem = (name, category) => {
-    itemsRequest(list.id, {
+    itemsRequest(currentFamilyId, list.id, {
       method: 'POST',
       body: JSON.stringify({ name, category, order: list.items.length }),
       headers: { 'Content-Type': 'application/json' },

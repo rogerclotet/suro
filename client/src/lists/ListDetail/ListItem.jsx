@@ -8,12 +8,14 @@ import {
 } from '@mui/material'
 import useClient from 'useClient'
 import ListItemInput from './ListItemInput'
+import { useFamilies } from 'families/FamilyProvider'
 
 const ListItem = ({ list, item, isEditing, onChange }) => {
   const { itemRequest } = useClient()
+  const { currentFamilyId } = useFamilies()
 
   const handleComplete = () => {
-    itemRequest(list.id, item.id, {
+    itemRequest(currentFamilyId, list.id, item.id, {
       method: 'PATCH',
       body: JSON.stringify({ is_complete: !item.is_complete }),
       headers: { 'Content-Type': 'application/json' },
@@ -25,7 +27,7 @@ const ListItem = ({ list, item, isEditing, onChange }) => {
   }
 
   const handleChangeName = () => {
-    itemRequest(list.id, item.id, {
+    itemRequest(currentFamilyId, list.id, item.id, {
       method: 'PATCH',
       body: JSON.stringify({ name }),
       headers: { 'Content-Type': 'application/json' },

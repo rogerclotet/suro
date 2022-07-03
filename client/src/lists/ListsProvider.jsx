@@ -20,7 +20,7 @@ const ListsProvider = ({ children }) => {
 
     setLists(undefined)
 
-    listsRequest().then(res => {
+    listsRequest(currentFamilyId).then(res => {
       if (res.status !== 200) {
         console.log('Error getting lists', res)
         return
@@ -37,7 +37,7 @@ const ListsProvider = ({ children }) => {
   }, [refreshLists])
 
   const createList = async data => {
-    return listsRequest({
+    return listsRequest(currentFamilyId, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {

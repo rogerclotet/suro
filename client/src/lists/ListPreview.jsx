@@ -105,7 +105,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
   }
 
   const handleDuplicate = async data => {
-    return listsRequest({
+    return listsRequest(currentFamilyId, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {

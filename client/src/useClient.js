@@ -1,12 +1,10 @@
 import { useCallback } from 'react'
 import { useAuth } from './auth/AuthProvider'
-import { useFamilies } from './families/FamilyProvider'
 
 const API_URL = process.env.REACT_APP_API_URL
 
 const useClient = () => {
   const { token } = useAuth()
-  const { currentFamilyId } = useFamilies()
 
   const request = useCallback(
     async (path, options = {}) =>
@@ -19,30 +17,30 @@ const useClient = () => {
   )
 
   const listsRequest = useCallback(
-    async (options = {}) =>
-      request(`/families/${currentFamilyId}/lists/`, options),
-    [request, currentFamilyId]
+    async (familyId, options = {}) =>
+      request(`/families/${familyId}/lists/`, options),
+    [request]
   )
 
   const listRequest = useCallback(
-    async (listId, options = {}) =>
-      request(`/families/${currentFamilyId}/lists/${listId}/`, options),
-    [request, currentFamilyId]
+    async (familyId, listId, options = {}) =>
+      request(`/families/${familyId}/lists/${listId}/`, options),
+    [request]
   )
 
   const itemsRequest = useCallback(
-    async (listId, options = {}) =>
-      request(`/families/${currentFamilyId}/lists/${listId}/items/`, options),
-    [request, currentFamilyId]
+    async (familyId, listId, options = {}) =>
+      request(`/families/${familyId}/lists/${listId}/items/`, options),
+    [request]
   )
 
   const itemRequest = useCallback(
-    async (listId, itemId, options = {}) =>
+    async (familyId, listId, itemId, options = {}) =>
       request(
-        `/families/${currentFamilyId}/lists/${listId}/items/${itemId}/`,
+        `/families/${familyId}/lists/${listId}/items/${itemId}/`,
         options
       ),
-    [request, currentFamilyId]
+    [request]
   )
 
   const invitationsRequest = useCallback(
@@ -61,8 +59,9 @@ const useClient = () => {
   )
 
   const familyRequest = useCallback(
-    async (options = {}) => request(`/families/${currentFamilyId}/`, options),
-    [request, currentFamilyId]
+    async (familyId, options = {}) =>
+      request(`/families/${familyId}/`, options),
+    [request]
   )
 
   const joinFamilyRequest = useCallback(

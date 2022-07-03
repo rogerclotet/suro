@@ -35,7 +35,7 @@ import EditFamilyDialog from './EditFamilyDialog'
 
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
-  const { families, refreshFamilies } = useFamilies()
+  const { families, refreshFamilies, currentFamilyId } = useFamilies()
   const { setHeader } = useLayout()
   const { invitationsRequest, joinFamilyRequest, familyRequest } = useClient()
   const [invitationLink, setInvitationLink] = useState()
@@ -131,7 +131,7 @@ const FamilySettings = ({ invitationToken }) => {
   }
 
   const handleEdit = async data => {
-    return familyRequest({
+    return familyRequest(currentFamilyId, {
       method: 'PATCH',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
