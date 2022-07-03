@@ -21,10 +21,10 @@ import {
 } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import useClient from '../useClient'
+import useClient from 'useClient'
 import { RWebShare } from 'react-web-share'
 import EditListDialog from './EditListDialog'
-import { useFamilies } from '../families/FamilyProvider'
+import { useFamilies } from 'families/FamilyProvider'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {

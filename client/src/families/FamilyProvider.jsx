@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useContext } from 'react'
 import { createContext } from 'react'
 import PropTypes from 'prop-types'
-import { useAuth } from '../auth/AuthProvider'
+import { useAuth } from 'auth/AuthProvider'
 
 const FamilyContext = createContext()
 

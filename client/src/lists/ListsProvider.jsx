@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useContext } from 'react'
-import useClient from '../useClient'
-import { useFamilies } from '../families/FamilyProvider'
+import useClient from 'useClient'
+import { useFamilies } from 'families/FamilyProvider'
 
 const ListsContext = createContext()
 

@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 import EditFamilyDialog from './EditFamilyDialog'
-import useClient from '../useClient'
+import useClient from 'useClient'
 
 const FAMILIES_LIMIT = 5
 

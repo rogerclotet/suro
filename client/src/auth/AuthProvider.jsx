@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { decodeToken, isExpired } from 'react-jwt'
-import LoadingScreen from '../LoadingScreen'
+import LoadingScreen from 'LoadingScreen'
 
 const JWT_TOKEN_KEY = 'token'
 const JWT_REFRESH_TOKEN_KEY = 'refresh'

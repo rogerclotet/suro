@@ -12,7 +12,7 @@ import {
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAuth } from './AuthProvider'
-import { useLayout } from '../HeaderProvider'
+import { useLayout } from 'HeaderProvider'
 import { Link as RouterLink } from 'react-router-dom'
 import { useSnackbar } from 'notistack'
 

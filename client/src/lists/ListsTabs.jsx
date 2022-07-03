@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Tab, Tabs } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
-import { useFamilies } from '../families/FamilyProvider'
+import { useFamilies } from 'families/FamilyProvider'
 
 const getCurrentTab = () => {
   const pathParts = location.pathname.split('/')
