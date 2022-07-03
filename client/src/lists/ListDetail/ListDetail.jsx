@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react'
 import {
   Container,
   IconButton,
@@ -5,7 +6,6 @@ import {
   ListItem as MaterialListItem,
   Typography,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import LoadingScreen from 'LoadingScreen'
 import { useLayout } from 'HeaderProvider'
@@ -17,6 +17,29 @@ import { Helmet } from 'react-helmet-async'
 import { Done, Edit } from '@mui/icons-material'
 import ItemCategory from 'lists/ItemCategory'
 import { useFamilies } from 'families/FamilyProvider'
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list)
+  const [removed] = result.splice(startIndex, 1)
+  result.splice(endIndex, 0, removed)
+
+  return result
+}
+
+const move = (source, destination, droppableSource, droppableDestination) => {
+  const sourceClone = Array.from(source)
+  const destClone = Array.from(destination)
+  const [removed] = sourceClone.splice(droppableSource.index, 1)
+
+  destClone.splice(droppableDestination.index, 0, removed)
+
+  const result = {}
+  result[droppableSource.droppableId] = sourceClone
+  result[droppableDestination.droppableId] = destClone
+
+  return result
+}
 
 const ListDetail = () => {
   const params = useParams()
@@ -99,6 +122,34 @@ const ListDetail = () => {
     setItemsByCategory(itemsByCategory => ({ ...itemsByCategory, [name]: [] }))
   }
 
+  const onDragEnd = result => {
+    const { source, destination } = result
+
+    // dropped outside the list
+    if (!destination) {
+      return
+    }
+
+    if (source.droppableId === destination.droppableId) {
+      const items = reorder(
+        itemsByCategory[source.droppableId],
+        source.index,
+        destination.index
+      )
+
+      console.log(items)
+    } else {
+      const result = move(
+        itemsByCategory[source.droppableId],
+        itemsByCategory[destination.droppableId],
+        source,
+        destination
+      )
+
+      console.log(result)
+    }
+  }
+
   return (
     <>
       <Helmet>
@@ -116,46 +167,80 @@ const ListDetail = () => {
           </Typography>
         </Container>
       ) : (
-        <List sx={{ pt: 0, pb: 8 }}>
-          {Object.keys(itemsByCategory).map(category => (
-            <div key={category}>
-              <ItemCategory name={category} />
-
-              {(list.is_template || isEditing) && (
-                <MaterialListItem divider>
-                  <ListItemInput
-                    onChange={name => handleCreateItem(name, category)}
-                  />
-                </MaterialListItem>
-              )}
-
-              {itemsByCategory[category].length === 0 ? (
-                <MaterialListItem>
-                  <Typography
-                    color="text.secondary"
-                    sx={{ fontStyle: 'italic' }}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <List sx={{ pt: 0, pb: 8 }}>
+            {Object.keys(itemsByCategory).map(category => (
+              <Droppable key={category} droppableId={category}>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    sx={{
+                      backgroundColor: snapshot.isDraggingOver
+                        ? 'red'
+                        : 'inherit',
+                    }}
                   >
-                    No hi ha elements
-                  </Typography>
-                </MaterialListItem>
-              ) : (
-                itemsByCategory[category].map(item => (
-                  <ListItem
-                    key={item.id}
-                    list={list}
-                    item={item}
-                    isEditing={list.is_template || isEditing}
-                    onChange={refreshList}
-                  />
-                ))
-              )}
-            </div>
-          ))}
+                    <ItemCategory name={category} />
 
-          {(list.is_template || isEditing) && (
-            <ItemCategory name="" editable onChange={handleCreateCategory} />
-          )}
-        </List>
+                    {(list.is_template || isEditing) && (
+                      <MaterialListItem divider>
+                        <ListItemInput
+                          onChange={name => handleCreateItem(name, category)}
+                        />
+                      </MaterialListItem>
+                    )}
+
+                    {itemsByCategory[category].length === 0 ? (
+                      <MaterialListItem>
+                        <Typography
+                          color="text.secondary"
+                          sx={{ fontStyle: 'italic' }}
+                        >
+                          No hi ha elements
+                        </Typography>
+                      </MaterialListItem>
+                    ) : (
+                      itemsByCategory[category].map((item, index) => (
+                        <Draggable
+                          key={item.id}
+                          draggableId={String(item.id)}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <ListItem
+                                list={list}
+                                item={item}
+                                isEditing={list.is_template || isEditing}
+                                onChange={refreshList}
+                                sx={{
+                                  backgroundColor: snapshot.isDragging
+                                    ? 'green'
+                                    : 'inherit',
+                                }}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                    )}
+
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            ))}
+
+            {(list.is_template || isEditing) && (
+              <ItemCategory name="" editable onChange={handleCreateCategory} />
+            )}
+          </List>
+        </DragDropContext>
       )}
     </>
   )
