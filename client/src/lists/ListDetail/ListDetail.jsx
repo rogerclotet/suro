@@ -201,15 +201,7 @@ const ListDetail = () => {
             {Object.keys(itemsByCategory).map(category => (
               <Droppable key={category} droppableId={category}>
                 {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    sx={{
-                      backgroundColor: snapshot.isDraggingOver
-                        ? 'red'
-                        : 'inherit',
-                    }}
-                  >
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
                     <ItemCategory name={category} />
 
                     {(list.is_template || isEditing) && (
@@ -220,23 +212,26 @@ const ListDetail = () => {
                       </MaterialListItem>
                     )}
 
-                    {itemsByCategory[category].length === 0 ? (
-                      <MaterialListItem>
-                        <Typography
-                          color="text.secondary"
-                          sx={{ fontStyle: 'italic' }}
-                        >
-                          No hi ha elements
-                        </Typography>
-                      </MaterialListItem>
-                    ) : (
+                    {!snapshot.isDraggingOver &&
+                      itemsByCategory[category].length === 0 && (
+                        <MaterialListItem>
+                          <Typography
+                            color="text.secondary"
+                            sx={{ fontStyle: 'italic' }}
+                          >
+                            No hi ha elements
+                          </Typography>
+                        </MaterialListItem>
+                      )}
+
+                    {itemsByCategory[category].length > 0 &&
                       itemsByCategory[category].map((item, index) => (
                         <Draggable
                           key={item.id}
                           draggableId={String(item.id)}
                           index={index}
                         >
-                          {(provided, snapshot) => (
+                          {provided => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
@@ -247,17 +242,11 @@ const ListDetail = () => {
                                 item={item}
                                 isEditing={list.is_template || isEditing}
                                 onChange={refreshList}
-                                sx={{
-                                  backgroundColor: snapshot.isDragging
-                                    ? 'green'
-                                    : 'inherit',
-                                }}
                               />
                             </div>
                           )}
                         </Draggable>
-                      ))
-                    )}
+                      ))}
 
                     {provided.placeholder}
                   </div>
