@@ -122,6 +122,14 @@ const ListDetail = () => {
     setItemsByCategory(itemsByCategory => ({ ...itemsByCategory, [name]: [] }))
   }
 
+  const updateItems = items => {
+    listRequest(currentFamilyId, list.id, {
+      method: 'PATCH',
+      body: JSON.stringify({ items }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(refreshList)
+  }
+
   const onDragEnd = result => {
     const { source, destination } = result
 
@@ -137,7 +145,11 @@ const ListDetail = () => {
         destination.index
       )
 
-      console.log(items)
+      setItemsByCategory({ ...itemsByCategory, [source.droppableId]: items })
+
+      updateItems(
+        items.map((item, index) => ({ id: item.id, order: index + 1 }))
+      )
     } else {
       const result = move(
         itemsByCategory[source.droppableId],
@@ -146,7 +158,24 @@ const ListDetail = () => {
         destination
       )
 
-      console.log(result)
+      setItemsByCategory({
+        ...itemsByCategory,
+        [source.droppableId]: result[source.droppableId],
+        [destination.droppableId]: result[destination.droppableId],
+      })
+
+      updateItems([
+        ...result[source.droppableId].map((item, index) => ({
+          id: item.id,
+          category: source.droppableId,
+          order: index + 1,
+        })),
+        ...result[destination.droppableId].map((item, index) => ({
+          id: item.id,
+          category: destination.droppableId,
+          order: index + 1,
+        })),
+      ])
     }
   }
 

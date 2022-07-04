@@ -52,6 +52,7 @@ const ListItem = ({ list, item, isEditing, onChange }) => {
           />
         )
       }
+      sx={{ backgroundColor: 'background.paper' }}
     >
       {!isEditing || item.is_complete ? (
         <ListItemText>
