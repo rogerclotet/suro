@@ -11,6 +11,7 @@ import { useFamilies } from './families/FamilyProvider'
 import NoCurrentFamily from './families/NoCurrentFamily'
 import LoadingScreen from './LoadingScreen'
 import FamilyRoute from './families/FamilyRoute'
+import ListsProvider from 'lists/ListsProvider'
 
 const AuthenticatedRoutes = ({ invitationToken }) => {
   const { families, currentFamilyId, isLoading } = useFamilies()
@@ -35,33 +36,35 @@ const AuthenticatedRoutes = ({ invitationToken }) => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route
-          index
-          element={<Navigate to={`f/${currentFamilyId}/l/lists`} replace />}
-        />
-        <Route path="f/:familyId" element={<FamilyRoute />}>
+    <ListsProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
           <Route
             index
-            element={<FamilySettings invitationToken={invitationToken} />}
+            element={<Navigate to={`f/${currentFamilyId}/l/lists`} replace />}
           />
-          <Route path="l" element={<Lists />}>
-            <Route index element={<Navigate to="lists" replace />} />
+          <Route path="f/:familyId" element={<FamilyRoute />}>
             <Route
-              path="lists"
-              element={<ListsList type={LIST_TYPE_LISTS} />}
+              index
+              element={<FamilySettings invitationToken={invitationToken} />}
             />
-            <Route
-              path="templates"
-              element={<ListsList type={LIST_TYPE_TEMPLATES} />}
-            />
+            <Route path="l" element={<Lists />}>
+              <Route index element={<Navigate to="lists" replace />} />
+              <Route
+                path="lists"
+                element={<ListsList type={LIST_TYPE_LISTS} />}
+              />
+              <Route
+                path="templates"
+                element={<ListsList type={LIST_TYPE_TEMPLATES} />}
+              />
+            </Route>
+            <Route path="l/:listId" element={<ListDetail />} />
           </Route>
-          <Route path="l/:listId" element={<ListDetail />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Route>
-        <Route path="*" element={<Navigate to="/" />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </ListsProvider>
   )
 }
 

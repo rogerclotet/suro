@@ -31,12 +31,19 @@ const validationSchema = yup.object({
   description: yup.string('Descripció'),
 })
 
-const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
+const EditListDialog = ({
+  title,
+  initialValues,
+  open,
+  onSave,
+  onCancel,
+  disableTypeChanges = false,
+}) => {
   const [isCreating, setIsCreating] = useState(false)
   const { lists } = useLists()
 
   const templates = useMemo(
-    () => lists.filter(list => list.is_template),
+    () => (lists === undefined ? [] : lists.filter(list => list.is_template)),
     [lists]
   )
 
@@ -131,60 +138,68 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
                 formik.touched.description && formik.errors.description
               }
             />
-            <FormGroup
-              sx={{
-                pl: 2,
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Switch
-                    id="is_template"
-                    name="is_template"
-                    value={formik.values.is_template}
-                    onChange={formik.handleChange}
-                  />
-                }
-                label="És una plantilla"
-              />
-              <Tooltip title="Es crearà una llista amb elements que es poden importar al crear noves llistes.">
-                <Info />
-              </Tooltip>
-            </FormGroup>
-            {!formik.values.is_template && (
-              <FormControl>
-                <InputLabel>Plantilles a importar</InputLabel>
-                <Select
-                  multiple
-                  id="imported_templates"
-                  name="imported_templates"
-                  input={<OutlinedInput label="Plantilles" />}
-                  value={formik.values.imported_templates}
-                  onChange={formik.handleChange}
-                  renderValue={selected => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selected.map(value => (
-                        <Chip
-                          key={value}
-                          label={
-                            templates.find(template => template.id === value)
-                              .name
-                          }
-                        />
-                      ))}
-                    </Box>
-                  )}
+
+            {!disableTypeChanges && (
+              <>
+                <FormGroup
+                  sx={{
+                    pl: 2,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
                 >
-                  {templates.map(template => (
-                    <MenuItem key={template.id} value={template.id}>
-                      {template.name} ({template.items.length} elements)
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        id="is_template"
+                        name="is_template"
+                        value={formik.values.is_template}
+                        onChange={formik.handleChange}
+                      />
+                    }
+                    label="És una plantilla"
+                  />
+                  <Tooltip title="Es crearà una llista amb elements que es poden importar al crear noves llistes.">
+                    <Info />
+                  </Tooltip>
+                </FormGroup>
+                {!formik.values.is_template && (
+                  <FormControl>
+                    <InputLabel>Plantilles a importar</InputLabel>
+                    <Select
+                      multiple
+                      id="imported_templates"
+                      name="imported_templates"
+                      input={<OutlinedInput label="Plantilles" />}
+                      value={formik.values.imported_templates}
+                      onChange={formik.handleChange}
+                      renderValue={selected => (
+                        <Box
+                          sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                        >
+                          {selected.map(value => (
+                            <Chip
+                              key={value}
+                              label={
+                                templates.find(
+                                  template => template.id === value
+                                ).name
+                              }
+                            />
+                          ))}
+                        </Box>
+                      )}
+                    >
+                      {templates.map(template => (
+                        <MenuItem key={template.id} value={template.id}>
+                          {template.name} ({template.items.length} elements)
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </>
             )}
           </Stack>
         </DialogContent>
@@ -214,6 +229,7 @@ EditListDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  disableTypeChanges: PropTypes.bool,
 }
 
 export default EditListDialog

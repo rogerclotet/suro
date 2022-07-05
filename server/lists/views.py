@@ -21,12 +21,13 @@ class FamilyListViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
-        items = request.data.pop("items")
-        for item_data in items:
-            if "id" not in item_data:
-                continue
-            id = item_data.pop("id")
-            ListItem.objects.select_for_update().filter(pk=id).update(**item_data)
+        if "items" in request.data:
+            items = request.data.pop("items")
+            for item_data in items:
+                if "id" not in item_data:
+                    continue
+                id = item_data.pop("id")
+                ListItem.objects.select_for_update().filter(pk=id).update(**item_data)
 
         return super().partial_update(request, *args, **kwargs)
 

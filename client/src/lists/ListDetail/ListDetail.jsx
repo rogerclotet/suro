@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   Container,
-  IconButton,
+  Fab,
   List,
   ListItem as MaterialListItem,
   Typography,
@@ -19,6 +19,8 @@ import ItemCategory from 'lists/ItemCategory'
 import { useFamilies } from 'families/FamilyProvider'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import useItemCategories from './useItemCategories'
+import ListDetailMenu from './ListDetailMenu'
+import { useLists } from 'lists/ListsProvider'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -46,9 +48,10 @@ const ListDetail = () => {
   const params = useParams()
   const [list, setList] = useState()
   const [isEditing, setIsEditing] = useState(false)
-  const { setHeader } = useLayout()
+  const { setHeader, setFab } = useLayout()
   const { listRequest, itemsRequest } = useClient()
   const { currentFamilyId } = useFamilies()
+  const { refreshLists } = useLists()
 
   const updateItems = items => {
     listRequest(currentFamilyId, list.id, {
@@ -69,6 +72,30 @@ const ListDetail = () => {
     setIsEditing(!isEditing)
   }
 
+  useEffect(() => {
+    if (!list || list.is_template) {
+      setFab(undefined)
+      return
+    }
+
+    setFab(
+      <Fab
+        onClick={toggleIsEditing}
+        color={isEditing ? 'default' : 'primary'}
+        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        className="umami-click-list-detail-edit"
+      >
+        {isEditing ? <Done /> : <Edit />}
+      </Fab>
+    )
+
+    return () => {
+      setFab(undefined)
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list, isEditing])
+
   const refreshList = useCallback(() => {
     if (!params.listId || currentFamilyId === undefined) {
       return
@@ -88,15 +115,24 @@ const ListDetail = () => {
     refreshList()
   }, [refreshList])
 
+  const handleListChange = async data => {
+    return listRequest(currentFamilyId, list.id, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(() => {
+      refreshList()
+      refreshLists()
+    })
+  }
+
   useEffect(() => {
     if (list !== undefined) {
       setHeader(
         list.name,
         `/f/${currentFamilyId}/l/${list.is_template ? 'templates' : 'lists'}`,
         list.is_template ? null : (
-          <IconButton size="large" edge="end" onClick={toggleIsEditing}>
-            {isEditing ? <Done /> : <Edit />}
-          </IconButton>
+          <ListDetailMenu list={list} onListChange={handleListChange} />
         )
       )
     }
