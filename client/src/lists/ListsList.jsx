@@ -44,6 +44,7 @@ const ListsList = ({ type }) => {
         onClick={startCreatingList}
         color="primary"
         sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        className="umami-click-lists-new"
       >
         <Add />
       </Fab>

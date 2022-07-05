@@ -142,6 +142,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
           <IconButton
             onClick={handleToggleFavorite}
             color={list.is_favorite ? 'secondary' : 'inherit'}
+            className="umami-click-lists-favorite"
           >
             <Favorite />
           </IconButton>
@@ -154,14 +155,20 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
               url: `${window.location.href}/${list.id}`,
             }}
           >
-            <IconButton>
+            <IconButton className="umami-click-lists-share">
               <Share />
             </IconButton>
           </RWebShare>
-          <IconButton onClick={handleStartDuplicating}>
+          <IconButton
+            onClick={handleStartDuplicating}
+            className="umami-click-lists-copy"
+          >
             <ContentCopy />
           </IconButton>
-          <IconButton onClick={() => setIsDeleting(true)}>
+          <IconButton
+            onClick={() => setIsDeleting(true)}
+            className="umami-click-lists-delete"
+          >
             <DeleteForever />
           </IconButton>
         </CardActions>

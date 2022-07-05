@@ -87,6 +87,7 @@ const FamilyList = ({ onClose }) => {
                     '&:hover': { backgroundColor: 'inherit' },
                   }}
                   component="span"
+                  className="umami-click-families-select"
                 >
                   <Badge badgeContent={family.members.length}>
                     <PeopleAlt />
@@ -97,13 +98,18 @@ const FamilyList = ({ onClose }) => {
                 <IconButton
                   size="small"
                   onClick={() => openFamilySettings(family.id)}
+                  className="umami-click-families-settings"
                 >
                   <Settings />
                 </IconButton>
               </Stack>
             </ListItem>
           ))}
-        <ListItemButton sx={{ pl: 4, pr: 1 }} onClick={startCreatingFamily}>
+        <ListItemButton
+          sx={{ pl: 4, pr: 1 }}
+          onClick={startCreatingFamily}
+          className="umami-click-families-new"
+        >
           <ListItemIcon>
             <Add />
           </ListItemIcon>
