@@ -18,6 +18,7 @@ import { Done, Edit } from '@mui/icons-material'
 import ItemCategory from 'lists/ItemCategory'
 import { useFamilies } from 'families/FamilyProvider'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import useItemCategories from './useItemCategories'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -44,11 +45,25 @@ const move = (source, destination, droppableSource, droppableDestination) => {
 const ListDetail = () => {
   const params = useParams()
   const [list, setList] = useState()
-  const [itemsByCategory, setItemsByCategory] = useState()
   const [isEditing, setIsEditing] = useState(false)
   const { setHeader } = useLayout()
   const { listRequest, itemsRequest } = useClient()
   const { currentFamilyId } = useFamilies()
+
+  const updateItems = items => {
+    listRequest(currentFamilyId, list.id, {
+      method: 'PATCH',
+      body: JSON.stringify({ items }),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(refreshList)
+  }
+
+  const {
+    itemsByCategory,
+    setItemsByCategory,
+    createCategory,
+    renameCategory,
+  } = useItemCategories(list, updateItems)
 
   const toggleIsEditing = () => {
     setIsEditing(!isEditing)
@@ -64,18 +79,7 @@ const ListDetail = () => {
     listRequest(currentFamilyId, listId)
       .then(res => res.json())
       .catch(e => console.log('Error loading list detail', e))
-      .then(data => {
-        const newItemsByCategory = {}
-        data.items.forEach(item => {
-          if (!(item.category in newItemsByCategory)) {
-            newItemsByCategory[item.category] = [item]
-          } else {
-            newItemsByCategory[item.category].push(item)
-          }
-        })
-        setItemsByCategory(newItemsByCategory)
-        setList(data)
-      })
+      .then(setList)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.listId, currentFamilyId])
@@ -98,7 +102,7 @@ const ListDetail = () => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [list, isEditing])
+  }, [list, isEditing, currentFamilyId])
 
   if (list === undefined) {
     return <LoadingScreen />
@@ -116,18 +120,6 @@ const ListDetail = () => {
         console.log('Error creating item', res.status)
       }
     })
-  }
-
-  const handleCreateCategory = name => {
-    setItemsByCategory(itemsByCategory => ({ ...itemsByCategory, [name]: [] }))
-  }
-
-  const updateItems = items => {
-    listRequest(currentFamilyId, list.id, {
-      method: 'PATCH',
-      body: JSON.stringify({ items }),
-      headers: { 'Content-Type': 'application/json' },
-    }).then(refreshList)
   }
 
   const onDragEnd = result => {
@@ -179,32 +171,11 @@ const ListDetail = () => {
     }
   }
 
-  const handleRenameCategory = (original, newName) => {
-    const originalItems = itemsByCategory[original]
-    const items = originalItems.map(item => ({
-      id: item.id,
-      category: newName,
-    }))
-
-    // eslint-disable-next-line no-unused-vars
-    const { [original]: _, ...restByCategory } = itemsByCategory
-
-    setItemsByCategory({
-      ...restByCategory,
-      [newName]: originalItems.map(item => ({ ...item, category: newName })),
-    })
-
-    updateItems(items)
-  }
-
   return (
     <>
       <Helmet>
         <title>{list.name}</title>
-        <meta
-          name="description"
-          content={`Llista amb ${list.items.length} elements. ${list.description}`}
-        />
+        <meta name="description" content={list.description} />
       </Helmet>
 
       {!(list.is_template || isEditing) && list.items.length === 0 ? (
@@ -223,7 +194,7 @@ const ListDetail = () => {
                     <ItemCategory
                       name={category}
                       editable={isEditing}
-                      onChange={name => handleRenameCategory(category, name)}
+                      onChange={name => renameCategory(category, name)}
                     />
 
                     {(list.is_template || isEditing) && (
@@ -277,7 +248,7 @@ const ListDetail = () => {
             ))}
 
             {(list.is_template || isEditing) && (
-              <ItemCategory name="" editable onChange={handleCreateCategory} />
+              <ItemCategory name="" editable onChange={createCategory} />
             )}
           </List>
         </DragDropContext>
