@@ -1,3 +1,4 @@
+import { useSnackbar } from 'notistack'
 import { useCallback } from 'react'
 import { useAuth } from './auth/AuthProvider'
 
@@ -5,6 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL
 
 const useClient = () => {
   const { token } = useAuth()
+  const { enqueueSnackbar } = useSnackbar()
 
   const request = useCallback(
     async (path, options = {}) =>
@@ -12,8 +14,13 @@ const useClient = () => {
         ...options,
         method: options.method || 'GET',
         headers: { ...options.headers, Authorization: `Bearer ${token}` },
+      }).catch(err => {
+        enqueueSnackbar('Hi ha hagut un problema de xarxa', {
+          variant: 'error',
+        })
+        console.log('Network error', err)
       }),
-    [token]
+    [token, enqueueSnackbar]
   )
 
   const listsRequest = useCallback(
