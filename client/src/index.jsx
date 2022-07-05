@@ -14,6 +14,7 @@ import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
 import LayoutProvider from './HeaderProvider'
 import { HelmetProvider } from 'react-helmet-async'
+import { SnackbarProvider } from 'notistack'
 
 const theme = createTheme({
   palette: {
@@ -33,15 +34,17 @@ root.render(
     {/* <React.StrictMode> */}
     <CssBaseline />
     <ThemeProvider theme={theme}>
-      <AuthProvider>
-        <HelmetProvider>
-          <LayoutProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </LayoutProvider>
-        </HelmetProvider>
-      </AuthProvider>
+      <SnackbarProvider maxSnack={3}>
+        <AuthProvider>
+          <HelmetProvider>
+            <LayoutProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </LayoutProvider>
+          </HelmetProvider>
+        </AuthProvider>
+      </SnackbarProvider>
     </ThemeProvider>
     {/* </React.StrictMode> */}
   </>

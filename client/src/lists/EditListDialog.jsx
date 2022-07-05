@@ -41,12 +41,14 @@ const EditListDialog = ({ title, initialValues, open, onSave, onCancel }) => {
   )
 
   const formik = useFormik({
-    initialValues: initialValues || {
-      name: '',
-      description: '',
-      is_template: false,
-      imported_templates: [],
-    },
+    initialValues: initialValues
+      ? { ...initialValues, imported_templates: [] }
+      : {
+          name: '',
+          description: '',
+          is_template: false,
+          imported_templates: [],
+        },
     validationSchema: validationSchema,
     onSubmit: data => {
       setIsCreating(true)

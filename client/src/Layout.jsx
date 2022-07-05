@@ -19,7 +19,6 @@ import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import SideMenu from './SideMenu'
 import { useEffect } from 'react'
-import { SnackbarProvider } from 'notistack'
 
 const drawerWidth = 240
 
@@ -106,23 +105,16 @@ const Layout = () => {
 
             {fab}
 
-            <SnackbarProvider
-              maxSnack={3}
-              classes={
-                fab !== undefined ? { root: 'snackbar-container' } : undefined
-              }
+            <Paper
+              elevation={0}
+              sx={{
+                flexGrow: 1,
+                overflowY: 'scroll',
+                pb: fab !== undefined ? 9 : 0,
+              }}
             >
-              <Paper
-                elevation={0}
-                sx={{
-                  flexGrow: 1,
-                  overflowY: 'scroll',
-                  pb: fab !== undefined ? 9 : 0,
-                }}
-              >
-                <Outlet />
-              </Paper>
-            </SnackbarProvider>
+              <Outlet />
+            </Paper>
           </Stack>
         </Container>
       </Box>
