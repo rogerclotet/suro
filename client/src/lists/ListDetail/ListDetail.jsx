@@ -179,6 +179,24 @@ const ListDetail = () => {
     }
   }
 
+  const handleRenameCategory = (original, newName) => {
+    const originalItems = itemsByCategory[original]
+    const items = originalItems.map(item => ({
+      id: item.id,
+      category: newName,
+    }))
+
+    // eslint-disable-next-line no-unused-vars
+    const { [original]: _, ...restByCategory } = itemsByCategory
+
+    setItemsByCategory({
+      ...restByCategory,
+      [newName]: originalItems.map(item => ({ ...item, category: newName })),
+    })
+
+    updateItems(items)
+  }
+
   return (
     <>
       <Helmet>
@@ -202,7 +220,11 @@ const ListDetail = () => {
               <Droppable key={category} droppableId={category}>
                 {(provided, snapshot) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
-                    <ItemCategory name={category} />
+                    <ItemCategory
+                      name={category}
+                      editable={isEditing}
+                      onChange={name => handleRenameCategory(category, name)}
+                    />
 
                     {(list.is_template || isEditing) && (
                       <MaterialListItem divider>
