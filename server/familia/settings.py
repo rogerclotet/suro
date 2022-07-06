@@ -177,5 +177,4 @@ if DEBUG:
     CSRF_TRUSTED_ORIGINS += ["http://localhost"]
 
 
-# Simple JWT
-REFRESH_TOKEN_LIFETIME = timedelta(days=30)
+SIMPLE_JWT = {"REFRESH_TOKEN_LIFETIME": timedelta(days=30)}

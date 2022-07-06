@@ -9,18 +9,24 @@ import FamilySettings from './families/FamilySettings'
 import PropTypes from 'prop-types'
 import { useFamilies } from './families/FamilyProvider'
 import NoCurrentFamily from './families/NoCurrentFamily'
+import LoadingScreen from './LoadingScreen'
+import FamilyRoute from './families/FamilyRoute'
+import ListsProvider from 'lists/ListsProvider'
 
 const AuthenticatedRoutes = ({ invitationToken }) => {
-  const { currentFamilyId } = useFamilies()
+  const { families, currentFamilyId, isLoading } = useFamilies()
 
-  if (!currentFamilyId) {
-    // TODO change LoadingScreen to Family creator / selector
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
+  if (families === []) {
     return (
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<NoCurrentFamily />} />
           <Route
-            path="family/:familyId"
+            path="f/:familyId"
             element={<FamilySettings invitationToken={invitationToken} />}
           />
           <Route path="*" element={<Navigate to="/" />} />
@@ -30,25 +36,35 @@ const AuthenticatedRoutes = ({ invitationToken }) => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="lists" replace />} />
-        <Route path="lists" element={<Lists />}>
-          <Route index element={<Navigate to="lists" replace />} />
-          <Route path="lists" element={<ListsList type={LIST_TYPE_LISTS} />} />
+    <ListsProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
           <Route
-            path="templates"
-            element={<ListsList type={LIST_TYPE_TEMPLATES} />}
+            index
+            element={<Navigate to={`f/${currentFamilyId}/l/lists`} replace />}
           />
+          <Route path="f/:familyId" element={<FamilyRoute />}>
+            <Route
+              index
+              element={<FamilySettings invitationToken={invitationToken} />}
+            />
+            <Route path="l" element={<Lists />}>
+              <Route index element={<Navigate to="lists" replace />} />
+              <Route
+                path="lists"
+                element={<ListsList type={LIST_TYPE_LISTS} />}
+              />
+              <Route
+                path="templates"
+                element={<ListsList type={LIST_TYPE_TEMPLATES} />}
+              />
+            </Route>
+            <Route path="l/:listId" element={<ListDetail />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" />} />
         </Route>
-        <Route path="list/:listId" element={<ListDetail />} />
-        <Route
-          path="family/:familyId"
-          element={<FamilySettings invitationToken={invitationToken} />}
-        />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </ListsProvider>
   )
 }
 

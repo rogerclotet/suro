@@ -23,7 +23,7 @@ class ListItemSerializer(serializers.ModelSerializer):
 
 class ListSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
-    items = ListItemSerializer(many=True)
+    items = ListItemSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         items_data = validated_data.pop("items")

@@ -12,8 +12,9 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { blueGrey, lightGreen } from '@mui/material/colors'
 import { BrowserRouter } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
-import HeaderProvider from './HeaderProvider'
+import LayoutProvider from './HeaderProvider'
 import { HelmetProvider } from 'react-helmet-async'
+import { SnackbarProvider } from 'notistack'
 
 const theme = createTheme({
   palette: {
@@ -29,20 +30,24 @@ const theme = createTheme({
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
-  <React.StrictMode>
+  <>
+    {/* <React.StrictMode> */}
     <CssBaseline />
     <ThemeProvider theme={theme}>
-      <AuthProvider>
-        <HelmetProvider>
-          <HeaderProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </HeaderProvider>
-        </HelmetProvider>
-      </AuthProvider>
+      <SnackbarProvider maxSnack={3}>
+        <AuthProvider>
+          <HelmetProvider>
+            <LayoutProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </LayoutProvider>
+          </HelmetProvider>
+        </AuthProvider>
+      </SnackbarProvider>
     </ThemeProvider>
-  </React.StrictMode>
+    {/* </React.StrictMode> */}
+  </>
 )
 
 // If you want to start measuring performance in your app, pass a function

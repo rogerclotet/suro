@@ -1,3 +1,4 @@
+import React from 'react'
 import { ExpandLess, ExpandMore, Logout, PeopleAlt } from '@mui/icons-material'
 import {
   Collapse,
@@ -9,18 +10,28 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import React from 'react'
 import { useState } from 'react'
 import { useAuth } from './auth/AuthProvider'
 import FamilyList from './families/FamiliyList'
 import PropTypes from 'prop-types'
+import NavigationMenu from './NavigationMenu'
+import { useLayout } from './HeaderProvider'
 
 const SideMenu = ({ onClose }) => {
   const [isFamilyOpen, setIsFamilyOpen] = useState(false)
-  const { logOut } = useAuth()
+  const { isLoggedIn, logOut } = useAuth()
+  const { setTabs, setFab } = useLayout()
 
   const handleToggleFamily = () => {
     setIsFamilyOpen(!isFamilyOpen)
+  }
+
+  const handleLogOut = () => {
+    // To avoid some issues with FamilyProvider not being present
+    setTabs(undefined)
+    setFab(undefined)
+
+    logOut()
   }
 
   return (
@@ -32,6 +43,7 @@ const SideMenu = ({ onClose }) => {
       </Toolbar>
       <Divider />
       <List component="nav">
+        {isLoggedIn && <NavigationMenu onClose={onClose} />}
         <ListItemButton onClick={handleToggleFamily}>
           <ListItemIcon>
             <PeopleAlt />
@@ -42,7 +54,7 @@ const SideMenu = ({ onClose }) => {
         <Collapse in={isFamilyOpen} timeout="auto" unmountOnExit>
           <FamilyList onClose={onClose} />
         </Collapse>
-        <ListItemButton onClick={logOut}>
+        <ListItemButton onClick={handleLogOut}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>

@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useState } from 'react'
 import PropTypes from 'prop-types'
 
-const TitleContext = createContext()
+const LayoutContext = createContext()
 
-export const useHeader = () => useContext(TitleContext)
+export const useLayout = () => useContext(LayoutContext)
 
-const HeaderProvider = ({ children }) => {
+const LayoutProvider = ({ children }) => {
   const [title, setTitle] = useState()
   const [backLink, setBackLink] = useState()
   const [actions, setActions] = useState()
+  const [tabs, setTabs] = useState()
+  const [fab, setFab] = useState()
 
   const setHeader = (title, backLink = undefined, actions = null) => {
     setTitle(title)
@@ -17,14 +19,25 @@ const HeaderProvider = ({ children }) => {
   }
 
   return (
-    <TitleContext.Provider value={{ title, backLink, actions, setHeader }}>
+    <LayoutContext.Provider
+      value={{
+        title,
+        backLink,
+        actions,
+        tabs,
+        fab,
+        setHeader,
+        setTabs,
+        setFab,
+      }}
+    >
       {children}
-    </TitleContext.Provider>
+    </LayoutContext.Provider>
   )
 }
 
-HeaderProvider.propTypes = {
+LayoutProvider.propTypes = {
   children: PropTypes.element,
 }
 
-export default HeaderProvider
+export default LayoutProvider

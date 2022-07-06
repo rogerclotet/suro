@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { useJwt } from 'react-jwt'
-import LoadingScreen from '../LoadingScreen'
+import { decodeToken, isExpired } from 'react-jwt'
+import LoadingScreen from 'LoadingScreen'
 
 const JWT_TOKEN_KEY = 'token'
 const JWT_REFRESH_TOKEN_KEY = 'refresh'
@@ -16,16 +16,16 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState()
   const [isLoading, setIsLoading] = useState(true)
 
-  const { decodedToken, isExpired, reEvaluateToken } = useJwt(token)
-
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem(JWT_TOKEN_KEY)
-    if (tokenFromStorage) {
-      reEvaluateToken(tokenFromStorage)
-      setToken(tokenFromStorage)
-      refreshToken()
-    } else {
+    if (!tokenFromStorage) {
       setIsLoading(false)
+    }
+
+    if (!isExpired(tokenFromStorage)) {
+      setToken(tokenFromStorage)
+    } else {
+      refreshToken()
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,8 +45,8 @@ const AuthProvider = ({ children }) => {
       if (res.status === 200) {
         return res.json().then(data => {
           if (data) {
-            localStorage.setItem(JWT_TOKEN_KEY, data.access)
             setToken(data.access)
+            localStorage.setItem(JWT_TOKEN_KEY, data.access)
           }
         })
       } else {
@@ -62,19 +62,7 @@ const AuthProvider = ({ children }) => {
       return
     }
 
-    if (isExpired) {
-      refreshToken()
-    } else {
-      setIsLoggedIn(true)
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
-
-  useEffect(() => {
-    if (!decodedToken) {
-      return
-    }
+    const decodedToken = decodeToken(token)
 
     setUser({
       userId: decodedToken.user_id,
@@ -91,7 +79,7 @@ const AuthProvider = ({ children }) => {
     return () => clearTimeout(timeout)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [decodedToken])
+  }, [token])
 
   const logIn = (email, password) => {
     setIsLoading(true)
@@ -100,19 +88,17 @@ const AuthProvider = ({ children }) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+    }).then(res => {
+      if (res.status === 200) {
+        return res.json().then(data => {
+          setToken(data.access)
+          localStorage.setItem(JWT_TOKEN_KEY, data.access)
+          localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
+        })
+      } else {
+        console.log('Error logging in', res)
+      }
     })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json().then(data => {
-            localStorage.setItem(JWT_TOKEN_KEY, data.access)
-            localStorage.setItem(JWT_REFRESH_TOKEN_KEY, data.refresh)
-            setToken(data.access)
-          })
-        } else {
-          throw new Error('Status', res.status, 'on login')
-        }
-      })
-      .catch(e => console.log('Error logging in', e))
   }
 
   const register = async (email, firstName, lastName, password) => {
@@ -129,8 +115,8 @@ const AuthProvider = ({ children }) => {
   }
 
   const logOut = () => {
-    setToken(undefined)
     setIsLoggedIn(false)
+    setToken(undefined)
     setUser(undefined)
 
     localStorage.removeItem(JWT_TOKEN_KEY)

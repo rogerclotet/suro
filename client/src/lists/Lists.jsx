@@ -1,34 +1,20 @@
-import React, { useState } from 'react'
-import { Tab, Tabs } from '@mui/material'
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import ListsProvider from './ListsProvider'
+import React, { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
+import { useLayout } from 'HeaderProvider'
+import ListsTabs from './ListsTabs'
 
 const Lists = () => {
-  const location = useLocation()
-  const [tab, setTab] = useState(() => {
-    const pathParts = location.pathname.split('/')
-    return pathParts[pathParts.length - 1] === 'templates' ? 1 : 0
-  })
+  const { setTabs } = useLayout()
 
-  const handleTabChange = (event, value) => {
-    setTab(value)
-  }
+  useEffect(() => {
+    setTabs(<ListsTabs />)
 
-  return (
-    <ListsProvider>
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        variant="fullWidth"
-        sx={{ backgroundColor: 'divider' }}
-      >
-        <Tab label="Llistes" LinkComponent={Link} to="lists" />
-        <Tab label="Plantilles" LinkComponent={Link} to="templates" />
-      </Tabs>
+    return () => setTabs(undefined)
 
-      <Outlet />
-    </ListsProvider>
-  )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return <Outlet />
 }
 
 export default Lists

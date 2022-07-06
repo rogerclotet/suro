@@ -1,4 +1,5 @@
-import { GroupAdd, Link, Share } from '@mui/icons-material'
+import React, { useEffect, useMemo } from 'react'
+import { Edit, GroupAdd, Link, Share } from '@mui/icons-material'
 import {
   Avatar,
   Button,
@@ -19,28 +20,29 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import React, { useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { useLocation, useParams } from 'react-router-dom'
-import { useHeader } from '../HeaderProvider'
-import LoadingScreen from '../LoadingScreen'
+import { useParams } from 'react-router-dom'
+import { useLayout } from 'HeaderProvider'
+import LoadingScreen from 'LoadingScreen'
 import { useFamilies } from './FamilyProvider'
-import useClient from '../useClient'
+import useClient from 'useClient'
 import { useState } from 'react'
 import { RWebShare } from 'react-web-share'
 import PropTypes from 'prop-types'
-import { useAuth } from '../auth/AuthProvider'
-import { useMemo } from 'react'
+import { useAuth } from 'auth/AuthProvider'
+import { useSnackbar } from 'notistack'
+import EditFamilyDialog from './EditFamilyDialog'
 
 const FamilySettings = ({ invitationToken }) => {
   const params = useParams()
-  const location = useLocation()
-  const { families, refreshFamilies } = useFamilies()
-  const { setHeader } = useHeader()
-  const { invitationsRequest, joinFamilyRequest } = useClient()
+  const { families, refreshFamilies, currentFamilyId } = useFamilies()
+  const { setHeader } = useLayout()
+  const { invitationsRequest, joinFamilyRequest, familyRequest } = useClient()
   const [invitationLink, setInvitationLink] = useState()
   const { user } = useAuth()
   const [family, setFamily] = useState()
+  const { enqueueSnackbar } = useSnackbar()
+  const [isEditing, setIsEditing] = useState(false)
 
   const isFamilyMember = useMemo(() => {
     if (!family) {
@@ -75,7 +77,13 @@ const FamilySettings = ({ invitationToken }) => {
 
   useEffect(() => {
     if (family) {
-      setHeader('Família ' + family.name)
+      setHeader(
+        'Família ' + family.name,
+        undefined,
+        <IconButton size="large" edge="end" onClick={() => setIsEditing(true)}>
+          <Edit />
+        </IconButton>
+      )
     }
   }, [setHeader, family])
 
@@ -95,9 +103,7 @@ const FamilySettings = ({ invitationToken }) => {
       res
         .json()
         .then(data =>
-          setInvitationLink(
-            `${window.location.host}${location.pathname}?t=${data.token}`
-          )
+          setInvitationLink(`${window.location.href}?t=${data.token}`)
         )
     })
   }
@@ -110,9 +116,26 @@ const FamilySettings = ({ invitationToken }) => {
     }).then(res => {
       if (res.status !== 200) {
         console.log('Error joining family', res)
+        res.json().then(error => {
+          if (error.code === 1) {
+            enqueueSnackbar('No et pots unir a més famílies', {
+              variant: 'error',
+              preventDuplicate: true,
+            })
+          }
+        })
+      } else {
+        refreshFamilies()
       }
-      refreshFamilies()
     })
+  }
+
+  const handleEdit = async data => {
+    return familyRequest(currentFamilyId, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+    }).then(refreshFamilies)
   }
 
   return (
@@ -211,6 +234,14 @@ const FamilySettings = ({ invitationToken }) => {
           </Stack>
         )}
       </Container>
+
+      <EditFamilyDialog
+        title="Editar família"
+        initialValues={family}
+        open={isEditing}
+        onSave={handleEdit}
+        onClose={() => setIsEditing(false)}
+      />
     </>
   )
 }

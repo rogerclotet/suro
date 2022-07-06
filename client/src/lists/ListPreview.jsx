@@ -21,9 +21,10 @@ import {
 } from '@mui/icons-material'
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import useClient from '../useClient'
+import useClient from 'useClient'
 import { RWebShare } from 'react-web-share'
 import EditListDialog from './EditListDialog'
+import { useFamilies } from 'families/FamilyProvider'
 
 const DeleteConfirmationDialog = ({ list, open, onClose }) => {
   const handleCancel = () => {
@@ -64,6 +65,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDuplicating, setIsDuplicating] = useState(false)
   const { listRequest, listsRequest } = useClient()
+  const { currentFamilyId } = useFamilies()
 
   const handleDeleteDialogClose = confirmed => {
     if (confirmed) {
@@ -103,7 +105,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
   }
 
   const handleDuplicate = async data => {
-    return listsRequest({
+    return listsRequest(currentFamilyId, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
@@ -120,7 +122,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
       <Card>
         <Link
           component={RouterLink}
-          to={`/list/${list.id}`}
+          to={`/f/${currentFamilyId}/l/${list.id}`}
           underline="none"
           color="inherit"
         >
@@ -140,6 +142,7 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
           <IconButton
             onClick={handleToggleFavorite}
             color={list.is_favorite ? 'secondary' : 'inherit'}
+            className="umami-click-lists-favorite"
           >
             <Favorite />
           </IconButton>
@@ -152,14 +155,20 @@ const ListPreview = ({ list, onChange, onDuplicate }) => {
               url: `${window.location.href}/${list.id}`,
             }}
           >
-            <IconButton>
+            <IconButton className="umami-click-lists-share">
               <Share />
             </IconButton>
           </RWebShare>
-          <IconButton onClick={handleStartDuplicating}>
+          <IconButton
+            onClick={handleStartDuplicating}
+            className="umami-click-lists-copy"
+          >
             <ContentCopy />
           </IconButton>
-          <IconButton onClick={() => setIsDeleting(true)}>
+          <IconButton
+            onClick={() => setIsDeleting(true)}
+            className="umami-click-lists-delete"
+          >
             <DeleteForever />
           </IconButton>
         </CardActions>

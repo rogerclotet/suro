@@ -26,10 +26,10 @@ const EditFamilyDialog = ({ title, initialValues, open, onSave, onClose }) => {
       name: '',
     },
     validationSchema: validationSchema,
-    onSubmit: data => {
+    onSubmit: ({ name }) => {
       setIsSaving(true)
 
-      onSave(data).then(() => {
+      onSave({ name: name.trim() }).then(() => {
         formik.resetForm()
         setIsSaving(false)
         onClose()
