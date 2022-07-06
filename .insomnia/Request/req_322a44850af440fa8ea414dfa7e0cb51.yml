@@ -1,7 +1,7 @@
 _id: req_322a44850af440fa8ea414dfa7e0cb51
 type: Request
 parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
-modified: 1655215304374
+modified: 1656970123634
 created: 1655215268717
 url: "{{ _.api_url }}/families/1/lists/6/"
 name: Update list
@@ -17,7 +17,6 @@ body:
     	"description": "Amb descripció",
     	"is_favorite": true,
     	"is_template": false,
-    	"items": [],
     	"created_at": "2022-06-11T22:32:40.394455Z",
     	"updated_at": "2022-06-11T22:32:40.394470Z"
     }
@@ -28,7 +27,7 @@ headers:
     id: pair_94183e33d7a544c382b33cc583ab577d
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MjE1NTQ1LCJpYXQiOjE2NTUyMTUyNDUsImp0aSI6IjUwZDhlYjkyMTE2ZTQzNDViYjUzODQ3ODliNTU3Y2Y3IiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.5Ic8cj6Er_U6akzB8PcwTBJhAkw40qSnJvuIthH7Cv8
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU2OTcwMjE4LCJpYXQiOjE2NTY5Njk5MTgsImp0aSI6IjY5ZDRmMjIyNWQ2ZTQ2YWM4ZTNjNTE4ZTg3NzhiNTgyIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.qpgzZvycFWpID5IZJTBgiN3b3h2952Nh7-xKfoWVDq4
 metaSortKey: -1655111040408
 isPrivate: false
 settingStoreCookies: true
