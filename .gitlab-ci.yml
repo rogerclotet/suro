@@ -26,30 +26,17 @@ client:
     - changes:
         - client/**/*
 
-deploy_server:
+deploy:
   stage: deploy
   image: alpine
   before_script:
     - apk add openssh-client sshpass
   script:
     - chmod +x scripts/deploy_server.sh
-    - scripts/deploy_server.sh
-  rules:
-    - if: '$CI_COMMIT_BRANCH != "main"'
-      when: never
-    - changes:
-        - server/**/*
-
-deploy_client:
-  stage: deploy
-  image: alpine
-  before_script:
-    - apk add openssh-client sshpass
-  script:
-    - chmod +x scripts/deploy_client.sh
-    - scripts/deploy_client.sh
+    - scripts/deploy.sh
   rules:
     - if: '$CI_COMMIT_BRANCH != "main"'
       when: never
     - changes:
         - client/**/*
+        - server/**/*
