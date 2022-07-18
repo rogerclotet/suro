@@ -32,7 +32,7 @@ deploy:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/deploy_server.sh
+    - chmod +x scripts/deploy.sh
     - scripts/deploy.sh
   rules:
     - if: '$CI_COMMIT_BRANCH != "main"'
