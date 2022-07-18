@@ -170,7 +170,7 @@ LOGGING = {
 }
 
 
-CORS_ALLOWED_ORIGINS = ["https://familia.clotet.dev", "http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = ["https://api.familia.clotet.dev"]
 if DEBUG:
