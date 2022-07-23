@@ -26,7 +26,7 @@ class ListSerializer(serializers.ModelSerializer):
     items = ListItemSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
-        items_data = validated_data.pop("items")
+        items_data = validated_data.pop("items") if "items" in validated_data else []
 
         list = super().create(validated_data)
 
