@@ -32,13 +32,15 @@ int defaultSort(FamilyList a, FamilyList b) {
 }
 
 class ListsState with ChangeNotifier {
-  final AuthClient client;
-  final FamiliesState familiesState;
+  final AuthClient _client;
+  final FamiliesState _familiesState;
 
   List<FamilyList>? _lists;
 
-  ListsState(this.client, this.familiesState) {
-    familiesState.addListener(() {
+  ListsState(this._client, this._familiesState) {
+    _familiesState.addListener(() {
+      _lists = null;
+      notifyListeners();
       refresh();
     });
   }
@@ -69,6 +71,18 @@ class ListsState with ChangeNotifier {
     return templates;
   }
 
+  FamilyList list(int listId) {
+    final index = _lists?.indexWhere(
+      (list) => list.id == listId,
+    );
+
+    if (index == null || index == -1) {
+      throw Exception("The list with id $listId doesn't exist");
+    }
+
+    return _lists![index];
+  }
+
   void _setList(FamilyList list) {
     if (_lists == null) {
       return;
@@ -91,7 +105,7 @@ class ListsState with ChangeNotifier {
     _setList(list);
     notifyListeners();
 
-    client.createList(familiesState.currentFamily!.id, list).then((created) {
+    _client.createList(_familiesState.currentFamily!.id, list).then((created) {
       _removeList(list);
       _setList(created);
     }, onError: (error) {
@@ -107,8 +121,8 @@ class ListsState with ChangeNotifier {
     _lists![index] = _lists![index].copyWith(isFavorite: !list.isFavorite);
     notifyListeners();
 
-    client.patchList(
-      familiesState.currentFamily!.id,
+    _client.patchList(
+      _familiesState.currentFamily!.id,
       list.id,
       {"is_favorite": !list.isFavorite},
     ).then((edited) {
@@ -127,7 +141,7 @@ class ListsState with ChangeNotifier {
     _lists!.remove(list);
     notifyListeners();
 
-    client.deleteList(familiesState.currentFamily!.id, list.id).catchError(
+    _client.deleteList(_familiesState.currentFamily!.id, list.id).catchError(
       (error) {
         _lists!.add(list);
 
@@ -140,12 +154,12 @@ class ListsState with ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    final currentFamilyId = familiesState.currentFamily?.id;
+    final currentFamilyId = _familiesState.currentFamily?.id;
     if (currentFamilyId == null) {
       return;
     }
 
-    final lists = await client.lists(currentFamilyId);
+    final lists = await _client.lists(currentFamilyId);
 
     _lists = lists;
 

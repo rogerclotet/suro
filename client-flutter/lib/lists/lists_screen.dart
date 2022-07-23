@@ -36,69 +36,77 @@ class ListsScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         drawer: const MainDrawer(),
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverOverlapAbsorber(
-                handle:
-                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: SliverAppBar(
-                  pinned: true,
-                  floating: true,
-                  forceElevated: innerBoxIsScrolled,
-                  title: const Text('Llistes'),
-                  bottom: const TabBar(
-                    tabs: [
-                      Tab(
-                        text: 'Llistes',
-                      ),
-                      Tab(
-                        text: 'Plantilles',
-                      ),
-                    ],
+        body: RefreshIndicator(
+          onRefresh: () => listsState.refresh(),
+          notificationPredicate: (notification) {
+            return notification.depth == 2;
+          },
+          triggerMode: RefreshIndicatorTriggerMode.onEdge,
+          edgeOffset: 128,
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverOverlapAbsorber(
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    forceElevated: innerBoxIsScrolled,
+                    title: const Text('Llistes'),
+                    bottom: const TabBar(
+                      tabs: [
+                        Tab(
+                          text: 'Llistes',
+                        ),
+                        Tab(
+                          text: 'Plantilles',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              listsState.lists,
-              listsState.templates,
-            ].asMap().entries.map(
-              (tab) {
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Builder(
-                    builder: ((context) {
-                      return CustomScrollView(
-                        key: PageStorageKey('${tab.key}'),
-                        slivers: [
-                          SliverOverlapInjector(
-                            handle:
-                                NestedScrollView.sliverOverlapAbsorberHandleFor(
-                              context,
+              ];
+            },
+            body: TabBarView(
+              children: [
+                listsState.lists,
+                listsState.templates,
+              ].asMap().entries.map(
+                (tab) {
+                  return SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: Builder(
+                      builder: ((context) {
+                        return CustomScrollView(
+                          key: PageStorageKey('${tab.key}'),
+                          slivers: [
+                            SliverOverlapInjector(
+                              handle: NestedScrollView
+                                  .sliverOverlapAbsorberHandleFor(
+                                context,
+                              ),
                             ),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.only(
-                              left: 2,
-                              right: 2,
-                              top: 4,
-                              bottom: 84,
+                            SliverPadding(
+                              padding: const EdgeInsets.only(
+                                left: 2,
+                                right: 2,
+                                top: 4,
+                                bottom: 84,
+                              ),
+                              sliver: Lists(
+                                lists: tab.value,
+                              ),
                             ),
-                            sliver: Lists(
-                              lists: tab.value,
-                            ),
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
-                );
-              },
-            ).toList(),
+                          ],
+                        );
+                      }),
+                    ),
+                  );
+                },
+              ).toList(),
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(

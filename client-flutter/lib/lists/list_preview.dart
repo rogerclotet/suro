@@ -13,7 +13,7 @@ class ListPreview extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ListDetailScreen(
-          list: list,
+          listId: list.id,
         ),
       ),
     );

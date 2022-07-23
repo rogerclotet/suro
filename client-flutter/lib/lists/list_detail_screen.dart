@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import '../models/list_item.dart';
 
 class ListDetailScreen extends StatefulWidget {
-  final FamilyList list;
+  final int listId;
 
-  const ListDetailScreen({required this.list, super.key});
+  const ListDetailScreen({required this.listId, super.key});
 
   @override
   State<ListDetailScreen> createState() => _ListDetailScreenState();
@@ -17,21 +17,6 @@ class ListDetailScreen extends StatefulWidget {
 class _ListDetailScreenState extends State<ListDetailScreen> {
   late FamilyList list;
   late Map<String, List<ListItem>> itemsByCategory;
-
-  @override
-  void initState() {
-    super.initState();
-
-    list = widget.list;
-
-    itemsByCategory = {};
-    for (var item in list.items) {
-      if (!itemsByCategory.containsKey(item.category)) {
-        itemsByCategory[item.category] = [];
-      }
-      itemsByCategory[item.category]!.add(item);
-    }
-  }
 
   void toggleCheckbox(int id, bool value) {
     setState(() {
@@ -75,12 +60,23 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final listsState = Provider.of<ListsState>(context);
+
+    list = listsState.list(widget.listId);
+    itemsByCategory = {};
+    for (var item in list.items) {
+      if (!itemsByCategory.containsKey(item.category)) {
+        itemsByCategory[item.category] = [];
+      }
+      itemsByCategory[item.category]!.add(item);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Hero(
-          tag: "title_${widget.list.id}",
+          tag: "title_${list.id}",
           child: Text(
-            widget.list.name,
+            list.name,
             style: Theme.of(context).textTheme.titleLarge,
             overflow: TextOverflow.ellipsis,
           ),
@@ -125,70 +121,74 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         child: const Icon(Icons.edit),
         onPressed: () => {},
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 80),
-        children: itemsByCategory
-            .map(
-              (key, items) {
-                if (items.isEmpty) {
-                  return MapEntry(key, []);
-                }
+      body: RefreshIndicator(
+        onRefresh: () => listsState.refresh(),
+        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 80),
+          children: itemsByCategory
+              .map(
+                (key, items) {
+                  if (items.isEmpty) {
+                    return MapEntry(key, []);
+                  }
 
-                return MapEntry(
-                  key,
-                  [
-                    key == ''
-                        ? Container()
-                        : ListTile(
-                            title: Text(
-                              key == '' ? 'Sense categoria' : key,
-                              style: Theme.of(context).textTheme.subtitle2,
+                  return MapEntry(
+                    key,
+                    [
+                      key == ''
+                          ? Container()
+                          : ListTile(
+                              title: Text(
+                                key == '' ? 'Sense categoria' : key,
+                                style: Theme.of(context).textTheme.subtitle2,
+                              ),
+                              dense: true,
+                              tileColor: Theme.of(context).colorScheme.surface,
                             ),
-                            dense: true,
-                            tileColor: Theme.of(context).colorScheme.surface,
+                      ...items.map((item) {
+                        return Dismissible(
+                          key: Key('${item.id}'),
+                          onDismissed: (direction) => deleteItem(item.id),
+                          background: Container(color: Colors.deepOrange[900]),
+                          child: ListTile(
+                            contentPadding:
+                                const EdgeInsets.only(left: 16, right: 2),
+                            title: Text(
+                              item.name,
+                              style: item.isComplete
+                                  ? TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1!
+                                          .color!
+                                          .withOpacity(0.4),
+                                    )
+                                  : null,
+                            ),
+                            trailing: Checkbox(
+                              value: item.isComplete,
+                              onChanged: (value) {
+                                toggleCheckbox(item.id, value != false);
+                              },
+                            ),
                           ),
-                    ...items.map((item) {
-                      return Dismissible(
-                        key: Key('${item.id}'),
-                        onDismissed: (direction) => deleteItem(item.id),
-                        background: Container(color: Colors.deepOrange[900]),
-                        child: ListTile(
-                          contentPadding:
-                              const EdgeInsets.only(left: 16, right: 2),
-                          title: Text(
-                            item.name,
-                            style: item.isComplete
-                                ? TextStyle(
-                                    decoration: TextDecoration.lineThrough,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1!
-                                        .color!
-                                        .withOpacity(0.4),
-                                  )
-                                : null,
-                          ),
-                          trailing: Checkbox(
-                            value: item.isComplete,
-                            onChanged: (value) {
-                              toggleCheckbox(item.id, value != false);
-                            },
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                );
-              },
-            )
-            .values
-            .fold<List<Widget>>(
-              [],
-              (previousValue, element) {
-                return [...previousValue, ...element];
-              },
-            )
-            .toList(),
+                        );
+                      }).toList(),
+                    ],
+                  );
+                },
+              )
+              .values
+              .fold<List<Widget>>(
+                [],
+                (previousValue, element) {
+                  return [...previousValue, ...element];
+                },
+              )
+              .toList(),
+        ),
       ),
     );
   }

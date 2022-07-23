@@ -6,9 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 const currentFamilyIdKey = 'currentFamilyId';
 
 class FamiliesState with ChangeNotifier {
-  final AuthClient client;
+  final AuthClient _client;
 
-  FamiliesState(this.client);
+  FamiliesState(this._client);
 
   List<Family>? _families;
   int? _currentFamilyId;
@@ -57,7 +57,7 @@ class FamiliesState with ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    final families = await client.families();
+    final families = await _client.families();
 
     _families = families;
 
