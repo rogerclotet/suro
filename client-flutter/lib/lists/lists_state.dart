@@ -96,6 +96,7 @@ class ListsState with ChangeNotifier {
       _setList(created);
     }, onError: (error) {
       _removeList(list);
+
       // TODO display snackbar
       logger.warning("Error creating list: $error");
     }).whenComplete(notifyListeners);
@@ -114,11 +115,28 @@ class ListsState with ChangeNotifier {
       // TODO display snackbar
     }, onError: (error) {
       _lists![index] = list;
+
       // TODO display snackbar
       logger.warning("Error toggling favorite: $error");
 
       notifyListeners();
     });
+  }
+
+  void delete(FamilyList list) {
+    _lists!.remove(list);
+    notifyListeners();
+
+    client.deleteList(familiesState.currentFamily!.id, list.id).catchError(
+      (error) {
+        _lists!.add(list);
+
+        // TODO display snackbar
+        logger.warning("Error toggling favorite: $error");
+
+        notifyListeners();
+      },
+    );
   }
 
   Future<void> refresh() async {

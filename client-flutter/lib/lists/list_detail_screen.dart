@@ -1,5 +1,7 @@
+import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/list_item.dart';
 
@@ -69,6 +71,8 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     );
   }
 
+  void delete() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +85,41 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Confirmació'),
+                content: Text(
+                  'Estàs segur que vols eliminar la llista ${list.name}?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    autofocus: true,
+                    child: const Text('Canceŀlar'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Provider.of<ListsState>(
+                        context,
+                        listen: false,
+                      ).delete(list);
+                      Navigator.pop(context, true);
+                    },
+                    child: const Text('Eliminar'),
+                  ),
+                ],
+              ),
+            ).then((confirmed) {
+              if (confirmed) {
+                Navigator.of(context).pop();
+              }
+            }),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.edit),

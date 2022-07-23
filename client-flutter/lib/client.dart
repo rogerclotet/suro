@@ -177,4 +177,14 @@ class AuthClient with ChangeNotifier {
 
     return parseJsonObject(res.bodyBytes, FamilyList.fromJson);
   }
+
+  Future<void> deleteList(int familyId, int listId) async {
+    final res = await client.delete(
+      Uri.parse('$baseUrl/families/$familyId/lists/$listId/'),
+    );
+
+    if (res.statusCode != 204) {
+      throw const ClientException("No s'ha pogut eliminar la llista");
+    }
+  }
 }
