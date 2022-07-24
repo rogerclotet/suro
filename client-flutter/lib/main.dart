@@ -5,6 +5,7 @@ import 'package:familia/families/family_settings_screen.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/client.dart';
 import 'package:familia/lists/lists_state.dart';
+import 'package:familia/lists/templates_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -29,6 +30,7 @@ const storage = FlutterSecureStorage(
 
 Map<String, WidgetBuilder> authRoutes = {
   ListsScreen.routeName: (_) => const ListsScreen(),
+  TemplatesScreen.routeName: (_) => const TemplatesScreen(),
   FamilySettingsScreen.routeName: (_) => const FamilySettingsScreen(),
 };
 
@@ -39,7 +41,7 @@ class FamilyApp extends StatefulWidget {
   State<FamilyApp> createState() => _FamilyAppState();
 }
 
-const primaryColor = Colors.teal;
+const primaryColor = Colors.yellow;
 final defaultColorScheme = ColorScheme.fromSwatch(
   primarySwatch: primaryColor,
   brightness: WidgetsBinding.instance.window.platformBrightness,
@@ -83,14 +85,29 @@ class _FamilyAppState extends State<FamilyApp> {
         builder: (lightColorScheme, darkColorScheme) {
           return Consumer<Auth>(
             builder: (context, auth, child) {
+              final lColorScheme =
+                  lightColorScheme?.harmonized() ?? defaultColorScheme;
+              final dColorScheme =
+                  darkColorScheme?.harmonized() ?? defaultColorScheme;
+
               return MaterialApp(
                 title: 'Família',
                 theme: ThemeData(
                   colorScheme: lightColorScheme ?? defaultColorScheme,
+                  checkboxTheme: CheckboxThemeData(
+                    checkColor: null,
+                    fillColor:
+                        MaterialStateProperty.all(lColorScheme.secondary),
+                  ),
                   useMaterial3: true,
                 ),
                 darkTheme: ThemeData(
                   colorScheme: darkColorScheme ?? defaultColorScheme,
+                  checkboxTheme: CheckboxThemeData(
+                    checkColor:
+                        MaterialStateProperty.all(dColorScheme.inversePrimary),
+                    fillColor: MaterialStateProperty.all(dColorScheme.primary),
+                  ),
                   useMaterial3: true,
                 ),
                 home: isInitializing

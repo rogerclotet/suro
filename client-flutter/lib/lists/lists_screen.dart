@@ -1,6 +1,7 @@
 import 'package:familia/lists/edit_list_screen.dart';
 import 'package:familia/lists/lists.dart';
 import 'package:familia/lists/lists_state.dart';
+import 'package:familia/lists/templates_screen.dart';
 import 'package:familia/main_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,93 +33,40 @@ class ListsScreen extends StatelessWidget {
       );
     }
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        drawer: const MainDrawer(),
-        body: RefreshIndicator(
-          onRefresh: () => listsState.refresh(),
-          notificationPredicate: (notification) {
-            return notification.depth == 2;
-          },
-          triggerMode: RefreshIndicatorTriggerMode.onEdge,
-          edgeOffset: 128,
-          child: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverOverlapAbsorber(
-                  handle:
-                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverAppBar(
-                    pinned: true,
-                    floating: true,
-                    forceElevated: innerBoxIsScrolled,
-                    title: const Text('Llistes'),
-                    bottom: const TabBar(
-                      tabs: [
-                        Tab(
-                          text: 'Llistes',
-                        ),
-                        Tab(
-                          text: 'Plantilles',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ];
-            },
-            body: TabBarView(
-              children: [
-                listsState.lists,
-                listsState.templates,
-              ].asMap().entries.map(
-                (tab) {
-                  return SafeArea(
-                    top: false,
-                    bottom: false,
-                    child: Builder(
-                      builder: ((context) {
-                        return CustomScrollView(
-                          key: PageStorageKey('${tab.key}'),
-                          slivers: [
-                            SliverOverlapInjector(
-                              handle: NestedScrollView
-                                  .sliverOverlapAbsorberHandleFor(
-                                context,
-                              ),
-                            ),
-                            SliverPadding(
-                              padding: const EdgeInsets.only(
-                                left: 2,
-                                right: 2,
-                                top: 4,
-                                bottom: 84,
-                              ),
-                              sliver: Lists(
-                                lists: tab.value,
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ),
-                  );
-                },
-              ).toList(),
+    return Scaffold(
+      drawer: const MainDrawer(),
+      appBar: AppBar(
+        title: const Text('Llistes'),
+        actions: [
+          Tooltip(
+            message: 'Plantilles',
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(TemplatesScreen.routeName);
+              },
+              icon: const Icon(Icons.library_books),
             ),
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => EditListForm(onChange: handleCreate),
-              ),
-            );
-          },
-          tooltip: 'Crear llista',
-          child: const Icon(Icons.add),
+          )
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  EditListForm(isTemplate: false, onChange: handleCreate),
+            ),
+          );
+        },
+        tooltip: 'Crear llista',
+        child: const Icon(Icons.add),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => listsState.refresh(),
+        triggerMode: RefreshIndicatorTriggerMode.onEdge,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Lists(lists: listsState.lists),
         ),
       ),
     );

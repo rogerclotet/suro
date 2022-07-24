@@ -10,7 +10,7 @@ class Lists extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverGrid.extent(
+    return GridView.extent(
       maxCrossAxisExtent: 200,
       childAspectRatio: 1.4,
       crossAxisSpacing: 4,
