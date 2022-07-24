@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_screen.dart';
 import 'package:familia/families/family_settings_screen.dart';
@@ -38,6 +39,12 @@ class FamilyApp extends StatefulWidget {
   State<FamilyApp> createState() => _FamilyAppState();
 }
 
+const primaryColor = Colors.teal;
+final defaultColorScheme = ColorScheme.fromSwatch(
+  primarySwatch: primaryColor,
+  brightness: WidgetsBinding.instance.window.platformBrightness,
+);
+
 class _FamilyAppState extends State<FamilyApp> {
   bool isInitializing = true;
 
@@ -65,8 +72,6 @@ class _FamilyAppState extends State<FamilyApp> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Colors.teal;
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => auth),
@@ -74,37 +79,39 @@ class _FamilyAppState extends State<FamilyApp> {
         ChangeNotifierProvider(create: (_) => familiesState),
         ChangeNotifierProvider(create: (_) => listsState),
       ],
-      child: Consumer<Auth>(
-        builder: (context, auth, child) {
-          return MaterialApp(
-            title: 'Família',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSwatch(
-                primarySwatch: primaryColor,
-                brightness: WidgetsBinding.instance.window.platformBrightness,
-              ),
-              appBarTheme: const AppBarTheme(
-                backgroundColor: primaryColor,
-              ),
-              useMaterial3: true,
-            ),
-            home: isInitializing
-                ? Scaffold(
-                    appBar: AppBar(
-                      title: const Text('Família'),
-                    ),
-                    body: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : auth.isLoggedIn
-                    ? const ListsScreen()
-                    : const LoginScreen(),
-            routes: isInitializing
-                ? {}
-                : auth.isLoggedIn
-                    ? authRoutes
-                    : {},
+      child: DynamicColorBuilder(
+        builder: (lightColorScheme, darkColorScheme) {
+          return Consumer<Auth>(
+            builder: (context, auth, child) {
+              return MaterialApp(
+                title: 'Família',
+                theme: ThemeData(
+                  colorScheme: lightColorScheme ?? defaultColorScheme,
+                  useMaterial3: true,
+                ),
+                darkTheme: ThemeData(
+                  colorScheme: darkColorScheme ?? defaultColorScheme,
+                  useMaterial3: true,
+                ),
+                home: isInitializing
+                    ? Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Família'),
+                        ),
+                        body: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : auth.isLoggedIn
+                        ? const ListsScreen()
+                        : const LoginScreen(),
+                routes: isInitializing
+                    ? {}
+                    : auth.isLoggedIn
+                        ? authRoutes
+                        : {},
+              );
+            },
           );
         },
       ),
