@@ -1,32 +1,28 @@
+import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/edit_list_screen.dart';
 import 'package:familia/lists/lists.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/lists/templates_screen.dart';
 import 'package:familia/main_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
-import '../models/list.dart';
 
 class ListsScreen extends StatelessWidget {
   const ListsScreen({Key? key}) : super(key: key);
 
-  static const routeName = '/lists';
+  static const routeName = 'lists';
 
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context);
-
-    void handleCreate(FamilyList list) {
-      listsState.createList(list);
-    }
 
     if (listsState.isLoading) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Llistes'),
         ),
-        drawer: const MainDrawer(),
+        drawer: MainDrawer(),
         body: const Center(
           child: CircularProgressIndicator(),
         ),
@@ -34,7 +30,7 @@ class ListsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      drawer: const MainDrawer(),
+      drawer: MainDrawer(),
       appBar: AppBar(
         title: const Text('Llistes'),
         actions: [
@@ -42,7 +38,15 @@ class ListsScreen extends StatelessWidget {
             message: 'Plantilles',
             child: IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(TemplatesScreen.routeName);
+                GoRouter.of(context).pushNamed(
+                  TemplatesScreen.routeName,
+                  params: {
+                    'fid': Provider.of<FamiliesState>(context, listen: false)
+                        .currentFamily!
+                        .id
+                        .toString()
+                  },
+                );
               },
               icon: const Icon(Icons.library_books),
             ),
@@ -50,24 +54,22 @@ class ListsScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) =>
-                  EditListForm(isTemplate: false, onChange: handleCreate),
-            ),
-          );
-        },
+        onPressed: () => GoRouter.of(context).pushNamed(
+          EditListScreen.newListRouteName,
+          params: {
+            'fid': Provider.of<FamiliesState>(context, listen: false)
+                .currentFamily!
+                .id
+                .toString()
+          },
+        ),
         tooltip: 'Crear llista',
         child: const Icon(Icons.add),
       ),
       body: RefreshIndicator(
         onRefresh: () => listsState.refresh(),
         triggerMode: RefreshIndicatorTriggerMode.onEdge,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Lists(lists: listsState.lists),
-        ),
+        child: Lists(lists: listsState.lists),
       ),
     );
   }

@@ -3,16 +3,21 @@ import 'package:familia/families/families_state.dart';
 import 'package:familia/families/family_settings_screen.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({super.key});
+  MainDrawer({super.key});
+
+  final _key = GlobalKey<DrawerControllerState>();
 
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context, listen: false);
+    final familiesState = Provider.of<FamiliesState>(context);
 
     return Drawer(
+      key: _key,
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
@@ -64,8 +69,9 @@ class MainDrawer extends StatelessWidget {
                           .toList(),
                       onChanged: (id) {
                         if (id != null) {
+                          _key.currentState?.close();
                           familiesState.selectFamily(id);
-                          Navigator.pop(context);
+                          // Navigator.pop(context);
                         }
                       },
                     );
@@ -78,9 +84,11 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.list_alt),
             title: const Text('Llistes'),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushReplacementNamed(
+              // Navigator.pop(context);
+              _key.currentState?.close();
+              GoRouter.of(context).replaceNamed(
                 ListsScreen.routeName,
+                params: {'fid': familiesState.currentFamily!.id.toString()},
               );
             },
           ),
@@ -88,9 +96,11 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('Preferències'),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushReplacementNamed(
+              // Navigator.pop(context);
+              _key.currentState?.close();
+              GoRouter.of(context).replaceNamed(
                 FamilySettingsScreen.routeName,
+                params: {'fid': familiesState.currentFamily!.id.toString()},
               );
             },
           ),

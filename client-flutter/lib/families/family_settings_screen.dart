@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FamilySettingsScreen extends StatefulWidget {
-  const FamilySettingsScreen({super.key});
+  final int familyId;
 
-  static const routeName = '/settings';
+  const FamilySettingsScreen({required this.familyId, super.key});
+
+  static const routeName = 'family_settings';
 
   @override
   State<FamilySettingsScreen> createState() => _FamilySettingsScreenState();
@@ -22,6 +24,10 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
   Widget build(BuildContext context) {
     familiesState ??= Provider.of<FamiliesState>(context);
 
+    if (familiesState!.currentFamily?.id != widget.familyId) {
+      familiesState!.selectFamily(widget.familyId);
+    }
+
     family = familiesState!.currentFamily;
 
     if (family == null) {
@@ -29,7 +35,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
         appBar: AppBar(
           title: const Text("Família"),
         ),
-        drawer: const MainDrawer(),
+        drawer: MainDrawer(),
         body: const Center(
           child: CircularProgressIndicator(),
         ),
@@ -38,7 +44,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(family!.name)),
-      drawer: const MainDrawer(),
+      drawer: MainDrawer(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

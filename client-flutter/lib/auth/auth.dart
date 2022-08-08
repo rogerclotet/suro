@@ -8,6 +8,7 @@ const refreshKey = 'refresh';
 
 class Auth with ChangeNotifier {
   FlutterSecureStorage storage;
+  bool isInitialized = false;
 
   String? _accessToken;
   String? _refreshToken;
@@ -30,6 +31,9 @@ class Auth with ChangeNotifier {
 
       await refresh();
     }
+
+    isInitialized = true;
+    notifyListeners();
   }
 
   Future<void> login(String email, String password) async {

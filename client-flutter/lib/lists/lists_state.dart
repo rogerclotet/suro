@@ -34,15 +34,23 @@ int defaultSort(FamilyList a, FamilyList b) {
 class ListsState with ChangeNotifier {
   final AuthClient _client;
   final FamiliesState _familiesState;
+  int? _currentFamilyId;
 
   List<FamilyList>? _lists;
 
-  ListsState(this._client, this._familiesState) {
-    _familiesState.addListener(() {
-      _lists = null;
-      notifyListeners();
-      refresh();
-    });
+  ListsState(this._client, this._familiesState);
+
+  void familiesStateChanged() {
+    if (_familiesState.currentFamily?.id == _currentFamilyId) {
+      return;
+    }
+
+    _currentFamilyId = _familiesState.currentFamily?.id;
+
+    _lists = null;
+    notifyListeners();
+
+    refresh();
   }
 
   bool get isLoading {

@@ -1,12 +1,16 @@
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/list_item.dart';
 
 class ListDetailScreen extends StatefulWidget {
   final int listId;
+
+  static const listRouteName = 'list_detail';
+  static const templateRouteName = 'template_detail';
 
   const ListDetailScreen({required this.listId, super.key});
 
@@ -61,6 +65,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context);
+    final router = GoRouter.of(context);
 
     list = listsState.list(widget.listId);
     itemsByCategory = {};
@@ -99,11 +104,11 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                   ),
                   TextButton(
                     onPressed: () {
+                      Navigator.pop(context, true);
                       Provider.of<ListsState>(
                         context,
                         listen: false,
                       ).delete(list);
-                      Navigator.pop(context, true);
                     },
                     child: const Text('Eliminar'),
                   ),
@@ -111,7 +116,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
               ),
             ).then((confirmed) {
               if (confirmed) {
-                Navigator.of(context).pop();
+                router.pop();
               }
             }),
           ),

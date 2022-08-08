@@ -18,7 +18,7 @@ class FamiliesState with ChangeNotifier {
 
     _currentFamilyId = prefs.getInt(currentFamilyIdKey);
 
-    await refresh();
+    return refresh();
   }
 
   List<Family> get families {

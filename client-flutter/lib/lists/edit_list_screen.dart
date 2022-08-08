@@ -1,21 +1,28 @@
 import 'package:familia/lists/template_select.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../models/list.dart';
+import 'lists_state.dart';
 
-class EditListForm extends StatefulWidget {
+class EditListScreen extends StatefulWidget {
+  final int? listId;
   final bool isTemplate;
-  final void Function(FamilyList list) onChange;
 
-  const EditListForm(
-      {required this.isTemplate, required this.onChange, super.key});
+  static const listRouteName = 'edit_list';
+  static const newListRouteName = 'new_list';
+  static const templateRouteName = 'edit_template';
+  static const newTemplateRouteName = 'new_template';
+
+  const EditListScreen({required this.isTemplate, this.listId, super.key});
 
   @override
-  State<EditListForm> createState() => _EditListFormState();
+  State<EditListScreen> createState() => _EditListScreenState();
 }
 
-class _EditListFormState extends State<EditListForm> {
+class _EditListScreenState extends State<EditListScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -27,25 +34,37 @@ class _EditListFormState extends State<EditListForm> {
     super.initState();
   }
 
-  void submit(NavigatorState navigator) {
-    if (_formKey.currentState!.validate()) {
-      final list = FamilyList(
-        id: -1,
-        name: nameController.text.trim(),
-        description: descriptionController.text.trim(),
-        isTemplate: widget.isTemplate,
-        items: importedTemplates.fold<List<ListItem>>(
-          [],
-          (previous, template) => [...previous, ...template.items],
-        ).map((item) {
-          return ListItem(id: -1, name: item.name, category: item.category);
-        }).toList(),
-      );
+  void handleChange(FamilyList list) {
+    final listsState = Provider.of<ListsState>(context, listen: false);
 
-      widget.onChange(list);
-
-      navigator.pop();
+    if (widget.listId != null) {
+      // TODO editing
+    } else {
+      listsState.createList(list);
     }
+  }
+
+  void submit(GoRouter router) {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final list = FamilyList(
+      id: -1,
+      name: nameController.text.trim(),
+      description: descriptionController.text.trim(),
+      isTemplate: widget.isTemplate,
+      items: importedTemplates.fold<List<ListItem>>(
+        [],
+        (previous, template) => [...previous, ...template.items],
+      ).map((item) {
+        return ListItem(id: -1, name: item.name, category: item.category);
+      }).toList(),
+    );
+
+    handleChange(list);
+
+    router.pop();
   }
 
   @override
@@ -57,11 +76,11 @@ class _EditListFormState extends State<EditListForm> {
             : const Text('Crear llista'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => GoRouter.of(context).pop(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => submit(Navigator.of(context)),
+        onPressed: () => submit(GoRouter.of(context)),
         child: const Icon(Icons.done),
       ),
       body: Form(
@@ -91,7 +110,7 @@ class _EditListFormState extends State<EditListForm> {
                 labelText: 'Descripció',
               ),
               maxLines: 3,
-              minLines: 3,
+              minLines: 1,
             ),
             widget.isTemplate
                 ? Container()

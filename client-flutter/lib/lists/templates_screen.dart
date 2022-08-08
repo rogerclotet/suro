@@ -1,8 +1,10 @@
 import 'package:familia/lists/lists.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../families/families_state.dart';
 import 'edit_list_screen.dart';
 
 class TemplatesScreen extends StatelessWidget {
@@ -19,13 +21,15 @@ class TemplatesScreen extends StatelessWidget {
         title: const Text('Plantilles'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => EditListForm(isTemplate: true, onChange: (_) {}),
-            ),
-          );
-        },
+        onPressed: () => GoRouter.of(context).pushNamed(
+          EditListScreen.newTemplateRouteName,
+          params: {
+            'fid': Provider.of<FamiliesState>(context, listen: false)
+                .currentFamily!
+                .id
+                .toString()
+          },
+        ),
         tooltip: 'Crear plantilla',
         child: const Icon(Icons.add),
       ),

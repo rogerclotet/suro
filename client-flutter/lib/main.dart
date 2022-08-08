@@ -1,13 +1,13 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_screen.dart';
-import 'package:familia/families/family_settings_screen.dart';
-import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/client.dart';
+import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
-import 'package:familia/lists/templates_screen.dart';
+import 'package:familia/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
@@ -28,12 +28,6 @@ const storage = FlutterSecureStorage(
   ),
 );
 
-Map<String, WidgetBuilder> authRoutes = {
-  ListsScreen.routeName: (_) => const ListsScreen(),
-  TemplatesScreen.routeName: (_) => const TemplatesScreen(),
-  FamilySettingsScreen.routeName: (_) => const FamilySettingsScreen(),
-};
-
 class FamilyApp extends StatefulWidget {
   const FamilyApp({super.key});
 
@@ -41,35 +35,60 @@ class FamilyApp extends StatefulWidget {
   State<FamilyApp> createState() => _FamilyAppState();
 }
 
-const primaryColor = Colors.yellow;
+const primaryColor = Colors.teal;
 final defaultColorScheme = ColorScheme.fromSwatch(
   primarySwatch: primaryColor,
   brightness: WidgetsBinding.instance.window.platformBrightness,
 );
 
 class _FamilyAppState extends State<FamilyApp> {
-  bool isInitializing = true;
-
   final auth = Auth(storage);
   late final authClient = AuthClient(auth);
   late final familiesState = FamiliesState(authClient);
   late final listsState = ListsState(authClient, familiesState);
+  late final router = GoRouter(
+    debugLogDiagnostics: true,
+    routes: routes(familiesState),
+    initialLocation: '/loading',
+    urlPathStrategy: UrlPathStrategy.path,
+  );
+  bool? wasLoggedIn;
 
   @override
   void initState() {
     super.initState();
 
-    auth.initialize().then(
-      (value) {
-        if (auth.isLoggedIn) {
-          familiesState.initialize();
-        }
+    auth.addListener(onAuthChanged);
+    familiesState.addListener(listsState.familiesStateChanged);
 
-        setState(() {
-          isInitializing = false;
-        });
-      },
-    );
+    auth.initialize();
+  }
+
+  void onAuthChanged() {
+    if (auth.isLoggedIn == wasLoggedIn) {
+      return;
+    }
+
+    wasLoggedIn = auth.isLoggedIn;
+
+    if (auth.isLoggedIn) {
+      familiesState.initialize().then((_) {
+        router.replaceNamed(
+          ListsScreen.routeName,
+          params: {
+            'fid': familiesState.currentFamily!.id.toString(),
+          },
+        );
+      });
+    } else {
+      router.replaceNamed(LoginScreen.routeName);
+    }
+  }
+
+  @override
+  void dispose() {
+    auth.removeListener(onAuthChanged);
+    super.dispose();
   }
 
   @override
@@ -90,8 +109,12 @@ class _FamilyAppState extends State<FamilyApp> {
               final dColorScheme =
                   darkColorScheme?.harmonized() ?? defaultColorScheme;
 
-              return MaterialApp(
+              return MaterialApp.router(
+                routeInformationParser: router.routeInformationParser,
+                routeInformationProvider: router.routeInformationProvider,
+                routerDelegate: router.routerDelegate,
                 title: 'Família',
+                themeMode: ThemeMode.system,
                 theme: ThemeData(
                   colorScheme: lightColorScheme ?? defaultColorScheme,
                   checkboxTheme: CheckboxThemeData(
@@ -110,23 +133,6 @@ class _FamilyAppState extends State<FamilyApp> {
                   ),
                   useMaterial3: true,
                 ),
-                home: isInitializing
-                    ? Scaffold(
-                        appBar: AppBar(
-                          title: const Text('Família'),
-                        ),
-                        body: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    : auth.isLoggedIn
-                        ? const ListsScreen()
-                        : const LoginScreen(),
-                routes: isInitializing
-                    ? {}
-                    : auth.isLoggedIn
-                        ? authRoutes
-                        : {},
               );
             },
           );
