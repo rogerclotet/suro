@@ -1,5 +1,5 @@
 import 'package:familia/families/families_state.dart';
-import 'package:familia/lists/list_detail_screen.dart';
+import 'package:familia/lists/list_details/list_detail_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';

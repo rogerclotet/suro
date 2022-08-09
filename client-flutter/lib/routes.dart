@@ -1,8 +1,7 @@
 import 'package:familia/auth/login_screen.dart';
 import 'package:familia/families/families_state.dart';
 import 'package:familia/families/family_settings_screen.dart';
-import 'package:familia/lists/edit_list_screen.dart';
-import 'package:familia/lists/list_detail_screen.dart';
+import 'package:familia/lists/list_details/list_detail_screen.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/templates_screen.dart';
 import 'package:familia/loading_screen.dart';
@@ -34,28 +33,11 @@ List<GoRoute> routes(FamiliesState familiesState) {
               builder: (context, state) => const ListsScreen(),
               routes: [
                 GoRoute(
-                  name: EditListScreen.newListRouteName,
-                  path: 'new',
-                  builder: (context, state) => const EditListScreen(
-                    isTemplate: false,
-                  ),
-                ),
-                GoRoute(
                   name: ListDetailScreen.listRouteName,
                   path: ':lid',
                   builder: (context, state) => ListDetailScreen(
                     listId: int.parse(state.params['lid']!),
                   ),
-                  routes: [
-                    GoRoute(
-                      name: EditListScreen.listRouteName,
-                      path: 'edit',
-                      builder: (context, state) => EditListScreen(
-                        listId: int.parse(state.params['lid']!),
-                        isTemplate: false,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -65,28 +47,11 @@ List<GoRoute> routes(FamiliesState familiesState) {
               builder: (context, state) => const TemplatesScreen(),
               routes: [
                 GoRoute(
-                  name: EditListScreen.newTemplateRouteName,
-                  path: 'new',
-                  builder: (context, state) => const EditListScreen(
-                    isTemplate: true,
-                  ),
-                ),
-                GoRoute(
                   name: ListDetailScreen.templateRouteName,
                   path: ':lid',
                   builder: (context, state) => ListDetailScreen(
                     listId: int.parse(state.params['lid']!),
                   ),
-                  routes: [
-                    GoRoute(
-                      name: EditListScreen.templateRouteName,
-                      path: 'edit',
-                      builder: (context, state) => EditListScreen(
-                        listId: int.parse(state.params['lid']!),
-                        isTemplate: true,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

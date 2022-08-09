@@ -17,7 +17,7 @@ class Lists extends StatelessWidget {
             .floor();
 
     return GridView.extent(
-      padding: EdgeInsets.fromLTRB(4, 8, 4, 84),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 84),
       maxCrossAxisExtent: 320,
       childAspectRatio: 1.4,
       crossAxisSpacing: 4,

@@ -1,8 +1,6 @@
 import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_form.dart';
-import 'package:familia/lists/lists_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {

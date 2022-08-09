@@ -7,9 +7,10 @@ import 'package:familia/main_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:animations/animations.dart';
 
 class ListsScreen extends StatelessWidget {
-  const ListsScreen({Key? key}) : super(key: key);
+  const ListsScreen({super.key});
 
   static const routeName = 'lists';
 
@@ -53,18 +54,30 @@ class ListsScreen extends StatelessWidget {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => GoRouter.of(context).pushNamed(
-          EditListScreen.newListRouteName,
-          params: {
-            'fid': Provider.of<FamiliesState>(context, listen: false)
-                .currentFamily!
-                .id
-                .toString()
-          },
+      floatingActionButton: OpenContainer(
+        transitionType: ContainerTransitionType.fade,
+        openBuilder: (BuildContext context, VoidCallback close) {
+          return EditListScreen(
+            isTemplate: false,
+            onClose: close,
+          );
+        },
+        closedElevation: 6.0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(56 / 4),
+          ),
         ),
-        tooltip: 'Crear llista',
-        child: const Icon(Icons.add),
+        closedColor: Theme.of(context).colorScheme.primary,
+        closedBuilder: (BuildContext context, VoidCallback openContainer) {
+          return const SizedBox(
+            height: 56,
+            width: 56,
+            child: Center(
+              child: Icon(Icons.add),
+            ),
+          );
+        },
       ),
       body: RefreshIndicator(
         onRefresh: () => listsState.refresh(),

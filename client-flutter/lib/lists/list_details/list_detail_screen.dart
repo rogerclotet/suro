@@ -1,10 +1,12 @@
+import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../models/list_item.dart';
+import '../../models/list_item.dart';
+import 'category_name.dart';
 
 class ListDetailScreen extends StatefulWidget {
   final int listId;
@@ -21,8 +23,9 @@ class ListDetailScreen extends StatefulWidget {
 class _ListDetailScreenState extends State<ListDetailScreen> {
   late FamilyList list;
   late Map<String, List<ListItem>> itemsByCategory;
+  bool isEditing = false;
 
-  void toggleCheckbox(int id, bool value) {
+  void setIsComplete(int id, bool value) {
     setState(() {
       final item = list.items.firstWhere((item) => item.id == id);
       item.isComplete = value;
@@ -60,12 +63,17 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     );
   }
 
-  void delete() {}
+  void toggleIsEditing() {
+    setState(() {
+      isEditing = !isEditing;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context);
     final router = GoRouter.of(context);
+    final theme = Theme.of(context);
 
     list = listsState.list(widget.listId);
     itemsByCategory = {};
@@ -123,77 +131,65 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.edit),
-        onPressed: () => {},
+        onPressed: toggleIsEditing,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, anim) =>
+              ScaleTransition(scale: anim, child: child),
+          child: isEditing
+              ? const Icon(Icons.done, key: ValueKey('done'))
+              : const Icon(
+                  Icons.edit,
+                  key: ValueKey('edit'),
+                ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => listsState.refresh(),
         triggerMode: RefreshIndicatorTriggerMode.onEdge,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 80),
-          children: itemsByCategory
-              .map(
-                (key, items) {
-                  if (items.isEmpty) {
-                    return MapEntry(key, []);
-                  }
+        child: list.items.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Aquesta llista no té elements',
+                  style: theme.textTheme.bodyMedium!.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: theme.textTheme.bodyMedium!.color!.withOpacity(0.6),
+                  ),
+                ),
+              )
+            : ListView(
+                padding: const EdgeInsets.only(bottom: 80),
+                children: itemsByCategory
+                    .map(
+                      (key, items) {
+                        if (items.isEmpty) {
+                          return MapEntry(key, []);
+                        }
 
-                  return MapEntry(
-                    key,
-                    [
-                      key == ''
-                          ? Container()
-                          : ListTile(
-                              title: Text(
-                                key == '' ? 'Sense categoria' : key,
-                                style: Theme.of(context).textTheme.subtitle2,
-                              ),
-                              dense: true,
-                              tileColor: Theme.of(context).colorScheme.surface,
-                            ),
-                      ...items.map((item) {
-                        return Dismissible(
-                          key: Key('${item.id}'),
-                          onDismissed: (direction) => deleteItem(item.id),
-                          background: Container(color: Colors.deepOrange[900]),
-                          child: ListTile(
-                            contentPadding:
-                                const EdgeInsets.only(left: 16, right: 2),
-                            title: Text(
-                              item.name,
-                              style: item.isComplete
-                                  ? TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1!
-                                          .color!
-                                          .withOpacity(0.4),
-                                    )
-                                  : null,
-                            ),
-                            trailing: Checkbox(
-                              value: item.isComplete,
-                              onChanged: (value) {
-                                toggleCheckbox(item.id, value != false);
-                              },
-                            ),
-                          ),
+                        return MapEntry(
+                          key,
+                          [
+                            CategoryName(name: key),
+                            ...items.map((item) {
+                              return CategoryItem(
+                                  item: item,
+                                  onDelete: deleteItem,
+                                  onChange: setIsComplete);
+                            }).toList(),
+                          ],
                         );
-                      }).toList(),
-                    ],
-                  );
-                },
-              )
-              .values
-              .fold<List<Widget>>(
-                [],
-                (previousValue, element) {
-                  return [...previousValue, ...element];
-                },
-              )
-              .toList(),
-        ),
+                      },
+                    )
+                    .values
+                    .fold<List<Widget>>(
+                      [],
+                      (previousValue, element) {
+                        return [...previousValue, ...element];
+                      },
+                    )
+                    .toList(),
+              ),
       ),
     );
   }

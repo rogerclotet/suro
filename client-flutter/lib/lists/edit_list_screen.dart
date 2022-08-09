@@ -1,7 +1,6 @@
 import 'package:familia/lists/template_select.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/list.dart';
@@ -10,13 +9,16 @@ import 'lists_state.dart';
 class EditListScreen extends StatefulWidget {
   final int? listId;
   final bool isTemplate;
+  final VoidCallback onClose;
 
   static const listRouteName = 'edit_list';
   static const newListRouteName = 'new_list';
-  static const templateRouteName = 'edit_template';
-  static const newTemplateRouteName = 'new_template';
 
-  const EditListScreen({required this.isTemplate, this.listId, super.key});
+  const EditListScreen(
+      {required this.isTemplate,
+      this.listId,
+      required this.onClose,
+      super.key});
 
   @override
   State<EditListScreen> createState() => _EditListScreenState();
@@ -44,7 +46,7 @@ class _EditListScreenState extends State<EditListScreen> {
     }
   }
 
-  void submit(GoRouter router) {
+  void submit() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -64,7 +66,7 @@ class _EditListScreenState extends State<EditListScreen> {
 
     handleChange(list);
 
-    router.pop();
+    widget.onClose();
   }
 
   @override
@@ -76,11 +78,11 @@ class _EditListScreenState extends State<EditListScreen> {
             : const Text('Crear llista'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => GoRouter.of(context).pop(),
+          onPressed: widget.onClose,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => submit(GoRouter.of(context)),
+        onPressed: () => submit(),
         child: const Icon(Icons.done),
       ),
       body: Form(
