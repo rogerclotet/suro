@@ -112,7 +112,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context, true);
+                      GoRouter.of(context).pop();
                       Provider.of<ListsState>(
                         context,
                         listen: false,

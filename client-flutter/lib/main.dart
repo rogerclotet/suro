@@ -122,6 +122,10 @@ class _FamilyAppState extends State<FamilyApp> {
                     fillColor:
                         MaterialStateProperty.all(lColorScheme.secondary),
                   ),
+                  floatingActionButtonTheme: FloatingActionButtonThemeData(
+                    backgroundColor: lColorScheme.primary,
+                    foregroundColor: lColorScheme.secondary,
+                  ),
                   useMaterial3: true,
                 ),
                 darkTheme: ThemeData(
@@ -130,6 +134,10 @@ class _FamilyAppState extends State<FamilyApp> {
                     checkColor:
                         MaterialStateProperty.all(dColorScheme.inversePrimary),
                     fillColor: MaterialStateProperty.all(dColorScheme.primary),
+                  ),
+                  floatingActionButtonTheme: FloatingActionButtonThemeData(
+                    backgroundColor: dColorScheme.primary,
+                    foregroundColor: lColorScheme.secondary,
                   ),
                   useMaterial3: true,
                 ),

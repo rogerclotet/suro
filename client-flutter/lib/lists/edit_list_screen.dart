@@ -6,19 +6,21 @@ import 'package:provider/provider.dart';
 import '../models/list.dart';
 import 'lists_state.dart';
 
+const defaultId = -1;
+
 class EditListScreen extends StatefulWidget {
   final int? listId;
   final bool isTemplate;
+  final List<ListItem>? initialItems;
   final VoidCallback onClose;
 
-  static const listRouteName = 'edit_list';
-  static const newListRouteName = 'new_list';
-
-  const EditListScreen(
-      {required this.isTemplate,
-      this.listId,
-      required this.onClose,
-      super.key});
+  const EditListScreen({
+    this.listId,
+    required this.isTemplate,
+    this.initialItems,
+    required this.onClose,
+    super.key,
+  });
 
   @override
   State<EditListScreen> createState() => _EditListScreenState();
@@ -27,13 +29,18 @@ class EditListScreen extends StatefulWidget {
 class _EditListScreenState extends State<EditListScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  late final String title;
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final List<FamilyList> importedTemplates = [];
+
+  List<FamilyList> importedTemplates = [];
 
   @override
   void initState() {
     super.initState();
+
+    title =
+        '${widget.initialItems != null ? "Duplicar" : "Crear"} ${widget.isTemplate ? "plantilla" : "llista"}';
   }
 
   void handleChange(FamilyList list) {
@@ -51,17 +58,24 @@ class _EditListScreenState extends State<EditListScreen> {
       return;
     }
 
+    final items = (widget.initialItems ?? []) +
+        importedTemplates.fold<List<ListItem>>(
+          [],
+          (previous, template) => [...previous, ...template.items],
+        ).map((item) {
+          return ListItem(
+            id: defaultId,
+            name: item.name,
+            category: item.category,
+          );
+        }).toList();
+
     final list = FamilyList(
-      id: -1,
+      id: widget.listId ?? defaultId,
       name: nameController.text.trim(),
       description: descriptionController.text.trim(),
       isTemplate: widget.isTemplate,
-      items: importedTemplates.fold<List<ListItem>>(
-        [],
-        (previous, template) => [...previous, ...template.items],
-      ).map((item) {
-        return ListItem(id: -1, name: item.name, category: item.category);
-      }).toList(),
+      items: items,
     );
 
     handleChange(list);
@@ -69,13 +83,17 @@ class _EditListScreenState extends State<EditListScreen> {
     widget.onClose();
   }
 
+  void setIncludedTemplates(List<FamilyList> templates) {
+    setState(() {
+      importedTemplates = templates;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.isTemplate
-            ? const Text('Crear plantilla')
-            : const Text('Crear llista'),
+        title: Text(title),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: widget.onClose,
@@ -114,11 +132,24 @@ class _EditListScreenState extends State<EditListScreen> {
               maxLines: 3,
               minLines: 1,
             ),
+            widget.initialItems != null && widget.initialItems!.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                    child: Text(
+                      'Es duplicaran ${widget.initialItems!.length} elements de la llista',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                  )
+                : Container(),
             widget.isTemplate
                 ? Container()
-                : const Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: TemplateSelect(),
+                : Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: TemplateSelect(
+                      onChange: setIncludedTemplates,
+                    ),
                   )
           ],
         ),

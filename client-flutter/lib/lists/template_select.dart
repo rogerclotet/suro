@@ -5,7 +5,9 @@ import '../models/list.dart';
 import 'lists_state.dart';
 
 class TemplateSelect extends StatefulWidget {
-  const TemplateSelect({super.key});
+  final void Function(List<FamilyList> templates) onChange;
+
+  const TemplateSelect({required this.onChange, super.key});
 
   @override
   State<TemplateSelect> createState() => _TemplateSelectState();
@@ -21,6 +23,8 @@ class _TemplateSelectState extends State<TemplateSelect> {
     setState(() {
       templates.remove(template);
       includedTemplates.add(template);
+
+      widget.onChange(includedTemplates);
     });
   }
 

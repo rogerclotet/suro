@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'edit_list_screen.dart';
+
 class ListPreview extends StatelessWidget {
   final FamilyList list;
   final int descriptionLines;
@@ -100,15 +102,25 @@ class ListPreview extends StatelessWidget {
                   onPressed: () => listsState.toggleFavorite(list),
                   icon: const Icon(Icons.favorite),
                   color: list.isFavorite
-                      ? Theme.of(context).colorScheme.secondary
+                      ? Theme.of(context).colorScheme.primary
                       : null,
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {}, // TODO
                   icon: const Icon(Icons.share),
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return EditListScreen(
+                        isTemplate: list.isTemplate,
+                        initialItems: list.items,
+                        onClose: () =>
+                            Navigator.of(context).pop(), // TODO save list?
+                      );
+                    }));
+                  },
                   icon: const Icon(Icons.copy),
                 ),
               ],

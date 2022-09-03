@@ -14,6 +14,7 @@ class TemplatesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,20 +28,17 @@ class TemplatesScreen extends StatelessWidget {
             onClose: close,
           );
         },
-        closedElevation: 6.0,
+        closedElevation: 6,
         closedShape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
-            Radius.circular(56 / 4),
+            Radius.circular(16),
           ),
         ),
-        closedColor: Theme.of(context).colorScheme.primary,
+        closedColor: theme.floatingActionButtonTheme.backgroundColor!,
         closedBuilder: (BuildContext context, VoidCallback openContainer) {
-          return const SizedBox(
-            height: 56,
-            width: 56,
-            child: Center(
-              child: Icon(Icons.add),
-            ),
+          return FloatingActionButton(
+            onPressed: openContainer,
+            child: const Icon(Icons.add),
           );
         },
       ),
