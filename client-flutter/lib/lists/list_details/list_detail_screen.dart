@@ -173,9 +173,11 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                             CategoryName(name: key),
                             ...items.map((item) {
                               return CategoryItem(
-                                  item: item,
-                                  onDelete: deleteItem,
-                                  onChange: setIsComplete);
+                                item: item,
+                                onDelete: deleteItem,
+                                onChange: setIsComplete,
+                                canBeCompleted: !list.isTemplate,
+                              );
                             }).toList(),
                           ],
                         );

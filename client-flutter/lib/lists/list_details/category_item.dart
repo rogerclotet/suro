@@ -6,11 +6,13 @@ class CategoryItem extends StatelessWidget {
   final ListItem item;
   final void Function(int id) onDelete;
   final void Function(int id, bool newValue) onChange;
+  final bool canBeCompleted;
 
   const CategoryItem({
     required this.item,
     required this.onDelete,
     required this.onChange,
+    required this.canBeCompleted,
     super.key,
   });
 
@@ -35,12 +37,17 @@ class CategoryItem extends StatelessWidget {
                 )
               : null,
         ),
-        trailing: Checkbox(
-          value: item.isComplete,
-          onChanged: (value) {
-            onChange(item.id, value != false);
-          },
-        ),
+        trailing: canBeCompleted
+            ? Checkbox(
+                value: item.isComplete,
+                onChanged: (value) {
+                  onChange(item.id, value != false);
+                },
+              )
+            : const SizedBox(
+                height: 0,
+                width: 0,
+              ),
       ),
     );
   }
