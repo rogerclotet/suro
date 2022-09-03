@@ -1,17 +1,15 @@
+import logging
 from rest_framework import serializers
 from core.models import Family
-from lists.models import List, ListItem
+from lists.models import ListItem
 from . import models
 
 
 class ListItemSerializer(serializers.ModelSerializer):
-    list = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
-
     class Meta:
         model = models.ListItem
         fields = (
             "id",
-            "list",
             "name",
             "order",
             "is_complete",
@@ -23,16 +21,19 @@ class ListItemSerializer(serializers.ModelSerializer):
 
 class ListSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
-    items = ListItemSerializer(many=True, read_only=True)
+    items = ListItemSerializer(many=True)
 
     def create(self, validated_data):
         items_data = validated_data.pop("items") if "items" in validated_data else []
 
+        logger = logging.getLogger(__name__)
+        logger.error("validated data %s", validated_data)
+
         list = super().create(validated_data)
 
         for item_data in items_data:
-            item_data.pop("list")
-            item_data.pop("is_complete")
+            item_data.pop("list", None)
+            item_data.pop("is_complete", None)
             ListItem.objects.create(**item_data, list=list)
 
         return list

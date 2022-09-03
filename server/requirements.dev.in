@@ -1,3 +1,5 @@
 -c requirements.txt
+-r requirements.txt
+
 black~=22.3
 flake8==4.0
