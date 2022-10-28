@@ -1,3 +1,4 @@
+import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
@@ -72,7 +73,6 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context);
-    final router = GoRouter.of(context);
     final theme = Theme.of(context);
 
     list = listsState.list(widget.listId);
@@ -97,36 +97,11 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () => showDialog(
+            onPressed: () => showDeleteListDialog(
               context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('Confirmació'),
-                content: Text(
-                  'Estàs segur que vols eliminar la llista ${list.name}?',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    autofocus: true,
-                    child: const Text('Canceŀlar'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      GoRouter.of(context).pop();
-                      Provider.of<ListsState>(
-                        context,
-                        listen: false,
-                      ).delete(list);
-                    },
-                    child: const Text('Eliminar'),
-                  ),
-                ],
-              ),
-            ).then((confirmed) {
-              if (confirmed) {
-                router.pop();
-              }
-            }),
+              list: list,
+              onDeleted: () => GoRouter.of(context).pop(),
+            ),
           ),
         ],
       ),

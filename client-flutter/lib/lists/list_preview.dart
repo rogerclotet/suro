@@ -1,4 +1,5 @@
 import 'package:familia/families/families_state.dart';
+import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/list_detail_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
@@ -106,10 +107,6 @@ class ListPreview extends StatelessWidget {
                       : null,
                 ),
                 IconButton(
-                  onPressed: () {}, // TODO
-                  icon: const Icon(Icons.share),
-                ),
-                IconButton(
                   onPressed: () {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
@@ -123,6 +120,12 @@ class ListPreview extends StatelessWidget {
                   },
                   icon: const Icon(Icons.copy),
                 ),
+                IconButton(
+                  onPressed: () {
+                    showDeleteListDialog(context: context, list: list);
+                  },
+                  icon: const Icon(Icons.delete),
+                )
               ],
             ),
           ],
