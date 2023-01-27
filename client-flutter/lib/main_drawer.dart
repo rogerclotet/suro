@@ -23,7 +23,7 @@ class MainDrawer extends StatelessWidget {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.primaryContainer,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
