@@ -7,7 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/list_item.dart';
+import '../edit_list_screen.dart';
 import 'category_name.dart';
+
+enum Actions { delete, edit }
 
 class ListDetailScreen extends StatefulWidget {
   final int listId;
@@ -95,13 +98,51 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => showDeleteListDialog(
-              context: context,
-              list: list,
-              onDeleted: () => GoRouter.of(context).pop(),
-            ),
+          PopupMenuButton(
+            onSelected: (value) {
+              switch (value) {
+                case Actions.edit:
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return EditListScreen(
+                          listId: list.id,
+                          isTemplate: list.isTemplate,
+                          onClose: () =>
+                              Navigator.of(context).pop(), // TODO save list?
+                        );
+                      },
+                    ),
+                  );
+                  break;
+                case Actions.delete:
+                  showDeleteListDialog(
+                    context: context,
+                    list: list,
+                    onDeleted: () => GoRouter.of(context).pop(),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) {
+              return [
+                const PopupMenuItem(
+                  value: Actions.edit,
+                  child: ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text("Editar"),
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: Actions.delete,
+                  child: ListTile(
+                    leading: Icon(Icons.delete),
+                    title: Text("Eliminar"),
+                  ),
+                ),
+              ];
+            },
+            position: PopupMenuPosition.under,
           ),
         ],
       ),

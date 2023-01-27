@@ -84,7 +84,7 @@ class ListPreview extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 12, right: 12),
                 child: Text(
                   list.description,
-                  style: Theme.of(context).textTheme.subtitle2?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: Theme.of(context)
                             .textTheme
                             .bodySmall
@@ -108,15 +108,18 @@ class ListPreview extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return EditListScreen(
-                        isTemplate: list.isTemplate,
-                        initialItems: list.items,
-                        onClose: () =>
-                            Navigator.of(context).pop(), // TODO save list?
-                      );
-                    }));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return EditListScreen(
+                            isTemplate: list.isTemplate,
+                            initialItems: list.items,
+                            onClose: () =>
+                                Navigator.of(context).pop(), // TODO save list?
+                          );
+                        },
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.copy),
                 ),

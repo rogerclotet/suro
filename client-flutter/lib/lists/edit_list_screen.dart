@@ -39,8 +39,13 @@ class _EditListScreenState extends State<EditListScreen> {
   void initState() {
     super.initState();
 
-    title =
-        '${widget.initialItems != null ? "Duplicar" : "Crear"} ${widget.isTemplate ? "plantilla" : "llista"}';
+    final actionText = widget.listId != null
+        ? "Editar"
+        : widget.initialItems != null
+            ? "Duplicar"
+            : "Crear";
+
+    title = '$actionText ${widget.isTemplate ? "plantilla" : "llista"}';
   }
 
   void handleChange(FamilyList list) {

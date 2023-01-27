@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_screen.dart';
 import 'package:familia/families/families_state.dart';
 import 'package:familia/families/family_settings_screen.dart';
@@ -5,19 +8,35 @@ import 'package:familia/lists/list_details/list_detail_screen.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/templates_screen.dart';
 import 'package:familia/loading_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-List<GoRoute> routes(FamiliesState familiesState) {
+List<GoRoute> routes(Auth auth, FamiliesState familiesState) {
   return [
     GoRoute(
       name: 'home',
       path: '/',
-      redirect: (state) {
-        if (familiesState.currentFamily != null) {
-          return '/f/${familiesState.currentFamily!.id}/l';
+      redirect: (BuildContext context, GoRouterState state) async {
+        if (!auth.isLoggedIn) {
+          if (state.subloc != '/login') {
+            log("Redirecting to login");
+            return '/login';
+          }
         }
 
-        return '/login';
+        log("Not redirecting");
+        return null;
+
+        // if (familiesState.currentFamily != null) {
+        //   final expectedRoute = '/f/${familiesState.currentFamily!.id}/l';
+        //   if (state.subloc != expectedRoute) {
+        //     log("Redirecting to family $expectedRoute ${state.subloc}");
+        //     return expectedRoute;
+        //   }
+        // }
+
+        // log("Not redirecting while logged in");
+        // return null;
       },
       routes: [
         GoRoute(

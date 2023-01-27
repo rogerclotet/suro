@@ -56,7 +56,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Membres',
-                    style: Theme.of(context).textTheme.subtitle2,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
                 ...family!.members.map((member) {

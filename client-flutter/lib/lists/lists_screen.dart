@@ -69,7 +69,7 @@ class ListsScreen extends StatelessWidget {
             Radius.circular(16),
           ),
         ),
-        closedColor: theme.floatingActionButtonTheme.backgroundColor!,
+        closedColor: theme.colorScheme.primaryContainer,
         closedBuilder: (BuildContext context, VoidCallback openContainer) {
           return FloatingActionButton(
             onPressed: openContainer,

@@ -10,7 +10,7 @@ class CategoryName extends StatelessWidget {
     return ListTile(
       title: Text(
         name == '' ? 'Sense categoria' : name,
-        style: Theme.of(context).textTheme.subtitle2,
+        style: Theme.of(context).textTheme.titleSmall,
       ),
       dense: true,
       tileColor: Theme.of(context).colorScheme.surface,

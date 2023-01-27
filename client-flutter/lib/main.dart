@@ -10,14 +10,19 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'families/families_state.dart';
+
+const _defaultColor = Color.fromARGB(255, 61, 195, 126);
 
 void main() {
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
+
+  usePathUrlStrategy();
 
   runApp(const FamilyApp());
 }
@@ -48,9 +53,8 @@ class _FamilyAppState extends State<FamilyApp> {
   late final listsState = ListsState(authClient, familiesState);
   late final router = GoRouter(
     debugLogDiagnostics: true,
-    routes: routes(familiesState),
+    routes: routes(auth, familiesState),
     initialLocation: '/loading',
-    urlPathStrategy: UrlPathStrategy.path,
   );
   bool? wasLoggedIn;
 
@@ -73,7 +77,7 @@ class _FamilyAppState extends State<FamilyApp> {
 
     if (auth.isLoggedIn) {
       familiesState.initialize().then((_) {
-        router.replaceNamed(
+        router.pushReplacementNamed(
           ListsScreen.routeName,
           params: {
             'fid': familiesState.currentFamily!.id.toString(),
@@ -81,7 +85,7 @@ class _FamilyAppState extends State<FamilyApp> {
         );
       });
     } else {
-      router.replaceNamed(LoginScreen.routeName);
+      router.pushReplacementNamed(LoginScreen.routeName);
     }
   }
 
@@ -101,14 +105,27 @@ class _FamilyAppState extends State<FamilyApp> {
         ChangeNotifierProvider(create: (_) => listsState),
       ],
       child: DynamicColorBuilder(
-        builder: (lightColorScheme, darkColorScheme) {
+        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+          ColorScheme lightColorScheme;
+          ColorScheme darkColorScheme;
+
+          if (lightDynamic != null && darkDynamic != null) {
+            // On Android S+ devices, use the provided dynamic color scheme.
+            // Harmonize the dynamic color scheme' built-in semantic colors.
+            lightColorScheme = lightDynamic.harmonized();
+            darkColorScheme = darkDynamic.harmonized();
+          } else {
+            // Otherwise, use fallback schemes.
+            lightColorScheme = ColorScheme.fromSeed(
+              seedColor: _defaultColor,
+            );
+            darkColorScheme = ColorScheme.fromSeed(
+              seedColor: _defaultColor,
+              brightness: Brightness.dark,
+            );
+          }
           return Consumer<Auth>(
             builder: (context, auth, child) {
-              final lColorScheme =
-                  lightColorScheme?.harmonized() ?? defaultColorScheme;
-              final dColorScheme =
-                  darkColorScheme?.harmonized() ?? defaultColorScheme;
-
               return MaterialApp.router(
                 routeInformationParser: router.routeInformationParser,
                 routeInformationProvider: router.routeInformationProvider,
@@ -116,29 +133,11 @@ class _FamilyAppState extends State<FamilyApp> {
                 title: 'Família',
                 themeMode: ThemeMode.system,
                 theme: ThemeData(
-                  colorScheme: lightColorScheme ?? defaultColorScheme,
-                  checkboxTheme: CheckboxThemeData(
-                    checkColor: null,
-                    fillColor:
-                        MaterialStateProperty.all(lColorScheme.secondary),
-                  ),
-                  floatingActionButtonTheme: FloatingActionButtonThemeData(
-                    backgroundColor: lColorScheme.primary,
-                    foregroundColor: lColorScheme.secondary,
-                  ),
+                  colorScheme: lightColorScheme,
                   useMaterial3: true,
                 ),
                 darkTheme: ThemeData(
-                  colorScheme: darkColorScheme ?? defaultColorScheme,
-                  checkboxTheme: CheckboxThemeData(
-                    checkColor:
-                        MaterialStateProperty.all(dColorScheme.inversePrimary),
-                    fillColor: MaterialStateProperty.all(dColorScheme.primary),
-                  ),
-                  floatingActionButtonTheme: FloatingActionButtonThemeData(
-                    backgroundColor: dColorScheme.primary,
-                    foregroundColor: lColorScheme.secondary,
-                  ),
+                  colorScheme: darkColorScheme,
                   useMaterial3: true,
                 ),
               );

@@ -86,7 +86,7 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               // Navigator.pop(context);
               _key.currentState?.close();
-              GoRouter.of(context).replaceNamed(
+              GoRouter.of(context).pushReplacementNamed(
                 ListsScreen.routeName,
                 params: {'fid': familiesState.currentFamily!.id.toString()},
               );
@@ -98,7 +98,7 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               // Navigator.pop(context);
               _key.currentState?.close();
-              GoRouter.of(context).replaceNamed(
+              GoRouter.of(context).pushReplacementNamed(
                 FamilySettingsScreen.routeName,
                 params: {'fid': familiesState.currentFamily!.id.toString()},
               );

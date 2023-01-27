@@ -31,7 +31,7 @@ class CategoryItem extends StatelessWidget {
                   decoration: TextDecoration.lineThrough,
                   color: Theme.of(context)
                       .textTheme
-                      .bodyText1!
+                      .bodyLarge!
                       .color!
                       .withOpacity(0.4),
                 )

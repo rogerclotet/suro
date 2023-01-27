@@ -81,7 +81,7 @@ class _TemplateSelectState extends State<TemplateSelect> {
                   style: TextStyle(
                       color: Theme.of(context)
                           .textTheme
-                          .subtitle1!
+                          .titleMedium!
                           .color!
                           .withOpacity(0.4)),
                 ),
@@ -109,7 +109,7 @@ class _TemplateSelectState extends State<TemplateSelect> {
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                       child: Text(
                         'Plantilles disponibles',
-                        style: Theme.of(context).textTheme.subtitle2,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                     const Divider(),
