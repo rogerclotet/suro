@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_screen.dart';
 import 'package:familia/client.dart';
+import 'package:familia/families/global_state.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/routes.dart';
@@ -47,13 +48,14 @@ final defaultColorScheme = ColorScheme.fromSwatch(
 );
 
 class _FamilyAppState extends State<FamilyApp> {
+  final globalState = GlobalState();
   final auth = Auth(storage);
   late final authClient = AuthClient(auth);
   late final familiesState = FamiliesState(authClient);
   late final listsState = ListsState(authClient, familiesState);
   late final router = GoRouter(
     debugLogDiagnostics: true,
-    routes: routes(auth, familiesState),
+    routes: routes(auth, familiesState, globalState),
     initialLocation: '/loading',
   );
   bool? wasLoggedIn;
@@ -77,12 +79,16 @@ class _FamilyAppState extends State<FamilyApp> {
 
     if (auth.isLoggedIn) {
       familiesState.initialize().then((_) {
-        router.pushReplacementNamed(
-          ListsScreen.routeName,
-          params: {
-            'fid': familiesState.currentFamily!.id.toString(),
-          },
-        );
+        if (globalState.initialRoute != null) {
+          router.pushReplacement(globalState.initialRoute!);
+        } else {
+          router.pushReplacementNamed(
+            ListsScreen.routeName,
+            params: {
+              'fid': familiesState.currentFamily!.id.toString(),
+            },
+          );
+        }
       });
     } else {
       router.pushReplacementNamed(LoginScreen.routeName);
