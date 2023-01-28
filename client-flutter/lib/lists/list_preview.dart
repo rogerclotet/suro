@@ -131,7 +131,7 @@ class ListPreview extends StatelessWidget {
                             .id;
                     var text = list.name;
                     if (list.description.isNotEmpty) {
-                      text += " (${list.description})";
+                      text += "\n${list.description}";
                     }
                     var path = GoRouter.of(context).namedLocation(
                       ListDetailScreen.listRouteName,
