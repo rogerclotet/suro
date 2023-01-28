@@ -1,11 +1,11 @@
 import 'package:familia/families/families_state.dart';
-import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/list_detail_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'edit_list_screen.dart';
 
@@ -125,9 +125,27 @@ class ListPreview extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    showDeleteListDialog(context: context, list: list);
+                    var familyId =
+                        Provider.of<FamiliesState>(context, listen: false)
+                            .currentFamily!
+                            .id;
+                    var text = list.name;
+                    if (list.description.isNotEmpty) {
+                      text += " (${list.description})";
+                    }
+                    var path = GoRouter.of(context).namedLocation(
+                      ListDetailScreen.listRouteName,
+                      params: {
+                        "fid": familyId.toString(),
+                        "lid": list.id.toString(),
+                      },
+                    );
+                    Share.share(
+                      "$text\nhttps://familia.clotet.dev$path",
+                      subject: list.name,
+                    );
                   },
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(Icons.share),
                 )
               ],
             ),
