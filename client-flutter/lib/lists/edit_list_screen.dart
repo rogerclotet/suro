@@ -72,6 +72,7 @@ class _EditListScreenState extends State<EditListScreen> {
             id: defaultId,
             name: item.name,
             category: item.category,
+            order: 0,
           );
         }).toList();
 

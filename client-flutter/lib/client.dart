@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:familia/auth/auth.dart';
 import 'package:familia/models/list.dart';
+import 'package:familia/models/list_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_interceptor/http_interceptor.dart';
 import 'package:logging/logging.dart';
+import 'config.dart' show baseUrl;
 
 import 'models/family.dart';
 
@@ -22,7 +24,6 @@ class ClientException {
   }
 }
 
-const baseUrl = 'https://api.familia.clotet.dev';
 const jsonHeader = {'Content-Type': 'application/json'};
 
 class AnonymousClient {
@@ -186,5 +187,24 @@ class AuthClient with ChangeNotifier {
     if (res.statusCode != 204) {
       throw const ClientException('No s\'ha pogut eliminar la llista');
     }
+  }
+
+  Future<ListItem> patchItem(
+    int familyId,
+    int listId,
+    int itemId,
+    Object object,
+  ) async {
+    final res = await client.patch(
+      Uri.parse('$baseUrl/families/$familyId/lists/$listId/items/$itemId/'),
+      headers: jsonHeader,
+      body: jsonEncode(object),
+    );
+
+    if (res.statusCode != 200) {
+      throw const ClientException('No s\'ha pogut actualitzar l\'element');
+    }
+
+    return parseJsonObject(res.bodyBytes, ListItem.fromJson);
   }
 }

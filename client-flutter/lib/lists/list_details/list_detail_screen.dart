@@ -27,6 +27,7 @@ class ListDetailScreen extends StatefulWidget {
 }
 
 class _ListDetailScreenState extends State<ListDetailScreen> {
+  late ListsState listsState;
   late FamilyList list;
   late Map<String, List<ListItem>> itemsByCategory;
   bool isEditing = false;
@@ -36,6 +37,8 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       final item = list.items.firstWhere((item) => item.id == id);
       item.isComplete = value;
     });
+
+    listsState.setIsComplete(list.id, id, value);
   }
 
   void deleteItem(int id) {
@@ -77,7 +80,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final listsState = Provider.of<ListsState>(context);
+    listsState = Provider.of<ListsState>(context);
     final theme = Theme.of(context);
 
     try {

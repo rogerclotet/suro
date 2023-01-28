@@ -54,4 +54,22 @@ class FamilyList {
       updatedAt: DateTime.parse(json['updated_at']),
     );
   }
+
+  void sortItems() {
+    items.sort((a, b) {
+      if (a.isComplete && !b.isComplete) {
+        return 1;
+      }
+      if (b.isComplete && !a.isComplete) {
+        return -1;
+      }
+
+      var orderScore = b.order - a.order;
+      if (orderScore != 0) {
+        return orderScore;
+      }
+
+      return a.id - b.id;
+    });
+  }
 }

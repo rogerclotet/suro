@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:familia/config.dart' show baseUrl;
 
 import 'edit_list_screen.dart';
 
@@ -141,7 +142,7 @@ class ListPreview extends StatelessWidget {
                       },
                     );
                     Share.share(
-                      '$text\nhttps://familia.clotet.dev$path',
+                      '$text\n$baseUrl$path',
                       subject: list.name,
                     );
                   },

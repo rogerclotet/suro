@@ -166,6 +166,37 @@ class ListsState with ChangeNotifier {
     );
   }
 
+  void setIsComplete(int listId, int itemId, bool value) async {
+    final currentFamilyId = _familiesState.currentFamily!.id;
+    final list = lists.firstWhere((l) => l.id == listId);
+    final item = list.items.firstWhere((i) => i.id == itemId);
+
+    item.isComplete = value;
+    list.sortItems();
+    notifyListeners();
+
+    try {
+      final item = await _client.patchItem(
+        currentFamilyId,
+        listId,
+        itemId,
+        {'is_complete': value},
+      );
+
+      final index = list.items.indexWhere((i) => i.id == itemId);
+      list.items[index] = item;
+      list.sortItems();
+      notifyListeners();
+    } catch (error) {
+      // TODO display snackbar
+      logger.warning('Error toggling favorite: $error');
+
+      item.isComplete = !value;
+      list.sortItems();
+      notifyListeners();
+    }
+  }
+
   Future<void> refresh() async {
     final currentFamilyId = _familiesState.currentFamily?.id;
     if (currentFamilyId == null) {
