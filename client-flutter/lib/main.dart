@@ -81,8 +81,6 @@ class _FamilyAppState extends State<FamilyApp> {
       familiesState.initialize().then((_) {
         if (globalState.initialRoute != null) {
           router.pushReplacement(globalState.initialRoute!);
-        } else if (GoRouterState.of(context).queryParams.containsKey("to")) {
-          router.pushReplacement(GoRouterState.of(context).queryParams["to"]!);
         } else {
           router.pushReplacementNamed(
             ListsScreen.routeName,
@@ -93,9 +91,13 @@ class _FamilyAppState extends State<FamilyApp> {
         }
       });
     } else {
+      Map<String, dynamic> queryParams = {};
+      if (router.location != "/") {
+        queryParams["to"] = router.location;
+      }
       router.pushReplacementNamed(
         LoginScreen.routeName,
-        queryParams: {"to": router.location},
+        queryParams: queryParams,
       );
     }
   }
