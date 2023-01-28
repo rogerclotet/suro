@@ -18,10 +18,10 @@ List<GoRoute> routes(
       path: '/',
       redirect: (BuildContext context, GoRouterState state) async {
         if (globalState.initialRoute == null) {
-          var to = state.queryParams["to"];
-          if (![null, "/"].contains(to)) {
+          var to = state.queryParams['to'];
+          if (![null, '/'].contains(to)) {
             globalState.initialRoute = to;
-          } else if (state.location != "/") {
+          } else if (state.location != '/') {
             globalState.initialRoute = state.location;
           }
         }

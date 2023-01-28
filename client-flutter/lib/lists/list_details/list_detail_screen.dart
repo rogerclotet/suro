@@ -102,7 +102,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Hero(
-          tag: "title_${list.id}",
+          tag: 'title_${list.id}',
           child: Text(
             list.name,
             style: Theme.of(context).textTheme.titleLarge,
@@ -151,14 +151,14 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                   value: Actions.edit,
                   child: ListTile(
                     leading: Icon(Icons.edit),
-                    title: Text("Editar"),
+                    title: Text('Editar'),
                   ),
                 ),
                 const PopupMenuItem(
                   value: Actions.delete,
                   child: ListTile(
                     leading: Icon(Icons.delete),
-                    title: Text("Eliminar"),
+                    title: Text('Eliminar'),
                   ),
                 ),
               ];

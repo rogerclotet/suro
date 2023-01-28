@@ -55,7 +55,7 @@ class ListPreview extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Hero(
-                      tag: "title_${list.id}",
+                      tag: 'title_${list.id}',
                       child: Text(
                         list.name,
                         style: Theme.of(context)
@@ -131,17 +131,17 @@ class ListPreview extends StatelessWidget {
                             .id;
                     var text = list.name;
                     if (list.description.isNotEmpty) {
-                      text += "\n${list.description}";
+                      text += '\n${list.description}';
                     }
                     var path = GoRouter.of(context).namedLocation(
                       ListDetailScreen.listRouteName,
                       params: {
-                        "fid": familyId.toString(),
-                        "lid": list.id.toString(),
+                        'fid': familyId.toString(),
+                        'lid': list.id.toString(),
                       },
                     );
                     Share.share(
-                      "$text\nhttps://familia.clotet.dev$path",
+                      '$text\nhttps://familia.clotet.dev$path',
                       subject: list.name,
                     );
                   },

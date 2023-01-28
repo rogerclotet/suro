@@ -145,20 +145,20 @@ class AuthClient with ChangeNotifier {
       Uri.parse('$baseUrl/families/$familyId/lists/'),
       headers: jsonHeader,
       body: jsonEncode({
-        "name": list.name,
-        "description": list.description,
-        "is_template": list.isTemplate,
-        "items": list.items.map((item) {
+        'name': list.name,
+        'description': list.description,
+        'is_template': list.isTemplate,
+        'items': list.items.map((item) {
           return {
-            "name": item.name,
-            "category": item.category,
+            'name': item.name,
+            'category': item.category,
           };
         }).toList(),
       }),
     );
 
     if (res.statusCode != 201) {
-      throw const ClientException("No s'ha pogut crear la llista");
+      throw const ClientException('No s\'ha pogut crear la llista');
     }
 
     return parseJsonObject(res.bodyBytes, FamilyList.fromJson);
@@ -172,7 +172,7 @@ class AuthClient with ChangeNotifier {
     );
 
     if (res.statusCode != 200) {
-      throw const ClientException("No s'ha pogut actualitzar la llista");
+      throw const ClientException('No s\'ha pogut actualitzar la llista');
     }
 
     return parseJsonObject(res.bodyBytes, FamilyList.fromJson);
@@ -184,7 +184,7 @@ class AuthClient with ChangeNotifier {
     );
 
     if (res.statusCode != 204) {
-      throw const ClientException("No s'ha pogut eliminar la llista");
+      throw const ClientException('No s\'ha pogut eliminar la llista');
     }
   }
 }

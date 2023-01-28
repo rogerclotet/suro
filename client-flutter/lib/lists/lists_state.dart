@@ -125,7 +125,7 @@ class ListsState with ChangeNotifier {
       _removeList(list);
 
       // TODO display snackbar
-      logger.warning("Error creating list: $error");
+      logger.warning('Error creating list: $error');
     }).whenComplete(notifyListeners);
   }
 
@@ -137,14 +137,14 @@ class ListsState with ChangeNotifier {
     _client.patchList(
       _familiesState.currentFamily!.id,
       list.id,
-      {"is_favorite": !list.isFavorite},
+      {'is_favorite': !list.isFavorite},
     ).then((edited) {
       // TODO display snackbar
     }, onError: (error) {
       _lists![index] = list;
 
       // TODO display snackbar
-      logger.warning("Error toggling favorite: $error");
+      logger.warning('Error toggling favorite: $error');
 
       notifyListeners();
     });
@@ -159,7 +159,7 @@ class ListsState with ChangeNotifier {
         _lists!.add(list);
 
         // TODO display snackbar
-        logger.warning("Error toggling favorite: $error");
+        logger.warning('Error toggling favorite: $error');
 
         notifyListeners();
       },

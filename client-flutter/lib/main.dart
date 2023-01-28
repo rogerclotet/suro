@@ -92,8 +92,8 @@ class _FamilyAppState extends State<FamilyApp> {
       });
     } else {
       Map<String, dynamic> queryParams = {};
-      if (router.location != "/") {
-        queryParams["to"] = router.location;
+      if (router.location != '/') {
+        queryParams['to'] = router.location;
       }
       router.pushReplacementNamed(
         LoginScreen.routeName,

@@ -58,7 +58,7 @@ class _TemplateSelectState extends State<TemplateSelect> {
             child: Row(
               children: [
                 Text(
-                  "Importar plantilles",
+                  'Importar plantilles',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(width: 16),
@@ -77,7 +77,7 @@ class _TemplateSelectState extends State<TemplateSelect> {
             ? Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                 child: Text(
-                  "No s'importaran plantilles.",
+                  'No s\'importaran plantilles.',
                   style: TextStyle(
                       color: Theme.of(context)
                           .textTheme

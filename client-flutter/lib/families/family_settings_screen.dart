@@ -33,7 +33,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
     if (family == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Família"),
+          title: const Text('Família'),
         ),
         drawer: MainDrawer(),
         body: const Center(

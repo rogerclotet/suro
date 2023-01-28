@@ -51,7 +51,7 @@ class FamilyList {
             (item) => ListItem.fromJson(item),
           )
           .toList(),
-      updatedAt: DateTime.parse(json["updated_at"]),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }
