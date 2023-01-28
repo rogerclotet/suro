@@ -26,8 +26,6 @@ Future showDeleteListDialog({
           onPressed: () {
             if (onDeleted != null) {
               onDeleted();
-            } else {
-              Navigator.of(context).pop();
             }
 
             Provider.of<ListsState>(

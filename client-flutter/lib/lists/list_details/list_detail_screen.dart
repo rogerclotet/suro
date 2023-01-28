@@ -1,5 +1,7 @@
+import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_item.dart';
+import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +80,17 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     final listsState = Provider.of<ListsState>(context);
     final theme = Theme.of(context);
 
-    list = listsState.list(widget.listId);
+    try {
+      list = listsState.list(widget.listId);
+    } on ListNotFoundException catch (_) {
+      GoRouter.of(context).pushReplacementNamed(
+        ListsScreen.routeName,
+        params: {
+          'fid': Provider.of<FamiliesState>(context, listen: false).toString()
+        },
+      );
+    }
+
     itemsByCategory = {};
     for (var item in list.items) {
       if (!itemsByCategory.containsKey(item.category)) {
@@ -119,7 +131,16 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                   showDeleteListDialog(
                     context: context,
                     list: list,
-                    onDeleted: () => GoRouter.of(context).pop(),
+                    onDeleted: () {
+                      GoRouter.of(context).pushReplacementNamed(
+                        ListsScreen.routeName,
+                        params: {
+                          'fid':
+                              Provider.of<FamiliesState>(context, listen: false)
+                                  .toString()
+                        },
+                      );
+                    },
                   );
                   break;
               }

@@ -5,6 +5,11 @@ import 'package:flutter/cupertino.dart';
 
 const currentFamilyIdKey = 'currentFamilyId';
 
+class ListNotFoundException implements Exception {
+  int listId;
+  ListNotFoundException(this.listId);
+}
+
 int favoriteSort(FamilyList a, FamilyList b) {
   if (a.isFavorite == b.isFavorite) {
     return 0;
@@ -85,7 +90,7 @@ class ListsState with ChangeNotifier {
     );
 
     if (index == null || index == -1) {
-      throw Exception("The list with id $listId doesn't exist");
+      throw ListNotFoundException(listId);
     }
 
     return _lists![index];
