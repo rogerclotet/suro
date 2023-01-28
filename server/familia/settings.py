@@ -29,7 +29,7 @@ DEBUG = os.environ.get("DEBUG", False)
 
 ALLOWED_HOSTS = ["api.familia.clotet.dev"]
 if DEBUG:
-    ALLOWED_HOSTS += ["localhost"]
+    ALLOWED_HOSTS += ["localhost", "10.0.2.2"]
 
 
 # Application definition
