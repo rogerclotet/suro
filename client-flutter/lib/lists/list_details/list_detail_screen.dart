@@ -1,6 +1,5 @@
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
-import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_list.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
@@ -11,7 +10,6 @@ import 'package:provider/provider.dart';
 
 import '../../models/list_item.dart';
 import '../edit_list_screen.dart';
-import 'category_name.dart';
 
 enum Actions { delete, edit }
 
@@ -77,6 +75,27 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     setState(() {
       isEditing = !isEditing;
     });
+  }
+
+  void handleCategoryNameChanged(
+    String category,
+    String newName,
+    ScaffoldMessengerState messenger,
+  ) {
+    final affectedItems = [...itemsByCategory[category]!];
+
+    setState(() {
+      for (var item in affectedItems) {
+        final index = list.items.indexOf(item);
+        list.items[index].category = newName;
+      }
+    });
+
+    listsState.changeCategoryName(
+      affectedItems,
+      newName,
+      ScaffoldMessenger.of(context),
+    );
   }
 
   @override
@@ -213,11 +232,19 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                 children: categories.map(
                   (category) {
                     return CategoryList(
+                      key: Key(category),
                       category: category,
                       items: itemsByCategory[category]!,
                       isTemplate: list.isTemplate,
+                      isEditing: isEditing,
                       onDelete: deleteItem,
                       onChangeIsComplete: setIsComplete,
+                      onChangeCategoryName: (newName) =>
+                          handleCategoryNameChanged(
+                        category,
+                        newName,
+                        ScaffoldMessenger.of(context),
+                      ),
                     );
                   },
                 ).toList(),

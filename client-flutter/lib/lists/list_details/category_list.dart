@@ -1,22 +1,26 @@
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_name.dart';
 import 'package:familia/models/list_item.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class CategoryList extends StatefulWidget {
   final String category;
   final List<ListItem> items;
   final bool isTemplate;
+  final bool isEditing;
   final void Function(int id) onDelete;
   final void Function(int id, bool newValue) onChangeIsComplete;
+  final void Function(String name) onChangeCategoryName;
 
   const CategoryList({
     super.key,
     required this.category,
     required this.items,
     required this.isTemplate,
+    required this.isEditing,
     required this.onDelete,
     required this.onChangeIsComplete,
+    required this.onChangeCategoryName,
   });
 
   @override
@@ -42,6 +46,7 @@ class _CategoryListState extends State<CategoryList> {
                 onDelete: widget.onDelete,
                 onChangeIsComplete: widget.onChangeIsComplete,
                 canBeCompleted: !widget.isTemplate,
+                isEditing: widget.isEditing,
               );
             },
           ).toList()
@@ -51,8 +56,10 @@ class _CategoryListState extends State<CategoryList> {
       children: [
         CategoryName(
           name: widget.category,
-          expanded: isExpanded,
+          isExpanded: isExpanded,
+          isEditing: widget.isEditing,
           onToggleExpand: toggleExpanded,
+          onChange: widget.onChangeCategoryName,
         ),
         ...displayedItems,
       ],

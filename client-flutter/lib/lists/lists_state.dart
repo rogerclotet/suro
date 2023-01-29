@@ -1,7 +1,9 @@
 import 'package:familia/client.dart';
 import 'package:familia/families/families_state.dart';
 import 'package:familia/models/list.dart';
+import 'package:familia/models/list_item.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 const currentFamilyIdKey = 'currentFamilyId';
 
@@ -195,6 +197,28 @@ class ListsState with ChangeNotifier {
       list.sortItems();
       notifyListeners();
     }
+  }
+
+  void changeCategoryName(
+    Iterable<ListItem> items,
+    String newName,
+    ScaffoldMessengerState messenger,
+  ) {
+    // TODO call client
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Nom de la categoria canviat: ${newName == '' ? 'Sense categoria' : newName}',
+        ),
+        action: SnackBarAction(
+          label: 'Desfer',
+          onPressed: () {
+            // TODO call client to revert
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> refresh() async {

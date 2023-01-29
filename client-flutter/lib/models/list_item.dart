@@ -1,8 +1,8 @@
 class ListItem {
   final int id;
-  final String name;
-  final String category;
-  final int order;
+  String name;
+  String category;
+  int order;
   bool isComplete;
 
   ListItem({

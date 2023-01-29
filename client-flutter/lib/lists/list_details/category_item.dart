@@ -7,12 +7,14 @@ class CategoryItem extends StatelessWidget {
   final void Function(int id) onDelete;
   final void Function(int id, bool newValue) onChangeIsComplete;
   final bool canBeCompleted;
+  final bool isEditing;
 
   const CategoryItem({
     required this.item,
     required this.onDelete,
     required this.onChangeIsComplete,
     required this.canBeCompleted,
+    required this.isEditing,
     super.key,
   });
 
