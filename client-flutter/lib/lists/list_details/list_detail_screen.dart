@@ -95,11 +95,20 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       );
     }
 
-    itemsByCategory = {};
+    final List<String> categories = [];
     for (var item in list.items) {
-      if (!itemsByCategory.containsKey(item.category)) {
-        itemsByCategory[item.category] = [];
+      if (!categories.contains(item.category)) {
+        categories.add(item.category);
       }
+    }
+    categories.sort();
+
+    itemsByCategory = {};
+    for (var category in categories) {
+      itemsByCategory[category] = [];
+    }
+
+    for (var item in list.items) {
       itemsByCategory[item.category]!.add(item);
     }
 
@@ -201,11 +210,11 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
               )
             : ListView(
                 padding: const EdgeInsets.only(bottom: 80),
-                children: itemsByCategory.entries.map(
-                  (e) {
+                children: categories.map(
+                  (category) {
                     return CategoryList(
-                      category: e.key,
-                      items: e.value,
+                      category: category,
+                      items: itemsByCategory[category]!,
                       isTemplate: list.isTemplate,
                       onDelete: deleteItem,
                       onChangeIsComplete: setIsComplete,
