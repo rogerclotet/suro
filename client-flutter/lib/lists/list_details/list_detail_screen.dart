@@ -1,6 +1,7 @@
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_item.dart';
+import 'package:familia/lists/list_details/category_list.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
@@ -200,37 +201,17 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
               )
             : ListView(
                 padding: const EdgeInsets.only(bottom: 80),
-                children: itemsByCategory
-                    .map(
-                      (key, items) {
-                        if (items.isEmpty) {
-                          return MapEntry(key, []);
-                        }
-
-                        return MapEntry(
-                          key,
-                          [
-                            CategoryName(name: key),
-                            ...items.map((item) {
-                              return CategoryItem(
-                                item: item,
-                                onDelete: deleteItem,
-                                onChange: setIsComplete,
-                                canBeCompleted: !list.isTemplate,
-                              );
-                            }).toList(),
-                          ],
-                        );
-                      },
-                    )
-                    .values
-                    .fold<List<Widget>>(
-                      [],
-                      (previousValue, element) {
-                        return [...previousValue, ...element];
-                      },
-                    )
-                    .toList(),
+                children: itemsByCategory.entries.map(
+                  (e) {
+                    return CategoryList(
+                      category: e.key,
+                      items: e.value,
+                      isTemplate: list.isTemplate,
+                      onDelete: deleteItem,
+                      onChangeIsComplete: setIsComplete,
+                    );
+                  },
+                ).toList(),
               ),
       ),
     );

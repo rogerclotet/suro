@@ -5,13 +5,13 @@ import '../../models/list_item.dart';
 class CategoryItem extends StatelessWidget {
   final ListItem item;
   final void Function(int id) onDelete;
-  final void Function(int id, bool newValue) onChange;
+  final void Function(int id, bool newValue) onChangeIsComplete;
   final bool canBeCompleted;
 
   const CategoryItem({
     required this.item,
     required this.onDelete,
-    required this.onChange,
+    required this.onChangeIsComplete,
     required this.canBeCompleted,
     super.key,
   });
@@ -41,7 +41,7 @@ class CategoryItem extends StatelessWidget {
             ? Checkbox(
                 value: item.isComplete,
                 onChanged: (value) {
-                  onChange(item.id, value != false);
+                  onChangeIsComplete(item.id, value != false);
                 },
               )
             : const SizedBox(
