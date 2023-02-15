@@ -1,10 +1,11 @@
 import logging
+
+from django.db import transaction
 from rest_framework import viewsets
+
+from lists.models import List, ListItem
 from lists.permissions import IsListFamilyMember, IsListItemFamilyMember
 from lists.serializers import ListItemSerializer, ListSerializer
-from lists.models import List, ListItem
-from django.db import transaction
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

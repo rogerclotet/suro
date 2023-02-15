@@ -1,4 +1,5 @@
 from django.db import models
+
 from core.models import Family
 
 
@@ -33,4 +34,4 @@ class ListItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["category", "is_complete", "order"]
+        ordering = ["category", "is_complete", "order", "id"]
