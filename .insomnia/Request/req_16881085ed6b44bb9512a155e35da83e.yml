@@ -1,7 +1,7 @@
 _id: req_16881085ed6b44bb9512a155e35da83e
 type: Request
 parentId: fld_87f614be964a4ee1a514a3d4c6de1ee9
-modified: 1655809612386
+modified: 1678732945591
 created: 1655110799859
 url: "{{ _.api_url }}/token/refresh/"
 name: JWT Refresh
@@ -11,7 +11,7 @@ body:
   mimeType: application/json
   text: >-
     {
-    	"refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY1NTE5Njg2NiwiaWF0IjoxNjU1MTEwNDY2LCJqdGkiOiI0MTk5NzMwZmY0NTA0YTBjOWMwMTRhYWI4MWM5YTg0NSIsInVzZXJfaWQiOjF9.gp3Ng2RGqqjbFqA7WFIl23ScMJWt0nzbGxGpKEtSvR0"
+    	"refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY4MTMyNDg3MSwiaWF0IjoxNjc4NzMyODcxLCJqdGkiOiJhOWJhMmJiMjVlNTU0ODAxODdlZjQ0NzI3ZTliYjFlZSIsInVzZXJfaWQiOjEsImZpcnN0X25hbWUiOiJSb2dlciIsImxhc3RfbmFtZSI6IkNsb3RldCJ9.iGS6ywtxB9PjJxlOGbNOYFAeHiO99X3jUUJpFua3P_A"
     }
 parameters: []
 headers:

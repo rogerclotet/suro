@@ -1,7 +1,7 @@
 _id: req_aae651dcfd6b4ba99f826559e4ddf556
 type: Request
 parentId: fld_aa8e3035d1284ec19a59983d9fe7144b
-modified: 1655768098647
+modified: 1678733624393
 created: 1655733672749
 url: "{{ _.api_url }}/invitations/ur4b4ps3qux7r45jkubp"
 name: Delete invitation
@@ -12,7 +12,7 @@ parameters: []
 headers: []
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1NzY4MzQ0LCJpYXQiOjE2NTU3NjgwNDQsImp0aSI6ImJlZDhiZDU5YmFhZDQwM2NhYjhkMjJiODgwY2M3M2ViIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.JLvg1guthotkExda-kWM4G1JDtxz0xGONFuzBkAbFTU
+  token: "{{ _.token }}"
   disabled: false
 metaSortKey: -1655199103153.25
 isPrivate: false

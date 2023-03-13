@@ -1,7 +1,7 @@
 _id: req_ba729aef567c40bdb0e0c204a67377d3
 type: Request
 parentId: fld_4dd7bdd97dd04db9890c6b1ceb06cf7d
-modified: 1656969850748
+modified: 1678733000269
 created: 1655890780579
 url: "{{ _.api_url }}/families/"
 name: Create family
@@ -20,7 +20,7 @@ headers:
     id: pair_7da9d831447d4786aea8efa6329c3f4f
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1ODkxMTczLCJpYXQiOjE2NTU4OTA4NzMsImp0aSI6ImRjZDE5NTVlNDcyNzQ3Y2E5NTVmNGExM2MyOTlkOWQwIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.aUsGTm25OGUzGwZtHHMf-l-NLmP0F79V6ieW2VcPiF8
+  token: "{{ _.token }}"
 metaSortKey: -1655120066490
 isPrivate: false
 settingStoreCookies: true

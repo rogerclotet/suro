@@ -1,9 +1,9 @@
 _id: req_70bc1907974044699645277e3eb8c25d
 type: Request
 parentId: fld_aa8e3035d1284ec19a59983d9fe7144b
-modified: 1655768111763
+modified: 1678733634653
 created: 1655640354159
-url: "{{ _.api_url }}/invitations/wmup8w48kbggy66xd063"
+url: "{{ _.api_url }}/invitations/77vqde1x1kleruxc0j1b"
 name: Invitation
 description: ""
 method: GET

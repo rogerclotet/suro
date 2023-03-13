@@ -1,7 +1,7 @@
 _id: req_7d2a09bf327b45088e023aaae46aca11
 type: Request
 parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
-modified: 1657091483096
+modified: 1678733014800
 created: 1656970094417
 url: "{{ _.api_url }}/families/1/lists/6/"
 name: Patch list
@@ -60,7 +60,7 @@ headers:
     id: pair_94183e33d7a544c382b33cc583ab577d
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU2OTcyNzU1LCJpYXQiOjE2NTY5NzI0NTUsImp0aSI6ImZmMzZhZWUwMTEzMjQ1NTE4ZDExYjE0N2RhMTc4ODRkIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.fexsNds999Ne_7yWMmVbeaGONMj3Ka_b5aHdyWUskes
+  token: "{{ _.token }}"
 metaSortKey: -1655110920133.5
 isPrivate: false
 settingStoreCookies: true

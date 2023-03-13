@@ -1,14 +1,17 @@
 _id: env_d65d218ceffa4988a941d28db5b040cc
 type: Environment
 parentId: env_3eae659a63ac60358e518911e143b67c0727ec7d
-modified: 1655293183231
+modified: 1678733572389
 created: 1655110265960
 name: Local
 data:
   api_url: http://localhost:8000
+  token: "{% response 'body', 'req_e67533c2ec494783889d4a13c0df5058',
+    'b64::JC5hY2Nlc3M=::46b', 'when-expired', 60 %}"
 dataPropertyOrder:
   "&":
     - api_url
+    - token
 color: null
 isPrivate: false
 metaSortKey: 1655110265960

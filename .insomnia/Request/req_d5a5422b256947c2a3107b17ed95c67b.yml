@@ -1,7 +1,7 @@
 _id: req_d5a5422b256947c2a3107b17ed95c67b
 type: Request
 parentId: fld_4dd7bdd97dd04db9890c6b1ceb06cf7d
-modified: 1655807341493
+modified: 1678733644780
 created: 1655807271105
 url: "{{ _.api_url }}/families/1/join/"
 name: Join family
@@ -11,8 +11,8 @@ body:
   mimeType: application/json
   text: |-
     {
-    	"token": "wmup8w48kbggy66xd063",
-    	"user_id": 3
+    	"token": "77vqde1x1kleruxc0j1b",
+    	"user_id": 1
     }
 parameters: []
 headers:
@@ -21,7 +21,7 @@ headers:
     id: pair_ecd58661bf6748f2bd79028713cc2e9a
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1ODA3NTUzLCJpYXQiOjE2NTU4MDcyNTMsImp0aSI6ImFkYmFlZDY2MzU4YTQzZTI4ODdhNDQwMjdkYjBlNjgxIiwidXNlcl9pZCI6MywiZmlyc3RfbmFtZSI6IiIsImxhc3RfbmFtZSI6IiJ9.UjiD4rTUhUgqQUucxLYbEVOdeGvixzgGrmZRP6H34mk
+  token: "{{ _.token }}"
 metaSortKey: -1655114530200
 isPrivate: false
 settingStoreCookies: true

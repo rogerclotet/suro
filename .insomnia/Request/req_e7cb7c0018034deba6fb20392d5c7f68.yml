@@ -1,7 +1,7 @@
 _id: req_e7cb7c0018034deba6fb20392d5c7f68
 type: Request
 parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
-modified: 1655234718264
+modified: 1678733010677
 created: 1655129531712
 url: "{{ _.api_url }}/families/1/lists/6/"
 name: List detail
@@ -12,7 +12,7 @@ parameters: []
 headers: []
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MjM1MDA4LCJpYXQiOjE2NTUyMzQ3MDgsImp0aSI6IjQ0YjUwZDA3ZmJkMjQ4MGZhMGU5NjI3YTMwZDEyNjdjIiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0._4Qzhh7m22QEoV-iEiOY8dZUadEfeYSAYFrVAi_rUEo
+  token: "{{ _.token }}"
 metaSortKey: -1655111280957
 isPrivate: false
 settingStoreCookies: true

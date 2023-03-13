@@ -1,7 +1,7 @@
 _id: req_d733448fb10443b08efd3b56e720d4f7
 type: Request
 parentId: fld_e6e11e627f4e4ac9aadff4c8d269aebe
-modified: 1655293188245
+modified: 1678739526990
 created: 1655243757437
 url: "{{ _.api_url }}/families/1/lists/"
 name: Create list
@@ -20,7 +20,7 @@ headers:
     id: pair_c14e539b71944d06bb2e6d623b0fa961
 authentication:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU1MjQ0OTMxLCJpYXQiOjE2NTUyNDQ2MzEsImp0aSI6IjBkZWFkN2ZiYzI1MDQ5OGRiM2ZkYTQ1NmM0N2VmMDE1IiwidXNlcl9pZCI6MSwiZmlyc3RfbmFtZSI6IlJvZ2VyIiwibGFzdF9uYW1lIjoiQ2xvdGV0In0.st1ETvqWQ9z7NaHFq3Cgno1FC_03HatQNkDHV7Bqg8A
+  token: "{{ _.token }}"
 metaSortKey: -1655111521506
 isPrivate: false
 settingStoreCookies: true
