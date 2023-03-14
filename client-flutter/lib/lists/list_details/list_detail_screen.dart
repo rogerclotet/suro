@@ -92,8 +92,10 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     });
 
     listsState.changeCategoryName(
+      list.id,
       affectedItems,
       newName,
+      category,
       ScaffoldMessenger.of(context),
     );
   }

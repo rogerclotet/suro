@@ -200,11 +200,41 @@ class ListsState with ChangeNotifier {
   }
 
   void changeCategoryName(
+    int listId,
     Iterable<ListItem> items,
     String newName,
-    ScaffoldMessengerState messenger,
-  ) {
-    // TODO call client
+    String oldName,
+    ScaffoldMessengerState messenger, {
+    bool isRevert = false,
+  }) async {
+    final currentFamilyId = _familiesState.currentFamily!.id;
+
+    try {
+      final updatedItems = await _client.changeCategoryName(
+        currentFamilyId,
+        listId,
+        items,
+        newName,
+      );
+
+      final list = lists.firstWhere((l) => l.id == listId);
+      for (final updatedItem in updatedItems) {
+        final index = list.items.indexWhere((i) => i.id == updatedItem.id);
+        list.items[index] = updatedItem;
+        list.sortItems();
+        notifyListeners();
+      }
+    } catch (error) {
+      // TODO display snackbar
+      logger.warning('Error changing category name: $error');
+      refresh();
+      return;
+    }
+
+    if (isRevert) {
+      // Reverting succeeded, we don't want any user feedback
+      return;
+    }
 
     messenger.showSnackBar(
       SnackBar(
@@ -214,7 +244,7 @@ class ListsState with ChangeNotifier {
         action: SnackBarAction(
           label: 'Desfer',
           onPressed: () {
-            // TODO call client to revert
+            changeCategoryName(listId, items, oldName, newName, messenger);
           },
         ),
       ),
