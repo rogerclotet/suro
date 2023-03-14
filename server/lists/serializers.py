@@ -1,4 +1,4 @@
-import logging
+from typing import Any, Dict, Iterable
 from rest_framework import serializers
 from core.models import Family
 from lists.models import ListItem
@@ -14,6 +14,7 @@ class ListItemSerializer(serializers.ModelSerializer):
             "order",
             "is_complete",
             "category",
+            "list",
             "created_at",
             "updated_at",
         )
@@ -21,13 +22,10 @@ class ListItemSerializer(serializers.ModelSerializer):
 
 class ListSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
-    items = ListItemSerializer(many=True)
+    items = ListItemSerializer(many=True, default=[])
 
-    def create(self, validated_data):
-        items_data = validated_data.pop("items") if "items" in validated_data else []
-
-        logger = logging.getLogger(__name__)
-        logger.error("validated data %s", validated_data)
+    def create(self, validated_data: Dict[str, Any]):
+        items_data: Iterable[Dict[str, Any]] = validated_data.pop("items", None) or []
 
         list = super().create(validated_data)
 

@@ -205,6 +205,31 @@ class AuthClient with ChangeNotifier {
       throw const ClientException('No s\'ha pogut actualitzar l\'element');
     }
 
-    return parseJsonObject(res.bodyBytes, ListItem.fromJson);
+    return parseJsonObject<ListItem>(res.bodyBytes, ListItem.fromJson);
+  }
+
+  Future<List<ListItem>> changeCategoryName(
+    int familyId,
+    int listId,
+    Iterable<ListItem> items,
+    String categoryName,
+  ) async {
+    final res = await client.post(
+      Uri.parse(
+        '$baseUrl/families/$familyId/lists/$listId/change_category_name/',
+      ),
+      headers: jsonHeader,
+      body: jsonEncode({
+        'items': items.map((item) => item.id).toList(),
+        'category': categoryName,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw const ClientException(
+          'No s\'ha pogut canviar el nom de la categoria');
+    }
+
+    return parseJsonList(res.bodyBytes, ListItem.fromJson);
   }
 }
