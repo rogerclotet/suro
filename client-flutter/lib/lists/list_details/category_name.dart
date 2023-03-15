@@ -26,25 +26,21 @@ class _CategoryNameState extends State<CategoryName> {
 
   @override
   void initState() {
-    editingName = widget.name;
     super.initState();
+    editingName = widget.name;
+    focusNode.addListener(() {
+      if (!focusNode.hasFocus) {
+        handleSubmit();
+      }
+    });
   }
 
-  void handleSubmit(String newName) {
+  void handleSubmit() {
     setState(() {
-      editingName = newName.trim();
+      editingName = editingName.trim();
     });
-    widget.onChange(editingName);
-  }
-
-  void handleTapOutside() {
-    focusNode.nextFocus();
-    final newName = editingName.trim();
-    setState(() {
-      editingName = newName;
-    });
-    if (newName != widget.name) {
-      widget.onChange(newName);
+    if (editingName != widget.name) {
+      widget.onChange(editingName);
     }
   }
 
@@ -54,11 +50,9 @@ class _CategoryNameState extends State<CategoryName> {
       title: widget.isEditing
           ? TextFormField(
               initialValue: widget.name,
-              onFieldSubmitted: handleSubmit,
               onChanged: (value) => setState(() {
                 editingName = value;
               }),
-              onTapOutside: (_) => handleTapOutside(),
               focusNode: focusNode,
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -71,10 +65,13 @@ class _CategoryNameState extends State<CategoryName> {
             ),
       dense: true,
       tileColor: Theme.of(context).colorScheme.surfaceVariant,
-      trailing: IconButton(
-        icon: Icon(widget.isExpanded ? Icons.expand_less : Icons.expand_more),
-        onPressed: widget.onToggleExpand,
-      ),
+      trailing: widget.isEditing
+          ? null
+          : IconButton(
+              icon: Icon(
+                  widget.isExpanded ? Icons.expand_less : Icons.expand_more),
+              onPressed: widget.onToggleExpand,
+            ),
     );
   }
 }

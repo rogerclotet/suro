@@ -9,7 +9,7 @@ class CategoryList extends StatefulWidget {
   final bool isTemplate;
   final bool isEditing;
   final void Function(int id) onDelete;
-  final void Function(int id, bool newValue) onChangeIsComplete;
+  final void Function(int id, Map<String, dynamic> toUpdate) onChange;
   final void Function(String name) onChangeCategoryName;
 
   const CategoryList({
@@ -19,7 +19,7 @@ class CategoryList extends StatefulWidget {
     required this.isTemplate,
     required this.isEditing,
     required this.onDelete,
-    required this.onChangeIsComplete,
+    required this.onChange,
     required this.onChangeCategoryName,
   });
 
@@ -38,13 +38,13 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final displayedItems = isExpanded
+    final displayedItems = isExpanded || widget.isEditing
         ? widget.items.map(
             (item) {
               return CategoryItem(
                 item: item,
                 onDelete: widget.onDelete,
-                onChangeIsComplete: widget.onChangeIsComplete,
+                onChange: widget.onChange,
                 canBeCompleted: !widget.isTemplate,
                 isEditing: widget.isEditing,
               );

@@ -31,13 +31,8 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   late Map<String, List<ListItem>> itemsByCategory;
   bool isEditing = false;
 
-  void setIsComplete(int id, bool value) {
-    setState(() {
-      final item = list.items.firstWhere((item) => item.id == id);
-      item.isComplete = value;
-    });
-
-    listsState.setIsComplete(list.id, id, value);
+  void editItem(int id, Map<String, dynamic> toUpdate) {
+    listsState.editItem(list.id, id, toUpdate);
   }
 
   void deleteItem(int id) {
@@ -240,7 +235,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                       isTemplate: list.isTemplate,
                       isEditing: isEditing,
                       onDelete: deleteItem,
-                      onChangeIsComplete: setIsComplete,
+                      onChange: editItem,
                       onChangeCategoryName: (newName) =>
                           handleCategoryNameChanged(
                         category,

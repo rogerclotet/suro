@@ -2,7 +2,6 @@ import 'package:familia/client.dart';
 import 'package:familia/families/families_state.dart';
 import 'package:familia/models/list.dart';
 import 'package:familia/models/list_item.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 const currentFamilyIdKey = 'currentFamilyId';
@@ -168,21 +167,19 @@ class ListsState with ChangeNotifier {
     );
   }
 
-  void setIsComplete(int listId, int itemId, bool value) async {
+  void editItem(int listId, int itemId, Map<String, dynamic> toUpdate) async {
     final currentFamilyId = _familiesState.currentFamily!.id;
     final list = lists.firstWhere((l) => l.id == listId);
     final item = list.items.firstWhere((i) => i.id == itemId);
 
-    item.isComplete = value;
-    list.sortItems();
-    notifyListeners();
+    item.patch(toUpdate);
 
     try {
       final item = await _client.patchItem(
         currentFamilyId,
         listId,
         itemId,
-        {'is_complete': value},
+        toUpdate,
       );
 
       final index = list.items.indexWhere((i) => i.id == itemId);
@@ -191,9 +188,9 @@ class ListsState with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       // TODO display snackbar
-      logger.warning('Error toggling favorite: $error');
+      logger.warning('Error editing item: $error');
 
-      item.isComplete = !value;
+      await refresh();
       list.sortItems();
       notifyListeners();
     }
