@@ -39,16 +39,14 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     listsState.editItem(list.id, id, toUpdate);
   }
 
-  void deleteItem(int id) {
+  void deleteItem(int id) async {
     final index = list.items.indexWhere((item) => item.id == id);
     final item = list.items[index];
     final categoryIndex = itemsByCategory[item.category]!.indexOf(item);
 
-    setState(() {
-      list.items.removeAt(index);
-      itemsByCategory[item.category]?.remove(item);
-    });
+    await listsState.deleteItem(list.id, id);
 
+    // TODO Fix context reference
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('S\'ha esborrat ${item.name}'),

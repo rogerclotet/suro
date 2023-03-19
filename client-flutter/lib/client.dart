@@ -230,6 +230,20 @@ class AuthClient with ChangeNotifier {
     return parseJsonObject<ListItem>(res.bodyBytes, ListItem.fromMap);
   }
 
+  Future<void> deleteItem(
+    int familyId,
+    int listId,
+    int itemId,
+  ) async {
+    final res = await client.delete(
+      Uri.parse('$baseUrl/families/$familyId/lists/$listId/items/$itemId/'),
+    );
+
+    if (res.statusCode != 204) {
+      throw const ClientException('No s\'ha pogut eliminar l\'element');
+    }
+  }
+
   Future<List<ListItem>> changeCategoryName(
     int familyId,
     int listId,

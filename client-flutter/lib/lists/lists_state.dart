@@ -226,6 +226,24 @@ class ListsState with ChangeNotifier {
     }
   }
 
+  Future<void> deleteItem(int listId, int itemId) async {
+    final currentFamilyId = _familiesState.currentFamily!.id;
+    final list = lists.firstWhere((l) => l.id == listId);
+    final item = list.items.firstWhere((i) => i.id == itemId);
+
+    list.items.remove(item);
+    notifyListeners();
+
+    try {
+      await _client.deleteItem(currentFamilyId, listId, itemId);
+    } catch (error) {
+      // TODO display snackbar
+      logger.warning('Error deleting item: $error');
+    }
+
+    refresh();
+  }
+
   void changeCategoryName(
     int listId,
     Iterable<ListItem> items,
