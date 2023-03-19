@@ -167,6 +167,36 @@ class ListsState with ChangeNotifier {
     );
   }
 
+  void addItem(int listId, String name, String category) async {
+    final currentFamilyId = _familiesState.currentFamily!.id;
+    final list = lists.firstWhere((l) => l.id == listId);
+    final item = ListItem(
+      id: -1,
+      name: name,
+      category: category,
+    );
+
+    list.items.add(item);
+    list.sortItems();
+    notifyListeners();
+
+    try {
+      final newItem = await _client.createItem(
+        currentFamilyId,
+        listId,
+        item.name,
+        item.category,
+      );
+
+      refresh();
+    } catch (error) {
+      // TODO display snackbar
+      logger.warning('Error creating item: $error');
+
+      refresh();
+    }
+  }
+
   void editItem(int listId, int itemId, Map<String, dynamic> toUpdate) async {
     final currentFamilyId = _familiesState.currentFamily!.id;
     final list = lists.firstWhere((l) => l.id == listId);

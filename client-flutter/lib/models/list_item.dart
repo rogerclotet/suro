@@ -11,7 +11,7 @@ class ListItem {
     required this.id,
     required this.name,
     required this.category,
-    required this.order,
+    this.order = 0,
     this.isComplete = false,
   });
 
@@ -38,11 +38,11 @@ class ListItem {
 
   factory ListItem.fromMap(Map<String, dynamic> map) {
     return ListItem(
-      id: map['id'],
-      name: map['name'],
-      category: map['category'],
-      order: map['order'],
-      isComplete: map['is_complete'],
+      id: map['id'] ?? -1,
+      name: map['name'] ?? '',
+      category: map['category'] ?? '',
+      order: map['order'] ?? 0,
+      isComplete: map['is_complete'] ?? false,
     );
   }
 

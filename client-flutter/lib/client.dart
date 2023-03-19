@@ -189,6 +189,28 @@ class AuthClient with ChangeNotifier {
     }
   }
 
+  Future<ListItem> createItem(
+    int familyId,
+    int listId,
+    String name,
+    String category,
+  ) async {
+    final res = await client.post(
+      Uri.parse('$baseUrl/families/$familyId/lists/$listId/items/'),
+      headers: jsonHeader,
+      body: jsonEncode({
+        'name': name,
+        'category': category,
+      }),
+    );
+
+    if (res.statusCode != 201) {
+      throw const ClientException('No s\'ha pogut crear l\'element');
+    }
+
+    return parseJsonObject<ListItem>(res.bodyBytes, ListItem.fromMap);
+  }
+
   Future<ListItem> patchItem(
     int familyId,
     int listId,

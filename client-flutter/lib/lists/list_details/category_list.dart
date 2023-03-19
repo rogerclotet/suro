@@ -1,5 +1,6 @@
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_name.dart';
+import 'package:familia/lists/list_details/new_category_item.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,7 @@ class CategoryList extends StatefulWidget {
   final void Function(int id) onDelete;
   final void Function(int id, Map<String, dynamic> toUpdate) onChange;
   final void Function(String name) onChangeCategoryName;
+  final void Function(String name, String category) onAddItem;
 
   const CategoryList({
     super.key,
@@ -21,6 +23,7 @@ class CategoryList extends StatefulWidget {
     required this.onDelete,
     required this.onChange,
     required this.onChangeCategoryName,
+    required this.onAddItem,
   });
 
   @override
@@ -38,20 +41,31 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final displayedItems = isExpanded || widget.isEditing
-        ? widget.items.map(
-            (item) {
-              return CategoryItem(
-                key: Key(item.id.toString()),
-                item: item,
-                onDelete: widget.onDelete,
-                onChange: widget.onChange,
-                canBeCompleted: !widget.isTemplate,
-                isEditing: widget.isEditing,
-              );
-            },
-          ).toList()
-        : [];
+    final List<Widget> displayedItems = [];
+
+    if (widget.isEditing) {
+      final newItemPlaceholder = NewCategoryItem(
+        onAdd: (name) => widget.onAddItem(name, widget.category),
+      );
+      displayedItems.add(newItemPlaceholder);
+    }
+
+    if (isExpanded || widget.isEditing) {
+      displayedItems.addAll(
+        widget.items.map(
+          (item) {
+            return CategoryItem(
+              key: Key(item.id.toString()),
+              item: item,
+              onDelete: widget.onDelete,
+              onChange: widget.onChange,
+              canBeCompleted: !widget.isTemplate,
+              isEditing: widget.isEditing,
+            );
+          },
+        ),
+      );
+    }
 
     return Column(
       children: [

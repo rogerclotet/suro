@@ -31,6 +31,10 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   late Map<String, List<ListItem>> itemsByCategory;
   bool isEditing = false;
 
+  void addItem(String name, String category) {
+    listsState.addItem(list.id, name, category);
+  }
+
   void editItem(int id, Map<String, dynamic> toUpdate) {
     listsState.editItem(list.id, id, toUpdate);
   }
@@ -242,6 +246,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                         newName,
                         ScaffoldMessenger.of(context),
                       ),
+                      onAddItem: addItem,
                     );
                   },
                 ).toList(),
