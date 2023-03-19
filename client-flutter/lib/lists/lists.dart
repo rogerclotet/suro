@@ -25,6 +25,7 @@ class Lists extends StatelessWidget {
       children: lists
           .map(
             (list) => ListPreview(
+              key: Key(list.id.toString()),
               list: list,
               descriptionLines: descriptionLines,
             ),

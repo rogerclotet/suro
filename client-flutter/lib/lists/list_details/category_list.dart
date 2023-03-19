@@ -42,6 +42,7 @@ class _CategoryListState extends State<CategoryList> {
         ? widget.items.map(
             (item) {
               return CategoryItem(
+                key: Key(item.id.toString()),
                 item: item,
                 onDelete: widget.onDelete,
                 onChange: widget.onChange,
