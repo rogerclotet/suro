@@ -47,6 +47,7 @@ class _NewCategoryItemState extends State<NewCategoryItem> {
       contentPadding: const EdgeInsets.only(left: 16, right: 16),
       title: TextFormField(
         controller: nameController,
+        textCapitalization: TextCapitalization.sentences,
         onChanged: (value) => setState(() {
           editingName = value;
         }),

@@ -47,6 +47,7 @@ class _EditableCategoryItemState extends State<EditableCategoryItem> {
       contentPadding: const EdgeInsets.only(left: 16, right: 16),
       title: TextFormField(
         initialValue: editingName,
+        textCapitalization: TextCapitalization.sentences,
         style: widget.item.isComplete
             ? TextStyle(
                 decoration: TextDecoration.lineThrough,
