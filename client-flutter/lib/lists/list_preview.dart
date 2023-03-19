@@ -40,6 +40,9 @@ class ListPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context, listen: false);
+    final missingItems = list.items.where((i) => !i.isComplete).length;
+    final titleStyle =
+        Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -59,24 +62,38 @@ class ListPreview extends StatelessWidget {
                       tag: 'title_${list.id}',
                       child: Text(
                         list.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontSize: 16),
+                        style: missingItems > 0
+                            ? titleStyle
+                            : titleStyle?.copyWith(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color!
+                                    .withOpacity(0.5),
+                              ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Text('${list.items.length}'),
-                    ),
-                  )
+                  missingItems > 0
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.background,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(missingItems.toString()),
+                          ),
+                        )
+                      : Icon(
+                          Icons.check,
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .color!
+                              .withOpacity(0.5),
+                        ),
                 ],
               ),
             ),
