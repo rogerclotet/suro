@@ -27,7 +27,7 @@ class ListItem {
         case 'order':
           order = entry.value;
           break;
-        case 'isComplete':
+        case 'is_complete':
           isComplete = entry.value;
           break;
         default:
@@ -36,13 +36,23 @@ class ListItem {
     }
   }
 
-  factory ListItem.fromJson(Map<String, dynamic> json) {
+  factory ListItem.fromMap(Map<String, dynamic> map) {
     return ListItem(
-      id: json['id'],
-      name: json['name'],
-      category: json['category'],
-      order: json['order'],
-      isComplete: json['is_complete'],
+      id: map['id'],
+      name: map['name'],
+      category: map['category'],
+      order: map['order'],
+      isComplete: map['is_complete'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'order': order,
+      'is_complete': isComplete,
+    };
   }
 }

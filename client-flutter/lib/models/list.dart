@@ -48,7 +48,7 @@ class FamilyList {
       isFavorite: json['is_favorite'],
       items: List<Map<String, dynamic>>.from(json['items'])
           .map(
-            (item) => ListItem.fromJson(item),
+            (item) => ListItem.fromMap(item),
           )
           .toList(),
       updatedAt: DateTime.parse(json['updated_at']),

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:familia/lists/list_details/editable_category_item.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +20,7 @@ class CategoryItem extends StatelessWidget {
   });
 
   void handleItemNameChange(ListItem item, String newName) {
-    onChange(item.id, {'name': newName});
+    onChange(item.id, {"name": newName});
   }
 
   @override
@@ -61,7 +59,7 @@ class CategoryItem extends StatelessWidget {
               ? Checkbox(
                   value: item.isComplete,
                   onChanged: (value) {
-                    onChange(item.id, {"isComplete": value != false});
+                    onChange(item.id, {"is_complete": value != false});
                   },
                 )
               : const SizedBox(

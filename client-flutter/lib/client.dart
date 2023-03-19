@@ -205,7 +205,7 @@ class AuthClient with ChangeNotifier {
       throw const ClientException('No s\'ha pogut actualitzar l\'element');
     }
 
-    return parseJsonObject<ListItem>(res.bodyBytes, ListItem.fromJson);
+    return parseJsonObject<ListItem>(res.bodyBytes, ListItem.fromMap);
   }
 
   Future<List<ListItem>> changeCategoryName(
@@ -230,6 +230,6 @@ class AuthClient with ChangeNotifier {
           'No s\'ha pogut canviar el nom de la categoria');
     }
 
-    return parseJsonList(res.bodyBytes, ListItem.fromJson);
+    return parseJsonList(res.bodyBytes, ListItem.fromMap);
   }
 }
