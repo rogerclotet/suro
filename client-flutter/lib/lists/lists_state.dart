@@ -130,6 +130,30 @@ class ListsState with ChangeNotifier {
     }).whenComplete(notifyListeners);
   }
 
+  void editList(int id, String name, String description) {
+    final list = _lists!.firstWhere((l) => l.id == id);
+    final index = _lists!.indexOf(list);
+
+    _lists![index] = list.copyWith(name: name, description: description);
+    notifyListeners();
+
+    _client.patchList(
+      _familiesState.currentFamily!.id,
+      id,
+      {'name': name, 'description': description},
+    ).then((edited) {
+      _lists![index] = edited;
+      notifyListeners();
+    }, onError: (error) {
+      _lists![index] = list;
+
+      // TODO display snackbar
+      logger.warning('Error editing list: $error');
+
+      notifyListeners();
+    });
+  }
+
   void toggleFavorite(FamilyList list) {
     final index = _lists!.indexOf(list);
     _lists![index] = _lists![index].copyWith(isFavorite: !list.isFavorite);

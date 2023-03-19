@@ -9,13 +9,13 @@ import 'lists_state.dart';
 const defaultId = -1;
 
 class EditListScreen extends StatefulWidget {
-  final int? listId;
+  final FamilyList? list;
   final bool isTemplate;
   final List<ListItem>? initialItems;
   final VoidCallback onClose;
 
   const EditListScreen({
-    this.listId,
+    this.list,
     required this.isTemplate,
     this.initialItems,
     required this.onClose,
@@ -39,11 +39,12 @@ class _EditListScreenState extends State<EditListScreen> {
   void initState() {
     super.initState();
 
-    final actionText = widget.listId != null
-        ? 'Editar'
-        : widget.initialItems != null
-            ? 'Duplicar'
-            : 'Crear';
+    var actionText = widget.initialItems != null ? 'Duplicar' : 'Crear';
+    if (widget.list != null) {
+      actionText = 'Editar';
+      nameController.text = widget.list!.name;
+      descriptionController.text = widget.list!.description;
+    }
 
     title = '$actionText ${widget.isTemplate ? 'plantilla' : 'llista'}';
   }
@@ -51,8 +52,12 @@ class _EditListScreenState extends State<EditListScreen> {
   void handleChange(FamilyList list) {
     final listsState = Provider.of<ListsState>(context, listen: false);
 
-    if (widget.listId != null) {
-      // TODO editing
+    if (widget.list != null) {
+      listsState.editList(
+        list.id,
+        nameController.text.trim(),
+        descriptionController.text.trim(),
+      );
     } else {
       listsState.createList(list);
     }
@@ -77,7 +82,7 @@ class _EditListScreenState extends State<EditListScreen> {
         }).toList();
 
     final list = FamilyList(
-      id: widget.listId ?? defaultId,
+      id: widget.list?.id ?? defaultId,
       name: nameController.text.trim(),
       description: descriptionController.text.trim(),
       isTemplate: widget.isTemplate,

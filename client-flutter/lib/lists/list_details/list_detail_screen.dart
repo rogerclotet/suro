@@ -149,10 +149,9 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                     MaterialPageRoute(
                       builder: (context) {
                         return EditListScreen(
-                          listId: list.id,
+                          list: list,
                           isTemplate: list.isTemplate,
-                          onClose: () =>
-                              Navigator.of(context).pop(), // TODO save list?
+                          onClose: () => Navigator.of(context).pop(),
                         );
                       },
                     ),
