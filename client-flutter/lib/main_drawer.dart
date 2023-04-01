@@ -22,16 +22,13 @@ class MainDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Família',
-                  style: TextStyle(
+                Text(
+                  familiesState.currentFamily!.name,
+                  style: const TextStyle(
                     fontSize: 24,
                   ),
                 ),

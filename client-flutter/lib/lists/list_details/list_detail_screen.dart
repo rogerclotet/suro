@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_list.dart';
@@ -82,19 +84,34 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     final affectedItems = [...itemsByCategory[category]!];
 
     setState(() {
-      for (var item in affectedItems) {
-        final index = list.items.indexOf(item);
-        list.items[index].category = newName;
+      if (itemsByCategory.containsKey(newName)) {
+        itemsByCategory[newName]!.addAll(affectedItems);
+      } else {
+        itemsByCategory[newName] = affectedItems;
+      }
+
+      if (category == '') {
+        itemsByCategory[''] = [];
+      } else {
+        itemsByCategory.remove(category);
+      }
+
+      log('Items by category: ${itemsByCategory.keys.map((e) => '$e: ${itemsByCategory[e]!.map((f) => f.name).join(',')}')}');
+
+      for (final item in affectedItems) {
+        item.category = newName;
       }
     });
 
-    listsState.changeCategoryName(
-      list.id,
-      affectedItems,
-      newName,
-      category,
-      ScaffoldMessenger.of(context),
-    );
+    if (affectedItems.isNotEmpty) {
+      listsState.changeCategoryName(
+        list.id,
+        affectedItems,
+        newName,
+        category,
+        ScaffoldMessenger.of(context),
+      );
+    }
   }
 
   @override
@@ -113,22 +130,17 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       );
     }
 
-    final List<String> categories = [];
-    for (var item in list.items) {
-      if (!categories.contains(item.category)) {
-        categories.add(item.category);
+    itemsByCategory = {'': []};
+    for (final item in list.items) {
+      if (itemsByCategory.containsKey(item.category)) {
+        itemsByCategory[item.category]!.add(item);
+      } else {
+        itemsByCategory[item.category] = [item];
       }
     }
+
+    final categories = [...itemsByCategory.keys];
     categories.sort();
-
-    itemsByCategory = {};
-    for (var category in categories) {
-      itemsByCategory[category] = [];
-    }
-
-    for (var item in list.items) {
-      itemsByCategory[item.category]!.add(item);
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -214,7 +226,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       body: RefreshIndicator(
         onRefresh: () => listsState.refresh(),
         triggerMode: RefreshIndicatorTriggerMode.onEdge,
-        child: list.items.isEmpty
+        child: !isEditing && list.items.isEmpty
             ? Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
@@ -237,12 +249,13 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                       isEditing: isEditing,
                       onDelete: deleteItem,
                       onChange: editItem,
-                      onChangeCategoryName: (newName) =>
-                          handleCategoryNameChanged(
-                        category,
-                        newName,
-                        ScaffoldMessenger.of(context),
-                      ),
+                      onChangeCategoryName: (newName) {
+                        handleCategoryNameChanged(
+                          category,
+                          newName,
+                          ScaffoldMessenger.of(context),
+                        );
+                      },
                       onAddItem: addItem,
                     );
                   },

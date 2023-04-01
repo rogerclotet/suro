@@ -121,6 +121,7 @@ class _EditListScreenState extends State<EditListScreen> {
           children: [
             TextFormField(
               controller: nameController,
+              textCapitalization: TextCapitalization.sentences,
               autofocus: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -136,6 +137,7 @@ class _EditListScreenState extends State<EditListScreen> {
             const SizedBox(height: 32),
             TextFormField(
               controller: descriptionController,
+              textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Descripció',

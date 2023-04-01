@@ -119,24 +119,16 @@ class _FamilyAppState extends State<FamilyApp> {
       ],
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          ColorScheme lightColorScheme;
-          ColorScheme darkColorScheme;
+          final lightColorScheme = lightDynamic ??
+              ColorScheme.fromSeed(
+                seedColor: _defaultColor,
+              );
+          final darkColorScheme = darkDynamic ??
+              ColorScheme.fromSeed(
+                seedColor: _defaultColor,
+                brightness: Brightness.dark,
+              );
 
-          if (lightDynamic != null && darkDynamic != null) {
-            // On Android S+ devices, use the provided dynamic color scheme.
-            // Harmonize the dynamic color scheme' built-in semantic colors.
-            lightColorScheme = lightDynamic.harmonized();
-            darkColorScheme = darkDynamic.harmonized();
-          } else {
-            // Otherwise, use fallback schemes.
-            lightColorScheme = ColorScheme.fromSeed(
-              seedColor: _defaultColor,
-            );
-            darkColorScheme = ColorScheme.fromSeed(
-              seedColor: _defaultColor,
-              brightness: Brightness.dark,
-            );
-          }
           return Consumer<Auth>(
             builder: (context, auth, child) {
               return MaterialApp.router(

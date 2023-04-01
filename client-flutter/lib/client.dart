@@ -138,7 +138,7 @@ class AuthClient with ChangeNotifier {
       Uri.parse('$baseUrl/families/$familyId/lists/'),
     );
 
-    return parseJsonList<FamilyList>(res.bodyBytes, FamilyList.fromJson);
+    return parseJsonList<FamilyList>(res.bodyBytes, FamilyList.fromMap);
   }
 
   Future<FamilyList> createList(int familyId, FamilyList list) async {
@@ -162,7 +162,7 @@ class AuthClient with ChangeNotifier {
       throw const ClientException('No s\'ha pogut crear la llista');
     }
 
-    return parseJsonObject(res.bodyBytes, FamilyList.fromJson);
+    return parseJsonObject(res.bodyBytes, FamilyList.fromMap);
   }
 
   Future<FamilyList> patchList(int familyId, int listId, Object object) async {
@@ -176,7 +176,7 @@ class AuthClient with ChangeNotifier {
       throw const ClientException('No s\'ha pogut actualitzar la llista');
     }
 
-    return parseJsonObject(res.bodyBytes, FamilyList.fromJson);
+    return parseJsonObject(res.bodyBytes, FamilyList.fromMap);
   }
 
   Future<void> deleteList(int familyId, int listId) async {
@@ -244,7 +244,7 @@ class AuthClient with ChangeNotifier {
     }
   }
 
-  Future<List<ListItem>> changeCategoryName(
+  Future<FamilyList> changeCategoryName(
     int familyId,
     int listId,
     Iterable<ListItem> items,
@@ -266,6 +266,6 @@ class AuthClient with ChangeNotifier {
           'No s\'ha pogut canviar el nom de la categoria');
     }
 
-    return parseJsonList(res.bodyBytes, ListItem.fromMap);
+    return parseJsonObject(res.bodyBytes, FamilyList.fromMap);
   }
 }

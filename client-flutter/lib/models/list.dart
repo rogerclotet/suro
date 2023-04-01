@@ -39,7 +39,7 @@ class FamilyList {
     );
   }
 
-  factory FamilyList.fromJson(Map<String, dynamic> json) {
+  factory FamilyList.fromMap(Map<String, dynamic> json) {
     return FamilyList(
       id: json['id'],
       name: json['name'],

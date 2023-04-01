@@ -279,20 +279,19 @@ class ListsState with ChangeNotifier {
     final currentFamilyId = _familiesState.currentFamily!.id;
 
     try {
-      final updatedItems = await _client.changeCategoryName(
+      final updatedList = await _client.changeCategoryName(
         currentFamilyId,
         listId,
         items,
         newName,
       );
 
-      final list = lists.firstWhere((l) => l.id == listId);
-      for (final updatedItem in updatedItems) {
-        final index = list.items.indexWhere((i) => i.id == updatedItem.id);
-        list.items[index] = updatedItem;
-        list.sortItems();
-        notifyListeners();
-      }
+      updatedList.sortItems();
+
+      final index = lists.indexWhere((l) => l.id == listId);
+      _lists![index] = updatedList;
+
+      notifyListeners();
     } catch (error) {
       // TODO display snackbar
       logger.warning('Error changing category name: $error');

@@ -32,6 +32,13 @@ class CategoryList extends StatefulWidget {
 
 class _CategoryListState extends State<CategoryList> {
   bool isExpanded = true;
+  late String categoryName;
+
+  @override
+  void initState() {
+    super.initState();
+    categoryName = widget.category;
+  }
 
   void toggleExpanded() {
     setState(() {
@@ -39,8 +46,19 @@ class _CategoryListState extends State<CategoryList> {
     });
   }
 
+  void handleCategoryNameChange(String name) {
+    setState(() {
+      categoryName = name;
+    });
+    widget.onChangeCategoryName(name);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.items.isEmpty && !widget.isEditing) {
+      return Container();
+    }
+
     final List<Widget> displayedItems = [];
 
     if (widget.isEditing) {
@@ -70,11 +88,11 @@ class _CategoryListState extends State<CategoryList> {
     return Column(
       children: [
         CategoryName(
-          name: widget.category,
+          name: categoryName,
           isExpanded: isExpanded,
           isEditing: widget.isEditing,
           onToggleExpand: toggleExpanded,
-          onChange: widget.onChangeCategoryName,
+          onChange: handleCategoryNameChange,
         ),
         ...displayedItems,
       ],
