@@ -153,6 +153,8 @@ class AuthClient with ChangeNotifier {
           return {
             'name': item.name,
             'category': item.category,
+            'order': item.order,
+            'is_complete': item.isComplete,
           };
         }).toList(),
       }),

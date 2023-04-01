@@ -117,7 +117,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         itemsByCategory.remove(category);
       }
 
-      updateCategories();
+      categories.remove(category);
 
       for (final item in affectedItems) {
         item.category = newName;

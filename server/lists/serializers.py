@@ -14,10 +14,10 @@ class ListItemSerializer(serializers.ModelSerializer):
             "order",
             "is_complete",
             "category",
-            "list",
             "created_at",
             "updated_at",
         )
+        extra_kwargs = {"list": {"write_only": True}}
 
 
 class ListSerializer(serializers.ModelSerializer):
