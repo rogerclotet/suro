@@ -164,7 +164,8 @@ class ListsState with ChangeNotifier {
       list.id,
       {'is_favorite': !list.isFavorite},
     ).then((edited) {
-      // TODO display snackbar
+      _lists![index] = list;
+      notifyListeners();
     }, onError: (error) {
       _lists![index] = list;
 
@@ -317,6 +318,45 @@ class ListsState with ChangeNotifier {
         ),
       ),
     );
+  }
+
+  void reorderItem(
+    int listId,
+    ListItem item,
+    String category,
+    int indexInCategory,
+  ) {
+    final listIndex = lists.indexWhere((l) => l.id == listId);
+    final list = lists[listIndex];
+
+    item.category = category;
+
+    final categoryItems =
+        list.items.where((i) => i.category == category).toList();
+    categoryItems.remove(item);
+    categoryItems.insert(indexInCategory, item);
+    for (var currentItem in categoryItems) {
+      currentItem.order = categoryItems.indexOf(currentItem);
+    }
+    list.sortItems();
+
+    notifyListeners();
+
+    _client.patchList(_familiesState.currentFamily!.id, listId, {
+      'items': categoryItems
+          .map((item) => {
+                'id': item.id,
+                'category': item.category,
+                'order': item.order,
+              })
+          .toList(),
+    }).then((edited) {
+      _lists![listIndex] = edited;
+      notifyListeners();
+    }).onError((error, stackTrace) {
+      refresh();
+      throw error!;
+    });
   }
 
   Future<void> refresh() async {

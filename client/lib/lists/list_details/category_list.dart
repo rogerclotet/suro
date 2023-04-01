@@ -1,5 +1,6 @@
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_name.dart';
+import 'package:familia/lists/list_details/item_placeholder.dart';
 import 'package:familia/lists/list_details/new_category_item.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class CategoryList extends StatefulWidget {
   final void Function(int id, Map<String, dynamic> toUpdate) onChange;
   final void Function(String name) onChangeCategoryName;
   final void Function(String name, String category) onAddItem;
+  final void Function(ListItem item, {int indexInCategory}) onItemDropped;
 
   const CategoryList({
     super.key,
@@ -24,6 +26,7 @@ class CategoryList extends StatefulWidget {
     required this.onChange,
     required this.onChangeCategoryName,
     required this.onAddItem,
+    required this.onItemDropped,
   });
 
   @override
@@ -33,6 +36,7 @@ class CategoryList extends StatefulWidget {
 class _CategoryListState extends State<CategoryList> {
   bool isExpanded = true;
   late String categoryName;
+  bool isDraggingOver = false;
 
   @override
   void initState() {
@@ -68,34 +72,61 @@ class _CategoryListState extends State<CategoryList> {
       displayedItems.add(newItemPlaceholder);
     }
 
+    if (isDraggingOver) {
+      displayedItems.add(const ItemPlaceholder());
+    }
+
     if (isExpanded || widget.isEditing) {
       displayedItems.addAll(
-        widget.items.map(
-          (item) {
-            return CategoryItem(
-              key: Key(item.id.toString()),
-              item: item,
-              onDelete: widget.onDelete,
-              onChange: widget.onChange,
-              canBeCompleted: !widget.isTemplate,
-              isEditing: widget.isEditing,
+        widget.items.asMap().map(
+          (index, item) {
+            return MapEntry(
+              index,
+              CategoryItem(
+                key: Key(item.id.toString()),
+                item: item,
+                onDelete: widget.onDelete,
+                onChange: widget.onChange,
+                canBeCompleted: !widget.isTemplate,
+                isEditing: widget.isEditing,
+                onItemDropped: (item) => widget.onItemDropped(
+                  item,
+                  indexInCategory: index,
+                ),
+              ),
             );
           },
-        ),
+        ).values,
       );
     }
 
-    return Column(
-      children: [
-        CategoryName(
-          name: categoryName,
-          isExpanded: isExpanded,
-          isEditing: categoryName.isNotEmpty ? widget.isEditing : false,
-          onToggleExpand: toggleExpanded,
-          onChange: handleCategoryNameChange,
-        ),
-        ...displayedItems,
-      ],
+    return DragTarget<ListItem>(
+      builder: (context, candidateData, rejectedData) {
+        return Column(
+          children: [
+            CategoryName(
+              name: categoryName,
+              isExpanded: isExpanded,
+              isEditing: categoryName.isNotEmpty ? widget.isEditing : false,
+              onToggleExpand: toggleExpanded,
+              onChange: handleCategoryNameChange,
+            ),
+            ...displayedItems,
+          ],
+        );
+      },
+      onAccept: (item) {
+        setState(() {
+          isDraggingOver = false;
+        });
+        widget.onItemDropped(item);
+      },
+      onMove: (details) => setState(() {
+        isDraggingOver = true;
+      }),
+      onLeave: (item) => setState(() {
+        isDraggingOver = false;
+      }),
     );
   }
 }

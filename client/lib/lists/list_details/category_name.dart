@@ -46,32 +46,36 @@ class _CategoryNameState extends State<CategoryName> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: widget.isEditing
-          ? TextFormField(
-              initialValue: widget.name,
-              onChanged: (value) => setState(() {
-                editingName = value;
-              }),
-              focusNode: focusNode,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                labelText: 'Nom de la categoria',
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+      ),
+      child: ListTile(
+        title: widget.isEditing
+            ? TextFormField(
+                initialValue: widget.name,
+                onChanged: (value) => setState(() {
+                  editingName = value;
+                }),
+                focusNode: focusNode,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  labelText: 'Nom de la categoria',
+                ),
+              )
+            : Text(
+                widget.name == '' ? 'Sense categoria' : widget.name,
+                style: Theme.of(context).textTheme.titleSmall,
               ),
-            )
-          : Text(
-              widget.name == '' ? 'Sense categoria' : widget.name,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-      dense: true,
-      tileColor: Theme.of(context).colorScheme.secondaryContainer,
-      trailing: widget.isEditing
-          ? null
-          : IconButton(
-              icon: Icon(
-                  widget.isExpanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: widget.onToggleExpand,
-            ),
+        dense: true,
+        trailing: widget.isEditing
+            ? null
+            : IconButton(
+                icon: Icon(
+                    widget.isExpanded ? Icons.expand_less : Icons.expand_more),
+                onPressed: widget.onToggleExpand,
+              ),
+      ),
     );
   }
 }

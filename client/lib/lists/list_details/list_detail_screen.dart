@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_list.dart';
@@ -131,6 +133,14 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         ScaffoldMessenger.of(context),
       );
     }
+  }
+
+  void handleItemDropped(
+    ListItem item,
+    String category, {
+    int indexInCategory = 0,
+  }) {
+    listsState.reorderItem(widget.listId, item, category, indexInCategory);
   }
 
   void handleCategoryAdded(String name) {
@@ -291,6 +301,13 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                           );
                         },
                         onAddItem: addItem,
+                        onItemDropped: (item, {indexInCategory = 0}) {
+                          handleItemDropped(
+                            item,
+                            category,
+                            indexInCategory: indexInCategory,
+                          );
+                        },
                       );
                     },
                   ).toList(),
