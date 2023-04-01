@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_list.dart';
@@ -166,18 +164,16 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       );
     }
 
-    setState(() {
-      itemsByCategory = {'': []};
-      for (final item in list.items) {
-        if (itemsByCategory.containsKey(item.category)) {
-          itemsByCategory[item.category]!.add(item);
-        } else {
-          itemsByCategory[item.category] = [item];
-        }
+    itemsByCategory = {'': []};
+    for (final item in list.items) {
+      if (itemsByCategory.containsKey(item.category)) {
+        itemsByCategory[item.category]!.add(item);
+      } else {
+        itemsByCategory[item.category] = [item];
       }
+    }
 
-      updateCategories();
-    });
+    updateCategories();
 
     return Scaffold(
       appBar: AppBar(

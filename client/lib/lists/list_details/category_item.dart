@@ -20,7 +20,7 @@ class CategoryItem extends StatelessWidget {
   });
 
   void handleItemNameChange(ListItem item, String newName) {
-    onChange(item.id, {"name": newName});
+    onChange(item.id, {'name': newName});
   }
 
   @override
@@ -59,7 +59,7 @@ class CategoryItem extends StatelessWidget {
               ? Checkbox(
                   value: item.isComplete,
                   onChanged: (value) {
-                    onChange(item.id, {"is_complete": value != false});
+                    onChange(item.id, {'is_complete': value != false});
                   },
                 )
               : const SizedBox(

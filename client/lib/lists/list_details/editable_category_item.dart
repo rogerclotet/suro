@@ -74,4 +74,12 @@ class _EditableCategoryItemState extends State<EditableCategoryItem> {
       dense: true,
     );
   }
+
+  @override
+  void deactivate() {
+    if (editingName != widget.item.name) {
+      widget.onChange(editingName);
+    }
+    super.deactivate();
+  }
 }

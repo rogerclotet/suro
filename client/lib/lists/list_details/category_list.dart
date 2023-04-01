@@ -1,6 +1,5 @@
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_name.dart';
-import 'package:familia/lists/list_details/new_category.dart';
 import 'package:familia/lists/list_details/new_category_item.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
