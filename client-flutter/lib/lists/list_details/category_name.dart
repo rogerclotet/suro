@@ -4,15 +4,15 @@ class CategoryName extends StatefulWidget {
   final String name;
   final bool isExpanded;
   final bool isEditing;
-  final void Function() onToggleExpand;
+  final void Function()? onToggleExpand;
   final void Function(String name) onChange;
 
   const CategoryName({
     required this.name,
     required this.isExpanded,
     required this.isEditing,
-    required this.onToggleExpand,
     required this.onChange,
+    this.onToggleExpand,
     super.key,
   });
 

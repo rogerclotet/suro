@@ -1,5 +1,6 @@
 import 'package:familia/lists/list_details/category_item.dart';
 import 'package:familia/lists/list_details/category_name.dart';
+import 'package:familia/lists/list_details/new_category.dart';
 import 'package:familia/lists/list_details/new_category_item.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class _CategoryListState extends State<CategoryList> {
         CategoryName(
           name: categoryName,
           isExpanded: isExpanded,
-          isEditing: widget.isEditing,
+          isEditing: categoryName.isNotEmpty ? widget.isEditing : false,
           onToggleExpand: toggleExpanded,
           onChange: handleCategoryNameChange,
         ),

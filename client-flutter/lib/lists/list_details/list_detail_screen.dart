@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
 import 'package:familia/lists/list_details/category_list.dart';
+import 'package:familia/lists/list_details/new_category.dart';
 import 'package:familia/lists/lists_screen.dart';
 import 'package:familia/lists/lists_state.dart';
 import 'package:familia/models/list.dart';
@@ -30,7 +31,8 @@ class ListDetailScreen extends StatefulWidget {
 class _ListDetailScreenState extends State<ListDetailScreen> {
   late ListsState listsState;
   late FamilyList list;
-  late Map<String, List<ListItem>> itemsByCategory;
+  Map<String, List<ListItem>> itemsByCategory = {};
+  List<String> categories = [];
   bool isEditing = false;
 
   void addItem(String name, String category) {
@@ -45,6 +47,18 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     final index = list.items.indexWhere((item) => item.id == id);
     final item = list.items[index];
     final categoryIndex = itemsByCategory[item.category]!.indexOf(item);
+
+    setState(() {
+      itemsByCategory[item.category]!.remove(item);
+
+      if (itemsByCategory[item.category]!.isEmpty) {
+        itemsByCategory.remove(item.category);
+      } else {
+        itemsByCategory[item.category]!.removeAt(categoryIndex);
+      }
+
+      categories.remove(item.category);
+    });
 
     await listsState.deleteItem(list.id, id);
 
@@ -76,6 +90,13 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     });
   }
 
+  void updateCategories() {
+    final categoriesSet = categories.toSet();
+    categoriesSet.addAll(itemsByCategory.keys);
+    categories = categoriesSet.toList();
+    categories.sort();
+  }
+
   void handleCategoryNameChanged(
     String category,
     String newName,
@@ -96,7 +117,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         itemsByCategory.remove(category);
       }
 
-      log('Items by category: ${itemsByCategory.keys.map((e) => '$e: ${itemsByCategory[e]!.map((f) => f.name).join(',')}')}');
+      updateCategories();
 
       for (final item in affectedItems) {
         item.category = newName;
@@ -112,6 +133,21 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
         ScaffoldMessenger.of(context),
       );
     }
+  }
+
+  void handleCategoryAdded(String name) {
+    if (itemsByCategory.containsKey(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ja existeix una categoria amb aquest nom'),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      itemsByCategory[name] = [];
+      updateCategories();
+    });
   }
 
   @override
@@ -130,17 +166,18 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
       );
     }
 
-    itemsByCategory = {'': []};
-    for (final item in list.items) {
-      if (itemsByCategory.containsKey(item.category)) {
-        itemsByCategory[item.category]!.add(item);
-      } else {
-        itemsByCategory[item.category] = [item];
+    setState(() {
+      itemsByCategory = {'': []};
+      for (final item in list.items) {
+        if (itemsByCategory.containsKey(item.category)) {
+          itemsByCategory[item.category]!.add(item);
+        } else {
+          itemsByCategory[item.category] = [item];
+        }
       }
-    }
 
-    final categories = [...itemsByCategory.keys];
-    categories.sort();
+      updateCategories();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -239,27 +276,32 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
               )
             : ListView(
                 padding: const EdgeInsets.only(bottom: 80),
-                children: categories.map(
-                  (category) {
-                    return CategoryList(
-                      key: Key(category),
-                      category: category,
-                      items: itemsByCategory[category]!,
-                      isTemplate: list.isTemplate,
-                      isEditing: isEditing,
-                      onDelete: deleteItem,
-                      onChange: editItem,
-                      onChangeCategoryName: (newName) {
-                        handleCategoryNameChanged(
-                          category,
-                          newName,
-                          ScaffoldMessenger.of(context),
-                        );
-                      },
-                      onAddItem: addItem,
-                    );
-                  },
-                ).toList(),
+                children: [
+                  ...categories.map(
+                    (category) {
+                      return CategoryList(
+                        key: Key(category),
+                        category: category,
+                        items: itemsByCategory[category] ?? [],
+                        isTemplate: list.isTemplate,
+                        isEditing: isEditing,
+                        onDelete: deleteItem,
+                        onChange: editItem,
+                        onChangeCategoryName: (newName) {
+                          handleCategoryNameChanged(
+                            category,
+                            newName,
+                            ScaffoldMessenger.of(context),
+                          );
+                        },
+                        onAddItem: addItem,
+                      );
+                    },
+                  ).toList(),
+                  ...(isEditing
+                      ? [NewCategory(onAdd: handleCategoryAdded)]
+                      : []),
+                ],
               ),
       ),
     );
