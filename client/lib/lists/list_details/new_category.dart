@@ -49,7 +49,7 @@ class _NewCategoryState extends State<NewCategory> {
         ),
       ),
       dense: true,
-      tileColor: Theme.of(context).colorScheme.surfaceVariant,
+      tileColor: Theme.of(context).colorScheme.secondaryContainer,
       trailing: IconButton(
         icon: const Icon(Icons.add),
         onPressed: handleSubmit,

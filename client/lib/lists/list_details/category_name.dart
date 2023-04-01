@@ -64,7 +64,7 @@ class _CategoryNameState extends State<CategoryName> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
       dense: true,
-      tileColor: Theme.of(context).colorScheme.surfaceVariant,
+      tileColor: Theme.of(context).colorScheme.secondaryContainer,
       trailing: widget.isEditing
           ? null
           : IconButton(

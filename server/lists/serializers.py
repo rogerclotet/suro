@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, Iterable
 from rest_framework import serializers
 from core.models import Family
@@ -6,6 +7,14 @@ from . import models
 
 
 class ListItemSerializer(serializers.ModelSerializer):
+    list = serializers.PrimaryKeyRelatedField(
+        queryset=models.List.objects.all(), required=False
+    )
+
+    def create(self, validated_data):
+        logging.info(f"Creating list item with data: {validated_data}")
+        return super().create(validated_data)
+
     class Meta:
         model = models.ListItem
         fields = (
@@ -14,10 +23,10 @@ class ListItemSerializer(serializers.ModelSerializer):
             "order",
             "is_complete",
             "category",
+            "list",
             "created_at",
             "updated_at",
         )
-        extra_kwargs = {"list": {"write_only": True}}
 
 
 class ListSerializer(serializers.ModelSerializer):

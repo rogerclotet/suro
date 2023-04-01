@@ -40,9 +40,14 @@ class ListPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listsState = Provider.of<ListsState>(context, listen: false);
-    final missingItems = list.items.where((i) => !i.isComplete).length;
+    final missingItems = list.isTemplate
+        ? list.items.length
+        : list.items.where((i) => !i.isComplete).length;
     final titleStyle =
         Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16);
+    final completedColor =
+        Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.5);
+    final showAsCompleted = list.isTemplate || missingItems > 0;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -62,15 +67,9 @@ class ListPreview extends StatelessWidget {
                       tag: 'title_${list.id}',
                       child: Text(
                         list.name,
-                        style: missingItems > 0
+                        style: showAsCompleted
                             ? titleStyle
-                            : titleStyle?.copyWith(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .color!
-                                    .withOpacity(0.5),
-                              ),
+                            : titleStyle?.copyWith(color: completedColor),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -78,7 +77,9 @@ class ListPreview extends StatelessWidget {
                   missingItems > 0
                       ? Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.background,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Padding(
@@ -86,14 +87,12 @@ class ListPreview extends StatelessWidget {
                             child: Text(missingItems.toString()),
                           ),
                         )
-                      : Icon(
-                          Icons.check,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .color!
-                              .withOpacity(0.5),
-                        ),
+                      : list.isTemplate
+                          ? Container()
+                          : Icon(
+                              Icons.check,
+                              color: completedColor,
+                            ),
                 ],
               ),
             ),
@@ -103,11 +102,13 @@ class ListPreview extends StatelessWidget {
                 child: Text(
                   list.description,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color
-                            ?.withOpacity(0.7),
+                        color: showAsCompleted
+                            ? Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color
+                                ?.withOpacity(0.7)
+                            : completedColor.withOpacity(0.3),
                       ),
                   maxLines: descriptionLines,
                   overflow: TextOverflow.ellipsis,
@@ -121,8 +122,13 @@ class ListPreview extends StatelessWidget {
                   onPressed: () => listsState.toggleFavorite(list),
                   icon: const Icon(Icons.favorite),
                   color: list.isFavorite
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                      ? Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(showAsCompleted ? 1 : 0.5)
+                      : showAsCompleted
+                          ? null
+                          : completedColor,
                 ),
                 IconButton(
                   onPressed: () {
@@ -140,6 +146,7 @@ class ListPreview extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.copy),
+                  color: showAsCompleted ? null : completedColor,
                 ),
                 IconButton(
                   onPressed: () {
@@ -164,6 +171,7 @@ class ListPreview extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.share),
+                  color: showAsCompleted ? null : completedColor,
                 )
               ],
             ),
