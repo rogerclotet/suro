@@ -4,11 +4,6 @@
     cd $SSH_PROJECT_DIRECTORY
     git pull
 
-    cd $SSH_PROJECT_DIRECTORY/client
-    nvm use 16
-    yarn install
-    REACT_APP_API_URL=$API_URL yarn build
-
     cd $SSH_PROJECT_DIRECTORY/server
     docker-compose -p familia -f docker-compose.yml -f docker-compose.prod.yml pull
     DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD \

@@ -12,20 +12,6 @@ server:
     - changes:
         - server/**/*
 
-client:
-  stage: check
-  image: node:16-alpine
-  cache:
-    paths:
-      - client/node_modules/
-  script:
-    - cd client
-    - yarn install --production=false
-    - yarn lint
-  rules:
-    - changes:
-        - client/**/*
-
 deploy:
   stage: deploy
   image: alpine
@@ -38,5 +24,4 @@ deploy:
     - if: '$CI_COMMIT_BRANCH != "main"'
       when: never
     - changes:
-        - client/**/*
         - server/**/*
