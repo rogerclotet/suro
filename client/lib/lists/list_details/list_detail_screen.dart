@@ -167,7 +167,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     } on ListNotFoundException catch (_) {
       GoRouter.of(context).pushReplacementNamed(
         ListsScreen.routeName,
-        params: {
+        pathParameters: {
           'fid': Provider.of<FamiliesState>(context, listen: false).toString()
         },
       );
@@ -218,7 +218,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                     onDeleted: () {
                       GoRouter.of(context).pushReplacementNamed(
                         ListsScreen.routeName,
-                        params: {
+                        pathParameters: {
                           'fid':
                               Provider.of<FamiliesState>(context, listen: false)
                                   .toString()
@@ -309,7 +309,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
                         },
                       );
                     },
-                  ).toList(),
+                  ),
                   ...(isEditing
                       ? [NewCategory(onAdd: handleCategoryAdded)]
                       : []),

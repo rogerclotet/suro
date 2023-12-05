@@ -42,7 +42,7 @@ class ListsScreen extends StatelessWidget {
               onPressed: () {
                 GoRouter.of(context).pushNamed(
                   TemplatesScreen.routeName,
-                  params: {
+                  pathParameters: {
                     'fid': Provider.of<FamiliesState>(context, listen: false)
                         .currentFamily!
                         .id

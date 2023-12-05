@@ -18,11 +18,11 @@ List<GoRoute> routes(
       path: '/',
       redirect: (BuildContext context, GoRouterState state) async {
         if (globalState.initialRoute == null) {
-          var to = state.queryParams['to'];
+          var to = state.uri.queryParameters['to'];
           if (![null, '/'].contains(to)) {
             globalState.initialRoute = to;
-          } else if (state.location != '/') {
-            globalState.initialRoute = state.location;
+          } else if (state.uri.toString() != '/') {
+            globalState.initialRoute = state.uri.toString();
           }
         }
 
@@ -33,7 +33,7 @@ List<GoRoute> routes(
           name: FamilySettingsScreen.routeName,
           path: 'f/:fid',
           builder: (context, state) => FamilySettingsScreen(
-            familyId: int.parse(state.params['fid']!),
+            familyId: int.parse(state.pathParameters['fid']!),
           ),
           routes: [
             GoRoute(
@@ -45,7 +45,7 @@ List<GoRoute> routes(
                   name: ListDetailScreen.listRouteName,
                   path: ':lid',
                   builder: (context, state) => ListDetailScreen(
-                    listId: int.parse(state.params['lid']!),
+                    listId: int.parse(state.pathParameters['lid']!),
                   ),
                 ),
               ],
@@ -59,7 +59,7 @@ List<GoRoute> routes(
                   name: ListDetailScreen.templateRouteName,
                   path: ':lid',
                   builder: (context, state) => ListDetailScreen(
-                    listId: int.parse(state.params['lid']!),
+                    listId: int.parse(state.pathParameters['lid']!),
                   ),
                 ),
               ],

@@ -23,7 +23,7 @@ class ListPreview extends StatelessWidget {
   void navigateToList(BuildContext context) {
     GoRouter.of(context).pushNamed(
       ListDetailScreen.listRouteName,
-      params: {
+      pathParameters: {
         'fid': Provider.of<FamiliesState>(context, listen: false)
             .currentFamily!
             .id
@@ -160,7 +160,7 @@ class ListPreview extends StatelessWidget {
                     }
                     var path = GoRouter.of(context).namedLocation(
                       ListDetailScreen.listRouteName,
-                      params: {
+                      pathParameters: {
                         'fid': familyId.toString(),
                         'lid': list.id.toString(),
                       },

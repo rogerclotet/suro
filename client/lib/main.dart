@@ -84,7 +84,7 @@ class _FamilyAppState extends State<FamilyApp> {
         } else {
           router.pushReplacementNamed(
             ListsScreen.routeName,
-            params: {
+            pathParameters: {
               'fid': familiesState.currentFamily!.id.toString(),
             },
           );
@@ -97,7 +97,7 @@ class _FamilyAppState extends State<FamilyApp> {
       }
       router.pushReplacementNamed(
         LoginScreen.routeName,
-        queryParams: queryParams,
+        queryParameters: queryParams,
       );
     }
   }

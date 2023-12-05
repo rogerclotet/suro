@@ -5,7 +5,6 @@ import 'package:familia/models/list.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_interceptor/http_interceptor.dart';
 import 'package:logging/logging.dart';
 import 'config.dart' show baseUrl;
 

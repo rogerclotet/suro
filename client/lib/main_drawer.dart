@@ -85,7 +85,7 @@ class MainDrawer extends StatelessWidget {
               _key.currentState?.close();
               GoRouter.of(context).pushReplacementNamed(
                 ListsScreen.routeName,
-                params: {'fid': familiesState.currentFamily!.id.toString()},
+                pathParameters: {'fid': familiesState.currentFamily!.id.toString()},
               );
             },
           ),
@@ -97,7 +97,7 @@ class MainDrawer extends StatelessWidget {
               _key.currentState?.close();
               GoRouter.of(context).pushReplacementNamed(
                 FamilySettingsScreen.routeName,
-                params: {'fid': familiesState.currentFamily!.id.toString()},
+                pathParameters: {'fid': familiesState.currentFamily!.id.toString()},
               );
             },
           ),

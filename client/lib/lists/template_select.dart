@@ -120,7 +120,7 @@ class _TemplateSelectState extends State<TemplateSelect> {
                         ),
                         onTap: () => includeTemplate(template),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),

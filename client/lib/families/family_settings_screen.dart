@@ -66,7 +66,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                       child: Icon(Icons.person),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
