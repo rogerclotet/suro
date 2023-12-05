@@ -4,6 +4,7 @@ import 'package:familia/auth/auth.dart';
 import 'package:familia/models/list.dart';
 import 'package:familia/models/list_item.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'config.dart' show baseUrl;
@@ -57,14 +58,15 @@ class AuthInterceptor extends InterceptorContract {
   AuthInterceptor(this.auth);
 
   @override
-  Future<RequestData> interceptRequest({required RequestData data}) async {
-    data.headers['Authorization'] = 'Bearer ${auth.token}';
-    return data;
+  Future<BaseRequest> interceptRequest({required BaseRequest request}) async {
+    request.headers['Authorization'] = 'Bearer ${auth.token}';
+    return request;
   }
 
   @override
-  Future<ResponseData> interceptResponse({required ResponseData data}) async {
-    return data;
+  Future<BaseResponse> interceptResponse(
+      {required BaseResponse response}) async {
+    return response;
   }
 }
 
@@ -74,7 +76,7 @@ class ExpiredTokenRetryPolicy extends RetryPolicy {
   ExpiredTokenRetryPolicy(this.auth);
 
   @override
-  Future<bool> shouldAttemptRetryOnResponse(ResponseData response) async {
+  Future<bool> shouldAttemptRetryOnResponse(BaseResponse response) async {
     if (response.statusCode != 401) {
       return false;
     }

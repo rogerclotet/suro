@@ -92,8 +92,8 @@ class _FamilyAppState extends State<FamilyApp> {
       });
     } else {
       Map<String, dynamic> queryParams = {};
-      if (router.location != '/') {
-        queryParams['to'] = router.location;
+      if (GoRouterState.of(context).fullPath != '/') {
+        queryParams['to'] = GoRouterState.of(context).fullPath;
       }
       router.pushReplacementNamed(
         LoginScreen.routeName,
@@ -139,11 +139,9 @@ class _FamilyAppState extends State<FamilyApp> {
                 themeMode: ThemeMode.system,
                 theme: ThemeData(
                   colorScheme: lightColorScheme,
-                  useMaterial3: true,
                 ),
                 darkTheme: ThemeData(
                   colorScheme: darkColorScheme,
-                  useMaterial3: true,
                 ),
               );
             },
