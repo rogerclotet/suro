@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
@@ -54,7 +53,7 @@ class _NewCategoryItemState extends State<NewCategoryItem> {
         focusNode: focusNode,
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: "Afegir element",
+          hintText: 'Afegir element',
           hintStyle: TextStyle(
             color:
                 Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.5),

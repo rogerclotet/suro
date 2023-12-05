@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:familia/lists/list_details/editable_category_item.dart';
 import 'package:familia/lists/list_details/item_placeholder.dart';

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:familia/families/families_state.dart';
 import 'package:familia/lists/delete_list_dialog.dart';
