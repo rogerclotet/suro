@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:familia/auth/auth.dart';
 import 'package:familia/auth/login_screen.dart';
 import 'package:familia/client.dart';
@@ -117,8 +119,10 @@ class _FamilyAppState extends State<FamilyApp> {
         title: 'Família',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.teal,
-              brightness: PlatformDispatcher.instance.platformBrightness),
+            seedColor: Colors.teal,
+            brightness: PlatformDispatcher.instance.platformBrightness,
+          ),
+          brightness: PlatformDispatcher.instance.platformBrightness,
         ),
       ),
     );
