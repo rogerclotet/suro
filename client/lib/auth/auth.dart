@@ -38,15 +38,13 @@ class Auth with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     final res = await AnonymousClient.login(email: email, password: password);
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-      _accessToken = data['access'];
-      _refreshToken = data['refresh'];
+    final data = jsonDecode(res.body);
+    _accessToken = data['access'];
+    _refreshToken = data['refresh'];
 
-      storage.write(key: refreshKey, value: _refreshToken);
+    storage.write(key: refreshKey, value: _refreshToken);
 
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   Future<void> refresh() async {

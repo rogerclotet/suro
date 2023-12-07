@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      auth.login(email, password).timeout(const Duration(seconds: 5));
+      await auth.login(email, password).timeout(const Duration(seconds: 5));
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
