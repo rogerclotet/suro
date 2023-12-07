@@ -64,7 +64,7 @@ class FamilyList {
         return -1;
       }
 
-      var orderScore = b.order - a.order;
+      var orderScore = a.order - b.order;
       if (orderScore != 0) {
         return orderScore;
       }
