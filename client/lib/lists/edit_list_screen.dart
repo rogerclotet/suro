@@ -124,7 +124,6 @@ class _EditListScreenState extends State<EditListScreen> {
               textCapitalization: TextCapitalization.sentences,
               autofocus: true,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
                 labelText: 'Nom',
               ),
               validator: (value) {
@@ -139,7 +138,6 @@ class _EditListScreenState extends State<EditListScreen> {
               controller: descriptionController,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
                 labelText: 'Descripció',
               ),
               maxLines: 3,

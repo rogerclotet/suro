@@ -39,7 +39,6 @@ class _LoginFormState extends State<LoginForm> {
                   autofocus: true,
                   autofillHints: const [AutofillHints.email],
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
                     labelText: 'Email',
                   ),
                   validator: (value) {
@@ -59,7 +58,6 @@ class _LoginFormState extends State<LoginForm> {
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
                     labelText: 'Contrasenya',
                   ),
                   validator: (value) {
