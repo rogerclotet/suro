@@ -11,13 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 List<GoRoute> routes(
-    Auth auth, FamiliesState familiesState, GlobalState globalState) {
+  Auth auth,
+  FamiliesState familiesState,
+  GlobalState globalState,
+) {
   return [
     GoRoute(
       name: 'home',
       path: '/',
       redirect: (BuildContext context, GoRouterState state) async {
         if (globalState.initialRoute == null) {
+          // Query parameters are not set at the moment, it should be set from main.dart
           var to = state.uri.queryParameters['to'];
           if (![null, '/'].contains(to)) {
             globalState.initialRoute = to;

@@ -89,13 +89,8 @@ class _FamilyAppState extends State<FamilyApp> {
         }
       });
     } else {
-      Map<String, dynamic> queryParams = {};
-      if (GoRouterState.of(context).fullPath != '/') {
-        queryParams['to'] = GoRouterState.of(context).fullPath;
-      }
       router.pushReplacementNamed(
         LoginScreen.routeName,
-        queryParameters: queryParams,
       );
     }
   }
@@ -109,21 +104,23 @@ class _FamilyAppState extends State<FamilyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => auth),
-          ListenableProvider(create: (_) => authClient),
-          ChangeNotifierProvider(create: (_) => familiesState),
-          ChangeNotifierProvider(create: (_) => listsState),
-        ],
-        child: MaterialApp.router(
-          routeInformationParser: router.routeInformationParser,
-          routeInformationProvider: router.routeInformationProvider,
-          routerDelegate: router.routerDelegate,
-          title: 'Família',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-            brightness: PlatformDispatcher.instance.platformBrightness,
-          ),
-        ));
+      providers: [
+        ChangeNotifierProvider(create: (_) => auth),
+        ListenableProvider(create: (_) => authClient),
+        ChangeNotifierProvider(create: (_) => familiesState),
+        ChangeNotifierProvider(create: (_) => listsState),
+      ],
+      child: MaterialApp.router(
+        routeInformationParser: router.routeInformationParser,
+        routeInformationProvider: router.routeInformationProvider,
+        routerDelegate: router.routerDelegate,
+        title: 'Família',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.teal,
+              brightness: PlatformDispatcher.instance.platformBrightness),
+        ),
+      ),
+    );
   }
 }
