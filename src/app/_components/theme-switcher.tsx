@@ -22,7 +22,7 @@ export default function ThemeSwitcher() {
       <input
         type="checkbox"
         name="theme"
-        checked={theme === themes[1]}
+        checked={theme === themes[0]}
         onChange={toggleTheme}
       />
 
