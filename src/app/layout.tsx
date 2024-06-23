@@ -2,8 +2,8 @@ import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import React from "react";
-import BottomNav from "./_components/bottom-nav";
-import Navbar from "./_components/navbar";
+import BottomNav from "./_components/navigation/bottom-nav";
+import Navbar from "./_components/navigation/navbar";
 import { themes } from "./_data/themes";
 
 export const metadata = {
