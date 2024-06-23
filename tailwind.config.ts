@@ -12,6 +12,6 @@ export default {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["emerald", "night"],
+    themes: ["emerald", "dim"],
   },
 } satisfies Config;

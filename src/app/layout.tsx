@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import React from "react";
 import BottomNav from "./_components/bottom-nav";
 import Navbar from "./_components/navbar";
+import { themes } from "./_data/themes";
 
 export const metadata = {
   title: "Família",
@@ -23,8 +24,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <ThemeProvider themes={["night", "emerald"]}>
-          <div className="flex min-h-screen flex-col items-center justify-stretch">
+        <ThemeProvider themes={[...themes]}>
+          <div className="flex flex-col items-center justify-stretch">
             <Navbar />
             <div className="flex-grow lg:container">{children}</div>
             <BottomNav />

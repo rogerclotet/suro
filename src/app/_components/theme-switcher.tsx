@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import React from "react";
+import { themes } from "../_data/themes";
 
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -13,7 +14,7 @@ export default function ThemeSwitcher() {
   }, []);
 
   function toggleTheme() {
-    setTheme(theme === "night" ? "emerald" : "night");
+    setTheme(theme === themes[0] ? themes[1] : themes[0]);
   }
 
   return (
@@ -21,7 +22,7 @@ export default function ThemeSwitcher() {
       <input
         type="checkbox"
         name="theme"
-        checked={theme === "emerald"}
+        checked={theme === themes[1]}
         onChange={toggleTheme}
       />
 
