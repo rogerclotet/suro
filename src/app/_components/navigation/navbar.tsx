@@ -1,8 +1,16 @@
+import { auth, signOut } from "@/auth";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import ThemeSwitcher from "../theme-switcher";
+import ProjectDropdown from "./project-dropdown";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await auth();
+
+  if (!session) {
+    return null;
+  }
+
   return (
     <div className="drawer flex flex-col items-center">
       <input id="menu-drawer" type="checkbox" className="drawer-toggle" />
@@ -40,7 +48,42 @@ export default function Navbar() {
           className="drawer-overlay"
         ></label>
 
-        <ul tabIndex={0} className="menu min-h-full w-80 bg-base-200 p-4">
+        <ul tabIndex={0} className="menu min-h-full w-80 gap-2 bg-base-200 p-4">
+          <li>
+            <details className="dropdown">
+              <summary>
+                <div className="flex flex-row items-center justify-between gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={session.user.image!}
+                    alt={session.user.name!}
+                    className="h-8 w-8 rounded-full border-2"
+                  />
+                  {session.user.name}
+                </div>
+              </summary>
+              <ul
+                tabIndex={0}
+                className="menu mt-2 w-full gap-2 rounded-l-xl bg-base-300"
+              >
+                <li>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await signOut();
+                    }}
+                  >
+                    <button>Tancar sessió</button>
+                  </form>
+                </li>
+              </ul>
+            </details>
+          </li>
+
+          <li>
+            <ProjectDropdown />
+          </li>
+
           <li>
             <a>Item 1</a>
           </li>

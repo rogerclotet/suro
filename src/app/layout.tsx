@@ -27,7 +27,9 @@ export default function RootLayout({
         <ThemeProvider themes={[...themes]}>
           <div className="flex flex-col items-center justify-stretch">
             <Navbar />
-            <div className="flex-grow lg:container">{children}</div>
+            <div className="w-full flex-grow px-4 py-4 lg:container">
+              {children}
+            </div>
             <BottomNav />
           </div>
         </ThemeProvider>
