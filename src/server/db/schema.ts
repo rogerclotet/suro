@@ -18,14 +18,14 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
-export const projects = createTable("project", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  name: varchar("name", { length: 255 }),
-});
+// export const projects = createTable("project", {
+//   id: varchar("id", { length: 255 }).notNull().primaryKey(),
+//   name: varchar("name", { length: 255 }),
+// });
 
-export const projectsRelations = relations(projects, ({ many }) => ({
-  users: many(users),
-}));
+// export const projectsRelations = relations(projects, ({ many }) => ({
+//   users: many(users),
+// }));
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -40,7 +40,6 @@ export const users = createTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
-  projects: many(projects),
 }));
 
 export const accounts = createTable(
