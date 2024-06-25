@@ -57,35 +57,29 @@ export default async function Navbar() {
                   <img
                     src={session.user.image!}
                     alt={session.user.name!}
-                    className="h-8 w-8 rounded-full border-2"
+                    className="h-8 w-8 rounded-full border-2 border-neutral-content"
                   />
                   {session.user.name}
                 </div>
               </summary>
-              <ul
-                tabIndex={0}
-                className="menu mt-2 w-full gap-2 rounded-l-xl bg-base-300"
-              >
-                <li>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await signOut();
-                    }}
-                  >
-                    <button>Tancar sessió</button>
-                  </form>
-                </li>
+
+              <ul tabIndex={0} className="menu mt-2 w-full gap-2">
+                <form
+                  action={async () => {
+                    "use server";
+                    await signOut();
+                  }}
+                >
+                  <li>
+                    <button className="h-full w-full">Tancar sessió</button>
+                  </li>
+                </form>
               </ul>
             </details>
           </li>
 
           <li>
             <ProjectDropdown />
-          </li>
-
-          <li>
-            <a>Item 1</a>
           </li>
         </ul>
       </div>
