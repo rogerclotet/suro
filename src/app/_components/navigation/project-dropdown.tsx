@@ -17,6 +17,7 @@ export default function ProjectSelector() {
       }
     }
     fetchProjects().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
