@@ -4,6 +4,7 @@ import {
   integer,
   pgTableCreator,
   primaryKey,
+  serial,
   text,
   timestamp,
   varchar,
@@ -18,14 +19,37 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
-// export const projects = createTable("project", {
-//   id: varchar("id", { length: 255 }).notNull().primaryKey(),
-//   name: varchar("name", { length: 255 }),
-// });
+export const projects = createTable("project", {
+  id: serial("id").notNull().primaryKey(),
+  name: varchar("name", { length: 255 }),
+});
 
-// export const projectsRelations = relations(projects, ({ many }) => ({
-//   users: many(users),
-// }));
+export const projectsRelations = relations(projects, ({ many }) => ({
+  users: many(projectToUsers),
+}));
+
+export const projectToUsers = createTable(
+  "projectToUser",
+  {
+    projectId: integer("projectId")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: varchar("userId", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+  }),
+);
+
+export const projectToUsersRelations = relations(projectToUsers, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectToUsers.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, { fields: [projectToUsers.userId], references: [users.id] }),
+}));
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -40,6 +64,7 @@ export const users = createTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  projects: many(projectToUsers),
 }));
 
 export const accounts = createTable(

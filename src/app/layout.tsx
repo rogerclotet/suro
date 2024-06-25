@@ -1,9 +1,10 @@
+import { auth } from "@/auth";
 import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import React from "react";
 import BottomNav from "./_components/navigation/bottom-nav";
-import Navbar from "./_components/navigation/navbar";
+import Drawer from "./_components/navigation/drawer";
 import { themes } from "./_data/themes";
 
 export const metadata = {
@@ -12,11 +13,13 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
   return (
     <html
       lang="ca"
@@ -26,11 +29,11 @@ export default function RootLayout({
       <body>
         <ThemeProvider themes={[...themes]}>
           <div className="flex flex-col items-center justify-stretch">
-            <Navbar />
+            <Drawer />
             <div className="w-full flex-grow px-4 py-4 lg:container">
               {children}
             </div>
-            <BottomNav />
+            {session && <BottomNav />}
           </div>
         </ThemeProvider>
       </body>
