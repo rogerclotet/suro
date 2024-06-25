@@ -3,7 +3,7 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import ThemeSwitcher from "../theme-switcher";
 import Navbar from "./navbar";
-import ProjectDropdown from "./project-dropdown";
+import ProjectSelector from "./project-dropdown";
 
 export default async function Drawer() {
   const session = await auth();
@@ -82,7 +82,7 @@ export default async function Drawer() {
           </li>
 
           <li>
-            <ProjectDropdown />
+            <ProjectSelector />
           </li>
         </ul>
       </div>

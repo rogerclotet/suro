@@ -1,18 +1,16 @@
 import { db } from "@/server/db";
 
-export default async function ProjectDropdown() {
+export default async function ProjectSelector() {
   const projects = await db.query.projects.findMany();
 
   return (
-    <details className="dropdown">
-      <summary>Projecte</summary>
-      <ul tabIndex={0} className="menu mt-2 gap-2 pl-2">
-        {projects.map((project) => (
-          <li key={project.id}>
-            <a href="#">{project.name}</a>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <select className="select select-bordered w-full max-w-xs">
+      {projects.map((project) => (
+        <option key={project.id} value={project.id}>
+          {project.name}
+        </option>
+      ))}
+      <option value="new">+ Nou projecte</option>
+    </select>
   );
 }
