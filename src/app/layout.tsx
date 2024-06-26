@@ -13,8 +13,8 @@ v.setGlobalConfig({ lang: "ca" });
 
 export const metadata = {
   title: "Família",
-  description: "",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  description: "Gestor familiar",
+  icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 
 export default async function RootLayout({
