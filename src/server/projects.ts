@@ -12,7 +12,13 @@ export async function getProjects() {
   }
 
   const results = await db.query.projectToUsers.findMany({
-    with: { user: true, project: true },
+    columns: {},
+    with: {
+      project: {
+        columns: { id: true, name: true },
+        with: { users: { columns: {}, with: { user: true } } },
+      },
+    },
     where: eq(projectToUsers.userId, session.user.id),
   });
 

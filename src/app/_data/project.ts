@@ -1,3 +1,4 @@
-import type { projects } from "@/server/db/schema";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { getProjects } from "@/server/projects";
 
-export type Project = typeof projects.$inferSelect;
+export type Project = Awaited<ReturnType<typeof getProjects>>[number];

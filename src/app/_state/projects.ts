@@ -7,8 +7,11 @@ interface ProjectsState {
   projects: Project[];
   setProjects: (projects: Project[]) => void;
   addProject: (project: Project) => void;
+  removeProject: (project: Project) => void;
   selectedProjectId: number;
   selectProject: (projectId: number) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
 export const useProjectsStore = create<ProjectsState>()(
@@ -17,8 +20,12 @@ export const useProjectsStore = create<ProjectsState>()(
       projects: [],
       setProjects: (projects) => set({ projects }),
       addProject: (project) => set({ projects: [...get().projects, project] }),
+      removeProject: (project) =>
+        set({ projects: get().projects.filter((p) => p.id !== project.id) }),
       selectedProjectId: -1,
       selectProject: (projectId) => set({ selectedProjectId: projectId }),
+      isLoading: true,
+      setIsLoading: (isLoading) => set({ isLoading }),
     }),
     { name: "ProjectsStore" },
   ),

@@ -2,7 +2,7 @@
 
 import { useProjectsStore } from "@/app/_state/projects";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { X } from "lucide-react";
+import { Plus } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,10 +10,11 @@ import type * as v from "valibot";
 import { createProject } from "./actions";
 import { createProjectSchema } from "./data";
 
-export default function CreateProject({ onClose }: { onClose: () => void }) {
+export default function CreateProject() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -21,6 +22,7 @@ export default function CreateProject({ onClose }: { onClose: () => void }) {
     },
     resolver: valibotResolver(createProjectSchema),
   });
+  const dialog = React.useRef<HTMLDialogElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const addProject = useProjectsStore((state) => state.addProject);
@@ -42,47 +44,59 @@ export default function CreateProject({ onClose }: { onClose: () => void }) {
       );
       return;
     } finally {
+      reset();
+      dialog.current?.close();
       setIsLoading(false);
-      onClose();
     }
   }
 
+  function openDialog() {
+    dialog.current?.showModal();
+  }
+
   return (
-    <div className="card bg-base-100 shadow-lg">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="card-body">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isLoading}
-            className="btn btn-square btn-ghost btn-sm absolute right-2 top-2"
-          >
-            <X />
-          </button>
-          <h2 className="card-title">Crear Projecte</h2>
-          <label className="form-control w-full max-w-xs">
-            <input
-              {...register("name")}
-              disabled={isLoading}
-              placeholder="Nom"
-              className="input input-bordered w-full max-w-xs"
-            />
-            {errors.name && (
-              <div className="label w-full">
-                <span className="label-text-alt text-error">
-                  {errors.name.message?.toString()}
-                </span>
-              </div>
-            )}
-          </label>
-          <div className="card-actions justify-end">
-            <button disabled={isLoading} className="btn btn-primary">
-              {isLoading && <span className="loading loading-spinner" />}
-              Crear
-            </button>
-          </div>
+    <>
+      <button className="btn btn-primary btn-sm" onClick={openDialog}>
+        <Plus />
+        Crear projecte
+      </button>
+
+      <dialog ref={dialog} className="modal">
+        <div className="modal-box">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <h3 className="mb-4 text-lg font-semibold">Crear Projecte</h3>
+            <label className="form-control w-full">
+              <div className="label label-text">Nom</div>
+              <input
+                {...register("name")}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
+              {errors.name && (
+                <div className="label w-full">
+                  <span className="label-text-alt text-error">
+                    {errors.name.message?.toString()}
+                  </span>
+                </div>
+              )}
+            </label>
+            <div className="modal-action">
+              <button
+                type="button"
+                onClick={() => dialog.current?.close()}
+                disabled={isLoading}
+                className="btn btn-neutral"
+              >
+                Cancel·lar
+              </button>
+              <button disabled={isLoading} className="btn btn-primary">
+                {isLoading && <span className="loading loading-spinner" />}
+                Crear
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      </dialog>
+    </>
   );
 }

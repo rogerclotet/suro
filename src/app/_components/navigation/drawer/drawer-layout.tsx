@@ -1,21 +1,28 @@
-import { auth } from "@/auth";
+"use client";
+
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
-import ThemeSwitcher from "../theme-switcher";
-import DrawerMenu from "./drawer-menu";
-import Navbar from "./navbar";
+import React from "react";
+import ThemeSwitcher from "../../theme-switcher";
+import Navbar from "../navbar";
+import ProjectSelector from "../project-dropdown";
 
-export default async function Drawer() {
-  const session = await auth();
-
-  if (!session) {
-    return null;
-  }
+export default function DrawerLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <div className="drawer flex flex-col items-center">
-      <input id="menu-drawer" type="checkbox" className="drawer-toggle" />
+      <input
+        id="menu-drawer"
+        type="checkbox"
+        checked={isOpen}
+        onChange={() => setIsOpen(!isOpen)}
+        className="drawer-toggle"
+      />
 
       <nav className="navbar w-full bg-primary text-primary-content lg:container lg:rounded-b-xl">
         <div className="navbar-start">
@@ -45,15 +52,24 @@ export default async function Drawer() {
         </div>
       </nav>
 
-      <div className="drawer-side">
+      <div className="drawer-side z-50">
         <label
           htmlFor="menu-drawer"
           aria-label="Tancar menú lateral"
           className="drawer-overlay"
         ></label>
-        <Suspense fallback={null}>
-          <DrawerMenu />
-        </Suspense>
+
+        <ul tabIndex={0} className="menu min-h-full w-80 gap-2 bg-base-200 p-4">
+          <li>{children}</li>
+
+          <ProjectSelector />
+
+          <li>
+            <Link href="/projectes" onClick={() => setIsOpen(false)}>
+              Gestionar projectes
+            </Link>
+          </li>
+        </ul>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 import * as v from "valibot";
 import { createProjectSchema } from "./data";
 
@@ -27,5 +28,15 @@ export async function createProject(
     .insert(projectToUsers)
     .values({ projectId: project.id, userId: session.user.id });
 
-  return project;
+  const fullProject = await db.query.projects.findFirst({
+    columns: { id: true, name: true },
+    with: { users: { columns: {}, with: { user: true } } },
+    where: eq(projects.id, project.id),
+  });
+
+  if (!fullProject) {
+    throw new Error("Error creating project");
+  }
+
+  return fullProject;
 }

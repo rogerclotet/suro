@@ -6,7 +6,7 @@ import React from "react";
 import { Toaster } from "sonner";
 import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
-import Drawer from "./_components/navigation/drawer";
+import Drawer from "./_components/navigation/drawer/drawer";
 import { themes } from "./_data/themes";
 
 v.setGlobalConfig({ lang: "ca" });
