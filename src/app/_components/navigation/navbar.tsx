@@ -13,7 +13,7 @@ export default function Navbar() {
         <li key={item.path}>
           <Link
             href={item.disabled ? "" : item.path}
-            className={`btn btn-ghost ${pathname === item.path ? "underline underline-offset-4 [text-decoration-thickness:0.15em]" : ""} ${item.disabled ? "cursor-default text-neutral-content" : ""}`}
+            className={`btn btn-ghost ${pathname === item.path ? "underline underline-offset-4 [text-decoration-thickness:0.15em]" : ""} ${item.disabled ? "no-animation cursor-default opacity-30" : ""}`}
           >
             {item.name}
           </Link>
