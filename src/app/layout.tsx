@@ -3,9 +3,13 @@ import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import React from "react";
+import { Toaster } from "sonner";
+import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
 import Drawer from "./_components/navigation/drawer";
 import { themes } from "./_data/themes";
+
+v.setGlobalConfig({ lang: "ca" });
 
 export const metadata = {
   title: "Família",
@@ -35,6 +39,19 @@ export default async function RootLayout({
             </div>
             {session && <BottomNav />}
           </div>
+
+          <Toaster
+            toastOptions={{
+              unstyled: true,
+              classNames: {
+                success: "alert alert-success",
+                error: "alert alert-error",
+                warning: "alert alert-warning",
+                info: "alert alert-info",
+              },
+            }}
+            position="bottom-center"
+          />
         </ThemeProvider>
       </body>
     </html>

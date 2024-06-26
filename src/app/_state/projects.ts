@@ -5,16 +5,18 @@ import type { Project } from "../_data/project";
 
 interface ProjectsState {
   projects: Project[];
-  updateProjects: (projects: Project[]) => void;
+  setProjects: (projects: Project[]) => void;
+  addProject: (project: Project) => void;
   selectedProjectId: number;
   selectProject: (projectId: number) => void;
 }
 
 export const useProjectsStore = create<ProjectsState>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       projects: [],
-      updateProjects: (projects) => set({ projects }),
+      setProjects: (projects) => set({ projects }),
+      addProject: (project) => set({ projects: [...get().projects, project] }),
       selectedProjectId: -1,
       selectProject: (projectId) => set({ selectedProjectId: projectId }),
     }),

@@ -38,9 +38,7 @@ export default async function DrawerMenu() {
         </details>
       </li>
 
-      <li>
-        <ProjectSelector />
-      </li>
+      <ProjectSelector />
     </ul>
   );
 }
