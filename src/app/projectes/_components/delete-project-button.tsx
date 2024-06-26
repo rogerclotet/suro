@@ -8,12 +8,22 @@ import { deleteProject } from "./actions";
 export default function DeleteProjectButton({ project }: { project: Project }) {
   const dialog = React.useRef<HTMLDialogElement>(null);
   const removeProject = useProjectsStore((state) => state.removeProject);
+  const addProject = useProjectsStore((state) => state.addProject);
 
   async function handleDelete() {
     removeProject(project);
     dialog.current?.close();
-    await deleteProject(project);
-    toast.success(`Projecte ${project.name} eliminat`);
+
+    try {
+      await deleteProject(project);
+      toast.success(`Projecte ${project.name} eliminat`);
+    } catch (error) {
+      console.error(error);
+      addProject(project);
+      toast.error(
+        "No s'ha pogut eliminar el projecte, torna-ho a provar més tard",
+      );
+    }
   }
 
   return (

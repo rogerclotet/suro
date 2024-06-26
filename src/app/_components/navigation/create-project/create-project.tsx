@@ -40,7 +40,7 @@ export default function CreateProject() {
     } catch (e) {
       console.error(e);
       toast.error(
-        "No s'ha pogut crear el projecte. Torna-ho a provar més tard",
+        "No s'ha pogut crear el projecte, torna-ho a provar més tard",
       );
       return;
     } finally {
