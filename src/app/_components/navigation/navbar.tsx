@@ -11,12 +11,18 @@ export default function Navbar() {
     <ul className="menu menu-horizontal gap-2 p-0">
       {menuItems.map((item) => (
         <li key={item.path}>
-          <Link
-            href={item.disabled ? "" : item.path}
-            className={`btn btn-ghost ${pathname === item.path ? "underline underline-offset-4 [text-decoration-thickness:0.15em]" : ""} ${item.disabled ? "no-animation cursor-default opacity-30" : ""}`}
-          >
-            {item.name}
-          </Link>
+          {item.disabled ? (
+            <div className="btn btn-ghost no-animation cursor-default opacity-40">
+              {item.name}
+            </div>
+          ) : (
+            <Link
+              href={item.disabled ? "" : item.path}
+              className={`btn btn-ghost ${pathname === item.path ? "underline underline-offset-4 [text-decoration-thickness:0.15em]" : ""}`}
+            >
+              {item.name}
+            </Link>
+          )}
         </li>
       ))}
     </ul>
