@@ -36,15 +36,21 @@ export default function ProjectSelector() {
     <>
       <li>
         <select
-          value={state.selectedProjectId}
+          value={state.selectedProjectId !== -1 ? state.selectedProjectId : ""}
           onChange={handleOptionChange}
           className="select select-bordered w-full max-w-xs"
         >
-          {state.projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
+          {state.projects.length > 0 ? (
+            state.projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))
+          ) : (
+            <option value="" disabled>
+              Seleccionar projecte
             </option>
-          ))}
+          )}
           <option value="new">+ Nou projecte</option>
         </select>
       </li>
