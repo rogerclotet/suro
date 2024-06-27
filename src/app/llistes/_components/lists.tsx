@@ -8,8 +8,10 @@ export default function Lists({ projects }: { projects: Project[] }) {
 
   return (
     <div>
-      Llistes del projecte{" "}
-      {projects.find((p) => p.id === selectedProjectId)?.name}
+      Llistes del projecte
+      <span className="font-bold text-accent">
+        {projects.find((p) => p.id === selectedProjectId)?.name}
+      </span>
     </div>
   );
 }
