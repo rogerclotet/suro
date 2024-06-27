@@ -8,5 +8,11 @@ export default async function ListesPage() {
     redirect("/login");
   }
 
-  return <Lists />;
+  return (
+    <div>
+      <h1 className="mb-4 text-xl font-semibold">Llistes</h1>
+
+      <Lists />
+    </div>
+  );
 }
