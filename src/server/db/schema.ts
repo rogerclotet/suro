@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -19,6 +20,51 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
+export const listItems = createTable("listItem", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  details: text("details"),
+  completed: boolean("completed").default(false),
+  createdAt: timestamp("createdAt", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
+  createdBy: varchar("createdBy", { length: 255 }).references(() => users.id),
+  updatedAt: timestamp("updatedAt", {
+    mode: "date",
+    withTimezone: true,
+  }).$onUpdate(() => new Date()),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  listId: uuid("listId")
+    .notNull()
+    .references(() => lists.id, { onDelete: "cascade" }),
+});
+
+export const listItemsRelations = relations(listItems, ({ one }) => ({
+  list: one(lists, { fields: [listItems.listId], references: [lists.id] }),
+}));
+
+export const lists = createTable("list", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
+  createdBy: varchar("createdBy", { length: 255 }).references(() => users.id),
+  updatedAt: timestamp("updatedAt", {
+    mode: "date",
+    withTimezone: true,
+  }).$onUpdate(() => new Date()),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  description: text("description"),
+});
+
+export const listsRelations = relations(lists, ({ one, many }) => ({
+  project: one(projects, { fields: [lists.id], references: [projects.id] }),
+  items: many(listItems),
+}));
+
 export const projects = createTable("project", {
   id: uuid("id").defaultRandom().notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -27,6 +73,7 @@ export const projects = createTable("project", {
 
 export const projectsRelations = relations(projects, ({ many }) => ({
   users: many(projectToUsers),
+  lists: many(lists),
 }));
 
 export const projectToUsers = createTable(
