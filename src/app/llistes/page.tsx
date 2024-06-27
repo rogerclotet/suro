@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import Lists from "./_components/lists";
 
 export default async function ListesPage() {
   const session = await auth();
@@ -7,5 +8,5 @@ export default async function ListesPage() {
     redirect("/login");
   }
 
-  return <div>Listes</div>;
+  return <Lists />;
 }
