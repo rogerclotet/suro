@@ -10,7 +10,7 @@ export default async function Login() {
 
   return (
     <div className="container mt-8 flex flex-col items-center gap-2 px-10">
-      <div className="card w-full max-w-80 shadow-xl">
+      <div className="card w-full max-w-80 bg-primary text-primary-content shadow-xl">
         <div className="card-body">
           <h2 className="card-title">Iniciar sessió</h2>
           <p>Has d&apos;iniciar sessió per a accedir a l&apos;aplicació</p>
