@@ -27,8 +27,9 @@ export default async function RootLayout({
   return (
     <html
       lang="ca"
-      className={`${GeistSans.variable}`}
       suppressHydrationWarning
+      className={`${GeistSans.variable}`}
+      style={{ scrollbarGutter: "stable" }}
     >
       <body>
         <ThemeProvider themes={[...themes]}>
