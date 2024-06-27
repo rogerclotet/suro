@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { createProjectSchema } from "./data";
 
@@ -17,26 +17,20 @@ export async function createProject(
 
   const parsedData = v.parse(createProjectSchema, data);
 
-  const result = await db.insert(projects).values(parsedData).returning();
+  const result = await db
+    .insert(projects)
+    .values(parsedData)
+    .returning({ id: projects.id });
   if (!result || result.length < 1) {
     throw new Error("Error creating project");
   }
 
   const project = result[0]!;
-
   await db
     .insert(projectToUsers)
     .values({ projectId: project.id, userId: session.user.id });
 
-  const fullProject = await db.query.projects.findFirst({
-    columns: { id: true, name: true, inviteToken: true },
-    with: { users: { columns: {}, with: { user: true } } },
-    where: eq(projects.id, project.id),
-  });
+  revalidatePath("/projectes");
 
-  if (!fullProject) {
-    throw new Error("Error creating project");
-  }
-
-  return fullProject;
+  return project.id;
 }

@@ -1,28 +1,12 @@
-"use client";
-
-import { Edit, Fingerprint } from "lucide-react";
-import { toast } from "sonner";
-import { useProjectsStore } from "../../_state/projects";
+import { getProjects } from "@/server/projects";
+import { Edit } from "lucide-react";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
+import IdIcon from "./id-icon";
 import InviteButton from "./invite-button";
 
-export default function ProjectsTable() {
-  const isLoading = useProjectsStore((state) => state.isLoading);
-  const projects = useProjectsStore((state) => state.projects);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-[200px] justify-center">
-        <span className="loading loading-spinner" />
-      </div>
-    );
-  }
-
-  async function copyIdToClipboard(id: string) {
-    await navigator.clipboard.writeText(id);
-    toast.info("Copiat al porta-retalls");
-  }
+export default async function ProjectsTable() {
+  const projects = await getProjects();
 
   return (
     <div className="overflow-x-auto">
@@ -39,13 +23,7 @@ export default function ProjectsTable() {
           {projects.map((project) => (
             <tr key={project.id} className="hover">
               <td>
-                <div
-                  onClick={() => copyIdToClipboard(project.id)}
-                  className="tooltip tooltip-right cursor-pointer"
-                  data-tip={project.id}
-                >
-                  <Fingerprint />
-                </div>
+                <IdIcon id={project.id} />
               </td>
               <td>{project.name}</td>
               <td className="p-0">

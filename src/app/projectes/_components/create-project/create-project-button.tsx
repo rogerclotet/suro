@@ -1,6 +1,6 @@
 "use client";
 
-import { useProjectsStore } from "@/app/_state/projects";
+import { useSelectedProject } from "@/app/_state/project-state";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -11,10 +11,12 @@ import { createProject } from "./actions";
 import { createProjectSchema } from "./data";
 
 export default function CreateProject() {
+  const { selectProject } = useSelectedProject();
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -25,18 +27,12 @@ export default function CreateProject() {
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const addProject = useProjectsStore((state) => state.addProject);
-  const selectProject = useProjectsStore((state) => state.selectProject);
-
   async function onSubmit(data: v.InferInput<typeof createProjectSchema>) {
     setIsLoading(true);
     try {
-      const project = await createProject(data);
-
-      toast.success(`Projecte ${project.name} creat`);
-
-      addProject(project);
-      selectProject(project.id);
+      const projectId = await createProject(data);
+      selectProject(projectId);
+      toast.success(`Projecte ${getValues().name} creat`);
     } catch (e) {
       console.error(e);
       toast.error(

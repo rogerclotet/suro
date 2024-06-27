@@ -5,7 +5,6 @@ import Link from "next/link";
 import React from "react";
 import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
-import ProjectSelector from "../project-dropdown";
 
 export default function DrawerLayout({
   children,
@@ -60,9 +59,7 @@ export default function DrawerLayout({
         ></label>
 
         <ul tabIndex={0} className="menu min-h-full w-80 gap-2 bg-base-200 p-4">
-          <li>{children}</li>
-
-          <ProjectSelector />
+          {children}
 
           <li>
             <Link href="/projectes" onClick={() => setIsOpen(false)}>

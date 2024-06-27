@@ -1,5 +1,6 @@
+"use client";
+
 import type { Project } from "@/app/_data/project";
-import { useProjectsStore } from "@/app/_state/projects";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -7,11 +8,8 @@ import { deleteProject } from "./actions";
 
 export default function DeleteProjectButton({ project }: { project: Project }) {
   const dialog = React.useRef<HTMLDialogElement>(null);
-  const removeProject = useProjectsStore((state) => state.removeProject);
-  const addProject = useProjectsStore((state) => state.addProject);
 
   async function handleDelete() {
-    removeProject(project);
     dialog.current?.close();
 
     try {
@@ -19,7 +17,6 @@ export default function DeleteProjectButton({ project }: { project: Project }) {
       toast.success(`Projecte ${project.name} eliminat`);
     } catch (error) {
       console.error(error);
-      addProject(project);
       toast.error(
         "No s'ha pogut eliminar el projecte, torna-ho a provar més tard",
       );

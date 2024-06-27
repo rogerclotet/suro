@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import CreateProject from "../_components/navigation/create-project/create-project";
+import { Suspense } from "react";
+import CreateProject from "./_components/create-project/create-project-button";
 import ProjectsTable from "./_components/projects-table";
 
 export default async function ProjectesPage() {
@@ -16,7 +17,15 @@ export default async function ProjectesPage() {
         <CreateProject />
       </div>
 
-      <ProjectsTable />
+      <Suspense
+        fallback={
+          <div className="flex h-[200px] justify-center">
+            <span className="loading loading-spinner" />
+          </div>
+        }
+      >
+        <ProjectsTable />
+      </Suspense>
     </div>
   );
 }

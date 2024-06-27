@@ -7,7 +7,10 @@ import { toast } from "sonner";
 
 export default function InviteButton({ project }: { project: Project }) {
   const dialog = React.useRef<HTMLDialogElement>(null);
-  const inviteLink = `${window.location.origin}/projectes/${project.id}?token=${project.inviteToken}`;
+  const inviteLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/projectes/${project.id}?token=${project.inviteToken}`
+      : "";
 
   async function copyLinkToClipboard() {
     await navigator.clipboard.writeText(inviteLink);
