@@ -19,18 +19,18 @@ export default function ProjectsTable() {
 
   return (
     <div className="overflow-x-auto">
-      <table className="table w-full">
+      <table className="table">
         <thead>
           <tr>
             <th>Id</th>
             <th>Nom</th>
             <th>Usuaris</th>
-            <th className="w-0">Accions</th>
+            <th className="w-40">Accions</th>
           </tr>
         </thead>
         <tbody>
           {projects.map((project) => (
-            <tr key={project.id} className="hover:bg-base-200">
+            <tr key={project.id} className="hover">
               <td>{project.id}</td>
               <td>{project.name}</td>
               <td className="p-0">
