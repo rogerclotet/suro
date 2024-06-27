@@ -37,6 +37,7 @@ export default function InviteButton({ project }: { project: Project }) {
               <input
                 type="text"
                 value={inviteLink}
+                readOnly
                 className="input input-bordered w-full"
               />
             </p>
