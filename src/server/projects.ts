@@ -15,7 +15,7 @@ export async function getProjects() {
     columns: {},
     with: {
       project: {
-        columns: { id: true, name: true },
+        columns: { id: true, name: true, inviteToken: true },
         with: { users: { columns: {}, with: { user: true } } },
       },
     },

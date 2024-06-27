@@ -1,9 +1,11 @@
 "use client";
 
-import { Edit, UserPlus } from "lucide-react";
+import { Edit, Fingerprint } from "lucide-react";
+import { toast } from "sonner";
 import { useProjectsStore } from "../../_state/projects";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
+import InviteButton from "./invite-button";
 
 export default function ProjectsTable() {
   const isLoading = useProjectsStore((state) => state.isLoading);
@@ -15,6 +17,11 @@ export default function ProjectsTable() {
         <span className="loading loading-spinner" />
       </div>
     );
+  }
+
+  async function copyIdToClipboard(id: string) {
+    await navigator.clipboard.writeText(id);
+    toast.info("Copiat al porta-retalls");
   }
 
   return (
@@ -31,31 +38,28 @@ export default function ProjectsTable() {
         <tbody>
           {projects.map((project) => (
             <tr key={project.id} className="hover">
-              <td>{project.id}</td>
+              <td>
+                <div
+                  onClick={() => copyIdToClipboard(project.id)}
+                  className="tooltip tooltip-right cursor-pointer"
+                  data-tip={project.id}
+                >
+                  <Fingerprint />
+                </div>
+              </td>
               <td>{project.name}</td>
               <td className="p-0">
                 <UsersList users={project.users} />
               </td>
               <td className="flex flex-row gap-2">
-                <div className="tooltip" data-tip="Convidar usuaris">
-                  <button
-                    aria-label="Convidar"
-                    className="btn btn-square btn-ghost btn-sm"
-                  >
-                    <UserPlus /> {/* TODO: implement invite */}
-                  </button>
-                </div>
-                <div className="tooltip" data-tip="Editar">
-                  <button
-                    aria-label="Editar"
-                    className="btn btn-square btn-ghost btn-sm"
-                  >
-                    <Edit /> {/* TODO: implement edit */}
-                  </button>
-                </div>
-                <div className="tooltip" data-tip="Eliminar">
-                  <DeleteProjectButton project={project} />
-                </div>
+                <InviteButton project={project} />
+                <button
+                  aria-label="Editar"
+                  className="btn btn-square btn-ghost btn-sm"
+                >
+                  <Edit /> {/* TODO: implement edit */}
+                </button>
+                <DeleteProjectButton project={project} />
               </td>
             </tr>
           ))}

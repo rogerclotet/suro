@@ -63,8 +63,9 @@ export default function CreateProject() {
 
       <dialog ref={dialog} className="modal">
         <div className="modal-box">
+          <h3 className="mb-4 text-lg font-semibold">Crear Projecte</h3>
+
           <form onSubmit={handleSubmit(onSubmit)}>
-            <h3 className="mb-4 text-lg font-semibold">Crear Projecte</h3>
             <label className="form-control w-full">
               <div className="label label-text">Nom</div>
               <input

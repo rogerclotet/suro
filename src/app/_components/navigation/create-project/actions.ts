@@ -29,7 +29,7 @@ export async function createProject(
     .values({ projectId: project.id, userId: session.user.id });
 
   const fullProject = await db.query.projects.findFirst({
-    columns: { id: true, name: true },
+    columns: { id: true, name: true, inviteToken: true },
     with: { users: { columns: {}, with: { user: true } } },
     where: eq(projects.id, project.id),
   });

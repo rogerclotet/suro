@@ -4,9 +4,9 @@ import {
   integer,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -20,8 +20,9 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
 export const projects = createTable("project", {
-  id: serial("id").notNull().primaryKey(),
-  name: varchar("name", { length: 255 }),
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  inviteToken: uuid("inviteToken").defaultRandom().notNull(),
 });
 
 export const projectsRelations = relations(projects, ({ many }) => ({
@@ -31,7 +32,7 @@ export const projectsRelations = relations(projects, ({ many }) => ({
 export const projectToUsers = createTable(
   "projectToUser",
   {
-    projectId: integer("projectId")
+    projectId: uuid("projectId")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
     userId: varchar("userId", { length: 255 })

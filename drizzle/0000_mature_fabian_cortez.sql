@@ -14,14 +14,15 @@ CREATE TABLE IF NOT EXISTS "f_account" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "f_projectToUser" (
-	"projectId" integer NOT NULL,
+	"projectId" uuid NOT NULL,
 	"userId" varchar(255) NOT NULL,
 	CONSTRAINT "f_projectToUser_projectId_userId_pk" PRIMARY KEY("projectId","userId")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "f_project" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar(255)
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"inviteToken" uuid DEFAULT gen_random_uuid() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "f_session" (

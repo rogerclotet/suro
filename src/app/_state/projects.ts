@@ -8,8 +8,8 @@ interface ProjectsState {
   setProjects: (projects: Project[]) => void;
   addProject: (project: Project) => void;
   removeProject: (project: Project) => void;
-  selectedProjectId: number;
-  selectProject: (projectId: number) => void;
+  selectedProjectId: string;
+  selectProject: (projectId: string) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
 }
@@ -22,7 +22,7 @@ export const useProjectsStore = create<ProjectsState>()(
       addProject: (project) => set({ projects: [...get().projects, project] }),
       removeProject: (project) =>
         set({ projects: get().projects.filter((p) => p.id !== project.id) }),
-      selectedProjectId: -1,
+      selectedProjectId: "",
       selectProject: (projectId) => set({ selectedProjectId: projectId }),
       isLoading: true,
       setIsLoading: (isLoading) => set({ isLoading }),

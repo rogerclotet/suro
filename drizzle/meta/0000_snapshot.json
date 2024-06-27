@@ -1,5 +1,5 @@
 {
-  "id": "b7608777-8339-4cd8-944d-7718a4de7ba2",
+  "id": "eee57235-8b2d-429f-b40c-1c7503adef7d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -116,7 +116,7 @@
       "columns": {
         "projectId": {
           "name": "projectId",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -173,15 +173,23 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "inviteToken": {
+          "name": "inviteToken",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         }
       },
       "indexes": {},

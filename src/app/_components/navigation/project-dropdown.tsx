@@ -24,14 +24,14 @@ export default function ProjectSelector() {
   }, []);
 
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    state.selectProject(Number(e.target.value));
+    state.selectProject(e.target.value);
   }
 
   return (
     <>
       <li>
         <select
-          value={state.selectedProjectId !== -1 ? state.selectedProjectId : ""}
+          value={state.selectedProjectId}
           onChange={handleOptionChange}
           className="select select-bordered w-full max-w-xs"
         >
