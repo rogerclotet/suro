@@ -1,17 +1,16 @@
 "use client";
 
-import { useSelectedProject } from "@/app/_state/project-state";
+import type { Project } from "@/app/_data/project";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import { createProject } from "./actions";
-import { createProjectSchema } from "./data";
+import { createList } from "./actions";
+import { createListSchema } from "./data";
 
-export default function CreateProjectButton() {
-  const { selectProject } = useSelectedProject();
+export default function CreateListButton({ project }: { project: Project }) {
   const {
     register,
     handleSubmit,
@@ -22,22 +21,19 @@ export default function CreateProjectButton() {
     defaultValues: {
       name: "",
     },
-    resolver: valibotResolver(createProjectSchema),
+    resolver: valibotResolver(createListSchema),
   });
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  async function onSubmit(data: v.InferInput<typeof createProjectSchema>) {
+  async function onSubmit(data: v.InferInput<typeof createListSchema>) {
     setIsLoading(true);
     try {
-      const projectId = await createProject(data);
-      selectProject(projectId);
-      toast.success(`Projecte ${getValues().name} creat`);
+      const listId = await createList(project.id, data);
+      toast.success(`Llista ${getValues().name} creada`);
     } catch (e) {
       console.error(e);
-      toast.error(
-        "No s'ha pogut crear el projecte, torna-ho a provar més tard",
-      );
+      toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
       return;
     } finally {
       reset();
@@ -54,12 +50,12 @@ export default function CreateProjectButton() {
     <>
       <button className="btn btn-primary btn-sm" onClick={openDialog}>
         <Plus />
-        Crear projecte
+        Crear llista
       </button>
 
       <dialog ref={dialog} className="modal">
         <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Crear Projecte</h3>
+          <h3 className="mb-4 text-lg font-semibold">Crear Llista</h3>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <label className="form-control w-full">

@@ -58,10 +58,16 @@ export const lists = createTable("list", {
   }).$onUpdate(() => new Date()),
   updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
   description: text("description"),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
 });
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
-  project: one(projects, { fields: [lists.id], references: [projects.id] }),
+  project: one(projects, {
+    fields: [lists.projectId],
+    references: [projects.id],
+  }),
   items: many(listItems),
 }));
 
