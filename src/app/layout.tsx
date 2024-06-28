@@ -35,7 +35,7 @@ export default async function RootLayout({
         <ThemeProvider themes={[...themes]} defaultTheme="dim">
           <div className="flex flex-col items-center justify-stretch">
             <Drawer />
-            <div className="w-full flex-grow px-4 py-4 lg:container">
+            <div className="mb-16 w-full flex-grow px-4 py-4 lg:container lg:mb-0">
               {children}
             </div>
             {session && <BottomNav />}
