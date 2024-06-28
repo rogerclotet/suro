@@ -21,7 +21,7 @@ export default function ProjectSelector({
 
   return (
     <select
-      value={selectedProjectId}
+      value={selectedProjectId ?? ""}
       onChange={handleOptionChange}
       className="select select-bordered w-full max-w-xs"
     >

@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getProject } from "@/server/projects";
+import { getUserProject } from "@/server/projects";
 import { redirect } from "next/navigation";
 import Lists from "./_components/lists";
 
@@ -13,7 +13,7 @@ export default async function ListesPage({
     redirect("/login");
   }
 
-  const project = await getProject(projectId);
+  const project = await getUserProject(projectId);
   if (!project) {
     redirect("/");
   }

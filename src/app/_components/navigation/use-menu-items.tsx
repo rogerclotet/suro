@@ -8,20 +8,6 @@ export type MenuItem = {
   disabled?: boolean;
 };
 
-export const menuItems: MenuItem[] = [
-  {
-    name: "Llistes",
-    path: "/llistes",
-    icon: <ListTodo />,
-  },
-  {
-    name: "Receptes",
-    path: "/receptes",
-    icon: <CookingPot />,
-    disabled: true,
-  },
-];
-
 export function useMenuItems() {
   const { selectedProjectId } = useSelectedProject();
 

@@ -2,7 +2,7 @@ import type { Project } from "@/app/_data/project";
 
 export default function UsersList({ users }: { users: Project["users"] }) {
   return (
-    <div className="avatar-group -space-x-6 overflow-visible">
+    <div className="avatar-group -space-x-4 overflow-visible">
       {users.slice(0, 3).map((user) => (
         <div key={user.user.id} className="tooltip" data-tip={user.user.name}>
           <UserAvatar user={user.user} />

@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { and, eq } from "drizzle-orm";
 import { db } from "./db";
-import { projectToUsers } from "./db/schema";
+import { projects, projectToUsers } from "./db/schema";
 
 export async function getProjects() {
   const session = await auth();
@@ -25,7 +25,7 @@ export async function getProjects() {
   return results.map((result) => result.project);
 }
 
-export async function getProject(projectId: string) {
+export async function getUserProject(projectId: string) {
   const session = await auth();
   if (!session) {
     return null;
@@ -46,4 +46,19 @@ export async function getProject(projectId: string) {
   });
 
   return result?.project;
+}
+
+export async function getInvitedProject(projectId: string) {
+  const session = await auth();
+  if (!session) {
+    return null;
+  }
+
+  const result = await db.query.projects.findFirst({
+    columns: { id: true, name: true, inviteToken: true },
+    with: { users: { columns: {}, with: { user: true } } },
+    where: and(eq(projects.id, projectId)),
+  });
+
+  return result;
 }

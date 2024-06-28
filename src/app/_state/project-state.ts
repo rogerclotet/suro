@@ -4,14 +4,14 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 interface ProjectState {
-  selectedProjectId: string;
+  selectedProjectId: string | null;
   selectProject: (projectId: string) => void;
 }
 
 const useProjectsStore = create<ProjectState>()(
   devtools(
     (set) => ({
-      selectedProjectId: "",
+      selectedProjectId: null,
       selectProject: (projectId) => set({ selectedProjectId: projectId }),
     }),
     { name: "ProjectsStore" },

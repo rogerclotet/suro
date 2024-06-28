@@ -9,7 +9,7 @@ export default function InviteButton({ project }: { project: Project }) {
   const dialog = React.useRef<HTMLDialogElement>(null);
   const inviteLink =
     typeof window !== "undefined"
-      ? `${window.location.origin}/projectes/${project.id}?token=${project.inviteToken}`
+      ? `${window.location.origin}/projectes/${project.id}/invitacio/${project.inviteToken}`
       : "";
 
   async function copyLinkToClipboard() {
