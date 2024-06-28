@@ -3,16 +3,19 @@ import UsersList from "@/app/projectes/_components/users-list";
 import { auth } from "@/auth";
 import { getInvitedProject } from "@/server/projects";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { acceptInvite } from "./actions";
 
+type Props = {
+  params: { projectId: string; inviteToken: string };
+};
+
 export default async function InvitePage({
   params: { projectId, inviteToken },
-}: {
-  params: { projectId: string; inviteToken: string };
-}) {
+}: Props) {
   const session = await auth();
   if (!session) {
     return redirect("/");
@@ -73,4 +76,17 @@ export default async function InvitePage({
       </div>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const project = await getInvitedProject(params.projectId);
+
+  if (!project) {
+    return {};
+  }
+
+  return {
+    title: `${project.name}`,
+    description: `Invitació per unir-se al projecte ${project.name}`,
+  };
 }
