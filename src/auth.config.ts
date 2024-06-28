@@ -19,6 +19,7 @@ export default {
         .insert(projects)
         .values({
           name: "Personal",
+          createdBy: user.id!,
         })
         .returning({ id: projects.id });
 
