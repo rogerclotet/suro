@@ -20,6 +20,7 @@ export default function CreateListButton({ project }: { project: Project }) {
   } = useForm({
     defaultValues: {
       name: "",
+      description: "",
     },
     resolver: valibotResolver(createListSchema),
   });
@@ -69,6 +70,21 @@ export default function CreateListButton({ project }: { project: Project }) {
                 <div className="label w-full">
                   <span className="label-text-alt text-error">
                     {errors.name.message?.toString()}
+                  </span>
+                </div>
+              )}
+            </label>
+            <label className="form-control w-full">
+              <div className="label label-text">Descripció</div>
+              <textarea
+                {...register("description")}
+                disabled={isLoading}
+                className="textarea textarea-bordered w-full"
+              />
+              {errors.description && (
+                <div className="label w-full">
+                  <span className="label-text-alt text-error">
+                    {errors.description.message?.toString()}
                   </span>
                 </div>
               )}
