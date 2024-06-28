@@ -12,8 +12,8 @@ export default async function ProjectesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="mb-4 text-xl font-semibold">Gestionar projectes</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">Gestionar projectes</h1>
         <CreateProjectButton />
       </div>
 

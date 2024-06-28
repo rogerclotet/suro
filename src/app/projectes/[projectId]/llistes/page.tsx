@@ -24,8 +24,8 @@ export default async function ListesPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="mb-4 text-xl font-semibold">Llistes</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">Llistes</h1>
         <CreateListButton project={project} />
       </div>
 
