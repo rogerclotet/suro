@@ -13,6 +13,12 @@ export default function ProjectSelector({
 }) {
   const { selectedProjectId, selectProject } = useSelectedProject();
 
+  React.useEffect(() => {
+    if (selectedProjectId === null && projects.length > 0) {
+      selectProject(projects[0]!.id);
+    }
+  }, [selectedProjectId, projects, selectProject]);
+
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const projectId = e.target.value;
     selectProject(e.target.value);

@@ -10,7 +10,7 @@ export default async function ListesPage({
 }) {
   const session = await auth();
   if (!session) {
-    redirect("/login");
+    redirect("/");
   }
 
   const project = await getUserProject(projectId);

@@ -17,11 +17,6 @@ export default function Login({
     return redirect(redirectTo);
   }
 
-  async function handleLogin() {
-    await login(redirectTo);
-    redirect(redirectTo);
-  }
-
   return (
     <div className="container mx-auto mt-8 flex flex-col items-center gap-2 px-10">
       <div className="card w-full max-w-80 bg-primary text-primary-content shadow-xl">
@@ -29,8 +24,10 @@ export default function Login({
           <h2 className="card-title">Iniciar sessió</h2>
           <p>Has d&apos;iniciar sessió per a accedir a l&apos;aplicació</p>
           <div className="card-actions mt-4">
-            <form onSubmit={handleLogin} className="w-full">
-              <button className="btn w-full">Entrar amb Google</button>
+            <form action={login} className="w-full">
+              <button type="submit" className="btn w-full">
+                Entrar amb Google
+              </button>
             </form>
           </div>
         </div>
