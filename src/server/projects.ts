@@ -45,7 +45,5 @@ export async function getProject(projectId: string) {
     ),
   });
 
-  console.log("result", result);
-
   return result?.project;
 }
