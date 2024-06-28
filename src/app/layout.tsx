@@ -32,7 +32,7 @@ export default async function RootLayout({
       style={{ scrollbarGutter: "stable" }}
     >
       <body>
-        <ThemeProvider themes={[...themes]}>
+        <ThemeProvider themes={[...themes]} defaultTheme="dim">
           <div className="flex flex-col items-center justify-stretch">
             <Drawer />
             <div className="w-full flex-grow px-4 py-4 lg:container">
