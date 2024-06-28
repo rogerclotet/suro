@@ -1,0 +1,1 @@
+ALTER TABLE "f_project" ALTER COLUMN "createdBy" SET NOT NULL;

@@ -1,3 +1,5 @@
+import type { Project } from "@/app/_data/project";
+import { auth } from "@/auth";
 import { getProjects } from "@/server/projects";
 import { Edit, Trash2 } from "lucide-react";
 import DeleteProjectButton from "../_components/delete-project-button";
@@ -7,6 +9,45 @@ import InviteButton from "./invite-button";
 
 export default async function ProjectsTable() {
   const projects = await getProjects();
+
+  async function DeleteButton({ project }: { project: Project }) {
+    if (projects.length < 1) {
+      return (
+        <div
+          className="tooltip tooltip-left"
+          data-tip="No es pot eliminar l'únic projecte"
+        >
+          <button
+            disabled
+            aria-label="Eliminar"
+            className="btn btn-square btn-error btn-sm"
+          >
+            <Trash2 />
+          </button>
+        </div>
+      );
+    }
+
+    const session = await auth();
+    if (project.createdBy !== session?.user.id) {
+      return (
+        <div
+          className="tooltip tooltip-left"
+          data-tip="Només el creador pot eliminar aquest projecte"
+        >
+          <button
+            disabled
+            aria-label="Eliminar"
+            className="btn btn-square btn-error btn-sm"
+          >
+            <Trash2 />
+          </button>
+        </div>
+      );
+    }
+
+    return <DeleteProjectButton projectId={project.id} projects={projects} />;
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -37,25 +78,7 @@ export default async function ProjectsTable() {
                 >
                   <Edit /> {/* TODO: implement edit */}
                 </button>
-                {projects.length > 1 ? (
-                  <DeleteProjectButton
-                    projectId={project.id}
-                    projects={projects}
-                  />
-                ) : (
-                  <div
-                    className="tooltip tooltip-left"
-                    data-tip="No es pot eliminar l'únic projecte"
-                  >
-                    <button
-                      disabled
-                      aria-label="Eliminar"
-                      className="btn btn-square btn-error btn-sm"
-                    >
-                      <Trash2 />
-                    </button>
-                  </div>
-                )}
+                <DeleteButton project={project} />
               </td>
             </tr>
           ))}

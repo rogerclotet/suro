@@ -19,7 +19,7 @@ export async function createProject(
 
   const result = await db
     .insert(projects)
-    .values(parsedData)
+    .values({ ...parsedData, createdBy: session.user.id })
     .returning({ id: projects.id });
   if (!result || result.length < 1) {
     throw new Error("Error creating project");

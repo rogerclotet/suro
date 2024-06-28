@@ -15,7 +15,7 @@ export async function getProjects() {
     columns: {},
     with: {
       project: {
-        columns: { id: true, name: true, inviteToken: true },
+        columns: { id: true, name: true, createdBy: true, inviteToken: true },
         with: { users: { columns: {}, with: { user: true } } },
       },
     },
@@ -35,7 +35,7 @@ export async function getUserProject(projectId: string) {
     columns: {},
     with: {
       project: {
-        columns: { id: true, name: true, inviteToken: true },
+        columns: { id: true, name: true, createdBy: true, inviteToken: true },
         with: { users: { columns: {}, with: { user: true } } },
       },
     },
@@ -55,7 +55,7 @@ export async function getInvitedProject(projectId: string) {
   }
 
   const result = await db.query.projects.findFirst({
-    columns: { id: true, name: true, inviteToken: true },
+    columns: { id: true, name: true, createdBy: true, inviteToken: true },
     with: { users: { columns: {}, with: { user: true } } },
     where: and(eq(projects.id, projectId)),
   });

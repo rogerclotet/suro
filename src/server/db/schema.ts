@@ -68,6 +68,9 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
 export const projects = createTable("project", {
   id: uuid("id").defaultRandom().notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
+  createdBy: varchar("createdBy", { length: 255 })
+    .notNull()
+    .references(() => users.id),
   inviteToken: uuid("inviteToken").defaultRandom().notNull(),
 });
 
