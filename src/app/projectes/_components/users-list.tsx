@@ -10,8 +10,8 @@ export default function UsersList({ users }: { users: Project["users"] }) {
       ))}
 
       {users.length > 3 && (
-        <div className="avatar placeholder">
-          <div className="w-12 bg-neutral text-neutral-content">
+        <div className="avatar placeholder border-2">
+          <div className="w-8 bg-neutral text-neutral-content">
             <span>+{users.length - 3}</span>
           </div>
         </div>
