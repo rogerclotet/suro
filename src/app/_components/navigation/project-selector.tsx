@@ -4,11 +4,19 @@ import type { Project } from "@/app/_data/project";
 import { useSelectedProject } from "@/app/_state/project-state";
 import React from "react";
 
-export default function ProjectSelector({ projects }: { projects: Project[] }) {
+export default function ProjectSelector({
+  projects,
+  onSelect,
+}: {
+  projects: Project[];
+  onSelect: (projectId: string) => void;
+}) {
   const { selectedProjectId, selectProject } = useSelectedProject();
 
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const projectId = e.target.value;
     selectProject(e.target.value);
+    onSelect(projectId);
   }
 
   return (

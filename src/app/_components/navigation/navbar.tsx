@@ -1,11 +1,12 @@
 "use client";
 
-import { menuItems } from "@/app/_data/menu-items";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMenuItems } from "./use-menu-items";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const menuItems = useMenuItems();
 
   return (
     <ul className="menu menu-horizontal gap-2 p-0">

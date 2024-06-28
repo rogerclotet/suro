@@ -1,17 +1,28 @@
 "use client";
 
+import type { Project } from "@/app/_data/project";
 import { Menu } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
+import ProjectSelector from "../project-selector";
 
 export default function DrawerLayout({
+  projects,
   children,
 }: {
+  projects: Project[];
   children: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const router = useRouter();
+
+  function handleSelectProject(projectId: string) {
+    setIsOpen(false);
+    router.push(`/projectes/${projectId}/llistes`);
+  }
 
   return (
     <div className="drawer flex flex-col items-center">
@@ -60,6 +71,13 @@ export default function DrawerLayout({
 
         <ul tabIndex={0} className="menu min-h-full w-80 gap-2 bg-base-200 p-4">
           {children}
+
+          <li>
+            <ProjectSelector
+              projects={projects}
+              onSelect={handleSelectProject}
+            />
+          </li>
 
           <li>
             <Link href="/projectes" onClick={() => setIsOpen(false)}>

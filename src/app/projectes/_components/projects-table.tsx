@@ -1,5 +1,5 @@
 import { getProjects } from "@/server/projects";
-import { Edit } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
 import IdIcon from "./id-icon";
@@ -37,7 +37,25 @@ export default async function ProjectsTable() {
                 >
                   <Edit /> {/* TODO: implement edit */}
                 </button>
-                <DeleteProjectButton project={project} />
+                {projects.length > 1 ? (
+                  <DeleteProjectButton
+                    projectId={project.id}
+                    projects={projects}
+                  />
+                ) : (
+                  <div
+                    className="tooltip tooltip-left"
+                    data-tip="No es pot eliminar l'únic projecte"
+                  >
+                    <button
+                      disabled
+                      aria-label="Eliminar"
+                      className="btn btn-square btn-error btn-sm"
+                    >
+                      <Trash2 />
+                    </button>
+                  </div>
+                )}
               </td>
             </tr>
           ))}

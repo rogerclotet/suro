@@ -1,11 +1,12 @@
 "use client";
 
-import { menuItems } from "@/app/_data/menu-items";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMenuItems } from "./use-menu-items";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const menuItems = useMenuItems();
 
   return (
     <div className="btm-nav text-xs lg:hidden">

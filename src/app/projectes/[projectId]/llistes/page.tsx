@@ -1,21 +1,28 @@
 import { auth } from "@/auth";
-import { getProjects } from "@/server/projects";
+import { getProject } from "@/server/projects";
 import { redirect } from "next/navigation";
 import Lists from "./_components/lists";
 
-export default async function ListesPage() {
+export default async function ListesPage({
+  params: { projectId },
+}: {
+  params: { projectId: string };
+}) {
   const session = await auth();
   if (!session) {
     redirect("/login");
   }
 
-  const projects = await getProjects();
+  const project = await getProject(projectId);
+  if (!project) {
+    redirect("/");
+  }
 
   return (
     <div>
       <h1 className="mb-4 text-xl font-semibold">Llistes</h1>
 
-      <Lists projects={projects} />
+      <Lists project={project} />
     </div>
   );
 }
