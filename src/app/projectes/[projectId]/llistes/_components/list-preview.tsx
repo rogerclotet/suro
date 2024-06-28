@@ -11,3 +11,15 @@ export default function ListPreview({ list }: { list: List }) {
     </div>
   );
 }
+
+export function ListPreviewSkeleton() {
+  return (
+    <div className="card bg-base-200 shadow-xl">
+      <div className="card-body">
+        <div className="skeleton h-8 w-52" />
+        <div className="skeleton h-12 w-full" />
+        <div className="skeleton h-6 w-32" />
+      </div>
+    </div>
+  );
+}

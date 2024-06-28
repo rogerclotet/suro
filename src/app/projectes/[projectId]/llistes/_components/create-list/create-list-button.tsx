@@ -1,6 +1,5 @@
 "use client";
 
-import type { Project } from "@/app/_data/project";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -10,7 +9,7 @@ import type * as v from "valibot";
 import { createList } from "./actions";
 import { createListSchema } from "./data";
 
-export default function CreateListButton({ project }: { project: Project }) {
+export default function CreateListButton({ projectId }: { projectId: string }) {
   const {
     register,
     handleSubmit,
@@ -30,7 +29,7 @@ export default function CreateListButton({ project }: { project: Project }) {
   async function onSubmit(data: v.InferInput<typeof createListSchema>) {
     setIsLoading(true);
     try {
-      const listId = await createList(project.id, data);
+      const listId = await createList(projectId, data);
       toast.success(`Llista ${getValues().name} creada`);
     } catch (e) {
       console.error(e);
