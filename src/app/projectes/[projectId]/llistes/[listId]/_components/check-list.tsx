@@ -33,7 +33,7 @@ export default function CheckList(props: { list: List }) {
 
   function handleCreated(name: string) {
     const newItem: List["items"][number] = {
-      id: "",
+      id: "-",
       name,
       details: null,
       completed: false,
