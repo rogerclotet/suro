@@ -6,18 +6,18 @@ import { db } from "@/server/db";
 import { lists } from "@/server/db/schema";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
-import { createListSchema } from "./data";
+import { listSchema } from "./data";
 
 export async function createList(
   projectId: Project["id"],
-  data: v.InferInput<typeof createListSchema>,
+  data: v.InferInput<typeof listSchema>,
 ) {
   const session = await auth();
   if (!session) {
     throw new Error("Not logged in");
   }
 
-  const parsedData = v.parse(createListSchema, data);
+  const parsedData = v.parse(listSchema, data);
 
   const result = await db
     .insert(lists)

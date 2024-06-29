@@ -1,6 +1,7 @@
 import type { List } from "@/app/_data/list";
 import { Settings } from "lucide-react";
 import DeleteListButton from "./delete-list-button";
+import EditListButton from "./edit-list-button";
 
 export default function SettingsMenu({ list }: { list: List }) {
   return (
@@ -9,6 +10,9 @@ export default function SettingsMenu({ list }: { list: List }) {
         <Settings />
       </summary>
       <ul className="menu dropdown-content z-[1] rounded-box bg-base-300 p-2 shadow-xl">
+        <li>
+          <EditListButton list={list} />
+        </li>
         <li>
           <DeleteListButton list={list} />
         </li>

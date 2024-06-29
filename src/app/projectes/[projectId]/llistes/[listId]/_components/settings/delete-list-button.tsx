@@ -28,7 +28,7 @@ export default function DeleteListButton({ list }: { list: List }) {
   }
 
   return (
-    <>
+    <div>
       <button
         onClick={() => dialog.current?.showModal()}
         className="btn btn-error flex-nowrap justify-start text-nowrap"
@@ -55,6 +55,6 @@ export default function DeleteListButton({ list }: { list: List }) {
           </div>
         </div>
       </dialog>
-    </>
+    </div>
   );
 }
