@@ -33,7 +33,7 @@ const EditListDialog = React.forwardRef<HTMLDialogElement, Props>(
 
       try {
         await updateList(list, data);
-        toast.success(`Llista ${list.name} actualitzada`);
+        toast.success(`Llista ${data.name} actualitzada`);
       } catch (error) {
         console.error(error);
         toast.error(
