@@ -1,10 +1,15 @@
 import type { List } from "@/app/_data/list";
+import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
   return (
     <div className="card bg-base-200 shadow-xl">
       <div className="card-body">
-        <h2 className="card-title">{list.name}</h2>
+        <h2 className="card-title">
+          <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>
+            {list.name}
+          </Link>
+        </h2>
         <p className="line-clamp-2">{list.description}</p>
         <p>{list.items.length} elements</p>
       </div>

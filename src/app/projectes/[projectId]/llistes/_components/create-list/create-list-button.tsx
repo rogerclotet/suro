@@ -2,6 +2,7 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,12 +26,14 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   });
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const router = useRouter();
 
   async function onSubmit(data: v.InferInput<typeof createListSchema>) {
     setIsLoading(true);
     try {
       const listId = await createList(projectId, data);
       toast.success(`Llista ${getValues().name} creada`);
+      router.push(`/projectes/${projectId}/llistes/${listId}`);
     } catch (e) {
       console.error(e);
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");

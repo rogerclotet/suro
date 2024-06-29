@@ -5,6 +5,22 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { lists, projects } from "./db/schema";
 
+export async function getList(listId: string) {
+  const session = await auth();
+  if (!session) {
+    return null;
+  }
+
+  const result = await db.query.lists.findFirst({
+    with: {
+      items: true,
+    },
+    where: eq(lists.id, listId),
+  });
+
+  return result;
+}
+
 export async function getLists(projectId: string) {
   const session = await auth();
   if (!session) {

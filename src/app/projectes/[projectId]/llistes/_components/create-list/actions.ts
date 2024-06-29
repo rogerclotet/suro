@@ -23,6 +23,7 @@ export async function createList(
     .insert(lists)
     .values({ ...parsedData, createdBy: session.user.id, projectId })
     .returning({ id: lists.id });
+
   if (!result || result.length < 1) {
     throw new Error("Error creating list");
   }
