@@ -19,5 +19,10 @@ export default async function ListPage({
     );
   }
 
-  return <div>Llista {list.name}</div>;
+  return (
+    <div>
+      <h1 className="mb-4 text-xl font-semibold">{list.name}</h1>
+      <p>{list.description}</p>
+    </div>
+  );
 }
