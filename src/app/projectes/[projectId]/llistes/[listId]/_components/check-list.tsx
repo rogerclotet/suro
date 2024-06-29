@@ -65,7 +65,7 @@ export default function CheckList(props: { list: List }) {
 }
 
 function sorted(items: List["items"]) {
-  return items.toSorted(compareItems);
+  return [...items].sort(compareItems);
 }
 
 function compareItems(a: List["items"][number], b: List["items"][number]) {
