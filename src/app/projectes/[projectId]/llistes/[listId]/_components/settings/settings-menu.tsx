@@ -9,7 +9,7 @@ export default function SettingsMenu({ list }: { list: List }) {
       <summary className="btn btn-square btn-ghost">
         <Settings />
       </summary>
-      <ul className="menu dropdown-content z-[1] rounded-box bg-base-300 p-2 shadow-xl">
+      <ul className="menu dropdown-content z-[1] rounded-box bg-base-200 p-2 shadow-xl">
         <li>
           <EditListButton list={list} />
         </li>
