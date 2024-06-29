@@ -1,6 +1,7 @@
 "use client";
 
 import type { Project } from "@/app/_data/project";
+import { useSelectedProject } from "@/app/_state/project-state";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,14 @@ export default function DrawerLayout({
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
+  const { selectedProjectId } = useSelectedProject();
+  const [project, setProject] = React.useState<Project>();
+
+  React.useEffect(() => {
+    if (selectedProjectId) {
+      setProject(projects.find((p) => p.id === selectedProjectId));
+    }
+  }, [selectedProjectId, projects]);
 
   function handleSelectProject(projectId: string) {
     setIsOpen(false);
@@ -49,7 +58,7 @@ export default function DrawerLayout({
           </div>
 
           <Link href="/" className="btn btn-ghost text-xl">
-            Família
+            {project?.name ?? "Família"}
           </Link>
         </div>
 
