@@ -15,25 +15,24 @@ export default function SettingsMenu({ list }: { list: List }) {
       <summary className="btn btn-square btn-ghost">
         <Settings />
       </summary>
-      <ul className="menu dropdown-content z-[1] rounded-box bg-base-200 p-2 shadow-xl">
+      <ul className="menu dropdown-content z-[1] gap-2 rounded-box bg-base-200 p-2 shadow-xl">
         <li>
-          <button
+          <a
             onClick={() => editDialog.current?.showModal()}
             className="btn flex flex-nowrap justify-start text-nowrap"
           >
             <Edit />
             Editar llista
-          </button>
+          </a>
         </li>
         <li>
-          <button
-            type="button"
+          <a
             onClick={() => deleteDialog.current?.showModal()}
             className="btn btn-error flex flex-nowrap justify-start text-nowrap"
           >
             <Trash2 />
             Eliminar llista
-          </button>
+          </a>
         </li>
       </ul>
 
