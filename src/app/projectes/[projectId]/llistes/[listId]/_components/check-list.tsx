@@ -43,29 +43,13 @@ export default function CheckList(props: { list: List }) {
     await deleteListItem(props.list, itemId);
   }
 
-  function handleCreated(name: string) {
-    const newItem: List["items"][number] = {
-      id: "-",
-      name,
-      details: null,
-      completed: false,
-      createdAt: new Date(),
-      createdBy: "",
-      updatedAt: null,
-      updatedBy: "",
-      listId: props.list.id,
-    };
-
-    setItems(sorted([...items, newItem]));
-  }
-
   return (
     <div className="w-full">
       <ul
         ref={animationParent}
         className="mx-auto flex flex-col items-stretch gap-1 pt-6 lg:max-w-lg"
       >
-        <NewListItem list={props.list} onCreated={handleCreated} />
+        <NewListItem list={props.list} />
 
         {items.map((item) => (
           <ListItem
