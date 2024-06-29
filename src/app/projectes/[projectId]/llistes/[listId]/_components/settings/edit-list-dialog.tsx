@@ -2,7 +2,6 @@
 
 import type { List } from "@/app/_data/list";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Edit } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,45 +9,41 @@ import type * as v from "valibot";
 import { listSchema } from "../../../_components/create-list/data";
 import { updateList } from "./actions";
 
-export default function EditListButton({ list }: { list: List }) {
-  const dialog = React.useRef<HTMLDialogElement>(null);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      name: list.name,
-      description: list.description ?? "",
-    },
-    resolver: valibotResolver(listSchema),
-  });
+type Props = {
+  list: List;
+  onClose: () => void;
+};
 
-  async function onSubmit(data: v.InferInput<typeof listSchema>) {
-    dialog.current?.close();
+const EditListDialog = React.forwardRef<HTMLDialogElement, Props>(
+  ({ list, onClose }, ref) => {
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm({
+      defaultValues: {
+        name: list.name,
+        description: list.description ?? "",
+      },
+      resolver: valibotResolver(listSchema),
+    });
 
-    try {
-      await updateList(list, data);
-      toast.success(`Llista ${list.name} actualitzada`);
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        "No s'ha pogut actualitzar la llista, torna-ho a provar més tard",
-      );
+    async function onSubmit(data: v.InferInput<typeof listSchema>) {
+      onClose();
+
+      try {
+        await updateList(list, data);
+        toast.success(`Llista ${list.name} actualitzada`);
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          "No s'ha pogut actualitzar la llista, torna-ho a provar més tard",
+        );
+      }
     }
-  }
 
-  return (
-    <div className="flex w-full justify-stretch p-0">
-      <button
-        onClick={() => dialog.current?.showModal()}
-        className="btn flex h-full w-full flex-nowrap items-center justify-start gap-2 text-nowrap px-2"
-      >
-        <Edit />
-        Editar llista
-      </button>
-
-      <dialog ref={dialog} className="modal">
+    return (
+      <dialog ref={ref} className="modal">
         <div className="modal-box">
           <h3 className="mb-4 text-lg font-semibold">Editar llista</h3>
 
@@ -84,7 +79,7 @@ export default function EditListButton({ list }: { list: List }) {
             <div className="modal-action">
               <button
                 type="button"
-                onClick={() => dialog.current?.close()}
+                onClick={onClose}
                 className="btn btn-neutral"
               >
                 Cancel·lar
@@ -94,6 +89,10 @@ export default function EditListButton({ list }: { list: List }) {
           </form>
         </div>
       </dialog>
-    </div>
-  );
-}
+    );
+  },
+);
+
+EditListDialog.displayName = "EditListDialog";
+
+export default EditListDialog;
