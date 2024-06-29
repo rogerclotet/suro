@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
 import Drawer from "./_components/navigation/drawer/drawer";
-import { themes } from "./_data/themes";
 
 v.setGlobalConfig({ lang: "ca" });
 
@@ -32,7 +31,7 @@ export default async function RootLayout({
       style={{ scrollbarGutter: "stable" }}
     >
       <body>
-        <ThemeProvider themes={[...themes]} defaultTheme="dim">
+        <ThemeProvider defaultTheme="dark" enableSystem>
           <div className="flex flex-col items-center justify-stretch">
             <Drawer />
             <div className="mb-16 w-full flex-grow px-4 py-4 lg:container lg:mb-0">

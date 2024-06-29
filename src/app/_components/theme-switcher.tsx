@@ -3,7 +3,8 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import React from "react";
-import { themes } from "../_data/themes";
+
+const themes = ["dark", "light"] as const;
 
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -28,8 +29,8 @@ export default function ThemeSwitcher() {
 
       {initialized && (
         <>
-          <Moon className="swap-off" />
-          <Sun className="swap-on" />
+          <Moon className="swap-on" />
+          <Sun className="swap-off" />
         </>
       )}
     </label>
