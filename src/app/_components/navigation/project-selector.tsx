@@ -2,6 +2,7 @@
 
 import type { Project } from "@/app/_data/project";
 import { useSelectedProject } from "@/app/_state/project-state";
+import { useParams } from "next/navigation";
 import React from "react";
 
 export default function ProjectSelector({
@@ -11,13 +12,18 @@ export default function ProjectSelector({
   projects: Project[];
   onSelect: (projectId: string) => void;
 }) {
+  const params = useParams<{ projectId: string }>();
   const { selectedProjectId, selectProject } = useSelectedProject();
 
   React.useEffect(() => {
     if (selectedProjectId === null && projects.length > 0) {
-      selectProject(projects[0]!.id);
+      if (params.projectId && projects.find((p) => p.id === params.projectId)) {
+        selectProject(params.projectId);
+      } else {
+        selectProject(projects[0]!.id);
+      }
     }
-  }, [selectedProjectId, projects, selectProject]);
+  }, [selectedProjectId, projects, selectProject, params]);
 
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const projectId = e.target.value;
