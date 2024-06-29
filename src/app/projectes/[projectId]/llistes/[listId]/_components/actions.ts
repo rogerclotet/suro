@@ -6,7 +6,6 @@ import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { setTimeout } from "timers/promises";
 
 export async function createListItem(
   list: List,
@@ -50,8 +49,6 @@ export async function updateListItem(
   ) {
     throw new Error("The user is not part of the project");
   }
-
-  await setTimeout(2000);
 
   await db
     .update(listItems)
