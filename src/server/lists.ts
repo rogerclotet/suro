@@ -14,6 +14,11 @@ export async function getList(listId: string) {
   try {
     const result = await db.query.lists.findFirst({
       with: {
+        project: {
+          with: {
+            users: true,
+          },
+        },
         items: {
           orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
         },
@@ -40,6 +45,11 @@ export async function getLists(projectId: string) {
         users: true,
         lists: {
           with: {
+            project: {
+              with: {
+                users: true,
+              },
+            },
             items: {
               orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
             },

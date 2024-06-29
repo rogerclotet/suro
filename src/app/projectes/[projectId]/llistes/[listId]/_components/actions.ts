@@ -17,7 +17,11 @@ export async function createListItem(
     return;
   }
 
-  // TODO check if the user has access to the list
+  if (
+    list.project.users.find((u) => u.userId === session.user.id) === undefined
+  ) {
+    throw new Error("The user is not part of the project");
+  }
 
   await db.insert(listItems).values({
     name,
@@ -25,6 +29,7 @@ export async function createListItem(
     createdBy: session.user.id,
     listId: list.id,
   });
+
   revalidatePath(`/projectes/${list.projectId}/llistes/${list.id}`);
 }
 
@@ -39,7 +44,11 @@ export async function updateListItem(
     return;
   }
 
-  // TODO check if the user has access to the list
+  if (
+    list.project.users.find((u) => u.userId === session.user.id) === undefined
+  ) {
+    throw new Error("The user is not part of the project");
+  }
 
   await db
     .update(listItems)

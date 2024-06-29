@@ -20,57 +20,74 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
-export const listItems = createTable("listItem", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  details: text("details"),
-  completed: boolean("completed").default(false),
-  createdAt: timestamp("createdAt", {
-    mode: "date",
-    withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
-  createdBy: varchar("createdBy", { length: 255 })
-    .references(() => users.id)
-    .notNull(),
-  updatedAt: timestamp("updatedAt", {
-    mode: "date",
-    withTimezone: true,
-  }).$onUpdate(() => new Date()),
-  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
-  listId: uuid("listId")
-    .notNull()
-    .references(() => lists.id, { onDelete: "cascade" }),
-});
+export const listItems = createTable(
+  "listItem",
+  {
+    id: uuid("id").defaultRandom().notNull().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    details: text("details"),
+    completed: boolean("completed").default(false),
+    createdAt: timestamp("createdAt", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+    createdBy: varchar("createdBy", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      mode: "date",
+      withTimezone: true,
+    }).$onUpdate(() => new Date()),
+    updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+    listId: uuid("listId")
+      .notNull()
+      .references(() => lists.id, { onDelete: "cascade" }),
+  },
+  (li) => ({
+    listIdIdx: index("listItem_listId_idx").on(li.listId),
+  }),
+);
 
 export const listItemsRelations = relations(listItems, ({ one }) => ({
-  list: one(lists, { fields: [listItems.listId], references: [lists.id] }),
+  list: one(lists, {
+    fields: [listItems.listId],
+    references: [lists.id],
+    relationName: "list",
+  }),
 }));
 
-export const lists = createTable("list", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  createdAt: timestamp("createdAt", {
-    mode: "date",
-    withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
-  createdBy: varchar("createdBy", { length: 255 })
-    .references(() => users.id)
-    .notNull(),
-  updatedAt: timestamp("updatedAt", {
-    mode: "date",
-    withTimezone: true,
-  }).$onUpdate(() => new Date()),
-  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
-  description: text("description"),
-  projectId: uuid("projectId")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-});
+export const lists = createTable(
+  "list",
+  {
+    id: uuid("id").defaultRandom().notNull().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    createdAt: timestamp("createdAt", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+    createdBy: varchar("createdBy", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      mode: "date",
+      withTimezone: true,
+    }).$onUpdate(() => new Date()),
+    updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+    description: text("description"),
+    projectId: uuid("projectId")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+  },
+  (l) => ({
+    projectIdIdx: index("list_projectId_idx").on(l.projectId),
+  }),
+);
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
   project: one(projects, {
     fields: [lists.projectId],
     references: [projects.id],
+    relationName: "project",
   }),
   items: many(listItems),
 }));
@@ -99,8 +116,8 @@ export const projectToUsers = createTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+  (ptu) => ({
+    pk: primaryKey({ columns: [ptu.projectId, ptu.userId] }),
   }),
 );
 
