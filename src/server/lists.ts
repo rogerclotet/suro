@@ -20,7 +20,11 @@ export async function getList(listId: string) {
           },
         },
         items: {
-          orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
+          orderBy: [
+            asc(listItems.completed),
+            desc(listItems.updatedAt),
+            desc(listItems.createdAt),
+          ],
         },
       },
       where: eq(lists.id, listId),
