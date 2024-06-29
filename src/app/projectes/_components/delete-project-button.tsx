@@ -53,6 +53,7 @@ export default function DeleteProjectButton({
       >
         <Trash2 />
       </button>
+
       <dialog ref={dialog} className="modal">
         <div className="modal-box">
           <h3 className="mb-4 text-lg font-semibold">Eliminar projecte</h3>

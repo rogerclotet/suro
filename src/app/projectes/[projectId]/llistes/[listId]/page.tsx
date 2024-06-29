@@ -1,6 +1,7 @@
 import { getList } from "@/server/lists";
 import Link from "next/link";
 import CheckList from "./_components/check-list";
+import SettingsMenu from "./_components/settings/settings-menu";
 
 export default async function ListPage({
   params: { listId },
@@ -22,12 +23,16 @@ export default async function ListPage({
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">{list.name}</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">{list.name}</h1>
+        <SettingsMenu list={list} />
+      </div>
       {list.description && (
         <p
           dangerouslySetInnerHTML={{
             __html: list.description.replaceAll("\n", "<br/>"),
           }}
+          className="pb-6"
         />
       )}
 
