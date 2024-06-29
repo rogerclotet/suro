@@ -11,14 +11,19 @@ export async function getList(listId: string) {
     return null;
   }
 
-  const result = await db.query.lists.findFirst({
-    with: {
-      items: true,
-    },
-    where: eq(lists.id, listId),
-  });
+  try {
+    const result = await db.query.lists.findFirst({
+      with: {
+        items: true,
+      },
+      where: eq(lists.id, listId),
+    });
 
-  return result;
+    return result;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
 }
 
 export async function getLists(projectId: string) {
@@ -27,22 +32,29 @@ export async function getLists(projectId: string) {
     return [];
   }
 
-  const project = await db.query.projects.findFirst({
-    with: {
-      users: true,
-      lists: {
-        with: {
-          items: true,
+  try {
+    const project = await db.query.projects.findFirst({
+      with: {
+        users: true,
+        lists: {
+          with: {
+            items: true,
+          },
+          orderBy: desc(lists.updatedAt),
         },
-        orderBy: desc(lists.updatedAt),
       },
-    },
-    where: eq(projects.id, projectId),
-  });
+      where: eq(projects.id, projectId),
+    });
 
-  if (project?.users.find((u) => u.userId === session.user.id) === undefined) {
-    throw new Error("Project not found");
+    if (
+      project?.users.find((u) => u.userId === session.user.id) === undefined
+    ) {
+      throw new Error("Project not found");
+    }
+
+    return project.lists;
+  } catch (e) {
+    console.error(e);
+    return [];
   }
-
-  return project.lists;
 }
