@@ -84,7 +84,7 @@ export default function ListItem(props: {
             onChange={(e) => setName(e.target.value)}
             onBlur={handleNameChange}
             placeholder={props.id ? "" : "Afegir element"}
-            className={`h-full w-full ${!props.id && "input-bordered"} ${completed && "line-through opacity-50"}`}
+            className={`h-full w-full ${!props.id && "input-bordered"} ${completed && "text-base-content line-through opacity-60"}`}
           />
           {name !== props.name && (
             <button className="btn btn-circle btn-ghost btn-sm">
