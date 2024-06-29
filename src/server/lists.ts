@@ -1,9 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "./db";
-import { projects } from "./db/schema";
+import { lists, projects } from "./db/schema";
 
 export async function getLists(projectId: string) {
   const session = await auth();
@@ -18,6 +18,7 @@ export async function getLists(projectId: string) {
         with: {
           items: true,
         },
+        orderBy: desc(lists.updatedAt),
       },
     },
     where: eq(projects.id, projectId),
