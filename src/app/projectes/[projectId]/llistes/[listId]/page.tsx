@@ -1,5 +1,6 @@
 import { getList } from "@/server/lists";
 import Link from "next/link";
+import CheckList from "./_components/check-list";
 
 export default async function ListPage({
   params: { listId },
@@ -23,6 +24,7 @@ export default async function ListPage({
     <div>
       <h1 className="mb-4 text-xl font-semibold">{list.name}</h1>
       <p>{list.description}</p>
+      <CheckList list={list} />
     </div>
   );
 }

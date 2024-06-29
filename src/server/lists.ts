@@ -1,9 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { db } from "./db";
-import { lists, projects } from "./db/schema";
+import { listItems, lists, projects } from "./db/schema";
 
 export async function getList(listId: string) {
   const session = await auth();
@@ -14,7 +14,9 @@ export async function getList(listId: string) {
   try {
     const result = await db.query.lists.findFirst({
       with: {
-        items: true,
+        items: {
+          orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
+        },
       },
       where: eq(lists.id, listId),
     });
@@ -38,9 +40,11 @@ export async function getLists(projectId: string) {
         users: true,
         lists: {
           with: {
-            items: true,
+            items: {
+              orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
+            },
           },
-          orderBy: desc(lists.updatedAt),
+          orderBy: [desc(lists.updatedAt)],
         },
       },
       where: eq(projects.id, projectId),

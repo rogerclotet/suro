@@ -1,0 +1,90 @@
+"use client";
+
+import { Check } from "lucide-react";
+import React from "react";
+import * as v from "valibot";
+import { listItemSchema } from "./data";
+
+export default function ListItem(props: {
+  id?: string;
+  name: string;
+  completed: boolean;
+  onChange: (name: string, completed: boolean) => void;
+}) {
+  const [name, setName] = React.useState(props.name);
+  const [completed, setCompleted] = React.useState(props.completed ?? false);
+
+  function save(name: string, completed: boolean) {
+    if (!hasChanged(name, completed)) {
+      return;
+    }
+
+    try {
+      const parsed = v.parse(listItemSchema, { name, completed });
+
+      props.onChange(parsed.name, parsed.completed);
+
+      if (!props.id) {
+        setName(props.name);
+        setCompleted(props.completed ?? false);
+      }
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  }
+
+  function handleCompletedChange() {
+    if (!props.id) {
+      return;
+    }
+
+    save(name, !completed);
+    setCompleted((prev) => !prev);
+  }
+
+  function handleNameChange() {
+    save(name, completed);
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    save(name, completed);
+  }
+
+  function hasChanged(name: string, completed: boolean) {
+    return name !== props.name || completed !== props.completed;
+  }
+
+  return (
+    <li>
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-2 lg:w-full lg:max-w-lg"
+      >
+        <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
+          <input
+            type="checkbox"
+            className="checkbox"
+            checked={completed}
+            disabled={!props.id}
+            onChange={handleCompletedChange}
+          />
+          <input
+            type="text"
+            disabled={completed}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={handleNameChange}
+            className={`h-full w-full ${!props.id && "input-bordered"} ${completed && "line-through opacity-50"}`}
+          />
+          {name !== props.name && (
+            <button className="btn btn-circle btn-ghost btn-sm">
+              <Check />
+            </button>
+          )}
+        </div>
+      </form>
+    </li>
+  );
+}

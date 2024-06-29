@@ -29,7 +29,9 @@ export const listItems = createTable("listItem", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  createdBy: varchar("createdBy", { length: 255 }).references(() => users.id),
+  createdBy: varchar("createdBy", { length: 255 })
+    .references(() => users.id)
+    .notNull(),
   updatedAt: timestamp("updatedAt", {
     mode: "date",
     withTimezone: true,
@@ -51,7 +53,9 @@ export const lists = createTable("list", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  createdBy: varchar("createdBy", { length: 255 }).references(() => users.id),
+  createdBy: varchar("createdBy", { length: 255 })
+    .references(() => users.id)
+    .notNull(),
   updatedAt: timestamp("updatedAt", {
     mode: "date",
     withTimezone: true,
