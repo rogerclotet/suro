@@ -39,10 +39,10 @@ export default function EditListButton({ list }: { list: List }) {
   }
 
   return (
-    <div>
+    <div className="flex w-full justify-stretch p-0">
       <button
         onClick={() => dialog.current?.showModal()}
-        className="btn btn-ghost flex-nowrap justify-start text-nowrap"
+        className="btn flex h-full w-full flex-nowrap items-center justify-start gap-2 text-nowrap px-2"
       >
         <Edit />
         Editar llista

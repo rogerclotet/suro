@@ -10,10 +10,10 @@ export default function SettingsMenu({ list }: { list: List }) {
         <Settings />
       </summary>
       <ul className="menu dropdown-content z-[1] rounded-box bg-base-200 p-2 shadow-xl">
-        <li>
+        <li className="p-0">
           <EditListButton list={list} />
         </li>
-        <li>
+        <li className="p-0">
           <DeleteListButton list={list} />
         </li>
       </ul>
