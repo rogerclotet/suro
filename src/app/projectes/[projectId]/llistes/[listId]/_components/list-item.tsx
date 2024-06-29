@@ -58,10 +58,7 @@ export default function ListItem(props: {
 
   return (
     <li>
-      <form
-        onSubmit={handleSubmit}
-        className="flex items-center gap-2 lg:w-full lg:max-w-lg"
-      >
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
           <input
             type="checkbox"

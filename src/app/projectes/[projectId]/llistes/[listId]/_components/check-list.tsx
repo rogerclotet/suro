@@ -48,19 +48,23 @@ export default function CheckList(props: { list: List }) {
   }
 
   return (
-    <ul className="flex flex-col items-stretch gap-1 pt-6 lg:items-center">
-      <NewListItem list={props.list} onCreated={handleCreated} />
+    <div className="w-full">
+      <ul className="mx-auto flex flex-col items-stretch gap-1 pt-6 lg:max-w-lg">
+        <NewListItem list={props.list} onCreated={handleCreated} />
 
-      {items.map((item) => (
-        <ListItem
-          key={item.id}
-          id={item.id}
-          name={item.name}
-          completed={item.completed ?? false}
-          onChange={(name, completed) => handleChange(item.id, name, completed)}
-        />
-      ))}
-    </ul>
+        {items.map((item) => (
+          <ListItem
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            completed={item.completed ?? false}
+            onChange={(name, completed) =>
+              handleChange(item.id, name, completed)
+            }
+          />
+        ))}
+      </ul>
+    </div>
   );
 }
 
