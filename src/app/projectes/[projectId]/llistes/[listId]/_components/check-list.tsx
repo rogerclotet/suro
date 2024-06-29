@@ -1,6 +1,7 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React from "react";
 import { deleteListItem, updateListItem } from "./actions";
 import ListItem from "./list-item";
@@ -8,6 +9,7 @@ import NewListItem from "./new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const [items, setItems] = React.useState(props.list.items);
+  const [animationParent] = useAutoAnimate();
 
   React.useEffect(() => {
     setItems(props.list.items);
@@ -59,7 +61,10 @@ export default function CheckList(props: { list: List }) {
 
   return (
     <div className="w-full">
-      <ul className="mx-auto flex flex-col items-stretch gap-1 pt-6 lg:max-w-lg">
+      <ul
+        ref={animationParent}
+        className="mx-auto flex flex-col items-stretch gap-1 pt-6 lg:max-w-lg"
+      >
         <NewListItem list={props.list} onCreated={handleCreated} />
 
         {items.map((item) => (
