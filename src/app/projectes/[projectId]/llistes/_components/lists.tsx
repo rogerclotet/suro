@@ -1,9 +1,20 @@
 import type { List } from "@/app/_data/list";
 import { getLists } from "@/server/lists";
+import { CornerRightUp } from "lucide-react";
 import ListPreview from "./list-preview";
 
 export default async function Lists({ projectId }: { projectId: string }) {
   const lists = await getLists(projectId);
+
+  if (lists.length === 0) {
+    return (
+      <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right md:pr-14">
+        Encara no hi ha llistes, pots crear-ne una aquí{" "}
+        <CornerRightUp className="sm:mb-4" />
+      </div>
+    );
+  }
+
   lists.sort((a, b) => todoCount(b) - todoCount(a));
 
   return (
