@@ -1,20 +1,13 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import CreateListButton from "./_components/create-list/create-list-button";
 import { ListPreviewSkeleton } from "./_components/list-preview";
 import Lists from "./_components/lists";
 
-export default async function ListesPage({
+export default function ListesPage({
   params: { projectId },
 }: {
   params: { projectId: string };
 }) {
-  const session = await auth();
-  if (!session) {
-    redirect("/");
-  }
-
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
