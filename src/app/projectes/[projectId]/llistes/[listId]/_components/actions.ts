@@ -60,3 +60,20 @@ export async function updateListItem(
 
   revalidatePath(`/projectes/${list.projectId}/llistes/${list.id}`);
 }
+
+export async function deleteListItem(list: List, itemId: string) {
+  const session = await auth();
+  if (!session) {
+    return;
+  }
+
+  if (
+    list.project.users.find((u) => u.userId === session.user.id) === undefined
+  ) {
+    throw new Error("The user is not part of the project");
+  }
+
+  await db.delete(listItems).where(eq(listItems.id, itemId));
+
+  revalidatePath(`/projectes/${list.projectId}/llistes/${list.id}`);
+}

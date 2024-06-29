@@ -2,7 +2,7 @@
 
 import type { List } from "@/app/_data/list";
 import React from "react";
-import { updateListItem } from "./actions";
+import { deleteListItem, updateListItem } from "./actions";
 import ListItem from "./list-item";
 import NewListItem from "./new-list-item";
 
@@ -29,6 +29,16 @@ export default function CheckList(props: { list: List }) {
     setItems(sorted(items));
 
     await updateListItem(props.list, itemId, name, completed);
+  }
+
+  async function handleDelete(itemId: string) {
+    const item = items.find((i) => i.id === itemId);
+    if (!item) {
+      return;
+    }
+
+    setItems(items.filter((i) => i.id !== itemId));
+    await deleteListItem(props.list, itemId);
   }
 
   function handleCreated(name: string) {
@@ -61,6 +71,7 @@ export default function CheckList(props: { list: List }) {
             onChange={(name, completed) =>
               handleChange(item.id, name, completed)
             }
+            onDelete={() => handleDelete(item.id)}
           />
         ))}
       </ul>

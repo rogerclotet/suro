@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
 import { listItemSchema } from "./data";
@@ -10,12 +10,18 @@ export default function ListItem(props: {
   name: string;
   completed: boolean;
   onChange: (name: string, completed: boolean) => void;
+  onDelete?: () => void;
 }) {
   const [name, setName] = React.useState(props.name);
   const [completed, setCompleted] = React.useState(props.completed ?? false);
 
   function save(name: string, completed: boolean) {
     if (!hasChanged(name, completed)) {
+      return;
+    }
+
+    if (name === "") {
+      props.onDelete?.();
       return;
     }
 
@@ -60,19 +66,24 @@ export default function ListItem(props: {
     <li>
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={completed}
-            disabled={!props.id}
-            onChange={handleCompletedChange}
-          />
+          {!props.id ? (
+            <Plus />
+          ) : (
+            <input
+              type="checkbox"
+              className="checkbox"
+              checked={completed}
+              disabled={!props.id}
+              onChange={handleCompletedChange}
+            />
+          )}
           <input
             type="text"
             disabled={completed}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={handleNameChange}
+            placeholder={props.id ? "" : "Afegir element"}
             className={`h-full w-full ${!props.id && "input-bordered"} ${completed && "line-through opacity-50"}`}
           />
           {name !== props.name && (

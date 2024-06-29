@@ -23,7 +23,14 @@ export default async function ListPage({
   return (
     <div>
       <h1 className="mb-4 text-xl font-semibold">{list.name}</h1>
-      <p>{list.description}</p>
+      {list.description && (
+        <p
+          dangerouslySetInnerHTML={{
+            __html: list.description.replaceAll("\n", "<br/>"),
+          }}
+        />
+      )}
+
       <CheckList list={list} />
     </div>
   );
