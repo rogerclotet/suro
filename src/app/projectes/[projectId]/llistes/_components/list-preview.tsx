@@ -23,7 +23,7 @@ export default function ListPreview({ list }: { list: List }) {
 
 export function ListPreviewSkeleton() {
   return (
-    <div className="card bg-base-200 shadow-xl">
+    <div className="card bg-base-300 shadow-xl">
       <div className="card-body">
         <div className="skeleton h-8 w-52" />
         <div className="skeleton h-12 w-full" />
