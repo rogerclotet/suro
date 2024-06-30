@@ -1,3 +1,5 @@
+"use client";
+
 import type { Category } from "@/app/_data/project";
 import { useSelectedProject } from "@/app/_state/project-state";
 import { Tag } from "lucide-react";

@@ -88,10 +88,10 @@ export default function ListItem(props: {
               <Check />
             </button>
           )}
+
+          <CategorySelector onSelect={handleCategorySelected} />
         </div>
       </form>
-
-      <CategorySelector onSelect={handleCategorySelected} />
     </li>
   );
 }
