@@ -12,6 +12,7 @@ export async function createListItem(
   list: List,
   name: string,
   completed: boolean,
+  category?: Category,
 ) {
   const session = await auth();
   if (!session) {
@@ -29,6 +30,7 @@ export async function createListItem(
     completed,
     createdBy: session.user.id,
     listId: list.id,
+    categoryId: category?.id ?? null,
   });
 
   revalidatePath(`/projectes/${list.projectId}/llistes/${list.id}`);
@@ -62,7 +64,7 @@ export async function updateListItem(
 export async function updateListItemCategory(
   list: List,
   itemId: string,
-  category: Category,
+  category: Category | null,
 ) {
   const session = await auth();
   if (!session) {
@@ -77,7 +79,7 @@ export async function updateListItemCategory(
 
   await db
     .update(listItems)
-    .set({ categoryId: category.id, updatedBy: session.user.id })
+    .set({ categoryId: category?.id ?? null, updatedBy: session.user.id })
     .where(eq(listItems.id, itemId));
 
   revalidatePath(`/projectes/${list.projectId}/llistes/${list.id}`);

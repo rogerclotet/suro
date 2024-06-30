@@ -2,7 +2,6 @@
 
 import type { List } from "@/app/_data/list";
 import type { Category } from "@/app/_data/project";
-import { useSelectedProject } from "@/app/_state/project-state";
 import { Check } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
@@ -20,7 +19,6 @@ export default function ListItem(props: {
 }) {
   const [name, setName] = React.useState(props.name);
   const [completed, setCompleted] = React.useState(props.completed ?? false);
-  const { project } = useSelectedProject();
 
   function save(name: string, completed: boolean) {
     if (!hasChanged(name, completed)) {
@@ -60,7 +58,7 @@ export default function ListItem(props: {
     return name !== props.name || completed !== props.completed;
   }
 
-  async function handleCategorySelected(category: Category) {
+  async function handleCategorySelected(category: Category | null) {
     await updateListItemCategory(props.list, props.id, category);
   }
 

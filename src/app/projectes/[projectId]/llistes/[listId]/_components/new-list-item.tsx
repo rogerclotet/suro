@@ -1,17 +1,21 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
+import type { Category } from "@/app/_data/project";
 import { useSelectedProject } from "@/app/_state/project-state";
 import { Check, Plus } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import * as v from "valibot";
 import { createListItem } from "./actions";
+import NewCategoryDialog from "./categories/new-category-dialog";
 import { listItemSchema } from "./data";
 
 export default function NewListItem({ list }: { list: List }) {
   const [name, setName] = React.useState("");
+  const [category, setCategory] = React.useState<Category>();
   const { project } = useSelectedProject();
+  const newCategoryDialog = React.useRef<HTMLDialogElement>(null);
 
   async function save() {
     if (name === "") {
@@ -20,7 +24,7 @@ export default function NewListItem({ list }: { list: List }) {
 
     try {
       const parsed = v.parse(listItemSchema, { name, completed: false });
-      await createListItem(list, parsed.name, false);
+      await createListItem(list, parsed.name, false, category);
       setName("");
     } catch (e) {
       console.error(e);
@@ -34,13 +38,22 @@ export default function NewListItem({ list }: { list: List }) {
     await save();
   }
 
+  function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (e.target.value === "new") {
+      newCategoryDialog.current?.showModal();
+      return;
+    }
+
+    setCategory(project?.categories.find((c) => c.id === e.target.value));
+  }
+
   return (
     <li className="flex w-full items-center justify-between gap-4">
       <form
         onSubmit={handleSubmit}
         className="flex flex-grow items-center gap-2"
       >
-        <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
+        <label className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
           <Plus />
           <input
             type="text"
@@ -54,17 +67,27 @@ export default function NewListItem({ list }: { list: List }) {
               <Check />
             </button>
           )}
-        </div>
+        </label>
       </form>
 
-      <select className="select select-bordered">
+      <select
+        value={category ? category.id : ""}
+        onChange={handleCategoryChange}
+        className="select select-bordered max-w-28 sm:max-w-48"
+      >
         <option value="">Sense categoria</option>
         {project?.categories.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
           </option>
         ))}
+        <option value="new">+ Nova categoria</option>
       </select>
+
+      <NewCategoryDialog
+        ref={newCategoryDialog}
+        onClose={() => newCategoryDialog.current?.close()}
+      />
     </li>
   );
 }
