@@ -2,7 +2,7 @@ import type { List } from "@/app/_data/list";
 import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
-  const todoCount = list.items.filter((item) => item.completed).length;
+  const todoCount = list.items.filter((item) => !item.completed).length;
 
   return (
     <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>

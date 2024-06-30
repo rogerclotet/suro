@@ -34,5 +34,5 @@ export default async function Lists({ projectId }: { projectId: string }) {
 }
 
 function todoCount(list: List) {
-  return list.items.filter((item) => item.completed).length;
+  return list.items.filter((item) => !item.completed).length;
 }
