@@ -1,12 +1,16 @@
 "use client";
 
+import type { List } from "@/app/_data/list";
+import type { Category } from "@/app/_data/project";
 import { Check, Plus } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
+import { updateListItemCategory } from "./actions";
 import CategorySelector from "./categories/category-selector";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
+  list: List;
   id?: string;
   name: string;
   completed: boolean;
@@ -63,6 +67,15 @@ export default function ListItem(props: {
     return name !== props.name || completed !== props.completed;
   }
 
+  async function handleCategorySelected(category: Category) {
+    if (!props.id) {
+      // TODO
+      return;
+    }
+
+    await updateListItemCategory(props.list, props.id, category);
+  }
+
   return (
     <li className="flex w-full items-center justify-between gap-4">
       <form
@@ -98,7 +111,7 @@ export default function ListItem(props: {
         </div>
       </form>
 
-      <CategorySelector />
+      <CategorySelector onSelect={handleCategorySelected} />
     </li>
   );
 }

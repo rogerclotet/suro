@@ -54,6 +54,7 @@ export default function CheckList(props: { list: List }) {
         {items.map((item) => (
           <ListItem
             key={item.id}
+            list={props.list}
             id={item.id}
             name={item.name}
             completed={item.completed ?? false}

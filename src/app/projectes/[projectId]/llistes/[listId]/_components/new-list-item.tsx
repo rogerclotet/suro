@@ -7,5 +7,7 @@ export default function NewListItem({ list }: { list: List }) {
     await createListItem(list, name, completed);
   }
 
-  return <ListItem name="" completed={false} onChange={handleChange} />;
+  return (
+    <ListItem list={list} name="" completed={false} onChange={handleChange} />
+  );
 }
