@@ -32,13 +32,11 @@ export default async function RootLayout({
     >
       <body>
         <ThemeProvider defaultTheme="dark" enableSystem>
-          <div className="flex flex-col items-center justify-stretch">
-            <Drawer />
-            <div className="mb-16 w-full flex-grow px-4 py-4 lg:container lg:mb-0">
-              {children}
-            </div>
-            {session && <BottomNav />}
+          <Drawer />
+          <div className="mx-auto mb-16 mt-16 w-full flex-grow px-4 py-4 lg:container lg:mb-0">
+            {children}
           </div>
+          {session && <BottomNav />}
 
           <Toaster
             toastOptions={{

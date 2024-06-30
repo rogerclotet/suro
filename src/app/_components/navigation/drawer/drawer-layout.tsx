@@ -43,7 +43,7 @@ export default function DrawerLayout({
         className="drawer-toggle"
       />
 
-      <nav className="navbar w-full bg-primary text-primary-content lg:container lg:rounded-b-xl">
+      <nav className="navbar fixed z-40 w-full bg-primary text-primary-content lg:container lg:rounded-b-xl">
         <div className="navbar-start">
           <div className="dropdown">
             <label
