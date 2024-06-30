@@ -16,7 +16,7 @@ export default function BottomNav() {
     <div className="btm-nav text-xs lg:hidden">
       {menuItems.map((item) => (
         <Link
-          key={item.path}
+          key={item.name}
           href={item.path}
           className={`${isActive(item.path) ? "active" : ""} text-primary ${item.disabled ? "disabled" : ""}`}
         >

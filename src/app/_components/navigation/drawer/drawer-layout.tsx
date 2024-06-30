@@ -19,14 +19,7 @@ export default function DrawerLayout({
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
-  const { selectedProjectId } = useSelectedProject();
-  const [project, setProject] = React.useState<Project>();
-
-  React.useEffect(() => {
-    if (selectedProjectId) {
-      setProject(projects.find((p) => p.id === selectedProjectId));
-    }
-  }, [selectedProjectId, projects]);
+  const { project } = useSelectedProject();
 
   function handleSelectProject(projectId: string) {
     setIsOpen(false);

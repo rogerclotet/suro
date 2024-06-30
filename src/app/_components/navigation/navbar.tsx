@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <ul className="menu menu-horizontal gap-2 p-0">
       {menuItems.map((item) => (
-        <li key={item.path}>
+        <li key={item.name}>
           {item.disabled ? (
             <div className="btn btn-ghost no-animation cursor-default opacity-40">
               {item.name}

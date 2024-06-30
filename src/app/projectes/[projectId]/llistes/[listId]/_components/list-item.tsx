@@ -3,6 +3,7 @@
 import { Check, Plus } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
+import CategorySelector from "./category-selector";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
@@ -63,8 +64,11 @@ export default function ListItem(props: {
   }
 
   return (
-    <li>
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <li className="flex w-full items-center justify-between gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-grow items-center gap-2"
+      >
         <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
           {!props.id ? (
             <Plus />
@@ -93,6 +97,8 @@ export default function ListItem(props: {
           )}
         </div>
       </form>
+
+      <CategorySelector />
     </li>
   );
 }

@@ -17,7 +17,10 @@ export async function getProjects() {
       with: {
         project: {
           columns: { id: true, name: true, createdBy: true, inviteToken: true },
-          with: { users: { columns: {}, with: { user: true } } },
+          with: {
+            users: { columns: {}, with: { user: true } },
+            categories: true,
+          },
         },
       },
       where: eq(projectToUsers.userId, session.user.id),
@@ -42,7 +45,10 @@ export async function getUserProject(projectId: string) {
       with: {
         project: {
           columns: { id: true, name: true, createdBy: true, inviteToken: true },
-          with: { users: { columns: {}, with: { user: true } } },
+          with: {
+            users: { columns: {}, with: { user: true } },
+            categories: true,
+          },
         },
       },
       where: and(
@@ -54,7 +60,7 @@ export async function getUserProject(projectId: string) {
     return result?.project;
   } catch (e) {
     console.error(e);
-    return undefined;
+    return null;
   }
 }
 
@@ -67,13 +73,13 @@ export async function getInvitedProject(projectId: string) {
   try {
     const result = await db.query.projects.findFirst({
       columns: { id: true, name: true, createdBy: true, inviteToken: true },
-      with: { users: { columns: {}, with: { user: true } } },
+      with: { users: { columns: {}, with: { user: true } }, categories: true },
       where: and(eq(projects.id, projectId)),
     });
 
     return result;
   } catch (e) {
     console.error(e);
-    return undefined;
+    return null;
   }
 }

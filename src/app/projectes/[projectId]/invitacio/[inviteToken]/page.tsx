@@ -25,7 +25,7 @@ export default async function InvitePage({
 
   if (project?.users.some((user) => user.user.id === session.user.id)) {
     // Already joined
-    return <Redirect projectId={projectId} />;
+    return <Redirect project={project} />;
   }
 
   if (project?.inviteToken !== inviteToken) {
