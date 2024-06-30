@@ -1,9 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "./db";
-import { projects, projectToUsers } from "./db/schema";
+import { categories, projects, projectToUsers } from "./db/schema";
 
 export async function getProjects() {
   const session = await auth();
@@ -19,7 +19,9 @@ export async function getProjects() {
           columns: { id: true, name: true, createdBy: true, inviteToken: true },
           with: {
             users: { columns: {}, with: { user: true } },
-            categories: true,
+            categories: {
+              orderBy: asc(categories.name),
+            },
           },
         },
       },
@@ -47,7 +49,9 @@ export async function getUserProject(projectId: string) {
           columns: { id: true, name: true, createdBy: true, inviteToken: true },
           with: {
             users: { columns: {}, with: { user: true } },
-            categories: true,
+            categories: {
+              orderBy: asc(categories.name),
+            },
           },
         },
       },
