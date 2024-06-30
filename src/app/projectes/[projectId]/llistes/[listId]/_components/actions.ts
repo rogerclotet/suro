@@ -14,7 +14,7 @@ export async function createListItem(
 ) {
   const session = await auth();
   if (!session) {
-    return;
+    throw new Error("Not logged in");
   }
 
   if (
@@ -41,7 +41,7 @@ export async function updateListItem(
 ) {
   const session = await auth();
   if (!session) {
-    return;
+    throw new Error("Not logged in");
   }
 
   if (
@@ -61,7 +61,7 @@ export async function updateListItem(
 export async function deleteListItem(list: List, itemId: string) {
   const session = await auth();
   if (!session) {
-    return;
+    throw new Error("Not logged in");
   }
 
   if (

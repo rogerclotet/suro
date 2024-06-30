@@ -3,7 +3,7 @@
 import { Check, Plus } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
-import CategorySelector from "./category-selector";
+import CategorySelector from "./categories/category-selector";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
