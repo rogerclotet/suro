@@ -30,8 +30,11 @@ export default function CreateProjectButton() {
   async function onSubmit(data: v.InferInput<typeof createProjectSchema>) {
     setIsLoading(true);
     try {
-      const projectId = await createProject(data);
-      selectProject(projectId);
+      const project = await createProject(data);
+      if (!project) {
+        throw new Error("Error creating project");
+      }
+      selectProject(project);
       toast.success(`Projecte ${getValues().name} creat`);
     } catch (e) {
       console.error(e);

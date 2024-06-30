@@ -20,6 +20,9 @@ export async function getList(listId: string) {
           },
         },
         items: {
+          with: {
+            category: true,
+          },
           orderBy: [
             asc(listItems.completed),
             desc(listItems.updatedAt),
@@ -55,6 +58,9 @@ export async function getLists(projectId: string) {
               },
             },
             items: {
+              with: {
+                category: true,
+              },
               orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
             },
           },

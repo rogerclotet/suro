@@ -1,12 +1,17 @@
 "use client";
 
-import { Check, Plus } from "lucide-react";
+import type { List } from "@/app/_data/list";
+import type { Category } from "@/app/_data/project";
+import { Check } from "lucide-react";
 import React from "react";
 import * as v from "valibot";
+import { updateListItemCategory } from "./actions";
+import CategorySelector from "./categories/category-selector";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
-  id?: string;
+  list: List;
+  id: string;
   name: string;
   completed: boolean;
   onChange: (name: string, completed: boolean) => void;
@@ -29,11 +34,6 @@ export default function ListItem(props: {
       const parsed = v.parse(listItemSchema, { name, completed });
 
       props.onChange(parsed.name, parsed.completed);
-
-      if (!props.id) {
-        setName(props.name);
-        setCompleted(props.completed ?? false);
-      }
     } catch (e) {
       console.error(e);
       return;
@@ -41,10 +41,6 @@ export default function ListItem(props: {
   }
 
   function handleCompletedChange() {
-    if (!props.id) {
-      return;
-    }
-
     save(name, !completed);
     setCompleted((prev) => !prev);
   }
@@ -62,29 +58,30 @@ export default function ListItem(props: {
     return name !== props.name || completed !== props.completed;
   }
 
+  async function handleCategorySelected(category: Category | null) {
+    await updateListItemCategory(props.list, props.id, category);
+  }
+
   return (
-    <li>
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <li className="flex w-full items-center justify-between gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-grow items-center gap-2"
+      >
         <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
-          {!props.id ? (
-            <Plus />
-          ) : (
-            <input
-              type="checkbox"
-              className="checkbox"
-              checked={completed}
-              disabled={!props.id}
-              onChange={handleCompletedChange}
-            />
-          )}
+          <input
+            type="checkbox"
+            className="checkbox"
+            checked={completed}
+            onChange={handleCompletedChange}
+          />
           <input
             type="text"
             disabled={completed}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={handleNameChange}
-            placeholder={props.id ? "" : "Afegir element"}
-            className={`h-full w-full ${!props.id && "input-bordered"} ${completed && "text-base-content line-through opacity-60"}`}
+            className={`h-full w-full ${completed && "text-base-content line-through opacity-60"}`}
           />
           {name !== props.name && (
             <button className="btn btn-circle btn-ghost btn-sm">
@@ -93,6 +90,8 @@ export default function ListItem(props: {
           )}
         </div>
       </form>
+
+      <CategorySelector onSelect={handleCategorySelected} />
     </li>
   );
 }

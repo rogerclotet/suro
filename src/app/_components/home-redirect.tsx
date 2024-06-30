@@ -1,14 +1,15 @@
 "use client";
 
 import { redirect } from "next/navigation";
+import type { Project } from "../_data/project";
 import { useSelectedProject } from "../_state/project-state";
 
-export default function Redirect({ projectId }: { projectId?: string }) {
-  const { selectedProjectId, selectProject } = useSelectedProject();
+export default function Redirect({ project }: { project?: Project }) {
+  const { project: selectedProject, selectProject } = useSelectedProject();
 
-  if (projectId) {
-    selectProject(projectId);
-  } else if (!selectedProjectId) {
+  if (project) {
+    selectProject(project);
+  } else if (!selectedProject) {
     return (
       <div className="flex h-[200px] justify-center">
         <span className="loading loading-spinner" />
@@ -16,5 +17,5 @@ export default function Redirect({ projectId }: { projectId?: string }) {
     );
   }
 
-  return redirect(`/projectes/${projectId ?? selectedProjectId}/llistes`);
+  return redirect(`/projectes/${project?.id ?? selectedProject?.id}/llistes`);
 }

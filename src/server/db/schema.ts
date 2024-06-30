@@ -42,6 +42,9 @@ export const listItems = createTable(
     listId: uuid("listId")
       .notNull()
       .references(() => lists.id, { onDelete: "cascade" }),
+    categoryId: uuid("categoryId").references(() => categories.id, {
+      onDelete: "set null",
+    }),
   },
   (li) => ({
     listIdIdx: index("listItem_listId_idx").on(li.listId),
@@ -53,6 +56,27 @@ export const listItemsRelations = relations(listItems, ({ one }) => ({
     fields: [listItems.listId],
     references: [lists.id],
     relationName: "list",
+  }),
+  category: one(categories, {
+    fields: [listItems.categoryId],
+    references: [categories.id],
+    relationName: "category",
+  }),
+}));
+
+export const categories = createTable("category", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
+
+export const categoriesRelations = relations(categories, ({ many, one }) => ({
+  items: many(listItems),
+  project: one(projects, {
+    fields: [categories.projectId],
+    references: [projects.id],
   }),
 }));
 
@@ -104,6 +128,7 @@ export const projects = createTable("project", {
 export const projectsRelations = relations(projects, ({ many }) => ({
   users: many(projectToUsers),
   lists: many(lists),
+  categories: many(categories),
 }));
 
 export const projectToUsers = createTable(

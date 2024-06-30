@@ -13,27 +13,33 @@ export default function ProjectSelector({
   onSelect: (projectId: string) => void;
 }) {
   const params = useParams<{ projectId: string }>();
-  const { selectedProjectId, selectProject } = useSelectedProject();
+  const { project, selectProject } = useSelectedProject();
 
   React.useEffect(() => {
-    if (selectedProjectId === null && projects.length > 0) {
-      if (params.projectId && projects.find((p) => p.id === params.projectId)) {
-        selectProject(params.projectId);
+    if (project === null && projects.length > 0) {
+      if (params.projectId) {
+        const projectToSelect = projects.find((p) => p.id === params.projectId);
+        if (projectToSelect) {
+          selectProject(projectToSelect);
+        }
       } else {
-        selectProject(projects[0]!.id);
+        selectProject(projects[0]!);
       }
     }
-  }, [selectedProjectId, projects, selectProject, params]);
+  }, [params.projectId, project, projects, selectProject]);
 
   function handleOptionChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const projectId = e.target.value;
-    selectProject(e.target.value);
+    const projectToSelect = projects.find((p) => p.id === projectId);
+    if (projectToSelect) {
+      selectProject(projectToSelect);
+    }
     onSelect(projectId);
   }
 
   return (
     <select
-      value={selectedProjectId ?? ""}
+      value={project?.id ?? ""}
       onChange={handleOptionChange}
       className="select select-bordered w-full max-w-xs"
     >
