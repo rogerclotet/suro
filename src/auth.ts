@@ -4,6 +4,8 @@ import authConfig from "./auth.config";
 import { db } from "./server/db";
 import {
   accounts,
+  projects,
+  projectToUsers,
   sessions,
   users,
   verificationTokens,
@@ -16,5 +18,25 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  events: {
+    createUser: async ({ user }) => {
+      const result = await db
+        .insert(projects)
+        .values({
+          name: "Personal",
+          createdBy: user.id!,
+        })
+        .returning({ id: projects.id });
+
+      if (result.length === 0) {
+        throw new Error("Failed to create personal project");
+      }
+
+      await db.insert(projectToUsers).values({
+        projectId: result[0]!.id,
+        userId: user.id!,
+      });
+    },
+  },
   ...authConfig,
 });

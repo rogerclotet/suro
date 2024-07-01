@@ -1,15 +1,14 @@
 "use server";
 
 import { auth } from "@/auth";
+import assert from "assert";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { listItems, lists, projects } from "./db/schema";
 
 export async function getList(listId: string) {
   const session = await auth();
-  if (!session) {
-    return null;
-  }
+  assert(session, "Unauthenticated user");
 
   try {
     const result = await db.query.lists.findFirst({

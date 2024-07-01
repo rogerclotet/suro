@@ -1,13 +1,16 @@
+import { checkAuth } from "@/lib/check-auth";
 import { Suspense } from "react";
 import CreateListButton from "./_components/create-list/create-list-button";
 import { ListPreviewSkeleton } from "./_components/list-preview";
 import Lists from "./_components/lists";
 
-export default function ListesPage({
+export default async function ListesPage({
   params: { projectId },
 }: {
   params: { projectId: string };
 }) {
+  await checkAuth();
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">

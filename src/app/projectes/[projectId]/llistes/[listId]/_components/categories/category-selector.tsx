@@ -6,8 +6,10 @@ import { Tag } from "lucide-react";
 import NewCategoryButton from "./new-category-button";
 
 export default function CategorySelector({
+  newCategoryDialog,
   onSelect,
 }: {
+  newCategoryDialog: React.RefObject<HTMLDialogElement>;
   onSelect: (category: Category | null) => void;
 }) {
   const { project } = useSelectedProject();
@@ -38,7 +40,7 @@ export default function CategorySelector({
           </li>
         ))}
         <li>
-          <NewCategoryButton />
+          <NewCategoryButton dialog={newCategoryDialog} />
         </li>
       </ul>
     </details>

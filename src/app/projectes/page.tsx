@@ -1,14 +1,10 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { checkAuth } from "@/lib/check-auth";
 import { Suspense } from "react";
 import CreateProjectButton from "./_components/create-project/create-project-button";
 import ProjectsTable from "./_components/projects-table";
 
 export default async function ProjectesPage() {
-  const session = await auth();
-  if (!session) {
-    redirect("/login");
-  }
+  await checkAuth();
 
   return (
     <div>

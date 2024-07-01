@@ -2,11 +2,12 @@
 
 import { Plus } from "lucide-react";
 import React from "react";
-import NewCategoryDialog from "./new-category-dialog";
 
-export default function NewCategoryButton() {
-  const dialog = React.useRef<HTMLDialogElement>(null);
-
+export default function NewCategoryButton({
+  dialog,
+}: {
+  dialog: React.RefObject<HTMLDialogElement>;
+}) {
   return (
     <div>
       <button
@@ -15,8 +16,6 @@ export default function NewCategoryButton() {
       >
         <Plus size={20} /> Nova categoria
       </button>
-
-      <NewCategoryDialog ref={dialog} onClose={() => dialog.current?.close()} />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import React from "react";
 import * as v from "valibot";
 import { updateListItemCategory } from "./actions";
 import CategorySelector from "./categories/category-selector";
+import NewCategoryDialog from "./categories/new-category-dialog";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
@@ -19,6 +20,7 @@ export default function ListItem(props: {
 }) {
   const [name, setName] = React.useState(props.name);
   const [completed, setCompleted] = React.useState(props.completed ?? false);
+  const newCategoryDialog = React.useRef<HTMLDialogElement>(null);
 
   function save(name: string, completed: boolean) {
     if (!hasChanged(name, completed)) {
@@ -89,9 +91,17 @@ export default function ListItem(props: {
             </button>
           )}
 
-          <CategorySelector onSelect={handleCategorySelected} />
+          <CategorySelector
+            newCategoryDialog={newCategoryDialog}
+            onSelect={handleCategorySelected}
+          />
         </div>
       </form>
+
+      <NewCategoryDialog
+        ref={newCategoryDialog}
+        onClose={() => newCategoryDialog.current?.close()}
+      />
     </li>
   );
 }

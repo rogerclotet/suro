@@ -1,3 +1,4 @@
+import { checkAuth } from "@/lib/check-auth";
 import { getList } from "@/server/lists";
 import Link from "next/link";
 import CheckList from "./_components/check-list";
@@ -8,6 +9,8 @@ export default async function ListPage({
 }: {
   params: { listId: string };
 }) {
+  await checkAuth();
+
   const list = await getList(listId);
 
   if (!list) {

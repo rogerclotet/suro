@@ -1,12 +1,8 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import Redirect from "./_components/home-redirect";
+import { checkAuth } from "@/lib/check-auth";
+import Redirect from "./_components/redirect";
 
 export default async function HomePage() {
-  const session = await auth();
-  if (!session) {
-    return redirect("/login");
-  }
+  await checkAuth();
 
   return <Redirect />;
 }

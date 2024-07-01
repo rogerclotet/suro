@@ -1,12 +1,13 @@
-import Redirect from "@/app/_components/home-redirect";
+import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/projectes/_components/users-list";
 import { auth } from "@/auth";
+import { checkAuth } from "@/lib/check-auth";
 import { getInvitedProject } from "@/server/projects";
+import assert from "assert";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { acceptInvite } from "./actions";
 
 type Props = {
@@ -16,10 +17,10 @@ type Props = {
 export default async function InvitePage({
   params: { projectId, inviteToken },
 }: Props) {
+  await checkAuth();
+
   const session = await auth();
-  if (!session) {
-    return redirect("/");
-  }
+  assert(session, "Unauthenticated user");
 
   const project = await getInvitedProject(projectId);
 
