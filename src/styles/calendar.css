@@ -1,42 +1,81 @@
-.calendar {
-  .calendar__navigation {
-    & > button,
-    .calendar__navigation-arrow-buttons > button {
-      @apply btn;
-      @apply btn-ghost;
-    }
+.react-calendar button {
+  @apply btn btn-ghost;
+}
 
-    .calendar__navigation__month-text {
-      @apply text-base-content;
-      @apply capitalize;
-    }
-  }
+.react-calendar__navigation {
+  display: flex;
+  height: 44px;
+  margin-bottom: 1em;
+}
 
-  .week-time-view-inside,
-  .month-view-inside {
-    @apply bg-base-300;
-    @apply border-base-100;
-    @apply rounded-xl;
+.react-calendar__navigation button {
+  min-width: 44px;
+  background: none;
+}
 
-    .vertical-borders-container__border:not(:last-of-type) {
-      @apply border-r-base-100;
-    }
+.react-calendar__navigation button:disabled {
+  @apply btn-disabled;
+}
 
-    .week-time-week__border-bottom-row {
-      @apply border-t-base-100;
-    }
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font: inherit;
+  font-size: 0.75em;
+  font-weight: bold;
+}
 
-    .month-week-row:not(:last-child) {
-      @apply border-b-base-100;
-    }
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5em;
+}
 
-    .week-time-header__number,
-    .month-cell-header__number {
-      @apply text-base-content;
+.btn.react-calendar__month-view__days__day--weekend {
+  @apply text-accent;
+}
 
-      &[data-day-type="disabled"] {
-        @apply text-opacity-30;
-      }
-    }
-  }
+.btn.react-calendar__tile--active.react-calendar__month-view__days__day--weekend {
+  @apply text-secondary-content;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth,
+.react-calendar__decade-view__years__year--neighboringDecade,
+.react-calendar__century-view__decades__decade--neighboringCentury {
+  @apply opacity-30;
+}
+
+.react-calendar__year-view .react-calendar__tile,
+.react-calendar__decade-view .react-calendar__tile,
+.react-calendar__century-view .react-calendar__tile {
+  padding: 2em 0.5em;
+}
+
+.btn.react-calendar__tile {
+  @apply min-h-14 px-4 py-2;
+}
+
+button.react-calendar__tile:disabled {
+  @apply btn-disabled;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth:disabled,
+.react-calendar__decade-view__years__year--neighboringDecade:disabled,
+.react-calendar__century-view__decades__decade--neighboringCentury:disabled {
+  color: #cdcdcd;
+}
+
+button.react-calendar__tile--now {
+  @apply bg-accent text-accent-content;
+}
+
+button.react-calendar__tile--hasActive {
+  background: #76baff;
+}
+
+button.react-calendar__tile--hasActive:enabled:hover,
+button.react-calendar__tile--hasActive:enabled:focus {
+  background: #a9d4ff;
+}
+
+button.react-calendar__tile--active {
+  @apply bg-secondary;
 }
