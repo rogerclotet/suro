@@ -1,0 +1,42 @@
+.calendar {
+  .calendar__navigation {
+    & > button,
+    .calendar__navigation-arrow-buttons > button {
+      @apply btn;
+      @apply btn-ghost;
+    }
+
+    .calendar__navigation__month-text {
+      @apply text-base-content;
+      @apply capitalize;
+    }
+  }
+
+  .week-time-view-inside,
+  .month-view-inside {
+    @apply bg-base-300;
+    @apply border-base-100;
+    @apply rounded-xl;
+
+    .vertical-borders-container__border:not(:last-of-type) {
+      @apply border-r-base-100;
+    }
+
+    .week-time-week__border-bottom-row {
+      @apply border-t-base-100;
+    }
+
+    .month-week-row:not(:last-child) {
+      @apply border-b-base-100;
+    }
+
+    .week-time-header__number,
+    .month-cell-header__number {
+      @apply text-base-content;
+
+      &[data-day-type="disabled"] {
+        @apply text-opacity-30;
+      }
+    }
+  }
+}

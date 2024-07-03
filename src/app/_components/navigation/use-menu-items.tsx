@@ -1,5 +1,5 @@
 import { useSelectedProject } from "@/app/_state/project-state";
-import { CookingPot, ListTodo } from "lucide-react";
+import { Calendar, CookingPot, ListTodo } from "lucide-react";
 import React from "react";
 
 export type MenuItem = {
@@ -21,6 +21,11 @@ const itemParts: MenuItemPart[] = [
     name: "Llistes",
     pathPart: "llistes",
     icon: <ListTodo />,
+  },
+  {
+    name: "Calendari",
+    pathPart: "calendari",
+    icon: <Calendar />,
   },
   {
     name: "Receptes",

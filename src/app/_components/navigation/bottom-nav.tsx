@@ -13,7 +13,7 @@ export default function BottomNav() {
   }
 
   return (
-    <div className="btm-nav text-xs lg:hidden">
+    <div className="btm-nav z-40 text-xs lg:hidden">
       {menuItems.map((item) => (
         <Link
           key={item.name}
