@@ -8,10 +8,10 @@ export default function ListPreview({ list }: { list: List }) {
     <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>
       <div className="card bg-base-300 shadow-xl">
         <div className="card-body">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <h2 className="card-title">{list.name}</h2>
             {todoCount > 0 && (
-              <span className="badge badge-lg">{todoCount}</span>
+              <span className="badge badge-lg mt-1">{todoCount}</span>
             )}
           </div>
           <p className="line-clamp-2">{list.description}</p>
