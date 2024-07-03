@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTableCreator,
   primaryKey,
   text,
@@ -19,6 +20,36 @@ import { type AdapterAccount } from "next-auth/adapters";
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const createTable = pgTableCreator((name) => `f_${name}`);
+
+export const templates = createTable("listTemplate", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  items: jsonb("items").notNull(),
+  createdAt: timestamp("createdAt", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
+  createdBy: varchar("createdBy", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  updatedAt: timestamp("updatedAt", {
+    mode: "date",
+    withTimezone: true,
+  }).$onUpdate(() => new Date()),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
+
+export const templatesRelations = relations(templates, ({ one }) => ({
+  project: one(projects, {
+    fields: [templates.projectId],
+    references: [projects.id],
+    relationName: "project",
+  }),
+}));
 
 export const listItems = createTable(
   "listItem",

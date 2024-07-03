@@ -1,4 +1,5 @@
 import { checkAuth } from "@/lib/check-auth";
+import { LayoutTemplate } from "lucide-react";
 import { Suspense } from "react";
 import CreateListButton from "./_components/create-list/create-list-button";
 import { ListPreviewSkeleton } from "./_components/list-preview";
@@ -15,7 +16,13 @@ export default async function ListesPage({
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">Llistes</h1>
-        <CreateListButton projectId={projectId} />
+
+        <div className="flex gap-4">
+          <button className="btn btn-secondary btn-sm">
+            <LayoutTemplate /> Crear plantilla
+          </button>
+          <CreateListButton projectId={projectId} />
+        </div>
       </div>
 
       <Suspense
