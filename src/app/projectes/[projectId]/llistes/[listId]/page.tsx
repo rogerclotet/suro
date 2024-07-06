@@ -30,6 +30,7 @@ export default async function ListPage({
         <h1 className="text-xl font-semibold">{list.name}</h1>
         <SettingsMenu list={list} />
       </div>
+
       {list.description && (
         <p
           dangerouslySetInnerHTML={{

@@ -159,6 +159,7 @@ export const projects = createTable("project", {
 export const projectsRelations = relations(projects, ({ many }) => ({
   users: many(projectToUsers),
   lists: many(lists),
+  templates: many(templates),
   categories: many(categories),
 }));
 
