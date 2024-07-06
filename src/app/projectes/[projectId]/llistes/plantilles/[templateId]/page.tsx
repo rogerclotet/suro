@@ -2,6 +2,7 @@ import { checkAuth } from "@/lib/check-auth";
 import { getTemplate } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
+import TemplateItems from "./_components/template-items";
 
 export default async function TemplatePage({
   params: { projectId, templateId },
@@ -51,6 +52,8 @@ export default async function TemplatePage({
           className="pb-6"
         />
       )}
+
+      <TemplateItems items={template.items} />
     </div>
   );
 }

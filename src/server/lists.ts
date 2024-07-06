@@ -1,5 +1,6 @@
 "use server";
 
+import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
 import assert from "assert";
 import { asc, desc, eq } from "drizzle-orm";
@@ -112,7 +113,7 @@ export async function getTemplate(templateId: string) {
       throw new Error("Template not found");
     }
 
-    return result;
+    return result as Template;
   } catch (e) {
     console.error(e);
     return undefined;
@@ -149,7 +150,10 @@ export async function getTemplates(projectId: string) {
       throw new Error("Project not found");
     }
 
-    return project.templates;
+    return project.templates.map((t) => ({
+      ...t,
+      items: t.items as { name: string; category: string }[],
+    }));
   } catch (e) {
     console.error(e);
     return [];
