@@ -16,14 +16,14 @@ export default {
       {
         dark: {
           primary: "#9FE88D",
-          secondary: "#2D82B7",
+          secondary: "#5BA8D7",
           accent: "#EF946C",
           neutral: "#1c212b",
           "base-100": "#2A303C",
         },
         light: {
           primary: "#40634C",
-          secondary: "#2D82B7",
+          secondary: "#205D83",
           accent: "#EF946C",
           neutral: "#333c4d",
           "base-100": "#FFFFFF",
