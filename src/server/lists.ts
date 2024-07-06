@@ -133,9 +133,7 @@ export async function getTemplates(projectId: string) {
         templates: {
           with: {
             project: {
-              with: {
-                users: true,
-              },
+              with: { users: true },
             },
           },
           orderBy: [desc(templates.updatedAt)],

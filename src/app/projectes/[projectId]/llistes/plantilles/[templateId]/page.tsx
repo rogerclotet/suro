@@ -53,7 +53,7 @@ export default async function TemplatePage({
         />
       )}
 
-      <TemplateItems items={template.items} />
+      <TemplateItems template={template} />
     </div>
   );
 }
