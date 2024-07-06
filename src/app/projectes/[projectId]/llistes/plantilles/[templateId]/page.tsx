@@ -1,11 +1,12 @@
 import { checkAuth } from "@/lib/check-auth";
 import { getTemplate } from "@/server/lists";
+import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 
 export default async function TemplatePage({
-  params: { templateId },
+  params: { projectId, templateId },
 }: {
-  params: { templateId: string };
+  params: { projectId: string; templateId: string };
 }) {
   await checkAuth();
 
@@ -23,8 +24,23 @@ export default async function TemplatePage({
 
   return (
     <div>
+      <div className="breadcrumbs pb-4 text-sm">
+        <ul>
+          <li>
+            <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
+          </li>
+          <li>
+            <Link href={`/projectes/${projectId}/llistes/plantilles`}>
+              Plantilles
+            </Link>
+          </li>
+        </ul>
+      </div>
+
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">{template.name}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          <LayoutTemplate /> {template.name}
+        </h1>
       </div>
 
       {template.description && (

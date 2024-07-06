@@ -1,4 +1,5 @@
 import { checkAuth } from "@/lib/check-auth";
+import Link from "next/link";
 import { Suspense } from "react";
 import CreateTemplateButton from "./_components/create-template/create-template-button";
 import { TemplatePreviewSkeleton } from "./_components/template-preview";
@@ -14,7 +15,16 @@ export default async function PlantillesPage({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Plantilles</h1>
+        <div className="breadcrumbs p-0 text-xl font-semibold">
+          <ul>
+            <li>
+              <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
+            </li>
+            <li>
+              <h1>Plantilles</h1>
+            </li>
+          </ul>
+        </div>
 
         <CreateTemplateButton projectId={projectId} />
       </div>
