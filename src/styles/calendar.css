@@ -29,11 +29,11 @@
   padding: 0.5em;
 }
 
-.btn.react-calendar__month-view__days__day--weekend {
+button.react-calendar__month-view__days__day--weekend {
   @apply text-accent;
 }
 
-.btn.react-calendar__tile--active.react-calendar__month-view__days__day--weekend {
+button.react-calendar__tile--active.react-calendar__month-view__days__day--weekend {
   @apply text-secondary-content;
 }
 
@@ -49,7 +49,7 @@
   padding: 2em 0.5em;
 }
 
-.btn.react-calendar__tile {
+button.react-calendar__tile {
   @apply min-h-14 px-4 py-2;
 }
 
@@ -67,6 +67,10 @@ button.react-calendar__tile--now {
   @apply bg-accent text-accent-content;
 }
 
+button.react-calendar__tile--now.react-calendar__month-view__days__day--weekend {
+  @apply text-accent-content;
+}
+
 button.react-calendar__tile--hasActive {
   background: #76baff;
 }
@@ -77,5 +81,5 @@ button.react-calendar__tile--hasActive:enabled:focus {
 }
 
 button.react-calendar__tile--active {
-  @apply bg-secondary;
+  @apply bg-secondary text-secondary-content;
 }
