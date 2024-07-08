@@ -2,6 +2,7 @@ import { checkAuth } from "@/lib/check-auth";
 import { getTemplate } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
+import SettingsMenu from "../_components/settings/settings-menu";
 import TemplateItems from "./_components/template-items";
 
 export default async function TemplatePage({
@@ -42,6 +43,7 @@ export default async function TemplatePage({
         <h1 className="flex items-center gap-2 text-xl font-semibold">
           <LayoutTemplate /> {template.name}
         </h1>
+        <SettingsMenu template={template} />
       </div>
 
       {template.description && (
