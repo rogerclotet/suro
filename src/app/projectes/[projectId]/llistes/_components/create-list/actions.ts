@@ -41,7 +41,7 @@ export async function createList(
   const list = result[0]!;
 
   const items =
-    parsedData.templates.length > 0
+    parsedData.templates && parsedData.templates.length > 0
       ? await getItems(parsedData.templates, project)
       : [];
 

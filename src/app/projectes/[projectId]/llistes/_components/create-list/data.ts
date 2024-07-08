@@ -3,5 +3,5 @@ import * as v from "valibot";
 export const listSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
   description: v.pipe(v.string(), v.trim()),
-  templates: v.array(v.string()),
+  templates: v.optional(v.array(v.string())),
 });
