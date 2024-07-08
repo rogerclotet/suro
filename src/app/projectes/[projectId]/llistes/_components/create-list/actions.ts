@@ -1,15 +1,17 @@
 "use server";
 
+import type { TemplateItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
-import { lists } from "@/server/db/schema";
+import { listItems, lists, templates } from "@/server/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { listSchema } from "./data";
 
 export async function createList(
-  projectId: Project["id"],
+  project: Project,
   data: v.InferInput<typeof listSchema>,
 ) {
   const session = await auth();
@@ -17,11 +19,19 @@ export async function createList(
     throw new Error("Not logged in");
   }
 
+  if (project.users.find((u) => u.user.id === session.user.id) === undefined) {
+    throw new Error("The user is not part of the project");
+  }
+
   const parsedData = v.parse(listSchema, data);
 
   const result = await db
     .insert(lists)
-    .values({ ...parsedData, createdBy: session.user.id, projectId })
+    .values({
+      ...parsedData,
+      createdBy: session.user.id,
+      projectId: project.id,
+    })
     .returning({ id: lists.id });
 
   if (!result || result.length < 1) {
@@ -30,7 +40,35 @@ export async function createList(
 
   const list = result[0]!;
 
-  revalidatePath(`/projectes/${projectId}/llistes`);
+  const items =
+    parsedData.templates.length > 0
+      ? await getItems(parsedData.templates, project)
+      : [];
+
+  const itemDataToInsert = items.map<typeof listItems.$inferInsert>((item) => ({
+    name: item.name,
+    categoryId: item.category !== "" ? item.category : null,
+    completed: false,
+    createdBy: session.user.id,
+    listId: list.id,
+  }));
+
+  await db.insert(listItems).values(itemDataToInsert);
+
+  revalidatePath(`/projectes/${project.id}/llistes`);
 
   return list.id;
+}
+
+async function getItems(templateIds: string[], project: Project) {
+  const results = await db.query.templates.findMany({
+    where: and(
+      inArray(templates.id, templateIds),
+      eq(templates.projectId, project.id),
+    ),
+  });
+
+  return results.flatMap<TemplateItem>(
+    (template) => template.items as TemplateItem[],
+  );
 }

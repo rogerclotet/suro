@@ -1,4 +1,5 @@
 import { checkAuth } from "@/lib/check-auth";
+import { getTemplates } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,6 +13,8 @@ export default async function ListesPage({
   params: { projectId: string };
 }) {
   await checkAuth();
+
+  const templates = await getTemplates(projectId);
 
   return (
     <div>
@@ -27,7 +30,7 @@ export default async function ListesPage({
           </Link>
         </div>
 
-        <CreateListButton projectId={projectId} />
+        <CreateListButton projectId={projectId} templates={templates} />
       </div>
 
       <Suspense
