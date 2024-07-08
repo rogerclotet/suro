@@ -1,5 +1,5 @@
 import { useSelectedProject } from "@/app/_state/project-state";
-import { Calendar, CookingPot, ListTodo } from "lucide-react";
+import { Calendar, FolderOpen, ListTodo } from "lucide-react";
 import React from "react";
 
 export type MenuItem = {
@@ -28,9 +28,9 @@ const itemParts: MenuItemPart[] = [
     icon: <Calendar />,
   },
   {
-    name: "Receptes",
-    pathPart: "receptes",
-    icon: <CookingPot />,
+    name: "Fitxers",
+    pathPart: "fitxers",
+    icon: <FolderOpen />,
     disabled: true,
   },
 ];
