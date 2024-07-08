@@ -1,7 +1,5 @@
 "use client";
 
-import type { Template } from "@/app/_data/list";
-import { useSelectedProject } from "@/app/_state/project-state";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,87 +7,64 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import { createList } from "./actions";
-import { listSchema } from "./data";
+import { createTemplate } from "./actions";
+import { templateSchema } from "./data";
 
-export default function CreateListButton({
+export default function CreateTemplateButton({
   projectId,
-  templates,
 }: {
   projectId: string;
-  templates: Template[];
 }) {
   const {
     register,
     handleSubmit,
     reset,
     getValues,
-    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
       name: "",
       description: "",
-      templates: [] as string[],
+      items: [],
     },
-    resolver: valibotResolver(listSchema),
+    resolver: valibotResolver(templateSchema),
   });
   const dialog = React.useRef<HTMLDialogElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
-  const [selectedTemplates, setSelectedTemplates] = React.useState<string[]>(
-    [],
-  );
-  const { project } = useSelectedProject();
 
-  if (!project) {
-    return null;
-  }
-
-  async function onSubmit(data: v.InferInput<typeof listSchema>) {
+  async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     setIsLoading(true);
     try {
-      const listId = await createList(project!, data);
-      toast.success(`Llista ${getValues().name} creada`);
-      router.push(`/projectes/${projectId}/llistes/${listId}`);
+      const templateId = await createTemplate(projectId, data);
+      toast.success(`Plantilla ${getValues().name} creada`);
+      router.push(`/projectes/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
       console.error(e);
-      toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
+      toast.error(
+        "No s'ha pogut crear la plantilla, torna-ho a provar més tard",
+      );
       return;
     } finally {
       reset();
-      setSelectedTemplates([]);
       dialog.current?.close();
       setIsLoading(false);
     }
   }
 
-  function handleTemplateToggle(templateId: string) {
-    let newTemplates = [...selectedTemplates];
-
-    if (selectedTemplates.includes(templateId)) {
-      newTemplates = newTemplates.filter((t) => t !== templateId);
-    } else {
-      newTemplates.push(templateId);
-    }
-
-    setSelectedTemplates(newTemplates);
-    setValue("templates", newTemplates);
-  }
-
   return (
     <>
       <button
-        className="btn btn-primary btn-sm"
+        className="btn btn-secondary btn-sm"
         onClick={() => dialog.current?.showModal()}
       >
         <Plus />
-        Crear llista
+        Crear plantilla
       </button>
 
       <dialog ref={dialog} className="modal">
         <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Crear Llista</h3>
+          <h3 className="mb-4 text-lg font-semibold">Crear plantilla</h3>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <label className="form-control w-full">
@@ -122,35 +97,6 @@ export default function CreateListButton({
                 </div>
               )}
             </label>
-            <div className="form-control w-full">
-              <div className="label label-text">Incloure plantilles</div>
-              <div className="flex flex-col gap-2">
-                {templates.map((template) => (
-                  <label
-                    key={template.id}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTemplates.includes(template.id)}
-                      onChange={() => handleTemplateToggle(template.id)}
-                      disabled={isLoading}
-                      className="checkbox"
-                    />
-                    <span className="label-text">
-                      {template.name} ({template.items.length} elements)
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {errors.templates && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.templates.message?.toString()}
-                  </span>
-                </div>
-              )}
-            </div>
             <div className="modal-action">
               <button
                 type="button"

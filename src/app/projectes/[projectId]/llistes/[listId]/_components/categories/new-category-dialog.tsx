@@ -11,10 +11,11 @@ import { categorySchema } from "./data";
 
 type Props = {
   onClose: () => void;
+  onCreate?: (categoryId: string) => void;
 };
 
 const NewCategoryDialog = forwardRef<HTMLDialogElement, Props>(
-  ({ onClose }, ref) => {
+  ({ onClose, onCreate }, ref) => {
     const { project, addCategory } = useSelectedProject();
     const {
       register,
@@ -44,6 +45,7 @@ const NewCategoryDialog = forwardRef<HTMLDialogElement, Props>(
           projectId: project.id,
         });
 
+        onCreate?.(categoryId);
         toast.success(`Categoria ${data.name} creada`);
       } catch (error) {
         console.error(error);
