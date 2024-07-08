@@ -35,3 +35,29 @@ export async function createTemplateItem(
     `/projectes/${template.projectId}/llistes/plantilles/${template.id}`,
   );
 }
+
+export async function updateTemplateItems(
+  template: Template,
+  items: Template["items"],
+) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  if (
+    template.project.users.find((u) => u.userId === session.user.id) ===
+    undefined
+  ) {
+    throw new Error("The user is not part of the project");
+  }
+
+  await db
+    .update(templates)
+    .set({ items })
+    .where(eq(templates.id, template.id));
+
+  revalidatePath(
+    `/projectes/${template.projectId}/llistes/plantilles/${template.id}`,
+  );
+}

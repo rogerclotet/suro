@@ -4,7 +4,12 @@ import type { Template } from "@/app/_data/list";
 import { useSelectedProject } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
+import { updateTemplateItems } from "./actions";
 import NewTemplateItem from "./new-template-item";
+import TemplateItem from "./template-item";
+
+type Item = Template["items"][number];
+type ItemWithIndex = Item & { index: number };
 
 export default function TemplateItems({ template }: { template: Template }) {
   const [itemsByCategory, setItemsByCategory] =
@@ -14,16 +19,17 @@ export default function TemplateItems({ template }: { template: Template }) {
 
   const groupItemsByCategory = React.useCallback(
     (items: Template["items"]) => {
-      const categories = new Map<string, Template["items"]>();
+      const categories = new Map<string, ItemWithIndex[]>();
 
-      for (const item of items) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]!;
         const category =
           project?.categories.find((c) => c.id === item.category)?.name ?? "";
         if (!categories.has(category)) {
           categories.set(category, []);
         }
 
-        categories.get(category)!.push(item);
+        categories.get(category)!.push({ ...item, index: i });
       }
 
       const result = [];
@@ -45,8 +51,21 @@ export default function TemplateItems({ template }: { template: Template }) {
     setItemsByCategory(groupItemsByCategory(template.items));
   }, [template.items, groupItemsByCategory, project]);
 
-  function sorted(items: Template["items"]) {
+  function sorted(items: ItemWithIndex[]) {
     return [...items].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async function handleItemChange(
+    index: number,
+    newName: string,
+    newCategory: string,
+  ) {
+    const newItems = [...template.items];
+    newItems[index] = { name: newName, category: newCategory };
+    await updateTemplateItems(
+      template,
+      newItems.map((item) => ({ name: item.name, category: item.category })),
+    );
   }
 
   return (
@@ -62,8 +81,15 @@ export default function TemplateItems({ template }: { template: Template }) {
             <h3 key={`title_${category}`} className="text-lg font-semibold">
               {category}
             </h3>
+
             {items.map((item) => (
-              <div key={item.name}>{item.name}</div>
+              <TemplateItem
+                key={item.index}
+                item={item}
+                onChange={(name, cat) =>
+                  handleItemChange(item.index, name, cat)
+                }
+              />
             ))}
           </Fragment>
         ))}
