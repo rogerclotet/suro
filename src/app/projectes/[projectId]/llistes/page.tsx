@@ -18,8 +18,8 @@ export default async function ListesPage({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <h1 className="text-xl font-semibold">Llistes</h1>
           <Link
             href={`/projectes/${projectId}/llistes/plantilles`}
