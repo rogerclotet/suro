@@ -19,18 +19,18 @@ export default async function ListesPage({
 
   return (
     <div>
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <h1 className="text-xl font-semibold">Llistes</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">Llistes</h1>
+
+        <div className="flex flex-grow flex-col items-end justify-between gap-2 sm:flex-row sm:items-center">
           <Button variant="neutral" size="sm" asChild className="gap-2">
             <Link href={`/projectes/${projectId}/llistes/plantilles`}>
               <LayoutTemplate size={18} />
               Gestionar plantilles
             </Link>
           </Button>
+          <CreateListButton projectId={projectId} templates={templates} />
         </div>
-
-        <CreateListButton projectId={projectId} templates={templates} />
       </div>
 
       <Suspense
