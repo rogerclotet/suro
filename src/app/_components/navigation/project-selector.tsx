@@ -37,20 +37,21 @@ export default function ProjectSelector({
         </Button>
       </CollapsibleTrigger>
 
-      {project &&
-        projects
-          .filter((p) => p.id !== project.id)
-          .map((p) => (
-            <CollapsibleContent key={p.id} className="space-y-2">
+      <CollapsibleContent className="space-y-2">
+        {project &&
+          projects
+            .filter((p) => p.id !== project.id)
+            .map((p) => (
               <Button
+                key={p.id}
                 onClick={() => handleProjectSelect(p.id)}
                 variant="ghost"
                 className="w-full justify-start"
               >
                 {p.name}
               </Button>
-            </CollapsibleContent>
-          ))}
+            ))}
+      </CollapsibleContent>
     </Collapsible>
   );
 }
