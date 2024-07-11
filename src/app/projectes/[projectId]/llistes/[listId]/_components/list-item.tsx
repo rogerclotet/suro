@@ -16,10 +16,10 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Tag } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -159,8 +159,8 @@ export default function ListItem(props: {
                     onValueChange={(v) => handleCategoryChange(v, onChange)}
                   >
                     <FormControl>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Sense categoria" />
+                      <SelectTrigger>
+                        <Tag />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

@@ -75,7 +75,7 @@ export default function NewListItem({ list }: { list: List }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="ml-6 flex flex-grow items-center gap-2"
+          className="flex flex-grow items-center gap-2"
         >
           <FormField
             control={form.control}

@@ -78,7 +78,7 @@ export default function TemplateItems({ template }: { template: Template }) {
     <div className="w-full">
       <ul
         ref={animationParent}
-        className="mx-auto flex flex-col items-stretch gap-1 lg:max-w-lg"
+        className="mx-auto flex max-w-lg flex-col items-stretch gap-1"
       >
         <NewTemplateItem template={template} />
 
