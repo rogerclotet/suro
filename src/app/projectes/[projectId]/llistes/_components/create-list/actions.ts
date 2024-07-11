@@ -40,20 +40,21 @@ export async function createList(
 
   const list = result[0]!;
 
-  const items =
-    parsedData.templates && parsedData.templates.length > 0
-      ? await getItems(parsedData.templates, project)
-      : [];
+  if (parsedData.templates && parsedData.templates.length > 0) {
+    const items = await getItems(parsedData.templates, project);
 
-  const itemDataToInsert = items.map<typeof listItems.$inferInsert>((item) => ({
-    name: item.name,
-    categoryId: item.category !== "" ? item.category : null,
-    completed: false,
-    createdBy: session.user.id,
-    listId: list.id,
-  }));
+    const itemDataToInsert = items.map<typeof listItems.$inferInsert>(
+      (item) => ({
+        name: item.name,
+        categoryId: item.category !== "" ? item.category : null,
+        completed: false,
+        createdBy: session.user.id,
+        listId: list.id,
+      }),
+    );
 
-  await db.insert(listItems).values(itemDataToInsert);
+    await db.insert(listItems).values(itemDataToInsert);
+  }
 
   revalidatePath(`/projectes/${project.id}/llistes`);
 
