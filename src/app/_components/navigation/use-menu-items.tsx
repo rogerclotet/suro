@@ -1,4 +1,4 @@
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
 import { Calendar, FolderOpen, ListTodo } from "lucide-react";
 import React from "react";
 
@@ -36,7 +36,7 @@ const itemParts: MenuItemPart[] = [
 ];
 
 export function useMenuItems(): MenuItem[] {
-  const { project: selectedProject } = useSelectedProject();
+  const { project: selectedProject } = useProjects();
 
   const items = React.useMemo(() => {
     if (selectedProject === null) {

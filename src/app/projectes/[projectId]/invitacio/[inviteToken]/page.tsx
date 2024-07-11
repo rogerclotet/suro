@@ -1,13 +1,21 @@
 import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/projectes/_components/users-list";
 import { auth } from "@/auth";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { checkAuth } from "@/lib/check-auth";
 import { getInvitedProject } from "@/server/projects";
 import assert from "assert";
-import { ArrowLeft } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
-import Link from "next/link";
 import { acceptInvite } from "./actions";
 
 type Props = {
@@ -31,50 +39,45 @@ export default async function InvitePage({
 
   if (project?.inviteToken !== inviteToken) {
     return (
-      <div className="space-y-4">
-        <div className="alert alert-error mx-auto my-12 max-w-sm">
-          Invitació invàlida
-        </div>
-
-        <Link href="/" className="btn btn-neutral">
-          <ArrowLeft /> Tornar a la pàgina principal
-        </Link>
-      </div>
+      <Alert variant="destructive" className="mx-auto mt-20 max-w-lg">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Invitació invàlida</AlertTitle>
+      </Alert>
     );
   }
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="card bg-primary text-primary-content shadow-xl">
-        <div className="card-body">
-          <h1 className="mb-4 text-xl font-semibold">
+    <div className="mt-20 flex items-center justify-center">
+      <Card>
+        <CardHeader>
+          <CardTitle>
             Invitació al projecte{" "}
             <span className="font-bold text-secondary">{project.name}</span>
-          </h1>
-
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="flex flex-row items-center gap-4">
             Participants: <UsersList users={project.users} />
           </div>
-
-          <div className="card-actions mt-4 justify-end">
-            <form
-              action={async () => {
-                "use server";
-                try {
-                  await acceptInvite(projectId, inviteToken);
-                  revalidatePath(
-                    `/projectes/${projectId}/invitacio/${inviteToken}`,
-                  );
-                } catch (error) {
-                  console.error(error);
-                }
-              }}
-            >
-              <button className="btn btn-neutral">Acceptar invitació</button>
-            </form>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <form
+            action={async () => {
+              "use server";
+              try {
+                await acceptInvite(projectId, inviteToken);
+                revalidatePath(
+                  `/projectes/${projectId}/invitacio/${inviteToken}`,
+                );
+              } catch (error) {
+                console.error(error);
+              }
+            }}
+          >
+            <Button>Acceptar invitació</Button>
+          </form>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

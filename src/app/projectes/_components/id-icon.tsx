@@ -1,6 +1,11 @@
 "use client";
 
 import type { Project } from "@/app/_data/project";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,12 +16,15 @@ export default function IdIcon({ id }: { id: Project["id"] }) {
   }
 
   return (
-    <div
-      onClick={() => copyIdToClipboard(id)}
-      className="tooltip tooltip-right cursor-pointer"
-      data-tip={id}
-    >
-      <Fingerprint />
-    </div>
+    <Tooltip>
+      <TooltipTrigger>
+        <div onClick={() => copyIdToClipboard(id)}>
+          <Fingerprint />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{id}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }

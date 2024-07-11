@@ -1,7 +1,20 @@
 "use client";
 
 import type { Template } from "@/app/_data/list";
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -19,14 +32,7 @@ export default function CreateListButton({
   projectId: string;
   templates: Template[];
 }) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    setValue,
-    formState: { errors },
-  } = useForm({
+  const form = useForm({
     defaultValues: {
       name: "",
       description: "",
@@ -34,140 +40,134 @@ export default function CreateListButton({
     },
     resolver: valibotResolver(listSchema),
   });
-  const dialog = React.useRef<HTMLDialogElement>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
-  const [selectedTemplates, setSelectedTemplates] = React.useState<string[]>(
-    [],
-  );
-  const { project } = useSelectedProject();
+  const { project } = useProjects();
+  const triggerRef = React.useRef<HTMLDivElement>(null);
 
   if (!project) {
     return null;
   }
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
-    setIsLoading(true);
     try {
       const listId = await createList(project!, data);
-      toast.success(`Llista ${getValues().name} creada`);
+      toast.success(`Llista ${form.getValues().name} creada`);
       router.push(`/projectes/${projectId}/llistes/${listId}`);
     } catch (e) {
       console.error(e);
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
       return;
     } finally {
-      reset();
-      setSelectedTemplates([]);
-      dialog.current?.close();
-      setIsLoading(false);
+      form.reset();
     }
-  }
-
-  function handleTemplateToggle(templateId: string) {
-    let newTemplates = [...selectedTemplates];
-
-    if (selectedTemplates.includes(templateId)) {
-      newTemplates = newTemplates.filter((t) => t !== templateId);
-    } else {
-      newTemplates.push(templateId);
-    }
-
-    setSelectedTemplates(newTemplates);
-    setValue("templates", newTemplates);
   }
 
   return (
     <>
-      <button
-        className="btn btn-primary btn-sm"
-        onClick={() => dialog.current?.showModal()}
+      <Button
+        onClick={() => triggerRef.current?.click()}
+        variant="default"
+        size="sm"
+        className="gap-2"
       >
         <Plus />
         Crear llista
-      </button>
+      </Button>
 
-      <dialog ref={dialog} className="modal">
-        <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Crear Llista</h3>
+      <ModalForm triggerRef={triggerRef} title="Crear llista">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input autoFocus {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-control w-full">
-              <div className="label label-text">Nom</div>
-              <input
-                {...register("name")}
-                disabled={isLoading}
-                className="input input-bordered w-full"
-              />
-              {errors.name && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.name.message?.toString()}
-                  </span>
-                </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripció</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </label>
-            <label className="form-control w-full">
-              <div className="label label-text">Descripció</div>
-              <textarea
-                {...register("description")}
-                disabled={isLoading}
-                className="textarea textarea-bordered w-full"
-              />
-              {errors.description && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.description.message?.toString()}
-                  </span>
-                </div>
-              )}
-            </label>
-            <div className="form-control w-full">
-              <div className="label label-text">Incloure plantilles</div>
-              <div className="flex flex-col gap-2">
-                {templates.map((template) => (
-                  <label
-                    key={template.id}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTemplates.includes(template.id)}
-                      onChange={() => handleTemplateToggle(template.id)}
-                      disabled={isLoading}
-                      className="checkbox"
+            />
+
+            <FormField
+              control={form.control}
+              name="templates"
+              render={() => (
+                <FormItem>
+                  <div className="mb-4">
+                    <FormLabel>Incloure plantilles</FormLabel>
+                    <FormDescription>
+                      {
+                        "S'inclouran els elements de les plantilles seleccionades a la nova llista"
+                      }
+                    </FormDescription>
+                  </div>
+                  {templates.map((template) => (
+                    <FormField
+                      key={template.id}
+                      control={form.control}
+                      name="templates"
+                      render={({ field }) => (
+                        <FormItem key={template.id}>
+                          <div className="flex flex-row items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(template.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([
+                                        ...field.value,
+                                        template.id,
+                                      ])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== template.id,
+                                        ),
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {template.name} ({template.items.length} elements)
+                            </FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
                     />
-                    <span className="label-text">
-                      {template.name} ({template.items.length} elements)
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {errors.templates && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.templates.message?.toString()}
-                  </span>
-                </div>
+                  ))}
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
-            <div className="modal-action">
-              <button
-                type="button"
-                onClick={() => dialog.current?.close()}
-                disabled={isLoading}
-                className="btn btn-neutral"
-              >
-                Cancel·lar
-              </button>
-              <button disabled={isLoading} className="btn btn-primary">
-                {isLoading && <span className="loading loading-spinner" />}
-                Crear
-              </button>
-            </div>
+            />
+
+            <Button
+              disabled={form.formState.isSubmitting}
+              className="w-full space-x-2"
+            >
+              {form.formState.isSubmitting && (
+                <span className="loading loading-spinner" />
+              )}
+              Crear
+            </Button>
           </form>
-        </div>
-      </dialog>
+        </Form>
+      </ModalForm>
     </>
   );
 }

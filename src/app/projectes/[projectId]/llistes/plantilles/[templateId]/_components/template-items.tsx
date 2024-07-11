@@ -1,7 +1,7 @@
 "use client";
 
 import type { Template } from "@/app/_data/list";
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
 import { updateTemplateItems } from "./actions";
@@ -15,7 +15,7 @@ export default function TemplateItems({ template }: { template: Template }) {
   const [itemsByCategory, setItemsByCategory] =
     React.useState<ReturnType<typeof groupItemsByCategory>>();
   const [animationParent] = useAutoAnimate();
-  const { project } = useSelectedProject();
+  const { project } = useProjects();
 
   const groupItemsByCategory = React.useCallback(
     (items: Template["items"]) => {
@@ -58,10 +58,16 @@ export default function TemplateItems({ template }: { template: Template }) {
   async function handleItemChange(
     index: number,
     newName: string,
-    newCategory: string,
+    newCategory: string | null,
   ) {
     const newItems = [...template.items];
-    newItems[index] = { name: newName, category: newCategory };
+
+    if (newName === "") {
+      newItems.splice(index, 1);
+    } else {
+      newItems[index] = { name: newName, category: newCategory };
+    }
+
     await updateTemplateItems(
       template,
       newItems.map((item) => ({ name: item.name, category: item.category })),

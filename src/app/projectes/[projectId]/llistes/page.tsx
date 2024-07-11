@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
 import { getTemplates } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
@@ -21,13 +22,12 @@ export default async function ListesPage({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <h1 className="text-xl font-semibold">Llistes</h1>
-          <Link
-            href={`/projectes/${projectId}/llistes/plantilles`}
-            className="btn btn-neutral btn-sm"
-          >
-            <LayoutTemplate size={18} />
-            Gestionar plantilles
-          </Link>
+          <Button variant="neutral" size="sm" asChild className="gap-2">
+            <Link href={`/projectes/${projectId}/llistes/plantilles`}>
+              <LayoutTemplate size={18} />
+              Gestionar plantilles
+            </Link>
+          </Button>
         </div>
 
         <CreateListButton projectId={projectId} templates={templates} />

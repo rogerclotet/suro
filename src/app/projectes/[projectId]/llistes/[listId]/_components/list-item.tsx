@@ -1,106 +1,189 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
-import type { Category } from "@/app/_data/project";
-import { Check } from "lucide-react";
+import { useProjects } from "@/app/_state/project-state";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { valibotResolver } from "@hookform/resolvers/valibot";
 import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as v from "valibot";
-import { updateListItemCategory } from "./actions";
-import CategorySelector from "./categories/category-selector";
-import NewCategoryDialog from "./categories/new-category-dialog";
+import NewCategoryModal from "./categories/new-category-modal";
 import { listItemSchema } from "./data";
 
 export default function ListItem(props: {
   list: List;
   id: string;
   name: string;
+  categoryId: string | null;
   completed: boolean;
-  onChange: (name: string, completed: boolean) => void;
+  onChange: (
+    name: string,
+    completed: boolean,
+    categoryId: string | null,
+  ) => void;
   onDelete?: () => void;
 }) {
-  const [name, setName] = React.useState(props.name);
-  const [completed, setCompleted] = React.useState(props.completed ?? false);
-  const newCategoryDialog = React.useRef<HTMLDialogElement>(null);
+  const form = useForm({
+    defaultValues: {
+      name: props.name,
+      completed: props.completed ?? false,
+      categoryId: props.categoryId,
+    },
+    resolver: valibotResolver(listItemSchema),
+  });
+  const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
+  const { project } = useProjects();
+  const formRef = React.useRef<HTMLFormElement>(null);
 
-  function save(name: string, completed: boolean) {
-    if (!hasChanged(name, completed)) {
-      return;
-    }
-
-    if (name === "") {
-      props.onDelete?.();
-      return;
-    }
-
+  function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     try {
-      const parsed = v.parse(listItemSchema, { name, completed });
+      const parsed = v.parse(listItemSchema, data);
 
-      props.onChange(parsed.name, parsed.completed);
+      if (parsed.name === "") {
+        props.onDelete?.();
+        return;
+      }
+
+      props.onChange(
+        parsed.name,
+        parsed.completed,
+        parsed.categoryId === "" ? null : parsed.categoryId ?? null,
+      );
     } catch (e) {
       console.error(e);
+      toast.error(
+        "No s'ha pogut actualitzar l'element, torna-ho a provar més tard",
+      );
       return;
     }
   }
 
-  function handleCompletedChange() {
-    save(name, !completed);
-    setCompleted((prev) => !prev);
+  async function handleNameBlur(_e: React.FocusEvent<HTMLInputElement>) {
+    if (form.formState.isDirty) {
+      formRef.current?.requestSubmit();
+    }
   }
 
-  function handleNameChange() {
-    save(name, completed);
-  }
+  async function handleCategoryChange(
+    value: string,
+    onChange: (value: string) => void,
+  ) {
+    if (value === "new") {
+      newCategoryModalRef.current?.click();
+      return;
+    }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    save(name, completed);
-  }
+    if (value === "-") {
+      onChange("");
+    } else {
+      onChange(value);
+    }
 
-  function hasChanged(name: string, completed: boolean) {
-    return name !== props.name || completed !== props.completed;
-  }
-
-  async function handleCategorySelected(category: Category | null) {
-    await updateListItemCategory(props.list, props.id, category);
+    formRef.current?.requestSubmit();
   }
 
   return (
-    <li className="flex w-full items-center justify-between gap-4">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-grow items-center gap-2"
-      >
-        <div className="input input-ghost flex w-full items-center gap-4 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={completed}
-            onChange={handleCompletedChange}
+    <li>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-row items-center gap-2"
+          ref={formRef}
+        >
+          <FormField
+            control={form.control}
+            name="completed"
+            render={({ field }) => (
+              <FormItem className="h-5 w-5">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                      formRef.current?.requestSubmit();
+                    }}
+                    className="h-5 w-5 transition-all"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <input
-            type="text"
-            disabled={completed}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={handleNameChange}
-            className={`h-full w-full ${completed && "text-base-content line-through opacity-60"}`}
-          />
-          {name !== props.name && (
-            <button className="btn btn-circle btn-ghost btn-sm">
-              <Check />
-            </button>
-          )}
 
-          <CategorySelector
-            newCategoryDialog={newCategoryDialog}
-            onSelect={handleCategorySelected}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="flex-grow">
+                <FormControl>
+                  <Input
+                    {...field}
+                    onBlur={(e) => handleNameBlur(e)}
+                    className={cn(
+                      "border-none",
+                      form.getValues().completed && "line-through",
+                    )}
+                    disabled={form.getValues().completed}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      </form>
 
-      <NewCategoryDialog
-        ref={newCategoryDialog}
-        onClose={() => newCategoryDialog.current?.close()}
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field: { onChange, value } }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    defaultValue={value ?? ""}
+                    onValueChange={(v) => handleCategoryChange(v, onChange)}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Sense categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="-">Sense categoria</SelectItem>
+                      {project?.categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="new">+ Nova categoria</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+
+      <NewCategoryModal
+        triggerRef={newCategoryModalRef}
+        onCreate={(categoryId) => form.setValue("categoryId", categoryId)}
       />
     </li>
   );

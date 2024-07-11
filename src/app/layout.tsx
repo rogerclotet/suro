@@ -1,12 +1,14 @@
 import { auth } from "@/auth";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import React from "react";
-import { Toaster } from "sonner";
 import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
 import Drawer from "./_components/navigation/drawer/drawer";
+import ProjectsLoader from "./_components/projects-loader";
 
 v.setGlobalConfig({ lang: "ca" });
 
@@ -28,28 +30,23 @@ export default async function RootLayout({
       lang="ca"
       suppressHydrationWarning
       className={`${GeistSans.variable}`}
-      style={{ scrollbarGutter: "stable" }}
     >
       <body>
-        <ThemeProvider defaultTheme="dark" enableSystem>
-          <Drawer />
-          <div className="mx-auto mb-16 mt-16 w-full flex-grow px-4 py-4 lg:container lg:mb-0">
-            {children}
-          </div>
-          {session && <BottomNav />}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <TooltipProvider>
+            <Drawer />
+            <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
+              {children}
+            </div>
+            {session && (
+              <>
+                <ProjectsLoader />
+                <BottomNav />
+              </>
+            )}
 
-          <Toaster
-            toastOptions={{
-              unstyled: true,
-              classNames: {
-                success: "alert alert-success",
-                error: "alert alert-error",
-                warning: "alert alert-warning",
-                info: "alert alert-info",
-              },
-            }}
-            position="bottom-center"
-          />
+            <Toaster position="bottom-center" />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

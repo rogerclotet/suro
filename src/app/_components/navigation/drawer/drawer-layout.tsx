@@ -1,7 +1,13 @@
 "use client";
 
-import type { Project } from "@/app/_data/project";
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,15 +17,13 @@ import Navbar from "../navbar";
 import ProjectSelector from "../project-selector";
 
 export default function DrawerLayout({
-  projects,
   children,
 }: {
-  projects: Project[];
   children: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
-  const { project } = useSelectedProject();
+  const { projects, project } = useProjects();
 
   function handleSelectProject(projectId: string) {
     setIsOpen(false);
@@ -27,28 +31,47 @@ export default function DrawerLayout({
   }
 
   return (
-    <div className="drawer flex flex-col items-center">
-      <input
-        id="menu-drawer"
-        type="checkbox"
-        checked={isOpen}
-        onChange={() => setIsOpen(!isOpen)}
-        className="drawer-toggle"
-      />
+    <div>
+      <nav className="fixed left-0 right-0 top-0 z-40 flex w-full flex-row items-center justify-between gap-2 bg-primary py-2 text-primary-foreground lg:container lg:rounded-b-xl">
+        <div className="flex flex-row items-center gap-2">
+          <Drawer direction="left" open={isOpen} onOpenChange={setIsOpen}>
+            <DrawerTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Obrir menú lateral"
+              >
+                <Menu />
+              </Button>
+            </DrawerTrigger>
 
-      <nav className="navbar fixed z-40 w-full bg-primary text-primary-content lg:container lg:rounded-b-xl">
-        <div className="navbar-start">
-          <div className="dropdown">
-            <label
-              htmlFor="menu-drawer"
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost text-xl"
-              aria-label="Obrir menú lateral"
-            >
-              <Menu />
-            </label>
-          </div>
+            <DrawerContent className="fixed left-0 h-full w-80 max-w-[calc(100vw-2rem)] rounded-none">
+              <DrawerTitle className="sr-only">Menú lateral</DrawerTitle>
+
+              <ul tabIndex={0} className="flex flex-col gap-2 p-4">
+                {children}
+
+                <li>
+                  <ProjectSelector
+                    projects={projects}
+                    onSelect={handleSelectProject}
+                  />
+                </li>
+
+                <li>
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full justify-start"
+                  >
+                    <Link href="/projectes" onClick={() => setIsOpen(false)}>
+                      Gestionar projectes
+                    </Link>
+                  </Button>
+                </li>
+              </ul>
+            </DrawerContent>
+          </Drawer>
 
           <Link href="/" className="btn btn-ghost text-xl">
             {project?.name ?? "Família"}
@@ -63,31 +86,6 @@ export default function DrawerLayout({
           <ThemeSwitcher />
         </div>
       </nav>
-
-      <div className="drawer-side z-50">
-        <label
-          htmlFor="menu-drawer"
-          aria-label="Tancar menú lateral"
-          className="drawer-overlay"
-        ></label>
-
-        <ul tabIndex={0} className="menu min-h-full w-80 gap-2 bg-base-200 p-4">
-          {children}
-
-          <li>
-            <ProjectSelector
-              projects={projects}
-              onSelect={handleSelectProject}
-            />
-          </li>
-
-          <li>
-            <Link href="/projectes" onClick={() => setIsOpen(false)}>
-              Gestionar projectes
-            </Link>
-          </li>
-        </ul>
-      </div>
     </div>
   );
 }

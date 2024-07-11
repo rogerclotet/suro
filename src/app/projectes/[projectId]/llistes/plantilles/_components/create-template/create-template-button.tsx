@@ -1,5 +1,16 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -15,13 +26,7 @@ export default function CreateTemplateButton({
 }: {
   projectId: string;
 }) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    formState: { errors },
-  } = useForm({
+  const form = useForm({
     defaultValues: {
       name: "",
       description: "",
@@ -29,15 +34,13 @@ export default function CreateTemplateButton({
     },
     resolver: valibotResolver(templateSchema),
   });
-  const dialog = React.useRef<HTMLDialogElement>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
+  const triggerRef = React.useRef<HTMLDivElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
-    setIsLoading(true);
     try {
       const templateId = await createTemplate(projectId, data);
-      toast.success(`Plantilla ${getValues().name} creada`);
+      toast.success(`Plantilla ${form.getValues().name} creada`);
       router.push(`/projectes/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
       console.error(e);
@@ -46,74 +49,65 @@ export default function CreateTemplateButton({
       );
       return;
     } finally {
-      reset();
-      dialog.current?.close();
-      setIsLoading(false);
+      form.reset();
     }
   }
 
   return (
     <>
-      <button
-        className="btn btn-secondary btn-sm"
-        onClick={() => dialog.current?.showModal()}
+      <Button
+        onClick={() => triggerRef.current?.click()}
+        variant="secondary"
+        size="sm"
+        className="gap-2"
       >
         <Plus />
         Crear plantilla
-      </button>
+      </Button>
 
-      <dialog ref={dialog} className="modal">
-        <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Crear plantilla</h3>
+      <ModalForm triggerRef={triggerRef} title="Crear plantilla">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input autoFocus {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-control w-full">
-              <div className="label label-text">Nom</div>
-              <input
-                {...register("name")}
-                disabled={isLoading}
-                className="input input-bordered w-full"
-              />
-              {errors.name && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.name.message?.toString()}
-                  </span>
-                </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripció</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </label>
-            <label className="form-control w-full">
-              <div className="label label-text">Descripció</div>
-              <textarea
-                {...register("description")}
-                disabled={isLoading}
-                className="textarea textarea-bordered w-full"
-              />
-              {errors.description && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.description.message?.toString()}
-                  </span>
-                </div>
+            />
+
+            <Button
+              disabled={form.formState.isSubmitting}
+              className="w-full space-x-2"
+            >
+              {form.formState.isSubmitting && (
+                <span className="loading loading-spinner" />
               )}
-            </label>
-            <div className="modal-action">
-              <button
-                type="button"
-                onClick={() => dialog.current?.close()}
-                disabled={isLoading}
-                className="btn btn-neutral"
-              >
-                Cancel·lar
-              </button>
-              <button disabled={isLoading} className="btn btn-primary">
-                {isLoading && <span className="loading loading-spinner" />}
-                Crear
-              </button>
-            </div>
+              Crear
+            </Button>
           </form>
-        </div>
-      </dialog>
+        </Form>
+      </ModalForm>
     </>
   );
 }

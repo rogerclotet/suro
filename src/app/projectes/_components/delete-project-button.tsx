@@ -1,7 +1,8 @@
 "use client";
 
-import type { Project } from "@/app/_data/project";
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import ModalAction from "@/components/ui/modal-action";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -9,13 +10,11 @@ import { deleteProject } from "./actions";
 
 export default function DeleteProjectButton({
   projectId,
-  projects,
 }: {
   projectId: string;
-  projects: Project[];
 }) {
-  const dialog = React.useRef<HTMLDialogElement>(null);
-  const { selectProject } = useSelectedProject();
+  const modalRef = React.useRef<HTMLDivElement>(null);
+  const { projects, selectProject } = useProjects();
 
   const projectToDelete = projects.find((project) => project.id === projectId);
   if (!projectToDelete) {
@@ -23,8 +22,6 @@ export default function DeleteProjectButton({
   }
 
   async function handleDelete() {
-    dialog.current?.close();
-
     if (!projectToDelete) {
       return;
     }
@@ -46,32 +43,24 @@ export default function DeleteProjectButton({
 
   return (
     <>
-      <button
-        onClick={() => dialog.current?.showModal()}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => modalRef.current?.click()}
         aria-label="Eliminar"
-        className="btn btn-square btn-error btn-sm"
+        className="hover:bg-destructive hover:text-destructive-foreground"
       >
         <Trash2 />
-      </button>
+      </Button>
 
-      <dialog ref={dialog} className="modal">
-        <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Eliminar projecte</h3>
-          <p className="mb-4">
-            Estàs segur que vols eliminar el projecte{" "}
-            <span className="font-bold">{projectToDelete.name}</span>? Aquesta
-            acció no es pot desfer.
-          </p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn btn-neutral">Cancel·lar</button>
-            </form>
-            <form action={handleDelete}>
-              <button className="btn btn-error">Eliminar</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
+      <ModalAction
+        title="Eliminar projecte"
+        description={`Estàs segur que vols eliminar el projecte ${projectToDelete.name}? Aquesta acció no es pot desfer.`}
+        actionText="Eliminar"
+        onAction={handleDelete}
+        variant="destructive"
+        triggerRef={modalRef}
+      />
     </>
   );
 }
