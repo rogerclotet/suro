@@ -5,8 +5,10 @@ import { devtools } from "zustand/middleware";
 import type { Project } from "../_data/project";
 
 interface ProjectState {
+  projects: Project[];
   project: Project | null;
   projectId: string | null;
+  setProjects: (projects: Project[]) => void;
   selectProject: (project: Project) => void;
   selectProjectId: (projectId: string) => void;
   addCategory: (category: Project["categories"][number]) => void;
@@ -15,8 +17,10 @@ interface ProjectState {
 const useProjectsStore = create<ProjectState>()(
   devtools(
     (set, get) => ({
+      projects: [],
       project: null,
       projectId: null,
+      setProjects: (projects) => set({ projects }),
       selectProject: (project) => set({ project }),
       selectProjectId: (projectId) => set({ projectId: projectId }),
       addCategory: (category) => {
@@ -36,7 +40,9 @@ const useProjectsStore = create<ProjectState>()(
   ),
 );
 
-export function useSelectedProject() {
+export function useProjects() {
+  const setProjects = useProjectsStore((state) => state.setProjects);
+  const projects = useProjectsStore((state) => state.projects);
   const project = useProjectsStore((state) => state.project);
   const selectProjectInStore = useProjectsStore((state) => state.selectProject);
   const selectProjectId = useProjectsStore((state) => state.selectProjectId);
@@ -56,5 +62,5 @@ export function useSelectedProject() {
     selectProjectId(project.id);
   }
 
-  return { project, selectProject, addCategory };
+  return { setProjects, projects, project, selectProject, addCategory };
 }

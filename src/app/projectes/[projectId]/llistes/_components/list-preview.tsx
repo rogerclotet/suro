@@ -1,4 +1,12 @@
 import type { List } from "@/app/_data/list";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
@@ -6,29 +14,21 @@ export default function ListPreview({ list }: { list: List }) {
 
   return (
     <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>
-      <div className="card bg-base-300 shadow-xl">
-        <div className="card-body">
+      <Card>
+        <CardHeader>
           <div className="flex items-start justify-between gap-2">
-            <h2 className="card-title">{list.name}</h2>
-            {todoCount > 0 && (
-              <span className="badge badge-lg mt-1">{todoCount}</span>
-            )}
+            <CardTitle>{list.name}</CardTitle>
+            {todoCount > 0 && <Badge variant="secondary">{todoCount}</Badge>}
           </div>
-          <p className="line-clamp-2">{list.description}</p>
-        </div>
-      </div>
+          <CardDescription className="line-clamp-2">
+            {list.description}
+          </CardDescription>
+        </CardHeader>
+      </Card>
     </Link>
   );
 }
 
 export function ListPreviewSkeleton() {
-  return (
-    <div className="card bg-base-300 shadow-xl">
-      <div className="card-body">
-        <div className="skeleton h-8 w-52" />
-        <div className="skeleton h-12 w-full" />
-        <div className="skeleton h-6 w-32" />
-      </div>
-    </div>
-  );
+  return <Skeleton className="h-36 w-full" />;
 }

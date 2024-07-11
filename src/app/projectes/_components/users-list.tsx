@@ -1,39 +1,49 @@
 import type { Project } from "@/app/_data/project";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function UsersList({ users }: { users: Project["users"] }) {
   return (
-    <div className="avatar-group -space-x-4 overflow-visible">
+    <div className="flex flex-row -space-x-3">
       {users.slice(0, 3).map((user) => (
-        <div key={user.user.id} className="tooltip" data-tip={user.user.name}>
-          <UserAvatar user={user.user} />
-        </div>
+        <Tooltip key={user.user.id}>
+          <TooltipTrigger>
+            <UserAvatar user={user.user} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{user.user.name}</p>
+          </TooltipContent>
+        </Tooltip>
       ))}
 
       {users.length > 3 && (
-        <div className="avatar placeholder border-2">
-          <div className="w-8 bg-neutral text-neutral-content">
-            <span>+{users.length - 3}</span>
-          </div>
-        </div>
+        <Tooltip>
+          <TooltipTrigger>
+            <Avatar>
+              <AvatarFallback>+{users.length - 3}</AvatarFallback>
+            </Avatar>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{users.map((u) => u.user.name).join(", ")}</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
 }
 
 function UserAvatar({ user }: { user: Project["users"][number]["user"] }) {
-  if (!user.image) {
-    <div key={user.id} className="avatar placeholder border-2">
-      <div className="w-8 bg-neutral-700 text-neutral-content">
-        <span>{user.name!.charAt(0).toUpperCase()}</span>
-      </div>
-    </div>;
-  }
-
   return (
-    <div key={user.id} className="avatar border-2">
+    <div key={user.id}>
       <div className="w-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={user.image!} alt={user.name!} />
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={user.image ?? undefined} />
+          <AvatarFallback>{user.name!.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
       </div>
     </div>
   );

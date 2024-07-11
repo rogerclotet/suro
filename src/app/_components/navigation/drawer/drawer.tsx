@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { getProjects } from "@/server/projects";
 import DrawerLayout from "./drawer-layout";
 import Profile from "./profile";
 
@@ -9,10 +8,8 @@ export default async function Drawer() {
     return null;
   }
 
-  const projects = await getProjects();
-
   return (
-    <DrawerLayout projects={projects}>
+    <DrawerLayout>
       <li>
         <Profile />
       </li>

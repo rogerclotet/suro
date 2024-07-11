@@ -1,14 +1,12 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="space-y-4">
-      <div className="alert alert-error">{"No s'ha trobat la pàgina."}</div>
-      <Link href="/" className="btn btn-neutral">
-        <ArrowLeft />
-        Tornar a la pàgina principal
-      </Link>
-    </div>
+    <Alert variant="destructive" className="mx-auto mt-20 max-w-lg">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Error</AlertTitle>
+      <AlertDescription>{"No s'ha trobat la pàgina."}</AlertDescription>
+    </Alert>
   );
 }

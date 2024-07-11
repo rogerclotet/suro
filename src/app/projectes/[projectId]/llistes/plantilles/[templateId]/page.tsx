@@ -1,3 +1,11 @@
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { checkAuth } from "@/lib/check-auth";
 import { getTemplate } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
@@ -26,18 +34,27 @@ export default async function TemplatePage({
 
   return (
     <div>
-      <div className="breadcrumbs pb-4 text-sm">
-        <ul>
-          <li>
-            <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
-          </li>
-          <li>
-            <Link href={`/projectes/${projectId}/llistes/plantilles`}>
-              Plantilles
-            </Link>
-          </li>
-        </ul>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/projectes/${projectId}/llistes/plantilles`}>
+                Plantilles
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{template.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="mb-4 flex items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 text-xl font-semibold">

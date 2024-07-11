@@ -1,3 +1,11 @@
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { checkAuth } from "@/lib/check-auth";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -15,16 +23,21 @@ export default async function PlantillesPage({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="breadcrumbs p-0 text-xl font-semibold">
-          <ul>
-            <li>
-              <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
-            </li>
-            <li>
-              <h1>Plantilles</h1>
-            </li>
-          </ul>
-        </div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild className="text-xl font-semibold">
+                <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="scale-150" />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-xl font-semibold">
+                Plantilles
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <CreateTemplateButton projectId={projectId} />
       </div>

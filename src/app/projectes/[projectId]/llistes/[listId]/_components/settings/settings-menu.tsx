@@ -1,51 +1,56 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ModalForm from "@/components/ui/modal-form";
 import { Edit, Settings, Trash2 } from "lucide-react";
 import React from "react";
-import DeleteListDialog from "./delete-list-dialog";
-import EditListDialog from "./edit-list-dialog";
+import DeleteListModal from "./delete-list-form";
+import EditListForm from "./edit-list-form";
 
 export default function SettingsMenu({ list }: { list: List }) {
-  const editDialog = React.useRef<HTMLDialogElement>(null);
-  const deleteDialog = React.useRef<HTMLDialogElement>(null);
+  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
+  const editDialogRef = React.useRef<HTMLDivElement>(null);
 
   return (
-    <details className="dropdown dropdown-end">
-      <summary className="btn btn-square btn-ghost">
-        <Settings />
-      </summary>
-      <ul className="menu dropdown-content z-[1] gap-2 rounded-box bg-base-200 p-2 shadow-xl">
-        <li>
-          <a
-            onClick={() => editDialog.current?.showModal()}
-            className="btn flex flex-nowrap justify-start text-nowrap"
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Settings />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => editDialogRef.current?.click()}
+            className="cursor-pointer gap-2"
           >
             <Edit />
             Editar llista
-          </a>
-        </li>
-        <li>
-          <a
-            onClick={() => deleteDialog.current?.showModal()}
-            className="btn btn-error flex flex-nowrap justify-start text-nowrap"
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => deleteDialogRef.current?.click()}
+            className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
           >
             <Trash2 />
             Eliminar llista
-          </a>
-        </li>
-      </ul>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      <EditListDialog
-        ref={editDialog}
-        list={list}
-        onClose={() => editDialog.current?.close()}
-      />
-      <DeleteListDialog
-        ref={deleteDialog}
-        list={list}
-        onClose={() => deleteDialog.current?.close()}
-      />
-    </details>
+      <ModalForm triggerRef={editDialogRef} title="Editar llista">
+        <EditListForm
+          list={list}
+          onClose={() => editDialogRef.current?.click()}
+        />
+      </ModalForm>
+      <DeleteListModal triggerRef={deleteDialogRef} list={list} />
+    </>
   );
 }

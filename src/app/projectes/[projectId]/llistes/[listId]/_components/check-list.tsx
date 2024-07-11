@@ -1,6 +1,7 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
 import { deleteListItem, updateListItem } from "./actions";
@@ -11,6 +12,7 @@ export default function CheckList(props: { list: List }) {
   const [itemsByCategory, setItemsByCategory] = React.useState(
     groupItemsByCategory(props.list.items),
   );
+  const { project } = useProjects();
   const [animationParent] = useAutoAnimate();
 
   React.useEffect(() => {
@@ -21,14 +23,21 @@ export default function CheckList(props: { list: List }) {
     item: List["items"][number],
     name: string,
     completed: boolean,
+    categoryId: string | null,
   ) {
+    if (name === "") {
+      return;
+    }
+
     item.name = name;
     item.completed = completed;
+    item.category =
+      project?.categories.find((c) => c.id === categoryId) ?? null;
     item.updatedAt = new Date();
 
     setItemsByCategory(groupItemsByCategory(props.list.items));
 
-    await updateListItem(props.list, item.id, name, completed);
+    await updateListItem(props.list, item.id, name, completed, categoryId);
   }
 
   async function handleDelete(item: List["items"][number]) {
@@ -58,8 +67,9 @@ export default function CheckList(props: { list: List }) {
                 id={item.id}
                 name={item.name}
                 completed={item.completed ?? false}
-                onChange={(name, completed) =>
-                  handleChange(item, name, completed)
+                categoryId={item.category?.id ?? null}
+                onChange={(name, completed, categoryId) =>
+                  handleChange(item, name, completed, categoryId)
                 }
                 onDelete={() => handleDelete(item)}
               />
@@ -84,10 +94,7 @@ function compareItems(a: List["items"][number], b: List["items"][number]) {
     return -1;
   }
 
-  const dateA = a.updatedAt ?? a.createdAt!;
-  const dateB = b.updatedAt ?? b.createdAt!;
-
-  return dateA < dateB ? 1 : -1;
+  return a.name.localeCompare(b.name);
 }
 
 function groupItemsByCategory(items: List["items"]) {

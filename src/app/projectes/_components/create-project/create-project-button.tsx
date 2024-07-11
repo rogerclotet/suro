@@ -1,6 +1,17 @@
 "use client";
 
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -11,31 +22,23 @@ import { createProject } from "./actions";
 import { createProjectSchema } from "./data";
 
 export default function CreateProjectButton() {
-  const { selectProject } = useSelectedProject();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    formState: { errors },
-  } = useForm({
+  const { selectProject } = useProjects();
+  const form = useForm({
     defaultValues: {
       name: "",
     },
     resolver: valibotResolver(createProjectSchema),
   });
-  const dialog = React.useRef<HTMLDialogElement>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const modalRef = React.useRef<HTMLDivElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof createProjectSchema>) {
-    setIsLoading(true);
     try {
       const project = await createProject(data);
       if (!project) {
         throw new Error("Error creating project");
       }
       selectProject(project);
-      toast.success(`Projecte ${getValues().name} creat`);
+      toast.success(`Projecte ${form.getValues().name} creat`);
     } catch (e) {
       console.error(e);
       toast.error(
@@ -43,60 +46,51 @@ export default function CreateProjectButton() {
       );
       return;
     } finally {
-      reset();
-      dialog.current?.close();
-      setIsLoading(false);
+      form.reset();
+      modalRef.current?.click();
     }
-  }
-
-  function openDialog() {
-    dialog.current?.showModal();
   }
 
   return (
     <>
-      <button className="btn btn-primary btn-sm" onClick={openDialog}>
+      <Button
+        size="sm"
+        onClick={() => modalRef.current?.click()}
+        className="gap-2"
+      >
         <Plus />
         Crear projecte
-      </button>
+      </Button>
 
-      <dialog ref={dialog} className="modal">
-        <div className="modal-box">
-          <h3 className="mb-4 text-lg font-semibold">Crear Projecte</h3>
-
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-control w-full">
-              <div className="label label-text">Nom</div>
-              <input
-                {...register("name")}
-                disabled={isLoading}
-                className="input input-bordered w-full"
-              />
-              {errors.name && (
-                <div className="label w-full">
-                  <span className="label-text-alt text-error">
-                    {errors.name.message?.toString()}
-                  </span>
-                </div>
+      <ModalForm triggerRef={modalRef} title="Crear Projecte">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input autoFocus {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </label>
-            <div className="modal-action">
-              <button
-                type="button"
-                onClick={() => dialog.current?.close()}
-                disabled={isLoading}
-                className="btn btn-neutral"
-              >
-                Cancel·lar
-              </button>
-              <button disabled={isLoading} className="btn btn-primary">
-                {isLoading && <span className="loading loading-spinner" />}
-                Crear
-              </button>
-            </div>
+            />
+
+            <Button
+              disabled={form.formState.isSubmitting}
+              className="w-full space-x-2"
+            >
+              {form.formState.isSubmitting && (
+                <span className="loading loading-spinner" />
+              )}
+              Crear
+            </Button>
           </form>
-        </div>
-      </dialog>
+        </Form>
+      </ModalForm>
     </>
   );
 }

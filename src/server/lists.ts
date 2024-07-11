@@ -23,11 +23,7 @@ export async function getList(listId: string) {
           with: {
             category: true,
           },
-          orderBy: [
-            asc(listItems.completed),
-            desc(listItems.updatedAt),
-            desc(listItems.createdAt),
-          ],
+          orderBy: [asc(listItems.completed), asc(listItems.name)],
         },
       },
       where: eq(lists.id, listId),
@@ -68,7 +64,7 @@ export async function getLists(projectId: string) {
               with: {
                 category: true,
               },
-              orderBy: [asc(listItems.completed), desc(listItems.updatedAt)],
+              orderBy: [asc(listItems.completed), asc(listItems.name)],
             },
           },
           orderBy: [desc(lists.updatedAt)],
@@ -150,7 +146,7 @@ export async function getTemplates(projectId: string) {
 
     return project.templates.map((t) => ({
       ...t,
-      items: t.items as { name: string; category: string }[],
+      items: t.items as { name: string; category: string | null }[],
     }));
   } catch (e) {
     console.error(e);

@@ -1,14 +1,28 @@
 "use client";
 
 import type { Template } from "@/app/_data/list";
-import { useSelectedProject } from "@/app/_state/project-state";
+import { useProjects } from "@/app/_state/project-state";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Check } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import NewCategoryDialog from "../../../[listId]/_components/categories/new-category-dialog";
+import NewCategoryModal from "../../../[listId]/_components/categories/new-category-modal";
 import { templateItemSchema } from "../../_components/create-template/data";
 
 export default function TemplateItem({
@@ -16,22 +30,18 @@ export default function TemplateItem({
   onChange,
 }: {
   item: Template["items"][number];
-  onChange: (name: string, category: string) => void;
+  onChange: (name: string, category: string | null) => void;
 }) {
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { dirtyFields },
-  } = useForm({
+  const form = useForm({
     defaultValues: {
       name: item.name,
       category: item.category,
     },
     resolver: valibotResolver(templateItemSchema),
   });
-  const { project } = useSelectedProject();
-  const newCategoryDialog = React.useRef<HTMLDialogElement>(null);
+  const { project } = useProjects();
+  const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
+  const formRef = React.useRef<HTMLFormElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -43,65 +53,91 @@ export default function TemplateItem({
     }
   }
 
-  const { onBlur: onNameBlur, ...registerName } = register("name");
-
-  const { onChange: onCategoryChange, ...registerCategory } =
-    register("category");
-
-  async function handleNameBlur(e: React.FocusEvent<HTMLInputElement>) {
-    await onNameBlur(e);
-    onChange(getValues("name"), item.category);
+  async function handleNameBlur(_e: React.FocusEvent<HTMLInputElement>) {
+    if (form.formState.isDirty) {
+      formRef.current?.requestSubmit();
+    }
   }
 
-  async function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    if (e.target.value === "new") {
-      newCategoryDialog.current?.showModal();
+  async function handleCategoryChange(
+    value: string,
+    onChange: (value: string) => void,
+  ) {
+    if (value === "new") {
+      newCategoryModalRef.current?.click();
       return;
     }
 
-    await onCategoryChange(e);
-    onChange(item.name, getValues("category"));
+    if (value === "-") {
+      onChange("");
+    } else {
+      onChange(value);
+    }
+
+    formRef.current?.requestSubmit();
   }
 
   return (
     <li className="flex w-full items-center justify-between gap-4">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-grow items-center gap-2"
-      >
-        <label className="input input-ghost flex w-full items-center gap-2 has-[input[disabled]]:border-transparent has-[input[disabled]]:bg-transparent has-[input[disabled]]:text-neutral-content">
-          <input
-            {...registerName}
-            onBlur={handleNameBlur}
-            placeholder="Afegir element"
-            className="input-bordered h-full w-full"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex w-full flex-row items-center gap-2"
+          ref={formRef}
+        >
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="flex-grow">
+                <FormControl>
+                  <Input
+                    {...field}
+                    onBlur={(e) => handleNameBlur(e)}
+                    className="border-none"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {dirtyFields.name && (
-            <button className="btn btn-circle btn-ghost btn-sm">
-              <Check />
-            </button>
-          )}
-        </label>
-      </form>
 
-      <select
-        {...registerCategory}
-        onChange={handleCategoryChange}
-        className="select select-bordered max-w-28 sm:max-w-48"
-      >
-        <option value="">Sense categoria</option>
-        {project?.categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-        <option value="new">+ Nova categoria</option>
-      </select>
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field: { onChange, value } }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    value={value ?? ""}
+                    onValueChange={(v) => handleCategoryChange(v, onChange)}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Sense categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="-">Sense categoria</SelectItem>
+                      {project?.categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="new">+ Nova categoria</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
 
-      <NewCategoryDialog
-        ref={newCategoryDialog}
-        onClose={() => newCategoryDialog.current?.close()}
-        onCreate={(categoryId) => onChange(item.name, categoryId)}
+      <NewCategoryModal
+        triggerRef={newCategoryModalRef}
+        onCreate={(categoryId) => form.setValue("category", categoryId)}
       />
     </li>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMenuItems } from "./use-menu-items";
@@ -9,27 +10,35 @@ export default function Navbar() {
   const menuItems = useMenuItems();
 
   function isActive(path: string) {
-    return pathname.includes(path);
+    return path !== "/" && pathname.includes(path);
   }
 
   return (
-    <ul className="menu menu-horizontal gap-2 p-0">
-      {menuItems.map((item) => (
-        <li key={item.name}>
-          {item.disabled ? (
-            <div className="btn btn-ghost no-animation cursor-default opacity-40">
+    <div className="flex flex-row items-center gap-2">
+      {menuItems.map((item) => {
+        if (item.disabled) {
+          return (
+            <Button key={item.name} variant="ghost" disabled>
               {item.name}
-            </div>
-          ) : (
+            </Button>
+          );
+        }
+
+        return (
+          <Button key={item.name} variant="ghost" asChild>
             <Link
-              href={item.disabled ? "" : item.path}
-              className={`btn btn-ghost ${isActive(item.path) ? "underline underline-offset-4 [text-decoration-thickness:0.15em]" : ""}`}
+              href={item.path}
+              className={
+                isActive(item.path)
+                  ? "underline underline-offset-4 [text-decoration-thickness:0.15em]"
+                  : ""
+              }
             >
               {item.name}
             </Link>
-          )}
-        </li>
-      ))}
-    </ul>
+          </Button>
+        );
+      })}
+    </div>
   );
 }
