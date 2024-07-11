@@ -1,25 +1,22 @@
 "use client";
 
-import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 export default function ProjectSelector({
-  projects,
   onSelect,
 }: {
-  projects: Project[];
   onSelect: (projectId: string) => void;
 }) {
-  const { project, selectProject } = useProjects();
+  const { projects, project, selectProject } = useProjects();
 
-  function handleOptionChange(projectId: string) {
+  function handleProjectSelect(projectId: string) {
     const projectToSelect = projects.find((p) => p.id === projectId);
     if (projectToSelect) {
       selectProject(projectToSelect);
@@ -28,23 +25,32 @@ export default function ProjectSelector({
   }
 
   return (
-    <Select value={project?.id ?? ""} onValueChange={handleOptionChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue
-          placeholder={
-            projects.length > 0 && project
-              ? project.name
-              : "Seleccionar projecte"
-          }
-        />
-      </SelectTrigger>
-      <SelectContent>
-        {projects.map((project) => (
-          <SelectItem key={project.id} value={project.id}>
-            {project.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Collapsible className="space-y-2 rounded-lg border">
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between"
+        >
+          {project?.name ?? "Seleccionar projecte"}
+          <ChevronDown className="h-4 w-4" />
+          <span className="sr-only">Seleccionar projecte</span>
+        </Button>
+      </CollapsibleTrigger>
+
+      {project &&
+        projects
+          .filter((p) => p.id !== project.id)
+          .map((p) => (
+            <CollapsibleContent key={p.id} className="space-y-2">
+              <Button
+                onClick={() => handleProjectSelect(p.id)}
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                {p.name}
+              </Button>
+            </CollapsibleContent>
+          ))}
+    </Collapsible>
   );
 }

@@ -23,7 +23,7 @@ export default function DrawerLayout({
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
-  const { projects, project } = useProjects();
+  const { project } = useProjects();
 
   function handleSelectProject(projectId: string) {
     setIsOpen(false);
@@ -52,10 +52,7 @@ export default function DrawerLayout({
                 {children}
 
                 <li>
-                  <ProjectSelector
-                    projects={projects}
-                    onSelect={handleSelectProject}
-                  />
+                  <ProjectSelector onSelect={handleSelectProject} />
                 </li>
 
                 <li>
