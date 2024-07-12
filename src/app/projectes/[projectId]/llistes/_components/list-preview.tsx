@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Check } from "lucide-react";
 import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
@@ -14,11 +15,15 @@ export default function ListPreview({ list }: { list: List }) {
 
   return (
     <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>
-      <Card>
+      <Card className={todoCount === 0 ? "opacity-50" : ""}>
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle>{list.name}</CardTitle>
-            {todoCount > 0 && <Badge variant="secondary">{todoCount}</Badge>}
+            {todoCount > 0 ? (
+              <Badge variant="secondary">{todoCount}</Badge>
+            ) : (
+              <Check />
+            )}
           </div>
           <CardDescription className="line-clamp-2">
             {list.description}

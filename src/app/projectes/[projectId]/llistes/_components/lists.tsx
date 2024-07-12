@@ -22,17 +22,41 @@ export default async function Lists({ projectId }: { projectId: string }) {
     );
   }
 
-  lists.sort((a, b) => todoCount(b) - todoCount(a));
+  const incompleteLists = lists.filter((list) =>
+    list.items.some((item) => !item.completed),
+  );
+  const completedLists = lists.filter((list) =>
+    list.items.every((item) => item.completed),
+  );
+
+  incompleteLists.sort(compareLists);
+  completedLists.sort(compareLists);
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {lists.map((list) => (
-        <ListPreview key={list.id} list={list} />
-      ))}
+    <div className="space-y-12">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {incompleteLists.map((list) => (
+          <ListPreview key={list.id} list={list} />
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-md font-semibold text-muted-foreground">
+          Completades:
+        </h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {completedLists.map((list) => (
+            <ListPreview key={list.id} list={list} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function todoCount(list: List) {
-  return list.items.filter((item) => !item.completed).length;
+function compareLists(a: List, b: List) {
+  return (
+    (b.updatedAt?.getTime() ?? b.createdAt?.getTime() ?? 0) -
+    (a.updatedAt?.getTime() ?? a.createdAt?.getTime() ?? 0)
+  );
 }
