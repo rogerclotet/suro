@@ -1,9 +1,9 @@
 import { auth } from "@/auth";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, lte, or } from "drizzle-orm";
 import { db } from "./db";
 import { events } from "./db/schema";
 
-export async function getEvents(projectId: string) {
+export async function getEvents(projectId: string, from: Date, to: Date) {
   const session = await auth();
   if (!session) {
     return [];
@@ -11,7 +11,10 @@ export async function getEvents(projectId: string) {
 
   try {
     const results = await db.query.events.findMany({
-      where: eq(events.projectId, projectId),
+      where: and(
+        eq(events.projectId, projectId),
+        or(gte(events.startAt, from), lte(events.endAt, to)),
+      ),
     });
 
     return results;

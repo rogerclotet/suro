@@ -83,7 +83,7 @@ export default function EditListForm({
           disabled={form.formState.isSubmitting}
           className="w-full space-x-2"
         >
-          {form.formState.isSubmitting && <Loader2 />}
+          {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
           Desar
         </Button>
       </form>

@@ -185,7 +185,9 @@ export default function CreateEventButton() {
             />
 
             <Button disabled={form.formState.isSubmitting} className="w-full">
-              {form.formState.isSubmitting && <Loader2 />}
+              {form.formState.isSubmitting && (
+                <Loader2 className="animate-spin" />
+              )}
               Crear
             </Button>
           </form>

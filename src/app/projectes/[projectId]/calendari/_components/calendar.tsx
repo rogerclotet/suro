@@ -1,6 +1,7 @@
 "use client";
 
 import type { Event } from "@/app/_data/event";
+import { useProjects } from "@/app/_state/project-state";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Card,
@@ -9,12 +10,99 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
 import React from "react";
 import CreateEventButton from "./event/create-event-button";
+import { eventsQueryOptions } from "./event/query";
 
-export default function Calendar({ events }: { events: Event[] }) {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+export default function Calendar() {
+  const [date, setDate] = React.useState<Date | undefined>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
+  const [monthStart, setMonthStart] = React.useState<Date>(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(1);
+    return date;
+  });
+  const { project } = useProjects();
+  const { data: events, isLoading } = useQuery(
+    eventsQueryOptions(monthStart, project?.id),
+  );
+
+  const currentEvents = events?.filter((event) =>
+    isCurrentDayEvent(event, date),
+  );
+
+  function isCurrentDayEvent(event: Event, date?: Date) {
+    if (!date || !event.startAt || !event.endAt) {
+      return false;
+    }
+
+    const eventStart = new Date(
+      event.startAt.getFullYear(),
+      event.startAt.getMonth(),
+      event.startAt.getDate(),
+    );
+    const eventEnd = new Date(
+      event.endAt.getFullYear(),
+      event.endAt.getMonth(),
+      event.endAt.getDate(),
+      23,
+      59,
+      59,
+    );
+
+    return eventStart <= date && eventEnd >= date;
+  }
+
+  function Events() {
+    if (isLoading || currentEvents === undefined) {
+      return (
+        <div className="flex h-32 items-center justify-center">
+          <Loader2 className="animate-spin" />
+        </div>
+      );
+    }
+
+    if (currentEvents && currentEvents.length === 0) {
+      return (
+        <p className="italic opacity-60">
+          No hi ha cap esdeveniment programat per aquest dia.
+        </p>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-4">
+        {currentEvents.map((event) => (
+          <Card key={event.id}>
+            <CardHeader>
+              <CardTitle>{event.name}</CardTitle>
+              <CardDescription>
+                {event.startAt.toLocaleString("ca-ES", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+                {" - "}
+                {event.endAt.toLocaleString("ca-ES", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </CardDescription>
+            </CardHeader>
+            {event.description && (
+              <CardContent>{event.description}</CardContent>
+            )}
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-8 space-y-4">
@@ -28,6 +116,7 @@ export default function Calendar({ events }: { events: Event[] }) {
             mode="single"
             selected={date}
             onSelect={setDate}
+            onMonthChange={setMonthStart}
             locale={ca}
             className="mx-auto"
             classNames={{
@@ -46,35 +135,7 @@ export default function Calendar({ events }: { events: Event[] }) {
               <CreateEventButton />
             </h2>
 
-            {events.length === 0 ? (
-              <p className="italic opacity-60">
-                No hi ha cap esdeveniment programat per aquest dia.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {events.map((event) => (
-                  <Card key={event.id}>
-                    <CardHeader>
-                      <CardTitle>{event.name}</CardTitle>
-                      <CardDescription>
-                        {event.startAt.toLocaleString("ca-ES", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                        {" - "}
-                        {event.endAt.toLocaleString("ca-ES", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </CardDescription>
-                    </CardHeader>
-                    {event.description && (
-                      <CardContent>{event.description}</CardContent>
-                    )}
-                  </Card>
-                ))}
-              </div>
-            )}
+            <Events />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
@@ -32,22 +33,24 @@ export default async function RootLayout({
       className={`${GeistSans.variable}`}
     >
       <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <TooltipProvider>
-            <Drawer />
-            <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
-              {children}
-            </div>
-            {session && (
-              <>
-                <ProjectsLoader />
-                <BottomNav />
-              </>
-            )}
+        <ReactQueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <TooltipProvider>
+              <Drawer />
+              <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
+                {children}
+              </div>
+              {session && (
+                <>
+                  <ProjectsLoader />
+                  <BottomNav />
+                </>
+              )}
 
-            <Toaster position="bottom-center" />
-          </TooltipProvider>
-        </ThemeProvider>
+              <Toaster position="bottom-center" />
+            </TooltipProvider>
+          </ThemeProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
