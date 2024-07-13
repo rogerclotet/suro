@@ -54,7 +54,6 @@ export function DatePicker({ dates, onDatesChange, className }: Props) {
             defaultMonth={dates?.from}
             selected={dates}
             onSelect={onDatesChange}
-            numberOfMonths={2}
             locale={ca}
           />
         </PopoverContent>
