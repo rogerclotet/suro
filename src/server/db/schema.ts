@@ -132,6 +132,7 @@ export const lists = createTable(
     projectId: uuid("projectId")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
+    eventId: uuid("eventId").references(() => events.id),
   },
   (l) => ({
     projectIdIdx: index("list_projectId_idx").on(l.projectId),
@@ -145,7 +146,31 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
     relationName: "project",
   }),
   items: many(listItems),
+  event: one(events, { fields: [lists.eventId], references: [events.id] }),
 }));
+
+export const events = createTable("event", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  startAt: timestamp("startAt", { mode: "date", withTimezone: true }).notNull(),
+  endAt: timestamp("endAt", { mode: "date", withTimezone: true }).notNull(),
+  createdAt: timestamp("createdAt", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
+  createdBy: varchar("createdBy", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  updatedAt: timestamp("updatedAt", {
+    mode: "date",
+    withTimezone: true,
+  }).$onUpdate(() => new Date()),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+});
 
 export const projects = createTable("project", {
   id: uuid("id").defaultRandom().notNull().primaryKey(),

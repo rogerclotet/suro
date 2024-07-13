@@ -25,6 +25,7 @@ export async function getList(listId: string) {
           },
           orderBy: [asc(listItems.completed), asc(listItems.name)],
         },
+        event: true,
       },
       where: eq(lists.id, listId),
     });
@@ -66,6 +67,7 @@ export async function getLists(projectId: string) {
               },
               orderBy: [asc(listItems.completed), asc(listItems.name)],
             },
+            event: true,
           },
           orderBy: [desc(lists.updatedAt)],
         },

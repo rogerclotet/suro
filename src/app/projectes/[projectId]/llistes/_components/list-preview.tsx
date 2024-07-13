@@ -25,8 +25,14 @@ export default function ListPreview({ list }: { list: List }) {
               <Check />
             )}
           </div>
-          <CardDescription className="line-clamp-2">
-            {list.description}
+          <CardDescription className="flex flex-col gap-2">
+            {list.event && (
+              <span>
+                {list.event.startAt.toLocaleString()} -{" "}
+                {list.event.endAt.toLocaleString()}
+              </span>
+            )}
+            <span className="line-clamp-2">{list.description}</span>
           </CardDescription>
         </CardHeader>
       </Card>
