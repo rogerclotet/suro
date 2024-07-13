@@ -14,6 +14,8 @@ export function eventsQueryOptions(
         return [];
       }
 
+      console.log("query", monthStart);
+
       const monthEnd = new Date(monthStart);
       monthEnd.setMonth(monthStart.getMonth() + 1);
       monthEnd.setDate(0);
