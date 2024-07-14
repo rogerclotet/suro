@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import React from "react";
+import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
 import { eventsQueryOptions } from "./event/query";
 
@@ -37,28 +38,6 @@ export default function Calendar() {
   const currentEvents = events?.filter((event) =>
     isCurrentDayEvent(event, date),
   );
-
-  function isCurrentDayEvent(event: Event, date?: Date) {
-    if (!date || !event.startAt || !event.endAt) {
-      return false;
-    }
-
-    const eventStart = new Date(
-      event.startAt.getFullYear(),
-      event.startAt.getMonth(),
-      event.startAt.getDate(),
-    );
-    const eventEnd = new Date(
-      event.endAt.getFullYear(),
-      event.endAt.getMonth(),
-      event.endAt.getDate(),
-      23,
-      59,
-      59,
-    );
-
-    return eventStart <= date && eventEnd >= date;
-  }
 
   function Events() {
     if (isLoading || currentEvents === undefined) {
@@ -104,6 +83,22 @@ export default function Calendar() {
     );
   }
 
+  function DayContent(props: DayContentProps) {
+    const hasEvent = events?.some((event) =>
+      isCurrentDayEvent(event, props.date),
+    );
+
+    return (
+      <span className="relative overflow-visible">
+        {hasEvent && (
+          <div className="event-indicator absolute -right-[8px] -top-[5px] h-2 w-2 rounded-full bg-secondary" />
+        )}
+
+        {props.date.getDate()}
+      </span>
+    );
+  }
+
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -121,6 +116,9 @@ export default function Calendar() {
             className="mx-auto"
             classNames={{
               cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent [&:has([aria-selected])]:rounded-md focus-within:relative focus-within:z-20",
+            }}
+            components={{
+              DayContent: DayContent,
             }}
           />
         </div>
@@ -141,4 +139,26 @@ export default function Calendar() {
       </div>
     </div>
   );
+}
+
+function isCurrentDayEvent(event: Event, date?: Date) {
+  if (!date || !event.startAt || !event.endAt) {
+    return false;
+  }
+
+  const eventStart = new Date(
+    event.startAt.getFullYear(),
+    event.startAt.getMonth(),
+    event.startAt.getDate(),
+  );
+  const eventEnd = new Date(
+    event.endAt.getFullYear(),
+    event.endAt.getMonth(),
+    event.endAt.getDate(),
+    23,
+    59,
+    59,
+  );
+
+  return eventStart <= date && eventEnd >= date;
 }
