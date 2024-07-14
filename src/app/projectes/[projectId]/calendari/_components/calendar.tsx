@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import React from "react";
 import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
-import EventDetails from "./event/event-details";
+import EventDetails from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
 

@@ -172,6 +172,14 @@ export const events = createTable("event", {
     .references(() => projects.id, { onDelete: "cascade" }),
 });
 
+export const eventsRelations = relations(events, ({ one }) => ({
+  project: one(projects, {
+    fields: [events.projectId],
+    references: [projects.id],
+    relationName: "project",
+  }),
+}));
+
 export const projects = createTable("project", {
   id: uuid("id").defaultRandom().notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
