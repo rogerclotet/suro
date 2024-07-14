@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { getEventList } from "@/server/lists";
 
-export const dynamic = "force-dynamic"; // defaults to auto
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: Request,
   {

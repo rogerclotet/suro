@@ -21,9 +21,7 @@ export function eventsQueryOptions(
       const res = await fetch(
         `/api/${projectId}/events?from=${monthStart.valueOf()}&to=${monthEnd.valueOf()}`,
       );
-      const newEvents = (await res.json()) as Event[];
-
-      return newEvents;
+      return (await res.json()) as Event[];
     },
     select: (data) => {
       return data.map((event) => ({

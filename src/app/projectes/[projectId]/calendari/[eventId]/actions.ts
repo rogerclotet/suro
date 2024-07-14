@@ -41,6 +41,28 @@ export async function createLinkedList(event: Event) {
   }
 }
 
+export async function linkEventList(event: Event, listId: string) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  try {
+    await db
+      .update(lists)
+      .set({
+        eventId: event.id,
+        updatedBy: session.user.id,
+      })
+      .where(eq(lists.id, listId));
+
+    revalidatePath(`/projectes/${event.projectId}/calendari/${event.id}`);
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error linking list");
+  }
+}
+
 export async function editEvent(
   event: Event,
   data: v.InferInput<typeof editEventSchema>,

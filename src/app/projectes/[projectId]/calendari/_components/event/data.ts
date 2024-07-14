@@ -14,3 +14,7 @@ export const editEventSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
   description: v.pipe(v.string(), v.trim()),
 });
+
+export const linkEventListSchema = v.object({
+  listId: v.string(),
+});

@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { getEvents } from "@/server/events";
 
-export const dynamic = "force-dynamic"; // defaults to auto
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: Request,
   { params: { projectId } }: { params: { projectId: string } },

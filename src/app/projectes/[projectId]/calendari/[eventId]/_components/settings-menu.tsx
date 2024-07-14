@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { createLinkedList } from "../actions";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";
+import LinkListForm from "./link-list-form";
 
 export default function SettingsMenu({
   event,
@@ -63,7 +64,7 @@ export default function SettingsMenu({
                 Crear llista
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => linkListRef.current?.click()} // TODO: Link list
+                onClick={() => linkListRef.current?.click()}
                 className="cursor-pointer gap-2"
               >
                 <ListTodo />
@@ -81,6 +82,7 @@ export default function SettingsMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <LinkListForm triggerRef={linkListRef} event={event} />
       <EditEventForm triggerRef={editDialogRef} event={event} />
       <DeleteEventModal triggerRef={deleteDialogRef} event={event} />
     </>
