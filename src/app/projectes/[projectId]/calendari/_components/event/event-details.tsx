@@ -23,10 +23,11 @@ export default function EventDetails({ event }: { event: Event }) {
     queryKey: ["event-list", event.id],
     queryFn: async () => {
       const res = await fetch(`/api/${projectId}/events/${event.id}/list`);
-      if (res.status === 404) {
+      if (res.ok) {
+        return res.json() as Promise<List>;
+      } else {
         return null;
       }
-      return res.json() as Promise<List>;
     },
     staleTime: 60 * 1000,
   });
