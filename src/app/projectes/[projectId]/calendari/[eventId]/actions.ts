@@ -7,6 +7,7 @@ import { events, lists } from "@/server/db/schema";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { eq } from "drizzle-orm";
 import { editEventSchema } from "../_components/event/data";
@@ -60,6 +61,27 @@ export async function linkEventList(event: Event, listId: string) {
   } catch (e) {
     console.error(e);
     throw new Error("Error linking list");
+  }
+}
+
+export async function unlinkEventList(event: Event, list: List) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  try {
+    await db
+      .update(lists)
+      .set({
+        eventId: null,
+      })
+      .where(eq(lists.id, list.id));
+
+    revalidatePath(`/projectes/${event.projectId}/calendari/${event.id}`);
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error unlinking list");
   }
 }
 

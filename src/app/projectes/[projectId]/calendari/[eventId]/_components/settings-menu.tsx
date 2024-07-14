@@ -9,13 +9,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, ListPlus, ListTodo, Settings, Trash2 } from "lucide-react";
+import {
+  Edit,
+  ListPlus,
+  ListTodo,
+  ListX,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import { createLinkedList } from "../actions";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";
 import LinkListForm from "./link-list-form";
+import UnlinkEventListModal from "./unlink-event-list-modal";
 
 export default function SettingsMenu({
   event,
@@ -27,6 +35,7 @@ export default function SettingsMenu({
   const editDialogRef = React.useRef<HTMLDivElement>(null);
   const deleteDialogRef = React.useRef<HTMLDivElement>(null);
   const linkListRef = React.useRef<HTMLDivElement>(null);
+  const unlinkListRef = React.useRef<HTMLDivElement>(null);
 
   async function handleCreateLinkedList() {
     try {
@@ -54,7 +63,7 @@ export default function SettingsMenu({
             <Edit />
             Editar esdeveniment
           </DropdownMenuItem>
-          {list === undefined && (
+          {list === undefined ? (
             <>
               <DropdownMenuItem
                 onClick={handleCreateLinkedList}
@@ -71,6 +80,14 @@ export default function SettingsMenu({
                 Enllaçar llista existent
               </DropdownMenuItem>
             </>
+          ) : (
+            <DropdownMenuItem
+              onClick={() => unlinkListRef.current?.click()}
+              className="cursor-pointer gap-2"
+            >
+              <ListX />
+              Desenllaçar llista
+            </DropdownMenuItem>
           )}
           <DropdownMenuItem
             onClick={() => deleteDialogRef.current?.click()}
@@ -83,6 +100,11 @@ export default function SettingsMenu({
       </DropdownMenu>
 
       <LinkListForm triggerRef={linkListRef} event={event} />
+      <UnlinkEventListModal
+        triggerRef={unlinkListRef}
+        event={event}
+        list={list}
+      />
       <EditEventForm triggerRef={editDialogRef} event={event} />
       <DeleteEventModal triggerRef={deleteDialogRef} event={event} />
     </>
