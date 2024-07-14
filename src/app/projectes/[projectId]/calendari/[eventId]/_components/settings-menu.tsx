@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit, ListPlus, ListTodo, Settings, Trash2 } from "lucide-react";
-import { redirect } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import { createLinkedList } from "../actions";
@@ -30,9 +29,8 @@ export default function SettingsMenu({
 
   async function handleCreateLinkedList() {
     try {
-      const listId = await createLinkedList(event);
+      await createLinkedList(event);
       toast.success("Llista creada correctament");
-      return redirect(`/projectes/${event.projectId}/llistes/${listId}`);
     } catch (e) {
       console.error(e);
       toast.error("No s'ha pogut crear la llista. Torna-ho a provar més tard");
