@@ -3,7 +3,7 @@
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
 import assert from "assert";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { listItems, lists, projects, templates } from "./db/schema";
 
@@ -40,6 +40,35 @@ export async function getList(listId: string) {
     return result;
   } catch (e) {
     console.error(e);
+    return undefined;
+  }
+}
+
+export async function getEventList(projectId: string, eventId: string) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  try {
+    const result = await db.query.lists.findFirst({
+      with: {
+        project: {
+          with: {
+            users: true,
+          },
+        },
+      },
+      where: and(eq(lists.eventId, eventId), eq(lists.projectId, projectId)),
+    });
+
+    if (
+      result?.project.users.find((u) => u.userId === session.user.id) ===
+      undefined
+    ) {
+      throw new Error("List not found");
+    }
+
+    return result;
+  } catch (e) {
     return undefined;
   }
 }

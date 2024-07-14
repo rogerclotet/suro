@@ -3,19 +3,13 @@
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
+import EventDetails from "./event/event-details";
 import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
 
@@ -61,25 +55,7 @@ export default function Calendar() {
     return (
       <div className="flex flex-col gap-4">
         {currentEvents.map((event) => (
-          <Card key={event.id}>
-            <CardHeader>
-              <CardTitle>{event.name}</CardTitle>
-              <CardDescription>
-                {event.startAt.toLocaleString("ca-ES", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
-                {" - "}
-                {event.endAt.toLocaleString("ca-ES", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
-              </CardDescription>
-            </CardHeader>
-            {event.description && (
-              <CardContent>{event.description}</CardContent>
-            )}
-          </Card>
+          <EventDetails key={event.id} event={event} />
         ))}
       </div>
     );
