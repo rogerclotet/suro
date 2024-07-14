@@ -3,8 +3,13 @@
 import type { Event } from "@/app/_data/event";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
-import { lists } from "@/server/db/schema";
+import { events, lists } from "@/server/db/schema";
 import { revalidatePath } from "next/cache";
+import * as v from "valibot";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import type { Project } from "@/app/_data/project";
+import { eq } from "drizzle-orm";
+import { editEventSchema } from "../_components/event/data";
 
 export async function createLinkedList(event: Event) {
   const session = await auth();
@@ -33,5 +38,58 @@ export async function createLinkedList(event: Event) {
   } catch (e) {
     console.error(e);
     throw new Error("Error creating list");
+  }
+}
+
+export async function editEvent(
+  event: Event,
+  data: v.InferInput<typeof editEventSchema>,
+  project: Project,
+) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  if (!project.users.some((u) => u.user.id === session.user.id)) {
+    throw new Error("Not authorized");
+  }
+
+  const parsedData = v.parse(editEventSchema, data);
+
+  try {
+    await db
+      .update(events)
+      .set({
+        name: parsedData.name,
+        description: parsedData.description,
+        updatedBy: session.user.id,
+      })
+      .where(eq(events.id, event.id));
+
+    revalidatePath(`/projectes/${event.projectId}/llistes/${event.id}`);
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error editing event");
+  }
+}
+
+export async function deleteEvent(event: Event) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Not logged in");
+  }
+
+  if (!event.project.users.some((u) => u.userId === session.user.id)) {
+    throw new Error("Not authorized");
+  }
+
+  try {
+    await db.delete(events).where(eq(events.id, event.id));
+
+    revalidatePath(`/projectes/${event.projectId}/calendari`);
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error deleting event");
   }
 }

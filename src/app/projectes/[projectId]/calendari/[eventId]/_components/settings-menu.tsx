@@ -14,6 +14,8 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 import { createLinkedList } from "../actions";
+import DeleteEventModal from "./delete-event-modal";
+import EditEventForm from "./edit-event-form";
 
 export default function SettingsMenu({
   event,
@@ -81,13 +83,8 @@ export default function SettingsMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* <ModalForm triggerRef={editDialogRef} title="Editar llista">
-        <EditListForm
-          list={list}
-          onClose={() => editDialogRef.current?.click()}
-        />
-      </ModalForm>
-      <DeleteListModal triggerRef={deleteDialogRef} list={list} /> */}
+      <EditEventForm triggerRef={editDialogRef} event={event} />
+      <DeleteEventModal triggerRef={deleteDialogRef} event={event} />
     </>
   );
 }

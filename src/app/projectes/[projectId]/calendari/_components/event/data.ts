@@ -9,3 +9,8 @@ export const eventSchema = v.object({
   }),
   allDay: v.boolean(),
 });
+
+export const editEventSchema = v.object({
+  name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
+  description: v.pipe(v.string(), v.trim()),
+});

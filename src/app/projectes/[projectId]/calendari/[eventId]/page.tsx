@@ -44,7 +44,7 @@ export default async function EventPage({
         </p>
       </div>
 
-      <p>{event.description}</p>
+      {event.description && <p>{event.description}</p>}
 
       {list !== undefined && (
         <div className="mx-auto mt-8 max-w-lg space-y-4">
