@@ -97,6 +97,12 @@ export default function Calendar() {
     }
   }
 
+  function handleDaySelect(date: Date | undefined) {
+    if (date) {
+      setDate(date);
+    }
+  }
+
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -108,7 +114,7 @@ export default function Calendar() {
           <CalendarComponent
             mode="single"
             selected={date}
-            onSelect={setDate}
+            onSelect={handleDaySelect}
             onMonthChange={setMonthStart}
             locale={ca}
             className="mx-auto"
@@ -128,7 +134,10 @@ export default function Calendar() {
                 dateStyle: "long",
               })}
 
-              <CreateEventButton onCreate={handleEventCreated} />
+              <CreateEventButton
+                defaultDate={date}
+                onCreate={handleEventCreated}
+              />
             </h2>
 
             <Events />

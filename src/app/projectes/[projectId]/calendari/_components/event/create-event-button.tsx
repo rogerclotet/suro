@@ -25,31 +25,35 @@ import { createEvent } from "./actions";
 import { eventSchema } from "./data";
 
 export default function CreateEventButton({
+  defaultDate,
   onCreate,
 }: {
+  defaultDate: Date | undefined;
   onCreate: (from: Date | undefined, to: Date | undefined) => void;
 }) {
-  const defaultStartAt = new Date();
-  const defaultEndAt = new Date();
-  defaultStartAt.setHours(defaultStartAt.getHours() + 1, 0, 0, 0);
-  defaultStartAt.setDate(defaultStartAt.getDate() + 1);
-  defaultEndAt.setHours(defaultEndAt.getHours() + 2, 0, 0, 0);
-  defaultEndAt.setDate(defaultEndAt.getDate() + 1);
-
   const { project } = useProjects();
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
       name: "",
       description: "",
-      dates: {
-        from: defaultStartAt,
-        to: defaultEndAt,
-      },
       allDay: true,
     },
     resolver: valibotResolver(eventSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const defaultTime = defaultDate?.getTime();
+    const defaultStartAt = defaultTime ? new Date(defaultTime) : new Date();
+    const defaultEndAt = defaultTime ? new Date(defaultTime) : new Date();
+    defaultStartAt.setDate(defaultStartAt.getDate());
+    defaultEndAt.setDate(defaultEndAt.getDate());
+
+    form.setValue("dates", {
+      from: defaultStartAt,
+      to: defaultEndAt,
+    });
+  }, [defaultDate, form]);
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
     try {
