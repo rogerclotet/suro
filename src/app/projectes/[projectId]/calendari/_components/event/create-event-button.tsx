@@ -24,7 +24,11 @@ import type * as v from "valibot";
 import { createEvent } from "./actions";
 import { eventSchema } from "./data";
 
-export default function CreateEventButton() {
+export default function CreateEventButton({
+  onCreate,
+}: {
+  onCreate: (from: Date | undefined, to: Date | undefined) => void;
+}) {
   const defaultStartAt = new Date();
   const defaultEndAt = new Date();
   defaultStartAt.setHours(defaultStartAt.getHours() + 1, 0, 0, 0);
@@ -51,6 +55,7 @@ export default function CreateEventButton() {
     try {
       await createEvent(data, project!);
       toast.success(`Esdeveniment ${data.name} creat`);
+      onCreate(data.dates.from, data.dates.to);
       form.reset();
       triggerRef.current?.click();
     } catch (error) {

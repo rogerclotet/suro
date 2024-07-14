@@ -4,7 +4,6 @@ import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { events } from "@/server/db/schema";
-import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { eventSchema } from "./data";
 
@@ -46,6 +45,4 @@ export async function createEvent(
     projectId: project.id,
     createdBy: session.user.id,
   });
-
-  revalidatePath(`/projectes/${project.id}/calendari`);
 }

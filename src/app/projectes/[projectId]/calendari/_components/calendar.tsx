@@ -10,12 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
+import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
 
 export default function Calendar() {
@@ -34,6 +35,7 @@ export default function Calendar() {
   const { data: events, isLoading } = useQuery(
     eventsQueryOptions(monthStart, project?.id),
   );
+  const queryClient = useQueryClient();
 
   const currentEvents = events?.filter((event) =>
     isCurrentDayEvent(event, date),
@@ -99,6 +101,26 @@ export default function Calendar() {
     );
   }
 
+  async function handleEventCreated(
+    from: Date | undefined,
+    to: Date | undefined,
+  ) {
+    const fromMonth = from ? getMonthString(from) : undefined;
+    const toMonth = to ? getMonthString(to) : undefined;
+
+    if (fromMonth) {
+      await queryClient.invalidateQueries({
+        queryKey: ["events", fromMonth],
+      });
+    }
+
+    if (toMonth && fromMonth !== toMonth) {
+      await queryClient.invalidateQueries({
+        queryKey: ["events", toMonth],
+      });
+    }
+  }
+
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -130,7 +152,7 @@ export default function Calendar() {
                 dateStyle: "long",
               })}
 
-              <CreateEventButton />
+              <CreateEventButton onCreate={handleEventCreated} />
             </h2>
 
             <Events />
