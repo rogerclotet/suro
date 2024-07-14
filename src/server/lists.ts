@@ -56,6 +56,13 @@ export async function getEventList(projectId: string, eventId: string) {
             users: true,
           },
         },
+        items: {
+          with: {
+            category: true,
+          },
+          orderBy: [asc(listItems.completed), asc(listItems.name)],
+        },
+        event: true,
       },
       where: and(eq(lists.eventId, eventId), eq(lists.projectId, projectId)),
     });

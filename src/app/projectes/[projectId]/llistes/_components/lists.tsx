@@ -22,11 +22,13 @@ export default async function Lists({ projectId }: { projectId: string }) {
     );
   }
 
-  const incompleteLists = lists.filter((list) =>
-    list.items.some((item) => !item.completed),
+  const incompleteLists = lists.filter(
+    (list) =>
+      list.items.length === 0 || list.items.some((item) => !item.completed),
   );
-  const completedLists = lists.filter((list) =>
-    list.items.every((item) => item.completed),
+  const completedLists = lists.filter(
+    (list) =>
+      list.items.length > 0 && list.items.every((item) => item.completed),
   );
 
   incompleteLists.sort(compareLists);

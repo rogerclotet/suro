@@ -12,24 +12,26 @@ import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
   const todoCount = list.items.filter((item) => !item.completed).length;
+  const completed = list.items.length > 0 && todoCount === 0;
 
   return (
     <Link href={`/projectes/${list.projectId}/llistes/${list.id}`}>
-      <Card className={todoCount === 0 ? "opacity-50" : ""}>
+      <Card className={completed ? "opacity-50" : ""}>
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle>{list.name}</CardTitle>
-            {todoCount > 0 ? (
-              <Badge variant="secondary">{todoCount}</Badge>
-            ) : (
+            {completed ? (
               <Check />
+            ) : todoCount === 0 ? null : (
+              <Badge variant="secondary">{todoCount}</Badge>
             )}
           </div>
           <CardDescription className="flex flex-col gap-2">
             {list.event && (
               <span>
-                {list.event.startAt.toLocaleString()} -{" "}
-                {list.event.endAt.toLocaleString()}
+                {list.event.startAt.toLocaleString("ca-ES", {
+                  dateStyle: "medium",
+                })}
               </span>
             )}
             <span className="line-clamp-2">{list.description}</span>
