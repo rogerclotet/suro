@@ -28,19 +28,21 @@ export default async function EventPage({
   const list = await getEventList(projectId, event.id);
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">{event.name}</h1>
-        <SettingsMenu event={event} list={list} />
-      </div>
+    <div className="space-y-4">
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-semibold">{event.name}</h1>
+          <SettingsMenu event={event} list={list} />
+        </div>
 
-      <p className="flex flex-wrap text-sm text-muted-foreground">
-        <TimeRemaining
-          event={event}
-          className="mr-2 text-foreground opacity-70"
-        />
-        <TimeRange startAt={event.startAt} endAt={event.endAt} />
-      </p>
+        <p className="flex flex-wrap text-sm text-muted-foreground">
+          <TimeRemaining
+            event={event}
+            className="mr-2 text-foreground opacity-70"
+          />
+          <TimeRange startAt={event.startAt} endAt={event.endAt} />
+        </p>
+      </div>
 
       <p>{event.description}</p>
 
