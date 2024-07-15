@@ -21,7 +21,7 @@ export default function InviteButton({ project }: { project: Project }) {
     toast.info("Copiat al porta-retalls");
   }
 
-  const canShare = navigator?.canShare?.();
+  const canShare = !!navigator.canShare;
 
   return (
     <>
@@ -43,13 +43,13 @@ export default function InviteButton({ project }: { project: Project }) {
         <Button
           variant={canShare ? "ghost" : "default"}
           onClick={copyLinkToClipboard}
-          className="flex items-center gap-2"
+          className="flex w-full items-center gap-2"
         >
           <Copy />
           Copiar enllaç
         </Button>
         {canShare && (
-          <Button aria-label="Compartir">
+          <Button aria-label="Compartir" className="w-full">
             <RWebShare
               data={{
                 title: project.name,
