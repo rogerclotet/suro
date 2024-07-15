@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function textToHtml(text: string) {
   const linkPattern =
-    /\b((https?:\/\/|www\.)[^'">\s]+\.[^,'">\s]+)(?=,\s|$)(?!["<>])/;
+    /\b((https?:\/\/|www\.)[^'">\s]+\.[^,'">\s]+)(?=,?\s|$)(?!["<>])/;
   const linkExp = new RegExp(linkPattern, "gi");
 
   text = text.replaceAll(
