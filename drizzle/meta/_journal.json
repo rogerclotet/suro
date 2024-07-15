@@ -71,6 +71,13 @@
       "when": 1720828216473,
       "tag": "0009_last_ender_wiggin",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1721031876233,
+      "tag": "0010_thick_switch",
+      "breakpoints": true
     }
   ]
 }
