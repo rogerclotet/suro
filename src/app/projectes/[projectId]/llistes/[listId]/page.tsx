@@ -3,6 +3,7 @@ import { textToHtml } from "@/lib/utils";
 import { getList } from "@/server/lists";
 import { CalendarFold } from "lucide-react";
 import Link from "next/link";
+import ShareButton from "../../../../../components/ui/share-button";
 import TimeRange from "../../calendari/_components/event/time-range";
 import CheckList from "./_components/check-list";
 import SettingsMenu from "./_components/settings/settings-menu";
@@ -31,7 +32,15 @@ export default async function ListPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">{list.name}</h1>
-        <SettingsMenu list={list} />
+
+        <div className="flex items-center gap-2">
+          <ShareButton
+            name={list.name}
+            text={list.description ?? ""}
+            path={`/projectes/${list.projectId}/llistes/${list.id}`}
+          />
+          <SettingsMenu list={list} />
+        </div>
       </div>
 
       {list.event && (

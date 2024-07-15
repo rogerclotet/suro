@@ -78,5 +78,16 @@
   }
   body {
     @apply bg-background text-foreground;
+
+    /* React Web Share */
+    .rws-container {
+      @apply bg-background;
+      @apply text-foreground;
+
+      .rws-close {
+        @apply bg-card;
+        @apply text-card-foreground;
+      }
+    }
   }
 }

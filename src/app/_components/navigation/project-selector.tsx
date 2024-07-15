@@ -24,6 +24,10 @@ export default function ProjectSelector({
     onSelect(projectId);
   }
 
+  if (!project || projects.length <= 1) {
+    return null;
+  }
+
   return (
     <Collapsible className="space-y-2 rounded-lg border">
       <CollapsibleTrigger asChild>

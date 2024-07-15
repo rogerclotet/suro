@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import ShareButton from "@/components/ui/share-button";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
@@ -34,7 +35,15 @@ export default async function EventPage({
       <div>
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-xl font-semibold">{event.name}</h1>
-          <SettingsMenu event={event} list={list} />
+
+          <div className="flex items-center gap-2">
+            <ShareButton
+              name={event.name}
+              text={event.description ?? ""}
+              path={`/projectes/${event.projectId}/calendari/${event.id}`}
+            />
+            <SettingsMenu event={event} list={list} />
+          </div>
         </div>
 
         <p className="flex flex-wrap text-sm text-muted-foreground">

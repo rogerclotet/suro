@@ -4,8 +4,9 @@ import type { Project } from "@/app/_data/project";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { UserPlus } from "lucide-react";
+import { Copy, Share2, UserPlus } from "lucide-react";
 import React from "react";
+import { RWebShare } from "react-web-share";
 import { toast } from "sonner";
 
 export default function InviteButton({ project }: { project: Project }) {
@@ -19,6 +20,8 @@ export default function InviteButton({ project }: { project: Project }) {
     await navigator.clipboard.writeText(inviteLink);
     toast.info("Copiat al porta-retalls");
   }
+
+  const canShare = navigator?.canShare?.();
 
   return (
     <>
@@ -37,7 +40,30 @@ export default function InviteButton({ project }: { project: Project }) {
         description="Pots convidar usuaris a aquest projecte compartint el següent enllaç:"
       >
         <Input readOnly value={inviteLink} />
-        <Button onClick={copyLinkToClipboard}>Copiar enllaç</Button>
+        <Button
+          variant={canShare ? "ghost" : "default"}
+          onClick={copyLinkToClipboard}
+          className="flex items-center gap-2"
+        >
+          <Copy />
+          Copiar enllaç
+        </Button>
+        {canShare && (
+          <Button aria-label="Compartir">
+            <RWebShare
+              data={{
+                title: `Convidar a ${project.name}`,
+                text: project.users.map((u) => u.user.name).join(", "),
+                url: inviteLink,
+              }}
+              closeText="Tancar"
+            >
+              <span className="flex items-center gap-2">
+                <Share2 /> Compartir
+              </span>
+            </RWebShare>
+          </Button>
+        )}
       </ModalForm>
     </>
   );
