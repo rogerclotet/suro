@@ -35,7 +35,7 @@ export default async function ListPage({
 
         <div className="flex items-center gap-2">
           <ShareButton
-            name={list.name}
+            title={list.name}
             text={list.description ?? ""}
             path={`/projectes/${list.projectId}/llistes/${list.id}`}
           />

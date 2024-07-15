@@ -5,11 +5,11 @@ import { Share2 } from "lucide-react";
 import { RWebShare } from "react-web-share";
 
 export default function ShareButton({
-  name,
+  title,
   text,
   path,
 }: {
-  name: string;
+  title: string;
   text: string;
   path: string;
 }) {
@@ -19,7 +19,7 @@ export default function ShareButton({
     <Button variant="ghost" size="icon" aria-label="Compartir">
       <RWebShare
         data={{
-          title: `Compartir ${name}`,
+          title: title,
           text: text,
           url: `${origin}/${path}`,
         }}

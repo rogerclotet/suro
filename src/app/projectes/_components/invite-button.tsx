@@ -52,8 +52,8 @@ export default function InviteButton({ project }: { project: Project }) {
           <Button aria-label="Compartir">
             <RWebShare
               data={{
-                title: `Convidar a ${project.name}`,
-                text: project.users.map((u) => u.user.name).join(", "),
+                title: project.name,
+                text: `Uneix-te a ${project.users.map((u) => u.user.name).join(", ")}`,
                 url: inviteLink,
               }}
               closeText="Tancar"

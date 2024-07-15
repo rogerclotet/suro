@@ -38,7 +38,7 @@ export default async function EventPage({
 
           <div className="flex items-center gap-2">
             <ShareButton
-              name={event.name}
+              title={event.name}
               text={event.description ?? ""}
               path={`/projectes/${event.projectId}/calendari/${event.id}`}
             />
