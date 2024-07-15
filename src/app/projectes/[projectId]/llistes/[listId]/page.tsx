@@ -1,7 +1,9 @@
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
 import { getList } from "@/server/lists";
+import { CalendarFold } from "lucide-react";
 import Link from "next/link";
+import TimeRange from "../../calendari/_components/event/time-range";
 import CheckList from "./_components/check-list";
 import SettingsMenu from "./_components/settings/settings-menu";
 
@@ -26,18 +28,35 @@ export default async function ListPage({
   }
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold">{list.name}</h1>
         <SettingsMenu list={list} />
       </div>
+
+      {list.event && (
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="flex items-center gap-2">
+            <CalendarFold />
+            <Link
+              href={`/projectes/${list.projectId}/calendari/${list.event.id}`}
+            >
+              {list.event.name}
+            </Link>
+          </h2>
+          <TimeRange
+            startAt={list.event.startAt}
+            endAt={list.event.endAt}
+            className="mt-0.5 text-sm text-muted-foreground"
+          />
+        </div>
+      )}
 
       {list.description && (
         <p
           dangerouslySetInnerHTML={{
             __html: textToHtml(list.description),
           }}
-          className="pb-6"
         />
       )}
 

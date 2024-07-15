@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { textToHtml } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { CalendarFold, Check } from "lucide-react";
 import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
@@ -29,7 +29,8 @@ export default function ListPreview({ list }: { list: List }) {
           </div>
           <CardDescription className="flex flex-col gap-2">
             {list.event && (
-              <span>
+              <span className="flex items-center gap-2">
+                <CalendarFold size={16} />
                 {list.event.startAt.toLocaleString("ca-ES", {
                   dateStyle: "medium",
                 })}

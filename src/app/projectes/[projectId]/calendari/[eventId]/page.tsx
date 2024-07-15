@@ -29,7 +29,7 @@ export default async function EventPage({
   const list = await getEventList(projectId, event.id);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-xl font-semibold">{event.name}</h1>
@@ -52,7 +52,7 @@ export default async function EventPage({
       )}
 
       {list !== undefined && (
-        <div className="mx-auto mt-8 max-w-lg space-y-4">
+        <div className="mx-auto max-w-xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
           <h2 className="text-xl font-semibold">
             <Link href={`/projectes/${projectId}/llistes/${list.id}`}>
               Llista
