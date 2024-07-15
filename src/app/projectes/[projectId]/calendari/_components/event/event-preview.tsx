@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { textToHtml } from "@/lib/utils";
 import Link from "next/link";
 import TimeRange from "./time-range";
 
@@ -19,7 +20,11 @@ export default function EventDetails({ event }: { event: Event }) {
             <TimeRange startAt={event.startAt} endAt={event.endAt} />
           </CardDescription>
         </CardHeader>
-        {event.description && <CardContent>{event.description}</CardContent>}
+        {event.description && (
+          <CardContent
+            dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
+          />
+        )}
       </Card>
     </Link>
   );

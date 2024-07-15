@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
 import Link from "next/link";
@@ -44,7 +45,11 @@ export default async function EventPage({
         </p>
       </div>
 
-      {event.description && <p>{event.description}</p>}
+      {event.description && (
+        <p
+          dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
+        />
+      )}
 
       {list !== undefined && (
         <div className="mx-auto mt-8 max-w-lg space-y-4">

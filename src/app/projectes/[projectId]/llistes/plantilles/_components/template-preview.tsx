@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { textToHtml } from "@/lib/utils";
 import Link from "next/link";
 
 export default function TemplatePreview({ template }: { template: Template }) {
@@ -16,9 +17,14 @@ export default function TemplatePreview({ template }: { template: Template }) {
       <Card>
         <CardHeader>
           <CardTitle>{template.name}</CardTitle>
-          <CardDescription className="line-clamp-2">
-            {template.description}
-          </CardDescription>
+          {template.description && (
+            <CardDescription
+              className="line-clamp-2"
+              dangerouslySetInnerHTML={{
+                __html: textToHtml(template.description),
+              }}
+            />
+          )}
         </CardHeader>
       </Card>
     </Link>

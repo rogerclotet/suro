@@ -7,6 +7,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { checkAuth } from "@/lib/check-auth";
+import { textToHtml } from "@/lib/utils";
 import { getTemplate } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
@@ -66,7 +67,7 @@ export default async function TemplatePage({
       {template.description && (
         <p
           dangerouslySetInnerHTML={{
-            __html: template.description.replaceAll("\n", "<br/>"),
+            __html: textToHtml(template.description),
           }}
           className="pb-6"
         />

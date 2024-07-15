@@ -1,4 +1,5 @@
 import { checkAuth } from "@/lib/check-auth";
+import { textToHtml } from "@/lib/utils";
 import { getList } from "@/server/lists";
 import Link from "next/link";
 import CheckList from "./_components/check-list";
@@ -34,7 +35,7 @@ export default async function ListPage({
       {list.description && (
         <p
           dangerouslySetInnerHTML={{
-            __html: list.description.replaceAll("\n", "<br/>"),
+            __html: textToHtml(list.description),
           }}
           className="pb-6"
         />
