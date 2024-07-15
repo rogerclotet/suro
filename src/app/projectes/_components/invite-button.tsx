@@ -39,7 +39,7 @@ export default function InviteButton({ project }: { project: Project }) {
         title="Convidar usuaris"
         description="Pots convidar usuaris a aquest projecte compartint el següent enllaç:"
       >
-        <div className="space-y-4">
+        <div className="space-y-2">
           <Input readOnly value={inviteLink} />
           <Button
             variant={canShare ? "ghost" : "default"}
