@@ -86,7 +86,10 @@ export default function EditEventForm({
             )}
           />
 
-          <Button disabled={form.formState.isSubmitting} className="w-full">
+          <Button
+            disabled={form.formState.isSubmitting}
+            className="w-full space-x-2"
+          >
             {form.formState.isSubmitting && (
               <Loader2 className="animate-spin" />
             )}
