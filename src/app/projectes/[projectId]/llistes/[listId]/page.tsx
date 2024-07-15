@@ -1,3 +1,4 @@
+import { ClientOnly } from "@/components/client-only";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
 import { getList } from "@/server/lists";
@@ -34,11 +35,13 @@ export default async function ListPage({
         <h1 className="text-xl font-semibold">{list.name}</h1>
 
         <div className="flex items-center gap-2">
-          <ShareButton
-            title={list.name}
-            text={list.description ?? ""}
-            path={`/projectes/${list.projectId}/llistes/${list.id}`}
-          />
+          <ClientOnly>
+            <ShareButton
+              title={list.name}
+              text={list.description ?? ""}
+              path={`/projectes/${list.projectId}/llistes/${list.id}`}
+            />
+          </ClientOnly>
           <SettingsMenu list={list} />
         </div>
       </div>

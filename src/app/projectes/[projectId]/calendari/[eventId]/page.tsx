@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
@@ -37,11 +38,13 @@ export default async function EventPage({
           <h1 className="text-xl font-semibold">{event.name}</h1>
 
           <div className="flex items-center gap-2">
-            <ShareButton
-              title={event.name}
-              text={event.description ?? ""}
-              path={`/projectes/${event.projectId}/calendari/${event.id}`}
-            />
+            <ClientOnly>
+              <ShareButton
+                title={event.name}
+                text={event.description ?? ""}
+                path={`/projectes/${event.projectId}/calendari/${event.id}`}
+              />
+            </ClientOnly>
             <SettingsMenu event={event} list={list} />
           </div>
         </div>

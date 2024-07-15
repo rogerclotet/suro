@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { textToHtml } from "@/lib/utils";
 import { CalendarFold, Check } from "lucide-react";
 import Link from "next/link";
 
@@ -37,12 +36,7 @@ export default function ListPreview({ list }: { list: List }) {
               </span>
             )}
             {list.description && (
-              <span
-                className="line-clamp-2"
-                dangerouslySetInnerHTML={{
-                  __html: textToHtml(list.description),
-                }}
-              />
+              <span className="line-clamp-2">{list.description}</span>
             )}
           </CardDescription>
         </CardHeader>

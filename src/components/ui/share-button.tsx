@@ -13,15 +13,13 @@ export default function ShareButton({
   text: string;
   path: string;
 }) {
-  const origin = window.location.origin;
-
   return (
     <Button variant="ghost" size="icon" aria-label="Compartir">
       <RWebShare
         data={{
           title: title,
           text: text,
-          url: `${origin}/${path}`,
+          url: `${window.location.origin}/${path}`,
         }}
         closeText="Tancar"
       >
