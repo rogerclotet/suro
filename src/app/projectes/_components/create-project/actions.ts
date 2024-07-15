@@ -6,17 +6,15 @@ import { projects, projectToUsers } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
-import { createProjectSchema } from "./data";
+import { projectSchema } from "./data";
 
-export async function createProject(
-  data: v.InferInput<typeof createProjectSchema>,
-) {
+export async function createProject(data: v.InferInput<typeof projectSchema>) {
   const session = await auth();
   if (!session) {
     throw new Error("Not logged in");
   }
 
-  const parsedData = v.parse(createProjectSchema, data);
+  const parsedData = v.parse(projectSchema, data);
 
   const result = await db
     .insert(projects)

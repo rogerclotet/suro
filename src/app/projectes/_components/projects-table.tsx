@@ -18,6 +18,7 @@ import { getProjects } from "@/server/projects";
 import { Edit, Trash2 } from "lucide-react";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
+import EditProjectButton from "./edit-project-button";
 import IdIcon from "./id-icon";
 import InviteButton from "./invite-button";
 
@@ -76,6 +77,27 @@ export default async function ProjectsTable() {
     return <DeleteProjectButton projectId={project.id} />;
   }
 
+  async function EditButton({ project }: { project: Project }) {
+    if (project.createdBy !== session?.user.id) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button disabled variant="ghost" size="icon" aria-label="Editar">
+                <Edit />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{"Només el creador pot editar aquest projecte"}</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return <EditProjectButton project={project} />;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -101,9 +123,7 @@ export default async function ProjectsTable() {
             </TableCell>
             <TableCell className="flex flex-row items-center justify-end gap-2 p-2">
               <InviteButton project={project} />
-              <Button variant="ghost" size="icon" aria-label="Editar">
-                <Edit /> {/* TODO: implement edit */}
-              </Button>
+              <EditButton project={project} />
               <DeleteButton project={project} />
             </TableCell>
           </TableRow>

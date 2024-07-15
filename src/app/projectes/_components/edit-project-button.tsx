@@ -1,6 +1,6 @@
 "use client";
 
-import { useProjects } from "@/app/_state/project-state";
+import type { Project } from "@/app/_data/project";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,56 +13,48 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Plus } from "lucide-react";
+import { Edit } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import { createProject } from "./actions";
-import { projectSchema } from "./data";
+import { editProject } from "./actions";
+import { projectSchema } from "./create-project/data";
 
-export default function CreateProjectButton() {
-  const { selectProject } = useProjects();
-  const form = useForm({
+export default function EditProjectButton({ project }: { project: Project }) {
+  const form = useForm<v.InferInput<typeof projectSchema>>({
     defaultValues: {
-      name: "",
+      name: project.name,
     },
     resolver: valibotResolver(projectSchema),
   });
-  const modalRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLDivElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
     try {
-      const project = await createProject(data);
-      if (!project) {
-        throw new Error("Error creating project");
-      }
-      selectProject(project);
-      toast.success(`Projecte ${form.getValues().name} creat`);
-    } catch (e) {
-      console.error(e);
+      await editProject(project, data);
+      toast.success(`Projecte ${data.name} actualitzat`);
+      triggerRef.current?.click();
+    } catch (error) {
+      console.error(error);
       toast.error(
-        "No s'ha pogut crear el projecte, torna-ho a provar més tard",
+        "No s'ha pogut editar el projecte, torna-ho a provar més tard",
       );
-      return;
-    } finally {
-      form.reset();
-      modalRef.current?.click();
     }
   }
 
   return (
     <>
       <Button
-        size="sm"
-        onClick={() => modalRef.current?.click()}
-        className="gap-2"
+        onClick={() => triggerRef.current?.click()}
+        variant="ghost"
+        size="icon"
+        aria-label="Editar"
       >
-        <Plus />
-        Crear projecte
+        <Edit />
       </Button>
 
-      <ModalForm triggerRef={modalRef} title="Crear Projecte">
+      <ModalForm triggerRef={triggerRef} title="Editar projecte">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -72,21 +64,18 @@ export default function CreateProjectButton() {
                 <FormItem>
                   <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input autoFocus {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button
-              disabled={form.formState.isSubmitting}
-              className="w-full space-x-2"
-            >
+            <Button disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting && (
                 <span className="loading loading-spinner" />
               )}
-              Crear
+              Desar
             </Button>
           </form>
         </Form>
