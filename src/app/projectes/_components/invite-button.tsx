@@ -39,31 +39,33 @@ export default function InviteButton({ project }: { project: Project }) {
         title="Convidar usuaris"
         description="Pots convidar usuaris a aquest projecte compartint el següent enllaç:"
       >
-        <Input readOnly value={inviteLink} />
-        <Button
-          variant={canShare ? "ghost" : "default"}
-          onClick={copyLinkToClipboard}
-          className="flex w-full items-center gap-2"
-        >
-          <Copy />
-          Copiar enllaç
-        </Button>
-        {canShare && (
-          <Button aria-label="Compartir" className="w-full">
-            <RWebShare
-              data={{
-                title: project.name,
-                text: `Uneix-te a ${project.users.map((u) => u.user.name).join(", ")}`,
-                url: inviteLink,
-              }}
-              closeText="Tancar"
-            >
-              <span className="flex items-center gap-2">
-                <Share2 /> Compartir
-              </span>
-            </RWebShare>
+        <div className="space-y-4">
+          <Input readOnly value={inviteLink} />
+          <Button
+            variant={canShare ? "ghost" : "default"}
+            onClick={copyLinkToClipboard}
+            className="flex w-full items-center gap-2"
+          >
+            <Copy />
+            Copiar enllaç
           </Button>
-        )}
+          {canShare && (
+            <Button aria-label="Compartir" className="w-full">
+              <RWebShare
+                data={{
+                  title: project.name,
+                  text: `Uneix-te a ${project.users.map((u) => u.user.name).join(", ")}`,
+                  url: inviteLink,
+                }}
+                closeText="Tancar"
+              >
+                <span className="flex items-center gap-2">
+                  <Share2 /> Compartir
+                </span>
+              </RWebShare>
+            </Button>
+          )}
+        </div>
       </ModalForm>
     </>
   );
