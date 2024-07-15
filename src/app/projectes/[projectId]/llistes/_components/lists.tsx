@@ -42,16 +42,18 @@ export default async function Lists({ projectId }: { projectId: string }) {
         ))}
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-md font-semibold text-muted-foreground">
-          Completades:
-        </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {completedLists.map((list) => (
-            <ListPreview key={list.id} list={list} />
-          ))}
+      {completedLists.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-md font-semibold text-muted-foreground">
+            Completades:
+          </h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {completedLists.map((list) => (
+              <ListPreview key={list.id} list={list} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
