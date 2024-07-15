@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
+import { ListTodo } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
@@ -52,14 +53,19 @@ export default async function EventPage({
       )}
 
       {list !== undefined && (
-        <div className="mx-auto max-w-xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
-          <h2 className="text-xl font-semibold">
-            <Link href={`/projectes/${projectId}/llistes/${list.id}`}>
-              Llista
-              {list.name !== event.name && <span> ({list.name})</span>}:
-            </Link>
-          </h2>
-          <CheckList list={list} />
+        <div className="pt-6">
+          <div className="mx-auto max-w-xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+            <h2 className="text-xl font-semibold">
+              <Link
+                href={`/projectes/${projectId}/llistes/${list.id}`}
+                className="flex items-center gap-2"
+              >
+                <ListTodo />
+                {list.name !== event.name ? list.name : "Llista"}
+              </Link>
+            </h2>
+            <CheckList list={list} />
+          </div>
         </div>
       )}
     </div>
