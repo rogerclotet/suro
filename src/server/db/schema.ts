@@ -132,7 +132,9 @@ export const lists = createTable(
     projectId: uuid("projectId")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
-    eventId: uuid("eventId").references(() => events.id),
+    eventId: uuid("eventId").references(() => events.id, {
+      onDelete: "set null",
+    }),
   },
   (l) => ({
     projectIdIdx: index("list_projectId_idx").on(l.projectId),
