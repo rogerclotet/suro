@@ -21,21 +21,15 @@ export async function createEvent(
   }
 
   const parsedData = v.parse(eventSchema, data);
-  if (parsedData.dates.from === undefined) {
-    throw new Error("Missing start date");
+  if (
+    parsedData.dates.from === undefined ||
+    parsedData.dates.to === undefined
+  ) {
+    throw new Error("Missing dates");
   }
 
   const startAt = new Date(parsedData.dates.from);
-  if (parsedData.allDay) {
-    startAt.setHours(0, 0, 0, 0);
-  }
-
-  const endAt = new Date(parsedData.dates.to ?? parsedData.dates.from);
-  if (parsedData.allDay) {
-    endAt.setHours(23, 59, 59, 999);
-  } else if (parsedData.dates.to === undefined) {
-    endAt.setHours(endAt.getHours() + 1, 0, 0, 0);
-  }
+  const endAt = new Date(parsedData.dates.to);
 
   await db.insert(events).values({
     name: parsedData.name,

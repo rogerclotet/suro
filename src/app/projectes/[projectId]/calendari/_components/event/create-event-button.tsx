@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import type { CheckedState } from "@radix-ui/react-checkbox";
 import { Loader2, Plus } from "lucide-react";
 import React from "react";
 import type { DateRange } from "react-day-picker";
@@ -69,9 +70,17 @@ export default function CreateEventButton({
   }
 
   function handleDatesChange(dates: DateRange | undefined) {
+    const from = dates?.from;
+    const to = dates?.to ?? dates?.from;
+
+    if (form.getValues().allDay) {
+      from?.setHours(0, 0, 0, 0);
+      to?.setHours(23, 59, 59, 999);
+    }
+
     form.setValue("dates", {
-      from: dates?.from,
-      to: dates?.to ?? dates?.from,
+      from,
+      to,
     });
   }
 
@@ -89,6 +98,21 @@ export default function CreateEventButton({
     const newDates = form.getValues("dates");
     newDates.to?.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
     form.setValue("dates", newDates);
+  }
+
+  function handleAllDayChange(checked: CheckedState) {
+    if (checked === "indeterminate") {
+      return;
+    }
+
+    if (checked) {
+      const newDates = form.getValues("dates");
+      newDates.from?.setHours(0, 0, 0, 0);
+      newDates.to?.setHours(23, 59, 59, 999);
+      form.setValue("dates", newDates);
+    }
+
+    form.setValue("allDay", checked);
   }
 
   return (
@@ -185,7 +209,7 @@ export default function CreateEventButton({
                   <FormControl>
                     <Checkbox
                       checked={field.value as boolean}
-                      onCheckedChange={field.onChange}
+                      onCheckedChange={handleAllDayChange}
                     />
                   </FormControl>
                   <FormLabel>Tot el dia</FormLabel>
