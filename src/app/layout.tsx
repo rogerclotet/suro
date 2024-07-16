@@ -5,6 +5,7 @@ import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { GeistSans } from "geist/font/sans";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import React from "react";
 import { extractRouterConfig } from "uploadthing/server";
@@ -45,24 +46,26 @@ export default async function RootLayout({
            */
           routerConfig={extractRouterConfig(uploadFileRouter)}
         />
-        <ReactQueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <TooltipProvider>
-              <Drawer />
-              <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
-                {children}
-              </div>
-              {session && (
-                <>
-                  <ProjectsLoader />
-                  <BottomNav />
-                </>
-              )}
+        <SessionProvider session={session}>
+          <ReactQueryProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <TooltipProvider>
+                <Drawer />
+                <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
+                  {children}
+                </div>
+                {session && (
+                  <>
+                    <ProjectsLoader />
+                    <BottomNav />
+                  </>
+                )}
 
-              <Toaster position="bottom-center" />
-            </TooltipProvider>
-          </ThemeProvider>
-        </ReactQueryProvider>
+                <Toaster position="bottom-center" />
+              </TooltipProvider>
+            </ThemeProvider>
+          </ReactQueryProvider>
+        </SessionProvider>
       </body>
     </html>
   );

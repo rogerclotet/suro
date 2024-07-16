@@ -1,6 +1,7 @@
 import type { File } from "@/app/_data/file";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { readableSize } from "../../readable-size";
@@ -8,6 +9,8 @@ import DeleteFileButton from "../delete-file/delete-file-button";
 import EditFileButton from "../edit-file/edit-file-button";
 
 export default function FileListItem({ file }: { file: File }) {
+  const session = useSession();
+
   return (
     <li className="flex h-16 items-center gap-4 border-background hover:bg-muted [&:not(:last-child)]:border-b-2">
       <Link href={file.url} target="_blank" rel="noopener noreferrer">
@@ -34,8 +37,12 @@ export default function FileListItem({ file }: { file: File }) {
             </span>
           </Link>
 
-          <EditFileButton file={file} />
-          <DeleteFileButton file={file} />
+          {file.uploadedBy.id === session?.data?.user.id && (
+            <>
+              <EditFileButton file={file} />
+              <DeleteFileButton file={file} />
+            </>
+          )}
         </div>
 
         <span className="text-xs text-muted-foreground">

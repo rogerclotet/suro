@@ -12,5 +12,9 @@ export default {
     async signIn({ profile }: { profile?: Profile }): Promise<boolean> {
       return profile?.email !== undefined;
     },
+    async session({ session, user }) {
+      session.user.id = user.id;
+      return session;
+    },
   },
 } satisfies NextAuthConfig;

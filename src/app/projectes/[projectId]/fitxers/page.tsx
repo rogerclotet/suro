@@ -1,5 +1,7 @@
+import { auth } from "@/auth";
 import getFiles from "@/server/files";
 import { CornerRightUp } from "lucide-react";
+import { redirect } from "next/navigation";
 import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
 import ViewSelector from "./_components/view-selector";
@@ -9,6 +11,11 @@ export default async function FilesPage({
 }: {
   params: { projectId: string };
 }) {
+  const session = await auth();
+  if (!session) {
+    return redirect("/");
+  }
+
   const allFiles = await getFiles(projectId);
 
   return (

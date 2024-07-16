@@ -14,7 +14,7 @@ export async function deleteFile(file: File) {
     return;
   }
 
-  if (!file.project.users.some((u) => u.userId === session.user.id)) {
+  if (file.uploadedBy.id !== session.user.id) {
     throw new Error("Unauthorized");
   }
 

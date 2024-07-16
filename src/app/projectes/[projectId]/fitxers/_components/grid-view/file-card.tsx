@@ -7,28 +7,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { readableSize } from "../../readable-size";
+import DeleteFileButton from "../delete-file/delete-file-button";
+import EditFileButton from "../edit-file/edit-file-button";
 
 export default function FileCard({ file }: { file: File }) {
+  const session = useSession();
+
   return (
-    <Link href={file.url} target="_blank" rel="noopener noreferrer">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-md line-clamp-1 truncate text-wrap">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-md flex flex-row items-center justify-between gap-2">
+          <Link
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="line-clamp-1"
+          >
             {file.name}
-          </CardTitle>
-          <CardDescription className="flex flex-row flex-wrap justify-between gap-1">
+          </Link>
+        </CardTitle>
+        <CardDescription className="flex flex-row items-end justify-between gap-1">
+          <span className="flex flex-col">
             <span>{readableSize(file.size)}</span>
             <span>{file.uploadedBy.name}</span>
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="aspect-square">
+          </span>
+
+          {file.uploadedBy.id === session?.data?.user.id && (
+            <span className="mb-0.5 flex flex-row items-center gap-2">
+              <EditFileButton file={file} />
+              <DeleteFileButton file={file} />
+            </span>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="aspect-square">
+        <Link href={file.url} target="_blank" rel="noopener noreferrer">
           <FilePreviewContent file={file} />
-        </CardFooter>
-      </Card>
-    </Link>
+        </Link>
+      </CardFooter>
+    </Card>
   );
 }
 

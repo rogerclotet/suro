@@ -17,7 +17,7 @@ export async function editFile(
   const session = await auth();
   assert(session, "Unauthenticated user");
 
-  if (!file.project.users.some((u) => u.userId === session.user.id)) {
+  if (file.uploadedBy.id !== session.user.id) {
     throw new Error("Unauthorized");
   }
 
