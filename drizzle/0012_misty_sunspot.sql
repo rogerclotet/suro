@@ -1,0 +1,1 @@
+ALTER TABLE "f_file" ADD COLUMN "createdAt" timestamp with time zone DEFAULT CURRENT_TIMESTAMP;

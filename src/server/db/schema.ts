@@ -191,6 +191,10 @@ export const files = createTable("file", {
   uploadedBy: varchar("uploadedBy", { length: 255 })
     .notNull()
     .references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("createdAt", {
+    mode: "date",
+    withTimezone: true,
+  }).default(sql`CURRENT_TIMESTAMP`),
   projectId: uuid("projectId")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
