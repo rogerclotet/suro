@@ -26,7 +26,9 @@ export default function FileListItem({ file }: { file: File }) {
 
       <div className="flex flex-grow flex-col justify-around gap-0.5">
         <Link href={file.url} target="_blank" rel="noopener noreferrer">
-          <span className="line-clamp-1">{file.name}</span>
+          <span className="line-clamp-1 [overflow-wrap:anywhere]">
+            {file.name}
+          </span>
         </Link>
         <span className="text-xs text-muted-foreground">
           {readableSize(file.size)}
