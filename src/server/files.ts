@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { files } from "./db/schema";
 
@@ -7,6 +7,12 @@ export default async function getFiles(projectId: string) {
     where: eq(files.projectId, projectId),
     with: {
       uploadedBy: true,
+      project: {
+        with: {
+          users: true,
+        },
+      },
     },
+    orderBy: [desc(files.createdAt)],
   });
 }

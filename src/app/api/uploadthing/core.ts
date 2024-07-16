@@ -36,7 +36,7 @@ export const uploadFileRouter = {
       // This code RUNS ON YOUR SERVER after upload
 
       await db.insert(files).values({
-        name: file.name,
+        name: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
         url: file.url,
         type: file.type,
         size: file.size,

@@ -1,8 +1,8 @@
 import getFiles from "@/server/files";
 import { CornerRightUp } from "lucide-react";
+import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
 import ViewSelector from "./_components/view-selector";
-import Files from "./files";
 
 export default async function FilesPage({
   params: { projectId },

@@ -4,6 +4,8 @@ import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import Image from "next/image";
 import Link from "next/link";
 import { readableSize } from "../../readable-size";
+import DeleteFileButton from "../delete-file/delete-file-button";
+import EditFileButton from "../edit-file/edit-file-button";
 
 export default function FileListItem({ file }: { file: File }) {
   return (
@@ -25,20 +27,26 @@ export default function FileListItem({ file }: { file: File }) {
       </Link>
 
       <div className="flex flex-grow flex-col justify-around gap-0.5">
-        <Link href={file.url} target="_blank" rel="noopener noreferrer">
-          <span className="line-clamp-1 [overflow-wrap:anywhere]">
-            {file.name}
-          </span>
-        </Link>
+        <div className="flex flex-row items-center gap-2">
+          <Link href={file.url} target="_blank" rel="noopener noreferrer">
+            <span className="line-clamp-1 [overflow-wrap:anywhere]">
+              {file.name}
+            </span>
+          </Link>
+
+          <EditFileButton file={file} />
+          <DeleteFileButton file={file} />
+        </div>
+
         <span className="text-xs text-muted-foreground">
           {readableSize(file.size)}
         </span>
       </div>
 
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 p-4">
         <Tooltip>
           <TooltipTrigger>
-            <span className="line-clamp-2 max-w-32 p-4 text-sm text-muted-foreground">
+            <span className="line-clamp-2 max-w-32 text-sm text-muted-foreground">
               {file.uploadedBy.name}
             </span>
           </TooltipTrigger>

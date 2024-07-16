@@ -96,7 +96,7 @@ export async function editEvent(
   }
 
   if (!project.users.some((u) => u.user.id === session.user.id)) {
-    throw new Error("Not authorized");
+    throw new Error("Unauthorized");
   }
 
   const parsedData = v.parse(editEventSchema, data);
@@ -125,7 +125,7 @@ export async function deleteEvent(event: Event) {
   }
 
   if (!event.project.users.some((u) => u.userId === session.user.id)) {
-    throw new Error("Not authorized");
+    throw new Error("Unauthorized");
   }
 
   try {

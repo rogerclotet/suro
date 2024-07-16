@@ -1,9 +1,9 @@
 "use client";
 
 import type { File } from "@/app/_data/file";
-import GridView from "./_components/grid-view/grid-view";
-import ListView from "./_components/list-view/list-view";
-import { useFileView } from "./_state/file-view-state";
+import { useFileView } from "../_state/file-view-state";
+import GridView from "./grid-view/grid-view";
+import ListView from "./list-view/list-view";
 
 export default function Files({ files }: { files: File[] }) {
   const { view } = useFileView();
