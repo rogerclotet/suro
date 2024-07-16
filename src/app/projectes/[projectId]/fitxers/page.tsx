@@ -14,12 +14,12 @@ export default async function FilesPage({
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
-        <h1 className="mt-1 text-xl font-semibold">Fitxers</h1>
-
-        <div className="flex items-start gap-2">
+        <div className="flex flex-grow flex-row flex-wrap items-center justify-between gap-2">
+          <h1 className="mt-1 text-xl font-semibold">Fitxers</h1>
           <ViewSelector />
-          <UploadButton projectId={projectId} />
         </div>
+
+        <UploadButton projectId={projectId} />
       </div>
 
       {allFiles.length === 0 ? (

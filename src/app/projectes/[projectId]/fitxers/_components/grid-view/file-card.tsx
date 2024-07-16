@@ -19,8 +19,9 @@ export default function FileCard({ file }: { file: File }) {
           <CardTitle className="text-md line-clamp-1 truncate text-wrap">
             {file.name}
           </CardTitle>
-          <CardDescription className="flex flex-col gap-1">
-            {file.uploadedBy.name} · {readableSize(file.size)}
+          <CardDescription className="flex flex-row flex-wrap justify-between gap-1">
+            <span>{readableSize(file.size)}</span>
+            <span>{file.uploadedBy.name}</span>
           </CardDescription>
         </CardHeader>
         <CardFooter className="aspect-square">
