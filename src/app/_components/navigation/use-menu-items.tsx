@@ -31,7 +31,6 @@ const itemParts: MenuItemPart[] = [
     name: "Fitxers",
     pathPart: "fitxers",
     icon: <FolderOpen />,
-    disabled: true,
   },
 ];
 

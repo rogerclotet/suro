@@ -182,6 +182,35 @@ export const eventsRelations = relations(events, ({ one }) => ({
   }),
 }));
 
+export const files = createTable("file", {
+  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  url: varchar("url", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
+  size: integer("size").notNull(),
+  uploadedBy: varchar("uploadedBy", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "set null" }),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  eventId: uuid("eventId").references(() => events.id, {
+    onDelete: "set null",
+  }),
+});
+
+export const filesRelations = relations(files, ({ one }) => ({
+  project: one(projects, {
+    fields: [files.projectId],
+    references: [projects.id],
+  }),
+  uploadedBy: one(users, {
+    fields: [files.uploadedBy],
+    references: [users.id],
+  }),
+  event: one(events, { fields: [files.eventId], references: [events.id] }),
+}));
+
 export const projects = createTable("project", {
   id: uuid("id").defaultRandom().notNull().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),

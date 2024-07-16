@@ -5,7 +5,16 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const coreConfig = {};
+const coreConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+      },
+    ],
+  },
+};
 
 import { withSentryConfig } from "@sentry/nextjs";
 
