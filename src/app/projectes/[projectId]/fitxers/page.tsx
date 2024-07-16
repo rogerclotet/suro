@@ -1,7 +1,8 @@
 import getFiles from "@/server/files";
 import { CornerRightUp } from "lucide-react";
-import FilePreview from "./_components/file-preview";
 import UploadButton from "./_components/upload-button";
+import ViewSelector from "./_components/view-selector";
+import Files from "./files";
 
 export default async function FilesPage({
   params: { projectId },
@@ -14,7 +15,11 @@ export default async function FilesPage({
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
         <h1 className="mt-1 text-xl font-semibold">Fitxers</h1>
-        <UploadButton projectId={projectId} />
+
+        <div className="flex items-start gap-2">
+          <ViewSelector />
+          <UploadButton projectId={projectId} />
+        </div>
       </div>
 
       {allFiles.length === 0 ? (
@@ -23,11 +28,7 @@ export default async function FilesPage({
           <CornerRightUp className="mb-4 flex-shrink-0" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {allFiles.map((file) => (
-            <FilePreview key={file.id} file={file} />
-          ))}
-        </div>
+        <Files files={allFiles} />
       )}
     </div>
   );

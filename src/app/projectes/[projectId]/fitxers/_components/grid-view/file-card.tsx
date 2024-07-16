@@ -9,40 +9,21 @@ import {
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import Image from "next/image";
 import Link from "next/link";
+import { readableSize } from "../../readable-size";
 
-export default function FilePreview({ file }: { file: File }) {
-  function printType() {
-    if (file.type === "image") {
-      return "imatge";
-    }
-    return file.type;
-  }
-
-  function printSize() {
-    if (file.size < 1024) {
-      return `${file.size} bytes`;
-    }
-    if (file.size < 1024 * 1024) {
-      return `${(file.size / 1024).toFixed(2)} KB`;
-    }
-    return `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-  }
-
+export default function FileCard({ file }: { file: File }) {
   return (
     <Link href={file.url} target="_blank" rel="noopener noreferrer">
       <Card>
         <CardHeader>
-          <CardTitle className="text-md line-clamp-2 text-wrap">
+          <CardTitle className="text-md line-clamp-1 truncate text-wrap">
             {file.name}
           </CardTitle>
           <CardDescription className="flex flex-col gap-1">
-            <span>
-              {printType()} · {printSize()}
-            </span>
-            <span>{file.uploadedBy.name}</span>
+            {file.uploadedBy.name} · {readableSize(file.size)}
           </CardDescription>
         </CardHeader>
-        <CardFooter>
+        <CardFooter className="aspect-square">
           <FilePreviewContent file={file} />
         </CardFooter>
       </Card>
@@ -52,15 +33,7 @@ export default function FilePreview({ file }: { file: File }) {
 
 function FilePreviewContent({ file }: { file: File }) {
   if (file.type === "image") {
-    return (
-      <Image
-        src={file.url}
-        alt={file.name}
-        width={350}
-        height={350}
-        className="aspect-square"
-      />
-    );
+    return <Image src={file.url} alt={file.name} width={350} height={350} />;
   }
 
   return (
