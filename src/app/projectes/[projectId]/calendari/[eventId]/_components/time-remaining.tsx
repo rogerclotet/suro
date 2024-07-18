@@ -19,7 +19,7 @@ export default function TimeRemaining({
   const days = Math.floor(timeRemaining / oneDay);
   const hours = Math.floor((timeRemaining % oneDay) / oneHour);
 
-  if (days > 0 || hours > 0) {
+  if (days > 0) {
     if (days > 2 || hours === 0) {
       return <span className={className}>Falten {days} dies</span>;
     } else {
@@ -31,7 +31,16 @@ export default function TimeRemaining({
     }
   }
 
+  if (hours > 1) {
+    return <span className={className}>Falten {hours} hores</span>;
+  }
+
   const minutes = Math.floor(timeRemaining / (1000 * 60));
+
+  if (hours > 0) {
+    return <span className={className}>Falta 1 hora i {minutes} minuts</span>;
+  }
+
   if (minutes > 0) {
     return <span className={className}>Falten {minutes} minuts</span>;
   }
