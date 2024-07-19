@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import React from "react";
 import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
-import EventDetails from "./event/event-preview";
+import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
 
@@ -55,7 +55,7 @@ export default function Calendar() {
     return (
       <div className="flex flex-col gap-4">
         {currentEvents.map((event) => (
-          <EventDetails key={event.id} event={event} />
+          <EventPreview key={event.id} event={event} />
         ))}
       </div>
     );
