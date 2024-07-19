@@ -1,5 +1,6 @@
 "use client";
 
+import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { UploadButton as UploadthingButton } from "@/components/uploadthing";
 import { Loader2, Upload } from "lucide-react";
@@ -8,8 +9,10 @@ import { toast } from "sonner";
 
 export default function UploadButton({
   projectId,
+  eventId,
 }: {
   projectId: Project["id"];
+  eventId?: Event["id"] | undefined;
 }) {
   const router = useRouter();
 
@@ -19,6 +22,7 @@ export default function UploadButton({
         endpoint="fileUploader"
         headers={{
           "x-project-id": projectId,
+          "x-event-id": eventId ?? "",
         }}
         onClientUploadComplete={(_res) => {
           toast.success("Fitxer compartit correctament");

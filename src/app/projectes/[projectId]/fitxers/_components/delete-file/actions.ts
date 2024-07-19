@@ -28,4 +28,8 @@ export async function deleteFile(file: File) {
   }
 
   revalidatePath(`/projectes/${file.project.id}/fitxers`);
+  
+  if (file.eventId) {
+    revalidatePath(`/projectes/${file.project.id}/calendari/${file.eventId}`);
+  }
 }

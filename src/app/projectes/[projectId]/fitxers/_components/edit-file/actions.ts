@@ -29,4 +29,8 @@ export async function editFile(
     .where(eq(files.id, file.id));
 
   revalidatePath(`/projectes/${file.project.id}/fitxers`);
+
+  if (file.eventId) {
+    revalidatePath(`/projectes/${file.projectId}/calendari/${file.eventId}`);
+  }
 }

@@ -18,7 +18,7 @@ export default function FileCard({ file }: { file: File }) {
   const session = useSession();
 
   return (
-    <Card>
+    <Card className="max-w-[180px]">
       <CardHeader>
         <CardTitle className="text-md flex flex-row items-center justify-between gap-2">
           <Link
@@ -30,18 +30,19 @@ export default function FileCard({ file }: { file: File }) {
             {file.name}
           </Link>
         </CardTitle>
-        <CardDescription className="flex flex-row items-end justify-between gap-1">
+        <CardDescription>
           <span className="flex flex-col">
-            <span>{readableSize(file.size)}</span>
-            <span>{file.uploadedBy.name}</span>
-          </span>
-
-          {file.uploadedBy.id === session?.data?.user.id && (
-            <span className="mb-0.5 flex flex-row items-center gap-2">
-              <EditFileButton file={file} />
-              <DeleteFileButton file={file} />
+            <span className="flex flex-row items-center justify-between gap-2">
+              {readableSize(file.size)}
+              {file.uploadedBy.id === session?.data?.user.id && (
+                <span className="mb-0.5 flex flex-row items-center gap-2">
+                  <EditFileButton file={file} />
+                  <DeleteFileButton file={file} />
+                </span>
+              )}
             </span>
-          )}
+            <span className="line-clamp-1">{file.uploadedBy.name}</span>
+          </span>
         </CardDescription>
       </CardHeader>
       <CardFooter className="aspect-square">

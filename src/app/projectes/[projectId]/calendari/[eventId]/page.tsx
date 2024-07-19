@@ -4,10 +4,12 @@ import ShareButton from "@/components/ui/share-button";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
-import { ListTodo } from "lucide-react";
+import { Folders, ListTodo } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import Files from "../../fitxers/_components/files";
+import UploadButton from "../../fitxers/_components/upload-button";
 import CheckList from "../../llistes/[listId]/_components/check-list";
 import TimeRange from "../_components/event/time-range";
 import SettingsMenu from "./_components/settings-menu";
@@ -64,9 +66,9 @@ export default async function EventPage({
         />
       )}
 
-      {list !== undefined && (
-        <div className="pt-6">
-          <div className="mx-auto max-w-xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+      <div className="grid grid-cols-1 items-stretch gap-4 pt-6 md:grid-cols-2">
+        {list !== undefined && (
+          <div className="max-w-3xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="text-xl font-semibold">
               <Link
                 href={`/projectes/${projectId}/llistes/${list.id}`}
@@ -78,8 +80,21 @@ export default async function EventPage({
             </h2>
             <CheckList list={list} />
           </div>
+        )}
+
+        <div className="space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+          <h2 className="flex items-start justify-between text-xl font-semibold">
+            <div className="flex items-center gap-2">
+              <Folders />
+              Fitxers
+            </div>
+
+            <UploadButton projectId={projectId} eventId={eventId} />
+          </h2>
+
+          {event.files.length > 0 && <Files files={event.files} />}
         </div>
-      )}
+      </div>
     </div>
   );
 }

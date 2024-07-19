@@ -174,12 +174,13 @@ export const events = createTable("event", {
     .references(() => projects.id, { onDelete: "cascade" }),
 });
 
-export const eventsRelations = relations(events, ({ one }) => ({
+export const eventsRelations = relations(events, ({ one, many }) => ({
   project: one(projects, {
     fields: [events.projectId],
     references: [projects.id],
     relationName: "project",
   }),
+  files: many(files),
 }));
 
 export const files = createTable("file", {

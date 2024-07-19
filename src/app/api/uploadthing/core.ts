@@ -29,8 +29,13 @@ export const uploadFileRouter = {
         throw new UploadThingError("Project ID not found");
       }
 
+      let eventId = req.headers.get("x-event-id");
+      if (eventId === "") {
+        eventId = null;
+      }
+
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: session.user.id, projectId };
+      return { userId: session.user.id, projectId, eventId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -42,9 +47,16 @@ export const uploadFileRouter = {
         size: file.size,
         uploadedBy: metadata.userId,
         projectId: metadata.projectId,
+        eventId: metadata.eventId,
       });
 
-      revalidatePath("/projectes/[projectId]/fitxers");
+      revalidatePath(`/projectes/${metadata.projectId}/fitxers`);
+
+      if (metadata.eventId) {
+        revalidatePath(
+          `/projectes/${metadata.projectId}/calendari/${metadata.eventId}`,
+        );
+      }
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return {};

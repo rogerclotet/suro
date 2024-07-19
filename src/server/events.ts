@@ -17,6 +17,11 @@ export async function getEvent(projectId: string, eventId: string) {
             users: true,
           },
         },
+        files: {
+          with: {
+            uploadedBy: true,
+          },
+        },
       },
     });
 
@@ -27,7 +32,10 @@ export async function getEvent(projectId: string, eventId: string) {
       throw new Error("Event not found");
     }
 
-    return result;
+    return {
+      ...result,
+      files: result.files.map((file) => ({ ...file, project: result.project })),
+    };
   } catch (e) {
     console.error(e);
     return undefined;
@@ -52,6 +60,11 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
             users: true,
           },
         },
+        files: {
+          with: {
+            uploadedBy: true,
+          },
+        },
       },
     });
 
@@ -62,7 +75,13 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
       throw new Error("Project not found");
     }
 
-    return results;
+    return results.map((result) => ({
+      ...result,
+      files: result.files.map((file) => ({
+        ...file,
+        project: result.project,
+      })),
+    }));
   } catch (e) {
     console.error(e);
     return [];
