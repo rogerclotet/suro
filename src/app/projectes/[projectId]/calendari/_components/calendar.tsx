@@ -6,6 +6,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import type { DayContentProps } from "react-day-picker";
 import CreateEventButton from "./event/create-event-button";
@@ -14,13 +15,16 @@ import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
 
 export default function Calendar() {
+  const searchParams = useSearchParams();
+  const day = searchParams.get("d");
+
   const [date, setDate] = React.useState<Date | undefined>(() => {
-    const today = new Date();
+    const today = day ? new Date(day) : new Date();
     today.setHours(0, 0, 0, 0);
     return today;
   });
   const [monthStart, setMonthStart] = React.useState<Date>(() => {
-    const date = new Date();
+    const date = day ? new Date(day) : new Date();
     date.setHours(0, 0, 0, 0);
     date.setDate(1);
     return date;
@@ -30,6 +34,7 @@ export default function Calendar() {
     eventsQueryOptions(monthStart, project?.id),
   );
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const currentEvents = events?.filter((event) =>
     isCurrentDayEvent(event, date),
@@ -100,6 +105,12 @@ export default function Calendar() {
   function handleDaySelect(date: Date | undefined) {
     if (date) {
       setDate(date);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+      router.push(`/projectes/${project?.id}/calendari?d=${dateString}`);
     }
   }
 
@@ -113,6 +124,7 @@ export default function Calendar() {
         <div className="flex flex-col items-center">
           <CalendarComponent
             mode="single"
+            defaultMonth={date}
             selected={date}
             onSelect={handleDaySelect}
             onMonthChange={setMonthStart}

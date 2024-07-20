@@ -11,15 +11,24 @@ import getMonthString from "./_components/event/get-month-string";
 
 export default async function CalendarPage({
   params: { projectId },
+  searchParams: { d: day },
 }: {
   params: { projectId: string };
+  searchParams: { d?: string };
 }) {
   const session = await auth();
   if (!session) {
     redirect("/");
   }
 
-  const monthStart = new Date();
+  if (day) {
+    const date = new Date(day);
+    if (isNaN(date.getTime())) {
+      redirect(`/projectes/${projectId}/calendari`);
+    }
+  }
+
+  const monthStart = day ? new Date(day) : new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
