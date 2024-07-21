@@ -9,6 +9,7 @@ import {
 import { checkAuth } from "@/lib/check-auth";
 import Link from "next/link";
 import { Suspense } from "react";
+import { setTimeout } from "timers/promises";
 import CreateTemplateButton from "./_components/create-template/create-template-button";
 import { TemplatePreviewSkeleton } from "./_components/template-preview";
 import Templates from "./_components/templates";
@@ -19,6 +20,8 @@ export default async function PlantillesPage({
   params: { projectId: string };
 }) {
   await checkAuth();
+
+  await setTimeout(3000);
 
   return (
     <div>

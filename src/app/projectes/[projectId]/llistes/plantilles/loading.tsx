@@ -1,15 +1,38 @@
-import { Loader2 } from "lucide-react";
+"use client";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import LoadingPage from "@/components/ui/loading-page";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function Loading() {
-  return (
-    <div>
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <h1 className="mt-1 text-xl font-semibold">Plantilles</h1>
-      </div>
+  const params = useParams();
+  const projectId = params.projectId as string;
 
-      <div className="flex h-[300px] w-full items-center justify-center">
-        <Loader2 className="animate-spin" />
-      </div>
-    </div>
+  return (
+    <LoadingPage>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild className="text-xl font-semibold">
+              <Link href={`/projectes/${projectId}/llistes`}>Llistes</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="scale-150" />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="text-xl font-semibold">
+              Plantilles
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </LoadingPage>
   );
 }
