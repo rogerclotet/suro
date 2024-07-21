@@ -44,7 +44,11 @@ export default function SettingsMenu({ list }: { list: List }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ModalForm triggerRef={editDialogRef} title="Editar llista">
+      <ModalForm
+        triggerRef={editDialogRef}
+        title="Editar llista"
+        description="Editar el títol i la descripció de la llista"
+      >
         <EditListForm
           list={list}
           onClose={() => editDialogRef.current?.click()}

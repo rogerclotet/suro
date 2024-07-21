@@ -62,7 +62,11 @@ export default function CreateProjectButton() {
         Crear projecte
       </Button>
 
-      <ModalForm triggerRef={modalRef} title="Crear Projecte">
+      <ModalForm
+        triggerRef={modalRef}
+        title="Crear Projecte"
+        description="Crear un projecte nou"
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField

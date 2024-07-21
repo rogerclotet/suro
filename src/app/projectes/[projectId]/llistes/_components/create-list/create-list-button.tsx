@@ -75,7 +75,11 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     <>
       <CreateButton onClick={() => triggerRef.current?.click()} />
 
-      <ModalForm triggerRef={triggerRef} title="Crear llista">
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Crear llista"
+        description="Crear una llista nova"
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField

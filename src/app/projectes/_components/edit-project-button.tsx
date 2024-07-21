@@ -54,7 +54,11 @@ export default function EditProjectButton({ project }: { project: Project }) {
         <Edit />
       </Button>
 
-      <ModalForm triggerRef={triggerRef} title="Editar projecte">
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Editar projecte"
+        description="Editar el nom del projecte"
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField

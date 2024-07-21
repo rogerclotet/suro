@@ -26,7 +26,7 @@ import { Button } from "./button";
 
 type Props = {
   title: string;
-  description?: string;
+  description: string;
   actionText: string;
   onAction: () => void;
   variant?: "default" | "destructive";
@@ -66,9 +66,7 @@ function ClientModalAction({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{title}</AlertDialogTitle>
-            {description && (
-              <AlertDialogDescription>{description}</AlertDialogDescription>
-            )}
+            <AlertDialogDescription>{description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel·lar</AlertDialogCancel>

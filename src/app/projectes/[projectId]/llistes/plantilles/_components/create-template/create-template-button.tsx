@@ -65,7 +65,11 @@ export default function CreateTemplateButton({
         Crear plantilla
       </Button>
 
-      <ModalForm triggerRef={triggerRef} title="Crear plantilla">
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Crear plantilla"
+        description="Crear una plantilla nova"
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField

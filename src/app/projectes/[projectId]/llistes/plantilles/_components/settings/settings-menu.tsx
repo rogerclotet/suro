@@ -44,7 +44,11 @@ export default function SettingsMenu({ template }: { template: Template }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ModalForm triggerRef={editDialogRef} title="Editar llista">
+      <ModalForm
+        triggerRef={editDialogRef}
+        title="Editar plantilla"
+        description="Editar el nom i la descripció de la plantilla"
+      >
         <EditTemplateForm
           template={template}
           onClose={() => editDialogRef.current?.click()}
