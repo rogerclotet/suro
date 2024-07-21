@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import LoadingPage from "@/components/ui/loading-page";
 import { redirect } from "next/navigation";
 import React from "react";
 import type { Project } from "../_data/project";
@@ -17,13 +17,11 @@ export default function Redirect({ project }: { project?: Project }) {
     }
   }, [project, projects, selectedProject, selectProject]);
 
-  if (projects.length === 0) {
-    return (
-      <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin" />
-      </div>
-    );
+  const projectId = project?.id ?? selectedProject?.id;
+
+  if (!projectId || projects.length === 0) {
+    return <LoadingPage>Carregant...</LoadingPage>;
   }
 
-  return redirect(`/projectes/${project?.id ?? selectedProject?.id}/llistes`);
+  return redirect(`/projectes/${projectId}/llistes`);
 }
