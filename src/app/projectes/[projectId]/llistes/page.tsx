@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
-import { getTemplates } from "@/server/lists";
 import { LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -15,8 +14,6 @@ export default async function ListesPage({
 }) {
   await checkAuth();
 
-  const templates = await getTemplates(projectId);
-
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
@@ -29,7 +26,7 @@ export default async function ListesPage({
               Gestionar plantilles
             </Link>
           </Button>
-          <CreateListButton projectId={projectId} templates={templates} />
+          <CreateListButton projectId={projectId} />
         </div>
       </div>
 

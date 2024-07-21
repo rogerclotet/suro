@@ -1,7 +1,7 @@
 "use client";
 
-import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { getTemplates } from "@/app/api/[projectId]/templates/api";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -25,13 +26,7 @@ import type * as v from "valibot";
 import { createList } from "./actions";
 import { listSchema } from "./data";
 
-export default function CreateListButton({
-  projectId,
-  templates,
-}: {
-  projectId: string;
-  templates: Template[];
-}) {
+export default function CreateListButton({ projectId }: { projectId: string }) {
   const form = useForm({
     defaultValues: {
       name: "",
@@ -43,10 +38,11 @@ export default function CreateListButton({
   const router = useRouter();
   const { project } = useProjects();
   const triggerRef = React.useRef<HTMLDivElement>(null);
-
-  if (!project) {
-    return null;
-  }
+  const { data: templates } = useQuery({
+    queryKey: ["templates", projectId],
+    queryFn: () => getTemplates(projectId),
+    staleTime: 60 * 1000,
+  });
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     try {
@@ -62,17 +58,22 @@ export default function CreateListButton({
     }
   }
 
-  return (
-    <>
-      <Button
-        onClick={() => triggerRef.current?.click()}
-        variant="default"
-        size="sm"
-        className="gap-2"
-      >
+  function CreateButton({ onClick }: { onClick?: () => void }) {
+    return (
+      <Button onClick={onClick} variant="default" size="sm" className="gap-2">
         <Plus />
         Crear llista
       </Button>
+    );
+  }
+
+  if (!project || templates === undefined) {
+    return <CreateButton />;
+  }
+
+  return (
+    <>
+      <CreateButton onClick={() => triggerRef.current?.click()} />
 
       <ModalForm triggerRef={triggerRef} title="Crear llista">
         <Form {...form}>
