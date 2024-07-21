@@ -21,7 +21,7 @@ export default async function FilesPage({
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="flex flex-grow flex-row flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-grow flex-row flex-wrap items-start justify-between gap-2">
           <h1 className="mt-1 text-xl font-semibold">Fitxers</h1>
           <ViewSelector />
         </div>

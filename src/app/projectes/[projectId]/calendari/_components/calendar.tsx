@@ -117,7 +117,7 @@ export default function Calendar() {
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Calendari</h1>
+        <h1 className="mt-1 text-xl font-semibold">Calendari</h1>
       </div>
 
       <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-8">
