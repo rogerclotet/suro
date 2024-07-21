@@ -12,7 +12,7 @@ export default function Redirect({ project }: { project?: Project }) {
   React.useEffect(() => {
     if (project) {
       selectProject(project);
-    } else if (!selectedProject) {
+    } else if (!selectedProject && projects && projects.length > 0) {
       selectProject(projects[0]!);
     }
   }, [project, projects, selectedProject, selectProject]);
