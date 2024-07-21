@@ -14,6 +14,7 @@ import BottomNav from "./_components/navigation/bottom-nav";
 import Drawer from "./_components/navigation/drawer/drawer";
 import ProjectsLoader from "./_components/projects-loader";
 import { uploadFileRouter } from "./api/uploadthing/core";
+import { CSPostHogProvider } from "./providers";
 
 v.setGlobalConfig({ lang: "ca" });
 
@@ -47,24 +48,26 @@ export default async function RootLayout({
           routerConfig={extractRouterConfig(uploadFileRouter)}
         />
         <SessionProvider session={session}>
-          <ReactQueryProvider>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-              <TooltipProvider>
-                <Drawer />
-                <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
-                  {children}
-                </div>
-                {session && (
-                  <>
-                    <ProjectsLoader />
-                    <BottomNav />
-                  </>
-                )}
+          <CSPostHogProvider>
+            <ReactQueryProvider>
+              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                <TooltipProvider>
+                  <Drawer />
+                  <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
+                    {children}
+                  </div>
+                  {session && (
+                    <>
+                      <ProjectsLoader />
+                      <BottomNav />
+                    </>
+                  )}
 
-                <Toaster position="bottom-center" />
-              </TooltipProvider>
-            </ThemeProvider>
-          </ReactQueryProvider>
+                  <Toaster position="bottom-center" />
+                </TooltipProvider>
+              </ThemeProvider>
+            </ReactQueryProvider>
+          </CSPostHogProvider>
         </SessionProvider>
       </body>
     </html>
