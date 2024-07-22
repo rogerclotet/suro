@@ -2,6 +2,7 @@
 
 import type { Template } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
+import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
@@ -22,8 +23,9 @@ export default function DeleteTemplateModal({
       router.push(`/projectes/${template.projectId}/llistes/plantilles`);
 
       toast.success(`Plantilla ${template.name} eliminada`);
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut eliminar la plantilla, torna-ho a provar més tard",
       );

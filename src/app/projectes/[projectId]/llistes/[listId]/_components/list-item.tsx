@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Check, Loader2, Tag } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -74,6 +75,7 @@ export default function ListItem(props: {
         categoryId: parsed.categoryId,
       });
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error(
         "No s'ha pogut actualitzar l'element, torna-ho a provar més tard",

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -68,6 +69,7 @@ export default function LinkListForm({
       triggerRef.current?.click();
       toast.success("Llista enllaçada correctament");
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error(
         "No s'ha pogut enllaçar la llista. Torna-ho a provar més tard",

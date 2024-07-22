@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Edit } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -36,6 +37,7 @@ export default function EditFileButton({ file }: { file: File }) {
       toast.success("Fitxer editat");
       triggerRef.current?.click();
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error("Error editant el fitxer. Torna-ho a provar més tard");
     }

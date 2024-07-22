@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
       toast.success(`Llista ${form.getValues().name} creada`);
       router.push(`/projectes/${projectId}/llistes/${listId}`);
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
       return;

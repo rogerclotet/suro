@@ -3,6 +3,7 @@
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
+import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -33,8 +34,9 @@ export default function DeleteProjectButton({
       );
       selectProject(firstNonDeletedProject!);
       toast.success(`Projecte ${projectToDelete.name} eliminat`);
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut eliminar el projecte, torna-ho a provar més tard",
       );

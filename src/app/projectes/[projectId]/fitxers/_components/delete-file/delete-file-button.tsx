@@ -2,6 +2,7 @@
 
 import type { File } from "@/app/_data/file";
 import ModalAction from "@/components/ui/modal-action";
+import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -14,8 +15,9 @@ export default function DeleteFileButton({ file }: { file: File }) {
     try {
       await deleteFile(file);
       toast.success(`Fitxer ${file.name} eliminat`);
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut eliminar el fitxer, torna-ho a provar més tard",
       );

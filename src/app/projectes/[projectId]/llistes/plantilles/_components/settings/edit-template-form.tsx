@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -39,8 +40,9 @@ export default function EditTemplateForm({
     try {
       await updateTemplate(template, data);
       toast.success(`Plantilla ${data.name} actualitzada`);
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut actualitzar la plantilla, torna-ho a provar més tard",
       );

@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -40,6 +41,7 @@ export default function CreateProjectButton() {
       selectProject(project);
       toast.success(`Projecte ${form.getValues().name} creat`);
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error(
         "No s'ha pogut crear el projecte, torna-ho a provar més tard",

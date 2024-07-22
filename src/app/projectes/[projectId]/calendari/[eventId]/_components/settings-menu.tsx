@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { captureException } from "@sentry/nextjs";
 import {
   Edit,
   ListPlus,
@@ -42,6 +43,7 @@ export default function SettingsMenu({
       await createLinkedList(event);
       toast.success("Llista creada correctament");
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error("No s'ha pogut crear la llista. Torna-ho a provar més tard");
     }

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Check, Loader2, Tag } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -50,6 +51,7 @@ export default function TemplateItem({
 
       form.reset({ name: data.name, category: data.category });
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error("No s'ha pogut crear l'element, torna-ho a provar més tard");
       return;

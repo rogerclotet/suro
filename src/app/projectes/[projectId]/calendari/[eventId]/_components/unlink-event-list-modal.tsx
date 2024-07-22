@@ -3,6 +3,7 @@
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
+import { captureException } from "@sentry/nextjs";
 import React from "react";
 import { toast } from "sonner";
 import { unlinkEventList } from "../actions";
@@ -24,8 +25,9 @@ export default function UnlinkEventListModal({
     try {
       await unlinkEventList(event, list);
       toast.success("S'ha desenllaçat la llista");
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut desenllaçar la llista, torna-ho a provar més tard",
       );

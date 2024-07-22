@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
+import { captureException } from "@sentry/nextjs";
 import { Loader2, Plus } from "lucide-react";
 import React from "react";
 import type { DateRange } from "react-day-picker";
@@ -63,8 +64,9 @@ export default function CreateEventButton({
       onCreate(data.dates.from, data.dates.to);
       form.reset();
       triggerRef.current?.click();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error("Error al crear l'esdeveniment. Torna-ho a provar més tard.");
     }
   }

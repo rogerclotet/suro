@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -43,6 +44,7 @@ export default function CreateTemplateButton({
       toast.success(`Plantilla ${form.getValues().name} creada`);
       router.push(`/projectes/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
+      captureException(e);
       console.error(e);
       toast.error(
         "No s'ha pogut crear la plantilla, torna-ho a provar més tard",

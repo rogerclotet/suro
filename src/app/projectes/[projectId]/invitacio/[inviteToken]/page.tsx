@@ -69,8 +69,8 @@ export default async function InvitePage({
                 revalidatePath(
                   `/projectes/${projectId}/invitacio/${inviteToken}`,
                 );
-              } catch (error) {
-                console.error(error);
+              } catch (e) {
+                console.error(e);
               }
             }}
           >

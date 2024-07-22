@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import type React from "react";
 import { useForm } from "react-hook-form";
@@ -56,8 +57,9 @@ export default function NewCategoryModal({
       form.reset();
 
       toast.success(`Categoria ${data.name} creada`);
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut crear la categoria, torna-ho a provar més tard",
       );

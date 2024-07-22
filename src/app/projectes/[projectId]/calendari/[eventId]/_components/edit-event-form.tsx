@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -44,8 +45,9 @@ export default function EditEventForm({
       toast.success("Editat correctament");
       form.reset();
       triggerRef.current?.click();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
     }
   }

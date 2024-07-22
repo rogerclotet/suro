@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
 import { Edit } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -35,8 +36,9 @@ export default function EditProjectButton({ project }: { project: Project }) {
       await editProject(project, data);
       toast.success(`Projecte ${data.name} actualitzat`);
       triggerRef.current?.click();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      captureException(e);
+      console.error(e);
       toast.error(
         "No s'ha pogut editar el projecte, torna-ho a provar més tard",
       );
