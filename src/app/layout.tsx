@@ -13,6 +13,7 @@ import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
 import Drawer from "./_components/navigation/drawer/drawer";
 import ProjectsLoader from "./_components/projects-loader";
+import UserIdentifer from "./_components/user-identifyer";
 import { uploadFileRouter } from "./api/uploadthing/core";
 import { CSPostHogProvider } from "./providers";
 
@@ -49,6 +50,7 @@ export default async function RootLayout({
             routerConfig={extractRouterConfig(uploadFileRouter)}
           />
           <SessionProvider session={session}>
+            <UserIdentifer />
             <ReactQueryProvider>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                 <TooltipProvider>
