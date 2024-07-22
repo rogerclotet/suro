@@ -2,6 +2,7 @@
 
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Check, Loader2 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -82,9 +84,27 @@ export default function NewListItem({ list }: { list: List }) {
             name="name"
             render={({ field }) => (
               <FormItem className="flex-grow">
-                <FormControl>
-                  <Input placeholder="Nou element" {...field} />
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <FormControl>
+                    <Input
+                      placeholder="Nou element"
+                      disabled={form.formState.isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={form.formState.isSubmitting}
+                    className={form.formState.isDirty ? "" : "hidden"}
+                  >
+                    {form.formState.isSubmitting ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <Check />
+                    )}
+                  </Button>
+                </div>
               </FormItem>
             )}
           />
@@ -97,6 +117,7 @@ export default function NewListItem({ list }: { list: List }) {
                 <Select
                   value={field.value}
                   onValueChange={handleCategoryChange}
+                  disabled={form.formState.isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger className="w-40">
