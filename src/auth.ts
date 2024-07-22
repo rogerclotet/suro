@@ -1,5 +1,6 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth";
+import posthog from "posthog-js";
 import authConfig from "./auth.config";
 import { db } from "./server/db";
 import {
@@ -36,6 +37,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         projectId: result[0]!.id,
         userId: user.id!,
       });
+    },
+    signOut: () => {
+      posthog.reset();
     },
   },
   ...authConfig,
