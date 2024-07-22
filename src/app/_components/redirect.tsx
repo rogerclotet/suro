@@ -13,7 +13,7 @@ export default function Redirect({ project }: { project?: Project }) {
     if (project) {
       selectProject(project);
     } else if (!selectedProject && projects && projects.length > 0) {
-      selectProject(projects[0]!);
+      selectProject(undefined);
     }
   }, [project, projects, selectedProject, selectProject]);
 

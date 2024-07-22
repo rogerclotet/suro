@@ -9,7 +9,7 @@ interface ProjectState {
   project: Project | null;
   projectId: string | null;
   setProjects: (projects: Project[]) => void;
-  selectProject: (project: Project) => void;
+  selectProject: (project: Project | undefined) => void;
   selectProjectId: (projectId: string) => void;
   addCategory: (category: Project["categories"][number]) => void;
 }
@@ -45,6 +45,7 @@ export function useProjects() {
   const projects = useProjectsStore((state) => state.projects);
   const project = useProjectsStore((state) => state.project);
   const selectProjectInStore = useProjectsStore((state) => state.selectProject);
+  const projectId = useProjectsStore((state) => state.projectId);
   const selectProjectId = useProjectsStore((state) => state.selectProjectId);
   const addCategory = useProjectsStore((state) => state.addCategory);
 
@@ -56,7 +57,17 @@ export function useProjects() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function selectProject(project: Project) {
+  function selectProject(project: Project | undefined) {
+    if (project === undefined) {
+      if (projectId) {
+        const projectToSelect = projects.find((p) => p.id === projectId);
+        selectProjectInStore(projectToSelect);
+      } else {
+        selectProjectInStore(projects[0]);
+      }
+      return;
+    }
+
     localStorage.setItem("selectedProjectId", project.id);
     selectProjectInStore(project);
     selectProjectId(project.id);
