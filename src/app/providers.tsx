@@ -13,5 +13,9 @@ if (typeof window !== "undefined") {
 }
 
 export function CSPostHogProvider({ children }: { children: React.ReactNode }) {
+  if (process.env.NODE_ENV === "development") {
+    return <>{children}</>;
+  }
+
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
