@@ -110,56 +110,59 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="templates"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel>Incloure plantilles</FormLabel>
-                    <FormDescription>
-                      {
-                        "S'inclouran els elements de les plantilles seleccionades a la nova llista"
-                      }
-                    </FormDescription>
-                  </div>
-                  {templates.map((template) => (
-                    <FormField
-                      key={template.id}
-                      control={form.control}
-                      name="templates"
-                      render={({ field }) => (
-                        <FormItem key={template.id}>
-                          <div className="flex flex-row items-center gap-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(template.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([
-                                        ...field.value,
-                                        template.id,
-                                      ])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== template.id,
-                                        ),
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {template.name} ({template.items.length} elements)
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {templates.length > 0 && (
+              <FormField
+                control={form.control}
+                name="templates"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel>Incloure plantilles</FormLabel>
+                      <FormDescription>
+                        {
+                          "S'inclouran els elements de les plantilles seleccionades a la nova llista"
+                        }
+                      </FormDescription>
+                    </div>
+                    {templates.map((template) => (
+                      <FormField
+                        key={template.id}
+                        control={form.control}
+                        name="templates"
+                        render={({ field }) => (
+                          <FormItem key={template.id}>
+                            <div className="flex flex-row items-center gap-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(template.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...field.value,
+                                          template.id,
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== template.id,
+                                          ),
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {template.name} ({template.items.length}{" "}
+                                elements)
+                              </FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <Button
               disabled={form.formState.isSubmitting}
