@@ -2,6 +2,7 @@
 
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Check, Loader2 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -48,7 +50,8 @@ export default function NewTemplateItem({ template }: { template: Template }) {
 
     try {
       await createTemplateItem(template, data);
-      form.reset({ name: "" });
+
+      form.reset({ name: "", category: data.category ?? "" });
     } catch (e) {
       console.error(e);
       toast.error("No s'ha pogut crear l'element, torna-ho a provar més tard");
@@ -82,11 +85,29 @@ export default function NewTemplateItem({ template }: { template: Template }) {
             render={({ field }) => (
               <FormItem className="flex-grow">
                 <FormControl>
-                  <Input placeholder="Nou element" {...field} />
+                  <Input
+                    placeholder="Nou element"
+                    disabled={form.formState.isSubmitting}
+                    {...field}
+                  />
                 </FormControl>
               </FormItem>
             )}
           />
+
+          {form.formState.isDirty && (
+            <Button
+              size="icon"
+              variant="ghost"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Check />
+              )}
+            </Button>
+          )}
 
           <FormField
             control={form.control}
@@ -96,6 +117,7 @@ export default function NewTemplateItem({ template }: { template: Template }) {
                 <Select
                   value={field.value}
                   onValueChange={handleCategoryChange}
+                  disabled={form.formState.isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger className="w-40">

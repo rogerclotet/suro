@@ -158,18 +158,19 @@ export default function ListItem(props: {
             )}
           />
 
-          <Button
-            size="icon"
-            variant="ghost"
-            disabled={form.formState.isSubmitting}
-            className={form.formState.isDirty ? "" : "hidden"}
-          >
-            {form.formState.isSubmitting ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Check />
-            )}
-          </Button>
+          {form.formState.isDirty && (
+            <Button
+              size="icon"
+              variant="ghost"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Check />
+              )}
+            </Button>
+          )}
 
           <FormField
             control={form.control}

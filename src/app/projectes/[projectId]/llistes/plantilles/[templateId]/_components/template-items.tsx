@@ -1,6 +1,6 @@
 "use client";
 
-import type { Template } from "@/app/_data/list";
+import { type Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
@@ -12,6 +12,7 @@ type Item = Template["items"][number];
 type ItemWithIndex = Item & { index: number };
 
 export default function TemplateItems({ template }: { template: Template }) {
+  const [items, setItems] = React.useState<Template["items"]>(template.items);
   const [itemsByCategory, setItemsByCategory] =
     React.useState<ReturnType<typeof groupItemsByCategory>>();
   const [animationParent] = useAutoAnimate();
@@ -48,8 +49,8 @@ export default function TemplateItems({ template }: { template: Template }) {
     if (!project) {
       return;
     }
-    setItemsByCategory(groupItemsByCategory(template.items));
-  }, [template.items, groupItemsByCategory, project]);
+    setItemsByCategory(groupItemsByCategory(items));
+  }, [items, groupItemsByCategory, project]);
 
   function sorted(items: ItemWithIndex[]) {
     return [...items].sort((a, b) => a.name.localeCompare(b.name));
@@ -67,6 +68,8 @@ export default function TemplateItems({ template }: { template: Template }) {
     } else {
       newItems[index] = { name: newName, category: newCategory };
     }
+
+    setItems(newItems);
 
     await updateTemplateItems(
       template,

@@ -2,6 +2,7 @@
 
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,7 +18,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Tag } from "lucide-react";
+import { Check, Loader2, Tag } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ export default function TemplateItem({
   onChange,
 }: {
   item: Template["items"][number];
-  onChange: (name: string, category: string | null) => void;
+  onChange: (name: string, category: string | null) => Promise<void>;
 }) {
   const form = useForm({
     defaultValues: {
@@ -45,7 +46,9 @@ export default function TemplateItem({
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
-      onChange(data.name, data.category);
+      await onChange(data.name, data.category);
+
+      form.reset({ name: data.name, category: data.category });
     } catch (e) {
       console.error(e);
       toast.error("No s'ha pogut crear l'element, torna-ho a provar més tard");
@@ -94,6 +97,7 @@ export default function TemplateItem({
                   <Input
                     {...field}
                     onBlur={(e) => handleNameBlur(e)}
+                    disabled={form.formState.isSubmitting}
                     className="border-none"
                   />
                 </FormControl>
@@ -101,6 +105,21 @@ export default function TemplateItem({
               </FormItem>
             )}
           />
+
+          {form.formState.isDirty && (
+            <Button
+              size="icon"
+              variant="ghost"
+              disabled={form.formState.isSubmitting}
+              className={form.formState.isDirty ? "" : "hidden"}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Check />
+              )}
+            </Button>
+          )}
 
           <FormField
             control={form.control}
@@ -111,6 +130,7 @@ export default function TemplateItem({
                   <Select
                     value={value ?? ""}
                     onValueChange={(v) => handleCategoryChange(v, onChange)}
+                    disabled={form.formState.isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger>
