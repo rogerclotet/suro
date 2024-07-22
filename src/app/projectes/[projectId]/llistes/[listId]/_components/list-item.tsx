@@ -2,6 +2,7 @@
 
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Tag } from "lucide-react";
+import { Check, Loader2, Tag } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -37,8 +38,8 @@ export default function ListItem(props: {
     name: string,
     completed: boolean,
     categoryId: string | null,
-  ) => void;
-  onDelete?: () => void;
+  ) => Promise<void>;
+  onDelete?: () => Promise<void>;
 }) {
   const form = useForm({
     defaultValues: {
@@ -52,20 +53,26 @@ export default function ListItem(props: {
   const { project } = useProjects();
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  function onSubmit(data: v.InferInput<typeof listItemSchema>) {
+  async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     try {
       const parsed = v.parse(listItemSchema, data);
 
       if (parsed.name === "") {
-        props.onDelete?.();
+        await props.onDelete?.();
         return;
       }
 
-      props.onChange(
+      await props.onChange(
         parsed.name,
         parsed.completed,
         parsed.categoryId === "" ? null : parsed.categoryId ?? null,
       );
+
+      form.reset({
+        name: parsed.name,
+        completed: parsed.completed,
+        categoryId: parsed.categoryId,
+      });
     } catch (e) {
       console.error(e);
       toast.error(
@@ -119,6 +126,7 @@ export default function ListItem(props: {
                       field.onChange(checked);
                       formRef.current?.requestSubmit();
                     }}
+                    disabled={form.formState.isSubmitting}
                     className="h-5 w-5 transition-all"
                   />
                 </FormControl>
@@ -140,13 +148,28 @@ export default function ListItem(props: {
                       "border-none",
                       form.getValues().completed && "line-through",
                     )}
-                    disabled={form.getValues().completed}
+                    disabled={
+                      form.formState.isSubmitting || form.getValues().completed
+                    }
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <Button
+            size="icon"
+            variant="ghost"
+            disabled={form.formState.isSubmitting}
+            className={form.formState.isDirty ? "" : "hidden"}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Check />
+            )}
+          </Button>
 
           <FormField
             control={form.control}
@@ -157,6 +180,7 @@ export default function ListItem(props: {
                   <Select
                     defaultValue={value ?? ""}
                     onValueChange={(v) => handleCategoryChange(v, onChange)}
+                    disabled={form.formState.isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger>

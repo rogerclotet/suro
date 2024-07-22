@@ -84,30 +84,29 @@ export default function NewListItem({ list }: { list: List }) {
             name="name"
             render={({ field }) => (
               <FormItem className="flex-grow">
-                <div className="flex items-center gap-2">
-                  <FormControl>
-                    <Input
-                      placeholder="Nou element"
-                      disabled={form.formState.isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <Button
-                    size="icon"
-                    variant="ghost"
+                <FormControl>
+                  <Input
+                    placeholder="Nou element"
                     disabled={form.formState.isSubmitting}
-                    className={form.formState.isDirty ? "" : "hidden"}
-                  >
-                    {form.formState.isSubmitting ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      <Check />
-                    )}
-                  </Button>
-                </div>
+                    {...field}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />
+
+          <Button
+            size="icon"
+            variant="ghost"
+            disabled={form.formState.isSubmitting}
+            className={form.formState.isDirty ? "" : "hidden"}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Check />
+            )}
+          </Button>
 
           <FormField
             control={form.control}
