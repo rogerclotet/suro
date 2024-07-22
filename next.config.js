@@ -26,6 +26,7 @@ const coreConfig = {
       },
     ];
   },
+  // This is required to support PostHog trailing slash API request
   skipTrailingSlashRedirect: true,
 };
 

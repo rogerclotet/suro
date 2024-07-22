@@ -37,18 +37,18 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${GeistSans.variable}`}
     >
-      <body>
-        <NextSSRPlugin
-          /**
-           * The `extractRouterConfig` will extract **only** the route configs
-           * from the router to prevent additional information from being
-           * leaked to the client. The data passed to the client is the same
-           * as if you were to fetch `/api/uploadthing` directly.
-           */
-          routerConfig={extractRouterConfig(uploadFileRouter)}
-        />
-        <SessionProvider session={session}>
-          <CSPostHogProvider>
+      <CSPostHogProvider>
+        <body>
+          <NextSSRPlugin
+            /**
+             * The `extractRouterConfig` will extract **only** the route configs
+             * from the router to prevent additional information from being
+             * leaked to the client. The data passed to the client is the same
+             * as if you were to fetch `/api/uploadthing` directly.
+             */
+            routerConfig={extractRouterConfig(uploadFileRouter)}
+          />
+          <SessionProvider session={session}>
             <ReactQueryProvider>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                 <TooltipProvider>
@@ -67,9 +67,9 @@ export default async function RootLayout({
                 </TooltipProvider>
               </ThemeProvider>
             </ReactQueryProvider>
-          </CSPostHogProvider>
-        </SessionProvider>
-      </body>
+          </SessionProvider>
+        </body>
+      </CSPostHogProvider>
     </html>
   );
 }
