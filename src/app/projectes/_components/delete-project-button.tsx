@@ -32,7 +32,7 @@ export default function DeleteProjectButton({
       const firstNonDeletedProject = projects.find(
         (project) => project.id !== projectId,
       );
-      selectProject(firstNonDeletedProject!);
+      selectProject(firstNonDeletedProject);
       toast.success(`Projecte ${projectToDelete.name} eliminat`);
     } catch (e) {
       captureException(e);
