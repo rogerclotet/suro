@@ -59,12 +59,15 @@ export function useProjects() {
 
   function selectProject(project: Project | undefined) {
     if (project === undefined) {
+      let projectToSelect = projects[0];
       if (projectId) {
-        const projectToSelect = projects.find((p) => p.id === projectId);
-        selectProjectInStore(projectToSelect);
-      } else {
-        selectProjectInStore(projects[0]);
+        const p = projects.find((p) => p.id === projectId);
+        if (p) {
+          projectToSelect = p;
+        }
       }
+
+      selectProjectInStore(projectToSelect);
       return;
     }
 
