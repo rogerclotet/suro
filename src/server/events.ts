@@ -44,9 +44,7 @@ export async function getEvent(projectId: string, eventId: string) {
 
 export async function getEvents(projectId: string, from: Date, to: Date) {
   const session = await auth();
-  if (!session) {
-    return [];
-  }
+  assert(session, "Unauthenticated user");
 
   try {
     const results = await db.query.events.findMany({
@@ -86,4 +84,15 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
     console.error(e);
     return [];
   }
+}
+
+export async function getEventsToExport(projectId: string) {
+  const results = await db.query.events.findMany({
+    where: eq(events.projectId, projectId),
+    with: {
+      createdBy: true,
+    },
+  });
+
+  return results;
 }

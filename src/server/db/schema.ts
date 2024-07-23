@@ -181,6 +181,7 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
     relationName: "project",
   }),
   files: many(files),
+  createdBy: one(users, { fields: [events.createdBy], references: [users.id] }),
 }));
 
 export const files = createTable("file", {
