@@ -35,20 +35,16 @@ export async function GET(
     events.map((e) => ({
       title: e.name,
       description: e.description ?? undefined,
-      start: Math.ceil(e.startAt.getTime() / 1000),
-      end: Math.ceil(e.endAt.getTime() / 1000),
+      start: e.startAt.getTime(),
+      end: e.endAt.getTime(),
       url: `https://familia.clotet.dev/projectes/${projectId}/calendari/${e.id}`,
       organizer: {
         name: e.createdBy.name ?? undefined,
         email: e.createdBy.email,
       },
       attendees: attendees,
-      created: e.createdAt
-        ? Math.ceil(e.createdAt.getTime() / 1000)
-        : undefined,
-      lastModified: e.updatedAt
-        ? Math.ceil(e.updatedAt.getTime() / 1000)
-        : undefined,
+      created: e.createdAt ? e.createdAt.getTime() : undefined,
+      lastModified: e.updatedAt ? e.updatedAt.getTime() : undefined,
       calName: project.name,
     })),
   );
