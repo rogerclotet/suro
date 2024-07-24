@@ -8,16 +8,12 @@ import { useIsClient } from "@uidotdev/usehooks";
 import React from "react";
 
 type ClientOnlyProps = {
-  fallback?: React.ReactNode;
   children: React.ReactNode;
 };
 
-export const ClientOnly: React.FC<ClientOnlyProps> = ({
-  children,
-  fallback,
-}) => {
+export const ClientOnly: React.FC<ClientOnlyProps> = ({ children }) => {
   const isClient = useIsClient();
 
   // Render children if on client side, otherwise return null
-  return isClient ? <>{children}</> : (fallback ?? null);
+  return isClient ? <>{children}</> : null;
 };
