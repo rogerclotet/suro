@@ -10,7 +10,7 @@ import * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { eq } from "drizzle-orm";
-import { editEventSchema } from "../_components/event/data";
+import { eventSchema } from "../_components/event/data";
 
 export async function createLinkedList(event: Event) {
   const session = await auth();
@@ -87,7 +87,7 @@ export async function unlinkEventList(event: Event, list: List) {
 
 export async function editEvent(
   event: Event,
-  data: v.InferInput<typeof editEventSchema>,
+  data: v.InferInput<typeof eventSchema>,
   project: Project,
 ) {
   const session = await auth();
@@ -99,7 +99,16 @@ export async function editEvent(
     throw new Error("Unauthorized");
   }
 
-  const parsedData = v.parse(editEventSchema, data);
+  const parsedData = v.parse(eventSchema, data);
+  if (
+    parsedData.dates.from === undefined ||
+    parsedData.dates.to === undefined
+  ) {
+    throw new Error("Missing dates");
+  }
+
+  const startAt = new Date(parsedData.dates.from);
+  const endAt = new Date(parsedData.dates.to);
 
   try {
     await db
@@ -107,6 +116,8 @@ export async function editEvent(
       .set({
         name: parsedData.name,
         description: parsedData.description,
+        startAt,
+        endAt,
         updatedBy: session.user.id,
       })
       .where(eq(events.id, event.id));

@@ -23,6 +23,7 @@ import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
+import { getTimeString } from "../../get-time-string";
 import { createEvent } from "./actions";
 import { eventSchema } from "./data";
 
@@ -236,14 +237,4 @@ export default function CreateEventButton({
       </ModalForm>
     </>
   );
-}
-
-function getTimeString(date: Date | undefined) {
-  if (!date) {
-    return "";
-  }
-
-  const hours = `${date.getHours()}`.padStart(2, "0");
-  const minutes = `${date.getMinutes()}`.padStart(2, "0");
-  return `${hours}:${minutes}`;
 }
