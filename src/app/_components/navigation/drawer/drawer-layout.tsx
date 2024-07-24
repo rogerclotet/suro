@@ -27,7 +27,7 @@ export default function DrawerLayout({
 
   function handleSelectProject(projectId: string) {
     setIsOpen(false);
-    router.push(`/projectes/${projectId}/llistes`);
+    router.push(`/grups/${projectId}/llistes`);
   }
 
   return (
@@ -61,8 +61,8 @@ export default function DrawerLayout({
                     asChild
                     className="w-full justify-start"
                   >
-                    <Link href="/projectes" onClick={() => setIsOpen(false)}>
-                      Gestionar projectes
+                    <Link href="/grups" onClick={() => setIsOpen(false)}>
+                      Gestionar grups
                     </Link>
                   </Button>
                 </li>

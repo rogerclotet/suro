@@ -37,7 +37,7 @@ export async function GET(
       description: e.description ?? undefined,
       start: e.startAt.getTime(),
       end: e.endAt.getTime(),
-      url: `https://familia.clotet.dev/projectes/${projectId}/calendari/${e.id}`,
+      url: `https://familia.clotet.dev/grups/${projectId}/calendari/${e.id}`,
       organizer: {
         name: e.createdBy.name ?? undefined,
         email: e.createdBy.email,

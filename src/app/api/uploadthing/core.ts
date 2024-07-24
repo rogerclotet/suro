@@ -50,11 +50,11 @@ export const uploadFileRouter = {
         eventId: metadata.eventId,
       });
 
-      revalidatePath(`/projectes/${metadata.projectId}/fitxers`);
+      revalidatePath(`/grups/${metadata.projectId}/fitxers`);
 
       if (metadata.eventId) {
         revalidatePath(
-          `/projectes/${metadata.projectId}/calendari/${metadata.eventId}`,
+          `/grups/${metadata.projectId}/calendari/${metadata.eventId}`,
         );
       }
 

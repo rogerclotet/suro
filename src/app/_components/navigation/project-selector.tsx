@@ -35,9 +35,9 @@ export default function ProjectSelector({
           variant="ghost"
           className="flex w-full items-center justify-between"
         >
-          {project?.name ?? "Seleccionar projecte"}
+          {project?.name ?? "Seleccionar grup"}
           <ChevronDown className="h-4 w-4" />
-          <span className="sr-only">Seleccionar projecte</span>
+          <span className="sr-only">Seleccionar grup</span>
         </Button>
       </CollapsibleTrigger>
 

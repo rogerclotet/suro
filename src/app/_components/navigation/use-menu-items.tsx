@@ -49,7 +49,7 @@ export function useMenuItems(): MenuItem[] {
 
     return itemParts.map(({ name, pathPart, icon, disabled }) => ({
       name,
-      path: `/projectes/${selectedProject.id}/${pathPart}`,
+      path: `/grups/${selectedProject.id}/${pathPart}`,
       icon,
       disabled,
     }));

@@ -23,5 +23,5 @@ export default function Redirect({ project }: { project?: Project }) {
     return <LoadingPage>Carregant...</LoadingPage>;
   }
 
-  return redirect(`/projectes/${projectId}/llistes`);
+  return redirect(`/grups/${projectId}/llistes`);
 }
