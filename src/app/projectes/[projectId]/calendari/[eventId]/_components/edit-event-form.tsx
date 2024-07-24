@@ -43,7 +43,7 @@ export default function EditEventForm({
     try {
       await editEvent(event, data, project!);
       toast.success("Editat correctament");
-      form.reset({ name: event.name, description: event.description ?? "" });
+      form.reset({ name: data.name, description: data.description ?? "" });
       triggerRef.current?.click();
     } catch (e) {
       captureException(e);
