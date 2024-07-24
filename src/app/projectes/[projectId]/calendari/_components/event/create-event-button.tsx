@@ -30,7 +30,7 @@ export default function CreateEventButton({
   defaultDate,
   onCreate,
 }: {
-  defaultDate: Date | undefined;
+  defaultDate: Date;
   onCreate: (from: Date | undefined, to: Date | undefined) => void;
 }) {
   const { project } = useProjects();
@@ -45,9 +45,12 @@ export default function CreateEventButton({
   const triggerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const defaultTime = defaultDate?.getTime();
-    const defaultStartAt = defaultTime ? new Date(defaultTime) : new Date();
-    const defaultEndAt = defaultTime ? new Date(defaultTime) : new Date();
+    const defaultTime = defaultDate.getTime();
+    const defaultStartAt = new Date(defaultTime);
+    defaultStartAt.setHours(0, 0, 0, 0);
+    const defaultEndAt = new Date(defaultTime);
+    defaultEndAt.setHours(23, 59, 59, 999);
+
     defaultStartAt.setDate(defaultStartAt.getDate());
     defaultEndAt.setDate(defaultEndAt.getDate());
 
