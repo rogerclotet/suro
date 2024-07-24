@@ -25,17 +25,8 @@ export default function Calendar() {
   const searchParams = useSearchParams();
   const day = searchParams.get("d");
 
-  const [date, setDate] = React.useState<Date | undefined>(() => {
-    const today = day ? new Date(day) : new Date();
-    today.setHours(0, 0, 0, 0);
-    return today;
-  });
-  const [monthStart, setMonthStart] = React.useState<Date>(() => {
-    const date = day ? new Date(day) : new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(1);
-    return date;
-  });
+  const [date, setDate] = React.useState<Date>();
+  const [monthStart, setMonthStart] = React.useState<Date>();
   const { project } = useProjects();
   const { data: events, isLoading } = useQuery(
     eventsQueryOptions(monthStart, project?.id),
@@ -46,6 +37,17 @@ export default function Calendar() {
   const currentEvents = events?.filter((event) =>
     isCurrentDayEvent(event, date),
   );
+
+  React.useEffect(() => {
+    const today = day ? new Date(day) : new Date();
+    today.setHours(0, 0, 0, 0);
+    setDate(today);
+
+    const date = day ? new Date(day) : new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(1);
+    setMonthStart(date);
+  }, [day]);
 
   function Events() {
     if (isLoading || currentEvents === undefined) {
