@@ -1,12 +1,20 @@
 import type { Event } from "@/app/_data/event";
+import { ClientOnly } from "@/components/client-only";
 
-export default function TimeRemaining({
-  event,
-  className,
-}: {
+type Props = {
   event: Event;
   className?: string;
-}) {
+};
+
+export default function TimeRemaining(props: Props) {
+  return (
+    <ClientOnly>
+      <ClientTimeRemaining {...props} />
+    </ClientOnly>
+  );
+}
+
+function ClientTimeRemaining({ event, className }: Props) {
   const now = new Date();
   const timeRemaining = event.startAt.getTime() - now.getTime();
 

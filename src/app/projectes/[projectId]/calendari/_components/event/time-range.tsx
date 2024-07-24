@@ -1,14 +1,24 @@
-"use client";
+import { ClientOnly } from "@/components/client-only";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
-export default function TimeRange({
-  startAt,
-  endAt,
-  className,
-}: {
+type Props = {
   startAt: Date;
   endAt: Date;
   className?: string;
-}) {
+};
+
+export default function TimeRange(props: Props) {
+  return (
+    <ClientOnly
+      fallback={<Skeleton className={cn("mt-1 h-4 w-20", props.className)} />}
+    >
+      <ClientTimeRange {...props} />
+    </ClientOnly>
+  );
+}
+
+function ClientTimeRange({ startAt, endAt, className }: Props) {
   if (isDayStart(startAt)) {
     if (isDayEnd(endAt)) {
       if (isSameDay(endAt, startAt)) {

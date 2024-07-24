@@ -51,13 +51,13 @@ export default async function EventPage({
           </div>
         </div>
 
-        <p className="flex flex-wrap text-sm text-muted-foreground">
+        <div className="flex flex-wrap text-sm text-muted-foreground">
           <TimeRemaining
             event={event}
             className="mr-2 text-foreground opacity-70"
           />
           <TimeRange startAt={event.startAt} endAt={event.endAt} />
-        </p>
+        </div>
       </div>
 
       {event.description && (
