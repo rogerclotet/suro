@@ -1,7 +1,5 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import React from "react";
 
 export default function TimeRange({
@@ -75,7 +73,7 @@ export default function TimeRange({
     );
   }, [startAt, endAt, className]);
 
-  return range ?? <Skeleton className={cn("mt-1 h-4 w-20", className)} />;
+  return range;
 }
 
 function isDayStart(date: Date) {
