@@ -119,6 +119,7 @@ export default function CreateEventButton({
     }
 
     form.setValue("allDay", checked);
+    form.setValue("dates", form.getValues("dates"));
   }
 
   return (

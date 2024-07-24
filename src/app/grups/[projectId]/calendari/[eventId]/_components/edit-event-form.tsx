@@ -114,6 +114,7 @@ export default function EditEventForm({
     }
 
     form.setValue("allDay", checked);
+    form.setValue("dates", form.getValues("dates"));
   }
 
   return (
