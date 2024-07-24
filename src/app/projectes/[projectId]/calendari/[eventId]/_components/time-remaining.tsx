@@ -1,4 +1,7 @@
+"use client";
+
 import type { Event } from "@/app/_data/event";
+import React from "react";
 
 export default function TimeRemaining({
   event,
@@ -7,41 +10,55 @@ export default function TimeRemaining({
   event: Event;
   className?: string;
 }) {
-  const now = new Date();
-  const timeRemaining = event.startAt.getTime() - now.getTime();
+  const [timeRemaining, setTimeRemaining] = React.useState<React.ReactNode>();
 
-  if (timeRemaining < 0) {
-    return null;
-  }
+  React.useEffect(() => {
+    const now = new Date();
+    const remainingMs = event.startAt.getTime() - now.getTime();
 
-  const oneHour = 1000 * 60 * 60;
-  const oneDay = oneHour * 24;
-  const days = Math.floor(timeRemaining / oneDay);
-  const hours = Math.floor((timeRemaining % oneDay) / oneHour);
+    if (remainingMs < 0) {
+      return void {};
+    }
 
-  if (days > 0) {
-    if (days > 2 || hours === 0) {
-      return <span className={className}>Falten {days} dies</span>;
-    } else {
-      return (
-        <span className={className}>
-          Falten {days} dies i {hours} hores
-        </span>
+    const oneHour = 1000 * 60 * 60;
+    const oneDay = oneHour * 24;
+    const days = Math.floor(remainingMs / oneDay);
+    const hours = Math.floor((remainingMs % oneDay) / oneHour);
+
+    if (days > 0) {
+      if (days > 2 || hours === 0) {
+        setTimeRemaining(<span className={className}>Falten {days} dies</span>);
+        return () => void {};
+      } else {
+        setTimeRemaining(
+          <span className={className}>
+            Falten {days} dies i {hours} hores
+          </span>,
+        );
+        return () => void {};
+      }
+    }
+
+    if (hours > 1) {
+      setTimeRemaining(<span className={className}>Falten {hours} hores</span>);
+      return () => void {};
+    }
+
+    const minutes = Math.floor(remainingMs / (1000 * 60));
+
+    if (hours > 0) {
+      setTimeRemaining(
+        <span className={className}>Falta 1 hora i {minutes} minuts</span>,
+      );
+      return () => void {};
+    }
+
+    if (minutes > 0) {
+      setTimeRemaining(
+        <span className={className}>Falten {minutes} minuts</span>,
       );
     }
-  }
+  }, [className, event.startAt]);
 
-  if (hours > 1) {
-    return <span className={className}>Falten {hours} hores</span>;
-  }
-
-  const minutes = Math.floor(timeRemaining / (1000 * 60));
-
-  if (hours > 0) {
-    return <span className={className}>Falta 1 hora i {minutes} minuts</span>;
-  }
-
-  if (minutes > 0) {
-    return <span className={className}>Falten {minutes} minuts</span>;
-  }
+  return timeRemaining;
 }

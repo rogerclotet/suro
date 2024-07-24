@@ -1,5 +1,9 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import React from "react";
+
 export default function TimeRange({
   startAt,
   endAt,
@@ -9,34 +13,54 @@ export default function TimeRange({
   endAt: Date;
   className?: string;
 }) {
-  if (isDayStart(startAt)) {
-    if (isDayEnd(endAt)) {
-      if (isSameDay(endAt, startAt)) {
-        return (
+  const [range, setRange] = React.useState<React.ReactNode>(null);
+
+  React.useEffect(() => {
+    if (isDayStart(startAt)) {
+      if (isDayEnd(endAt)) {
+        if (isSameDay(endAt, startAt)) {
+          setRange(
+            <span className={className}>
+              {startAt.toLocaleDateString("ca-ES", {
+                dateStyle: "medium",
+              })}
+            </span>,
+          );
+          return () => void {};
+        }
+
+        setRange(
           <span className={className}>
-            {startAt.toLocaleDateString("ca-ES", {
+            {startAt.toLocaleString("ca-ES", {
               dateStyle: "medium",
             })}
-          </span>
+            {" - "}
+            {endAt.toLocaleString("ca-ES", {
+              dateStyle: "medium",
+            })}
+          </span>,
         );
+        return () => void {};
       }
+    }
 
-      return (
+    if (isSameDay(startAt, endAt)) {
+      setRange(
         <span className={className}>
           {startAt.toLocaleString("ca-ES", {
             dateStyle: "medium",
+            timeStyle: "short",
           })}
           {" - "}
           {endAt.toLocaleString("ca-ES", {
-            dateStyle: "medium",
+            timeStyle: "short",
           })}
-        </span>
+        </span>,
       );
+      return () => void {};
     }
-  }
 
-  if (isSameDay(startAt, endAt)) {
-    return (
+    setRange(
       <span className={className}>
         {startAt.toLocaleString("ca-ES", {
           dateStyle: "medium",
@@ -44,25 +68,14 @@ export default function TimeRange({
         })}
         {" - "}
         {endAt.toLocaleString("ca-ES", {
+          dateStyle: "medium",
           timeStyle: "short",
         })}
-      </span>
+      </span>,
     );
-  }
+  }, [startAt, endAt, className]);
 
-  return (
-    <span className={className}>
-      {startAt.toLocaleString("ca-ES", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })}
-      {" - "}
-      {endAt.toLocaleString("ca-ES", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })}
-    </span>
-  );
+  return range ?? <Skeleton className={cn("mt-1 h-4 w-20", className)} />;
 }
 
 function isDayStart(date: Date) {
