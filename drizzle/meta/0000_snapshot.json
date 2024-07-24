@@ -1,7 +1,5 @@
 {
-  "id": "eee57235-8b2d-429f-b40c-1c7503adef7d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "tables": {
     "public.f_account": {
@@ -77,26 +75,34 @@
       },
       "indexes": {
         "account_userId_idx": {
-          "name": "account_userId_idx",
           "columns": [
-            "userId"
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "account_userId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_account_userId_f_user_id_fk": {
           "name": "f_account_userId_f_user_id_fk",
           "tableFrom": "f_account",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -132,28 +138,28 @@
         "f_projectToUser_projectId_f_project_id_fk": {
           "name": "f_projectToUser_projectId_f_project_id_fk",
           "tableFrom": "f_projectToUser",
-          "tableTo": "f_project",
           "columnsFrom": [
             "projectId"
           ],
+          "tableTo": "f_project",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "f_projectToUser_userId_f_user_id_fk": {
           "name": "f_projectToUser_userId_f_user_id_fk",
           "tableFrom": "f_projectToUser",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -222,26 +228,34 @@
       },
       "indexes": {
         "session_userId_idx": {
-          "name": "session_userId_idx",
           "columns": [
-            "userId"
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "session_userId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_session_userId_f_user_id_fk": {
           "name": "f_session_userId_f_user_id_fk",
           "tableFrom": "f_session",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -328,8 +342,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "eee57235-8b2d-429f-b40c-1c7503adef7d",
+  "prevId": "00000000-0000-0000-0000-000000000000"
 }

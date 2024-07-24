@@ -1,7 +1,5 @@
 {
-  "id": "a0a0cfe0-5123-4bb5-915a-3f3b1808f8bf",
-  "prevId": "734193b6-6f60-42d8-8a27-4e82147c8dfc",
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "tables": {
     "public.f_account": {
@@ -77,26 +75,34 @@
       },
       "indexes": {
         "account_userId_idx": {
-          "name": "account_userId_idx",
           "columns": [
-            "userId"
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "account_userId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_account_userId_f_user_id_fk": {
           "name": "f_account_userId_f_user_id_fk",
           "tableFrom": "f_account",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -174,52 +180,60 @@
       },
       "indexes": {
         "listItem_listId_idx": {
-          "name": "listItem_listId_idx",
           "columns": [
-            "listId"
+            {
+              "expression": "listId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "listItem_listId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_listItem_createdBy_f_user_id_fk": {
           "name": "f_listItem_createdBy_f_user_id_fk",
           "tableFrom": "f_listItem",
-          "tableTo": "f_user",
           "columnsFrom": [
             "createdBy"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "f_listItem_updatedBy_f_user_id_fk": {
           "name": "f_listItem_updatedBy_f_user_id_fk",
           "tableFrom": "f_listItem",
-          "tableTo": "f_user",
           "columnsFrom": [
             "updatedBy"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "f_listItem_listId_f_list_id_fk": {
           "name": "f_listItem_listId_f_list_id_fk",
           "tableFrom": "f_listItem",
-          "tableTo": "f_list",
           "columnsFrom": [
             "listId"
           ],
+          "tableTo": "f_list",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -282,52 +296,60 @@
       },
       "indexes": {
         "list_projectId_idx": {
-          "name": "list_projectId_idx",
           "columns": [
-            "projectId"
+            {
+              "expression": "projectId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "list_projectId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_list_createdBy_f_user_id_fk": {
           "name": "f_list_createdBy_f_user_id_fk",
           "tableFrom": "f_list",
-          "tableTo": "f_user",
           "columnsFrom": [
             "createdBy"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "f_list_updatedBy_f_user_id_fk": {
           "name": "f_list_updatedBy_f_user_id_fk",
           "tableFrom": "f_list",
-          "tableTo": "f_user",
           "columnsFrom": [
             "updatedBy"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "f_list_projectId_f_project_id_fk": {
           "name": "f_list_projectId_f_project_id_fk",
           "tableFrom": "f_list",
-          "tableTo": "f_project",
           "columnsFrom": [
             "projectId"
           ],
+          "tableTo": "f_project",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -355,28 +377,28 @@
         "f_projectToUser_projectId_f_project_id_fk": {
           "name": "f_projectToUser_projectId_f_project_id_fk",
           "tableFrom": "f_projectToUser",
-          "tableTo": "f_project",
           "columnsFrom": [
             "projectId"
           ],
+          "tableTo": "f_project",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "f_projectToUser_userId_f_user_id_fk": {
           "name": "f_projectToUser_userId_f_user_id_fk",
           "tableFrom": "f_projectToUser",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -426,15 +448,15 @@
         "f_project_createdBy_f_user_id_fk": {
           "name": "f_project_createdBy_f_user_id_fk",
           "tableFrom": "f_project",
-          "tableTo": "f_user",
           "columnsFrom": [
             "createdBy"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -465,26 +487,34 @@
       },
       "indexes": {
         "session_userId_idx": {
-          "name": "session_userId_idx",
           "columns": [
-            "userId"
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "session_userId_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "f_session_userId_f_user_id_fk": {
           "name": "f_session_userId_f_user_id_fk",
           "tableFrom": "f_session",
-          "tableTo": "f_user",
           "columnsFrom": [
             "userId"
           ],
+          "tableTo": "f_user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -571,8 +601,10 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "a0a0cfe0-5123-4bb5-915a-3f3b1808f8bf",
+  "prevId": "734193b6-6f60-42d8-8a27-4e82147c8dfc"
 }

@@ -12,6 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { getRandomValues } from "node:crypto";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -22,7 +23,10 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const createTable = pgTableCreator((name) => `f_${name}`);
 
 export const templates = createTable("listTemplate", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   items: jsonb("items").notNull(),
@@ -38,7 +42,7 @@ export const templates = createTable("listTemplate", {
     withTimezone: true,
   }).$onUpdate(() => new Date()),
   updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
-  projectId: uuid("projectId")
+  projectId: varchar("projectId")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
 });
@@ -54,7 +58,10 @@ export const templatesRelations = relations(templates, ({ one }) => ({
 export const listItems = createTable(
   "listItem",
   {
-    id: uuid("id").defaultRandom().notNull().primaryKey(),
+    id: varchar("id", { length: 255 })
+      .$defaultFn(randomId)
+      .notNull()
+      .primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     details: text("details"),
     completed: boolean("completed").default(false),
@@ -70,10 +77,10 @@ export const listItems = createTable(
       withTimezone: true,
     }).$onUpdate(() => new Date()),
     updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
-    listId: uuid("listId")
+    listId: varchar("listId")
       .notNull()
       .references(() => lists.id, { onDelete: "cascade" }),
-    categoryId: uuid("categoryId").references(() => categories.id, {
+    categoryId: varchar("categoryId").references(() => categories.id, {
       onDelete: "set null",
     }),
   },
@@ -96,9 +103,12 @@ export const listItemsRelations = relations(listItems, ({ one }) => ({
 }));
 
 export const categories = createTable("category", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  projectId: uuid("projectId")
+  projectId: varchar("projectId")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
 });
@@ -114,7 +124,10 @@ export const categoriesRelations = relations(categories, ({ many, one }) => ({
 export const lists = createTable(
   "list",
   {
-    id: uuid("id").defaultRandom().notNull().primaryKey(),
+    id: varchar("id", { length: 255 })
+      .$defaultFn(randomId)
+      .notNull()
+      .primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     createdAt: timestamp("createdAt", {
       mode: "date",
@@ -129,10 +142,10 @@ export const lists = createTable(
     }).$onUpdate(() => new Date()),
     updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
     description: text("description"),
-    projectId: uuid("projectId")
+    projectId: varchar("projectId")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
-    eventId: uuid("eventId").references(() => events.id, {
+    eventId: varchar("eventId").references(() => events.id, {
       onDelete: "set null",
     }),
   },
@@ -152,7 +165,10 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
 }));
 
 export const events = createTable("event", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   startAt: timestamp("startAt", { mode: "date", withTimezone: true }).notNull(),
@@ -169,7 +185,7 @@ export const events = createTable("event", {
     withTimezone: true,
   }).$onUpdate(() => new Date()),
   updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
-  projectId: uuid("projectId")
+  projectId: varchar("projectId")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
 });
@@ -185,7 +201,10 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
 }));
 
 export const files = createTable("file", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   url: varchar("url", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
@@ -197,10 +216,10 @@ export const files = createTable("file", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  projectId: uuid("projectId")
+  projectId: varchar("projectId")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  eventId: uuid("eventId").references(() => events.id, {
+  eventId: varchar("eventId").references(() => events.id, {
     onDelete: "set null",
   }),
 });
@@ -218,7 +237,10 @@ export const filesRelations = relations(files, ({ one }) => ({
 }));
 
 export const projects = createTable("project", {
-  id: uuid("id").defaultRandom().notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   createdBy: varchar("createdBy", { length: 255 })
     .notNull()
@@ -236,7 +258,7 @@ export const projectsRelations = relations(projects, ({ many }) => ({
 export const projectToUsers = createTable(
   "projectToUser",
   {
-    projectId: uuid("projectId")
+    projectId: varchar("projectId")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
     userId: varchar("userId", { length: 255 })
@@ -340,3 +362,14 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+function dec2hex(dec: number) {
+  return dec.toString(16).padStart(2, "0");
+}
+
+function randomId() {
+  const len = 6;
+  const arr = new Uint8Array(len / 2);
+  getRandomValues(arr);
+  return Array.from(arr, dec2hex).join("");
+}

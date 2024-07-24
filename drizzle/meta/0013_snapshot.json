@@ -1,4 +1,6 @@
 {
+  "id": "122476da-6558-4517-8d11-a14af6aeb615",
+  "prevId": "02b0ee7f-2735-40c3-8cb1-d884d2d7d65d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -75,6 +77,7 @@
       },
       "indexes": {
         "account_userId_idx": {
+          "name": "account_userId_idx",
           "columns": [
             {
               "expression": "userId",
@@ -83,28 +86,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "account_userId_idx",
           "isUnique": false,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
-      "foreignKeys": {
-        "f_account_userId_f_user_id_fk": {
-          "name": "f_account_userId_f_user_id_fk",
-          "tableFrom": "f_account",
-          "columnsFrom": [
-            "userId"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "f_account_provider_providerAccountId_pk": {
           "name": "f_account_provider_providerAccountId_pk",
@@ -122,10 +110,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -135,27 +122,13 @@
         },
         "projectId": {
           "name": "projectId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "f_category_projectId_f_project_id_fk": {
-          "name": "f_category_projectId_f_project_id_fk",
-          "tableFrom": "f_category",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -165,10 +138,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -221,53 +193,78 @@
         },
         "projectId": {
           "name": "projectId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "f_event_createdBy_f_user_id_fk": {
-          "name": "f_event_createdBy_f_user_id_fk",
-          "tableFrom": "f_event",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.f_file": {
+      "name": "f_file",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
         },
-        "f_event_updatedBy_f_user_id_fk": {
-          "name": "f_event_updatedBy_f_user_id_fk",
-          "tableFrom": "f_event",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         },
-        "f_event_projectId_f_project_id_fk": {
-          "name": "f_event_projectId_f_project_id_fk",
-          "tableFrom": "f_event",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "size": {
+          "name": "size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uploadedBy": {
+          "name": "uploadedBy",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -277,10 +274,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -328,19 +324,20 @@
         },
         "listId": {
           "name": "listId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
         "categoryId": {
           "name": "categoryId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
         "listItem_listId_idx": {
+          "name": "listItem_listId_idx",
           "columns": [
             {
               "expression": "listId",
@@ -349,67 +346,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "listItem_listId_idx",
           "isUnique": false,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
-      "foreignKeys": {
-        "f_listItem_createdBy_f_user_id_fk": {
-          "name": "f_listItem_createdBy_f_user_id_fk",
-          "tableFrom": "f_listItem",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_listItem_updatedBy_f_user_id_fk": {
-          "name": "f_listItem_updatedBy_f_user_id_fk",
-          "tableFrom": "f_listItem",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_listItem_listId_f_list_id_fk": {
-          "name": "f_listItem_listId_f_list_id_fk",
-          "tableFrom": "f_listItem",
-          "columnsFrom": [
-            "listId"
-          ],
-          "tableTo": "f_list",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "f_listItem_categoryId_f_category_id_fk": {
-          "name": "f_listItem_categoryId_f_category_id_fk",
-          "tableFrom": "f_listItem",
-          "columnsFrom": [
-            "categoryId"
-          ],
-          "tableTo": "f_category",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "set null"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -419,10 +362,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -463,19 +405,20 @@
         },
         "projectId": {
           "name": "projectId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
         "eventId": {
           "name": "eventId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
         "list_projectId_idx": {
+          "name": "list_projectId_idx",
           "columns": [
             {
               "expression": "projectId",
@@ -484,67 +427,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "list_projectId_idx",
           "isUnique": false,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
-      "foreignKeys": {
-        "f_list_createdBy_f_user_id_fk": {
-          "name": "f_list_createdBy_f_user_id_fk",
-          "tableFrom": "f_list",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_list_updatedBy_f_user_id_fk": {
-          "name": "f_list_updatedBy_f_user_id_fk",
-          "tableFrom": "f_list",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_list_projectId_f_project_id_fk": {
-          "name": "f_list_projectId_f_project_id_fk",
-          "tableFrom": "f_list",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "f_list_eventId_f_event_id_fk": {
-          "name": "f_list_eventId_f_event_id_fk",
-          "tableFrom": "f_list",
-          "columnsFrom": [
-            "eventId"
-          ],
-          "tableTo": "f_event",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "set null"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -554,7 +443,7 @@
       "columns": {
         "projectId": {
           "name": "projectId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -566,34 +455,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "f_projectToUser_projectId_f_project_id_fk": {
-          "name": "f_projectToUser_projectId_f_project_id_fk",
-          "tableFrom": "f_projectToUser",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "f_projectToUser_userId_f_user_id_fk": {
-          "name": "f_projectToUser_userId_f_user_id_fk",
-          "tableFrom": "f_projectToUser",
-          "columnsFrom": [
-            "userId"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "f_projectToUser_projectId_userId_pk": {
           "name": "f_projectToUser_projectId_userId_pk",
@@ -611,10 +473,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -637,21 +498,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "f_project_createdBy_f_user_id_fk": {
-          "name": "f_project_createdBy_f_user_id_fk",
-          "tableFrom": "f_project",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -680,6 +527,7 @@
       },
       "indexes": {
         "session_userId_idx": {
+          "name": "session_userId_idx",
           "columns": [
             {
               "expression": "userId",
@@ -688,28 +536,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "session_userId_idx",
           "isUnique": false,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
-      "foreignKeys": {
-        "f_session_userId_f_user_id_fk": {
-          "name": "f_session_userId_f_user_id_fk",
-          "tableFrom": "f_session",
-          "columnsFrom": [
-            "userId"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -719,10 +552,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -769,53 +601,13 @@
         },
         "projectId": {
           "name": "projectId",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "f_listTemplate_createdBy_f_user_id_fk": {
-          "name": "f_listTemplate_createdBy_f_user_id_fk",
-          "tableFrom": "f_listTemplate",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_listTemplate_updatedBy_f_user_id_fk": {
-          "name": "f_listTemplate_updatedBy_f_user_id_fk",
-          "tableFrom": "f_listTemplate",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "f_listTemplate_projectId_f_project_id_fk": {
-          "name": "f_listTemplate_projectId_f_project_id_fk",
-          "tableFrom": "f_listTemplate",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -899,11 +691,10 @@
   },
   "enums": {},
   "schemas": {},
+  "sequences": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "3262c0df-77f6-4b4b-b8a5-efd5a1bc8355",
-  "prevId": "864f84ee-323f-4d1a-9e67-7a5047b2b117"
+    "tables": {}
+  }
 }
