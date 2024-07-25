@@ -36,15 +36,20 @@ export const templates = createTable("listTemplate", {
   }).default(sql`CURRENT_TIMESTAMP`),
   createdBy: varchar("createdBy", { length: 255 })
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onUpdate: "cascade" }),
   updatedAt: timestamp("updatedAt", {
     mode: "date",
     withTimezone: true,
   }).$onUpdate(() => new Date()),
-  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id, {
+    onUpdate: "cascade",
+  }),
   projectId: varchar("projectId")
     .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
+    .references(() => projects.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
 });
 
 export const templatesRelations = relations(templates, ({ one }) => ({
@@ -70,18 +75,22 @@ export const listItems = createTable(
       withTimezone: true,
     }).default(sql`CURRENT_TIMESTAMP`),
     createdBy: varchar("createdBy", { length: 255 })
-      .references(() => users.id)
+      .references(() => users.id, { onUpdate: "cascade" })
       .notNull(),
     updatedAt: timestamp("updatedAt", {
       mode: "date",
       withTimezone: true,
     }).$onUpdate(() => new Date()),
-    updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+    updatedBy: varchar("updatedBy", { length: 255 }).references(
+      () => users.id,
+      { onUpdate: "cascade" },
+    ),
     listId: varchar("listId")
       .notNull()
-      .references(() => lists.id, { onDelete: "cascade" }),
+      .references(() => lists.id, { onDelete: "cascade", onUpdate: "cascade" }),
     categoryId: varchar("categoryId").references(() => categories.id, {
       onDelete: "set null",
+      onUpdate: "cascade",
     }),
   },
   (li) => ({
@@ -110,7 +119,10 @@ export const categories = createTable("category", {
   name: varchar("name", { length: 255 }).notNull(),
   projectId: varchar("projectId")
     .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
+    .references(() => projects.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
 });
 
 export const categoriesRelations = relations(categories, ({ many, one }) => ({
@@ -134,7 +146,7 @@ export const lists = createTable(
       withTimezone: true,
     }).default(sql`CURRENT_TIMESTAMP`),
     createdBy: varchar("createdBy", { length: 255 })
-      .references(() => users.id)
+      .references(() => users.id, { onUpdate: "cascade" })
       .notNull(),
     updatedAt: timestamp("updatedAt", {
       mode: "date",
@@ -144,9 +156,13 @@ export const lists = createTable(
     description: text("description"),
     projectId: varchar("projectId")
       .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
+      .references(() => projects.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     eventId: varchar("eventId").references(() => events.id, {
       onDelete: "set null",
+      onUpdate: "cascade",
     }),
   },
   (l) => ({
@@ -179,15 +195,20 @@ export const events = createTable("event", {
   }).default(sql`CURRENT_TIMESTAMP`),
   createdBy: varchar("createdBy", { length: 255 })
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onUpdate: "cascade" }),
   updatedAt: timestamp("updatedAt", {
     mode: "date",
     withTimezone: true,
   }).$onUpdate(() => new Date()),
-  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id),
+  updatedBy: varchar("updatedBy", { length: 255 }).references(() => users.id, {
+    onUpdate: "cascade",
+  }),
   projectId: varchar("projectId")
     .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
+    .references(() => projects.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
 });
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
@@ -211,14 +232,17 @@ export const files = createTable("file", {
   size: integer("size").notNull(),
   uploadedBy: varchar("uploadedBy", { length: 255 })
     .notNull()
-    .references(() => users.id, { onDelete: "set null" }),
+    .references(() => users.id, { onDelete: "set null", onUpdate: "cascade" }),
   createdAt: timestamp("createdAt", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   projectId: varchar("projectId")
     .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
+    .references(() => projects.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
   eventId: varchar("eventId").references(() => events.id, {
     onDelete: "set null",
   }),
@@ -244,7 +268,7 @@ export const projects = createTable("project", {
   name: varchar("name", { length: 255 }).notNull(),
   createdBy: varchar("createdBy", { length: 255 })
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onUpdate: "cascade" }),
   inviteToken: uuid("inviteToken").defaultRandom().notNull(),
 });
 
@@ -260,10 +284,13 @@ export const projectToUsers = createTable(
   {
     projectId: varchar("projectId")
       .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
+      .references(() => projects.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     userId: varchar("userId", { length: 255 })
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
   },
   (ptu) => ({
     pk: primaryKey({ columns: [ptu.projectId, ptu.userId] }),
@@ -299,7 +326,7 @@ export const accounts = createTable(
   {
     userId: varchar("userId", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onUpdate: "cascade" }),
     type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
@@ -333,7 +360,7 @@ export const sessions = createTable(
       .primaryKey(),
     userId: varchar("userId", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onUpdate: "cascade" }),
     expires: timestamp("expires", {
       mode: "date",
       withTimezone: true,
