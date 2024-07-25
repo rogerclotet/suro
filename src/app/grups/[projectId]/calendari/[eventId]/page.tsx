@@ -7,7 +7,6 @@ import { getEventList } from "@/server/lists";
 import { Folders, ListTodo } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 import Files from "../../fitxers/_components/files";
 import UploadButton from "../../fitxers/_components/upload-button";
 import CheckList from "../../llistes/[listId]/_components/check-list";
@@ -27,7 +26,6 @@ export default async function EventPage({
 
   const event = await getEvent(projectId, eventId);
   if (event === undefined) {
-    toast.error("No s'ha trobat l'esdeveniment");
     return redirect(`/grups/${projectId}/calendari`);
   }
 

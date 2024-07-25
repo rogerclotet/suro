@@ -16,6 +16,7 @@ import {
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
+import { useLogger } from "next-axiom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -62,6 +63,7 @@ export default function LinkListForm({
     select: (data) => data?.filter((list) => list.eventId === null),
     staleTime: 60 * 1000,
   });
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof linkEventListSchema>) {
     try {
@@ -70,7 +72,11 @@ export default function LinkListForm({
       toast.success("Llista enllaçada correctament");
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error linking event list", {
+        error: e,
+        projectId: event.projectId,
+        eventId: event.id,
+      });
       toast.error(
         "No s'ha pogut enllaçar la llista. Torna-ho a provar més tard",
       );

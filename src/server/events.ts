@@ -1,8 +1,11 @@
 import { auth } from "@/auth";
 import assert from "assert";
 import { and, eq, gte, lte, or } from "drizzle-orm";
+import { Logger } from "next-axiom";
 import { db } from "./db";
 import { events } from "./db/schema";
+
+const log = new Logger();
 
 export async function getEvent(projectId: string, eventId: string) {
   const session = await auth();
@@ -37,7 +40,8 @@ export async function getEvent(projectId: string, eventId: string) {
       files: result.files.map((file) => ({ ...file, project: result.project })),
     };
   } catch (e) {
-    console.error(e);
+    log.error("Error getting event", { error: e, projectId, eventId });
+    await log.flush();
     return undefined;
   }
 }
@@ -81,7 +85,8 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
       })),
     }));
   } catch (e) {
-    console.error(e);
+    log.error("Error getting events", { error: e, projectId });
+    await log.flush();
     return [];
   }
 }

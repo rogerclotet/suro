@@ -18,6 +18,7 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
 import { createLinkedList } from "../actions";
@@ -37,6 +38,7 @@ export default function SettingsMenu({
   const deleteDialogRef = React.useRef<HTMLDivElement>(null);
   const linkListRef = React.useRef<HTMLDivElement>(null);
   const unlinkListRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function handleCreateLinkedList() {
     try {
@@ -44,7 +46,11 @@ export default function SettingsMenu({
       toast.success("Llista creada correctament");
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating event list", {
+        error: e,
+        projectId: event.projectId,
+        eventId: event.id,
+      });
       toast.error("No s'ha pogut crear la llista. Torna-ho a provar més tard");
     }
   }

@@ -20,6 +20,7 @@ import {
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Check, Loader2, Tag } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,9 +29,11 @@ import NewCategoryModal from "../../../[listId]/_components/categories/new-categ
 import { templateItemSchema } from "../../_components/create-template/data";
 
 export default function TemplateItem({
+  template,
   item,
   onChange,
 }: {
+  template: Template;
   item: Template["items"][number];
   onChange: (name: string, category: string | null) => Promise<void>;
 }) {
@@ -44,6 +47,7 @@ export default function TemplateItem({
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -52,7 +56,11 @@ export default function TemplateItem({
       form.reset({ name: data.name, category: data.category });
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error updating template item", {
+        error: e,
+        projectId: project?.id,
+        templateId: template.id,
+      });
       toast.error("No s'ha pogut crear l'element, torna-ho a provar més tard");
       return;
     }

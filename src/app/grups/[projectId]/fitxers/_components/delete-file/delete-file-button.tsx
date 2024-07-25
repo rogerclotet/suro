@@ -4,12 +4,14 @@ import type { File } from "@/app/_data/file";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
 import { deleteFile } from "./actions";
 
 export default function DeleteFileButton({ file }: { file: File }) {
   const triggerRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function handleDelete() {
     try {
@@ -17,7 +19,10 @@ export default function DeleteFileButton({ file }: { file: File }) {
       toast.success(`Fitxer ${file.name} eliminat`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error deleting file", {
+        error: e,
+        projectId: file.project.id,
+      });
       toast.error(
         "No s'ha pogut eliminar el fitxer, torna-ho a provar més tard",
       );

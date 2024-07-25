@@ -21,6 +21,7 @@ import {
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Check, Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -40,6 +41,7 @@ export default function NewListItem({ list }: { list: List }) {
   });
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
@@ -55,7 +57,11 @@ export default function NewListItem({ list }: { list: List }) {
       form.reset();
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating list item", {
+        error: e,
+        projectId: list.projectId,
+        listId: list.id,
+      });
       toast.error("No s'ha pogut crear l'element, torna-ho a provar més tard");
       return;
     }

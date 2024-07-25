@@ -15,6 +15,7 @@ import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import type React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ export default function NewCategoryModal({
     },
     resolver: valibotResolver(categorySchema),
   });
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof categorySchema>) {
     try {
@@ -59,7 +61,10 @@ export default function NewCategoryModal({
       toast.success(`Categoria ${data.name} creada`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating category", {
+        error: e,
+        projectId: project?.id,
+      });
       toast.error(
         "No s'ha pogut crear la categoria, torna-ho a provar més tard",
       );

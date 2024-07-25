@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -34,6 +35,7 @@ export default function EditListForm({
     },
     resolver: valibotResolver(listSchema),
   });
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     try {
@@ -41,7 +43,11 @@ export default function EditListForm({
       toast.success(`Llista ${data.name} actualitzada`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error editing list", {
+        error: e,
+        projectId: list.projectId,
+        listId: list.id,
+      });
       toast.error(
         "No s'ha pogut actualitzar la llista, torna-ho a provar més tard",
       );

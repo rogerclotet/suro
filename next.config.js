@@ -30,9 +30,13 @@ const coreConfig = {
   skipTrailingSlashRedirect: true,
 };
 
+import { withAxiom } from "next-axiom";
+
+const configWithAxiom = withAxiom(coreConfig);
+
 import { withSentryConfig } from "@sentry/nextjs";
 
-const config = withSentryConfig(coreConfig, {
+const config = withSentryConfig(configWithAxiom, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 

@@ -15,6 +15,7 @@ import { getInvitedProject } from "@/server/projects";
 import assert from "assert";
 import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
+import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import { acceptInvite } from "./actions";
 
@@ -29,6 +30,8 @@ export default async function InvitePage({
 
   const session = await auth();
   assert(session, "Unauthenticated user");
+
+  const log = new Logger();
 
   const project = await getInvitedProject(projectId);
 
@@ -68,7 +71,8 @@ export default async function InvitePage({
                 await acceptInvite(projectId, inviteToken);
                 revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
               } catch (e) {
-                console.error(e);
+                log.error("Error accepting invite", { error: e, projectId });
+                await log.flush();
               }
             }}
           >

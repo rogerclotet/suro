@@ -1,2 +1,4 @@
 import { handlers } from "@/auth";
-export const { GET, POST } = handlers;
+import { withAxiom } from "next-axiom";
+
+export const { GET, POST } = withAxiom(handlers);

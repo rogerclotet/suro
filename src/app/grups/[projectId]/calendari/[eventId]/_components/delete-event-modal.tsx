@@ -3,6 +3,7 @@
 import type { Event } from "@/app/_data/event";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export default function DeleteEventModal({
   triggerRef: React.RefObject<HTMLDivElement>;
 }) {
   const router = useRouter();
+  const log = useLogger();
 
   async function handleDelete() {
     try {
@@ -24,7 +26,11 @@ export default function DeleteEventModal({
       toast.success(`Esdeveniment ${event.name} eliminat`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error deleting event", {
+        error: e,
+        projectId: event.projectId,
+        eventId: event.id,
+      });
       toast.error(
         "No s'ha pogut eliminar la plantilla, torna-ho a provar més tard",
       );

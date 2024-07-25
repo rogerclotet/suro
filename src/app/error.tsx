@@ -1,26 +1,34 @@
 "use client";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useLogger } from "next-axiom";
 import { LogLevel } from "next-axiom/dist/logger";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NotFound() {
+export default function ErrorPage({
+  error,
+}: {
+  error: Error & { digest?: string };
+}) {
   const pathname = usePathname();
   const log = useLogger({ source: "error.tsx" });
+  const status = error.message == "Invalid URL" ? 404 : 500;
 
   log.logHttpRequest(
     LogLevel.error,
-    "Not found",
+    error.message,
     {
       host: window.location.href,
       path: pathname,
       statusCode: status,
     },
-    {},
+    {
+      error: error.name,
+      cause: error.cause,
+      stack: error.stack,
+      digest: error.digest,
+    },
   );
 
   return (
@@ -29,15 +37,8 @@ export default function NotFound() {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
-          <p>{"No s'ha trobat la pàgina."}</p>
-          <div className="mt-4">
-            <Link href="/">
-              <Button variant="neutral" className="gap-2">
-                <ArrowLeft />
-                {"Tornar a l'inici"}
-              </Button>
-            </Link>
-          </div>
+          <p>{"S'ha produït un error:"}</p>
+          <p className="italic">{error.message}</p>
         </AlertDescription>
       </Alert>
     </div>

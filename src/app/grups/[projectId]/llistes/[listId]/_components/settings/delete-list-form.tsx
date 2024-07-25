@@ -3,6 +3,7 @@
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export default function DeleteListModal({
   triggerRef: React.RefObject<HTMLDivElement>;
 }) {
   const router = useRouter();
+  const log = useLogger();
 
   async function handleDelete() {
     try {
@@ -25,7 +27,11 @@ export default function DeleteListModal({
       toast.success(`Llista ${list.name} eliminada`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error deleting list", {
+        error: e,
+        projectId: list.projectId,
+        listId: list.id,
+      });
       toast.error(
         "No s'ha pogut eliminar la llista, torna-ho a provar més tard",
       );

@@ -14,6 +14,7 @@ import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -37,6 +38,7 @@ export default function CreateTemplateButton({
   });
   const router = useRouter();
   const triggerRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
@@ -45,7 +47,7 @@ export default function CreateTemplateButton({
       router.push(`/grups/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating template", { error: e, projectId });
       toast.error(
         "No s'ha pogut crear la plantilla, torna-ho a provar més tard",
       );

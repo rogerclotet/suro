@@ -15,6 +15,7 @@ import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Edit } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ export default function EditFileButton({ file }: { file: File }) {
     resolver: valibotResolver(editFileSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof editFileSchema>) {
     try {
@@ -38,7 +40,7 @@ export default function EditFileButton({ file }: { file: File }) {
       triggerRef.current?.click();
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error editing file", { error: e, projectId: file.project.id });
       toast.error("Error editant el fitxer. Torna-ho a provar més tard");
     }
   }

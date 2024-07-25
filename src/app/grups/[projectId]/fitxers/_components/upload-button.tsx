@@ -4,6 +4,7 @@ import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { UploadButton as UploadthingButton } from "@/components/uploadthing";
 import { Loader2, Upload } from "lucide-react";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ export default function UploadButton({
   eventId?: Event["id"] | undefined;
 }) {
   const router = useRouter();
+  const log = useLogger();
 
   return (
     <div>
@@ -29,7 +31,7 @@ export default function UploadButton({
           router.refresh();
         }}
         onUploadError={(error: Error) => {
-          console.error(error);
+          log.error("Error uploading file", { error, projectId, eventId });
           toast.error("No s'ha pogut compartir el fitxer");
         }}
         content={{

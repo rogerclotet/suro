@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Check, Loader2, Tag } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -53,6 +54,7 @@ export default function ListItem(props: {
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
   const { project } = useProjects();
   const formRef = React.useRef<HTMLFormElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     try {
@@ -66,7 +68,7 @@ export default function ListItem(props: {
       await props.onChange(
         parsed.name,
         parsed.completed,
-        parsed.categoryId === "" ? null : parsed.categoryId ?? null,
+        parsed.categoryId === "" ? null : (parsed.categoryId ?? null),
       );
 
       form.reset({
@@ -76,7 +78,12 @@ export default function ListItem(props: {
       });
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error updating list item", {
+        error: e,
+        projectId: props.list.projectId,
+        listId: props.list.id,
+        itemId: props.id,
+      });
       toast.error(
         "No s'ha pogut actualitzar l'element, torna-ho a provar més tard",
       );

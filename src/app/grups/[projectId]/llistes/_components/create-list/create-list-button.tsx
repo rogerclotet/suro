@@ -19,6 +19,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -44,6 +45,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     queryFn: () => getTemplates(projectId),
     staleTime: 60 * 1000,
   });
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     try {
@@ -52,7 +54,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating list", { error: e, projectId });
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
       return;
     } finally {

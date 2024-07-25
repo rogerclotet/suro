@@ -1,8 +1,10 @@
 "use client";
 
 import type { Template } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
+import { useLogger } from "next-axiom";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
@@ -16,6 +18,8 @@ export default function DeleteTemplateModal({
   triggerRef: React.RefObject<HTMLDivElement>;
 }) {
   const router = useRouter();
+  const { project } = useProjects();
+  const log = useLogger();
 
   async function handleDelete() {
     try {
@@ -25,7 +29,11 @@ export default function DeleteTemplateModal({
       toast.success(`Plantilla ${template.name} eliminada`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error deleting template", {
+        error: e,
+        projectId: project?.id,
+        templateId: template.id,
+      });
       toast.error(
         "No s'ha pogut eliminar la plantilla, torna-ho a provar més tard",
       );

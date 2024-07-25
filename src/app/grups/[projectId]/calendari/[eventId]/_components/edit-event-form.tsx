@@ -19,6 +19,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
@@ -48,6 +49,7 @@ export default function EditEventForm({
     },
     resolver: valibotResolver(eventSchema),
   });
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
     try {
@@ -65,7 +67,11 @@ export default function EditEventForm({
       triggerRef.current?.click();
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error editing event", {
+        error: e,
+        projectId: event.projectId,
+        eventId: event.id,
+      });
       toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
     }
   }

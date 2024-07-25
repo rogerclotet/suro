@@ -94,6 +94,7 @@ export default function TemplateItems({ template }: { template: Template }) {
             {items.map((item) => (
               <TemplateItem
                 key={item.index}
+                template={template}
                 item={item}
                 onChange={(name, cat) =>
                   handleItemChange(item.index, name, cat)

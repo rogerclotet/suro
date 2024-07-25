@@ -15,6 +15,7 @@ import ModalForm from "@/components/ui/modal-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ export default function CreateProjectButton() {
     resolver: valibotResolver(projectSchema),
   });
   const modalRef = React.useRef<HTMLDivElement>(null);
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
     try {
@@ -42,7 +44,7 @@ export default function CreateProjectButton() {
       toast.success(`Grup ${form.getValues().name} creat`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error creating project", { error: e });
       toast.error("No s'ha pogut crear el grup, torna-ho a provar més tard");
       return;
     } finally {

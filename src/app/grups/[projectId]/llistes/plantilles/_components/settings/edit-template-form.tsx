@@ -1,6 +1,7 @@
 "use client";
 
 import type { Template } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -35,6 +37,8 @@ export default function EditTemplateForm({
     },
     resolver: valibotResolver(templateSchema),
   });
+  const { project } = useProjects();
+  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
@@ -42,7 +46,11 @@ export default function EditTemplateForm({
       toast.success(`Plantilla ${data.name} actualitzada`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error editing template", {
+        error: e,
+        projectId: project?.id,
+        templateId: template.id,
+      });
       toast.error(
         "No s'ha pogut actualitzar la plantilla, torna-ho a provar més tard",
       );

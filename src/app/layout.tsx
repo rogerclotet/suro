@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { GeistSans } from "geist/font/sans";
 import { SessionProvider } from "next-auth/react";
+import { AxiomWebVitals } from "next-axiom";
 import { ThemeProvider } from "next-themes";
 import React from "react";
 import { extractRouterConfig } from "uploadthing/server";
@@ -38,6 +39,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${GeistSans.variable}`}
     >
+      <AxiomWebVitals />
       <CSPostHogProvider>
         <body>
           <NextSSRPlugin

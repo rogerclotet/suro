@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
 import { deleteProject } from "./actions";
@@ -16,6 +17,7 @@ export default function DeleteProjectButton({
 }) {
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
+  const log = useLogger();
 
   const projectToDelete = projects.find((project) => project.id === projectId);
   if (!projectToDelete) {
@@ -36,7 +38,7 @@ export default function DeleteProjectButton({
       toast.success(`Grup ${projectToDelete.name} eliminat`);
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error deleting project", { error: e, projectId });
       toast.error("No s'ha pogut eliminar el grup, torna-ho a provar més tard");
     }
   }

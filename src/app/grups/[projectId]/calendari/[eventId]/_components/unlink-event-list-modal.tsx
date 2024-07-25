@@ -4,6 +4,7 @@ import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
+import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
 import { unlinkEventList } from "../actions";
@@ -17,6 +18,8 @@ export default function UnlinkEventListModal({
   list: List | undefined;
   triggerRef: React.RefObject<HTMLDivElement>;
 }) {
+  const log = useLogger();
+
   async function handleUnlink() {
     if (list === undefined) {
       return;
@@ -27,7 +30,11 @@ export default function UnlinkEventListModal({
       toast.success("S'ha desenllaçat la llista");
     } catch (e) {
       captureException(e);
-      console.error(e);
+      log.error("Error unlinking event list", {
+        error: e,
+        projectId: event.projectId,
+        eventId: event.id,
+      });
       toast.error(
         "No s'ha pogut desenllaçar la llista, torna-ho a provar més tard",
       );

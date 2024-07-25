@@ -19,7 +19,7 @@ export default function ShareButton({
         data={{
           title: title,
           text: text,
-          url: `${window.location.origin}/${path}`,
+          url: `${window.location.origin}${path}`,
         }}
         closeText="Tancar"
       >
