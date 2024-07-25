@@ -245,6 +245,7 @@ export const files = createTable("file", {
     }),
   eventId: varchar("eventId").references(() => events.id, {
     onDelete: "set null",
+    onUpdate: "cascade",
   }),
 });
 
