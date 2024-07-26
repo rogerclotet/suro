@@ -8,7 +8,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Menu } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -70,8 +72,13 @@ export default function DrawerLayout({
             </DrawerContent>
           </Drawer>
 
-          <Link href="/" className="btn btn-ghost text-xl">
-            {project?.name ?? "Família"}
+          <Link
+            href="/"
+            className="btn btn-ghost flex items-center gap-2 text-xl"
+          >
+            <Image src="/favicon.png" alt="Logo" width={36} height={36} />
+
+            {project?.name ?? <Skeleton className="h-6 w-24 opacity-20" />}
           </Link>
         </div>
 
