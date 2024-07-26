@@ -76,7 +76,7 @@ export default function DrawerLayout({
             href="/"
             className="btn btn-ghost flex items-center gap-2 text-xl"
           >
-            <Image src="/favicon.png" alt="Logo" width={36} height={36} />
+            <Image src="/favicon.png" alt="Logo" width={32} height={32} />
 
             {project?.name ?? <Skeleton className="h-6 w-24 opacity-20" />}
           </Link>
