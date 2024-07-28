@@ -6,6 +6,7 @@
     cd $SSH_PROJECT_DIRECTORY
     git pull
     docker build -t familia .
-    docker run -d -p $PORT:3000 familia -d
+    docker stop familia
+    docker run --name=familia --restart=unless-stopped -d -p $PORT:3000 familia
 EOF
 )
