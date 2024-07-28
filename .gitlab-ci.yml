@@ -1,0 +1,9 @@
+deploy:
+  image: alpine
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/deploy.sh
+    - scripts/deploy.sh
+  only:
+    - main
