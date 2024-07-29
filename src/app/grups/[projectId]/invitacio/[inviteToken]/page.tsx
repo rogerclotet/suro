@@ -31,8 +31,6 @@ export default async function InvitePage({
   const session = await auth();
   assert(session, "Unauthenticated user");
 
-  const log = new Logger();
-
   const project = await getInvitedProject(projectId);
 
   if (project?.users.some((user) => user.user.id === session.user.id)) {
@@ -71,6 +69,7 @@ export default async function InvitePage({
                 await acceptInvite(projectId, inviteToken);
                 revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
               } catch (e) {
+                const log = new Logger();
                 log.error("Error accepting invite", { error: e, projectId });
                 await log.flush();
               }
