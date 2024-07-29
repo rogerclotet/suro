@@ -56,7 +56,15 @@ export default function FileCard({ file }: { file: File }) {
 
 function FilePreviewContent({ file }: { file: File }) {
   if (file.type === "image") {
-    return <Image src={file.url} alt={file.name} width={350} height={350} />;
+    return (
+      <Image
+        src={file.url}
+        alt={file.name}
+        width={350}
+        height={350}
+        className="aspect-square object-cover"
+      />
+    );
   }
 
   return (
