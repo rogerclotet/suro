@@ -26,10 +26,10 @@ export default function Login({ session }: { session?: Session | null }) {
     <div className="container mx-auto mt-8 flex flex-col items-center gap-2 px-10">
       <Card>
         <CardHeader>
-          <div className="mx-auto mb-6 rounded-md bg-background px-0.5 py-1">
+          <div className="mx-auto mb-4 rounded-full bg-background p-4">
             <Image src="/favicon.png" alt="Logo" width={64} height={64} />
           </div>
-          <CardTitle>Iniciar sessió</CardTitle>
+          <CardTitle className="text-center">Iniciar sessió</CardTitle>
           <CardDescription>
             {"Has d'iniciar sessió per a accedir a l'aplicació"}
           </CardDescription>
