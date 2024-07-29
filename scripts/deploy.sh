@@ -9,5 +9,6 @@
     docker stop familia
     docker rm familia
     docker run --name=familia --restart=unless-stopped -d -p $PORT:3000 familia
+    docker image prune -f
 EOF
 )
