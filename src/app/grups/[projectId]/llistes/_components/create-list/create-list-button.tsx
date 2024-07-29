@@ -56,7 +56,6 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
       captureException(e);
       log.error("Error creating list", { error: e, projectId });
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
-      return;
     } finally {
       form.reset();
     }
@@ -107,7 +106,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
                 <FormItem>
                   <FormLabel>Descripció</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={form.formState.isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,6 +150,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
                                           ),
                                         );
                                   }}
+                                  disabled={form.formState.isSubmitting}
                                 />
                               </FormControl>
                               <FormLabel className="font-normal">
@@ -169,7 +169,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
             )}
 
             <Button
-              disabled={form.formState.isSubmitting}
+              disabled={!form.formState.isDirty || form.formState.isSubmitting}
               className="w-full space-x-2"
             >
               {form.formState.isSubmitting && (
