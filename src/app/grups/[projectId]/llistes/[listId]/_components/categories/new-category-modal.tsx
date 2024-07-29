@@ -28,7 +28,7 @@ export default function NewCategoryModal({
   onCreate,
 }: {
   triggerRef: React.RefObject<HTMLDivElement>;
-  onCreate: (categoryId: string) => void;
+  onCreate?: (categoryId: string) => void;
 }) {
   const { project, addCategory } = useProjects();
   const form = useForm({

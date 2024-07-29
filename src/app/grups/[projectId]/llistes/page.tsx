@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
-import { LayoutTemplate } from "lucide-react";
+import { LayoutTemplate, Tags } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import CreateListButton from "./_components/create-list/create-list-button";
@@ -20,12 +20,21 @@ export default async function ListesPage({
         <h1 className="mt-1 text-xl font-semibold">Llistes</h1>
 
         <div className="flex flex-grow flex-col items-end justify-between gap-2 sm:flex-row sm:items-center">
-          <Button variant="neutral" size="sm" asChild className="gap-2">
-            <Link href={`/grups/${projectId}/llistes/plantilles`}>
-              <LayoutTemplate size={18} />
-              Gestionar plantilles
-            </Link>
-          </Button>
+          <div className="flex flex-row flex-wrap items-center justify-end gap-2">
+            <Button variant="neutral" size="sm" asChild className="gap-2">
+              <Link href={`/grups/${projectId}/llistes/plantilles`}>
+                <LayoutTemplate size={18} />
+                Plantilles
+              </Link>
+            </Button>
+            <Button variant="neutral" size="sm" asChild className="gap-2">
+              <Link href={`/grups/${projectId}/llistes/categories`}>
+                <Tags size={18} />
+                Categories
+              </Link>
+            </Button>
+          </div>
+
           <CreateListButton projectId={projectId} />
         </div>
       </div>

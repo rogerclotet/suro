@@ -4,6 +4,7 @@ import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { categories } from "@/server/db/schema";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { categorySchema } from "./data";
 
@@ -29,6 +30,8 @@ export async function createCategory(
       projectId: project.id,
     })
     .returning({ id: categories.id });
+
+  revalidatePath(`/grups/${project.id}/llistes/categories`);
 
   return result[0]!.id;
 }
