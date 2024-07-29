@@ -8,7 +8,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -78,7 +77,7 @@ export default function DrawerLayout({
           >
             <Image src="/favicon.png" alt="Logo" width={32} height={32} />
 
-            {project?.name ?? <Skeleton className="h-6 w-24 opacity-20" />}
+            {project?.name}
           </Link>
         </div>
 
