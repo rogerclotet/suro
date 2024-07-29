@@ -9,7 +9,8 @@ export default function Category({ category }: { category: Category }) {
       <div className="flex flex-col gap-1">
         {category.name}
         <span className="text-sm text-muted-foreground">
-          {category.items.length} elements
+          {category.items.length}{" "}
+          {category.items.length === 1 ? "element" : "elements"}
         </span>
       </div>
 
