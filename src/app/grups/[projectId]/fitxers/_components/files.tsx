@@ -9,9 +9,38 @@ import ListView from "./list-view/list-view";
 export default function Files({ files }: { files: File[] }) {
   const { view } = useFileView();
 
+  const projectFiles = files.filter((f) => f.eventId === null);
+  const eventFiles = files.filter((f) => f.eventId);
+
   if (view === "grid") {
-    return <GridView files={files} />;
+    return (
+      <div className="space-y-8">
+        <GridView files={projectFiles} />
+
+        {eventFiles.length > 0 && (
+          <div>
+            <h3 className="mb-4 text-lg font-semibold">
+              {"Fitxers d'esdeveniments"}
+            </h3>
+            <GridView files={eventFiles} />
+          </div>
+        )}
+      </div>
+    );
   }
 
-  return <ListView files={files} />;
+  return (
+    <div className="space-y-8">
+      <ListView files={projectFiles} />
+
+      {eventFiles.length > 0 && (
+        <div>
+          <h3 className="mb-4 text-lg font-semibold">
+            {"Fitxers d'esdeveniments"}
+          </h3>
+          <ListView files={eventFiles} />
+        </div>
+      )}
+    </div>
+  );
 }

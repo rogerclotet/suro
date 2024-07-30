@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { files } from "./db/schema";
 
-export default async function getFiles(projectId: string) {
+export default async function getProjectFiles(projectId: string) {
   return await db.query.files.findMany({
     where: eq(files.projectId, projectId),
     with: {
@@ -12,6 +12,7 @@ export default async function getFiles(projectId: string) {
           users: true,
         },
       },
+      event: true,
     },
     orderBy: [desc(files.createdAt)],
   });

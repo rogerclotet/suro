@@ -1,6 +1,7 @@
 import type { File } from "@/app/_data/file";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { CalendarFold } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,7 +51,7 @@ export default function FileListItem({ file }: { file: File }) {
         </span>
       </div>
 
-      <div className="flex-shrink-0 p-4">
+      <div className="flex flex-shrink-0 flex-col items-end pr-4">
         <Tooltip>
           <TooltipTrigger>
             <span className="line-clamp-2 max-w-32 text-sm text-muted-foreground">
@@ -59,6 +60,17 @@ export default function FileListItem({ file }: { file: File }) {
           </TooltipTrigger>
           <TooltipContent>{file.uploadedBy.name}</TooltipContent>
         </Tooltip>
+
+        {file.event && (
+          <Link
+            href={`/grups/${file.event.projectId}/calendari/${file.event.id}`}
+          >
+            <span className="line-clamp-2 flex max-w-32 flex-row items-center gap-2 text-sm text-muted-foreground">
+              <CalendarFold size={14} />
+              {file.event.name}
+            </span>
+          </Link>
+        )}
       </div>
     </li>
   );

@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { CalendarFold } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,7 +42,7 @@ export default function FileCard({ file }: { file: File }) {
                 </span>
               )}
             </span>
-            <span className="line-clamp-1">{file.uploadedBy.name}</span>
+            <ExtraInfo file={file} />
           </span>
         </CardDescription>
       </CardHeader>
@@ -52,6 +53,21 @@ export default function FileCard({ file }: { file: File }) {
       </CardFooter>
     </Card>
   );
+}
+
+function ExtraInfo({ file }: { file: File }) {
+  if (file.event) {
+    return (
+      <Link
+        href={`/grups/${file.event.projectId}/calendari/${file.event.id}`}
+        className="line-clamp-1 flex flex-row items-center gap-2"
+      >
+        <CalendarFold size={14} /> {file.event.name}
+      </Link>
+    );
+  }
+
+  return <span className="line-clamp-1">{file.uploadedBy.name}</span>;
 }
 
 function FilePreviewContent({ file }: { file: File }) {

@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import getFiles from "@/server/files";
+import getProjectFiles from "@/server/files";
 import { CornerRightUp } from "lucide-react";
 import { redirect } from "next/navigation";
 import Files from "./_components/files";
@@ -16,7 +16,7 @@ export default async function FilesPage({
     return redirect("/");
   }
 
-  const allFiles = await getFiles(projectId);
+  const allFiles = await getProjectFiles(projectId);
 
   return (
     <div>
