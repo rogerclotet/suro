@@ -54,7 +54,11 @@ export default function NewListItem({ list }: { list: List }) {
 
     try {
       await createListItem(list, data);
-      form.reset();
+      form.reset({
+        name: "",
+        completed: false,
+        categoryId: data.categoryId ?? "",
+      });
     } catch (e) {
       captureException(e);
       log.error("Error creating list item", {
