@@ -37,7 +37,11 @@ export async function getEvent(projectId: string, eventId: string) {
 
     return {
       ...result,
-      files: result.files.map((file) => ({ ...file, project: result.project })),
+      files: result.files.map((file) => ({
+        ...file,
+        project: result.project,
+        event: result,
+      })),
     };
   } catch (e) {
     log.error("Error getting event", { error: e, projectId, eventId });
