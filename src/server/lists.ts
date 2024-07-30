@@ -176,11 +176,6 @@ export async function getTemplates(projectId: string) {
       with: {
         users: true,
         templates: {
-          with: {
-            project: {
-              with: { users: true },
-            },
-          },
           orderBy: [desc(templates.updatedAt)],
         },
       },
@@ -196,6 +191,7 @@ export async function getTemplates(projectId: string) {
     return project.templates.map((t) => ({
       ...t,
       items: t.items as { name: string; category: string | null }[],
+      project,
     }));
   } catch (e) {
     log.error("Error getting templates", { error: e, projectId });

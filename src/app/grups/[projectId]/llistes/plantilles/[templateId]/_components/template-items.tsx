@@ -56,7 +56,7 @@ export default function TemplateItems({ template }: { template: Template }) {
     return [...items].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async function handleItemChange(
+  async function handleItemChanged(
     index: number,
     newName: string,
     newCategory: string | null,
@@ -77,13 +77,17 @@ export default function TemplateItems({ template }: { template: Template }) {
     );
   }
 
+  function handleItemAdded(item: Item) {
+    setItems([...items, item]);
+  }
+
   return (
     <div className="w-full">
       <ul
         ref={animationParent}
         className="mx-auto flex max-w-lg flex-col items-stretch gap-1"
       >
-        <NewTemplateItem template={template} />
+        <NewTemplateItem template={template} onCreate={handleItemAdded} />
 
         {itemsByCategory?.map(({ category, items }) => (
           <Fragment key={category}>
@@ -97,7 +101,7 @@ export default function TemplateItems({ template }: { template: Template }) {
                 template={template}
                 item={item}
                 onChange={(name, cat) =>
-                  handleItemChange(item.index, name, cat)
+                  handleItemChanged(item.index, name, cat)
                 }
               />
             ))}

@@ -30,7 +30,15 @@ import NewCategoryModal from "../../../[listId]/_components/categories/new-categ
 import { templateItemSchema } from "../../_components/create-template/data";
 import { createTemplateItem } from "./actions";
 
-export default function NewTemplateItem({ template }: { template: Template }) {
+type Item = Template["items"][number];
+
+export default function NewTemplateItem({
+  template,
+  onCreate,
+}: {
+  template: Template;
+  onCreate: (item: Item) => void;
+}) {
   const form = useForm({
     defaultValues: {
       name: "",
@@ -53,9 +61,10 @@ export default function NewTemplateItem({ template }: { template: Template }) {
 
     try {
       await createTemplateItem(template, data);
-
+      onCreate({ name: data.name, category: data.category ?? null });
       form.reset({ name: "", category: data.category ?? "" });
     } catch (e) {
+      console.log(e);
       captureException(e);
       log.error("Error creating template item", {
         error: e,
