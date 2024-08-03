@@ -42,7 +42,7 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
 
   if (spending.from !== null && spending.to !== null) {
     return (
-      <p className="text-muted-foreground">
+      <span className="text-muted-foreground">
         <span className="font-semibold text-foreground">
           {spending.from.name}
         </span>{" "}
@@ -57,13 +57,13 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
           {spending.to.name}
         </span>{" "}
         <DateWithTooltip />
-      </p>
+      </span>
     );
   }
 
   if (spending.from !== null) {
     return (
-      <p className="text-muted-foreground">
+      <span className="text-muted-foreground">
         <span className="font-semibold text-foreground">
           {spending.from.name}
         </span>{" "}
@@ -74,13 +74,13 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
           className="font-semibold text-foreground"
         />{" "}
         <DateWithTooltip />
-      </p>
+      </span>
     );
   }
 
   if (spending.to !== null) {
     return (
-      <p className="text-muted-foreground">
+      <span className="text-muted-foreground">
         <span className="font-semibold text-foreground">
           {spending.to.name}
         </span>{" "}
@@ -91,7 +91,7 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
           className="font-semibold text-foreground"
         />{" "}
         <DateWithTooltip />
-      </p>
+      </span>
     );
   }
 
