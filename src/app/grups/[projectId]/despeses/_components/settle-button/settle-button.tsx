@@ -105,9 +105,15 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
             </div>
           )}
 
-          <Button disabled={selected.length === 0} onClick={handleSubmit}>
-            Confirmar seleccionades
-          </Button>
+          {selected.length > 0 && (
+            <Button
+              disabled={selected.length === 0}
+              onClick={handleSubmit}
+              className="w-full"
+            >
+              Confirmar seleccionades
+            </Button>
+          )}
         </ModalForm>
       )}
     </>
