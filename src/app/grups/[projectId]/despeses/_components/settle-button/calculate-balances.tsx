@@ -24,7 +24,6 @@ export function calculateBalances(project: Project, spendings: Spending[]) {
         }
       }
     }
-    console.log(balancesFromSpendings);
   }
 
   return balancesFromSpendings;

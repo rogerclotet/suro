@@ -51,6 +51,7 @@ export default function CreateSpendingButton() {
       await createSpending(project!.id, data);
       toast.success("Despesa creada");
       triggerRef.current?.click();
+      form.reset();
     } catch (e) {
       captureException(e);
       log.error("Error creating spending", {
@@ -59,10 +60,6 @@ export default function CreateSpendingButton() {
       });
       toast.error("No s'ha pogut crear la despesa, torna-ho a provar més tard");
     }
-  }
-
-  function getUser(id: string) {
-    return project!.users.find((u) => u.user.id === id)?.user;
   }
 
   return (
@@ -135,9 +132,7 @@ export default function CreateSpendingButton() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue>
-                            {getUser(field.value)?.name}
-                          </SelectValue>
+                          <SelectValue placeholder="Selecciona un usuari" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -166,11 +161,7 @@ export default function CreateSpendingButton() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue>
-                            {field.value
-                              ? getUser(field.value)?.name
-                              : "Compartit"}
-                          </SelectValue>
+                          <SelectValue placeholder="Repartit" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

@@ -64,7 +64,6 @@ export default function NewTemplateItem({
       onCreate({ name: data.name, category: data.category ?? null });
       form.reset({ name: "", category: data.category ?? "" });
     } catch (e) {
-      console.log(e);
       captureException(e);
       log.error("Error creating template item", {
         error: e,
