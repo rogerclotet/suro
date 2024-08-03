@@ -31,6 +31,7 @@ type Props = {
   onAction: () => void;
   variant?: "default" | "destructive";
   triggerRef: React.RefObject<HTMLDivElement>;
+  children?: React.ReactNode;
 };
 
 export default function ModalAction(props: Props) {
@@ -46,6 +47,7 @@ function ClientModalAction({
   description,
   actionText,
   onAction,
+  children,
   variant = "default",
   triggerRef,
 }: Props) {
@@ -68,6 +70,7 @@ function ClientModalAction({
             <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>{description}</AlertDialogDescription>
           </AlertDialogHeader>
+          {children}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
             <AlertDialogAction onClick={onAction} className={actionButtonStyle}>
@@ -89,6 +92,7 @@ function ClientModalAction({
           <DrawerTitle>{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
+        {children}
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant={variant} onClick={onAction}>

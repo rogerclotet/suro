@@ -14,6 +14,7 @@ import {
 import { Loader2 } from "lucide-react";
 import React from "react";
 import MonetaryAmount from "./monetary-amount";
+import { calculateBalances } from "./settle-button/calculate-balances";
 
 export default function SpendingsTable({
   spendings,
@@ -27,22 +28,13 @@ export default function SpendingsTable({
   const { project } = useProjects();
 
   React.useEffect(() => {
-    setBalances(() => {
-      const balancesFromSpendings: Record<string, number> = {};
-      for (const spending of spendings) {
-        if (spending.from) {
-          balancesFromSpendings[spending.from.id] =
-            (balancesFromSpendings[spending.from.id] ?? 0) + spending.amount;
-        }
-        if (spending.to) {
-          balancesFromSpendings[spending.to.id] =
-            (balancesFromSpendings[spending.to.id] ?? 0) - spending.amount;
-        }
-      }
-      return balancesFromSpendings;
-    });
+    if (!project) {
+      return;
+    }
+
+    setBalances(() => calculateBalances(project, spendings));
     setCurrency(spendings[0]?.currency ?? "EUR");
-  }, [spendings]);
+  }, [spendings, project]);
 
   if (!project) {
     return (

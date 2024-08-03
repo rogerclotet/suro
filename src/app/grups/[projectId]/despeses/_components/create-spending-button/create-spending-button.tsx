@@ -60,10 +60,6 @@ export default function CreateSpendingButton() {
     }
   }
 
-  if (!project) {
-    return null;
-  }
-
   function getUser(id: string) {
     return project!.users.find((u) => u.user.id === id)?.user;
   }
@@ -78,109 +74,113 @@ export default function CreateSpendingButton() {
         <Plus /> Crear despesa
       </Button>
 
-      <ModalForm
-        triggerRef={triggerRef}
-        title="Crear despesa"
-        description="Crear una nova despesa"
-      >
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quantitat</FormLabel>
-                  <div className="flex flex-row items-center gap-4">
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        step="0.01"
-                        disabled={form.formState.isSubmitting}
-                      />
-                    </FormControl>
-                    <span>€</span>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      {project && (
+        <ModalForm
+          triggerRef={triggerRef}
+          title="Crear despesa"
+          description="Crear una nova despesa"
+        >
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantitat</FormLabel>
+                    <div className="flex flex-row items-center gap-4">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          step="0.01"
+                          disabled={form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <span>€</span>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="from"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pagador</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={form.formState.isSubmitting}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue>{getUser(field.value)?.name}</SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {project.users.map((u) => (
-                        <SelectItem key={u.user.id} value={u.user.id}>
-                          {u.user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="from"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pagador</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={form.formState.isSubmitting}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue>
+                            {getUser(field.value)?.name}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {project.users.map((u) => (
+                          <SelectItem key={u.user.id} value={u.user.id}>
+                            {u.user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="to"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Destinatari</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={form.formState.isSubmitting}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue>
-                          {field.value
-                            ? getUser(field.value)?.name
-                            : "Compartit"}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {project.users.map((u) => (
-                        <SelectItem key={u.user.id} value={u.user.id}>
-                          {u.user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="to"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Destinatari</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={form.formState.isSubmitting}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue>
+                            {field.value
+                              ? getUser(field.value)?.name
+                              : "Compartit"}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {project.users.map((u) => (
+                          <SelectItem key={u.user.id} value={u.user.id}>
+                            {u.user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button
-              className="w-full space-x-2"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting && (
-                <span className="loading loading-spinner" />
-              )}
-              Crear
-            </Button>
-          </form>
-        </Form>
-      </ModalForm>
+              <Button
+                className="w-full space-x-2"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting && (
+                  <span className="loading loading-spinner" />
+                )}
+                Crear
+              </Button>
+            </form>
+          </Form>
+        </ModalForm>
+      )}
     </>
   );
 }

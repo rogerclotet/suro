@@ -23,6 +23,9 @@
     "plugins": [{ "name": "next" }],
     "incremental": true,
 
+    /* ViTest */
+    "types": ["vitest/importMeta"],
+
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {

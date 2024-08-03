@@ -1,6 +1,7 @@
 import { checkAuth } from "@/lib/check-auth";
 import { getProjectSpendings } from "@/server/spendings";
 import CreateSpendingButton from "./_components/create-spending-button/create-spending-button";
+import SettleButton from "./_components/settle-button/settle-button";
 import SpendingsList from "./_components/spendings-list";
 import SpendingsTable from "./_components/spendings-table";
 
@@ -17,7 +18,11 @@ export default async function DespesesPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <h1 className="mt-1 text-xl font-semibold">Despeses</h1>
-        <CreateSpendingButton />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <SettleButton spendings={projectSpendings} />
+          <CreateSpendingButton />
+        </div>
       </div>
 
       <SpendingsTable spendings={projectSpendings} />
