@@ -20,22 +20,29 @@ export default function SpendingsTable({
 }: {
   spendings: Spending[];
 }) {
-  const [balnaces] = React.useState<Record<string, number>>(() => {
-    const balancesFromSpendings: Record<string, number> = {};
-    for (const spending of spendings) {
-      if (spending.from) {
-        balancesFromSpendings[spending.from.id] =
-          (balancesFromSpendings[spending.from.id] ?? 0) + spending.amount;
-      }
-      if (spending.to) {
-        balancesFromSpendings[spending.to.id] =
-          (balancesFromSpendings[spending.to.id] ?? 0) - spending.amount;
-      }
-    }
-    return balancesFromSpendings;
-  });
-  const [currency] = React.useState(() => spendings[0]?.currency ?? "EUR");
+  const [balnaces, setBalances] = React.useState<Record<string, number>>({});
+  const [currency, setCurrency] = React.useState(
+    () => spendings[0]?.currency ?? "EUR",
+  );
   const { project } = useProjects();
+
+  React.useEffect(() => {
+    setBalances(() => {
+      const balancesFromSpendings: Record<string, number> = {};
+      for (const spending of spendings) {
+        if (spending.from) {
+          balancesFromSpendings[spending.from.id] =
+            (balancesFromSpendings[spending.from.id] ?? 0) + spending.amount;
+        }
+        if (spending.to) {
+          balancesFromSpendings[spending.to.id] =
+            (balancesFromSpendings[spending.to.id] ?? 0) - spending.amount;
+        }
+      }
+      return balancesFromSpendings;
+    });
+    setCurrency(spendings[0]?.currency ?? "EUR");
+  }, [spendings]);
 
   if (!project) {
     return (
