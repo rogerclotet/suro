@@ -1,5 +1,5 @@
 import { useProjects } from "@/app/_state/project-state";
-import { Calendar, FolderOpen, ListTodo } from "lucide-react";
+import { Calendar, FolderOpen, HandCoins, ListTodo } from "lucide-react";
 import React from "react";
 
 export type MenuItem = {
@@ -31,6 +31,11 @@ const itemParts: MenuItemPart[] = [
     name: "Fitxers",
     pathPart: "fitxers",
     icon: <FolderOpen />,
+  },
+  {
+    name: "Despeses",
+    pathPart: "despeses",
+    icon: <HandCoins />,
   },
 ];
 
