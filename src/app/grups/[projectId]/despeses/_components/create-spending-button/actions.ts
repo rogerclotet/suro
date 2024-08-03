@@ -18,9 +18,13 @@ export async function createSpending(
 
   const parsedData = v.parse(spendingSchema, data);
 
+  const description =
+    parsedData.description === "" ? null : (parsedData.description ?? null);
+
   await db.insert(spendings).values({
     amount: parsedData.amount * 100,
     currency: "EUR",
+    description,
     from: parsedData.from,
     to: parsedData.to,
     createdBy: session.user.id,

@@ -2,7 +2,10 @@ import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
 
 export function calculateBalances(project: Project, spendings: Spending[]) {
-  const balancesFromSpendings: Record<string, number> = {};
+  const balancesFromSpendings: Record<string, number> = project.users.reduce(
+    (acc, user) => ({ ...acc, [user.user.id]: 0 }),
+    {},
+  );
 
   for (const spending of spendings) {
     if (spending.from) {
@@ -21,6 +24,7 @@ export function calculateBalances(project: Project, spendings: Spending[]) {
         }
       }
     }
+    console.log(balancesFromSpendings);
   }
 
   return balancesFromSpendings;

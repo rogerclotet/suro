@@ -12,6 +12,7 @@ export const spendingSchema = v.pipe(
     ),
     from: v.string(),
     to: v.optional(v.string()),
+    description: v.optional(v.string()),
   }),
   v.forward(
     v.partialCheck(

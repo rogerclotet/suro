@@ -38,6 +38,7 @@ export default function CreateSpendingButton() {
       amount: 0,
       from: session?.data?.user.id,
       to: undefined,
+      description: "",
     },
     resolver: valibotResolver(spendingSchema),
   });
@@ -99,6 +100,23 @@ export default function CreateSpendingButton() {
                       </FormControl>
                       <span>€</span>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descripció</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={form.formState.isSubmitting}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

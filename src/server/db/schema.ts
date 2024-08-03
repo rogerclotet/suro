@@ -268,6 +268,7 @@ export const spendings = createTable("spending", {
     .primaryKey(),
   amount: integer("amount").notNull(),
   currency: varchar("currency", { length: 255 }).notNull(),
+  description: text("description"),
   from: varchar("from", { length: 255 }).references(() => users.id, {
     onUpdate: "cascade",
   }),

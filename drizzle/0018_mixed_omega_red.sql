@@ -1,0 +1,1 @@
+ALTER TABLE "f_spending" ADD COLUMN "description" text;

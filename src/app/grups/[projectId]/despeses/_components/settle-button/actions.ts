@@ -29,6 +29,7 @@ export async function settlePayments(
     payments.map((p) => ({
       amount: p.amount,
       currency: p.currency,
+      description: "Liquidació de pagaments",
       from: p.from,
       to: p.to,
       createdBy: session.user.id,
