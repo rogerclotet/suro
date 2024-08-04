@@ -52,7 +52,9 @@ function UserAvatar({
       <div className="w-8">
         <Avatar className={cn("h-8 w-8", className)}>
           <AvatarImage src={user.image ?? undefined} />
-          <AvatarFallback>{user.name!.charAt(0).toUpperCase()}</AvatarFallback>
+          <AvatarFallback className="bg-secondary text-secondary-foreground">
+            {user.name?.charAt(0)?.toUpperCase()}
+          </AvatarFallback>
         </Avatar>
       </div>
     </div>

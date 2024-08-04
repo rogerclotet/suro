@@ -64,8 +64,8 @@ export default function SpendingsTable({
             <TableCell className="flex items-center gap-4">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={u.user.image ?? undefined} />
-                <AvatarFallback>
-                  {u.user.name?.[0]?.toUpperCase()}
+                <AvatarFallback className="bg-secondary text-secondary-foreground">
+                  {u.user.name?.charAt(0)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               {u.user.name}

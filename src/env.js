@@ -27,6 +27,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_APP_ID: z.string(),
     UPLOADTHING_URL: z.optional(z.string()),
+    AUTH_RESEND_KEY: z.string(),
+    RESEND_EMAIL_FROM: z.string(),
   },
 
   /**
@@ -59,6 +61,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
     UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
     UPLOADTHING_URL: process.env.UPLOADTHING_URL,
+    AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY,
+    RESEND_EMAIL_FROM: process.env.RESEND_EMAIL_FROM,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

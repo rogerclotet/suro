@@ -8,7 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
+import { Mail } from "lucide-react";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import { redirect, useSearchParams } from "next/navigation";
@@ -34,8 +36,22 @@ export default function Login({ session }: { session?: Session | null }) {
             {"Has d'iniciar sessió per a accedir a l'aplicació"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form action={login} className="text-center">
+        <CardContent className="space-y-4">
+          <form
+            action={(formData) => login("resend", formData)}
+            className="space-y-4 rounded-lg border-2 border-muted p-4 text-center"
+          >
+            <Input
+              name="email"
+              type="email"
+              placeholder="exemple@exemple.com"
+            />
+            <Button className="gap-4">
+              <Mail />
+              Entrar amb email
+            </Button>
+          </form>
+          <form action={() => login("google")} className="text-center">
             <Button className="gap-4">
               <SiGoogle />
               Entrar amb Google

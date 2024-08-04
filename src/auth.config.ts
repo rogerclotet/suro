@@ -1,16 +1,26 @@
 import type { NextAuthConfig, Profile } from "next-auth";
 import Google from "next-auth/providers/google";
+import Resend from "next-auth/providers/resend";
 import { env } from "./env";
 
 export default {
-  providers: [Google],
+  providers: [
+    Google,
+    Resend({
+      from: env.RESEND_EMAIL_FROM,
+    }),
+  ],
   secret: env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
   },
   callbacks: {
     async signIn({ profile }: { profile?: Profile }): Promise<boolean> {
-      return profile?.email !== undefined;
+      if (profile) {
+        return profile?.email !== undefined;
+      }
+      // Allow all users from email magic links to sign in
+      return true;
     },
     async session({ session, user }) {
       session.user.id = user.id;

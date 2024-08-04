@@ -1,5 +1,5 @@
 import { auth, signOut } from "@/auth";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AvatarFallback } from "@radix-ui/react-avatar";
 import { LogOut } from "lucide-react";
 
 export default async function Profile() {
@@ -22,8 +21,8 @@ export default async function Profile() {
         <Button variant="ghost" className="w-full justify-start gap-4">
           <Avatar className="h-8 w-8">
             <AvatarImage src={session.user.image ?? undefined} />
-            <AvatarFallback>
-              {session.user.name?.[0]?.toUpperCase()}
+            <AvatarFallback className="bg-secondary text-secondary-foreground">
+              {session.user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {session.user.name}

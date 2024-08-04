@@ -2,6 +2,6 @@
 
 import { signIn } from "@/auth";
 
-export async function login() {
-  await signIn("google");
+export async function login(provider: string, formData?: FormData) {
+  await signIn(provider, formData);
 }
