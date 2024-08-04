@@ -13,18 +13,19 @@ import {
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import React from "react";
-import MonetaryAmount from "./monetary-amount";
 import { calculateBalances } from "./settle-button/calculate-balances";
+import UserBalance from "./user-balance";
 
 export default function SpendingsTable({
   spendings,
 }: {
   spendings: Spending[];
 }) {
-  const [balnaces, setBalances] = React.useState<Record<string, number>>({});
+  const [balances, setBalances] = React.useState<Record<string, number>>({});
   const [currency, setCurrency] = React.useState(
     () => spendings[0]?.currency ?? "EUR",
   );
+  const [maxAbsBalance, setMaxAbsBalance] = React.useState(0);
   const { project } = useProjects();
 
   React.useEffect(() => {
@@ -32,7 +33,9 @@ export default function SpendingsTable({
       return;
     }
 
-    setBalances(() => calculateBalances(project, spendings));
+    const balances = calculateBalances(project, spendings);
+    setBalances(balances);
+    setMaxAbsBalance(Math.max(...Object.values(balances).map(Math.abs)));
     setCurrency(spendings[0]?.currency ?? "EUR");
   }, [spendings, project]);
 
@@ -45,11 +48,11 @@ export default function SpendingsTable({
   }
 
   return (
-    <Table>
+    <Table className="mx-auto max-w-2xl">
       <TableHeader>
         <TableRow>
           <TableHead>Usuari</TableHead>
-          <TableHead>Saldo</TableHead>
+          <TableHead className="text-right">Saldo</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -67,10 +70,12 @@ export default function SpendingsTable({
               </Avatar>
               {u.user.name}
             </TableCell>
-            <TableCell>
-              <MonetaryAmount
-                amount={balnaces[u.user.id] ?? 0}
+            <TableCell className="p-0 pr-4">
+              <UserBalance
+                balance={balances[u.user.id] ?? 0}
+                maxAbsBalance={maxAbsBalance}
                 currency={currency}
+                className="ml-auto"
               />
             </TableCell>
           </TableRow>
