@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getProjects } from "@/server/projects";
 import { Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
 import EditProjectButton from "./edit-project-button";
@@ -117,7 +118,9 @@ export default async function ProjectsTable() {
             <TableCell>
               <IdIcon id={project.id} />
             </TableCell>
-            <TableCell>{project.name}</TableCell>
+            <TableCell>
+              <Link href={`/grups/${project.id}`}>{project.name}</Link>
+            </TableCell>
             <TableCell className="p-0">
               <UsersList users={project.users} />
             </TableCell>
