@@ -36,12 +36,12 @@ export default function UserBalance({
   return (
     <div
       className={cn(
-        "relative flex h-10 w-[min(200px,calc(50vw-50px))] items-center justify-center overflow-hidden rounded-md bg-[rgb(from_var(--muted-foreground)_r_g_b/0.1)]",
+        "relative flex h-10 w-[min(200px,calc(50vw-50px))] items-center justify-center overflow-hidden rounded-md bg-muted",
         className,
       )}
     >
       <BalanceBar />
-      <span className="z-10 rounded-full bg-[rgb(from_var(--foreground)_r_g_b/0.8)] px-1">
+      <span className="z-10 rounded-full bg-foreground px-1">
         <MonetaryAmount
           amount={balance}
           currency={currency}
