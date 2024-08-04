@@ -1,4 +1,5 @@
-import { auth, signOut } from "@/auth";
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,10 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { logOut } from "./actions";
 
-export default async function Profile() {
-  const session = await auth();
+export default function Profile({ onNavigate }: { onNavigate: () => void }) {
+  const session = useSession();
+
   if (!session) {
     return null;
   }
@@ -20,21 +25,23 @@ export default async function Profile() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-start gap-4">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={session.user.image ?? undefined} />
+            <AvatarImage src={session.data?.user.image ?? undefined} />
             <AvatarFallback className="bg-secondary text-secondary-foreground">
-              {session.user.name?.charAt(0)?.toUpperCase()}
+              {session.data?.user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          {session.user.name}
+          {session.data?.user.name}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <form
-          action={async () => {
-            "use server";
-            await signOut();
-          }}
-        >
+        <Link href="/perfil">
+          <DropdownMenuItem className="gap-2" onClick={onNavigate}>
+            <User />
+            Perfil
+          </DropdownMenuItem>
+        </Link>
+
+        <form action={logOut}>
           <button>
             <DropdownMenuItem className="gap-2">
               <LogOut /> Tancar sessió

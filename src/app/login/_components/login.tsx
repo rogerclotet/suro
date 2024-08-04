@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,13 +11,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
-import { Mail } from "lucide-react";
+import { Info, Mail } from "lucide-react";
 import type { Session } from "next-auth";
 import Image from "next/image";
 import { redirect, useSearchParams } from "next/navigation";
-import { login } from "./actions";
+import React from "react";
+import { loginWithGoogle, loginWithResend } from "./actions";
 
 export default function Login({ session }: { session?: Session | null }) {
+  const [loggedInWithResend, setLoggedInWithResend] = React.useState(false);
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("to") ?? "/";
 
@@ -24,8 +27,13 @@ export default function Login({ session }: { session?: Session | null }) {
     return redirect(redirectTo);
   }
 
+  async function handleResendSignIn(formData?: FormData) {
+    await loginWithResend(formData);
+    setLoggedInWithResend(true);
+  }
+
   return (
-    <div className="container mx-auto mt-8 flex flex-col items-center gap-2 px-10">
+    <div className="container mx-auto mt-8 flex w-[28rem] flex-col items-center gap-2 px-10">
       <Card>
         <CardHeader>
           <div className="mx-auto mb-4 rounded-full bg-background p-4">
@@ -38,7 +46,7 @@ export default function Login({ session }: { session?: Session | null }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <form
-            action={(formData) => login("resend", formData)}
+            action={handleResendSignIn}
             className="space-y-4 rounded-lg border-2 border-muted p-4 text-center"
           >
             <Input
@@ -50,8 +58,20 @@ export default function Login({ session }: { session?: Session | null }) {
               <Mail />
               Entrar amb email
             </Button>
+
+            {loggedInWithResend && (
+              <Alert className="text-left text-secondary">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Correu enviat</AlertTitle>
+                <AlertDescription className="text-wrap">
+                  {
+                    "T'hem enviat un email amb un enllaç per iniciar la sessió. Comprova la safata d'entrada."
+                  }
+                </AlertDescription>
+              </Alert>
+            )}
           </form>
-          <form action={() => login("google")} className="text-center">
+          <form action={loginWithGoogle} className="text-center">
             <Button className="gap-4">
               <SiGoogle />
               Entrar amb Google

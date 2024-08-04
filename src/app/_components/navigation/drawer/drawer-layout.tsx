@@ -16,12 +16,9 @@ import React from "react";
 import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
 import ProjectSelector from "../project-selector";
+import Profile from "./profile/profile";
 
-export default function DrawerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DrawerLayout() {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
   const { project } = useProjects();
@@ -50,7 +47,9 @@ export default function DrawerLayout({
               <DrawerTitle className="sr-only">Menú lateral</DrawerTitle>
 
               <ul tabIndex={0} className="flex flex-col gap-2 p-4">
-                {children}
+                <li>
+                  <Profile onNavigate={() => setIsOpen(false)} />
+                </li>
 
                 <li>
                   <ProjectSelector onSelect={handleSelectProject} />

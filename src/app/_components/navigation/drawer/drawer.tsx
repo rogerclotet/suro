@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import DrawerLayout from "./drawer-layout";
-import Profile from "./profile";
 
 export default async function Drawer() {
   const session = await auth();
@@ -8,11 +7,5 @@ export default async function Drawer() {
     return null;
   }
 
-  return (
-    <DrawerLayout>
-      <li>
-        <Profile />
-      </li>
-    </DrawerLayout>
-  );
+  return <DrawerLayout />;
 }

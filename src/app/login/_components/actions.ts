@@ -2,6 +2,13 @@
 
 import { signIn } from "@/auth";
 
-export async function login(provider: string, formData?: FormData) {
-  await signIn(provider, formData);
+export async function loginWithResend(formData?: FormData) {
+  await signIn("resend", {
+    email: formData?.get("email"),
+    redirect: false,
+  });
+}
+
+export async function loginWithGoogle() {
+  await signIn("google");
 }
