@@ -105,9 +105,9 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
             </div>
           )}
 
-          {selected.length > 0 && (
+          {pending.length > 0 && (
             <Button
-              disabled={selected.length === 0}
+              disabled={pending.length === 0}
               onClick={handleSubmit}
               className="w-full"
             >
