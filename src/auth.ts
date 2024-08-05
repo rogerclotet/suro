@@ -1,6 +1,7 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
+import { Logger } from "next-axiom";
 import authConfig from "./auth.config";
 import { db } from "./server/db";
 import {
@@ -52,7 +53,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           });
         } catch (e) {
           trx.rollback();
-          console.log(e);
+          const log = new Logger();
+          log.error("Failed to create user", { error: e });
+          await log.flush();
           throw e;
         }
       });
