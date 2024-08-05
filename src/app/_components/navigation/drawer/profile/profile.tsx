@@ -35,7 +35,10 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <Link href="/perfil">
-          <DropdownMenuItem className="gap-2" onClick={onNavigate}>
+          <DropdownMenuItem
+            className="cursor-pointer gap-2"
+            onClick={onNavigate}
+          >
             <User />
             Perfil
           </DropdownMenuItem>
@@ -43,7 +46,7 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
 
         <form action={logOut}>
           <button>
-            <DropdownMenuItem className="gap-2">
+            <DropdownMenuItem className="cursor-pointer gap-2">
               <LogOut /> Tancar sessió
             </DropdownMenuItem>
           </button>

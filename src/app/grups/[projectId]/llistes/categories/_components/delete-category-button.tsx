@@ -21,8 +21,8 @@ export default function DeleteCategoryButton({
     try {
       await deleteCategory(category);
       toast.success("La categoria s'ha eliminat correctament");
-    } catch (error) {
-      log.error("Error deleting category", { error, categoryId: category.id });
+    } catch (e) {
+      log.error("Error deleting category", { error: e, categoryId: category.id });
       toast.error("Error eliminant la categoria. Torna-ho a provar més tard");
     }
   }

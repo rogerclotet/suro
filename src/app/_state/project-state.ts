@@ -57,6 +57,25 @@ export function useProjects() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  React.useEffect(() => {
+    if (projects.length === 0) {
+      return;
+    }
+
+    const projectId = localStorage.getItem("selectedProjectId");
+    if (projectId) {
+      const p = projects.find((p) => p.id === projectId);
+      if (p) {
+        selectProjectInStore(p);
+        selectProjectId(projectId);
+        return;
+      }
+    }
+
+    selectProjectInStore(projects[0]);
+    selectProjectId(projects[0]!.id);
+  }, [projects, selectProjectInStore, selectProjectId]);
+
   function selectProject(project: Project | undefined) {
     if (project === undefined) {
       let projectToSelect = projects[0];

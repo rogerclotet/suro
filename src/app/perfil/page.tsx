@@ -1,16 +1,20 @@
-"use client";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import ProfileEditor from "./_components/profile-editor/profile-editor";
 
-import { useSession } from "next-auth/react";
-
-export default function PerfilPage() {
-  const session = useSession();
+export default async function PerfilPage() {
+  const session = await auth();
+  if (!session) {
+    return redirect("/");
+  }
 
   return (
     <div className="space-y-4">
       <h1 className="mt-1 text-xl font-semibold">Perfil</h1>
 
-      <p>Hola {session.data?.user.name},</p>
-      <p>Aquí podràs editar el teu perfil.</p>
+      <div className="mx-auto max-w-xl">
+        <ProfileEditor user={session.user} />
+      </div>
     </div>
   );
 }
