@@ -13,7 +13,7 @@ export default function UserBalance({
   className?: string;
 }) {
   function BalanceBar() {
-    const positive = balance >= 0;
+    const positive = Math.round(balance) >= 0;
     const percent = maxAbsBalance === 0 ? 0 : Math.abs(balance) / maxAbsBalance;
 
     if (positive) {
@@ -43,7 +43,7 @@ export default function UserBalance({
       <BalanceBar />
       <span className="z-10 rounded-full bg-foreground px-1">
         <MonetaryAmount
-          amount={balance}
+          amount={Math.round(balance)}
           currency={currency}
           className="font-semibold text-primary-foreground"
         />

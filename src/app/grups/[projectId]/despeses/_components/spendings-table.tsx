@@ -35,7 +35,13 @@ export default function SpendingsTable({
 
     const balances = calculateBalances(project, spendings);
     setBalances(balances);
-    setMaxAbsBalance(Math.max(...Object.values(balances).map(Math.abs)));
+    setMaxAbsBalance(
+      Math.max(
+        ...Object.values(balances).map((balance) =>
+          Math.abs(Math.round(balance)),
+        ),
+      ),
+    );
     setCurrency(spendings[0]?.currency ?? "EUR");
   }, [spendings, project]);
 

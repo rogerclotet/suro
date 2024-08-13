@@ -86,11 +86,9 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
               </AlertDescription>
             </Alert>
           ) : (
-            <div>
-              <h2 className="mb-2 font-semibold">
-                Propostes per saldar deutes:
-              </h2>
-              <ul>
+            <div className="mb-2 space-y-2">
+              <h2 className="font-semibold">Propostes per saldar deutes:</h2>
+              <ul className="space-y-2">
                 {pending.map((payment, index) => (
                   <li key={index}>
                     <SettleProposal

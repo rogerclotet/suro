@@ -55,7 +55,7 @@ export function generateProposals(project: Project, spendings: Spending[]) {
   const proposals: SettlingPayment[] = Array.from(toPay).flatMap(
     ([fromUserId, toPays]) => {
       return Array.from(toPays).map(([toUserId, amount]) => ({
-        amount,
+        amount: Math.round(amount),
         currency,
         to: toUserId,
         from: fromUserId,
