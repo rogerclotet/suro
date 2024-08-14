@@ -1,9 +1,22 @@
+"use client";
+
 import type { Spending } from "@/app/_data/spending";
+import React from "react";
 import MonetaryAmount from "./monetary-amount";
 
 export default function SpendingLine({ spending }: { spending: Spending }) {
+  const [createdAt, setCreatedAt] = React.useState<Date>();
+
+  React.useEffect(() => {
+    setCreatedAt(spending.createdAt);
+  }, [spending.createdAt]);
+
   function getDisplayDate() {
-    const date = new Date(spending.createdAt);
+    if (!createdAt) {
+      return null;
+    }
+
+    const date = new Date(createdAt);
     // if it's the same day as now
     const isToday =
       date.getFullYear() === new Date().getFullYear() &&
