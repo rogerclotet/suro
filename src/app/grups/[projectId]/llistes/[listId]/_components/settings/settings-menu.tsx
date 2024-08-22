@@ -1,6 +1,6 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
+import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,14 +9,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ModalForm from "@/components/ui/modal-form";
-import { Edit, Settings, Trash2 } from "lucide-react";
+import { Edit, Import, Settings, Trash2 } from "lucide-react";
 import React from "react";
-import DeleteListModal from "./delete-list-form";
+import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
+import ImportTemplatesModal from "./import-templates/import-templates-modal";
 
-export default function SettingsMenu({ list }: { list: List }) {
-  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
+export default function SettingsMenu({
+  list,
+  templates,
+}: {
+  list: List;
+  templates: Template[];
+}) {
+  const importDialogRef = React.useRef<HTMLDivElement>(null);
   const editDialogRef = React.useRef<HTMLDivElement>(null);
+  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -27,6 +35,12 @@ export default function SettingsMenu({ list }: { list: List }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => importDialogRef.current?.click()}
+            className="cursor-pointer gap-2"
+          >
+            <Import /> Importar plantilles
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => editDialogRef.current?.click()}
             className="cursor-pointer gap-2"
@@ -44,6 +58,11 @@ export default function SettingsMenu({ list }: { list: List }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <ImportTemplatesModal
+        list={list}
+        templates={templates}
+        triggerRef={importDialogRef}
+      />
       <ModalForm
         triggerRef={editDialogRef}
         title="Editar llista"

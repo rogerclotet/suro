@@ -1,7 +1,7 @@
 import { ClientOnly } from "@/components/client-only";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
-import { getList } from "@/server/lists";
+import { getList, getTemplates } from "@/server/lists";
 import { CalendarFold } from "lucide-react";
 import Link from "next/link";
 import ShareButton from "../../../../../components/ui/share-button";
@@ -10,13 +10,14 @@ import CheckList from "./_components/check-list";
 import SettingsMenu from "./_components/settings/settings-menu";
 
 export default async function ListPage({
-  params: { listId },
+  params: { projectId, listId },
 }: {
-  params: { listId: string };
+  params: { projectId: string; listId: string };
 }) {
   await checkAuth();
 
   const list = await getList(listId);
+  const templates = await getTemplates(projectId);
 
   if (!list) {
     return (
@@ -42,7 +43,7 @@ export default async function ListPage({
               path={`/grups/${list.projectId}/llistes/${list.id}`}
             />
           </ClientOnly>
-          <SettingsMenu list={list} />
+          <SettingsMenu list={list} templates={templates} />
         </div>
       </div>
 
