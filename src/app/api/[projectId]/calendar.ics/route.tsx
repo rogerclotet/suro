@@ -37,8 +37,20 @@ export const GET = withAxiom(
       events.map((e) => ({
         title: e.name,
         description: e.description ?? undefined,
-        start: e.startAt.getTime(),
-        end: e.endAt.getTime(),
+        start: e.allDay
+          ? [
+              e.startAt.getFullYear(),
+              e.startAt.getMonth() + 1,
+              e.startAt.getDate(),
+            ]
+          : e.startAt.getTime(),
+        end: e.allDay
+          ? [
+              e.endAt.getFullYear(),
+              e.endAt.getMonth() + 1,
+              e.endAt.getDate() + 1,
+            ]
+          : e.endAt.getTime(),
         url: `https://familia.clotet.dev/grups/${projectId}/calendari/${e.id}`,
         organizer: {
           name: e.createdBy.name ?? undefined,

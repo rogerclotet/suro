@@ -189,6 +189,7 @@ export const events = createTable("event", {
   description: text("description"),
   startAt: timestamp("startAt", { mode: "date", withTimezone: true }).notNull(),
   endAt: timestamp("endAt", { mode: "date", withTimezone: true }).notNull(),
+  allDay: boolean("allDay").default(false),
   createdAt: timestamp("createdAt", {
     mode: "date",
     withTimezone: true,

@@ -36,6 +36,7 @@ export async function createEvent(
     description: parsedData.description,
     startAt,
     endAt,
+    allDay: parsedData.allDay,
     projectId: project.id,
     createdBy: session.user.id,
   });
