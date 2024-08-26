@@ -19,7 +19,7 @@ import type { CheckedState } from "@radix-ui/react-checkbox";
 import { captureException } from "@sentry/nextjs";
 import { Loader2, Plus } from "lucide-react";
 import { useLogger } from "next-axiom";
-import React from "react";
+import React, { useCallback } from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,21 +47,34 @@ export default function CreateEventButton({
   const triggerRef = React.useRef<HTMLDivElement>(null);
   const log = useLogger();
 
+  const selectDefaultTime = useCallback(
+    (fromDate: Date, toDate: Date, allDay?: boolean) => {
+      const defaultStartAt = new Date(fromDate.getTime());
+      const defaultEndAt = new Date(toDate.getTime());
+
+      if (allDay) {
+        defaultStartAt.setHours(0, 0, 0, 0);
+        defaultEndAt.setHours(23, 59, 59, 999);
+      } else {
+        const now = new Date();
+        defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
+        defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
+      }
+
+      defaultStartAt.setDate(defaultStartAt.getDate());
+      defaultEndAt.setDate(defaultEndAt.getDate());
+
+      form.setValue("dates", {
+        from: defaultStartAt,
+        to: defaultEndAt,
+      });
+    },
+    [form],
+  );
+
   React.useEffect(() => {
-    const defaultTime = defaultDate.getTime();
-    const defaultStartAt = new Date(defaultTime);
-    defaultStartAt.setHours(0, 0, 0, 0);
-    const defaultEndAt = new Date(defaultTime);
-    defaultEndAt.setHours(23, 59, 59, 999);
-
-    defaultStartAt.setDate(defaultStartAt.getDate());
-    defaultEndAt.setDate(defaultEndAt.getDate());
-
-    form.setValue("dates", {
-      from: defaultStartAt,
-      to: defaultEndAt,
-    });
-  }, [defaultDate, form]);
+    selectDefaultTime(defaultDate, defaultDate, true);
+  }, [defaultDate, selectDefaultTime]);
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
     try {
@@ -78,25 +91,28 @@ export default function CreateEventButton({
   }
 
   function handleDatesChange(dates: DateRange | undefined) {
-    const from = dates?.from;
-    const to = dates?.to ?? dates?.from;
+    const from = dates?.from ?? new Date();
+    const to = dates?.to ?? from;
 
-    if (form.getValues().allDay) {
-      from?.setHours(0, 0, 0, 0);
-      to?.setHours(23, 59, 59, 999);
-    }
-
-    form.setValue("dates", {
-      from,
-      to,
-    });
+    selectDefaultTime(from, to, form.getValues("allDay"));
   }
 
   function handleStartTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    newDates.from?.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.from) {
+      return;
+    }
+
+    newDates.from.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.to || newDates.from > newDates.to) {
+      newDates.to?.setHours(
+        newDates.from.getHours() + 1,
+        newDates.from.getMinutes(),
+      );
+    }
+
     form.setValue("dates", newDates);
   }
 
@@ -104,7 +120,18 @@ export default function CreateEventButton({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    newDates.to?.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.to) {
+      return;
+    }
+
+    newDates.to.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.from || newDates.from > newDates.to) {
+      newDates.from?.setHours(
+        newDates.to.getHours() - 1,
+        newDates.to.getMinutes(),
+      );
+    }
+
     form.setValue("dates", newDates);
   }
 
@@ -113,15 +140,14 @@ export default function CreateEventButton({
       return;
     }
 
-    if (checked) {
-      const newDates = form.getValues("dates");
-      newDates.from?.setHours(0, 0, 0, 0);
-      newDates.to?.setHours(23, 59, 59, 999);
-      form.setValue("dates", newDates);
-    }
+    const newDates = form.getValues("dates");
+    selectDefaultTime(
+      newDates.from ?? newDates.to!,
+      newDates.to ?? newDates.from!,
+      checked,
+    );
 
     form.setValue("allDay", checked);
-    form.setValue("dates", form.getValues("dates"));
   }
 
   return (
