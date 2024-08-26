@@ -19,7 +19,7 @@ import type { CheckedState } from "@radix-ui/react-checkbox";
 import { captureException } from "@sentry/nextjs";
 import { Loader2, Plus } from "lucide-react";
 import { useLogger } from "next-axiom";
-import React, { useCallback } from "react";
+import React from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,7 +47,7 @@ export default function CreateEventButton({
   const triggerRef = React.useRef<HTMLDivElement>(null);
   const log = useLogger();
 
-  const selectDefaultTime = useCallback(
+  const selectDefaultTime = React.useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
       const defaultStartAt = new Date(fromDate.getTime());
       const defaultEndAt = new Date(toDate.getTime());

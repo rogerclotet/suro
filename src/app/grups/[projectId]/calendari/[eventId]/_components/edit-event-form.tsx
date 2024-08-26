@@ -45,11 +45,36 @@ export default function EditEventForm({
         from: event.startAt,
         to: event.endAt,
       },
-      allDay: isAllDay(event.startAt, event.endAt),
+      allDay: event.allDay,
     },
     resolver: valibotResolver(eventSchema),
   });
   const log = useLogger();
+
+  const selectDefaultTime = React.useCallback(
+    (fromDate: Date, toDate: Date, allDay?: boolean) => {
+      const defaultStartAt = new Date(fromDate.getTime());
+      const defaultEndAt = new Date(toDate.getTime());
+
+      if (allDay) {
+        defaultStartAt.setHours(0, 0, 0, 0);
+        defaultEndAt.setHours(23, 59, 59, 999);
+      } else {
+        const now = new Date();
+        defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
+        defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
+      }
+
+      defaultStartAt.setDate(defaultStartAt.getDate());
+      defaultEndAt.setDate(defaultEndAt.getDate());
+
+      form.setValue("dates", {
+        from: defaultStartAt,
+        to: defaultEndAt,
+      });
+    },
+    [form],
+  );
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
     try {
@@ -77,25 +102,28 @@ export default function EditEventForm({
   }
 
   function handleDatesChange(dates: DateRange | undefined) {
-    const from = dates?.from;
-    const to = dates?.to ?? dates?.from;
+    const from = dates?.from ?? new Date();
+    const to = dates?.to ?? from;
 
-    if (form.getValues().allDay) {
-      from?.setHours(0, 0, 0, 0);
-      to?.setHours(23, 59, 59, 999);
-    }
-
-    form.setValue("dates", {
-      from,
-      to,
-    });
+    selectDefaultTime(from, to, form.getValues("allDay"));
   }
 
   function handleStartTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
+   const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    newDates.from?.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.from) {
+      return;
+    }
+
+    newDates.from.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.to || newDates.from > newDates.to) {
+      newDates.to?.setHours(
+        newDates.from.getHours() + 1,
+        newDates.from.getMinutes(),
+      );
+    }
+
     form.setValue("dates", newDates);
   }
 
@@ -103,7 +131,18 @@ export default function EditEventForm({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    newDates.to?.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.to) {
+      return;
+    }
+
+    newDates.to.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    if (!newDates.from || newDates.from > newDates.to) {
+      newDates.from?.setHours(
+        newDates.to.getHours() - 1,
+        newDates.to.getMinutes(),
+      );
+    }
+
     form.setValue("dates", newDates);
   }
 
@@ -112,15 +151,14 @@ export default function EditEventForm({
       return;
     }
 
-    if (checked) {
-      const newDates = form.getValues("dates");
-      newDates.from?.setHours(0, 0, 0, 0);
-      newDates.to?.setHours(23, 59, 59, 999);
-      form.setValue("dates", newDates);
-    }
+    const newDates = form.getValues("dates");
+    selectDefaultTime(
+      newDates.from ?? newDates.to!,
+      newDates.to ?? newDates.from!,
+      checked,
+    );
 
     form.setValue("allDay", checked);
-    form.setValue("dates", form.getValues("dates"));
   }
 
   return (
