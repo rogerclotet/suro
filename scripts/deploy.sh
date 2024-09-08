@@ -3,6 +3,7 @@
 (
   sshpass -p $SSH_PASSWORD ssh $SSH_USERNAME@$SSH_IP -o StrictHostKeyChecking=no <<-EOF
     source ~/.bashrc
+    echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     docker pull $IMAGE_TAG
     docker stop familia
     docker run --name=familia --restart=unless-stopped -d -p $PORT:3000 $IMAGE_TAG
