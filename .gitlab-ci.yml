@@ -1,14 +1,15 @@
 stages:
+  - prepare
   - build
   - deploy
 
-build:
-  image: docker:27.2.0
-  stage: build
-  services:
-    - docker:27.2.0-dind
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+prepare:
+  image: alpine
+  stage: prepare
   variables:
-    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     DATABASE_URL: $DATABASE_URL
     NEXTAUTH_SECRET: $NEXTAUTH_SECRET
     NEXTAUTH_URL: $NEXTAUTH_URL
@@ -24,8 +25,20 @@ build:
     NEXT_PUBLIC_AXIOM_DATASET: $NEXT_PUBLIC_AXIOM_DATASET
     NEXT_PUBLIC_AXIOM_TOKEN: $NEXT_PUBLIC_AXIOM_TOKEN
   script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - env > .env
+  artifacts:
+    paths:
+      - .env
+
+build:
+  image: docker:27.2.0
+  stage: build
+  services:
+    - docker:27.2.0-dind
+  needs:
+    - prepare
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
     - docker push $CI_REGISTRY_IMAGE:latest
@@ -35,8 +48,6 @@ build:
 deploy:
   image: alpine
   stage: deploy
-  variables:
-    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   before_script:
     - apk add openssh-client sshpass
   script:
