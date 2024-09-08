@@ -3,10 +3,11 @@
 (
   sshpass -p $SSH_PASSWORD ssh $SSH_USERNAME@$SSH_IP -o StrictHostKeyChecking=no <<-EOF
     source ~/.bashrc
-    echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
-    docker pull $IMAGE_TAG
+    cd $SSH_PROJECT_DIRECTORY
+    git pull
+    docker build -t familia .
     docker stop familia
-    docker run --name=familia --restart=unless-stopped -d -p $PORT:3000 $IMAGE_TAG
-    docker image rm -f $(docker images -a | grep -v "$IMAGE_TAG" | awk 'NR>1 {print $3}')
+    docker rm familia
+    docker run --name=familia --restart=unless-stopped -d -p $PORT:3000 familia
 EOF
 )
