@@ -25,6 +25,7 @@ build:
     NEXT_PUBLIC_AXIOM_TOKEN: $NEXT_PUBLIC_AXIOM_TOKEN
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - env > .env
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
     - docker push $CI_REGISTRY_IMAGE:latest
