@@ -43,7 +43,7 @@ export default function UserBalance({
       <BalanceBar />
       <span className="z-10 rounded-full bg-foreground px-1">
         <MonetaryAmount
-          amount={Math.round(balance)}
+          amount={maxAbsBalance === 0 ? 0 : balance}
           currency={currency}
           className="font-semibold text-primary-foreground"
         />

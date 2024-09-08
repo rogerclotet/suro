@@ -78,7 +78,7 @@ export default function SpendingsTable({
             </TableCell>
             <TableCell className="p-0 pr-4">
               <UserBalance
-                balance={balances[u.user.id] ?? 0}
+                balance={Math.trunc(balances[u.user.id] ?? 0)}
                 maxAbsBalance={maxAbsBalance}
                 currency={currency}
                 className="ml-auto"
