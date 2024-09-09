@@ -52,6 +52,14 @@ export function generateProposals(project: Project, spendings: Spending[]) {
     }
   } while (balances.some(({ balance }) => balance > 0));
 
+  toPay.forEach((toPays, _fromUserId) => {
+    toPays.forEach((amount, toUserId) => {
+      if (Math.round(amount) === 0) {
+        toPays.delete(toUserId);
+      }
+    });
+  });
+
   const proposals: SettlingPayment[] = Array.from(toPay).flatMap(
     ([fromUserId, toPays]) => {
       return Array.from(toPays).map(([toUserId, amount]) => ({
