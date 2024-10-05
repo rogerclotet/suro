@@ -76,14 +76,21 @@ export default function Calendar() {
   }
 
   function DayContent(props: DayContentProps) {
-    const hasEvent = events?.some((event) =>
-      isCurrentDayEvent(event, props.date),
-    );
+    const dayEvents = events
+      ?.filter((event) => isCurrentDayEvent(event, props.date))
+      .slice(0, 3);
 
     return (
       <span className="relative overflow-visible">
-        {hasEvent && (
-          <div className="event-indicator absolute -right-[8px] -top-[5px] h-2 w-2 rounded-full bg-secondary" />
+        {dayEvents && dayEvents.length > 0 && (
+          <div className="absolute -right-[8px] -top-[5px] flex flex-row-reverse gap-0.5">
+            {dayEvents.map((event) => (
+              <div
+                key={event.id}
+                className="event-indicator h-1.5 w-1.5 rounded-full bg-secondary"
+              />
+            ))}
+          </div>
         )}
 
         {props.date.getDate()}
