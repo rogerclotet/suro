@@ -57,6 +57,21 @@ const config = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        event1: {
+          DEFAULT: "var(--event-1)",
+        },
+        event2: {
+          DEFAULT: "var(--event-2)",
+        },
+        event3: {
+          DEFAULT: "var(--event-3)",
+        },
+        event4: {
+          DEFAULT: "var(--event-4)",
+        },
+        event5: {
+          DEFAULT: "var(--event-5)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -20,6 +20,9 @@ import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
+import { cn } from "@/lib/utils";
+
+const EVENT_COLORS = 5;
 
 export default function Calendar() {
   const searchParams = useSearchParams();
@@ -31,11 +34,15 @@ export default function Calendar() {
   const { data: events, isLoading } = useQuery(
     eventsQueryOptions(monthStart, project?.id),
   );
+  const [eventColors, setEventColors] = React.useState<Map<string, number>>(
+    new Map(),
+  );
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const currentEvents = events?.filter((event) =>
-    isCurrentDayEvent(event, date),
+  const currentEvents = React.useMemo(
+    () => events?.filter((event) => isCurrentDayEvent(event, date)),
+    [events, date],
   );
 
   React.useEffect(() => {
@@ -48,6 +55,20 @@ export default function Calendar() {
     date.setDate(1);
     setMonthStart(date);
   }, [day]);
+
+  React.useEffect(() => {
+    if (!events) {
+      return;
+    }
+
+    const colors = new Map();
+    [...events].forEach((event, index) => {
+      const color = index % EVENT_COLORS;
+      colors.set(event.id, color);
+    });
+    setEventColors(colors);
+    console.log(colors);
+  }, [monthStart]);
 
   function Events() {
     if (isLoading || currentEvents === undefined) {
@@ -84,12 +105,28 @@ export default function Calendar() {
       <span className="relative overflow-visible">
         {dayEvents && dayEvents.length > 0 && (
           <div className="absolute -right-[8px] -top-[5px] flex flex-row-reverse gap-0.5">
-            {dayEvents.map((event) => (
-              <div
-                key={event.id}
-                className="event-indicator h-1.5 w-1.5 rounded-full bg-secondary"
-              />
-            ))}
+            {dayEvents.map((event) => {
+              const color = eventColors.get(event.id);
+              return (
+                <div
+                  key={event.id}
+                  className={cn(
+                    "event-indicator h-1.5 w-1.5 rounded-full",
+                    // Explictly defining colors to avoid concatenating arbitrary values
+                    // https://v2.tailwindcss.com/docs/just-in-time-mode#arbitrary-value-support
+                    color === 2
+                      ? "bg-event2"
+                      : color === 3
+                        ? "bg-event3"
+                        : color === 4
+                          ? "bg-event4"
+                          : color === 5
+                            ? "bg-event5"
+                            : "bg-event1",
+                  )}
+                />
+              );
+            })}
           </div>
         )}
 

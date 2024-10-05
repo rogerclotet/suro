@@ -21,14 +21,17 @@ export function eventsQueryOptions(
       const res = await fetch(
         `/api/${projectId}/events?from=${monthStart.valueOf()}&to=${monthEnd.valueOf()}`,
       );
-      return (await res.json()) as Event[];
+      const events = (await res.json()) as Event[];
+      return events;
     },
     select: (data) => {
-      return data.map((event) => ({
-        ...event,
-        startAt: new Date(event.startAt),
-        endAt: new Date(event.endAt),
-      }));
+      return data
+        .sort((a, b) => a.startAt.getTime() - b.startAt.getTime())
+        .map((event) => ({
+          ...event,
+          startAt: new Date(event.startAt),
+          endAt: new Date(event.endAt),
+        }));
     },
     staleTime: 60 * 1000,
   });
