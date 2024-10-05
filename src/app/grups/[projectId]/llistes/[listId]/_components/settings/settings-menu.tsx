@@ -9,11 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ModalForm from "@/components/ui/modal-form";
-import { Edit, Import, Settings, Trash2 } from "lucide-react";
+import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
 import React from "react";
 import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
 import ImportTemplatesModal from "./import-templates/import-templates-modal";
+import ClearCompletedModal from "./clear-completed-modal";
 
 export default function SettingsMenu({
   list,
@@ -22,6 +23,7 @@ export default function SettingsMenu({
   list: List;
   templates: Template[];
 }) {
+  const clearCompletedDialogRef = React.useRef<HTMLDivElement>(null);
   const importDialogRef = React.useRef<HTMLDivElement>(null);
   const editDialogRef = React.useRef<HTMLDivElement>(null);
   const deleteDialogRef = React.useRef<HTMLDivElement>(null);
@@ -35,6 +37,12 @@ export default function SettingsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => clearCompletedDialogRef.current?.click()}
+            className="cursor-pointer gap-2"
+          >
+            <ListX /> Esborrar completats
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => importDialogRef.current?.click()}
             className="cursor-pointer gap-2"
@@ -58,6 +66,7 @@ export default function SettingsMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <ClearCompletedModal list={list} triggerRef={clearCompletedDialogRef} />
       <ImportTemplatesModal
         list={list}
         templates={templates}

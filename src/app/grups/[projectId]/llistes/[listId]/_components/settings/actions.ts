@@ -3,8 +3,8 @@
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
-import { lists } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { listItems, lists } from "@/server/db/schema";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { listSchema } from "../../../_components/create-list/data";
@@ -44,6 +44,26 @@ export async function updateList(
   const parsedData = v.parse(listSchema, data);
 
   await db.update(lists).set(parsedData).where(eq(lists.id, list.id));
+
+  revalidatePath(`/grups/${list.projectId}/llistes`);
+  revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);
+}
+
+export async function clearCompletedItems(list: List) {
+  const session = await auth();
+  if (!session) {
+    return;
+  }
+
+  if (
+    list.project.users.find((u) => u.userId === session.user.id) === undefined
+  ) {
+    throw new Error("The user is not part of the project");
+  }
+
+  await db
+    .delete(listItems)
+    .where(and(eq(listItems.listId, list.id), eq(listItems.completed, true)));
 
   revalidatePath(`/grups/${list.projectId}/llistes`);
   revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);
