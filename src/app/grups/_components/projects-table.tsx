@@ -22,6 +22,7 @@ import UsersList from "../_components/users-list";
 import EditProjectButton from "./edit-project-button";
 import IdIcon from "./id-icon";
 import InviteButton from "./invite-button";
+import LeaveButton from "./leave-button";
 
 export default async function ProjectsTable() {
   const session = await auth();
@@ -148,6 +149,7 @@ export default async function ProjectsTable() {
             </TableCell>
             <TableCell className="flex flex-row items-center justify-end gap-2 p-2">
               <InviteButton project={project} />
+              <LeaveButton project={project} />
               <EditButton project={project} />
               <DeleteButton project={project} />
             </TableCell>
