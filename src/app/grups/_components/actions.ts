@@ -44,6 +44,10 @@ export async function deleteProject(project: Project) {
     throw new Error("Only the creator can delete the project");
   }
 
+  if (project.users.length > 1) {
+    throw new Error("Cannot delete a project with users");
+  }
+
   await db.delete(projects).where(eq(projects.id, project.id));
 
   revalidatePath("/grups");

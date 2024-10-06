@@ -53,6 +53,28 @@ export default async function ProjectsTable() {
       );
     }
 
+    if (project.users.length > 1) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled
+                aria-label="Eliminar"
+              >
+                <Trash2 />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{"Només es poden eliminar els grups buits"}</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
     if (ownProjects <= 1) {
       return (
         <Tooltip>
