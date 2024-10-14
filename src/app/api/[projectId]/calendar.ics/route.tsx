@@ -4,7 +4,7 @@ import { db } from "@/server/db";
 import { projects } from "@/server/db/schema";
 import { getEventsToExport } from "@/server/events";
 import { and, eq } from "drizzle-orm";
-import { createEvents } from "ics";
+import { createEvents, type EventAttributes } from "ics";
 import { withAxiom, type AxiomRequest } from "next-axiom";
 
 export const GET = withAxiom(
@@ -34,33 +34,40 @@ export const GET = withAxiom(
     const events = await getEventsToExport(projectId);
 
     const { error, value } = createEvents(
-      events.map((e) => ({
-        title: e.name,
-        description: e.description ?? undefined,
-        start: e.allDay
-          ? [
+      events.map((e) => {
+        const common: Partial<EventAttributes> = {
+          title: e.name,
+          description: e.description ?? undefined,
+          startInputType: "utc",
+          url: `https://familia.clotet.dev/grups/${projectId}/calendari/${e.id}`,
+          organizer: {
+            name: e.createdBy.name ?? undefined,
+            email: e.createdBy.email,
+          },
+          attendees: attendees,
+          created: e.createdAt ? e.createdAt.getTime() : undefined,
+          lastModified: e.updatedAt ? e.updatedAt.getTime() : undefined,
+          calName: project.name,
+        };
+
+        if (e.allDay) {
+          return {
+            ...common,
+            start: [
               e.startAt.getFullYear(),
               e.startAt.getMonth() + 1,
               e.startAt.getDate(),
-            ]
-          : e.startAt.getTime(),
-        end: e.allDay
-          ? [
-              e.endAt.getFullYear(),
-              e.endAt.getMonth() + 1,
-              e.endAt.getDate() + 1,
-            ]
-          : e.endAt.getTime(),
-        url: `https://familia.clotet.dev/grups/${projectId}/calendari/${e.id}`,
-        organizer: {
-          name: e.createdBy.name ?? undefined,
-          email: e.createdBy.email,
-        },
-        attendees: attendees,
-        created: e.createdAt ? e.createdAt.getTime() : undefined,
-        lastModified: e.updatedAt ? e.updatedAt.getTime() : undefined,
-        calName: project.name,
-      })),
+            ],
+            duration: { days: 1 },
+          };
+        }
+
+        return {
+          ...common,
+          start: e.startAt.getTime(),
+          end: e.endAt.getTime(),
+        };
+      }),
     );
 
     if (error) {
