@@ -54,9 +54,9 @@ export const GET = withAxiom(
           return {
             ...common,
             start: [
-              e.startAt.getFullYear(),
-              e.startAt.getMonth() + 1,
-              e.startAt.getDate(),
+              e.startAt.getUTCFullYear(),
+              e.startAt.getUTCMonth() + 1,
+              e.startAt.getUTCDate(),
             ],
             duration: { days: 1 },
           };
