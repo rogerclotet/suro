@@ -67,7 +67,7 @@ export default function Calendar() {
       colors.set(event.id, color);
     });
     setEventColors(colors);
-    console.log(colors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthStart]);
 
   function Events() {

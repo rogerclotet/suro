@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import { events } from "@/server/db/schema";
 import * as v from "valibot";
 import { eventSchema } from "./data";
+import { revalidatePath } from "next/cache";
 
 export async function createEvent(
   data: v.InferInput<typeof eventSchema>,
@@ -40,4 +41,6 @@ export async function createEvent(
     projectId: project.id,
     createdBy: session.user.id,
   });
+
+  revalidatePath(`/grups/${project.id}/calendari`);
 }
