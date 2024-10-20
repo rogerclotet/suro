@@ -235,18 +235,24 @@ function isCurrentDayEvent(event: Event, date?: Date) {
     return false;
   }
 
+  let endAt = event.endAt;
+  if (event.allDay) {
+    endAt = new Date(endAt.getTime() - 86400000);
+  }
+
   const eventStart = new Date(
     event.startAt.getFullYear(),
     event.startAt.getMonth(),
     event.startAt.getDate(),
   );
   const eventEnd = new Date(
-    event.endAt.getFullYear(),
-    event.endAt.getMonth(),
-    event.endAt.getDate(),
+    endAt.getFullYear(),
+    endAt.getMonth(),
+    endAt.getDate(),
     23,
     59,
     59,
+    999,
   );
 
   return eventStart <= date && eventEnd >= date;

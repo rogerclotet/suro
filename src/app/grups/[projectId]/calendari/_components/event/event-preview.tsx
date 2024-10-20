@@ -32,7 +32,11 @@ export default function EventPreview({ event }: { event: Event }) {
             )}
           </CardTitle>
           <CardDescription>
-            <TimeRange startAt={event.startAt} endAt={event.endAt} />
+            <TimeRange
+              startAt={event.startAt}
+              endAt={event.endAt}
+              allDay={event.allDay}
+            />
           </CardDescription>
         </CardHeader>
         {event.description && (

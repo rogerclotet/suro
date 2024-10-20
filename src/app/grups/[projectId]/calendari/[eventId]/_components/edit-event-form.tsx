@@ -43,7 +43,9 @@ export default function EditEventForm({
       description: event.description ?? "",
       dates: {
         from: event.startAt,
-        to: event.endAt,
+        to: event.allDay
+          ? new Date(event.endAt.getTime() - 86400000)
+          : event.endAt,
       },
       allDay: event.allDay,
     },
@@ -58,15 +60,12 @@ export default function EditEventForm({
 
       if (allDay) {
         defaultStartAt.setHours(0, 0, 0, 0);
-        defaultEndAt.setHours(23, 59, 59, 999);
+        defaultEndAt.setHours(0, 0, 0, 0);
       } else {
         const now = new Date();
         defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
         defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
       }
-
-      defaultStartAt.setDate(defaultStartAt.getDate());
-      defaultEndAt.setDate(defaultEndAt.getDate());
 
       form.setValue("dates", {
         from: defaultStartAt,
@@ -84,10 +83,7 @@ export default function EditEventForm({
         name: data.name,
         description: data.description ?? "",
         dates: { from: data.dates.from, to: data.dates.to },
-        allDay:
-          data.dates.from &&
-          data.dates.to &&
-          isAllDay(data.dates.from, data.dates.to),
+        allDay: data.allDay,
       });
       triggerRef.current?.click();
     } catch (e) {
@@ -109,7 +105,7 @@ export default function EditEventForm({
   }
 
   function handleStartTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
-   const value = e.target.value;
+    const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
     if (!newDates.from) {
@@ -272,15 +268,3 @@ export default function EditEventForm({
     </ModalForm>
   );
 }
-
-function isAllDay(from: Date, to: Date) {
-  return (
-    from.getHours() === 0 &&
-    from.getMinutes() === 0 &&
-    from.getSeconds() === 0 &&
-    to.getHours() === 23 &&
-    to.getMinutes() === 59 &&
-    to.getSeconds() === 59
-  );
-}
-

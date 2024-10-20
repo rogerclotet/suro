@@ -54,15 +54,12 @@ export default function CreateEventButton({
 
       if (allDay) {
         defaultStartAt.setHours(0, 0, 0, 0);
-        defaultEndAt.setHours(23, 59, 59, 999);
+        defaultEndAt.setHours(0, 0, 0, 0);
       } else {
         const now = new Date();
         defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
         defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
       }
-
-      defaultStartAt.setDate(defaultStartAt.getDate());
-      defaultEndAt.setDate(defaultEndAt.getDate());
 
       form.setValue("dates", {
         from: defaultStartAt,

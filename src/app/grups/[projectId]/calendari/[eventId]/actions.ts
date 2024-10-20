@@ -132,6 +132,10 @@ export async function editEvent(
   const startAt = new Date(parsedData.dates.from);
   const endAt = new Date(parsedData.dates.to);
 
+  if (parsedData.allDay) {
+    endAt.setUTCDate(endAt.getUTCDate() + 1);
+  }
+
   try {
     await db
       .update(events)

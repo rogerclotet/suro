@@ -58,6 +58,7 @@ export default async function ListPage({
           <TimeRange
             startAt={list.event.startAt}
             endAt={list.event.endAt}
+            allDay={list.event.allDay}
             className="mt-0.5 text-sm text-muted-foreground"
           />
         </div>

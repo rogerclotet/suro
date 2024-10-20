@@ -54,7 +54,11 @@ export default async function EventPage({
             event={event}
             className="mr-2 text-foreground opacity-70"
           />
-          <TimeRange startAt={event.startAt} endAt={event.endAt} />
+          <TimeRange
+            startAt={event.startAt}
+            endAt={event.endAt}
+            allDay={event.allDay}
+          />
         </div>
       </div>
 

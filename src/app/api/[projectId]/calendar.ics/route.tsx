@@ -58,7 +58,11 @@ export const GET = withAxiom(
               e.startAt.getUTCMonth() + 1,
               e.startAt.getUTCDate(),
             ],
-            duration: { days: 1 },
+            duration: {
+              days: Math.round(
+                (e.endAt.getTime() - e.startAt.getTime()) / 86400000,
+              ),
+            },
           };
         }
 
