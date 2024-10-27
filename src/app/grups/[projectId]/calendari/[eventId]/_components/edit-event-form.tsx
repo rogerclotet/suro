@@ -76,8 +76,26 @@ export default function EditEventForm({
   );
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
+    const dataToEdit = window.structuredClone(data);
+    if (dataToEdit.allDay) {
+      dataToEdit.dates.from = new Date(
+        Date.UTC(
+          data.dates.from?.getFullYear() ?? 0,
+          data.dates.from?.getMonth() ?? 0,
+          data.dates.from?.getDate() ?? 0,
+        ),
+      );
+      dataToEdit.dates.to = new Date(
+        Date.UTC(
+          data.dates.to?.getFullYear() ?? 0,
+          data.dates.to?.getMonth() ?? 0,
+          data.dates.to?.getDate() ?? 0,
+        ),
+      );
+    }
+
     try {
-      await editEvent(event, data, project!);
+      await editEvent(event, dataToEdit, project!);
       toast.success("Editat correctament");
       form.reset({
         name: data.name,

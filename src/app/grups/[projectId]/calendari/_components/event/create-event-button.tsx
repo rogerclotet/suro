@@ -74,8 +74,26 @@ export default function CreateEventButton({
   }, [defaultDate, selectDefaultTime]);
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
+    const dataToCreate = window.structuredClone(data);
+    if (dataToCreate.allDay) {
+      dataToCreate.dates.from = new Date(
+        Date.UTC(
+          data.dates.from?.getFullYear() ?? 0,
+          data.dates.from?.getMonth() ?? 0,
+          data.dates.from?.getDate() ?? 0,
+        ),
+      );
+      dataToCreate.dates.to = new Date(
+        Date.UTC(
+          data.dates.to?.getFullYear() ?? 0,
+          data.dates.to?.getMonth() ?? 0,
+          data.dates.to?.getDate() ?? 0,
+        ),
+      );
+    }
+
     try {
-      await createEvent(data, project!);
+      await createEvent(dataToCreate, project!);
       toast.success(`Esdeveniment ${data.name} creat`);
       onCreate(data.dates.from, data.dates.to);
       form.reset();
