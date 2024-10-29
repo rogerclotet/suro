@@ -29,6 +29,7 @@ export const env = createEnv({
     UPLOADTHING_URL: z.optional(z.string()),
     AUTH_RESEND_KEY: z.string(),
     RESEND_EMAIL_FROM: z.string(),
+    VAPID_PRIVATE_KEY: z.string(),
   },
 
   /**
@@ -41,6 +42,7 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
     NEXT_PUBLIC_AXIOM_DATASET: z.string(),
     NEXT_PUBLIC_AXIOM_TOKEN: z.string(),
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string(),
   },
 
   /**
@@ -63,6 +65,8 @@ export const env = createEnv({
     UPLOADTHING_URL: process.env.UPLOADTHING_URL,
     AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY,
     RESEND_EMAIL_FROM: process.env.RESEND_EMAIL_FROM,
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
