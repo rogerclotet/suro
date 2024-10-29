@@ -8,6 +8,7 @@ import {
 } from "../push";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { sendPush } from "../api/web-push/[...path]/api";
 
 export default function TestPage() {
   const [unsupported, setUnsupported] = React.useState<boolean>(false);
@@ -27,14 +28,8 @@ export default function TestPage() {
     });
   }, []);
 
-  async function sendPush() {
-    await fetch("/api/web-push/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ body: message }),
-    });
+  async function sendTestPush() {
+    await sendPush(message ?? "");
     setMessage(null);
   }
 
@@ -64,7 +59,7 @@ export default function TestPage() {
             value={message ?? ""}
             onChange={(e) => setMessage(e.target.value)}
           />
-          <Button onClick={sendPush} disabled={!message}>
+          <Button onClick={sendTestPush} disabled={!message}>
             Test Web Push
           </Button>
         </div>

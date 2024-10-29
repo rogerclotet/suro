@@ -39,9 +39,7 @@ async function sendPush(request: Request) {
   );
 
   const payload: object = (await request.json()) as object;
-  const pushPayload = JSON.stringify({
-    ...payload,
-  });
+  const pushPayload = JSON.stringify(payload);
 
   setTimeout(() => {
     sendNotification(subscription, pushPayload).catch((err) => {
