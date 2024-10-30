@@ -6,6 +6,8 @@ import { templates } from "@/server/db/schema";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { templateSchema } from "./data";
+import { sendPushNotification } from "@/server/push";
+import { getUserProject } from "@/server/projects";
 
 export async function createTemplate(
   projectId: string,
@@ -14,6 +16,12 @@ export async function createTemplate(
   const session = await auth();
   if (!session) {
     throw new Error("Not logged in");
+  }
+
+  const project = await getUserProject(projectId);
+
+  if (project?.users.find((u) => u.user.id === session.user.id) === undefined) {
+    throw new Error("The user is not part of the project");
   }
 
   const parsedData = v.parse(templateSchema, data);
@@ -30,6 +38,20 @@ export async function createTemplate(
   const template = result[0]!;
 
   revalidatePath(`/grups/${projectId}/llistes/plantilles`);
+
+  setTimeout(() => {
+    sendPushNotification(
+      project,
+      `Nova plantilla: ${parsedData.name}`,
+      project.name,
+      `/grups/${project.id}/llistes/plantilles/${template.id}`,
+    ).catch((err) => {
+      console.error(
+        "Failed to send push notification after creating template",
+        err,
+      );
+    });
+  }, 0);
 
   return template.id;
 }
