@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { CalendarFold, Check } from "lucide-react";
 import Link from "next/link";
 
@@ -16,7 +17,7 @@ export default function ListPreview({ list }: { list: List }) {
 
   return (
     <Link href={`/grups/${list.projectId}/llistes/${list.id}`}>
-      <Card className={completed ? "opacity-50" : ""}>
+      <Card className={cn("h-full", completed ? "opacity-50" : "")}>
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <CardTitle>{list.name}</CardTitle>
