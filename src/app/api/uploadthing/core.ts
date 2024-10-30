@@ -1,6 +1,8 @@
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { files } from "@/server/db/schema";
+import { getUserProject } from "@/server/projects";
+import { sendPushNotification } from "@/server/push";
 import { revalidatePath } from "next/cache";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
@@ -57,6 +59,32 @@ export const uploadFileRouter = {
           `/grups/${metadata.projectId}/calendari/${metadata.eventId}`,
         );
       }
+
+      setTimeout(() => {
+        getUserProject(metadata.projectId)
+          .then((project) => {
+            if (!project) {
+              return;
+            }
+
+            sendPushNotification(
+              project,
+              `Fitxer ${file.name} afegit`,
+              project.name,
+              metadata.eventId
+                ? `/grups/${project.id}/calendari/${metadata.eventId}`
+                : `/grups/${project.id}/fitxers`,
+            ).catch((err) => {
+              console.error(
+                "Failed to send push notification after uploading file",
+                err,
+              );
+            });
+          })
+          .catch((err) => {
+            console.error("Failed to get project after uploading file", err);
+          });
+      }, 0);
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return {};
