@@ -7,6 +7,7 @@ import { events } from "@/server/db/schema";
 import * as v from "valibot";
 import { eventSchema } from "./data";
 import { revalidatePath } from "next/cache";
+import { sendPushNotification } from "@/server/push";
 
 export async function createEvent(
   data: v.InferInput<typeof eventSchema>,
@@ -47,4 +48,27 @@ export async function createEvent(
   });
 
   revalidatePath(`/grups/${project.id}/calendari`);
+
+  setTimeout(() => {
+    let timeRange = parsedData.dates.from?.toLocaleDateString("ca-ES", {
+      dateStyle: "short",
+    });
+    if (parsedData.dates.to !== parsedData.dates.from) {
+      timeRange += ` - ${parsedData.dates.to?.toLocaleDateString("ca-ES", {
+        dateStyle: "short",
+      })}`;
+    }
+
+    sendPushNotification(
+      project,
+      `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
+      project.name,
+      `/grups/${project.id}/calendari`,
+    ).catch((err) => {
+      console.error(
+        "Failed to send push notification after creating event",
+        err,
+      );
+    });
+  }, 0);
 }
