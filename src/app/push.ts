@@ -1,14 +1,37 @@
-const SERVICE_WORKER_FILE_PATH = "./sw.js";
+import { submitSubscription } from "./api/web-push/[...path]/api";
+
+const SERVICE_WORKER_FILE_PATH = "/sw.js";
 
 export async function registerAndSubscribe(
   onSubscribe: (subs: PushSubscription | null) => void,
 ): Promise<void> {
   try {
-    await navigator.serviceWorker.register(SERVICE_WORKER_FILE_PATH);
+    await navigator.serviceWorker.register(SERVICE_WORKER_FILE_PATH, {
+      scope: "/",
+    });
     await subscribe(onSubscribe);
   } catch (err) {
-    console.error("Failed to register service-worker", err);
+    console.error("Failed to register service worker", err);
   }
+}
+
+export function areNotificationsEnabled() {
+  switch (localStorage.getItem("notifications")) {
+    case "enabled":
+      return true;
+    case "disabled":
+      return false;
+    default:
+      return undefined;
+  }
+}
+
+export function enableNotifications() {
+  localStorage.setItem("notifications", "enabled");
+}
+
+export function disableNotifications() {
+  localStorage.setItem("notifications", "disabled");
 }
 
 export function notificationUnsupported(): boolean {
@@ -28,12 +51,18 @@ async function subscribe(
 ): Promise<void> {
   try {
     const registration = await navigator.serviceWorker.ready;
+    const currentSubsctiption =
+      await registration.pushManager.getSubscription();
+    if (currentSubsctiption) {
+      onSubscribe(currentSubsctiption);
+      return;
+    }
+
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     });
-    console.info("Created subscription object", subscription.toJSON());
-    // submit subscription to server.
+    // submit subscription to server
     await submitSubscription(subscription);
     onSubscribe(subscription);
   } catch (err) {
@@ -41,30 +70,19 @@ async function subscribe(
   }
 }
 
-async function submitSubscription(
-  subscription: PushSubscription,
-): Promise<void> {
-  const endpointUrl = "/api/web-push/subscription";
-  await fetch(endpointUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ subscription }),
-  });
-}
-
 export async function checkPermissionStateAndAct(
   onSubscribe: (subs: PushSubscription | null) => void,
 ): Promise<void> {
-  const notificationPermission = Notification.permission;
-  switch (notificationPermission) {
+  const result = await navigator.permissions.query({
+    name: "notifications",
+  });
+  switch (result.state) {
     case "denied":
       break;
     case "granted":
       await registerAndSubscribe(onSubscribe);
       break;
-    case "default":
+    case "prompt":
       break;
   }
 }

@@ -13,10 +13,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
 import ProjectSelector from "../project-selector";
 import Profile from "./profile/profile";
+import NotificationBell from "./notification-bell/notification-bell";
+import ThemeSwitcher from "../../theme-switcher";
 
 export default function DrawerLayout() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -44,29 +45,35 @@ export default function DrawerLayout() {
             </DrawerTrigger>
 
             <DrawerContent className="fixed left-0 h-full w-80 max-w-[calc(100vw-2rem)] rounded-none">
-              <DrawerTitle className="sr-only">Menú lateral</DrawerTitle>
+              <div className="flex h-full flex-col justify-between gap-4 p-4">
+                <div>
+                  <DrawerTitle className="sr-only">Menú lateral</DrawerTitle>
 
-              <ul tabIndex={0} className="flex flex-col gap-2 p-4">
-                <li>
-                  <Profile onNavigate={() => setIsOpen(false)} />
-                </li>
+                  <ul tabIndex={0} className="flex flex-col gap-2">
+                    <li>
+                      <Profile onNavigate={() => setIsOpen(false)} />
+                    </li>
 
-                <li>
-                  <ProjectSelector onSelect={handleSelectProject} />
-                </li>
+                    <li>
+                      <ProjectSelector onSelect={handleSelectProject} />
+                    </li>
 
-                <li>
-                  <Button
-                    variant="ghost"
-                    asChild
-                    className="w-full justify-start"
-                  >
-                    <Link href="/grups" onClick={() => setIsOpen(false)}>
-                      Gestionar grups
-                    </Link>
-                  </Button>
-                </li>
-              </ul>
+                    <li>
+                      <Button
+                        variant="ghost"
+                        asChild
+                        className="w-full justify-start"
+                      >
+                        <Link href="/grups" onClick={() => setIsOpen(false)}>
+                          Gestionar grups
+                        </Link>
+                      </Button>
+                    </li>
+                  </ul>
+                </div>
+
+                <ThemeSwitcher />
+              </div>
             </DrawerContent>
           </Drawer>
 
@@ -85,7 +92,7 @@ export default function DrawerLayout() {
         </div>
 
         <div className="text-right">
-          <ThemeSwitcher />
+          <NotificationBell />
         </div>
       </nav>
     </div>

@@ -9,6 +9,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { listSchema } from "./data";
+import { sendPushNotification } from "@/server/push";
 
 export async function createList(
   project: Project,
@@ -57,6 +58,20 @@ export async function createList(
   }
 
   revalidatePath(`/grups/${project.id}/llistes`);
+
+  setTimeout(() => {
+    sendPushNotification(
+      project,
+      `Nova llista: ${parsedData.name}`,
+      project.name,
+      `/grups/${project.id}/llistes/${list.id}`,
+    ).catch((err) => {
+      console.error(
+        "Failed to send push notification after creating list",
+        err,
+      );
+    });
+  }, 0);
 
   return list.id;
 }

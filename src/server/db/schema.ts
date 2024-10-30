@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 import { getRandomValues } from "node:crypto";
+import { type PushSubscription } from "web-push";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -302,6 +303,28 @@ export const spendingsRelations = relations(spendings, ({ one }) => ({
     relationName: "project",
   }),
 }));
+
+export const pushSubscriptions = createTable("pushSubscription", {
+  id: varchar("id", { length: 255 })
+    .$defaultFn(randomId)
+    .notNull()
+    .primaryKey(),
+  subscription: jsonb("subscription").$type<PushSubscription>().notNull(),
+  userId: varchar("userId", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onUpdate: "cascade" }),
+});
+
+export const pushSubscriptionsRelations = relations(
+  pushSubscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [pushSubscriptions.userId],
+      references: [users.id],
+      relationName: "user",
+    }),
+  }),
+);
 
 export const projects = createTable("project", {
   id: varchar("id", { length: 255 })
