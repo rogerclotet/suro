@@ -59,12 +59,12 @@ export async function createEvent(
       })}`;
     }
 
-    sendProjectNotification(
+    sendProjectNotification({
       project,
-      `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
-      project.name,
-      `/grups/${project.id}/calendari`,
-    ).catch((err) => {
+      body: `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
+      title: project.name,
+      path: `/grups/${project.id}/calendari`,
+    }).catch((err) => {
       console.error(
         "Failed to send push notification after creating event",
         err,

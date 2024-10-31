@@ -60,12 +60,12 @@ export async function createList(
   revalidatePath(`/grups/${project.id}/llistes`);
 
   setTimeout(() => {
-    sendProjectNotification(
+    sendProjectNotification({
       project,
-      `Nova llista: ${parsedData.name}`,
-      project.name,
-      `/grups/${project.id}/llistes/${list.id}`,
-    ).catch((err) => {
+      body: `Nova llista: ${parsedData.name}`,
+      title: project.name,
+      path: `/grups/${project.id}/llistes/${list.id}`,
+    }).catch((err) => {
       console.error(
         "Failed to send push notification after creating list",
         err,

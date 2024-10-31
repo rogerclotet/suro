@@ -49,14 +49,14 @@ export async function createSpending(
   }
 
   setTimeout(() => {
-    sendProjectNotification(
+    sendProjectNotification({
       project,
-      parsedData.description
+      body: parsedData.description
         ? `Nova despesa: ${parsedData.description} (${parsedData.amount}€)`
         : `Nova despesa: ${parsedData.amount}€`,
-      project.name,
-      `/grups/${project.id}/despeses`,
-    ).catch((err) => {
+      title: project.name,
+      path: `/grups/${project.id}/despeses`,
+    }).catch((err) => {
       console.error(
         "Failed to send push notification after creating spending",
         err,

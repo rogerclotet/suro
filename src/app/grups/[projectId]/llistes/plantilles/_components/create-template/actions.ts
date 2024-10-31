@@ -40,12 +40,12 @@ export async function createTemplate(
   revalidatePath(`/grups/${projectId}/llistes/plantilles`);
 
   setTimeout(() => {
-    sendProjectNotification(
+    sendProjectNotification({
       project,
-      `Nova plantilla: ${parsedData.name}`,
-      project.name,
-      `/grups/${project.id}/llistes/plantilles/${template.id}`,
-    ).catch((err) => {
+      body: `Nova plantilla: ${parsedData.name}`,
+      title: project.name,
+      path: `/grups/${project.id}/llistes/plantilles/${template.id}`,
+    }).catch((err) => {
       console.error(
         "Failed to send push notification after creating template",
         err,

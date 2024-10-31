@@ -6,12 +6,19 @@ import { inArray } from "drizzle-orm";
 import { pushSubscriptions } from "./db/schema";
 import type { Project } from "@/app/_data/project";
 
-export async function sendProjectNotification(
-  project: Project,
-  body: string,
-  title?: string,
-  path?: string,
-) {
+export async function sendProjectNotification({
+  project,
+  body,
+  title,
+  path,
+  image,
+}: {
+  project: Project;
+  body: string;
+  title?: string;
+  path?: string;
+  image?: string;
+}) {
   const session = await auth();
   if (!session) {
     throw new Error("Unauthorized");
@@ -24,20 +31,28 @@ export async function sendProjectNotification(
     return;
   }
 
-  await sendNotificationsToUsers(
-    usersToNotify.map((u) => u.user.id),
+  await sendNotificationsToUsers({
+    users: usersToNotify.map((u) => u.user.id),
     body,
     title,
     path,
-  );
+    image,
+  });
 }
 
-export async function sendNotificationsToUsers(
-  users: string[],
-  body: string,
-  title?: string,
-  path?: string,
-) {
+export async function sendNotificationsToUsers({
+  users,
+  body,
+  title,
+  path,
+  image,
+}: {
+  users: string[];
+  body: string;
+  title?: string;
+  path?: string;
+  image?: string;
+}) {
   setVapidDetails(
     "mailto:roger@clotet.dev",
     env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
@@ -56,6 +71,7 @@ export async function sendNotificationsToUsers(
     title,
     body,
     path,
+    image,
   });
 
   const notificationPromises = [];

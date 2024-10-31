@@ -105,16 +105,17 @@ function sendNotification(
           return;
         }
 
-        sendNotificationsToUsers(
-          project.users
+        sendNotificationsToUsers({
+          users: project.users
             .filter((u) => u.user.id !== userId)
             .map((u) => u.user.id),
-          `Fitxer ${file.name} afegit`,
-          project.name,
-          eventId
+          body: `Fitxer ${file.name} afegit`,
+          title: project.name,
+          path: eventId
             ? `/grups/${project.id}/calendari/${eventId}`
             : `/grups/${project.id}/fitxers`,
-        ).catch((err) => {
+          image: file.type.includes("image") ? file.url : undefined,
+        }).catch((err) => {
           console.error(
             "Failed to send push notification after uploading file",
             err,
