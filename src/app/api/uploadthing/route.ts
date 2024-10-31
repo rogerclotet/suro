@@ -12,7 +12,6 @@ export const { GET, POST } = withAxiom(
     config: {
       token: env.UPLOADTHING_TOKEN,
       callbackUrl: urlBase ? `${urlBase}/api/uploadthing` : undefined,
-      logLevel: process.env.NODE_ENV === "development" ? "Debug" : "Warning",
     },
   }),
 );
