@@ -52,6 +52,15 @@ export default function NewListItem({ list }: { list: List }) {
       data.categoryId = null;
     }
 
+    if (
+      list.items.find(
+        (i) => i.categoryId === data.categoryId && i.name === data.name,
+      )
+    ) {
+      toast.error("Ja existeix un element amb aquest nom");
+      return;
+    }
+
     try {
       await createListItem(list, data);
       form.reset({

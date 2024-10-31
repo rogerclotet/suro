@@ -57,11 +57,24 @@ export default function ListItem(props: {
   const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
+    if (!form.formState.isDirty) {
+      return;
+    }
+
     try {
       const parsed = v.parse(listItemSchema, data);
 
       if (parsed.name === "") {
         await props.onDelete?.();
+        return;
+      }
+
+      if (
+        props.list.items.filter(
+          (i) => i.categoryId === data.categoryId && i.name === data.name,
+        ).length > 0
+      ) {
+        toast.error("Ja existeix un element amb aquest nom");
         return;
       }
 
@@ -88,12 +101,6 @@ export default function ListItem(props: {
         "No s'ha pogut actualitzar l'element, torna-ho a provar més tard",
       );
       return;
-    }
-  }
-
-  async function handleNameBlur(_e: React.FocusEvent<HTMLInputElement>) {
-    if (form.formState.isDirty) {
-      formRef.current?.requestSubmit();
     }
   }
 
@@ -152,7 +159,6 @@ export default function ListItem(props: {
                 <FormControl>
                   <Input
                     {...field}
-                    onBlur={(e) => handleNameBlur(e)}
                     className={cn(
                       "border-none",
                       form.getValues().completed && "line-through",
