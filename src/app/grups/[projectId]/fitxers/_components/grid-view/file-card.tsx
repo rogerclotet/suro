@@ -72,7 +72,7 @@ function ExtraInfo({ file }: { file: File }) {
 }
 
 function FilePreviewContent({ file }: { file: File }) {
-  if (file.type === "image") {
+  if (file.type.includes("image")) {
     return (
       <Image
         src={file.url}
