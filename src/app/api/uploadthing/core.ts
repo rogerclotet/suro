@@ -1,11 +1,12 @@
 import { auth } from "@/auth";
 import { db } from "@/server/db";
-import { files } from "@/server/db/schema";
-import { getUserProject } from "@/server/projects";
-import { sendPushNotification } from "@/server/push";
+import { files, projects } from "@/server/db/schema";
+import { sendNotificationsToUsers } from "@/server/push";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import type { UploadedFileData } from "uploadthing/types";
 
 const f = createUploadthing();
 
@@ -60,31 +61,12 @@ export const uploadFileRouter = {
         );
       }
 
-      setTimeout(() => {
-        getUserProject(metadata.projectId)
-          .then((project) => {
-            if (!project) {
-              return;
-            }
-
-            sendPushNotification(
-              project,
-              `Fitxer ${file.name} afegit`,
-              project.name,
-              metadata.eventId
-                ? `/grups/${project.id}/calendari/${metadata.eventId}`
-                : `/grups/${project.id}/fitxers`,
-            ).catch((err) => {
-              console.error(
-                "Failed to send push notification after uploading file",
-                err,
-              );
-            });
-          })
-          .catch((err) => {
-            console.error("Failed to get project after uploading file", err);
-          });
-      }, 0);
+      sendNotification(
+        file,
+        metadata.userId,
+        metadata.projectId,
+        metadata.eventId,
+      );
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return {};
@@ -92,3 +74,55 @@ export const uploadFileRouter = {
 } satisfies FileRouter;
 
 export type UploadFileRouter = typeof uploadFileRouter;
+
+function sendNotification(
+  file: UploadedFileData,
+  userId: string,
+  projectId: string,
+  eventId: string | null,
+) {
+  setTimeout(() => {
+    db.query.projects
+      .findFirst({
+        columns: {
+          id: true,
+          name: true,
+          createdBy: true,
+          inviteToken: true,
+        },
+        with: {
+          users: { columns: {}, with: { user: true } },
+          categories: true,
+        },
+        where: and(eq(projects.id, projectId)),
+      })
+      .then((project) => {
+        if (!project) {
+          console.error(
+            "Could not find project after uploading file",
+            projectId,
+          );
+          return;
+        }
+
+        sendNotificationsToUsers(
+          project.users
+            .filter((u) => u.user.id !== userId)
+            .map((u) => u.user.id),
+          `Fitxer ${file.name} afegit`,
+          project.name,
+          eventId
+            ? `/grups/${project.id}/calendari/${eventId}`
+            : `/grups/${project.id}/fitxers`,
+        ).catch((err) => {
+          console.error(
+            "Failed to send push notification after uploading file",
+            err,
+          );
+        });
+      })
+      .catch((err) => {
+        console.error("Could not find project after uploading file", err);
+      });
+  }, 0);
+}

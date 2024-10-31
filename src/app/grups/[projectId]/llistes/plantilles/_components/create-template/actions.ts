@@ -6,7 +6,7 @@ import { templates } from "@/server/db/schema";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { templateSchema } from "./data";
-import { sendPushNotification } from "@/server/push";
+import { sendProjectNotification } from "@/server/push";
 import { getUserProject } from "@/server/projects";
 
 export async function createTemplate(
@@ -40,7 +40,7 @@ export async function createTemplate(
   revalidatePath(`/grups/${projectId}/llistes/plantilles`);
 
   setTimeout(() => {
-    sendPushNotification(
+    sendProjectNotification(
       project,
       `Nova plantilla: ${parsedData.name}`,
       project.name,

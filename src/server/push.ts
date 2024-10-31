@@ -6,7 +6,7 @@ import { inArray } from "drizzle-orm";
 import { pushSubscriptions } from "./db/schema";
 import type { Project } from "@/app/_data/project";
 
-export async function sendPushNotification(
+export async function sendProjectNotification(
   project: Project,
   body: string,
   title?: string,
@@ -17,12 +17,6 @@ export async function sendPushNotification(
     throw new Error("Unauthorized");
   }
 
-  setVapidDetails(
-    "mailto:roger@clotet.dev",
-    env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    env.VAPID_PRIVATE_KEY,
-  );
-
   const usersToNotify = project.users.filter(
     (u) => u.user.id !== session.user.id,
   );
@@ -30,11 +24,32 @@ export async function sendPushNotification(
     return;
   }
 
+  await sendNotificationsToUsers(
+    usersToNotify.map((u) => u.user.id),
+    body,
+    title,
+    path,
+  );
+}
+
+export async function sendNotificationsToUsers(
+  users: string[],
+  body: string,
+  title?: string,
+  path?: string,
+) {
+  setVapidDetails(
+    "mailto:roger@clotet.dev",
+    env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    env.VAPID_PRIVATE_KEY,
+  );
+
+  if (users.length === 0) {
+    return;
+  }
+
   const subscriptions = await db.query.pushSubscriptions.findMany({
-    where: inArray(
-      pushSubscriptions.userId,
-      usersToNotify.map((u) => u.user.id),
-    ),
+    where: inArray(pushSubscriptions.userId, users),
   });
 
   const pushPayload = JSON.stringify({

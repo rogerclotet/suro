@@ -7,7 +7,7 @@ import { events } from "@/server/db/schema";
 import * as v from "valibot";
 import { eventSchema } from "./data";
 import { revalidatePath } from "next/cache";
-import { sendPushNotification } from "@/server/push";
+import { sendProjectNotification } from "@/server/push";
 
 export async function createEvent(
   data: v.InferInput<typeof eventSchema>,
@@ -59,7 +59,7 @@ export async function createEvent(
       })}`;
     }
 
-    sendPushNotification(
+    sendProjectNotification(
       project,
       `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
       project.name,

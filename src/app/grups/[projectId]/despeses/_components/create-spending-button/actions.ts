@@ -7,7 +7,7 @@ import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { spendingSchema } from "./data";
-import { sendPushNotification } from "@/server/push";
+import { sendProjectNotification } from "@/server/push";
 import { getUserProject } from "@/server/projects";
 
 export async function createSpending(
@@ -49,7 +49,7 @@ export async function createSpending(
   }
 
   setTimeout(() => {
-    sendPushNotification(
+    sendProjectNotification(
       project,
       parsedData.description
         ? `Nova despesa: ${parsedData.description} (${parsedData.amount}€)`
