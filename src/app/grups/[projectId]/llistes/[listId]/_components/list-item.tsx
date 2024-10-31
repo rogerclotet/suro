@@ -134,7 +134,7 @@ export default function ListItem(props: {
             control={form.control}
             name="completed"
             render={({ field }) => (
-              <FormItem className="h-5 w-5">
+              <FormItem className="flex items-center">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
