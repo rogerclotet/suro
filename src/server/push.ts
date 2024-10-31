@@ -1,10 +1,10 @@
+import type { Project } from "@/app/_data/project";
+import { auth } from "@/auth";
 import { env } from "@/env";
+import { inArray } from "drizzle-orm";
 import { sendNotification, setVapidDetails } from "web-push";
 import { db } from "./db";
-import { auth } from "@/auth";
-import { inArray } from "drizzle-orm";
 import { pushSubscriptions } from "./db/schema";
-import type { Project } from "@/app/_data/project";
 
 export async function sendProjectNotification({
   project,
