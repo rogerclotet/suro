@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Bell, BellOff } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 export default function NotificationBell() {
   const [unsupported, setUnsupported] = React.useState<boolean>(true);
@@ -45,9 +46,11 @@ export default function NotificationBell() {
 
     if (enabled) {
       disableNotifications();
+      toast.success("Notificacions desactivades");
     } else {
       await registerAndSubscribe(() => {
         enableNotifications();
+        toast.success("Notificacions activades");
       });
     }
   }
