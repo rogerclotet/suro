@@ -194,7 +194,7 @@ export default function Calendar() {
         <div className="flex flex-col items-center">
           <CalendarComponent
             mode="single"
-            defaultMonth={date}
+            month={monthStart}
             selected={date}
             onSelect={handleDaySelect}
             onMonthChange={setMonthStart}
