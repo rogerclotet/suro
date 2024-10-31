@@ -70,6 +70,7 @@ export default function ListItem(props: {
       }
 
       if (
+        form.formState.dirtyFields.name &&
         props.list.items.filter(
           (i) => i.categoryId === data.categoryId && i.name === data.name,
         ).length > 0
