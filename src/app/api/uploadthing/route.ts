@@ -6,14 +6,13 @@ import { uploadFileRouter } from "./core";
 
 const urlBase = env.UPLOADTHING_URL;
 
-// Export routes for Next App Router
 export const { GET, POST } = withAxiom(
   createRouteHandler({
     router: uploadFileRouter,
     config: {
-      uploadthingId: env.UPLOADTHING_APP_ID,
-      uploadthingSecret: env.UPLOADTHING_SECRET,
+      token: env.UPLOADTHING_TOKEN,
       callbackUrl: urlBase ? `${urlBase}/api/uploadthing` : undefined,
+      logLevel: process.env.NODE_ENV === "development" ? "Debug" : "Warning",
     },
   }),
 );
