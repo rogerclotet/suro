@@ -1,6 +1,5 @@
 {
   "typescript.experimental.updateImportsOnPaste": true,
-  "javascript.experimental.updateImportsOnPaste": true,
   "editor.formatOnSave": true,
   "typescript.preferences.preferTypeOnlyAutoImports": true,
   "editor.codeActionsOnSave": {

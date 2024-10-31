@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { jsonb, varchar } from "drizzle-orm/pg-core";
+import { type PushSubscription } from "web-push";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
 
