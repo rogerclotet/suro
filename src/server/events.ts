@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import assert from "assert";
-import { and, eq, gte, lte, or } from "drizzle-orm";
+import { and, asc, eq, gte, lte, or } from "drizzle-orm";
 import { Logger } from "next-axiom";
 import { db } from "./db";
 import { events } from "./db/schema";
@@ -72,6 +72,7 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
           },
         },
       },
+      orderBy: asc(events.startAt),
     });
 
     if (
