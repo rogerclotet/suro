@@ -29,11 +29,8 @@ export default function CategoryItems({
   });
   const style: CSSProperties = {
     backgroundColor: isOver ? "rgba(0, 0, 0, 0.2)" : undefined,
+    display: items.length > 0 || isDragging ? "block" : "none",
   };
-
-  if (!isDragging && items.length === 0) {
-    return null;
-  }
 
   return (
     <div ref={setNodeRef} style={style} className="rounded-md px-2">

@@ -5,6 +5,11 @@ import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import {
   DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -22,6 +27,11 @@ export default function CheckList(props: { list: List }) {
   );
   const [animationParent] = useAutoAnimate();
   const [dragging, setDragging] = React.useState(false);
+  const mouseSensor = useSensor(MouseSensor);
+  const touchSensor = useSensor(TouchSensor);
+  const keyboardSensor = useSensor(KeyboardSensor);
+
+  const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
   React.useEffect(() => {
     setItemsByCategory(groupItemsByCategory(props.list.items, project));
@@ -101,6 +111,7 @@ export default function CheckList(props: { list: List }) {
       modifiers={[restrictToVerticalAxis]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      sensors={sensors}
     >
       <div className="w-full">
         <ul
