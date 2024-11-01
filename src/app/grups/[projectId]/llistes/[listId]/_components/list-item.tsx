@@ -53,7 +53,7 @@ export default function ListItem(props: {
 
   return (
     <li
-      className="flex h-10 flex-row items-center gap-5"
+      className="flex h-10 touch-manipulation flex-row items-center gap-5"
       onClick={() => setEditing(!props.completed)}
       ref={setNodeRef}
       style={style}
