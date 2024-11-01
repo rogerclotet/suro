@@ -14,7 +14,6 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React from "react";
 import { deleteListItem, updateListItem } from "./actions";
 import CategoryItems from "./category-items";
@@ -25,7 +24,6 @@ export default function CheckList(props: { list: List }) {
   const [itemsByCategory, setItemsByCategory] = React.useState(
     groupItemsByCategory(props.list.items, project),
   );
-  const [animationParent] = useAutoAnimate();
   const [dragging, setDragging] = React.useState(false);
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
@@ -114,12 +112,11 @@ export default function CheckList(props: { list: List }) {
       sensors={sensors}
     >
       <div className="w-full">
-        <ul
-          ref={animationParent}
-          className="mx-auto flex max-w-lg flex-col items-stretch gap-1"
-        >
+        <div className="mx-auto max-w-lg">
           <NewListItem list={props.list} />
+        </div>
 
+        <div className="mx-auto flex max-w-lg flex-col items-stretch gap-1">
           {itemsByCategory.map(({ category, items }) => (
             <CategoryItems
               key={category}
@@ -131,7 +128,7 @@ export default function CheckList(props: { list: List }) {
               handleDelete={handleDelete}
             />
           ))}
-        </ul>
+        </div>
       </div>
     </DndContext>
   );

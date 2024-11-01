@@ -1,5 +1,6 @@
 import type { List } from "@/app/_data/list";
 import { useDroppable } from "@dnd-kit/core";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { CSSProperties } from "react";
 import ListItem from "./list-item";
 
@@ -23,6 +24,7 @@ export default function CategoryItems({
   ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
 }) {
+  const [animationParent] = useAutoAnimate();
   const { isOver, setNodeRef } = useDroppable({
     id: category === "" ? "droppable" : `droppable-${category}`,
     data: { category },
@@ -37,24 +39,26 @@ export default function CategoryItems({
       <h3 key={`title_${category}`} className="text-lg font-semibold">
         {category}
       </h3>
-      {items.length > 0 ? (
-        items.map((item) => (
-          <ListItem
-            key={item.id}
-            list={list}
-            id={item.id}
-            name={item.name}
-            completed={item.completed ?? false}
-            categoryId={item.category?.id ?? null}
-            onChange={(name, completed, categoryId) =>
-              handleChange(item, name, completed, categoryId)
-            }
-            onDelete={() => handleDelete(item)}
-          />
-        ))
-      ) : (
-        <div className="h-10" />
-      )}
+      <ul ref={animationParent}>
+        {items.length > 0 ? (
+          items.map((item) => (
+            <ListItem
+              key={item.id}
+              list={list}
+              id={item.id}
+              name={item.name}
+              completed={item.completed ?? false}
+              categoryId={item.category?.id ?? null}
+              onChange={(name, completed, categoryId) =>
+                handleChange(item, name, completed, categoryId)
+              }
+              onDelete={() => handleDelete(item)}
+            />
+          ))
+        ) : (
+          <div className="h-10" />
+        )}
+      </ul>
     </div>
   );
 }
