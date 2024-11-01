@@ -2,10 +2,12 @@
 
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import React, { Fragment } from "react";
+import React from "react";
 import { deleteListItem, updateListItem } from "./actions";
-import ListItem from "./list-item";
+import CategoryItems from "./category-items";
 import NewListItem from "./new-list-item";
 
 export default function CheckList(props: { list: List }) {
@@ -47,37 +49,63 @@ export default function CheckList(props: { list: List }) {
     await deleteListItem(props.list, item.id);
   }
 
-  return (
-    <div className="w-full">
-      <ul
-        ref={animationParent}
-        className="mx-auto flex max-w-lg flex-col items-stretch gap-1"
-      >
-        <NewListItem list={props.list} />
+  async function handleDragEnd(event: DragEndEvent) {
+    const itemId = event.active.data.current?.id as string | undefined;
+    if (!itemId) {
+      return;
+    }
+    const categoryName = event.over?.data.current?.category as
+      | string
+      | undefined;
+    if (!categoryName) {
+      return;
+    }
 
-        {itemsByCategory.map(({ category, items }) => (
-          <Fragment key={category}>
-            <h3 key={`title_${category}`} className="text-lg font-semibold">
-              {category}
-            </h3>
-            {items.map((item) => (
-              <ListItem
-                key={item.id}
-                list={props.list}
-                id={item.id}
-                name={item.name}
-                completed={item.completed ?? false}
-                categoryId={item.category?.id ?? null}
-                onChange={(name, completed, categoryId) =>
-                  handleChange(item, name, completed, categoryId)
-                }
-                onDelete={() => handleDelete(item)}
-              />
-            ))}
-          </Fragment>
-        ))}
-      </ul>
-    </div>
+    const item = props.list.items.find((i) => i.id === itemId);
+    if (!item) {
+      return;
+    }
+
+    const category =
+      project?.categories.find((c) => c.name === categoryName) ?? null;
+    if (!category) {
+      return;
+    }
+
+    item.category = category;
+    setItemsByCategory(groupItemsByCategory(props.list.items));
+
+    await updateListItem(
+      props.list,
+      itemId,
+      item.name,
+      item.completed ?? false,
+      category.id,
+    );
+  }
+
+  return (
+    <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={handleDragEnd}>
+      <div className="w-full">
+        <ul
+          ref={animationParent}
+          className="mx-auto flex max-w-lg flex-col items-stretch gap-1"
+        >
+          <NewListItem list={props.list} />
+
+          {itemsByCategory.map(({ category, items }) => (
+            <CategoryItems
+              key={category}
+              category={category}
+              items={items}
+              list={props.list}
+              handleChange={handleChange}
+              handleDelete={handleDelete}
+            />
+          ))}
+        </ul>
+      </div>
+    </DndContext>
   );
 }
 
