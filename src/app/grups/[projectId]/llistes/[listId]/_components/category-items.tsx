@@ -56,7 +56,7 @@ export default function CategoryItems({
             />
           ))
         ) : (
-          <div className="h-10" />
+          <div className="mb-2 h-10 rounded-md border-2 border-dashed border-[rgba(255,255,255,0.2)]" />
         )}
       </ul>
     </div>
