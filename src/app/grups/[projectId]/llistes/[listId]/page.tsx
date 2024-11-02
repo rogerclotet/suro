@@ -1,12 +1,13 @@
 import { ClientOnly } from "@/components/client-only";
+import ShareButton from "@/components/ui/share-button";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
-import { getList, getTemplates } from "@/server/lists";
+import { getLists, getTemplates } from "@/server/lists";
 import { CalendarFold } from "lucide-react";
 import Link from "next/link";
-import ShareButton from "../../../../../components/ui/share-button";
 import TimeRange from "../../calendari/_components/event/time-range";
 import CheckList from "./_components/check-list";
+import ListsDropdown from "./_components/lists-dropdown";
 import SettingsMenu from "./_components/settings/settings-menu";
 
 export default async function ListPage({
@@ -16,9 +17,10 @@ export default async function ListPage({
 }) {
   await checkAuth();
 
-  const list = await getList(listId);
+  const lists = await getLists(projectId);
   const templates = await getTemplates(projectId);
 
+  const list = lists.find((l) => l.id === listId);
   if (!list) {
     return (
       <div className="space-y-4">
@@ -33,7 +35,9 @@ export default async function ListPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">{list.name}</h1>
+        <h1>
+          <ListsDropdown listId={listId} lists={lists} projectId={projectId} />
+        </h1>
 
         <div className="flex items-center gap-2">
           <ClientOnly>
