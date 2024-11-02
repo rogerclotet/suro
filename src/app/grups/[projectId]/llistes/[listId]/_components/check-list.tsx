@@ -93,14 +93,15 @@ export default function CheckList(props: { list: List }) {
     const category =
       project?.categories.find((c) => c.name === categoryName) ?? null;
 
-    if (
-      props.list.items.find(
-        (i) => i.categoryId === category?.id && i.name === item.name,
-      )
-    ) {
-      toast.error("L'element ja existeix a aquesta categoria");
-      return;
-    }
+      if (
+        props.list.items.find(
+          (i) =>
+            i.categoryId === (category?.id ?? null) && i.name === item.name,
+        )
+      ) {
+        toast.error("L'element ja existeix a aquesta categoria");
+        return;
+      }
 
     item.category = category;
     setItemsByCategory(groupItemsByCategory(props.list.items, project));
