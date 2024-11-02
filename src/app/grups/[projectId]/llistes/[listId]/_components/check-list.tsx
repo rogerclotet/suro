@@ -93,15 +93,18 @@ export default function CheckList(props: { list: List }) {
     const category =
       project?.categories.find((c) => c.name === categoryName) ?? null;
 
-      if (
-        props.list.items.find(
-          (i) =>
-            i.categoryId === (category?.id ?? null) && i.name === item.name,
-        )
-      ) {
-        toast.error("L'element ja existeix a aquesta categoria");
-        return;
-      }
+    if (category === item.category) {
+      return;
+    }
+
+    if (
+      props.list.items.find(
+        (i) => i.categoryId === (category?.id ?? null) && i.name === item.name,
+      )
+    ) {
+      toast.error("L'element ja existeix a aquesta categoria");
+      return;
+    }
 
     item.category = category;
     setItemsByCategory(groupItemsByCategory(props.list.items, project));
@@ -128,17 +131,24 @@ export default function CheckList(props: { list: List }) {
         </div>
 
         <div className="mx-auto flex max-w-lg flex-col items-stretch gap-1">
-          {itemsByCategory.map(({ category, items }) => (
-            <CategoryItems
-              key={category}
-              category={category}
-              items={items}
-              list={props.list}
-              isDragging={dragging}
-              handleChange={handleChange}
-              handleDelete={handleDelete}
-            />
-          ))}
+          {itemsByCategory
+            .sort((a, b) => {
+              if (a.items.length !== 0 && b.items.length !== 0) {
+                return a.category.localeCompare(b.category);
+              }
+              return b.items.length - a.items.length;
+            })
+            .map(({ category, items }) => (
+              <CategoryItems
+                key={category}
+                category={category}
+                items={items}
+                list={props.list}
+                isDragging={dragging}
+                handleChange={handleChange}
+                handleDelete={handleDelete}
+              />
+            ))}
         </div>
       </div>
     </DndContext>
