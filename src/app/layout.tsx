@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";

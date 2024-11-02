@@ -67,7 +67,7 @@ function ClientModalForm({ triggerRef, title, description, children }: Props) {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
-          {description && <DrawerDescription>{description}</DrawerDescription>}
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4">{children}</div>
         <DrawerFooter className="pt-2">

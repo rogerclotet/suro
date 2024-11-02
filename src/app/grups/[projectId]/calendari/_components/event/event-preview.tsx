@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger } from "@/components/ui/touch-tooltip";
 import { textToHtml } from "@/lib/utils";
 import { TooltipContent } from "@radix-ui/react-tooltip";
 import { Folders } from "lucide-react";

@@ -13,7 +13,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/touch-tooltip";
 import { getProjects } from "@/server/projects";
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";

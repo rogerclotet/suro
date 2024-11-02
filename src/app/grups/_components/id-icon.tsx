@@ -5,7 +5,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/touch-tooltip";
 import { Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 

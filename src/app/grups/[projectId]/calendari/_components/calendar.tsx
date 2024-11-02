@@ -8,7 +8,8 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/touch-tooltip";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
@@ -20,7 +21,6 @@ import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
 import { eventsQueryOptions } from "./event/query";
-import { cn } from "@/lib/utils";
 
 const EVENT_COLORS = 5;
 

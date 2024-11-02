@@ -4,7 +4,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/touch-tooltip";
 import { cn } from "@/lib/utils";
 
 export default function UsersList({ users }: { users: Project["users"] }) {
