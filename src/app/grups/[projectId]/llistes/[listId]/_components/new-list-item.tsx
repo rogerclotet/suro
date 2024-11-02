@@ -68,6 +68,9 @@ export default function NewListItem({ list }: { list: List }) {
         completed: false,
         categoryId: data.categoryId ?? "",
       });
+      setTimeout(() => {
+        form.setFocus("name");
+      }, 1);
     } catch (e) {
       captureException(e);
       log.error("Error creating list item", {
