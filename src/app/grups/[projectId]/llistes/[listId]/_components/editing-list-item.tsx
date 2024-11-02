@@ -1,7 +1,6 @@
 "use client";
 
 import type { List } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -12,22 +11,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { captureException } from "@sentry/nextjs";
-import { Check, Loader2, Tag } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useLogger } from "next-axiom";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as v from "valibot";
-import NewCategoryModal from "./categories/new-category-modal";
 import { listItemSchema } from "./data";
 
 export default function EditingListItem(props: {
@@ -52,8 +44,6 @@ export default function EditingListItem(props: {
     },
     resolver: valibotResolver(listItemSchema),
   });
-  const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
-  const { project } = useProjects();
   const formRef = React.useRef<HTMLFormElement>(null);
   const log = useLogger();
 
@@ -114,24 +104,6 @@ export default function EditingListItem(props: {
     }
   }
 
-  async function handleCategoryChange(
-    value: string,
-    onChange: (value: string) => void,
-  ) {
-    if (value === "new") {
-      newCategoryModalRef.current?.click();
-      return;
-    }
-
-    if (value === "-") {
-      onChange("");
-    } else {
-      onChange(value);
-    }
-
-    formRef.current?.requestSubmit();
-  }
-
   function handleBlur() {
     if (!form.formState.isSubmitting) {
       formRef.current?.requestSubmit();
@@ -190,7 +162,7 @@ export default function EditingListItem(props: {
             )}
           />
 
-          {form.formState.isDirty && (
+          {form.formState.isDirty ? (
             <Button
               size="icon"
               variant="ghost"
@@ -202,46 +174,11 @@ export default function EditingListItem(props: {
                 <Check />
               )}
             </Button>
+          ) : (
+            <div className="w-4" />
           )}
-
-          <FormField
-            control={form.control}
-            name="categoryId"
-            render={({ field: { onChange, value } }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    defaultValue={value ?? ""}
-                    onValueChange={(v) => handleCategoryChange(v, onChange)}
-                    disabled={form.formState.isSubmitting}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <Tag />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="-">Sense categoria</SelectItem>
-                      {project?.categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="new">+ Nova categoria</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </form>
       </Form>
-
-      <NewCategoryModal
-        triggerRef={newCategoryModalRef}
-        onCreate={(categoryId) => form.setValue("categoryId", categoryId)}
-      />
     </li>
   );
 }
