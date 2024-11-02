@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
 import { categories, lists, templates } from "./lists";
+import { notes } from "./notes";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
 
@@ -21,6 +22,7 @@ export const projectsRelations = relations(projects, ({ many }) => ({
   lists: many(lists),
   templates: many(templates),
   categories: many(categories),
+  notes: many(notes),
 }));
 
 export const projectToUsers = createTable(
