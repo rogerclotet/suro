@@ -59,8 +59,20 @@ export default async function Lists({ projectId }: { projectId: string }) {
 }
 
 function compareLists(a: List, b: List) {
+  const updatedAtA = a.updatedAt?.getTime() ?? a.createdAt?.getTime() ?? 0;
+  const itemsUpdatedAtA = a.items.reduce(
+    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    0,
+  );
+
+  const updatedAtB = b.updatedAt?.getTime() ?? b.createdAt?.getTime() ?? 0;
+  const itemsUpdatedAtB = b.items.reduce(
+    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    0,
+  );
+
   return (
-    (b.updatedAt?.getTime() ?? b.createdAt?.getTime() ?? 0) -
-    (a.updatedAt?.getTime() ?? a.createdAt?.getTime() ?? 0)
+    Math.max(updatedAtB, itemsUpdatedAtB) -
+    Math.max(updatedAtA, itemsUpdatedAtA)
   );
 }
