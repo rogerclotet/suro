@@ -1,6 +1,9 @@
 import type { File } from "@/app/_data/file";
-import { Tooltip, TooltipContent } from "@/components/ui/touch-tooltip";
-import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/touch-tooltip";
 import { CalendarFold } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
