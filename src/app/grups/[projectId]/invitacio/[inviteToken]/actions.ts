@@ -1,9 +1,9 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function acceptInvite(projectId: string, inviteToken: string) {
   const session = await auth();

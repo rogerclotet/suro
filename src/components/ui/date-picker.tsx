@@ -1,5 +1,10 @@
 "use client";
 
+import { format } from "date-fns";
+import { ca } from "date-fns/locale";
+import { Calendar as CalendarIcon } from "lucide-react";
+import type * as React from "react";
+import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -8,11 +13,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { ca } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
-import type { DateRange } from "react-day-picker";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   dates: DateRange;

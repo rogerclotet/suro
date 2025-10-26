@@ -1,11 +1,11 @@
-import { auth } from "@/auth";
-import { getEvents } from "@/server/events";
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { getEvents } from "@/server/events";
 import Calendar from "./_components/calendar";
 import getMonthString from "./_components/event/get-month-string";
 

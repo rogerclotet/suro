@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,8 +11,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import LoadingPage from "@/components/ui/loading-page";
-import Link from "next/link";
-import { useParams } from "next/navigation";
 
 export default function Loading() {
   const params = useParams();

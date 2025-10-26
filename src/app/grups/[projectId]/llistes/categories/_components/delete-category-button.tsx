@@ -1,12 +1,12 @@
 "use client";
 
-import type { Category } from "@/app/_data/category";
-import { Button } from "@/components/ui/button";
-import ModalAction from "@/components/ui/modal-action";
 import { Trash2 } from "lucide-react";
 import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
+import type { Category } from "@/app/_data/category";
+import { Button } from "@/components/ui/button";
+import ModalAction from "@/components/ui/modal-action";
 import { deleteCategory } from "./actions";
 
 export default function DeleteCategoryButton({
@@ -22,7 +22,10 @@ export default function DeleteCategoryButton({
       await deleteCategory(category);
       toast.success("La categoria s'ha eliminat correctament");
     } catch (e) {
-      log.error("Error deleting category", { error: e, categoryId: category.id });
+      log.error("Error deleting category", {
+        error: e,
+        categoryId: category.id,
+      });
       toast.error("Error eliminant la categoria. Torna-ho a provar més tard");
     }
   }

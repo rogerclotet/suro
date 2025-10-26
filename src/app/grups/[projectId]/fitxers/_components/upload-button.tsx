@@ -1,12 +1,12 @@
 "use client";
 
+import { Loader2, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLogger } from "next-axiom";
+import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { UploadButton as UploadthingButton } from "@/components/uploadthing";
-import { Loader2, Upload } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export default function UploadButton({
   projectId,

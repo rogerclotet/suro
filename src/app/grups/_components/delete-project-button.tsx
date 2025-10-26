@@ -1,13 +1,13 @@
 "use client";
 
-import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
-import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
 import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import ModalAction from "@/components/ui/modal-action";
 import { deleteProject } from "./actions";
 
 export default function DeleteProjectButton({

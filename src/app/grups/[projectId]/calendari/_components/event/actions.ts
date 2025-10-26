@@ -1,13 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { events } from "@/server/db/schema";
-import * as v from "valibot";
-import { eventSchema } from "./data";
-import { revalidatePath } from "next/cache";
 import { sendProjectNotification } from "@/server/push";
+import { eventSchema } from "./data";
 
 export async function createEvent(
   data: v.InferInput<typeof eventSchema>,

@@ -1,12 +1,12 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+import React from "react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
-import React from "react";
 import MonetaryAmount from "../../monetary-amount";
 import type { SettlingPayment } from "../data";
 

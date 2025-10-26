@@ -1,11 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import type { Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
-import { revalidatePath } from "next/cache";
 
 export async function importTemplates(
   project: Project,

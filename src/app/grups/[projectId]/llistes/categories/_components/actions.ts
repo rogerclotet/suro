@@ -1,12 +1,12 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { Category } from "@/app/_data/category";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { categories } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { categorySchema } from "../../[listId]/_components/categories/data";
 
 export async function editCategory(

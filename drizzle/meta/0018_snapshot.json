@@ -97,12 +97,8 @@
           "name": "f_account_userId_f_user_id_fk",
           "tableFrom": "f_account",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         }
@@ -110,10 +106,7 @@
       "compositePrimaryKeys": {
         "f_account_provider_providerAccountId_pk": {
           "name": "f_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
+          "columns": ["provider", "providerAccountId"]
         }
       },
       "uniqueConstraints": {}
@@ -147,12 +140,8 @@
           "name": "f_category_projectId_f_project_id_fk",
           "tableFrom": "f_category",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -232,12 +221,8 @@
           "name": "f_event_createdBy_f_user_id_fk",
           "tableFrom": "f_event",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -245,12 +230,8 @@
           "name": "f_event_updatedBy_f_user_id_fk",
           "tableFrom": "f_event",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updatedBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -258,12 +239,8 @@
           "name": "f_event_projectId_f_project_id_fk",
           "tableFrom": "f_event",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -337,12 +314,8 @@
           "name": "f_file_uploadedBy_f_user_id_fk",
           "tableFrom": "f_file",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "uploadedBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploadedBy"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         },
@@ -350,12 +323,8 @@
           "name": "f_file_projectId_f_project_id_fk",
           "tableFrom": "f_file",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -363,12 +332,8 @@
           "name": "f_file_eventId_f_event_id_fk",
           "tableFrom": "f_file",
           "tableTo": "f_event",
-          "columnsFrom": [
-            "eventId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["eventId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -465,12 +430,8 @@
           "name": "f_listItem_createdBy_f_user_id_fk",
           "tableFrom": "f_listItem",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -478,12 +439,8 @@
           "name": "f_listItem_updatedBy_f_user_id_fk",
           "tableFrom": "f_listItem",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updatedBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -491,12 +448,8 @@
           "name": "f_listItem_listId_f_list_id_fk",
           "tableFrom": "f_listItem",
           "tableTo": "f_list",
-          "columnsFrom": [
-            "listId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -504,12 +457,8 @@
           "name": "f_listItem_categoryId_f_category_id_fk",
           "tableFrom": "f_listItem",
           "tableTo": "f_category",
-          "columnsFrom": [
-            "categoryId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["categoryId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -599,12 +548,8 @@
           "name": "f_list_createdBy_f_user_id_fk",
           "tableFrom": "f_list",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -612,12 +557,8 @@
           "name": "f_list_updatedBy_f_user_id_fk",
           "tableFrom": "f_list",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updatedBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -625,12 +566,8 @@
           "name": "f_list_projectId_f_project_id_fk",
           "tableFrom": "f_list",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -638,12 +575,8 @@
           "name": "f_list_eventId_f_event_id_fk",
           "tableFrom": "f_list",
           "tableTo": "f_event",
-          "columnsFrom": [
-            "eventId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["eventId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -674,12 +607,8 @@
           "name": "f_projectToUser_projectId_f_project_id_fk",
           "tableFrom": "f_projectToUser",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -687,12 +616,8 @@
           "name": "f_projectToUser_userId_f_user_id_fk",
           "tableFrom": "f_projectToUser",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -700,10 +625,7 @@
       "compositePrimaryKeys": {
         "f_projectToUser_projectId_userId_pk": {
           "name": "f_projectToUser_projectId_userId_pk",
-          "columns": [
-            "projectId",
-            "userId"
-          ]
+          "columns": ["projectId", "userId"]
         }
       },
       "uniqueConstraints": {}
@@ -744,12 +666,8 @@
           "name": "f_project_createdBy_f_user_id_fk",
           "tableFrom": "f_project",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         }
@@ -802,12 +720,8 @@
           "name": "f_session_userId_f_user_id_fk",
           "tableFrom": "f_session",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         }
@@ -881,12 +795,8 @@
           "name": "f_spending_from_f_user_id_fk",
           "tableFrom": "f_spending",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "from"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -894,12 +804,8 @@
           "name": "f_spending_to_f_user_id_fk",
           "tableFrom": "f_spending",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "to"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -907,12 +813,8 @@
           "name": "f_spending_createdBy_f_user_id_fk",
           "tableFrom": "f_spending",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -920,12 +822,8 @@
           "name": "f_spending_projectId_f_project_id_fk",
           "tableFrom": "f_spending",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -999,12 +897,8 @@
           "name": "f_listTemplate_createdBy_f_user_id_fk",
           "tableFrom": "f_listTemplate",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -1012,12 +906,8 @@
           "name": "f_listTemplate_updatedBy_f_user_id_fk",
           "tableFrom": "f_listTemplate",
           "tableTo": "f_user",
-          "columnsFrom": [
-            "updatedBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updatedBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "cascade"
         },
@@ -1025,12 +915,8 @@
           "name": "f_listTemplate_projectId_f_project_id_fk",
           "tableFrom": "f_listTemplate",
           "tableTo": "f_project",
-          "columnsFrom": [
-            "projectId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["projectId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1107,10 +993,7 @@
       "compositePrimaryKeys": {
         "f_verificationToken_identifier_token_pk": {
           "name": "f_verificationToken_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {}

@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/auth";
 import { and, asc, eq } from "drizzle-orm";
 import { Logger } from "next-axiom";
+import { auth } from "@/auth";
 import { db } from "./db";
 import { categories, projects, projectToUsers } from "./db/schema";
 

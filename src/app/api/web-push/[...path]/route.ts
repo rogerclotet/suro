@@ -1,7 +1,7 @@
+import type { PushSubscription } from "web-push";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { pushSubscriptions } from "@/server/db/schema";
-import { type PushSubscription } from "web-push";
 
 export async function POST(request: Request) {
   const { pathname } = new URL(request.url);

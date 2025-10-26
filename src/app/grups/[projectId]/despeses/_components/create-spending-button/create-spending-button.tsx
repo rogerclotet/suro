@@ -1,5 +1,14 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
+import { Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useLogger } from "next-axiom";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,15 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createSpending } from "./actions";
 import { spendingSchema } from "./data";
 

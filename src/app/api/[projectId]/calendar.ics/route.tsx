@@ -1,11 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import { and, eq } from "drizzle-orm";
+import { createEvents, type EventAttributes } from "ics";
+import { type AxiomRequest, withAxiom } from "next-axiom";
 import { db } from "@/server/db";
 import { projects } from "@/server/db/schema";
 import { getEventsToExport } from "@/server/events";
-import { and, eq } from "drizzle-orm";
-import { createEvents, type EventAttributes } from "ics";
-import { withAxiom, type AxiomRequest } from "next-axiom";
 
 export const GET = withAxiom(
   async (

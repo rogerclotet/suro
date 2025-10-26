@@ -35,10 +35,10 @@
     --input: #ffffff;
     --ring: #40634c;
 
-    --event-1: #5BA8D7;
-    --event-2: #F49FBC;
-    --event-3: #41E2BA;
-    --event-4: #FFD95C;
+    --event-1: #5ba8d7;
+    --event-2: #f49fbc;
+    --event-3: #41e2ba;
+    --event-4: #ffd95c;
     --event-5: #966f4d;
 
     --radius: 0.5rem;
@@ -73,7 +73,7 @@
     --destructive-foreground: #000;
 
     --border: #20252f;
-    --input: #323946;    
+    --input: #323946;
     --ring: #9fe88d;
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import React from "react";
+import { Button } from "@/components/ui/button";
 import NewCategoryModal from "../../[listId]/_components/categories/new-category-modal";
 
 export default function NewCategoryButton() {

@@ -5,7 +5,7 @@
  * @see https://github.com/uidotdev/usehooks/issues/218
  */
 import { useIsClient } from "@uidotdev/usehooks";
-import React from "react";
+import type React from "react";
 
 type ClientOnlyProps = {
   children: React.ReactNode;

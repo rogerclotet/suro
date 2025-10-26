@@ -1,8 +1,8 @@
+import { CornerRightUp } from "lucide-react";
+import { redirect } from "next/navigation";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { getLists } from "@/server/lists";
-import { CornerRightUp } from "lucide-react";
-import { redirect } from "next/navigation";
 import ListPreview from "./list-preview";
 
 export default async function Lists({ projectId }: { projectId: string }) {

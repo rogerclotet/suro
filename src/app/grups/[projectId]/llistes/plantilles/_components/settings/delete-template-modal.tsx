@@ -1,13 +1,13 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+import { useRouter } from "next/navigation";
+import { useLogger } from "next-axiom";
+import type React from "react";
+import { toast } from "sonner";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import ModalAction from "@/components/ui/modal-action";
-import { captureException } from "@sentry/nextjs";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
 import { deleteTemplate } from "./actions";
 
 export default function DeleteTemplateModal({

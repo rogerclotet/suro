@@ -1,16 +1,16 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
+import React, { Fragment } from "react";
+import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ModalForm from "@/components/ui/modal-form";
-import { captureException } from "@sentry/nextjs";
-import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React, { Fragment } from "react";
-import { toast } from "sonner";
 import { importTemplates } from "./actions";
 import TemplatePreview from "./template-preview";
 

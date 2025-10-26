@@ -1,13 +1,13 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { LogLevel } from "next-axiom/dist/logger";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLogger } from "next-axiom";
+import { LogLevel } from "next-axiom/dist/logger";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   const pathname = usePathname();

@@ -1,15 +1,15 @@
 "use server";
 
+import { and, eq, inArray } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { TemplateItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { listItems, lists, templates } from "@/server/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
-import { listSchema } from "./data";
 import { sendProjectNotification } from "@/server/push";
+import { listSchema } from "./data";
 
 export async function createList(
   project: Project,

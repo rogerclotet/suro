@@ -1,5 +1,7 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
+import React from "react";
 import type { Spending } from "@/app/_data/spending";
 import { useProjects } from "@/app/_state/project-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,8 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
-import React from "react";
 import { calculateBalances } from "./settle-button/calculate-balances";
 import UserBalance from "./user-balance";
 

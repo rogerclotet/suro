@@ -1,5 +1,12 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ca } from "date-fns/locale";
+import { CalendarArrowDown, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import type { DayContentProps } from "react-day-picker";
+import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -10,13 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { cn } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ca } from "date-fns/locale";
-import { CalendarArrowDown, Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
-import type { DayContentProps } from "react-day-picker";
-import { toast } from "sonner";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";

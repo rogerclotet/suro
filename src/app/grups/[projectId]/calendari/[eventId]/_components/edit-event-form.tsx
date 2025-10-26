@@ -1,5 +1,15 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import type { CheckedState } from "@radix-ui/react-checkbox";
+import { captureException } from "@sentry/nextjs";
+import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
+import React from "react";
+import type { DateRange } from "react-day-picker";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -15,16 +25,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { type CheckedState } from "@radix-ui/react-checkbox";
-import { captureException } from "@sentry/nextjs";
-import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import type { DateRange } from "react-day-picker";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
 import { editEvent } from "../actions";

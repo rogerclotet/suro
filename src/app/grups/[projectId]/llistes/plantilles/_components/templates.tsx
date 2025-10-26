@@ -1,8 +1,8 @@
+import { CornerRightUp, Info } from "lucide-react";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getTemplates } from "@/server/lists";
-import { CornerRightUp, Info } from "lucide-react";
-import { redirect } from "next/navigation";
 import TemplatePreview from "./template-preview";
 
 export default async function Templates({ projectId }: { projectId: string }) {

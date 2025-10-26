@@ -1,6 +1,6 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { calculateBalances } from "./calculate-balances";
 import { generateProposals } from "./generate-proposals";
 

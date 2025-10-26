@@ -1,7 +1,7 @@
-import { auth } from "@/auth";
-import getProjectFiles from "@/server/files";
 import { CornerRightUp } from "lucide-react";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import getProjectFiles from "@/server/files";
 import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
 import ViewSelector from "./_components/view-selector";

@@ -1,13 +1,13 @@
-import { Logger } from "next-axiom";
 import {
-  NextResponse,
   type NextFetchEvent,
   type NextRequest,
+  NextResponse,
 } from "next/server";
+import { Logger } from "next-axiom";
 
 export const pathnameHeader = "x-pathname";
 
-export function middleware(request: NextRequest, event: NextFetchEvent) {
+export function proxy(request: NextRequest, event: NextFetchEvent) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(pathnameHeader, request.nextUrl.pathname);
 

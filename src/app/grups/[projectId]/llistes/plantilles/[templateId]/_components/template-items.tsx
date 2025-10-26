@@ -1,9 +1,9 @@
 "use client";
 
-import { type Template } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
+import type { Template } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import { updateTemplateItems } from "./actions";
 import NewTemplateItem from "./new-template-item";
 import TemplateItem from "./template-item";

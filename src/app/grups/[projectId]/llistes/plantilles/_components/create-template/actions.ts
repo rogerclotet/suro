@@ -1,13 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
-import { templateSchema } from "./data";
-import { sendProjectNotification } from "@/server/push";
 import { getUserProject } from "@/server/projects";
+import { sendProjectNotification } from "@/server/push";
+import { templateSchema } from "./data";
 
 export async function createTemplate(
   projectId: string,

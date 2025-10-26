@@ -1,5 +1,11 @@
 "use client";
 
+import { SiGoogle } from "@icons-pack/react-simple-icons";
+import { Info, Mail } from "lucide-react";
+import Image from "next/image";
+import { redirect, useSearchParams } from "next/navigation";
+import type { Session } from "next-auth";
+import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +16,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
-import { Info, Mail } from "lucide-react";
-import type { Session } from "next-auth";
-import Image from "next/image";
-import { redirect, useSearchParams } from "next/navigation";
-import React from "react";
 import { loginWithGoogle, loginWithResend } from "./actions";
 
 export default function Login({ session }: { session?: Session | null }) {

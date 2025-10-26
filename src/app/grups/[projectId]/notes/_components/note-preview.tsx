@@ -1,6 +1,6 @@
+import Link from "next/link";
 import type { Note } from "@/app/_data/note";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 
 export default function NotePreview({ note }: { note: Note }) {
   return (

@@ -1,12 +1,12 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { listItems, lists } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { listSchema } from "../../../_components/create-list/data";
 
 export async function deleteList(list: List) {

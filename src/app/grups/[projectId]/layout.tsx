@@ -1,5 +1,5 @@
-import { getInvitedProject } from "@/server/projects";
 import type { Metadata } from "next";
+import { getInvitedProject } from "@/server/projects";
 import CurrentProjectUpdater from "./_components/current-project-updater";
 
 type Props = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,7 +8,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
 
 export default function ProjectSelector({
   onSelect,

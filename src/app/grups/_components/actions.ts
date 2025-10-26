@@ -1,12 +1,12 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { projectSchema } from "./create-project/data";
 
 export async function editProject(

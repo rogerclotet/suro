@@ -1,7 +1,7 @@
 "use client";
 
-import type { Event } from "@/app/_data/event";
 import React from "react";
+import type { Event } from "@/app/_data/event";
 
 export default function TimeRemaining({
   event,

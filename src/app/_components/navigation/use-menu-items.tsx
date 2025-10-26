@@ -1,6 +1,6 @@
-import { useProjects } from "@/app/_state/project-state";
 import { Calendar, FolderOpen, HandCoins, ListTodo } from "lucide-react";
 import React from "react";
+import { useProjects } from "@/app/_state/project-state";
 
 export type MenuItem = {
   name: string;

@@ -1,7 +1,7 @@
-import type { List } from "@/app/_data/list";
 import { useDroppable } from "@dnd-kit/core";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { CSSProperties } from "react";
+import type { List } from "@/app/_data/list";
 import ListItem from "./list-item";
 
 export default function CategoryItems({

@@ -1,5 +1,10 @@
 "use client";
 
+import { Menu } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,16 +13,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React from "react";
+import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
 import ProjectSelector from "../project-selector";
-import Profile from "./profile/profile";
 import NotificationBell from "./notification-bell/notification-bell";
-import ThemeSwitcher from "../../theme-switcher";
+import Profile from "./profile/profile";
 
 export default function DrawerLayout() {
   const [isOpen, setIsOpen] = React.useState(false);

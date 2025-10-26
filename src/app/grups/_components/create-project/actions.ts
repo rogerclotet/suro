@@ -1,11 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { projectSchema } from "./data";
 
 export async function createProject(data: v.InferInput<typeof projectSchema>) {

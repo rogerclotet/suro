@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Template } from "@/app/_data/list";
 import {
   Card,
@@ -6,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 
 export default function TemplatePreview({ template }: { template: Template }) {
   return (

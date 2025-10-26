@@ -1,5 +1,12 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
+import { Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -12,13 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { templateSchema } from "../create-template/data";
 import { updateTemplate } from "./actions";
 

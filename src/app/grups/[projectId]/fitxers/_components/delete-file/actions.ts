@@ -1,13 +1,13 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { Logger } from "next-axiom";
 import type { File } from "@/app/_data/file";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { files } from "@/server/db/schema";
 import { utapi } from "@/server/uploadthing";
-import { eq } from "drizzle-orm";
-import { Logger } from "next-axiom";
-import { revalidatePath } from "next/cache";
 
 export async function deleteFile(file: File) {
   const session = await auth();

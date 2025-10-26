@@ -1,5 +1,5 @@
-import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "./db";
 import { categories } from "./db/schema";
 import { getUserProject } from "./projects";

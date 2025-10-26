@@ -1,12 +1,12 @@
 "use client";
 
-import type { File } from "@/app/_data/file";
-import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
 import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
+import type { File } from "@/app/_data/file";
+import ModalAction from "@/components/ui/modal-action";
 import { deleteFile } from "./actions";
 
 export default function DeleteFileButton({ file }: { file: File }) {

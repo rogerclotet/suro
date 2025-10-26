@@ -5,5 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    reporters: ["junit"],
+    outputFile: "./test-report.xml",
   },
 });

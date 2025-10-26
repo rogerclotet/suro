@@ -1,7 +1,7 @@
-import { auth } from "@/auth";
 import assert from "assert";
 import { and, asc, eq, gte, lte, or } from "drizzle-orm";
 import { Logger } from "next-axiom";
+import { auth } from "@/auth";
 import { db } from "./db";
 import { events } from "./db/schema";
 

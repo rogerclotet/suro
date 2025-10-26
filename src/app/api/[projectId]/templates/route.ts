@@ -1,5 +1,5 @@
+import { type AxiomRequest, withAxiom } from "next-axiom";
 import { getTemplates } from "@/server/lists";
-import { withAxiom, type AxiomRequest } from "next-axiom";
 
 export const GET = withAxiom(
   async (

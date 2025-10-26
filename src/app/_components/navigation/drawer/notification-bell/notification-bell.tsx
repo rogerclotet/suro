@@ -1,5 +1,8 @@
 "use client";
 
+import { Bell, BellOff } from "lucide-react";
+import React from "react";
+import { toast } from "sonner";
 import {
   areNotificationsEnabled,
   checkPermissionStateAndAct,
@@ -9,9 +12,6 @@ import {
   registerAndSubscribe,
 } from "@/app/push";
 import { Button } from "@/components/ui/button";
-import { Bell, BellOff } from "lucide-react";
-import React from "react";
-import { toast } from "sonner";
 
 export default function NotificationBell() {
   const [unsupported, setUnsupported] = React.useState<boolean>(true);

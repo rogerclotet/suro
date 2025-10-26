@@ -1,12 +1,12 @@
+import { Folders, ListTodo } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
-import { Folders, ListTodo } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import Files from "../../fitxers/_components/files";
 import UploadButton from "../../fitxers/_components/upload-button";
 import CheckList from "../../llistes/[listId]/_components/check-list";

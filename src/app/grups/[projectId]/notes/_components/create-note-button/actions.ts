@@ -1,12 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { notes } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { noteSchema } from "./schema";
 
 export async function createNote(

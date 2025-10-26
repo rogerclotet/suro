@@ -1,13 +1,13 @@
 "use client";
 
-import type { Project } from "@/app/_data/project";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import ModalForm from "@/components/ui/modal-form";
 import { Copy, Share2, UserPlus } from "lucide-react";
 import React from "react";
 import { RWebShare } from "react-web-share";
 import { toast } from "sonner";
+import type { Project } from "@/app/_data/project";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import ModalForm from "@/components/ui/modal-form";
 
 export default function InviteButton({ project }: { project: Project }) {
   const modalRef = React.useRef<HTMLDivElement>(null);

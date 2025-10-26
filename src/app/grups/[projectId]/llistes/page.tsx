@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { checkAuth } from "@/lib/check-auth";
 import { LayoutTemplate, Tags } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
+import { checkAuth } from "@/lib/check-auth";
 import CreateListButton from "./_components/create-list/create-list-button";
 import { ListPreviewSkeleton } from "./_components/list-preview";
 import Lists from "./_components/lists";

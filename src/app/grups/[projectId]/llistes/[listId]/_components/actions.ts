@@ -1,12 +1,12 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { listItemSchema } from "./data";
 
 export async function createListItem(

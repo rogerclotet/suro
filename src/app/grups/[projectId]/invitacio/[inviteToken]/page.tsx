@@ -1,3 +1,8 @@
+import assert from "assert";
+import { AlertCircle } from "lucide-react";
+import type { Metadata } from "next";
+import { revalidatePath } from "next/cache";
+import { Logger } from "next-axiom";
 import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/grups/_components/users-list";
 import { auth } from "@/auth";
@@ -12,11 +17,6 @@ import {
 } from "@/components/ui/card";
 import { checkAuth } from "@/lib/check-auth";
 import { getInvitedProject } from "@/server/projects";
-import assert from "assert";
-import { AlertCircle } from "lucide-react";
-import type { Metadata } from "next";
-import { Logger } from "next-axiom";
-import { revalidatePath } from "next/cache";
 import { acceptInvite } from "./actions";
 
 type Props = {

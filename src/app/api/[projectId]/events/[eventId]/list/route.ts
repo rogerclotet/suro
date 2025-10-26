@@ -1,6 +1,6 @@
+import { type AxiomRequest, withAxiom } from "next-axiom";
 import { auth } from "@/auth";
 import { getEventList } from "@/server/lists";
-import { withAxiom, type AxiomRequest } from "next-axiom";
 
 export const dynamic = "force-dynamic";
 

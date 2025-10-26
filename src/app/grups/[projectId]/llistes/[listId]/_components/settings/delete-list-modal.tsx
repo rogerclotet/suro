@@ -1,12 +1,12 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+import { useRouter } from "next/navigation";
+import { useLogger } from "next-axiom";
+import type React from "react";
+import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
-import { captureException } from "@sentry/nextjs";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { toast } from "sonner";
 import { deleteList } from "./actions";
 
 export default function DeleteListModal({

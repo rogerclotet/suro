@@ -1,9 +1,9 @@
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
 import { getNote } from "@/server/notes";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import Link from "next/link";
 
 export default async function Page({
   params: { noteId },

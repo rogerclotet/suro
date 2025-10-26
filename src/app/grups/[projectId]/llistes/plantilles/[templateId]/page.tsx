@@ -1,3 +1,5 @@
+import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
+import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Breadcrumb,
@@ -11,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
 import { getTemplate } from "@/server/lists";
-import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
-import Link from "next/link";
 import SettingsMenu from "../_components/settings/settings-menu";
 import TemplateItems from "./_components/template-items";
 

@@ -1,11 +1,11 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
 import React from "react";
+import type { List } from "@/app/_data/list";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import EditingListItem from "./editing-list-item";
 
 export default function ListItem(props: {

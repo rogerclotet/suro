@@ -1,16 +1,16 @@
 "use client";
 
-import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
-import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
-import { leaveProject } from "./actions";
 import type { Project } from "@/app/_data/project";
-import { useSession } from "next-auth/react";
+import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
+import ModalAction from "@/components/ui/modal-action";
+import { leaveProject } from "./actions";
 
 export default function LeaveButton({ project }: { project: Project }) {
   const session = useSession();

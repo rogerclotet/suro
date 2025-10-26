@@ -1,10 +1,10 @@
 "use client";
 
+import React from "react";
 import type { Template } from "@/app/_data/list";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 export default function TemplatePreview({
   template,

@@ -8,7 +8,7 @@ import { GeistSans } from "geist/font/sans";
 import { SessionProvider } from "next-auth/react";
 import { AxiomWebVitals } from "next-axiom";
 import { ThemeProvider } from "next-themes";
-import React from "react";
+import type React from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";

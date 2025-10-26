@@ -1,10 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { spendings } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
-import { revalidatePath } from "next/cache";
 import type { SettlingPayment } from "./data";
 
 export async function settlePayments(

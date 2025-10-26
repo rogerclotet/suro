@@ -1,10 +1,10 @@
 "use server";
 
-import type { Template } from "@/app/_data/list";
-import { auth } from "@/auth";
 import assert from "assert";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { Logger } from "next-axiom";
+import type { Template } from "@/app/_data/list";
+import { auth } from "@/auth";
 import { db } from "./db";
 import { listItems, lists, projects, templates } from "./db/schema";
 

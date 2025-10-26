@@ -1,12 +1,12 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import * as Sentry from "@sentry/nextjs";
 import { AlertCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useLogger } from "next-axiom";
 import { LogLevel } from "next-axiom/dist/logger";
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function GlobalError({
   error,

@@ -2,6 +2,7 @@
 
 (
   sshpass -p $SSH_PASSWORD ssh $SSH_USERNAME@$SSH_IP -o StrictHostKeyChecking=no <<-EOF
+    set -e
     source ~/.bashrc
     cd $SSH_PROJECT_DIRECTORY
     git pull

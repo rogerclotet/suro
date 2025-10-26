@@ -1,14 +1,5 @@
 "use client";
 
-import type { Event } from "@/app/_data/event";
-import type { List } from "@/app/_data/list";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { captureException } from "@sentry/nextjs";
 import {
   Edit,
@@ -21,6 +12,15 @@ import {
 import { useLogger } from "next-axiom";
 import React from "react";
 import { toast } from "sonner";
+import type { Event } from "@/app/_data/event";
+import type { List } from "@/app/_data/list";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { createLinkedList } from "../actions";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";

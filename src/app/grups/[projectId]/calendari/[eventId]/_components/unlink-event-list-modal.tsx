@@ -1,12 +1,12 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
+import { useLogger } from "next-axiom";
+import type React from "react";
+import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
-import { captureException } from "@sentry/nextjs";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { toast } from "sonner";
 import { unlinkEventList } from "../actions";
 
 export default function UnlinkEventListModal({

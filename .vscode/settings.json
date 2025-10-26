@@ -3,6 +3,29 @@
   "typescript.preferences.preferTypeOnlyAutoImports": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "always",
-    "source.organizeImports": "always"
-  }
+    "source.organizeImports": "always",
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  },
+  "biome.configurationPath": "./biome.json",
+  "tailwindCSS.includeLanguages": {
+    "css": "css"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always"
 }

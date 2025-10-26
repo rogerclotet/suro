@@ -1,10 +1,10 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useLogger } from "next-axiom";
 import { LogLevel } from "next-axiom/dist/logger";
-import { usePathname } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ErrorPage({
   error,

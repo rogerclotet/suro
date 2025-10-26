@@ -1,11 +1,11 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
-import ModalAction from "@/components/ui/modal-action";
 import { captureException } from "@sentry/nextjs";
 import { useLogger } from "next-axiom";
-import React from "react";
+import type React from "react";
 import { toast } from "sonner";
+import type { List } from "@/app/_data/list";
+import ModalAction from "@/components/ui/modal-action";
 import { clearCompletedItems } from "./actions";
 
 export default function ClearCompletedModal({

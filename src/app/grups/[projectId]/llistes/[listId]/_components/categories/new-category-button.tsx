@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import React from "react";
+import type React from "react";
 
 export default function NewCategoryButton({
   dialog,
