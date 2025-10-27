@@ -6,10 +6,12 @@ import { checkAuth } from "@/lib/check-auth";
 import { getNote } from "@/server/notes";
 
 export default async function Page({
-  params: { noteId },
+  params,
 }: {
-  params: { noteId: string };
+  params: Promise<{ projectId: string; noteId: string }>;
 }) {
+  const { noteId } = await params;
+
   await checkAuth();
 
   const note = await getNote(noteId);

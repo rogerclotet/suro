@@ -67,7 +67,7 @@ export default function ListItem(props: {
 
       <span
         className={cn(
-          "flex-grow",
+          "grow",
           props.completed ? "text-muted-foreground line-through" : "",
         )}
       >

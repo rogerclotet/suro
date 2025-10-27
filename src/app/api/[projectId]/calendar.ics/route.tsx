@@ -10,8 +10,10 @@ import { getEventsToExport } from "@/server/events";
 export const GET = withAxiom(
   async (
     request: AxiomRequest,
-    { params: { projectId } }: { params: { projectId: string } },
+    { params }: { params: Promise<{ projectId: string }> },
   ) => {
+    const { projectId } = await params;
+
     const project = await db.query.projects.findFirst({
       columns: { name: true },
       with: {

@@ -1,13 +1,5 @@
 "use client";
 
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Check, Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +12,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { captureException } from "@sentry/nextjs";
+import { Check, Loader2 } from "lucide-react";
+import { useLogger } from "next-axiom";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as v from "valibot";
 import { listItemSchema } from "./data";
 
 export default function EditingListItem(props: {
@@ -49,7 +49,6 @@ export default function EditingListItem(props: {
 
   React.useEffect(() => {
     form.setFocus("name");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
@@ -143,7 +142,7 @@ export default function EditingListItem(props: {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="flex-grow">
+              <FormItem className="grow">
                 <FormControl>
                   <Input
                     {...field}

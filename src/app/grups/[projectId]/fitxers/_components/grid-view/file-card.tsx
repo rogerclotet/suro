@@ -1,8 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { CalendarFold } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
 import type { File } from "@/app/_data/file";
 import {
   Card,
@@ -11,6 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CalendarFold } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 import { readableSize } from "../../readable-size";
 import DeleteFileButton from "../delete-file/delete-file-button";
 import EditFileButton from "../edit-file/edit-file-button";
@@ -62,7 +61,7 @@ function ExtraInfo({ file }: { file: File }) {
         href={`/grups/${file.event.projectId}/calendari/${file.event.id}`}
         className="line-clamp-1 flex flex-row items-center gap-2"
       >
-        <CalendarFold size={14} className="flex-shrink-0" />
+        <CalendarFold size={14} className="shrink-0" />
         <span className="line-clamp-1">{file.event.name}</span>
       </Link>
     );

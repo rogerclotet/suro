@@ -7,10 +7,12 @@ import UploadButton from "./_components/upload-button";
 import ViewSelector from "./_components/view-selector";
 
 export default async function FilesPage({
-  params: { projectId },
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = await params;
+
   const session = await auth();
   if (!session) {
     return redirect("/");
@@ -21,7 +23,7 @@ export default async function FilesPage({
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="flex flex-grow flex-row flex-wrap items-start justify-between gap-2">
+        <div className="flex grow flex-row flex-wrap items-start justify-between gap-2">
           <h1 className="mt-1 text-xl font-semibold">Fitxers</h1>
           <ViewSelector />
         </div>
@@ -32,7 +34,7 @@ export default async function FilesPage({
       {allFiles.length === 0 ? (
         <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right sm:pr-16">
           Encara no hi ha fitxers, en pots compartir aquí{" "}
-          <CornerRightUp className="mb-4 flex-shrink-0" />
+          <CornerRightUp className="mb-4 shrink-0" />
         </div>
       ) : (
         <Files files={allFiles} />

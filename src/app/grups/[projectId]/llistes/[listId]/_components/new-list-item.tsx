@@ -101,13 +101,13 @@ export default function NewListItem({ list }: { list: List }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-grow items-center gap-2"
+          className="flex grow items-center gap-2"
         >
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="flex-grow">
+              <FormItem className="grow">
                 <FormControl>
                   <Input
                     placeholder="Nou element"

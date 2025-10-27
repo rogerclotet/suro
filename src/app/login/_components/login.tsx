@@ -33,7 +33,7 @@ export default function Login({ session }: { session?: Session | null }) {
   }
 
   return (
-    <div className="container mx-auto mt-8 flex w-[28rem] flex-col items-center gap-2 px-10">
+    <div className="container mx-auto mt-8 flex w-md flex-col items-center gap-2 px-10">
       <Card>
         <CardHeader>
           <div className="mx-auto mb-4 rounded-full bg-background p-4">

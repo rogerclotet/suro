@@ -211,15 +211,15 @@ export default function CreateEventButton({
               name="dates"
               render={({ field }) => (
                 <div className="flex flex-row flex-wrap gap-2">
-                  <FormItem className="flex-grow">
+                  <FormItem className="grow">
                     <FormLabel>Dates</FormLabel>
                     <DatePicker
                       dates={field.value as DateRange}
                       onDatesChange={handleDatesChange}
                     />
                   </FormItem>
-                  <div className="flex flex-grow flex-row gap-2">
-                    <FormItem className="w-auto flex-grow">
+                  <div className="flex grow flex-row gap-2">
+                    <FormItem className="w-auto grow">
                       <FormLabel>Hora inici</FormLabel>
                       <Input
                         type="time"
@@ -233,7 +233,7 @@ export default function CreateEventButton({
                         className="justify-center"
                       />
                     </FormItem>
-                    <FormItem className="w-auto flex-grow">
+                    <FormItem className="w-auto grow">
                       <FormLabel>Hora final</FormLabel>
                       <Input
                         type="time"
@@ -255,7 +255,7 @@ export default function CreateEventButton({
             <FormField
               name="allDay"
               render={({ field }) => (
-                <FormItem className="flex flex-grow flex-row items-center gap-2 space-y-0">
+                <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
                   <FormControl>
                     <Checkbox
                       checked={field.value as boolean}

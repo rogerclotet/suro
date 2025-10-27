@@ -10,10 +10,12 @@ import SpendingsList from "./_components/spendings-list";
 import SpendingsTable from "./_components/spendings-table";
 
 export default async function DespesesPage({
-  params: { projectId },
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = await params;
+
   const session = await auth();
   if (!session) {
     redirect("/");

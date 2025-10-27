@@ -55,7 +55,7 @@ export default function UploadButton({
             return "Imatges o PDFs (4 MB)";
           },
         }}
-        className="ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:h-9 ut-button:w-full ut-button:bg-primary ut-button:px-3 ut-button:text-primary-foreground ut-button:ring-offset-background after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring ut-button:focus-visible:ring-offset-2 ut-allowed-content:text-muted-foreground"
+        className="ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:h-9 ut-button:w-full ut-button:bg-primary ut-button:px-3 ut-button:text-primary-foreground ut-button:ring-offset-background after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring ut-button:focus-visible:ring-offset-2 ut-allowed-content:text-muted-foreground"
       />
     </div>
   );

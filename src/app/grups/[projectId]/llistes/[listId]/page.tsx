@@ -13,11 +13,13 @@ import ListsDropdown from "./_components/lists-dropdown";
 import SettingsMenu from "./_components/settings/settings-menu";
 
 export default async function ListPage({
-  params: { projectId, listId },
+  params,
 }: {
-  params: { projectId: string; listId: string };
+  params: Promise<{ projectId: string; listId: string }>;
 }) {
   await checkAuth();
+
+  const { projectId, listId } = await params;
 
   const lists = await getLists(projectId);
   const templates = await getTemplates(projectId);
@@ -83,6 +85,7 @@ export default async function ListPage({
 
       {list.description && (
         <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
           dangerouslySetInnerHTML={{
             __html: textToHtml(list.description),
           }}

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { getLists, getTemplates } from "@/server/lists";
 
 export type List = Awaited<ReturnType<typeof getLists>>[number];

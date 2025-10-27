@@ -1,13 +1,12 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import type * as v from "valibot";
 import type { templateItemSchema } from "../../_components/create-template/data";
 
 export async function createTemplateItem(

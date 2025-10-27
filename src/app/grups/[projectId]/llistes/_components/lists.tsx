@@ -17,7 +17,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
     return (
       <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right md:pr-14">
         Encara no hi ha llistes, pots crear-ne una aquí{" "}
-        <CornerRightUp className="mb-4 flex-shrink-0" />
+        <CornerRightUp className="mb-4 shrink-0" />
       </div>
     );
   }

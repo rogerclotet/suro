@@ -102,7 +102,7 @@ export default function TemplateItem({
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="flex-grow">
+              <FormItem className="grow">
                 <FormControl>
                   <Input
                     {...field}

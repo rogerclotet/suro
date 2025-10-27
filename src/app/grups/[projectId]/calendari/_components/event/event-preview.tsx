@@ -45,7 +45,7 @@ export default function EventPreview({ event }: { event: Event }) {
         {event.description && (
           <CardContent
             dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
-            className="break-words"
+            className="wrap-break-word"
           />
         )}
       </Card>

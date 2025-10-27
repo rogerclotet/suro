@@ -6,11 +6,14 @@ import Category from "./_components/category";
 import NewCategoryButton from "./_components/new-category-button";
 
 export default async function CategoriesPage({
-  params: { projectId },
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
   await checkAuth();
+
+  const { projectId } = await params;
+
   const categories = await getCategories(projectId);
 
   return (
@@ -27,7 +30,7 @@ export default async function CategoriesPage({
         <>
           <div className="mb-4 flex flex-row items-center justify-end gap-4 pr-8 text-right sm:pr-16">
             Encara no hi ha categories, en pots crear aquí{" "}
-            <CornerRightUp className="mb-4 flex-shrink-0" />
+            <CornerRightUp className="mb-4 shrink-0" />
           </div>
 
           <Description />

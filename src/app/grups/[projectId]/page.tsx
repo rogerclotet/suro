@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 
-export default function ProjectPage({
-  params: { projectId },
+export default async function ProjectPage({
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = await params;
+
   redirect(`/grups/${projectId}/llistes`);
 }

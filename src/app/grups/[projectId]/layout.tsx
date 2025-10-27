@@ -3,14 +3,13 @@ import { getInvitedProject } from "@/server/projects";
 import CurrentProjectUpdater from "./_components/current-project-updater";
 
 type Props = {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
   children: React.ReactNode;
 };
 
-export default function ProjectLayout({
-  params: { projectId },
-  children,
-}: Props) {
+export default async function ProjectLayout({ params, children }: Props) {
+  const { projectId } = await params;
+
   return (
     <>
       <CurrentProjectUpdater projectId={projectId} />
@@ -20,8 +19,12 @@ export default function ProjectLayout({
 }
 
 export async function generateMetadata({
-  params: { projectId },
-}: Props): Promise<Metadata> {
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}): Promise<Metadata> {
+  const { projectId } = await params;
+
   const project = await getInvitedProject(projectId);
 
   if (!project) {

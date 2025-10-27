@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export const GET = withAxiom(
   async (
-    request: AxiomRequest,
-    {
-      params: { projectId, eventId },
-    }: { params: { projectId: string; eventId: string } },
+    _request: AxiomRequest,
+    { params }: { params: Promise<{ projectId: string; eventId: string }> },
   ) => {
+    const { projectId, eventId } = await params;
+
     const session = await auth();
     if (!session) {
       return new Response("Unauthorized", { status: 401 });

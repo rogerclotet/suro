@@ -136,7 +136,7 @@ export default async function ProjectsTable() {
         {projects.map((project) => (
           <TableRow
             key={project.id}
-            className="hover:bg-card [&_.avatar]:transition-colors [&_.avatar]:hover:border-card"
+            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell>
               <IdIcon id={project.id} />

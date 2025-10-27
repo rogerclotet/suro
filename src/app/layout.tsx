@@ -57,7 +57,7 @@ export default async function RootLayout({
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                 <TooltipProvider>
                   <Drawer />
-                  <div className="mx-auto mb-20 mt-14 w-full flex-grow px-4 py-4 lg:container lg:mb-4">
+                  <div className="mx-auto mb-20 mt-14 w-full grow px-4 py-4 lg:container lg:mb-4">
                     {children}
                   </div>
                   {session && (

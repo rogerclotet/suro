@@ -15,10 +15,12 @@ import SettingsMenu from "./_components/settings-menu";
 import TimeRemaining from "./_components/time-remaining";
 
 export default async function EventPage({
-  params: { projectId, eventId },
+  params,
 }: {
-  params: { projectId: string; eventId: string };
+  params: Promise<{ projectId: string; eventId: string }>;
 }) {
+  const { projectId, eventId } = await params;
+
   const session = await auth();
   if (!session) {
     return redirect("/");
@@ -64,6 +66,7 @@ export default async function EventPage({
 
       {event.description && (
         <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
           dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
         />
       )}

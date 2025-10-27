@@ -19,7 +19,7 @@ export default function BottomNav() {
         item.disabled ? (
           <div
             key={item.name}
-            className="flex flex-grow flex-col items-center justify-center gap-2 bg-muted p-2 text-muted-foreground"
+            className="flex grow flex-col items-center justify-center gap-2 bg-muted p-2 text-muted-foreground"
           >
             {item.name}
             {item.icon}
@@ -29,7 +29,7 @@ export default function BottomNav() {
             key={item.name}
             href={item.path}
             className={cn(
-              "flex flex-grow flex-col items-center justify-center gap-2 p-2 text-primary",
+              "flex grow flex-col items-center justify-center gap-2 p-2 text-primary",
               isActive(item.path) && "border-t-2 border-primary",
             )}
           >

@@ -65,7 +65,7 @@ export default function SpendingsTable({
         {project.users.map((u) => (
           <TableRow
             key={u.user.id}
-            className="hover:bg-card [&_.avatar]:transition-colors [&_.avatar]:hover:border-card"
+            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell className="flex items-center gap-4">
               <Avatar className="h-8 w-8">

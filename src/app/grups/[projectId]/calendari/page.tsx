@@ -10,12 +10,15 @@ import Calendar from "./_components/calendar";
 import getMonthString from "./_components/event/get-month-string";
 
 export default async function CalendarPage({
-  params: { projectId },
-  searchParams: { d: day },
+  params,
+  searchParams,
 }: {
-  params: { projectId: string };
-  searchParams: { d?: string };
+  params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ d?: string }>;
 }) {
+  const { projectId } = await params;
+  const { d: day } = await searchParams;
+
   const session = await auth();
   if (!session) {
     redirect("/");
@@ -23,7 +26,7 @@ export default async function CalendarPage({
 
   if (day) {
     const date = new Date(day);
-    if (isNaN(date.getTime())) {
+    if (Number.isNaN(date.getTime())) {
       redirect(`/grups/${projectId}/calendari`);
     }
   }

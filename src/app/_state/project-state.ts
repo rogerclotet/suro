@@ -1,4 +1,4 @@
-import type {} from "@redux-devtools/extension"; // required for devtools typing
+import type { } from "@redux-devtools/extension"; // required for devtools typing
 import React from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -54,7 +54,6 @@ export function useProjects() {
     if (projectId) {
       selectProjectId(projectId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {

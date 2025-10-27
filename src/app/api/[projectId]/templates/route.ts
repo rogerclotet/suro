@@ -3,9 +3,11 @@ import { getTemplates } from "@/server/lists";
 
 export const GET = withAxiom(
   async (
-    request: AxiomRequest,
-    { params: { projectId } }: { params: { projectId: string } },
+    _request: AxiomRequest,
+    { params }: { params: Promise<{ projectId: string }> },
   ) => {
+    const { projectId } = await params;
+
     const templates = await getTemplates(projectId);
     return Response.json(templates);
   },

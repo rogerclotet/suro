@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "node:assert";
 import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
@@ -19,13 +19,13 @@ import { checkAuth } from "@/lib/check-auth";
 import { getInvitedProject } from "@/server/projects";
 import { acceptInvite } from "./actions";
 
-type Props = {
-  params: { projectId: string; inviteToken: string };
-};
-
 export default async function InvitePage({
-  params: { projectId, inviteToken },
-}: Props) {
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}) {
+  const { projectId, inviteToken } = await params;
+
   await checkAuth();
 
   const session = await auth();
@@ -83,8 +83,14 @@ export default async function InvitePage({
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = await getInvitedProject(params.projectId);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}): Promise<Metadata> {
+  const { projectId } = await params;
+
+  const project = await getInvitedProject(projectId);
 
   if (!project) {
     return {};

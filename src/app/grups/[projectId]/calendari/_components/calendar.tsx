@@ -1,12 +1,5 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ca } from "date-fns/locale";
-import { CalendarArrowDown, Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
-import type { DayContentProps } from "react-day-picker";
-import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -17,6 +10,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { cn } from "@/lib/utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ca } from "date-fns/locale";
+import { CalendarArrowDown, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import type { DayProps } from "react-day-picker";
+import { toast } from "sonner";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
@@ -67,7 +67,6 @@ export default function Calendar() {
       colors.set(event.id, color);
     });
     setEventColors(colors);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthStart]);
 
   function Events() {
@@ -96,9 +95,9 @@ export default function Calendar() {
     );
   }
 
-  function DayContent(props: DayContentProps) {
+  function DayContent(props: DayProps) {
     const dayEvents = events
-      ?.filter((event) => isCurrentDayEvent(event, props.date))
+      ?.filter((event) => isCurrentDayEvent(event, props.day.date))
       .slice(0, 3);
 
     return (
@@ -130,7 +129,7 @@ export default function Calendar() {
           </div>
         )}
 
-        {props.date.getDate()}
+        {props.day.date.getDate()}
       </span>
     );
   }
@@ -204,13 +203,13 @@ export default function Calendar() {
               cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent [&:has([aria-selected])]:rounded-md focus-within:relative focus-within:z-20",
             }}
             components={{
-              DayContent: DayContent,
+              Day: DayContent,
             }}
           />
         </div>
 
         {date && (
-          <div className="flex-grow">
+          <div className="grow">
             <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 text-xl font-semibold">
               {date.toLocaleString("ca-ES", {
                 dateStyle: "long",
