@@ -36,9 +36,7 @@ export default function FileListItem({ file }: { file: File }) {
       <div className="flex grow flex-col justify-around gap-0.5">
         <div className="flex flex-row items-center gap-2">
           <Link href={file.url} target="_blank" rel="noopener noreferrer">
-            <span className="line-clamp-1 wrap-anywhere">
-              {file.name}
-            </span>
+            <span className="line-clamp-1 wrap-anywhere">{file.name}</span>
           </Link>
 
           {file.uploadedBy.id === session?.data?.user.id && (

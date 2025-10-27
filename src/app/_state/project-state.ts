@@ -1,4 +1,4 @@
-import type { } from "@redux-devtools/extension"; // required for devtools typing
+import type {} from "@redux-devtools/extension"; // required for devtools typing
 import React from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";

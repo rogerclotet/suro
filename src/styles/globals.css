@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @layer base {
   :root {
@@ -76,7 +76,6 @@
     --ring: #9fe88d;
   }
 }
-
 
 @theme inline {
   --color-background: var(--background);
