@@ -49,7 +49,7 @@ export function DatePicker({ dates, onDatesChange, className }: Props) {
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
-            initialFocus
+            autoFocus
             mode="range"
             defaultMonth={dates?.from}
             selected={dates}

@@ -5,12 +5,15 @@ import { ca } from "date-fns/locale";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
-import type { DayProps } from "react-day-picker";
+import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Calendar as CalendarComponent,
+  CalendarDayButton,
+} from "@/components/ui/calendar";
 import {
   Tooltip,
   TooltipContent,
@@ -56,6 +59,7 @@ export default function Calendar() {
     setMonthStart(date);
   }, [day]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We need to re-run the effect only when the month changes, if we add events we run into infinite re-renders
   React.useEffect(() => {
     if (!events) {
       return;
@@ -95,15 +99,31 @@ export default function Calendar() {
     );
   }
 
-  function DayContent(props: DayProps) {
+  function CustomDayButton({
+    className,
+    day,
+    modifiers,
+    ...props
+  }: {
+    className?: string;
+    day: CalendarDay;
+    modifiers: Modifiers;
+  } & React.ComponentProps<typeof DayButton>) {
     const dayEvents = events
-      ?.filter((event) => isCurrentDayEvent(event, props.day.date))
+      ?.filter((event) => isCurrentDayEvent(event, day.date))
       .slice(0, 3);
 
     return (
-      <span className="relative overflow-visible">
+      <div className="relative overflow-visible h-9 w-9">
+        <CalendarDayButton
+          className="text-sm"
+          day={day}
+          modifiers={modifiers}
+          {...props}
+        />
+
         {dayEvents && dayEvents.length > 0 && (
-          <div className="absolute -right-[8px] -top-[5px] flex flex-row-reverse gap-0.5">
+          <div className="absolute right-0.5 top-0.5 flex flex-row-reverse gap-0.5">
             {dayEvents.map((event) => {
               const color = eventColors.get(event.id);
               return (
@@ -114,23 +134,21 @@ export default function Calendar() {
                     // Explictly defining colors to avoid concatenating arbitrary values
                     // https://v2.tailwindcss.com/docs/just-in-time-mode#arbitrary-value-support
                     color === 2
-                      ? "bg-event2"
+                      ? "bg-event-2"
                       : color === 3
-                        ? "bg-event3"
+                        ? "bg-event-3"
                         : color === 4
-                          ? "bg-event4"
+                          ? "bg-event-4"
                           : color === 5
-                            ? "bg-event5"
-                            : "bg-event1",
+                            ? "bg-event-5"
+                            : "bg-event-1",
                   )}
                 />
               );
             })}
           </div>
         )}
-
-        {props.day.date.getDate()}
-      </span>
+      </div>
     );
   }
 
@@ -200,10 +218,10 @@ export default function Calendar() {
             locale={ca}
             className="mx-auto"
             classNames={{
-              cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent [&:has([aria-selected])]:rounded-md focus-within:relative focus-within:z-20",
+              caption_label: "text-md",
             }}
             components={{
-              Day: DayContent,
+              DayButton: CustomDayButton,
             }}
           />
         </div>
