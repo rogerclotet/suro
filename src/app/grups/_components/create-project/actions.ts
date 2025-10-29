@@ -20,11 +20,11 @@ export async function createProject(data: v.InferInput<typeof projectSchema>) {
     .insert(projects)
     .values({ ...parsedData, createdBy: session.user.id })
     .returning({ id: projects.id });
-  if (!result || result.length < 1) {
+  if (!result || result.length < 1 || !result[0]) {
     throw new Error("Error creating project");
   }
 
-  const project = result[0]!;
+  const project = result[0];
   await db
     .insert(projectToUsers)
     .values({ projectId: project.id, userId: session.user.id });

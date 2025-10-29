@@ -39,8 +39,13 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
   const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     try {
-      const noteId = await createNote(project!, data);
+      const noteId = await createNote(project, data);
       toast.success(`Nota ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/notes/${noteId}`);
     } catch (e) {

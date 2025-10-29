@@ -31,11 +31,11 @@ export async function createTemplate(
     .values({ ...parsedData, createdBy: session.user.id, projectId })
     .returning({ id: templates.id });
 
-  if (!result || result.length < 1) {
+  if (!result || result.length < 1 || !result[0]) {
     throw new Error("Error creating template");
   }
 
-  const template = result[0]!;
+  const template = result[0];
 
   revalidatePath(`/grups/${projectId}/llistes/plantilles`);
 

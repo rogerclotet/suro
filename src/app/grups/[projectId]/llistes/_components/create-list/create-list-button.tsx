@@ -48,8 +48,13 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     try {
-      const listId = await createList(project!, data);
+      const listId = await createList(project, data);
       toast.success(`Llista ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {

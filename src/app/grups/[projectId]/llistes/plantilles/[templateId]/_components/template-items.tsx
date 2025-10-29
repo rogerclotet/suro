@@ -27,7 +27,9 @@ export default function TemplateItems({ template }: { template: Template }) {
       const categories = new Map<string, ItemWithIndex[]>();
 
       for (let i = 0; i < items.length; i++) {
-        const item = items[i]!;
+        const item = items[i];
+        if (!item) continue;
+
         const category =
           project?.categories.find((c) => c.id === item.category)?.name ?? "";
         if (!categories.has(category)) {

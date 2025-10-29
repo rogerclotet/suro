@@ -8,7 +8,7 @@ export function generateProposals(project: Project, spendings: Spending[]) {
     return [];
   }
 
-  const currency = spendings[0]?.currency;
+  const currency = spendings[0]?.currency ?? "EUR";
 
   const balances = Object.entries(calculateBalances(project, spendings)).map(
     ([userId, balance]) => ({
@@ -23,29 +23,35 @@ export function generateProposals(project: Project, spendings: Spending[]) {
     balances.sort((a, b) => b.balance - a.balance);
 
     outer: for (let i = 0; i < balances.length; i++) {
-      const userId = balances[i]?.userId;
-      const balance = balances[i]?.balance;
+      const balanceI = balances[i];
+      if (!balanceI) continue;
+
+      const userId = balanceI.userId;
+      const balance = balanceI.balance;
 
       for (let j = 0; j < balances.length; j++) {
         if (i === j) {
           continue;
         }
 
-        const amount = Math.min(balance, -balances[j]?.balance);
+        const balanceJ = balances[j];
+        if (!balanceJ) continue;
+
+        const amount = Math.min(balance, -balanceJ.balance);
         if (amount <= 0) {
           continue;
         }
 
-        const fromUserId = balances[j]?.userId;
+        const fromUserId = balanceJ.userId;
 
         if (!toPay.has(fromUserId)) {
           toPay.set(fromUserId, new Map());
         }
         const currentToPay = toPay.get(fromUserId)?.get(userId) ?? 0;
-        toPay.get(balances[j]?.userId)?.set(userId, currentToPay + amount);
+        toPay.get(balanceJ.userId)?.set(userId, currentToPay + amount);
 
-        balances[i]!.balance -= amount;
-        balances[j]!.balance += amount;
+        balanceI.balance -= amount;
+        balanceJ.balance += amount;
 
         break outer;
       }

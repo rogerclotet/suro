@@ -33,11 +33,11 @@ export async function createNote(
     })
     .returning({ id: notes.id });
 
-  if (!result || result.length < 1) {
+  if (!result || result.length < 1 || !result[0]) {
     throw new Error("Error creating note");
   }
 
-  const note = result[0]!;
+  const note = result[0];
 
   revalidatePath(`/grups/${project.id}/notes`);
 

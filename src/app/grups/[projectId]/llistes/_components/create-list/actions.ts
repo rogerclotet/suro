@@ -35,11 +35,11 @@ export async function createList(
     })
     .returning({ id: lists.id });
 
-  if (!result || result.length < 1) {
+  if (!result || result.length < 1 || !result[0]) {
     throw new Error("Error creating list");
   }
 
-  const list = result[0]!;
+  const list = result[0];
 
   if (parsedData.templates && parsedData.templates.length > 0) {
     const items = await getItems(parsedData.templates, project);
