@@ -33,5 +33,5 @@ export async function createCategory(
 
   revalidatePath(`/grups/${project.id}/llistes/categories`);
 
-  return result[0]!.id;
+  return result[0]?.id;
 }

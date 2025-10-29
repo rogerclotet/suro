@@ -48,7 +48,7 @@ export default function CreateSpendingButton() {
 
   async function onSubmit(data: v.InferInput<typeof spendingSchema>) {
     try {
-      await createSpending(project!.id, data);
+      await createSpending(project?.id, data);
       toast.success("Despesa creada");
       triggerRef.current?.click();
       form.reset();
@@ -56,7 +56,7 @@ export default function CreateSpendingButton() {
       captureException(e);
       log.error("Error creating spending", {
         error: e,
-        projectId: project!.id,
+        projectId: project?.id,
       });
       toast.error("No s'ha pogut crear la despesa, torna-ho a provar més tard");
     }

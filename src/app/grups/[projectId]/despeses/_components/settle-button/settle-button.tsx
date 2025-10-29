@@ -45,7 +45,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
 
   async function handleSubmit() {
     try {
-      await settlePayments(project!.id, selected);
+      await settlePayments(project?.id, selected);
       triggerRef.current?.click();
       toast.success("Deutes saldats correctament");
     } catch (e) {
@@ -53,7 +53,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
       log.error("Error settling payments", {
         error: e,
         payments: selected,
-        projectId: project!.id,
+        projectId: project?.id,
       });
       toast.error("Error al saldar deutes");
     }
@@ -90,7 +90,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
               <h2 className="font-semibold">Propostes per saldar deutes:</h2>
               <ul className="space-y-2">
                 {pending.map((payment, index) => (
-                  <li key={index}>
+                  <li key={`${payment.from}-${payment.to}-${payment.amount}`}>
                     <SettleProposal
                       payment={payment}
                       onChange={(selected) =>

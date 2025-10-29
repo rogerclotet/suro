@@ -19,7 +19,7 @@ export default function GlobalError({
 
   const pathname = usePathname();
   const log = useLogger({ source: "global-error.tsx" });
-  const status = error.message == "Invalid URL" ? 404 : 500;
+  const status = error.message === "Invalid URL" ? 404 : 500;
 
   log.logHttpRequest(
     LogLevel.error,

@@ -32,6 +32,7 @@ export default function DeleteFileButton({ file }: { file: File }) {
   return (
     <>
       <button
+        type="button"
         onClick={() => triggerRef.current?.click()}
         className="text-muted-foreground hover:text-destructive"
       >

@@ -14,9 +14,10 @@ export default function TemplatePreview({
   onChange: (selected: boolean) => void;
 }) {
   const [checked, setChecked] = React.useState(false);
+  const checkboxId = `template-${template.id}`;
 
   return (
-    <label className="cursor-pointer">
+    <label className="cursor-pointer" htmlFor={checkboxId}>
       <Card
         className={cn(
           "flex flex-row items-center gap-4 border-2 border-transparent px-4 py-1",
@@ -24,6 +25,7 @@ export default function TemplatePreview({
         )}
       >
         <Checkbox
+          id={checkboxId}
           defaultChecked={false}
           onCheckedChange={(checked) => {
             if (checked === "indeterminate") {

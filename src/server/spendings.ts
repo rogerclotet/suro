@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "node:assert";
 import { desc, eq } from "drizzle-orm";
 import { Logger } from "next-axiom";
 import { auth } from "@/auth";

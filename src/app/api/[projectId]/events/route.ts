@@ -24,8 +24,8 @@ export const GET = withAxiom(
       return new Response("Missing date range", { status: 400 });
     }
 
-    const fromDate = new Date(parseInt(from));
-    const toDate = new Date(parseInt(to));
+    const fromDate = new Date(parseInt(from, 10));
+    const toDate = new Date(parseInt(to, 10));
 
     if (fromDate > toDate) {
       return new Response("Invalid date range", { status: 400 });

@@ -11,6 +11,7 @@ export default function NewCategoryButton({
   return (
     <div>
       <button
+        type="button"
         onClick={() => dialog.current?.showModal()}
         className="flex flex-row flex-nowrap items-center justify-start gap-2 text-nowrap"
       >

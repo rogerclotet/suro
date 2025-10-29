@@ -18,9 +18,13 @@ export default function IdIcon({ id }: { id: Project["id"] }) {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <div onClick={() => copyIdToClipboard(id)}>
+        <button
+          type="button"
+          onClick={() => copyIdToClipboard(id)}
+          className="inline-flex"
+        >
           <Fingerprint />
-        </div>
+        </button>
       </TooltipTrigger>
       <TooltipContent>
         <p>{id}</p>

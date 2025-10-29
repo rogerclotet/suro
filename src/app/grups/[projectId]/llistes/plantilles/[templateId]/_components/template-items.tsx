@@ -18,6 +18,10 @@ export default function TemplateItems({ template }: { template: Template }) {
   const [animationParent] = useAutoAnimate();
   const { project } = useProjects();
 
+  const sorted = React.useCallback((items: ItemWithIndex[]) => {
+    return [...items].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
   const groupItemsByCategory = React.useCallback(
     (items: Template["items"]) => {
       const categories = new Map<string, ItemWithIndex[]>();
@@ -30,7 +34,7 @@ export default function TemplateItems({ template }: { template: Template }) {
           categories.set(category, []);
         }
 
-        categories.get(category)!.push({ ...item, index: i });
+        categories.get(category)?.push({ ...item, index: i });
       }
 
       const result = [];
@@ -42,7 +46,7 @@ export default function TemplateItems({ template }: { template: Template }) {
 
       return result;
     },
-    [project],
+    [project, sorted],
   );
 
   React.useEffect(() => {
@@ -51,10 +55,6 @@ export default function TemplateItems({ template }: { template: Template }) {
     }
     setItemsByCategory(groupItemsByCategory(items));
   }, [items, groupItemsByCategory, project]);
-
-  function sorted(items: ItemWithIndex[]) {
-    return [...items].sort((a, b) => a.name.localeCompare(b.name));
-  }
 
   async function handleItemChanged(
     index: number,

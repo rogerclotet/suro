@@ -54,7 +54,7 @@ export function useProjects() {
     if (projectId) {
       selectProjectId(projectId);
     }
-  }, []);
+  }, [selectProjectId]);
 
   React.useEffect(() => {
     if (projects.length === 0) {
@@ -72,7 +72,7 @@ export function useProjects() {
     }
 
     selectProjectInStore(projects[0]);
-    selectProjectId(projects[0]!.id);
+    selectProjectId(projects[0]?.id);
   }, [projects, selectProjectInStore, selectProjectId]);
 
   function selectProject(project: Project | undefined) {

@@ -1,6 +1,6 @@
 "use server";
 
-import assert from "assert";
+import assert from "node:assert";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";

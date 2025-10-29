@@ -48,7 +48,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           }
 
           await trx.insert(projectToUsers).values({
-            projectId: result[0]!.id,
+            projectId: result[0]?.id,
             userId: user.id!,
           });
         } catch (e) {

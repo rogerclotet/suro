@@ -76,6 +76,11 @@ export default function EditEventForm({
   );
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     const dataToEdit = window.structuredClone(data);
     if (dataToEdit.allDay) {
       dataToEdit.dates.from = new Date(
@@ -95,7 +100,7 @@ export default function EditEventForm({
     }
 
     try {
-      await editEvent(event, dataToEdit, project!);
+      await editEvent(event, dataToEdit, project);
       toast.success("Editat correctament");
       form.reset({
         name: data.name,
@@ -126,11 +131,11 @@ export default function EditEventForm({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.from) {
+    if (!newDates.from || !hour || !minute) {
       return;
     }
 
-    newDates.from.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.from.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.to || newDates.from > newDates.to) {
       newDates.to?.setHours(
         newDates.from.getHours() + 1,
@@ -145,11 +150,11 @@ export default function EditEventForm({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.to) {
+    if (!newDates.to || !hour || !minute) {
       return;
     }
 
-    newDates.to.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.to.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.from || newDates.from > newDates.to) {
       newDates.from?.setHours(
         newDates.to.getHours() - 1,
@@ -166,11 +171,9 @@ export default function EditEventForm({
     }
 
     const newDates = form.getValues("dates");
-    selectDefaultTime(
-      newDates.from ?? newDates.to!,
-      newDates.to ?? newDates.from!,
-      checked,
-    );
+    const fromDate = newDates.from ?? newDates.to ?? new Date();
+    const toDate = newDates.to ?? newDates.from ?? new Date();
+    selectDefaultTime(fromDate, toDate, checked);
 
     form.setValue("allDay", checked);
   }

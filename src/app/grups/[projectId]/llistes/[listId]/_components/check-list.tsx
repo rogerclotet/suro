@@ -184,7 +184,7 @@ function groupItemsByCategory(items: List["items"], project: Project | null) {
 
   for (const item of items) {
     const category = item.category?.name ?? "";
-    categories.get(category)!.push(item);
+    categories.get(category)?.push(item);
   }
 
   const result = [];

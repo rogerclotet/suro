@@ -49,7 +49,7 @@ export default function EditingListItem(props: {
 
   React.useEffect(() => {
     form.setFocus("name");
-  }, []);
+  }, [form.setFocus]);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (!form.formState.isDirty) {

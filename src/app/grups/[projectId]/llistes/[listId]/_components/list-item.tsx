@@ -55,6 +55,12 @@ export default function ListItem(props: {
     <li
       className="flex h-10 touch-manipulation flex-row items-center gap-5"
       onClick={() => setEditing(!props.completed)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setEditing(!props.completed);
+        }
+      }}
       ref={setNodeRef}
       style={style}
     >
@@ -74,14 +80,20 @@ export default function ListItem(props: {
         {props.name}
       </span>
 
-      <div
+      <button
+        type="button"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.stopPropagation();
+          }
+        }}
         className="py-2 pl-2 text-muted-foreground"
         {...listeners}
         {...attributes}
       >
         <GripVertical />
-      </div>
+      </button>
     </li>
   );
 }

@@ -32,7 +32,7 @@ export async function createLinkedList(event: Event) {
       })
       .returning({ id: lists.id });
 
-    const listId = res[0]!.id;
+    const listId = res[0]?.id;
 
     revalidatePath(`/grups/${event.projectId}/llistes`);
     revalidatePath(`/grups/${event.projectId}/llistes/${listId}`);

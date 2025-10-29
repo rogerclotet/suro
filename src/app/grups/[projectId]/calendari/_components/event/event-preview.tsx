@@ -44,6 +44,7 @@ export default function EventPreview({ event }: { event: Event }) {
         </CardHeader>
         {event.description && (
           <CardContent
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Already sanitized
             dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
             className="wrap-break-word"
           />

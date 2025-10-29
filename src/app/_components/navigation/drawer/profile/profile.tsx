@@ -45,7 +45,7 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
         </Link>
 
         <form action={logOut}>
-          <button>
+          <button type="submit">
             <DropdownMenuItem className="cursor-pointer gap-2">
               <LogOut /> Tancar sessió
             </DropdownMenuItem>

@@ -1,6 +1,6 @@
 "use server";
 
-import assert from "assert";
+import assert from "node:assert";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { Logger } from "next-axiom";
 import type { Template } from "@/app/_data/list";
