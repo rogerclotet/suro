@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -30,25 +30,36 @@ export default function EditFileButton({ file }: { file: File }) {
     },
     resolver: valibotResolver(editFileSchema),
   });
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
-  async function onSubmit(data: v.InferInput<typeof editFileSchema>) {
-    try {
-      await editFile(file, data);
-      toast.success("Fitxer editat");
-      triggerRef.current?.click();
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "edit_file",
-        projectId: file.project.id,
-        eventId: file.eventId,
-        fileId: file.id,
-      });
-      toast.error("Error editant el fitxer. Torna-ho a provar més tard");
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof editFileSchema>) => {
+      try {
+        await editFile(file, data);
+        toast.success("Fitxer editat");
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "edit_file",
+          projectId: file.project.id,
+          eventId: file.eventId,
+          fileId: file.id,
+        });
+        toast.error("Error editant el fitxer. Torna-ho a provar més tard");
+      }
+    },
+    [file, session?.user.id],
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
 
   return (
     <>
@@ -66,7 +77,7 @@ export default function EditFileButton({ file }: { file: File }) {
         description="Edita el nom del fitxer"
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"

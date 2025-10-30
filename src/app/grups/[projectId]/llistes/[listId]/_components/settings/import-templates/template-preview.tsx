@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useState } from "react";
 import type { Template } from "@/app/_data/list";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +13,7 @@ export default function TemplatePreview({
   template: Template;
   onChange: (selected: boolean) => void;
 }) {
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = useState(false);
   const checkboxId = `template-${template.id}`;
 
   return (

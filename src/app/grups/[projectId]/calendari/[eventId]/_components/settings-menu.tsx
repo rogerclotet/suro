@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
@@ -35,10 +35,10 @@ export default function SettingsMenu({
   list: List | undefined;
 }) {
   const { data: session } = useSession();
-  const editDialogRef = React.useRef<HTMLDivElement>(null);
-  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
-  const linkListRef = React.useRef<HTMLDivElement>(null);
-  const unlinkListRef = React.useRef<HTMLDivElement>(null);
+  const editDialogRef = useRef<HTMLDivElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
+  const linkListRef = useRef<HTMLDivElement>(null);
+  const unlinkListRef = useRef<HTMLDivElement>(null);
 
   async function handleCreateLinkedList() {
     try {

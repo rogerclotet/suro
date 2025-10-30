@@ -1,18 +1,18 @@
 import { Calendar, FolderOpen, HandCoins, ListTodo } from "lucide-react";
-import React from "react";
+import { type ReactNode, useMemo } from "react";
 import { useProjects } from "@/app/_state/project-state";
 
 export type MenuItem = {
   name: string;
   path: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   disabled?: boolean;
 };
 
 type MenuItemPart = {
   name: string;
   pathPart: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   disabled?: boolean;
 };
 
@@ -42,7 +42,7 @@ const itemParts: MenuItemPart[] = [
 export function useMenuItems(): MenuItem[] {
   const { project: selectedProject } = useProjects();
 
-  const items = React.useMemo(() => {
+  const items = useMemo(() => {
     if (selectedProject === null) {
       return itemParts.map(({ name, icon, disabled }) => ({
         name,

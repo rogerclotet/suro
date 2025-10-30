@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type React from "react";
+import type { RefObject } from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
@@ -16,7 +16,7 @@ export default function UnlinkEventListModal({
 }: {
   event: Event;
   list: List | undefined;
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
 

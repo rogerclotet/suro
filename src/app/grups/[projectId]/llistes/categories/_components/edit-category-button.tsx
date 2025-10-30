@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -33,27 +33,38 @@ export default function EditCategoryButton({
     },
     resolver: valibotResolver(categorySchema),
   });
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
-  async function onSubmit(data: v.InferInput<typeof categorySchema>) {
-    try {
-      await editCategory(category, data);
-      toast.success("Categoria editada correctament");
-      triggerRef.current?.click();
-      form.reset({ name: data.name });
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "edit_category",
-        projectId: category.projectId,
-        categoryId: category.id,
-      });
-      toast.error(
-        "No s'ha pogut editar la categoria. Torna-ho a provar més tard",
-      );
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof categorySchema>) => {
+      try {
+        await editCategory(category, data);
+        toast.success("Categoria editada correctament");
+        triggerRef.current?.click();
+        form.reset({ name: data.name });
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "edit_category",
+          projectId: category.projectId,
+          categoryId: category.id,
+        });
+        toast.error(
+          "No s'ha pogut editar la categoria. Torna-ho a provar més tard",
+        );
+      }
+    },
+    [category, form, session?.user.id],
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
 
   return (
     <>
@@ -72,7 +83,7 @@ export default function EditCategoryButton({
         description="Editar el nom de la categoria"
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"

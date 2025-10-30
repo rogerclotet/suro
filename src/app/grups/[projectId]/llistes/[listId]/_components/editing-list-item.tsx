@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -44,12 +44,14 @@ export default function EditingListItem(props: {
     },
     resolver: valibotResolver(listItemSchema),
   });
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
-  React.useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
+  useEffect(() => {
     form.setFocus("name");
-  }, [form.setFocus]);
+  }, []);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (!form.formState.isDirty) {
@@ -113,7 +115,10 @@ export default function EditingListItem(props: {
     <li>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void form.handleSubmit(onSubmit)(e);
+          }}
           className="flex flex-row items-center gap-2"
           ref={formRef}
         >

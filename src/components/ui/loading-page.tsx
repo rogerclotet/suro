@@ -1,10 +1,7 @@
 import { Loader2 } from "lucide-react";
+import type { ReactNode } from "react";
 
-export default function LoadingPage({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export default function LoadingPage({ children }: { children?: ReactNode }) {
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">

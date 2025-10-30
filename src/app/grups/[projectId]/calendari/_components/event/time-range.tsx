@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 export default function TimeRange({
   startAt,
@@ -13,9 +13,9 @@ export default function TimeRange({
   allDay: boolean;
   className?: string;
 }) {
-  const [range, setRange] = React.useState<React.ReactNode>(null);
+  const [range, setRange] = useState<ReactNode>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (allDay) {
       const allDayEndAt = new Date(
         endAt.getFullYear(),

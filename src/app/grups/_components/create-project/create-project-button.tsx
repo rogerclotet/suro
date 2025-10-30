@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -31,7 +31,7 @@ export default function CreateProjectButton() {
     },
     resolver: valibotResolver(projectSchema),
   });
-  const modalRef = React.useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useEffect } from "react";
 import { useProjects } from "@/app/_state/project-state";
 
 export default function CurrentProjectUpdater({
@@ -10,7 +10,7 @@ export default function CurrentProjectUpdater({
 }) {
   const { projects, project, selectProject } = useProjects();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (projects.length === 0) {
       return;
     }

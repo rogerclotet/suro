@@ -3,7 +3,7 @@
 import { LogOut } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
@@ -13,7 +13,7 @@ import { leaveProject } from "./actions";
 
 export default function LeaveButton({ project }: { project: Project }) {
   const { data: session } = useSession();
-  const modalRef = React.useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
 
   async function handleLeave() {

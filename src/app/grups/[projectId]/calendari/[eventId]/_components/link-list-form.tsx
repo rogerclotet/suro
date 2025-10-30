@@ -4,6 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { type FormEvent, type RefObject, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -28,7 +29,7 @@ export default function LinkListForm({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
   const form = useForm({
@@ -65,23 +66,34 @@ export default function LinkListForm({
     staleTime: 60 * 1000,
   });
 
-  async function onSubmit(data: v.InferInput<typeof linkEventListSchema>) {
-    try {
-      await linkEventList(event, data.listId);
-      triggerRef.current?.click();
-      toast.success("Llista enllaçada correctament");
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "link_event_list",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error(
-        "No s'ha pogut enllaçar la llista. Torna-ho a provar més tard",
-      );
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof linkEventListSchema>) => {
+      try {
+        await linkEventList(event, data.listId);
+        triggerRef.current?.click();
+        toast.success("Llista enllaçada correctament");
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "link_event_list",
+          projectId: event.projectId,
+          eventId: event.id,
+        });
+        toast.error(
+          "No s'ha pogut enllaçar la llista. Torna-ho a provar més tard",
+        );
+      }
+    },
+    [event, session?.user.id, triggerRef],
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
 
   return (
     <ModalForm
@@ -90,7 +102,7 @@ export default function LinkListForm({
       description="Selecciona la llista a enllaçar. Un esdeveniment només pot tenir una llista enllaçada, i una llista només pot estar enllaçada a un esdeveniment."
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           <FormField
             control={form.control}
             name="listId"

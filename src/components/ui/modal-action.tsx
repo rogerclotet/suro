@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import React from "react";
+import { type ReactNode, type RefObject, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,8 @@ type Props = {
   actionText: string;
   onAction: () => void;
   variant?: "default" | "destructive";
-  triggerRef: React.RefObject<HTMLDivElement | null>;
-  children?: React.ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
+  children?: ReactNode;
 };
 
 export default function ModalAction(props: Props) {
@@ -51,7 +51,7 @@ function ClientModalAction({
   variant = "default",
   triggerRef,
 }: Props) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
 
   const actionButtonStyle =

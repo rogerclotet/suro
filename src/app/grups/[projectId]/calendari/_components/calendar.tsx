@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
+import { type ComponentProps, useEffect, useMemo, useState } from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
@@ -27,28 +27,60 @@ import { eventsQueryOptions } from "./event/query";
 
 const EVENT_COLORS = 5;
 
+function Events({
+  isLoading,
+  currentEvents,
+}: {
+  isLoading: boolean;
+  currentEvents: Event[] | undefined;
+}) {
+  if (isLoading || currentEvents === undefined) {
+    return (
+      <div className="flex h-32 items-center justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
+
+  if (currentEvents && currentEvents.length === 0) {
+    return (
+      <p className="italic opacity-60">
+        No hi ha cap esdeveniment programat per aquest dia.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {currentEvents.map((event) => (
+        <EventPreview key={event.id} event={event} />
+      ))}
+    </div>
+  );
+}
+
 export default function Calendar() {
   const searchParams = useSearchParams();
   const day = searchParams.get("d");
 
-  const [date, setDate] = React.useState<Date>();
-  const [monthStart, setMonthStart] = React.useState<Date>();
+  const [date, setDate] = useState<Date>();
+  const [monthStart, setMonthStart] = useState<Date>();
   const { project } = useProjects();
   const { data: events, isLoading } = useQuery(
     eventsQueryOptions(monthStart, project?.id),
   );
-  const [eventColors, setEventColors] = React.useState<Map<string, number>>(
+  const [eventColors, setEventColors] = useState<Map<string, number>>(
     new Map(),
   );
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const currentEvents = React.useMemo(
+  const currentEvents = useMemo(
     () => events?.filter((event) => isCurrentDayEvent(event, date)),
     [events, date],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const today = day ? new Date(day) : new Date();
     today.setHours(0, 0, 0, 0);
     setDate(today);
@@ -60,7 +92,7 @@ export default function Calendar() {
   }, [day]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: We need to re-run the effect only when the month changes, if we add events we run into infinite re-renders
-  React.useEffect(() => {
+  useEffect(() => {
     if (!events) {
       return;
     }
@@ -71,33 +103,7 @@ export default function Calendar() {
       colors.set(event.id, color);
     });
     setEventColors(colors);
-  }, [monthStart]);
-
-  function Events() {
-    if (isLoading || currentEvents === undefined) {
-      return (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="animate-spin" />
-        </div>
-      );
-    }
-
-    if (currentEvents && currentEvents.length === 0) {
-      return (
-        <p className="italic opacity-60">
-          No hi ha cap esdeveniment programat per aquest dia.
-        </p>
-      );
-    }
-
-    return (
-      <div className="flex flex-col gap-4">
-        {currentEvents.map((event) => (
-          <EventPreview key={event.id} event={event} />
-        ))}
-      </div>
-    );
-  }
+  }, [monthStart, events]);
 
   function CustomDayButton({
     className,
@@ -108,7 +114,7 @@ export default function Calendar() {
     className?: string;
     day: CalendarDay;
     modifiers: Modifiers;
-  } & React.ComponentProps<typeof DayButton>) {
+  } & ComponentProps<typeof DayButton>) {
     const dayEvents = events
       ?.filter((event) => isCurrentDayEvent(event, day.date))
       .slice(0, 3);
@@ -239,7 +245,7 @@ export default function Calendar() {
               />
             </h2>
 
-            <Events />
+            <Events isLoading={isLoading} currentEvents={currentEvents} />
           </div>
         )}
       </div>

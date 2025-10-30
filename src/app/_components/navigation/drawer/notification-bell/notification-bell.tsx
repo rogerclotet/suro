@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, BellOff } from "lucide-react";
-import React from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   areNotificationsEnabled,
@@ -14,11 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function NotificationBell() {
-  const [unsupported, setUnsupported] = React.useState<boolean>(true);
-  const [enabled, setEnabled] = React.useState(false);
-  const [initialized, setInitialized] = React.useState(false);
+  const [unsupported, setUnsupported] = useState<boolean>(true);
+  const [enabled, setEnabled] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const isUnsupported = notificationUnsupported();
     setUnsupported(isUnsupported);
     if (isUnsupported) {

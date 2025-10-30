@@ -3,14 +3,14 @@
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { File } from "@/app/_data/file";
 import ModalAction from "@/components/ui/modal-action";
 import { deleteFile } from "./actions";
 
 export default function DeleteFileButton({ file }: { file: File }) {
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function handleDelete() {

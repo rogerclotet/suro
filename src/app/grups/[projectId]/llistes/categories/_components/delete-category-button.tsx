@@ -3,7 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Category } from "@/app/_data/category";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export default function DeleteCategoryButton({
 }: {
   category: Category;
 }) {
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function handleDelete() {

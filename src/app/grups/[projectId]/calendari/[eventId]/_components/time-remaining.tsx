@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { Event } from "@/app/_data/event";
 
 export default function TimeRemaining({
@@ -10,9 +10,9 @@ export default function TimeRemaining({
   event: Event;
   className?: string;
 }) {
-  const [timeRemaining, setTimeRemaining] = React.useState<React.ReactNode>();
+  const [timeRemaining, setTimeRemaining] = useState<ReactNode>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const now = new Date();
     const remainingMs = event.startAt.getTime() - now.getTime();
 

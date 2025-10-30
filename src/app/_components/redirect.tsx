@@ -1,7 +1,7 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import React from "react";
+import { useEffect } from "react";
 import LoadingPage from "@/components/ui/loading-page";
 import type { Project } from "../_data/project";
 import { useProjects } from "../_state/project-state";
@@ -9,7 +9,7 @@ import { useProjects } from "../_state/project-state";
 export default function Redirect({ project }: { project?: Project }) {
   const { projects, project: selectedProject, selectProject } = useProjects();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (project) {
       selectProject(project);
     } else if (!selectedProject && projects && projects.length > 0) {

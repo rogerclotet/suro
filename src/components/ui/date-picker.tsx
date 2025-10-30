@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { ca } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
-import type * as React from "react";
+import type { HTMLAttributes } from "react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-type Props = React.HTMLAttributes<HTMLDivElement> & {
+type Props = HTMLAttributes<HTMLDivElement> & {
   dates: DateRange;
   onDatesChange: (dates: DateRange | undefined) => void;
 };

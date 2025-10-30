@@ -11,7 +11,13 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import React from "react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
@@ -22,17 +28,17 @@ import NewListItem from "./new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const { project } = useProjects();
-  const [itemsByCategory, setItemsByCategory] = React.useState(
+  const [itemsByCategory, setItemsByCategory] = useState(
     groupItemsByCategory(props.list.items, project),
   );
-  const [dragging, setDragging] = React.useState(false);
+  const [dragging, setDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const keyboardSensor = useSensor(KeyboardSensor);
 
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setItemsByCategory(groupItemsByCategory(props.list.items, project));
   }, [props.list.items, project]);
 

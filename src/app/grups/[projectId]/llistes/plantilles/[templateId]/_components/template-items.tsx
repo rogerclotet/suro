@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import React, { Fragment } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { updateTemplateItems } from "./actions";
@@ -12,17 +12,17 @@ type Item = Template["items"][number];
 type ItemWithIndex = Item & { index: number };
 
 export default function TemplateItems({ template }: { template: Template }) {
-  const [items, setItems] = React.useState<Template["items"]>(template.items);
+  const [items, setItems] = useState<Template["items"]>(template.items);
   const [itemsByCategory, setItemsByCategory] =
-    React.useState<ReturnType<typeof groupItemsByCategory>>();
+    useState<ReturnType<typeof groupItemsByCategory>>();
   const [animationParent] = useAutoAnimate();
   const { project } = useProjects();
 
-  const sorted = React.useCallback((items: ItemWithIndex[]) => {
+  const sorted = useCallback((items: ItemWithIndex[]) => {
     return [...items].sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
-  const groupItemsByCategory = React.useCallback(
+  const groupItemsByCategory = useCallback(
     (items: Template["items"]) => {
       const categories = new Map<string, ItemWithIndex[]>();
 
@@ -51,7 +51,7 @@ export default function TemplateItems({ template }: { template: Template }) {
     [project, sorted],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!project) {
       return;
     }

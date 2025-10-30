@@ -5,7 +5,12 @@ import type { CheckedState } from "@radix-ui/react-checkbox";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  type RefObject,
+  useCallback,
+} from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -34,7 +39,7 @@ export default function EditEventForm({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
   const { project } = useProjects();
@@ -53,7 +58,7 @@ export default function EditEventForm({
     resolver: valibotResolver(eventSchema),
   });
 
-  const selectDefaultTime = React.useCallback(
+  const selectDefaultTime = useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
       const defaultStartAt = new Date(fromDate.getTime());
       const defaultEndAt = new Date(toDate.getTime());
@@ -75,50 +80,53 @@ export default function EditEventForm({
     [form],
   );
 
-  async function onSubmit(data: v.InferInput<typeof eventSchema>) {
-    if (!project) {
-      toast.error("No s'ha seleccionat cap projecte");
-      return;
-    }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof eventSchema>) => {
+      if (!project) {
+        toast.error("No s'ha seleccionat cap projecte");
+        return;
+      }
 
-    const dataToEdit = window.structuredClone(data);
-    if (dataToEdit.allDay) {
-      dataToEdit.dates.from = new Date(
-        Date.UTC(
-          data.dates.from?.getFullYear() ?? 0,
-          data.dates.from?.getMonth() ?? 0,
-          data.dates.from?.getDate() ?? 0,
-        ),
-      );
-      dataToEdit.dates.to = new Date(
-        Date.UTC(
-          data.dates.to?.getFullYear() ?? 0,
-          data.dates.to?.getMonth() ?? 0,
-          data.dates.to?.getDate() ?? 0,
-        ),
-      );
-    }
+      const dataToEdit = window.structuredClone(data);
+      if (dataToEdit.allDay) {
+        dataToEdit.dates.from = new Date(
+          Date.UTC(
+            data.dates.from?.getFullYear() ?? 0,
+            data.dates.from?.getMonth() ?? 0,
+            data.dates.from?.getDate() ?? 0,
+          ),
+        );
+        dataToEdit.dates.to = new Date(
+          Date.UTC(
+            data.dates.to?.getFullYear() ?? 0,
+            data.dates.to?.getMonth() ?? 0,
+            data.dates.to?.getDate() ?? 0,
+          ),
+        );
+      }
 
-    try {
-      await editEvent(event, dataToEdit, project);
-      toast.success("Editat correctament");
-      form.reset({
-        name: data.name,
-        description: data.description ?? "",
-        dates: { from: data.dates.from, to: data.dates.to },
-        allDay: data.allDay,
-      });
-      triggerRef.current?.click();
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "edit_event",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
-    }
-  }
+      try {
+        await editEvent(event, dataToEdit, project);
+        toast.success("Editat correctament");
+        form.reset({
+          name: data.name,
+          description: data.description ?? "",
+          dates: { from: data.dates.from, to: data.dates.to },
+          allDay: data.allDay,
+        });
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "edit_event",
+          projectId: event.projectId,
+          eventId: event.id,
+        });
+        toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
+      }
+    },
+    [project, event, form, session?.user.id, triggerRef],
+  );
 
   function handleDatesChange(dates: DateRange | undefined) {
     const from = dates?.from ?? new Date();
@@ -127,7 +135,7 @@ export default function EditEventForm({
     selectDefaultTime(from, to, form.getValues("allDay"));
   }
 
-  function handleStartTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleStartTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
@@ -146,7 +154,7 @@ export default function EditEventForm({
     form.setValue("dates", newDates);
   }
 
-  function handleEndTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleEndTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
@@ -178,6 +186,14 @@ export default function EditEventForm({
     form.setValue("allDay", checked);
   }
 
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
+
   return (
     <ModalForm
       triggerRef={triggerRef}
@@ -185,7 +201,7 @@ export default function EditEventForm({
       description="Editar el nom i descripció de l'esdeveniment"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           <FormField
             control={form.control}
             name="name"

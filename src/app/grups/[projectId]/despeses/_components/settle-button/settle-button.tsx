@@ -3,7 +3,7 @@
 import { Check, Handshake } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Spending } from "@/app/_data/spending";
 import { useProjects } from "@/app/_state/project-state";
@@ -16,13 +16,13 @@ import type { SettlingPayment } from "./data";
 import { generateProposals } from "./generate-proposals";
 
 export default function SettleButton({ spendings }: { spendings: Spending[] }) {
-  const [pending, setPending] = React.useState<SettlingPayment[]>();
-  const [selected, setSelected] = React.useState<SettlingPayment[]>([]);
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const [pending, setPending] = useState<SettlingPayment[]>();
+  const [selected, setSelected] = useState<SettlingPayment[]>([]);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { project } = useProjects();
   const { data: session } = useSession();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!project) {
       return;
     }

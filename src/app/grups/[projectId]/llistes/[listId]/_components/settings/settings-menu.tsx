@@ -1,7 +1,7 @@
 "use client";
 
 import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
-import React from "react";
+import { useRef } from "react";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +23,10 @@ export default function SettingsMenu({
   list: List;
   templates: Template[];
 }) {
-  const clearCompletedDialogRef = React.useRef<HTMLDivElement>(null);
-  const importDialogRef = React.useRef<HTMLDivElement>(null);
-  const editDialogRef = React.useRef<HTMLDivElement>(null);
-  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
+  const clearCompletedDialogRef = useRef<HTMLDivElement>(null);
+  const importDialogRef = useRef<HTMLDivElement>(null);
+  const editDialogRef = useRef<HTMLDivElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
 
   return (
     <>

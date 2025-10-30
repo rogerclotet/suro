@@ -1,7 +1,7 @@
 "use client";
 
 import { Edit, Settings, Trash2 } from "lucide-react";
-import React from "react";
+import { useRef } from "react";
 import type { Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,8 @@ import DeleteTemplateModal from "./delete-template-modal";
 import EditTemplateForm from "./edit-template-form";
 
 export default function SettingsMenu({ template }: { template: Template }) {
-  const editDialogRef = React.useRef<HTMLDivElement>(null);
-  const deleteDialogRef = React.useRef<HTMLDivElement>(null);
+  const editDialogRef = useRef<HTMLDivElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
 
   return (
     <>

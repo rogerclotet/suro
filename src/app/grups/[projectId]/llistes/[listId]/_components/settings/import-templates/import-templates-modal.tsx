@@ -3,7 +3,15 @@
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React, { Fragment } from "react";
+import {
+  type FormEvent,
+  Fragment,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
@@ -21,17 +29,17 @@ export default function ImportTemplatesModal({
 }: {
   list: List;
   templates: Template[];
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
-  const [selected, setSelected] = React.useState<boolean[]>([]);
-  const [itemsByCategory, setItemsByCategory] = React.useState<
+  const [selected, setSelected] = useState<boolean[]>([]);
+  const [itemsByCategory, setItemsByCategory] = useState<
     Record<string, Template["items"]>
   >({});
-  const [submitting, setSubmitting] = React.useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { project } = useProjects();
   const { data: session } = useSession();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!project) {
       return;
     }

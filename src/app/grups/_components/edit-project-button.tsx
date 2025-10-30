@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -30,23 +30,34 @@ export default function EditProjectButton({ project }: { project: Project }) {
     },
     resolver: valibotResolver(projectSchema),
   });
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
-  async function onSubmit(data: v.InferInput<typeof projectSchema>) {
-    try {
-      await editProject(project, data);
-      toast.success(`Grup ${data.name} actualitzat`);
-      triggerRef.current?.click();
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "edit_project",
-        projectId: project.id,
-      });
-      toast.error("No s'ha pogut editar el grup, torna-ho a provar més tard");
-    }
-  }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof projectSchema>) => {
+      try {
+        await editProject(project, data);
+        toast.success(`Grup ${data.name} actualitzat`);
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "edit_project",
+          projectId: project.id,
+        });
+        toast.error("No s'ha pogut editar el grup, torna-ho a provar més tard");
+      }
+    },
+    [project, session?.user.id],
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
 
   return (
     <>
@@ -65,7 +76,7 @@ export default function EditProjectButton({ project }: { project: Project }) {
         description="Editar el nom del grup"
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"

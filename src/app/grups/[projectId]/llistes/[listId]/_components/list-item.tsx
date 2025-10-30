@@ -2,7 +2,7 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
-import React from "react";
+import { useRef, useState } from "react";
 import type { List } from "@/app/_data/list";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ export default function ListItem(props: {
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
-  const [editing, setEditing] = React.useState(false);
+  const [editing, setEditing] = useState(false);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `draggable-${props.id}`,
     data: { id: props.id },

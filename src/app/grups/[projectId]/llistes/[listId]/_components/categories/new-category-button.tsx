@@ -1,12 +1,12 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import type React from "react";
+import type { RefObject } from "react";
 
 export default function NewCategoryButton({
   dialog,
 }: {
-  dialog: React.RefObject<HTMLDialogElement>;
+  dialog: RefObject<HTMLDialogElement>;
 }) {
   return (
     <div>

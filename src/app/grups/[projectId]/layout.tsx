@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { getInvitedProject } from "@/server/projects";
 import CurrentProjectUpdater from "./_components/current-project-updater";
 
 type Props = {
   params: Promise<{ projectId: string }>;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export default async function ProjectLayout({ params, children }: Props) {

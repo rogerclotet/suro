@@ -5,7 +5,13 @@ import type { CheckedState } from "@radix-ui/react-checkbox";
 import { Loader2, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -46,9 +52,9 @@ export default function CreateEventButton({
     },
     resolver: valibotResolver(eventSchema),
   });
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
-  const selectDefaultTime = React.useCallback(
+  const selectDefaultTime = useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
       const defaultStartAt = new Date(fromDate.getTime());
       const defaultEndAt = new Date(toDate.getTime());
@@ -70,49 +76,54 @@ export default function CreateEventButton({
     [form],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     selectDefaultTime(defaultDate, defaultDate, true);
   }, [defaultDate, selectDefaultTime]);
 
-  async function onSubmit(data: v.InferInput<typeof eventSchema>) {
-    if (!project) {
-      toast.error("No s'ha seleccionat cap projecte");
-      return;
-    }
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof eventSchema>) => {
+      if (!project) {
+        toast.error("No s'ha seleccionat cap projecte");
+        return;
+      }
 
-    const dataToCreate = window.structuredClone(data);
-    if (dataToCreate.allDay) {
-      dataToCreate.dates.from = new Date(
-        Date.UTC(
-          data.dates.from?.getFullYear() ?? 0,
-          data.dates.from?.getMonth() ?? 0,
-          data.dates.from?.getDate() ?? 0,
-        ),
-      );
-      dataToCreate.dates.to = new Date(
-        Date.UTC(
-          data.dates.to?.getFullYear() ?? 0,
-          data.dates.to?.getMonth() ?? 0,
-          data.dates.to?.getDate() ?? 0,
-        ),
-      );
-    }
+      const dataToCreate = window.structuredClone(data);
+      if (dataToCreate.allDay) {
+        dataToCreate.dates.from = new Date(
+          Date.UTC(
+            data.dates.from?.getFullYear() ?? 0,
+            data.dates.from?.getMonth() ?? 0,
+            data.dates.from?.getDate() ?? 0,
+          ),
+        );
+        dataToCreate.dates.to = new Date(
+          Date.UTC(
+            data.dates.to?.getFullYear() ?? 0,
+            data.dates.to?.getMonth() ?? 0,
+            data.dates.to?.getDate() ?? 0,
+          ),
+        );
+      }
 
-    try {
-      await createEvent(dataToCreate, project);
-      toast.success(`Esdeveniment ${data.name} creat`);
-      onCreate(data.dates.from, data.dates.to);
-      form.reset();
-      triggerRef.current?.click();
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event",
-        projectId: project?.id,
-      });
-      toast.error("Error al crear l'esdeveniment. Torna-ho a provar més tard.");
-    }
-  }
+      try {
+        await createEvent(dataToCreate, project);
+        toast.success(`Esdeveniment ${data.name} creat`);
+        onCreate(data.dates.from, data.dates.to);
+        form.reset();
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "create_event",
+          projectId: project?.id,
+        });
+        toast.error(
+          "Error al crear l'esdeveniment. Torna-ho a provar més tard.",
+        );
+      }
+    },
+    [project, onCreate, form, session?.user.id],
+  );
 
   function handleDatesChange(dates: DateRange | undefined) {
     const from = dates?.from ?? new Date();
@@ -121,7 +132,7 @@ export default function CreateEventButton({
     selectDefaultTime(from, to, form.getValues("allDay"));
   }
 
-  function handleStartTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleStartTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
@@ -140,7 +151,7 @@ export default function CreateEventButton({
     form.setValue("dates", newDates);
   }
 
-  function handleEndTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleEndTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
@@ -172,6 +183,14 @@ export default function CreateEventButton({
     form.setValue("allDay", checked);
   }
 
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
+
   return (
     <>
       <Button onClick={() => triggerRef.current?.click()} className="gap-2">
@@ -184,7 +203,7 @@ export default function CreateEventButton({
         description="Crear un esdeveniment nou"
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <FormField
               control={form.control}
               name="name"

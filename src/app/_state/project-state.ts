@@ -1,5 +1,5 @@
 import type {} from "@redux-devtools/extension"; // required for devtools typing
-import React from "react";
+import { useEffect } from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { Project } from "../_data/project";
@@ -49,14 +49,14 @@ export function useProjects() {
   const selectProjectId = useProjectsStore((state) => state.selectProjectId);
   const addCategory = useProjectsStore((state) => state.addCategory);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const projectId = localStorage.getItem("selectedProjectId");
     if (projectId) {
       selectProjectId(projectId);
     }
   }, [selectProjectId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (projects.length === 0) {
       return;
     }

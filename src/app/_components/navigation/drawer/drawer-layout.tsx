@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import { useState } from "react";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,7 @@ import NotificationBell from "./notification-bell/notification-bell";
 import Profile from "./profile/profile";
 
 export default function DrawerLayout() {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { project } = useProjects();
 

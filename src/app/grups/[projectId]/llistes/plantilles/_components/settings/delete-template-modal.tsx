@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type React from "react";
+import type { RefObject } from "react";
 import { toast } from "sonner";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
@@ -15,7 +15,7 @@ export default function DeleteTemplateModal({
   triggerRef,
 }: {
   template: Template;
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
   const { project } = useProjects();

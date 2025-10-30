@@ -1,7 +1,7 @@
 "use client";
 
 import { useMediaQuery } from "@uidotdev/usehooks";
-import * as React from "react";
+import { type ReactNode, type RefObject, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,10 +24,10 @@ import {
 import { ClientOnly } from "../client-only";
 
 type Props = {
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
   title: string;
   description: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export default function ModalForm(props: Props) {
@@ -39,7 +39,7 @@ export default function ModalForm(props: Props) {
 }
 
 function ClientModalForm({ triggerRef, title, description, children }: Props) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
 
   if (isMdOrLarger) {

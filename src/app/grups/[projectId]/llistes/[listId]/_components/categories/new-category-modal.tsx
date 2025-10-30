@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type React from "react";
+import { type FormEvent, type RefObject, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -27,7 +27,7 @@ export default function NewCategoryModal({
   triggerRef,
   onCreate,
 }: {
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  triggerRef: RefObject<HTMLDivElement | null>;
   onCreate?: (categoryId: string) => void;
 }) {
   const { project, addCategory } = useProjects();

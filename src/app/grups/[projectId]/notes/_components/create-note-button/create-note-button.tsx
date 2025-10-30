@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import React from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -35,7 +35,7 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
   });
   const router = useRouter();
   const { project } = useProjects();
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {

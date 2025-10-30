@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import React from "react";
+import { type ReactNode, useState } from "react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Card } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default function SettleProposal({
   payment: SettlingPayment;
   onChange: (selected: boolean) => void;
 }) {
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = useState(false);
   const { project } = useProjects();
   const checkboxId = `settle-${payment.from}-${payment.to}-${payment.amount}`;
 

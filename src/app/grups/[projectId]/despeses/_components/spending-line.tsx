@@ -1,27 +1,92 @@
 "use client";
 
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Spending } from "@/app/_data/spending";
 import MonetaryAmount from "./monetary-amount";
 
-export default function SpendingLine({ spending }: { spending: Spending }) {
-  const [createdAt, setCreatedAt] = React.useState<Date>();
+function UserPaid({ spending }: { spending: Spending }) {
+  if (spending.from === null) {
+    return null;
+  }
 
-  React.useEffect(() => {
+  return (
+    <>
+      <span className="font-semibold text-foreground">
+        {spending.from.name}
+      </span>{" "}
+      ha pagat{" "}
+      <MonetaryAmount
+        amount={spending.amount}
+        currency={spending.currency}
+        className="font-semibold text-foreground"
+      />
+    </>
+  );
+}
+
+function PaidTo({ spending }: { spending: Spending }) {
+  if (spending.to === null) {
+    return null;
+  }
+
+  return (
+    <>
+      a{" "}
+      <span className="font-semibold text-foreground">{spending.to.name}</span>
+    </>
+  );
+}
+
+function UserReceived({ spending }: { spending: Spending }) {
+  if (spending.to === null) {
+    return null;
+  }
+
+  return (
+    <>
+      <span className="font-semibold text-foreground">{spending.to.name}</span>{" "}
+      ha rebut{" "}
+      <MonetaryAmount
+        amount={spending.amount}
+        currency={spending.currency}
+        className="font-semibold text-foreground"
+      />
+    </>
+  );
+}
+
+function Description({ spending }: { spending: Spending }) {
+  if (spending.description === null || spending.description === "") {
+    return null;
+  }
+
+  return (
+    <>
+      per <span className="text-foreground">{spending.description}</span>
+    </>
+  );
+}
+
+export default function SpendingLine({ spending }: { spending: Spending }) {
+  const [createdAt, setCreatedAt] = useState<Date>();
+  const [now] = useState(() => Date.now());
+
+  useEffect(() => {
     setCreatedAt(spending.createdAt);
   }, [spending.createdAt]);
 
-  function getDisplayDate() {
+  const displayDate = useMemo(() => {
     if (!createdAt) {
       return null;
     }
 
     const date = new Date(createdAt);
     // if it's the same day as now
+    const nowDate = new Date(now);
     const isToday =
-      date.getFullYear() === new Date().getFullYear() &&
-      date.getMonth() === new Date().getMonth() &&
-      date.getDate() === new Date().getDate();
+      date.getFullYear() === nowDate.getFullYear() &&
+      date.getMonth() === nowDate.getMonth() &&
+      date.getDate() === nowDate.getDate();
 
     const dateString = isToday
       ? `${date.toLocaleTimeString("ca-ES", {
@@ -37,7 +102,7 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
           year: "numeric",
         })}`;
 
-    const dateDiff = Math.floor((Date.now() - date.getTime()) / 1000);
+    const dateDiff = Math.floor((now - date.getTime()) / 1000);
     if (dateDiff < 60) {
       return "ara mateix";
     } else if (dateDiff < 3600) {
@@ -52,79 +117,13 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
     }
 
     return `el ${dateString}`;
-  }
-
-  function UserPaid() {
-    if (spending.from === null) {
-      return null;
-    }
-
-    return (
-      <>
-        <span className="font-semibold text-foreground">
-          {spending.from.name}
-        </span>{" "}
-        ha pagat{" "}
-        <MonetaryAmount
-          amount={spending.amount}
-          currency={spending.currency}
-          className="font-semibold text-foreground"
-        />
-      </>
-    );
-  }
-
-  function PaidTo() {
-    if (spending.to === null) {
-      return null;
-    }
-
-    return (
-      <>
-        a{" "}
-        <span className="font-semibold text-foreground">
-          {spending.to.name}
-        </span>
-      </>
-    );
-  }
-
-  function UserReceived() {
-    if (spending.to === null) {
-      return null;
-    }
-
-    return (
-      <>
-        <span className="font-semibold text-foreground">
-          {spending.to.name}
-        </span>{" "}
-        ha rebut{" "}
-        <MonetaryAmount
-          amount={spending.amount}
-          currency={spending.currency}
-          className="font-semibold text-foreground"
-        />
-      </>
-    );
-  }
-
-  function Description() {
-    if (spending.description === null || spending.description === "") {
-      return null;
-    }
-
-    return (
-      <>
-        per <span className="text-foreground">{spending.description}</span>
-      </>
-    );
-  }
+  }, [createdAt, now]);
 
   if (spending.from !== null && spending.to !== null) {
     return (
       <span className="text-muted-foreground">
-        <UserPaid /> <PaidTo /> <Description /> {getDisplayDate()}
+        <UserPaid spending={spending} /> <PaidTo spending={spending} />{" "}
+        <Description spending={spending} /> {displayDate}
       </span>
     );
   }
@@ -132,7 +131,8 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
   if (spending.from !== null) {
     return (
       <span className="text-muted-foreground">
-        <UserPaid /> <Description /> {getDisplayDate()}
+        <UserPaid spending={spending} /> <Description spending={spending} />{" "}
+        {displayDate}
       </span>
     );
   }
@@ -140,7 +140,8 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
   if (spending.to !== null) {
     return (
       <span className="text-muted-foreground">
-        <UserReceived /> <Description /> {getDisplayDate()}
+        <UserReceived spending={spending} /> <Description spending={spending} />{" "}
+        {displayDate}
       </span>
     );
   }

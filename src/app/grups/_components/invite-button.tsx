@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Share2, UserPlus } from "lucide-react";
-import React from "react";
+import { useRef } from "react";
 import { RWebShare } from "react-web-share";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 
 export default function InviteButton({ project }: { project: Project }) {
-  const modalRef = React.useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const inviteLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/grups/${project.id}/invitacio/${project.inviteToken}`

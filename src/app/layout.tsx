@@ -7,7 +7,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { GeistSans } from "geist/font/sans";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
-import type React from "react";
+import type { ReactNode } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
 import BottomNav from "./_components/navigation/bottom-nav";
@@ -27,7 +27,7 @@ export const metadata = {
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const session = await auth();
 

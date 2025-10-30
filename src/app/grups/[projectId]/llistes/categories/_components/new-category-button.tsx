@@ -1,12 +1,12 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import React from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import NewCategoryModal from "../../[listId]/_components/categories/new-category-modal";
 
 export default function NewCategoryButton() {
-  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
