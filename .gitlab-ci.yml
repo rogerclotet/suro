@@ -4,8 +4,9 @@ stages:
 
 check:
   stage: check
-  image: node:25.0-alpine
+  image: node:25.1-alpine
   before_script:
+    - npm install -g corepack
     - corepack enable pnpm
     - pnpm install
   script:
