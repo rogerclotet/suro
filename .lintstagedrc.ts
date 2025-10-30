@@ -3,8 +3,8 @@
 import type { Configuration } from "lint-staged";
 
 export default {
-  "*.{js,jsx,ts,tsx}": ["eslint --fix", "vitest related run"],
-  "*.{js,jsx,mjs,ts,tsx,json,html,css}": [() => "biome check --write"],
+  "*.{js,jsx,ts,tsx}": ["pnpm eslint:fix", "vitest related run"],
+  "*.{js,jsx,mjs,ts,tsx,json,html,css}": [() => "pnpm biome:fix"],
   "*.{ts,tsx}": [() => "tsc -p tsconfig.json --noEmit"],
   ".biome.json": ["biome migrate --write"],
 } satisfies Configuration;
