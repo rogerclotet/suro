@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Logger } from "next-axiom";
 import * as v from "valibot";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { spendings } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
@@ -40,9 +40,9 @@ export async function createSpending(
       projectId: projectId,
     });
   } catch (e) {
-    const log = new Logger();
-    log.error("Error creating spending", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "create_spending",
       projectId: projectId,
     });
     throw new Error("Error creating spending", { cause: e });

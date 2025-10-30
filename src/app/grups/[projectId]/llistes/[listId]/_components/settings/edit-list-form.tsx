@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -35,16 +35,16 @@ export default function EditListForm({
     },
     resolver: valibotResolver(listSchema),
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     try {
       await updateList(list, data);
       toast.success(`Llista ${data.name} actualitzada`);
     } catch (e) {
-      captureException(e);
-      log.error("Error editing list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "update_list",
         projectId: list.projectId,
         listId: list.id,
       });

@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { Check, Handshake } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { toast } from "sonner";
 import type { Spending } from "@/app/_data/spending";
@@ -20,7 +20,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
   const [selected, setSelected] = React.useState<SettlingPayment[]>([]);
   const triggerRef = React.useRef<HTMLDivElement>(null);
   const { project } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   React.useEffect(() => {
     if (!project) {
@@ -45,14 +45,16 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
 
   async function handleSubmit() {
     try {
-      await settlePayments(project?.id, selected);
+      if (!project?.id) {
+        throw new Error("No project selected");
+      }
+      await settlePayments(project.id, selected);
       triggerRef.current?.click();
       toast.success("Deutes saldats correctament");
     } catch (e) {
-      captureException(e);
-      log.error("Error settling payments", {
-        error: e,
-        payments: selected,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "settle_payments",
         projectId: project?.id,
       });
       toast.error("Error al saldar deutes");

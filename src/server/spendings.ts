@@ -1,11 +1,11 @@
+"use server";
+
 import assert from "node:assert";
 import { desc, eq } from "drizzle-orm";
-import { Logger } from "next-axiom";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { spendings } from "./db/schema";
-
-const log = new Logger();
 
 export async function getProjectSpendings(projectId: string) {
   const session = await auth();
@@ -24,8 +24,11 @@ export async function getProjectSpendings(projectId: string) {
 
     return result;
   } catch (e) {
-    log.error("Error getting project spendings", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_project_spendings",
+      projectId,
+    });
     return [];
   }
 }

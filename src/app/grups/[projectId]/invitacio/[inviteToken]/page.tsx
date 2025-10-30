@@ -2,7 +2,6 @@ import assert from "node:assert";
 import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
-import { Logger } from "next-axiom";
 import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/grups/_components/users-list";
 import { auth } from "@/auth";
@@ -16,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { checkAuth } from "@/lib/check-auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { getInvitedProject } from "@/server/projects";
 import { acceptInvite } from "./actions";
 
@@ -69,9 +69,12 @@ export default async function InvitePage({
                 await acceptInvite(projectId, inviteToken);
                 revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
               } catch (e) {
-                const log = new Logger();
-                log.error("Error accepting invite", { error: e, projectId });
-                await log.flush();
+                const posthog = getPostHogServer();
+                posthog.captureException(e, session?.user.id, {
+                  distinctId: session?.user.id,
+                  action: "accept_invite",
+                  projectId,
+                });
               }
             }}
           >

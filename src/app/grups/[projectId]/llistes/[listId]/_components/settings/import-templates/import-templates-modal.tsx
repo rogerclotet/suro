@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
@@ -21,7 +21,7 @@ export default function ImportTemplatesModal({
 }: {
   list: List;
   templates: Template[];
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [selected, setSelected] = React.useState<boolean[]>([]);
   const [itemsByCategory, setItemsByCategory] = React.useState<
@@ -29,7 +29,7 @@ export default function ImportTemplatesModal({
   >({});
   const [submitting, setSubmitting] = React.useState(false);
   const { project } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   React.useEffect(() => {
     if (!project) {
@@ -74,9 +74,9 @@ export default function ImportTemplatesModal({
       triggerRef.current?.click();
       setSelected([]);
     } catch (e) {
-      captureException(e);
-      log.error("Error importing templates to existing list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "import_templates_to_existing_list",
         projectId: project.id,
         listId: list.id,
         templateIds: templates

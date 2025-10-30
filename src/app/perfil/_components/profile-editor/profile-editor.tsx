@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import type { User } from "next-auth";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -22,7 +22,7 @@ export default function ProfileEditor({ user }: { user: User }) {
     },
     resolver: valibotResolver(profileSchema),
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof profileSchema>) {
     try {
@@ -30,8 +30,12 @@ export default function ProfileEditor({ user }: { user: User }) {
       form.reset({ name: data.name });
       toast.success("S'ha desat el perfil");
     } catch (e) {
-      captureException(e);
-      log.error("Error saving profile", { error: e, userId: user.id, data });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_profile",
+        userId: user.id,
+        data,
+      });
       toast.error("No s'ha pogut desar el perfil, torna-ho a provar més tard");
     }
   }

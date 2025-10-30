@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Check, Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -48,7 +48,7 @@ export default function NewTemplateItem({
   });
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     if (data.name === "") {
@@ -64,9 +64,9 @@ export default function NewTemplateItem({
       onCreate({ name: data.name, category: data.category ?? null });
       form.reset({ name: "", category: data.category ?? "" });
     } catch (e) {
-      captureException(e);
-      log.error("Error creating template item", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_template_item",
         projectId: template.projectId,
         templateId: template.id,
       });
@@ -131,7 +131,7 @@ export default function NewTemplateItem({
             render={({ field }) => (
               <FormItem>
                 <Select
-                  value={field.value}
+                  value={field.value ?? undefined}
                   onValueChange={handleCategoryChange}
                   disabled={form.formState.isSubmitting}
                 >

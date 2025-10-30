@@ -24,7 +24,7 @@ import {
 import { ClientOnly } from "../client-only";
 
 type Props = {
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   title: string;
   description: string;
   children: React.ReactNode;

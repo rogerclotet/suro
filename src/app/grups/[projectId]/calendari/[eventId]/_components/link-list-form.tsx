@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -28,8 +28,9 @@ export default function LinkListForm({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const { data: session } = useSession();
   const form = useForm({
     defaultValues: {
       listId: "",
@@ -63,7 +64,6 @@ export default function LinkListForm({
     select: (data) => data?.filter((list) => list.eventId === null),
     staleTime: 60 * 1000,
   });
-  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof linkEventListSchema>) {
     try {
@@ -71,9 +71,9 @@ export default function LinkListForm({
       triggerRef.current?.click();
       toast.success("Llista enllaçada correctament");
     } catch (e) {
-      captureException(e);
-      log.error("Error linking event list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "link_event_list",
         projectId: event.projectId,
         eventId: event.id,
       });

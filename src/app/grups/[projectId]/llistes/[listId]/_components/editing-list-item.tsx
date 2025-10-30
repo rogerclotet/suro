@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Check, Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ export default function EditingListItem(props: {
     resolver: valibotResolver(listItemSchema),
   });
   const formRef = React.useRef<HTMLFormElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   React.useEffect(() => {
     form.setFocus("name");
@@ -89,9 +89,9 @@ export default function EditingListItem(props: {
 
       props.onBlur?.();
     } catch (e) {
-      captureException(e);
-      log.error("Error updating list item", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "update_list_item",
         projectId: props.list.projectId,
         listId: props.list.id,
         itemId: props.id,

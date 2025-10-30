@@ -1,7 +1,8 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { toast } from "sonner";
 import type { Category } from "@/app/_data/category";
@@ -15,18 +16,22 @@ export default function DeleteCategoryButton({
   category: Category;
 }) {
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleDelete() {
     try {
       await deleteCategory(category);
       toast.success("La categoria s'ha eliminat correctament");
     } catch (e) {
-      log.error("Error deleting category", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_category",
+        projectId: category.projectId,
         categoryId: category.id,
       });
-      toast.error("Error eliminant la categoria. Torna-ho a provar més tard");
+      toast.error(
+        "No s'ha pogut eliminar la categoria, torna-ho a provar més tard",
+      );
     }
   }
 

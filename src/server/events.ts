@@ -1,11 +1,11 @@
+"use server";
+
 import assert from "node:assert";
 import { and, asc, eq, gte, lte, or } from "drizzle-orm";
-import { Logger } from "next-axiom";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { events } from "./db/schema";
-
-const log = new Logger();
 
 export async function getEvent(projectId: string, eventId: string) {
   const session = await auth();
@@ -44,8 +44,12 @@ export async function getEvent(projectId: string, eventId: string) {
       })),
     };
   } catch (e) {
-    log.error("Error getting event", { error: e, projectId, eventId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_event",
+      projectId,
+      eventId,
+    });
     return undefined;
   }
 }
@@ -90,8 +94,11 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
       })),
     }));
   } catch (e) {
-    log.error("Error getting events", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_events",
+      projectId,
+    });
     return [];
   }
 }

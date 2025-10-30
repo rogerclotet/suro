@@ -1,10 +1,10 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { project } = useProjects();
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {
     if (!project) {
@@ -49,8 +49,11 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
       toast.success(`Nota ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/notes/${noteId}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating note", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_note",
+        projectId,
+      });
       toast.error("No s'ha pogut crear la nota, torna-ho a provar més tard");
     } finally {
       form.reset();

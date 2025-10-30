@@ -30,7 +30,7 @@ type Props = {
   actionText: string;
   onAction: () => void;
   variant?: "default" | "destructive";
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   children?: React.ReactNode;
 };
 

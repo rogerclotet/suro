@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import type React from "react";
 import { toast } from "sonner";
 import type { Template } from "@/app/_data/list";
@@ -15,11 +15,11 @@ export default function DeleteTemplateModal({
   triggerRef,
 }: {
   template: Template;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
   const { project } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleDelete() {
     try {
@@ -28,9 +28,9 @@ export default function DeleteTemplateModal({
 
       toast.success(`Plantilla ${template.name} eliminada`);
     } catch (e) {
-      captureException(e);
-      log.error("Error deleting template", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_template",
         projectId: project?.id,
         templateId: template.id,
       });

@@ -1,9 +1,8 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useLogger } from "next-axiom";
-import { LogLevel } from "next-axiom/dist/logger";
+import posthog from "posthog-js";
+import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ErrorPage({
@@ -11,25 +10,9 @@ export default function ErrorPage({
 }: {
   error: Error & { digest?: string };
 }) {
-  const pathname = usePathname();
-  const log = useLogger({ source: "error.tsx" });
-  const status = error.message === "Invalid URL" ? 404 : 500;
-
-  log.logHttpRequest(
-    LogLevel.error,
-    error.message,
-    {
-      host: window.location.href,
-      path: pathname,
-      statusCode: status,
-    },
-    {
-      error: error.name,
-      cause: error.cause,
-      stack: error.stack,
-      digest: error.digest,
-    },
-  );
+  useEffect(() => {
+    posthog.captureException(error);
+  }, [error]);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">

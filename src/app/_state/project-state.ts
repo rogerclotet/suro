@@ -71,8 +71,10 @@ export function useProjects() {
       }
     }
 
-    selectProjectInStore(projects[0]);
-    selectProjectId(projects[0]?.id);
+    if (projects[0]) {
+      selectProjectInStore(projects[0]);
+      selectProjectId(projects[0].id);
+    }
   }, [projects, selectProjectInStore, selectProjectId]);
 
   function selectProject(project: Project | undefined) {

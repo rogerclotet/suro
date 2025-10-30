@@ -2,17 +2,15 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { Logger } from "next-axiom";
 import * as v from "valibot";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { events, lists } from "@/server/db/schema";
 import { eventSchema } from "../_components/event/data";
-
-const log = new Logger();
 
 export async function createLinkedList(event: Event) {
   const session = await auth();
@@ -39,12 +37,12 @@ export async function createLinkedList(event: Event) {
 
     return listId;
   } catch (e) {
-    log.error("Error creating event list", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "create_event_list",
       projectId: event.projectId,
       eventId: event.id,
     });
-    await log.flush();
 
     throw new Error("Error creating list");
   }
@@ -67,12 +65,12 @@ export async function linkEventList(event: Event, listId: string) {
 
     revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
   } catch (e) {
-    log.error("Error linking event list", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "link_event_list",
       listId,
       eventId: event.id,
     });
-    await log.flush();
 
     throw new Error("Error linking list");
   }
@@ -94,13 +92,12 @@ export async function unlinkEventList(event: Event, list: List) {
 
     revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
   } catch (e) {
-    log.error("Error unlinking event list", {
-      error: e,
-      projectId: event.projectId,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "unlink_event_list",
       listId: list.id,
       eventId: event.id,
     });
-    await log.flush();
 
     throw new Error("Error unlinking list");
   }
@@ -149,12 +146,12 @@ export async function editEvent(
 
     revalidatePath(`/grups/${event.projectId}/llistes/${event.id}`);
   } catch (e) {
-    log.error("Error editing event", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "edit_event",
       projectId: event.projectId,
       eventId: event.id,
     });
-    await log.flush();
 
     throw new Error("Error editing event");
   }
@@ -175,12 +172,12 @@ export async function deleteEvent(event: Event) {
 
     revalidatePath(`/grups/${event.projectId}/calendari`);
   } catch (e) {
-    log.error("Error deleting event", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "delete_event",
       projectId: event.projectId,
       eventId: event.id,
     });
-    await log.flush();
 
     throw new Error("Error deleting event");
   }

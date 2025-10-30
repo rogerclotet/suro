@@ -2,7 +2,8 @@
 
 import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
@@ -16,7 +17,7 @@ export default function UploadButton({
   eventId?: Event["id"] | undefined;
 }) {
   const router = useRouter();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   return (
     <div>
@@ -31,7 +32,12 @@ export default function UploadButton({
           router.refresh();
         }}
         onUploadError={(error: Error) => {
-          log.error("Error uploading file", { error, projectId, eventId });
+          posthog.captureException(error, {
+            distinctId: session?.user.id,
+            action: "upload_file",
+            projectId,
+            eventId,
+          });
           toast.error("No s'ha pogut compartir el fitxer");
         }}
         content={{

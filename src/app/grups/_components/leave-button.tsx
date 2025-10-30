@@ -1,9 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { LogOut } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useLogger } from "next-axiom";
+import posthog from "posthog-js";
 import React from "react";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
@@ -13,10 +12,9 @@ import ModalAction from "@/components/ui/modal-action";
 import { leaveProject } from "./actions";
 
 export default function LeaveButton({ project }: { project: Project }) {
-  const session = useSession();
+  const { data: session } = useSession();
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
-  const log = useLogger();
 
   async function handleLeave() {
     try {
@@ -25,16 +23,16 @@ export default function LeaveButton({ project }: { project: Project }) {
       selectProject(projectToSelect);
       toast.success(`Has sortit del grup ${project.name}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error leaving project", { error: e, projectId: project.id });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "leave_project",
+        projectId: project.id,
+      });
       toast.error("No s'ha pogut sortir del grup, torna-ho a provar més tard");
     }
   }
 
-  if (
-    project.users.length <= 1 ||
-    project.createdBy === session.data?.user.id
-  ) {
+  if (project.users.length <= 1 || project.createdBy === session?.user.id) {
     return null;
   }
 

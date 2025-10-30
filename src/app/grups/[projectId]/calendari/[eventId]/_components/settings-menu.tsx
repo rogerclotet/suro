@@ -1,6 +1,5 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import {
   Edit,
   ListPlus,
@@ -9,7 +8,8 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
@@ -34,20 +34,20 @@ export default function SettingsMenu({
   event: Event;
   list: List | undefined;
 }) {
+  const { data: session } = useSession();
   const editDialogRef = React.useRef<HTMLDivElement>(null);
   const deleteDialogRef = React.useRef<HTMLDivElement>(null);
   const linkListRef = React.useRef<HTMLDivElement>(null);
   const unlinkListRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
 
   async function handleCreateLinkedList() {
     try {
       await createLinkedList(event);
       toast.success("Llista creada correctament");
     } catch (e) {
-      captureException(e);
-      log.error("Error creating event list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_event_list",
         projectId: event.projectId,
         eventId: event.id,
       });

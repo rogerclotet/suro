@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -38,16 +38,16 @@ export default function EditTemplateForm({
     resolver: valibotResolver(templateSchema),
   });
   const { project } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
       await updateTemplate(template, data);
       toast.success(`Plantilla ${data.name} actualitzada`);
     } catch (e) {
-      captureException(e);
-      log.error("Error editing template", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "update_template",
         projectId: project?.id,
         templateId: template.id,
       });

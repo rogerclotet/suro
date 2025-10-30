@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { Trash2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { toast } from "sonner";
 import { useProjects } from "@/app/_state/project-state";
@@ -17,7 +17,7 @@ export default function DeleteProjectButton({
 }) {
   const modalRef = React.useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   const projectToDelete = projects.find((project) => project.id === projectId);
   if (!projectToDelete) {
@@ -37,8 +37,11 @@ export default function DeleteProjectButton({
       selectProject(firstNonDeletedProject);
       toast.success(`Grup ${projectToDelete.name} eliminat`);
     } catch (e) {
-      captureException(e);
-      log.error("Error deleting project", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_project",
+        projectId,
+      });
       toast.error("No s'ha pogut eliminar el grup, torna-ho a provar més tard");
     }
   }

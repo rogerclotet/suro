@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import type React from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
@@ -14,10 +14,10 @@ export default function DeleteListModal({
   triggerRef,
 }: {
   list: List;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleDelete() {
     try {
@@ -26,9 +26,9 @@ export default function DeleteListModal({
 
       toast.success(`Llista ${list.name} eliminada`);
     } catch (e) {
-      captureException(e);
-      log.error("Error deleting list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_list",
         projectId: list.projectId,
         listId: list.id,
       });

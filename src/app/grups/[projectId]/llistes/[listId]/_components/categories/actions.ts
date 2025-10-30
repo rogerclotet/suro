@@ -31,7 +31,11 @@ export async function createCategory(
     })
     .returning({ id: categories.id });
 
+  if (!result || result.length < 1 || !result[0]) {
+    throw new Error("Error creating category");
+  }
+
   revalidatePath(`/grups/${project.id}/llistes/categories`);
 
-  return result[0]?.id;
+  return result[0].id;
 }

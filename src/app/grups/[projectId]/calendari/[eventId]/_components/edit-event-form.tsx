@@ -2,9 +2,9 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
-import { captureException } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
@@ -34,8 +34,9 @@ export default function EditEventForm({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const { data: session } = useSession();
   const { project } = useProjects();
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
@@ -51,7 +52,6 @@ export default function EditEventForm({
     },
     resolver: valibotResolver(eventSchema),
   });
-  const log = useLogger();
 
   const selectDefaultTime = React.useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
@@ -110,9 +110,9 @@ export default function EditEventForm({
       });
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error editing event", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_event",
         projectId: event.projectId,
         eventId: event.id,
       });

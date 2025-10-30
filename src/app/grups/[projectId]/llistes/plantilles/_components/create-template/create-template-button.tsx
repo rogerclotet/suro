@@ -1,10 +1,10 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ export default function CreateTemplateButton({
   });
   const router = useRouter();
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
@@ -46,8 +46,11 @@ export default function CreateTemplateButton({
       toast.success(`Plantilla ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating template", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_template",
+        projectId,
+      });
       toast.error(
         "No s'ha pogut crear la plantilla, torna-ho a provar més tard",
       );

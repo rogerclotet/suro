@@ -40,8 +40,6 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
-    NEXT_PUBLIC_AXIOM_DATASET: z.string(),
-    NEXT_PUBLIC_AXIOM_TOKEN: z.string(),
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string(),
   },
 
@@ -58,8 +56,6 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_KEY,
-    NEXT_PUBLIC_AXIOM_DATASET: process.env.NEXT_PUBLIC_AXIOM_DATASET,
-    NEXT_PUBLIC_AXIOM_TOKEN: process.env.NEXT_PUBLIC_AXIOM_TOKEN,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     UPLOADTHING_URL: process.env.UPLOADTHING_URL,
     AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY,

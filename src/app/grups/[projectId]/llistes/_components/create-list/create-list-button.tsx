@@ -1,11 +1,11 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,7 +45,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     queryFn: () => getTemplates(projectId),
     staleTime: 60 * 1000,
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     if (!project) {
@@ -58,8 +58,11 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
       toast.success(`Llista ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating list", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_list",
+        projectId,
+      });
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
     } finally {
       form.reset();
@@ -146,7 +149,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
                                   onCheckedChange={(checked) => {
                                     return checked
                                       ? field.onChange([
-                                          ...field.value,
+                                          ...(field.value ?? []),
                                           template.id,
                                         ])
                                       : field.onChange(

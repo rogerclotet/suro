@@ -1,8 +1,8 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
-import { Logger } from "next-axiom";
 import authConfig from "./auth.config";
+import { getPostHogServer } from "./lib/posthog-server";
 import { db } from "./server/db";
 import {
   accounts,
@@ -55,9 +55,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           });
         } catch (e) {
           trx.rollback();
-          const log = new Logger();
-          log.error("Failed to create user", { error: e });
-          await log.flush();
+          const posthog = getPostHogServer();
+          posthog.captureException(e, userId, {
+            action: "create_user",
+          });
           throw e;
         }
       });

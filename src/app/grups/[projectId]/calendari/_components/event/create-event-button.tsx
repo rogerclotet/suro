@@ -2,9 +2,9 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
-import { captureException } from "@sentry/nextjs";
 import { Loader2, Plus } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
@@ -35,6 +35,8 @@ export default function CreateEventButton({
   defaultDate: Date;
   onCreate: (from: Date | undefined, to: Date | undefined) => void;
 }) {
+  const { data: session } = useSession();
+
   const { project } = useProjects();
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
@@ -45,7 +47,6 @@ export default function CreateEventButton({
     resolver: valibotResolver(eventSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
 
   const selectDefaultTime = React.useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
@@ -104,8 +105,11 @@ export default function CreateEventButton({
       form.reset();
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error creating event", { error: e, projectId: project?.id });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_event",
+        projectId: project?.id,
+      });
       toast.error("Error al crear l'esdeveniment. Torna-ho a provar més tard.");
     }
   }

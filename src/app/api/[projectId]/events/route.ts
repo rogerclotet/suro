@@ -1,38 +1,36 @@
-import { type AxiomRequest, withAxiom } from "next-axiom";
+import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getEvents } from "@/server/events";
 
 export const dynamic = "force-dynamic";
 
-export const GET = withAxiom(
-  async (
-    request: AxiomRequest,
-    { params }: { params: Promise<{ projectId: string }> },
-  ) => {
-    const { projectId } = await params;
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ projectId: string }> },
+) => {
+  const { projectId } = await params;
 
-    const session = await auth();
-    if (!session) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+  const session = await auth();
+  if (!session) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
-    const { searchParams } = new URL(request.url);
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
+  const { searchParams } = new URL(request.url);
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
-    if (!from || !to) {
-      return new Response("Missing date range", { status: 400 });
-    }
+  if (!from || !to) {
+    return new Response("Missing date range", { status: 400 });
+  }
 
-    const fromDate = new Date(parseInt(from, 10));
-    const toDate = new Date(parseInt(to, 10));
+  const fromDate = new Date(parseInt(from, 10));
+  const toDate = new Date(parseInt(to, 10));
 
-    if (fromDate > toDate) {
-      return new Response("Invalid date range", { status: 400 });
-    }
+  if (fromDate > toDate) {
+    return new Response("Invalid date range", { status: 400 });
+  }
 
-    const events = await getEvents(projectId, fromDate, toDate);
+  const events = await getEvents(projectId, fromDate, toDate);
 
-    return Response.json(events);
-  },
-);
+  return Response.json(events);
+};

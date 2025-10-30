@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
 import { calculateBalances } from "./calculate-balances";
@@ -11,6 +11,10 @@ vi.mock("./calculate-balances", () => ({
 }));
 
 describe("generate proposals", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });

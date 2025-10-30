@@ -1,8 +1,8 @@
 "use client";
 
-import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import type React from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
@@ -14,10 +14,10 @@ export default function DeleteEventModal({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleDelete() {
     try {
@@ -25,14 +25,14 @@ export default function DeleteEventModal({
       router.push(`/grups/${event.projectId}/calendari`);
       toast.success(`Esdeveniment ${event.name} eliminat`);
     } catch (e) {
-      captureException(e);
-      log.error("Error deleting event", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_event",
         projectId: event.projectId,
         eventId: event.id,
       });
       toast.error(
-        "No s'ha pogut eliminar la plantilla, torna-ho a provar més tard",
+        "No s'ha pogut eliminar l'esdeveniment, torna-ho a provar més tard",
       );
     }
   }

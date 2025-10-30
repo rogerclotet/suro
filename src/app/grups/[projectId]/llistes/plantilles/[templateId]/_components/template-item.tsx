@@ -1,9 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
 import { Check, Loader2, Tag } from "lucide-react";
-import { useLogger } from "next-axiom";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,7 +47,7 @@ export default function TemplateItem({
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -55,9 +55,9 @@ export default function TemplateItem({
 
       form.reset({ name: data.name, category: data.category });
     } catch (e) {
-      captureException(e);
-      log.error("Error updating template item", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "update_template_item",
         projectId: project?.id,
         templateId: template.id,
       });
