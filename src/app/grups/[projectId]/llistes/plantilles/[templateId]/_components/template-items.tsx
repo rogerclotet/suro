@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { updateTemplateItems } from "./actions";
@@ -13,8 +13,6 @@ type ItemWithIndex = Item & { index: number };
 
 export default function TemplateItems({ template }: { template: Template }) {
   const [items, setItems] = useState<Template["items"]>(template.items);
-  const [itemsByCategory, setItemsByCategory] =
-    useState<ReturnType<typeof groupItemsByCategory>>();
   const [animationParent] = useAutoAnimate();
   const { project } = useProjects();
 
@@ -51,11 +49,11 @@ export default function TemplateItems({ template }: { template: Template }) {
     [project, sorted],
   );
 
-  useEffect(() => {
+  const itemsByCategory = useMemo(() => {
     if (!project) {
-      return;
+      return new Map();
     }
-    setItemsByCategory(groupItemsByCategory(items));
+    return groupItemsByCategory(items);
   }, [items, groupItemsByCategory, project]);
 
   async function handleItemChanged(
@@ -91,13 +89,13 @@ export default function TemplateItems({ template }: { template: Template }) {
       >
         <NewTemplateItem template={template} onCreate={handleItemAdded} />
 
-        {itemsByCategory?.map(({ category, items }) => (
+        {Array.from(itemsByCategory.entries()).map(([category, items]) => (
           <Fragment key={category}>
             <h3 key={`title_${category}`} className="text-lg font-semibold">
               {category}
             </h3>
 
-            {items.map((item) => (
+            {items.map((item: ItemWithIndex) => (
               <TemplateItem
                 key={item.index}
                 template={template}

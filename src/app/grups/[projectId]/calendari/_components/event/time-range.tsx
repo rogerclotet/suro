@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useMemo } from "react";
 
 export default function TimeRange({
   startAt,
@@ -13,9 +13,7 @@ export default function TimeRange({
   allDay: boolean;
   className?: string;
 }) {
-  const [range, setRange] = useState<ReactNode>(null);
-
-  useEffect(() => {
+  const range = useMemo(() => {
     if (allDay) {
       const allDayEndAt = new Date(
         endAt.getFullYear(),
@@ -24,17 +22,16 @@ export default function TimeRange({
       );
 
       if (isSameDay(allDayEndAt, startAt)) {
-        setRange(
+        return (
           <span className={className}>
             {startAt.toLocaleDateString("ca-ES", {
               dateStyle: "medium",
             })}
-          </span>,
+          </span>
         );
-        return () => void {};
       }
 
-      setRange(
+      return (
         <span className={className}>
           {startAt.toLocaleString("ca-ES", {
             dateStyle: "medium",
@@ -43,13 +40,12 @@ export default function TimeRange({
           {allDayEndAt.toLocaleString("ca-ES", {
             dateStyle: "medium",
           })}
-        </span>,
+        </span>
       );
-      return () => void {};
     }
 
     if (isSameDay(startAt, endAt)) {
-      setRange(
+      return (
         <span className={className}>
           {startAt.toLocaleString("ca-ES", {
             dateStyle: "medium",
@@ -59,12 +55,11 @@ export default function TimeRange({
           {endAt.toLocaleString("ca-ES", {
             timeStyle: "short",
           })}
-        </span>,
+        </span>
       );
-      return () => void {};
     }
 
-    setRange(
+    return (
       <span className={className}>
         {startAt.toLocaleString("ca-ES", {
           dateStyle: "medium",
@@ -75,7 +70,7 @@ export default function TimeRange({
           dateStyle: "medium",
           timeStyle: "short",
         })}
-      </span>,
+      </span>
     );
   }, [startAt, endAt, allDay, className]);
 

@@ -14,14 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function NotificationBell() {
-  const [unsupported, setUnsupported] = useState<boolean>(true);
   const [enabled, setEnabled] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
+  const unsupported = notificationUnsupported();
+
   useEffect(() => {
-    const isUnsupported = notificationUnsupported();
-    setUnsupported(isUnsupported);
-    if (isUnsupported) {
+    if (unsupported) {
       return;
     }
 
@@ -39,7 +38,7 @@ export default function NotificationBell() {
       .catch((err) => {
         console.error("Failed to check notification permission", err);
       });
-  }, []);
+  }, [unsupported]);
 
   async function toggleSubscription() {
     setEnabled(!enabled);

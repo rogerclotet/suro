@@ -68,19 +68,14 @@ function Description({ spending }: { spending: Spending }) {
 }
 
 export default function SpendingLine({ spending }: { spending: Spending }) {
-  const [createdAt, setCreatedAt] = useState<Date>();
   const [now] = useState(() => Date.now());
 
-  useEffect(() => {
-    setCreatedAt(spending.createdAt);
-  }, [spending.createdAt]);
-
   const displayDate = useMemo(() => {
-    if (!createdAt) {
+    if (!spending.createdAt) {
       return null;
     }
 
-    const date = new Date(createdAt);
+    const date = new Date(spending.createdAt);
     // if it's the same day as now
     const nowDate = new Date(now);
     const isToday =
@@ -117,7 +112,7 @@ export default function SpendingLine({ spending }: { spending: Spending }) {
     }
 
     return `el ${dateString}`;
-  }, [createdAt, now]);
+  }, [spending.createdAt, now]);
 
   if (spending.from !== null && spending.to !== null) {
     return (

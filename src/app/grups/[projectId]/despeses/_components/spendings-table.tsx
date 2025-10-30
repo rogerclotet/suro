@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import type { Spending } from "@/app/_data/spending";
 import { useProjects } from "@/app/_state/project-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,28 +21,22 @@ export default function SpendingsTable({
 }: {
   spendings: Spending[];
 }) {
-  const [balances, setBalances] = useState<Record<string, number>>({});
-  const [currency, setCurrency] = useState(
-    () => spendings[0]?.currency ?? "EUR",
-  );
-  const [maxAbsBalance, setMaxAbsBalance] = useState(0);
   const { project } = useProjects();
 
-  useEffect(() => {
+  const { balances, currency, maxAbsBalance } = useMemo(() => {
     if (!project) {
-      return;
+      return { balances: {}, currency: "EUR", maxAbsBalance: 0 };
     }
 
     const balances = calculateBalances(project, spendings);
-    setBalances(balances);
-    setMaxAbsBalance(
-      Math.max(
-        ...Object.values(balances).map((balance) =>
-          Math.abs(Math.round(balance)),
-        ),
+    const maxAbsBalance = Math.max(
+      ...Object.values(balances).map((balance) =>
+        Math.abs(Math.round(balance)),
       ),
     );
-    setCurrency(spendings[0]?.currency ?? "EUR");
+    const currency = spendings[0]?.currency ?? "EUR";
+
+    return { balances, currency, maxAbsBalance };
   }, [spendings, project]);
 
   if (!project) {

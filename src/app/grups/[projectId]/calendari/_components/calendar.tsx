@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ca } from "date-fns/locale";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ComponentProps, useEffect, useMemo, useState } from "react";
+import { type ComponentProps, useMemo, useState } from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
@@ -63,38 +63,36 @@ export default function Calendar() {
   const searchParams = useSearchParams();
   const day = searchParams.get("d");
 
-  const [date, setDate] = useState<Date>();
-  const [monthStart, setMonthStart] = useState<Date>();
+  const today = useMemo(() => {
+    const today = day ? new Date(day) : new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }, [day]);
+
+  const monthStart = useMemo(() => {
+    const date = day ? new Date(day) : new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(1);
+    return date;
+  }, [day]);
+
+  const [date, setDate] = useState<Date>(today);
+  const [currentMonth, setCurrentMonth] = useState<Date>(monthStart);
   const { project } = useProjects();
   const { data: events, isLoading } = useQuery(
-    eventsQueryOptions(monthStart, project?.id),
-  );
-  const [eventColors, setEventColors] = useState<Map<string, number>>(
-    new Map(),
+    eventsQueryOptions(currentMonth, project?.id),
   );
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const currentEvents = useMemo(
-    () => events?.filter((event) => isCurrentDayEvent(event, date)),
-    [events, date],
+    () => events?.filter((event) => isCurrentDayEvent(event, today)),
+    [events, today],
   );
 
-  useEffect(() => {
-    const today = day ? new Date(day) : new Date();
-    today.setHours(0, 0, 0, 0);
-    setDate(today);
-
-    const date = day ? new Date(day) : new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(1);
-    setMonthStart(date);
-  }, [day]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: We need to re-run the effect only when the month changes, if we add events we run into infinite re-renders
-  useEffect(() => {
+  const eventColors = useMemo(() => {
     if (!events) {
-      return;
+      return new Map();
     }
 
     const colors = new Map();
@@ -102,8 +100,8 @@ export default function Calendar() {
       const color = index % EVENT_COLORS;
       colors.set(event.id, color);
     });
-    setEventColors(colors);
-  }, [monthStart, events]);
+    return colors;
+  }, [events]);
 
   function CustomDayButton({
     className,
@@ -217,10 +215,10 @@ export default function Calendar() {
         <div className="flex flex-col items-center">
           <CalendarComponent
             mode="single"
-            month={monthStart}
+            month={currentMonth}
             selected={date}
             onSelect={handleDaySelect}
-            onMonthChange={setMonthStart}
+            onMonthChange={setCurrentMonth}
             locale={ca}
             className="mx-auto"
             classNames={{

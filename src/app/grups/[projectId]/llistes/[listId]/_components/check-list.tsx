@@ -15,6 +15,7 @@ import {
   type FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,9 +29,6 @@ import NewListItem from "./new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const { project } = useProjects();
-  const [itemsByCategory, setItemsByCategory] = useState(
-    groupItemsByCategory(props.list.items, project),
-  );
   const [dragging, setDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
@@ -38,9 +36,10 @@ export default function CheckList(props: { list: List }) {
 
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
-  useEffect(() => {
-    setItemsByCategory(groupItemsByCategory(props.list.items, project));
-  }, [props.list.items, project]);
+  const itemsByCategory = useMemo(
+    () => groupItemsByCategory(props.list.items, project),
+    [props.list.items, project],
+  );
 
   async function handleChange(
     item: List["items"][number],
@@ -58,18 +57,10 @@ export default function CheckList(props: { list: List }) {
       project?.categories.find((c) => c.id === categoryId) ?? null;
     item.updatedAt = new Date();
 
-    setItemsByCategory(groupItemsByCategory(props.list.items, project));
-
     await updateListItem(props.list, item.id, name, completed, categoryId);
   }
 
   async function handleDelete(item: List["items"][number]) {
-    setItemsByCategory(
-      groupItemsByCategory(
-        props.list.items.filter((i) => i.id !== item.id),
-        project,
-      ),
-    );
     await deleteListItem(props.list, item.id);
   }
 
@@ -113,7 +104,6 @@ export default function CheckList(props: { list: List }) {
     }
 
     item.category = category;
-    setItemsByCategory(groupItemsByCategory(props.list.items, project));
 
     await updateListItem(
       props.list,

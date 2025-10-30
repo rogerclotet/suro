@@ -47,11 +47,9 @@ export default function EditingListItem(props: {
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
   useEffect(() => {
     form.setFocus("name");
-  }, []);
+  }, [form]);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (!form.formState.isDirty) {

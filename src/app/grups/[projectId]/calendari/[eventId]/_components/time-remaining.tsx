@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useMemo } from "react";
 import type { Event } from "@/app/_data/event";
 
 export default function TimeRemaining({
@@ -10,14 +10,12 @@ export default function TimeRemaining({
   event: Event;
   className?: string;
 }) {
-  const [timeRemaining, setTimeRemaining] = useState<ReactNode>();
-
-  useEffect(() => {
+  const timeRemaining = useMemo(() => {
     const now = new Date();
     const remainingMs = event.startAt.getTime() - now.getTime();
 
     if (remainingMs < 0) {
-      return void {};
+      return null;
     }
 
     const oneHour = 1000 * 60 * 60;
@@ -27,37 +25,31 @@ export default function TimeRemaining({
 
     if (days > 0) {
       if (days > 2 || hours === 0) {
-        setTimeRemaining(<span className={className}>Falten {days} dies</span>);
-        return () => void {};
+        return <span className={className}>Falten {days} dies</span>;
       } else {
-        setTimeRemaining(
+        return (
           <span className={className}>
             Falten {days} dies i {hours} hores
-          </span>,
+          </span>
         );
-        return () => void {};
       }
     }
 
     if (hours > 1) {
-      setTimeRemaining(<span className={className}>Falten {hours} hores</span>);
-      return () => void {};
+      return <span className={className}>Falten {hours} hores</span>;
     }
 
     const minutes = Math.floor(remainingMs / (1000 * 60));
 
     if (hours > 0) {
-      setTimeRemaining(
-        <span className={className}>Falta 1 hora i {minutes} minuts</span>,
-      );
-      return () => void {};
+      return <span className={className}>Falta 1 hora i {minutes} minuts</span>;
     }
 
     if (minutes > 0) {
-      setTimeRemaining(
-        <span className={className}>Falten {minutes} minuts</span>,
-      );
+      return <span className={className}>Falten {minutes} minuts</span>;
     }
+
+    return null;
   }, [className, event.startAt]);
 
   return timeRemaining;
