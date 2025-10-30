@@ -1,12 +1,1 @@
-echo "Running linter and formatter..."
-pnpm lint:fix
-
-echo "Running type checker..."
-pnpm typecheck
-
-echo "Running tests..."
-pnpm test
-
-echo ""
-echo ""
-echo "✅ All checks passed!"
+pnpm lint-staged

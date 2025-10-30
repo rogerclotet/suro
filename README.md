@@ -23,7 +23,9 @@ pnpm install
 ### Run linter and tests
 
 ```bash
-pnpm lint
+pnpm eslint
+pnpm biome:check
+pnpm typecheck
 pnpm test
 ```
 

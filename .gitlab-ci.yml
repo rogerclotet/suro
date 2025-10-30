@@ -9,7 +9,8 @@ check:
     - npm install -g pnpm@latest-10
     - pnpm install
   script:
-    - pnpm lint
+    - pnpm eslint
+    - pnpm biome:check
     - pnpm typecheck
     - pnpm test
   artifacts:

@@ -13,9 +13,10 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "biome check",
-    "lint:fix": "biome check --write",
-    "format": "biome format --write",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint --fix .",
+    "biome:check": "biome check",
+    "biome:fix": "biome check --write",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -82,8 +83,11 @@
     "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^5.1.0",
     "drizzle-kit": "^0.31.6",
+    "eslint": "^9.38.0",
+    "eslint-config-next": "^16.0.1",
     "husky": "^9.1.7",
     "jsdom": "^27.0.1",
+    "lint-staged": "^16.2.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.16",
     "tailwindcss-animate": "^1.0.7",
@@ -105,7 +109,8 @@
       "core-js",
       "esbuild",
       "msgpackr-extract",
-      "sharp"
+      "sharp",
+      "unrs-resolver"
     ]
   }
 }
