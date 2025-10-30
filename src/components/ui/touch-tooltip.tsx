@@ -11,7 +11,7 @@ import type {
   TooltipProviderProps,
   TooltipTriggerProps,
 } from "@radix-ui/react-tooltip";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import {
   Tooltip as OriginalTooltip,
@@ -27,7 +27,7 @@ export const TooltipProvider = ({
   children,
   ...props
 }: TooltipProviderProps) => {
-  const [isTouch, setTouch] = useState<boolean | undefined>(() => {
+  const [isTouch, _setTouch] = useState<boolean | undefined>(() => {
     if (typeof window === "undefined") {
       return undefined;
     }

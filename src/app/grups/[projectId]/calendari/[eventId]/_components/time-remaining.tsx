@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import type { Event } from "@/app/_data/event";
 
 export default function TimeRemaining({

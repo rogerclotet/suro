@@ -2,7 +2,12 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { forwardRef, type ElementRef, type ComponentPropsWithoutRef, type HTMLAttributes, type ComponentProps } from "react";
+import {
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  forwardRef,
+  type HTMLAttributes,
+} from "react";
 
 import { cn } from "@/lib/utils";
 

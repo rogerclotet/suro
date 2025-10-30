@@ -5,7 +5,7 @@ import { Info, Mail } from "lucide-react";
 import Image from "next/image";
 import { redirect, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {

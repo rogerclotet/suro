@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2, Tag } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { type FocusEvent, type FormEvent, useCallback, useRef } from "react";
+import { type FocusEvent, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";

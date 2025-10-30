@@ -3,15 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import {
-  type FormEvent,
-  Fragment,
-  type RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, type RefObject, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";

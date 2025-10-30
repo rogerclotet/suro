@@ -3,9 +3,7 @@ import { ChevronRight, MoreHorizontal } from "lucide-react";
 import {
   type ComponentProps,
   type ComponentPropsWithoutRef,
-  type ElementRef,
   forwardRef,
-  type HTMLAttributes,
   type ReactNode,
 } from "react";
 
