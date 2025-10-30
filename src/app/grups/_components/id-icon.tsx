@@ -17,7 +17,7 @@ export default function IdIcon({ id }: { id: Project["id"] }) {
 
   return (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger asChild>
         <button
           type="button"
           onClick={() => copyIdToClipboard(id)}

@@ -80,9 +80,7 @@ export default function ProfileEditor({ user }: { user: User }) {
 
         <FormItem>
           <Label>Email</Label>
-          <FormControl>
-            <Input value={user.email ?? ""} disabled />
-          </FormControl>
+          <Input value={user.email ?? ""} disabled />
         </FormItem>
 
         <Button
