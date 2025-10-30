@@ -1,12 +1,12 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+import React from "react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
-import React from "react";
 import MonetaryAmount from "../../monetary-amount";
 import type { SettlingPayment } from "../data";
 
@@ -19,13 +19,14 @@ export default function SettleProposal({
 }) {
   const [checked, setChecked] = React.useState(false);
   const { project } = useProjects();
+  const checkboxId = `settle-${payment.from}-${payment.to}-${payment.amount}`;
 
   if (!project) {
     return null;
   }
 
   return (
-    <label className="cursor-pointer">
+    <label className="cursor-pointer" htmlFor={checkboxId}>
       <Card
         className={cn(
           "flex flex-row items-center gap-4 border-2 border-transparent px-4 py-1",
@@ -33,6 +34,7 @@ export default function SettleProposal({
         )}
       >
         <Checkbox
+          id={checkboxId}
           defaultChecked={false}
           onCheckedChange={(checked) => {
             if (checked === "indeterminate") {

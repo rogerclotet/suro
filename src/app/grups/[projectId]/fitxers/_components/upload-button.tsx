@@ -1,12 +1,13 @@
 "use client";
 
+import { Loader2, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { UploadButton as UploadthingButton } from "@/components/uploadthing";
-import { Loader2, Upload } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export default function UploadButton({
   projectId,
@@ -16,7 +17,7 @@ export default function UploadButton({
   eventId?: Event["id"] | undefined;
 }) {
   const router = useRouter();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   return (
     <div>
@@ -31,7 +32,12 @@ export default function UploadButton({
           router.refresh();
         }}
         onUploadError={(error: Error) => {
-          log.error("Error uploading file", { error, projectId, eventId });
+          posthog.captureException(error, {
+            distinctId: session?.user.id,
+            action: "upload_file",
+            projectId,
+            eventId,
+          });
           toast.error("No s'ha pogut compartir el fitxer");
         }}
         content={{
@@ -55,7 +61,7 @@ export default function UploadButton({
             return "Imatges o PDFs (4 MB)";
           },
         }}
-        className="ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:h-9 ut-button:w-full ut-button:bg-primary ut-button:px-3 ut-button:text-primary-foreground ut-button:ring-offset-background after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring ut-button:focus-visible:ring-offset-2 ut-allowed-content:text-muted-foreground"
+        className="ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:h-9 ut-button:w-full ut-button:bg-primary ut-button:px-3 ut-button:text-primary-foreground ut-button:ring-offset-background after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring ut-button:focus-visible:ring-offset-2 ut-allowed-content:text-muted-foreground"
       />
     </div>
   );

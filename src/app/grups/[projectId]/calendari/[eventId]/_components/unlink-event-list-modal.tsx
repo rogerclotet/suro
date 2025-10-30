@@ -1,12 +1,12 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import type React from "react";
+import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
-import { captureException } from "@sentry/nextjs";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { toast } from "sonner";
 import { unlinkEventList } from "../actions";
 
 export default function UnlinkEventListModal({
@@ -16,9 +16,9 @@ export default function UnlinkEventListModal({
 }: {
   event: Event;
   list: List | undefined;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleUnlink() {
     if (list === undefined) {
@@ -29,9 +29,9 @@ export default function UnlinkEventListModal({
       await unlinkEventList(event, list);
       toast.success("S'ha desenllaçat la llista");
     } catch (e) {
-      captureException(e);
-      log.error("Error unlinking event list", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "unlink_event_list",
         projectId: event.projectId,
         eventId: event.id,
       });

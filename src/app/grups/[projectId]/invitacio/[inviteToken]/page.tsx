@@ -1,3 +1,7 @@
+import assert from "node:assert";
+import { AlertCircle } from "lucide-react";
+import type { Metadata } from "next";
+import { revalidatePath } from "next/cache";
 import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/grups/_components/users-list";
 import { auth } from "@/auth";
@@ -11,21 +15,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { checkAuth } from "@/lib/check-auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { getInvitedProject } from "@/server/projects";
-import assert from "assert";
-import { AlertCircle } from "lucide-react";
-import type { Metadata } from "next";
-import { Logger } from "next-axiom";
-import { revalidatePath } from "next/cache";
 import { acceptInvite } from "./actions";
 
-type Props = {
-  params: { projectId: string; inviteToken: string };
-};
-
 export default async function InvitePage({
-  params: { projectId, inviteToken },
-}: Props) {
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}) {
+  const { projectId, inviteToken } = await params;
+
   await checkAuth();
 
   const session = await auth();
@@ -69,9 +69,12 @@ export default async function InvitePage({
                 await acceptInvite(projectId, inviteToken);
                 revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
               } catch (e) {
-                const log = new Logger();
-                log.error("Error accepting invite", { error: e, projectId });
-                await log.flush();
+                const posthog = getPostHogServer();
+                posthog.captureException(e, session?.user.id, {
+                  distinctId: session?.user.id,
+                  action: "accept_invite",
+                  projectId,
+                });
               }
             }}
           >
@@ -83,8 +86,14 @@ export default async function InvitePage({
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = await getInvitedProject(params.projectId);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}): Promise<Metadata> {
+  const { projectId } = await params;
+
+  const project = await getInvitedProject(projectId);
 
   if (!project) {
     return {};

@@ -1,6 +1,6 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { calculateBalances } from "./calculate-balances";
 import { generateProposals } from "./generate-proposals";
 
@@ -11,6 +11,10 @@ vi.mock("./calculate-balances", () => ({
 }));
 
 describe("generate proposals", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -43,9 +47,9 @@ describe("generate proposals", () => {
     );
 
     expect(proposals).toHaveLength(1);
-    expect(proposals[0]!.from).toEqual("user1");
-    expect(proposals[0]!.to).toEqual("user2");
-    expect(proposals[0]!.amount).toEqual(100);
+    expect(proposals[0]?.from).toEqual("user1");
+    expect(proposals[0]?.to).toEqual("user2");
+    expect(proposals[0]?.amount).toEqual(100);
   });
 
   it("should generate proposals for spendings from more than two users", () => {
@@ -70,21 +74,21 @@ describe("generate proposals", () => {
 
     expect(proposals).toHaveLength(4);
 
-    expect(proposals[0]!.from).toEqual("user2");
-    expect(proposals[0]!.to).toEqual("user1");
-    expect(proposals[0]!.amount).toEqual(1740);
+    expect(proposals[0]?.from).toEqual("user2");
+    expect(proposals[0]?.to).toEqual("user1");
+    expect(proposals[0]?.amount).toEqual(1740);
 
-    expect(proposals[1]!.from).toEqual("user3");
-    expect(proposals[1]!.to).toEqual("user1");
-    expect(proposals[1]!.amount).toEqual(3465);
+    expect(proposals[1]?.from).toEqual("user3");
+    expect(proposals[1]?.to).toEqual("user1");
+    expect(proposals[1]?.amount).toEqual(3465);
 
-    expect(proposals[2]!.from).toEqual("user5");
-    expect(proposals[2]!.to).toEqual("user4");
-    expect(proposals[2]!.amount).toEqual(2935);
+    expect(proposals[2]?.from).toEqual("user5");
+    expect(proposals[2]?.to).toEqual("user4");
+    expect(proposals[2]?.amount).toEqual(2935);
 
-    expect(proposals[3]!.from).toEqual("user5");
-    expect(proposals[3]!.to).toEqual("user1");
-    expect(proposals[3]!.amount).toEqual(530);
+    expect(proposals[3]?.from).toEqual("user5");
+    expect(proposals[3]?.to).toEqual("user1");
+    expect(proposals[3]?.amount).toEqual(530);
   });
 });
 

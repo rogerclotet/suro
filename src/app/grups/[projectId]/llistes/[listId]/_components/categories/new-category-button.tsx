@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import React from "react";
+import type React from "react";
 
 export default function NewCategoryButton({
   dialog,
@@ -11,6 +11,7 @@ export default function NewCategoryButton({
   return (
     <div>
       <button
+        type="button"
         onClick={() => dialog.current?.showModal()}
         className="flex flex-row flex-nowrap items-center justify-start gap-2 text-nowrap"
       >

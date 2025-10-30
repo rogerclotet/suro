@@ -1,8 +1,8 @@
+import { CornerRightUp, Info } from "lucide-react";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getTemplates } from "@/server/lists";
-import { CornerRightUp, Info } from "lucide-react";
-import { redirect } from "next/navigation";
 import TemplatePreview from "./template-preview";
 
 export default async function Templates({ projectId }: { projectId: string }) {
@@ -18,7 +18,7 @@ export default async function Templates({ projectId }: { projectId: string }) {
       <div className="space-y-4">
         <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right md:pr-14">
           Encara no hi ha plantilles, pots crear-ne una aquí{" "}
-          <CornerRightUp className="mb-4 flex-shrink-0" />
+          <CornerRightUp className="mb-4 shrink-0" />
         </div>
         <div className="text-muted-foreground">
           <Description />

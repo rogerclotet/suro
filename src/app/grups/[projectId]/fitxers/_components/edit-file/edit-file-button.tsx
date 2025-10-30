@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Edit } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { File } from "@/app/_data/file";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Edit } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { editFile } from "./actions";
 import { editFileSchema } from "./schema";
 
@@ -31,7 +31,7 @@ export default function EditFileButton({ file }: { file: File }) {
     resolver: valibotResolver(editFileSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof editFileSchema>) {
     try {
@@ -39,8 +39,13 @@ export default function EditFileButton({ file }: { file: File }) {
       toast.success("Fitxer editat");
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error editing file", { error: e, projectId: file.project.id });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_file",
+        projectId: file.project.id,
+        eventId: file.eventId,
+        fileId: file.id,
+      });
       toast.error("Error editant el fitxer. Torna-ho a provar més tard");
     }
   }
@@ -48,6 +53,7 @@ export default function EditFileButton({ file }: { file: File }) {
   return (
     <>
       <button
+        type="button"
         onClick={() => triggerRef.current?.click()}
         className="text-muted-foreground hover:text-primary"
       >

@@ -1,5 +1,5 @@
-import type { Event } from "@/app/_data/event";
 import { queryOptions } from "@tanstack/react-query";
+import type { Event } from "@/app/_data/event";
 import getMonthString from "./get-month-string";
 
 export function eventsQueryOptions(

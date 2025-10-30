@@ -94,13 +94,9 @@
         "f_account_userId_f_user_id_fk": {
           "name": "f_account_userId_f_user_id_fk",
           "tableFrom": "f_account",
-          "columnsFrom": [
-            "userId"
-          ],
+          "columnsFrom": ["userId"],
           "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -108,10 +104,7 @@
       "compositePrimaryKeys": {
         "f_account_provider_providerAccountId_pk": {
           "name": "f_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
+          "columns": ["provider", "providerAccountId"]
         }
       },
       "uniqueConstraints": {}
@@ -138,26 +131,18 @@
         "f_projectToUser_projectId_f_project_id_fk": {
           "name": "f_projectToUser_projectId_f_project_id_fk",
           "tableFrom": "f_projectToUser",
-          "columnsFrom": [
-            "projectId"
-          ],
+          "columnsFrom": ["projectId"],
           "tableTo": "f_project",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "f_projectToUser_userId_f_user_id_fk": {
           "name": "f_projectToUser_userId_f_user_id_fk",
           "tableFrom": "f_projectToUser",
-          "columnsFrom": [
-            "userId"
-          ],
+          "columnsFrom": ["userId"],
           "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -165,10 +150,7 @@
       "compositePrimaryKeys": {
         "f_projectToUser_projectId_userId_pk": {
           "name": "f_projectToUser_projectId_userId_pk",
-          "columns": [
-            "projectId",
-            "userId"
-          ]
+          "columns": ["projectId", "userId"]
         }
       },
       "uniqueConstraints": {}
@@ -247,13 +229,9 @@
         "f_session_userId_f_user_id_fk": {
           "name": "f_session_userId_f_user_id_fk",
           "tableFrom": "f_session",
-          "columnsFrom": [
-            "userId"
-          ],
+          "columnsFrom": ["userId"],
           "tableTo": "f_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -330,10 +308,7 @@
       "compositePrimaryKeys": {
         "f_verificationToken_identifier_token_pk": {
           "name": "f_verificationToken_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
+          "columns": ["identifier", "token"]
         }
       },
       "uniqueConstraints": {}

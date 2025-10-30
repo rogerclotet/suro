@@ -1,11 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { db } from "@/server/db";
 import { categories } from "@/server/db/schema";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 import { categorySchema } from "./data";
 
 export async function createCategory(
@@ -31,7 +31,11 @@ export async function createCategory(
     })
     .returning({ id: categories.id });
 
+  if (!result || result.length < 1 || !result[0]) {
+    throw new Error("Error creating category");
+  }
+
   revalidatePath(`/grups/${project.id}/llistes/categories`);
 
-  return result[0]!.id;
+  return result[0].id;
 }

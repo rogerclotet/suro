@@ -1,5 +1,7 @@
 "use client";
 
+import { Edit, Settings, Trash2 } from "lucide-react";
+import React from "react";
 import type { Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ModalForm from "@/components/ui/modal-form";
-import { Edit, Settings, Trash2 } from "lucide-react";
-import React from "react";
 import DeleteTemplateModal from "./delete-template-modal";
 import EditTemplateForm from "./edit-template-form";
 

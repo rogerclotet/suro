@@ -1,5 +1,14 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import { Textarea } from "@/components/ui/textarea";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Plus } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createNote } from "./actions";
 import { noteSchema } from "./schema";
 
@@ -36,16 +36,24 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { project } = useProjects();
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     try {
-      const noteId = await createNote(project!, data);
+      const noteId = await createNote(project, data);
       toast.success(`Nota ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/notes/${noteId}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating note", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_note",
+        projectId,
+      });
       toast.error("No s'ha pogut crear la nota, torna-ho a provar més tard");
     } finally {
       form.reset();

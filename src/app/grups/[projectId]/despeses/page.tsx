@@ -1,19 +1,21 @@
+import { Info } from "lucide-react";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getUserProject } from "@/server/projects";
 import { getProjectSpendings } from "@/server/spendings";
-import { Info } from "lucide-react";
-import { redirect } from "next/navigation";
 import CreateSpendingButton from "./_components/create-spending-button/create-spending-button";
 import SettleButton from "./_components/settle-button/settle-button";
 import SpendingsList from "./_components/spendings-list";
 import SpendingsTable from "./_components/spendings-table";
 
 export default async function DespesesPage({
-  params: { projectId },
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = await params;
+
   const session = await auth();
   if (!session) {
     redirect("/");

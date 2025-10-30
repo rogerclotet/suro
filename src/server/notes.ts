@@ -1,12 +1,10 @@
 "use server";
 
-import { auth } from "@/auth";
 import { desc, eq } from "drizzle-orm";
-import { Logger } from "next-axiom";
+import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { notes, projects } from "./db/schema";
-
-const log = new Logger();
 
 export async function getNote(noteId: string) {
   const session = await auth();
@@ -35,8 +33,11 @@ export async function getNote(noteId: string) {
 
     return result;
   } catch (e) {
-    log.error("Error getting note", { error: e, noteId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_note",
+      noteId,
+    });
     return undefined;
   }
 }
@@ -66,8 +67,11 @@ export async function getNotes(projectId: string) {
 
     return project.notes;
   } catch (e) {
-    log.error("Error getting notes", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_notes",
+      projectId,
+    });
     return [];
   }
 }

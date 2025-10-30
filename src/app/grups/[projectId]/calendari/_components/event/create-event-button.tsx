@@ -1,5 +1,15 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import type { CheckedState } from "@radix-ui/react-checkbox";
+import { Loader2, Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import type { DateRange } from "react-day-picker";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,16 +24,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import type { CheckedState } from "@radix-ui/react-checkbox";
-import { captureException } from "@sentry/nextjs";
-import { Loader2, Plus } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import type { DateRange } from "react-day-picker";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { getTimeString } from "../../get-time-string";
 import { createEvent } from "./actions";
 import { eventSchema } from "./data";
@@ -35,6 +35,8 @@ export default function CreateEventButton({
   defaultDate: Date;
   onCreate: (from: Date | undefined, to: Date | undefined) => void;
 }) {
+  const { data: session } = useSession();
+
   const { project } = useProjects();
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
@@ -45,7 +47,6 @@ export default function CreateEventButton({
     resolver: valibotResolver(eventSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
 
   const selectDefaultTime = React.useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
@@ -74,6 +75,11 @@ export default function CreateEventButton({
   }, [defaultDate, selectDefaultTime]);
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     const dataToCreate = window.structuredClone(data);
     if (dataToCreate.allDay) {
       dataToCreate.dates.from = new Date(
@@ -93,14 +99,17 @@ export default function CreateEventButton({
     }
 
     try {
-      await createEvent(dataToCreate, project!);
+      await createEvent(dataToCreate, project);
       toast.success(`Esdeveniment ${data.name} creat`);
       onCreate(data.dates.from, data.dates.to);
       form.reset();
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error creating event", { error: e, projectId: project?.id });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_event",
+        projectId: project?.id,
+      });
       toast.error("Error al crear l'esdeveniment. Torna-ho a provar més tard.");
     }
   }
@@ -116,11 +125,11 @@ export default function CreateEventButton({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.from) {
+    if (!newDates.from || !hour || !minute) {
       return;
     }
 
-    newDates.from.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.from.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.to || newDates.from > newDates.to) {
       newDates.to?.setHours(
         newDates.from.getHours() + 1,
@@ -135,11 +144,11 @@ export default function CreateEventButton({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.to) {
+    if (!newDates.to || !hour || !minute) {
       return;
     }
 
-    newDates.to.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.to.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.from || newDates.from > newDates.to) {
       newDates.from?.setHours(
         newDates.to.getHours() - 1,
@@ -156,11 +165,9 @@ export default function CreateEventButton({
     }
 
     const newDates = form.getValues("dates");
-    selectDefaultTime(
-      newDates.from ?? newDates.to!,
-      newDates.to ?? newDates.from!,
-      checked,
-    );
+    const fromDate = newDates.from ?? newDates.to ?? new Date();
+    const toDate = newDates.to ?? newDates.from ?? new Date();
+    selectDefaultTime(fromDate, toDate, checked);
 
     form.setValue("allDay", checked);
   }
@@ -211,15 +218,15 @@ export default function CreateEventButton({
               name="dates"
               render={({ field }) => (
                 <div className="flex flex-row flex-wrap gap-2">
-                  <FormItem className="flex-grow">
+                  <FormItem className="grow">
                     <FormLabel>Dates</FormLabel>
                     <DatePicker
                       dates={field.value as DateRange}
                       onDatesChange={handleDatesChange}
                     />
                   </FormItem>
-                  <div className="flex flex-grow flex-row gap-2">
-                    <FormItem className="w-auto flex-grow">
+                  <div className="flex grow flex-row gap-2">
+                    <FormItem className="w-auto grow">
                       <FormLabel>Hora inici</FormLabel>
                       <Input
                         type="time"
@@ -233,7 +240,7 @@ export default function CreateEventButton({
                         className="justify-center"
                       />
                     </FormItem>
-                    <FormItem className="w-auto flex-grow">
+                    <FormItem className="w-auto grow">
                       <FormLabel>Hora final</FormLabel>
                       <Input
                         type="time"
@@ -255,7 +262,7 @@ export default function CreateEventButton({
             <FormField
               name="allDay"
               render={({ field }) => (
-                <FormItem className="flex flex-grow flex-row items-center gap-2 space-y-0">
+                <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
                   <FormControl>
                     <Checkbox
                       checked={field.value as boolean}

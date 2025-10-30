@@ -3,11 +3,13 @@ import CreateNoteButton from "./_components/create-note-button/create-note-butto
 import NoteList from "./_components/note-list";
 import { NotePreviewSkeleton } from "./_components/note-preview";
 
-export default function Page({
-  params: { projectId },
+export default async function Page({
+  params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }) {
+  const { projectId } = await params;
+
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -20,7 +22,7 @@ export default function Page({
         fallback={
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             {[...Array<undefined>(3)].map((_, i) => (
-              <NotePreviewSkeleton key={i} />
+              <NotePreviewSkeleton key={i.toString()} />
             ))}
           </div>
         }

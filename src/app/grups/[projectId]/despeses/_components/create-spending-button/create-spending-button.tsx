@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,24 +27,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createSpending } from "./actions";
 import { spendingSchema } from "./data";
 
 export default function CreateSpendingButton() {
-  const session = useSession();
+  const { data: session } = useSession();
   const form = useForm<v.InferInput<typeof spendingSchema>>({
     defaultValues: {
       amount: 0,
-      from: session?.data?.user.id,
+      from: session?.user.id,
       to: undefined,
       description: "",
     },
@@ -44,19 +43,21 @@ export default function CreateSpendingButton() {
   });
   const { project } = useProjects();
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
 
   async function onSubmit(data: v.InferInput<typeof spendingSchema>) {
     try {
-      await createSpending(project!.id, data);
+      if (!project?.id) {
+        throw new Error("No project selected");
+      }
+      await createSpending(project.id, data);
       toast.success("Despesa creada");
       triggerRef.current?.click();
       form.reset();
     } catch (e) {
-      captureException(e);
-      log.error("Error creating spending", {
-        error: e,
-        projectId: project!.id,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_spending",
+        projectId: project?.id,
       });
       toast.error("No s'ha pogut crear la despesa, torna-ho a provar més tard");
     }

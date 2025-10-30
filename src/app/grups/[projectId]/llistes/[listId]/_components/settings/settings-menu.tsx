@@ -1,5 +1,7 @@
 "use client";
 
+import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
+import React from "react";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ModalForm from "@/components/ui/modal-form";
-import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
-import React from "react";
+import ClearCompletedModal from "./clear-completed-modal";
 import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
 import ImportTemplatesModal from "./import-templates/import-templates-modal";
-import ClearCompletedModal from "./clear-completed-modal";
 
 export default function SettingsMenu({
   list,

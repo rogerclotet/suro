@@ -1,7 +1,7 @@
 "use client";
 
-import type { Spending } from "@/app/_data/spending";
 import React from "react";
+import type { Spending } from "@/app/_data/spending";
 import MonetaryAmount from "./monetary-amount";
 
 export default function SpendingLine({ spending }: { spending: Spending }) {

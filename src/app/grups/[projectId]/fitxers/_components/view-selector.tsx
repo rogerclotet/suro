@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { LayoutGrid, Rows3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useFileView } from "../_state/file-view-state";
 
 export default function ViewSelector() {

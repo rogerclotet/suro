@@ -1,3 +1,5 @@
+import { Folders } from "lucide-react";
+import Link from "next/link";
 import type { Event } from "@/app/_data/event";
 import {
   Card,
@@ -12,8 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { textToHtml } from "@/lib/utils";
-import { Folders } from "lucide-react";
-import Link from "next/link";
 import TimeRange from "./time-range";
 
 export default function EventPreview({ event }: { event: Event }) {
@@ -44,8 +44,9 @@ export default function EventPreview({ event }: { event: Event }) {
         </CardHeader>
         {event.description && (
           <CardContent
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Already sanitized
             dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
-            className="break-words"
+            className="wrap-break-word"
           />
         )}
       </Card>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useProjects } from "@/app/_state/project-state";
 import React from "react";
+import { useProjects } from "@/app/_state/project-state";
 
 export default function CurrentProjectUpdater({
   projectId,

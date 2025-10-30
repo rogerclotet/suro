@@ -1,5 +1,10 @@
 "use client";
 
+import { Menu } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,16 +13,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React from "react";
+import ThemeSwitcher from "../../theme-switcher";
 import Navbar from "../navbar";
 import ProjectSelector from "../project-selector";
-import Profile from "./profile/profile";
 import NotificationBell from "./notification-bell/notification-bell";
-import ThemeSwitcher from "../../theme-switcher";
+import Profile from "./profile/profile";
 
 export default function DrawerLayout() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -30,8 +30,8 @@ export default function DrawerLayout() {
   }
 
   return (
-    <div>
-      <nav className="fixed left-0 right-0 top-0 z-40 flex w-full items-center justify-between gap-2 bg-primary py-2 text-primary-foreground lg:container lg:grid lg:grid-cols-3 lg:rounded-b-xl">
+    <div className="fixed left-0 right-0 top-0 z-40">
+      <nav className="flex w-full mx-auto items-center justify-between gap-2 bg-primary py-2 text-primary-foreground lg:container lg:grid lg:grid-cols-3 lg:rounded-b-xl">
         <div className="flex flex-row items-center gap-2">
           <Drawer direction="left" open={isOpen} onOpenChange={setIsOpen}>
             <DrawerTrigger asChild>
@@ -49,7 +49,7 @@ export default function DrawerLayout() {
                 <div>
                   <DrawerTitle className="sr-only">Menú lateral</DrawerTitle>
 
-                  <ul tabIndex={0} className="flex flex-col gap-2">
+                  <ul className="flex flex-col gap-2">
                     <li>
                       <Profile onNavigate={() => setIsOpen(false)} />
                     </li>

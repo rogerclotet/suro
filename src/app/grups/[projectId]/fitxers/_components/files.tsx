@@ -5,7 +5,6 @@ import { useFileView } from "../_state/file-view-state";
 import GridView from "./grid-view/grid-view";
 import ListView from "./list-view/list-view";
 
-
 export default function Files({ files }: { files: File[] }) {
   const { view } = useFileView();
 

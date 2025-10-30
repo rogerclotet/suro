@@ -1,3 +1,5 @@
+import { AlertCircle, ArrowLeft, CalendarFold } from "lucide-react";
+import Link from "next/link";
 import { ClientOnly } from "@/components/client-only";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -5,19 +7,19 @@ import ShareButton from "@/components/ui/share-button";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
 import { getLists, getTemplates } from "@/server/lists";
-import { AlertCircle, ArrowLeft, CalendarFold } from "lucide-react";
-import Link from "next/link";
 import TimeRange from "../../calendari/_components/event/time-range";
 import CheckList from "./_components/check-list";
 import ListsDropdown from "./_components/lists-dropdown";
 import SettingsMenu from "./_components/settings/settings-menu";
 
 export default async function ListPage({
-  params: { projectId, listId },
+  params,
 }: {
-  params: { projectId: string; listId: string };
+  params: Promise<{ projectId: string; listId: string }>;
 }) {
   await checkAuth();
+
+  const { projectId, listId } = await params;
 
   const lists = await getLists(projectId);
   const templates = await getTemplates(projectId);
@@ -83,6 +85,7 @@ export default async function ListPage({
 
       {list.description && (
         <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
           dangerouslySetInnerHTML={{
             __html: textToHtml(list.description),
           }}

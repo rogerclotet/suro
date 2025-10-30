@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Edit } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Edit } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { editProject } from "./actions";
 import { projectSchema } from "./create-project/data";
 
@@ -31,7 +31,7 @@ export default function EditProjectButton({ project }: { project: Project }) {
     resolver: valibotResolver(projectSchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
     try {
@@ -39,8 +39,11 @@ export default function EditProjectButton({ project }: { project: Project }) {
       toast.success(`Grup ${data.name} actualitzat`);
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error editing project", { error: e, projectId: project.id });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_project",
+        projectId: project.id,
+      });
       toast.error("No s'ha pogut editar el grup, torna-ho a provar més tard");
     }
   }

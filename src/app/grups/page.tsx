@@ -1,5 +1,5 @@
-import { checkAuth } from "@/lib/check-auth";
 import { Suspense } from "react";
+import { checkAuth } from "@/lib/check-auth";
 import CreateProjectButton from "./_components/create-project/create-project-button";
 import ProjectsTable from "./_components/projects-table";
 

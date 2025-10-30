@@ -1,3 +1,5 @@
+import { useMediaQuery } from "@uidotdev/usehooks";
+import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +21,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useMediaQuery } from "@uidotdev/usehooks";
-import React from "react";
 import { ClientOnly } from "../client-only";
 import { Button } from "./button";
 
@@ -30,7 +30,7 @@ type Props = {
   actionText: string;
   onAction: () => void;
   variant?: "default" | "destructive";
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   children?: React.ReactNode;
 };
 

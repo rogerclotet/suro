@@ -1,15 +1,15 @@
 "use client";
 
+import { Check, Handshake } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { toast } from "sonner";
 import type { Spending } from "@/app/_data/spending";
 import { useProjects } from "@/app/_state/project-state";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ModalForm from "@/components/ui/modal-form";
-import { captureException } from "@sentry/nextjs";
-import { Check, Handshake } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { toast } from "sonner";
 import SettleProposal from "./_components/settle-proposal";
 import { settlePayments } from "./actions";
 import type { SettlingPayment } from "./data";
@@ -20,7 +20,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
   const [selected, setSelected] = React.useState<SettlingPayment[]>([]);
   const triggerRef = React.useRef<HTMLDivElement>(null);
   const { project } = useProjects();
-  const log = useLogger();
+  const { data: session } = useSession();
 
   React.useEffect(() => {
     if (!project) {
@@ -45,15 +45,17 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
 
   async function handleSubmit() {
     try {
-      await settlePayments(project!.id, selected);
+      if (!project?.id) {
+        throw new Error("No project selected");
+      }
+      await settlePayments(project.id, selected);
       triggerRef.current?.click();
       toast.success("Deutes saldats correctament");
     } catch (e) {
-      captureException(e);
-      log.error("Error settling payments", {
-        error: e,
-        payments: selected,
-        projectId: project!.id,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "settle_payments",
+        projectId: project?.id,
       });
       toast.error("Error al saldar deutes");
     }
@@ -90,7 +92,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
               <h2 className="font-semibold">Propostes per saldar deutes:</h2>
               <ul className="space-y-2">
                 {pending.map((payment, index) => (
-                  <li key={index}>
+                  <li key={`${payment.from}-${payment.to}-${payment.amount}`}>
                     <SettleProposal
                       payment={payment}
                       onChange={(selected) =>

@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import type React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +20,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import type React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createCategory } from "./actions";
 import { categorySchema } from "./data";
 
@@ -27,7 +27,7 @@ export default function NewCategoryModal({
   triggerRef,
   onCreate,
 }: {
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   onCreate?: (categoryId: string) => void;
 }) {
   const { project, addCategory } = useProjects();
@@ -37,7 +37,7 @@ export default function NewCategoryModal({
     },
     resolver: valibotResolver(categorySchema),
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof categorySchema>) {
     try {
@@ -60,9 +60,9 @@ export default function NewCategoryModal({
 
       toast.success(`Categoria ${data.name} creada`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating category", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_category",
         projectId: project?.id,
       });
       toast.error(

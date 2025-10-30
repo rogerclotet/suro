@@ -1,5 +1,15 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { getTemplates } from "@/app/api/[projectId]/templates/api";
 import { Button } from "@/components/ui/button";
@@ -15,16 +25,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { useLogger } from "next-axiom";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createList } from "./actions";
 import { listSchema } from "./data";
 
@@ -45,16 +45,24 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     queryFn: () => getTemplates(projectId),
     staleTime: 60 * 1000,
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     try {
-      const listId = await createList(project!, data);
+      const listId = await createList(project, data);
       toast.success(`Llista ${form.getValues().name} creada`);
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating list", { error: e, projectId });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_list",
+        projectId,
+      });
       toast.error("No s'ha pogut crear la llista, torna-ho a provar més tard");
     } finally {
       form.reset();
@@ -141,7 +149,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
                                   onCheckedChange={(checked) => {
                                     return checked
                                       ? field.onChange([
-                                          ...field.value,
+                                          ...(field.value ?? []),
                                           template.id,
                                         ])
                                       : field.onChange(

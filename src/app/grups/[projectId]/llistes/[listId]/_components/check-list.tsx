@@ -1,21 +1,21 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
 import {
   DndContext,
+  type DragEndEvent,
+  type DragStartEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import React from "react";
 import { toast } from "sonner";
+import type { List } from "@/app/_data/list";
+import type { Project } from "@/app/_data/project";
+import { useProjects } from "@/app/_state/project-state";
 import { deleteListItem, updateListItem } from "./actions";
 import CategoryItems from "./category-items";
 import NewListItem from "./new-list-item";
@@ -184,7 +184,7 @@ function groupItemsByCategory(items: List["items"], project: Project | null) {
 
   for (const item of items) {
     const category = item.category?.name ?? "";
-    categories.get(category)!.push(item);
+    categories.get(category)?.push(item);
   }
 
   const result = [];

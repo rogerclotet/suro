@@ -1,5 +1,15 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import type { CheckedState } from "@radix-ui/react-checkbox";
+import { Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import type { DateRange } from "react-day-picker";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -15,16 +25,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { type CheckedState } from "@radix-ui/react-checkbox";
-import { captureException } from "@sentry/nextjs";
-import { Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import type { DateRange } from "react-day-picker";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
 import { editEvent } from "../actions";
@@ -34,8 +34,9 @@ export default function EditEventForm({
   triggerRef,
 }: {
   event: Event;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const { data: session } = useSession();
   const { project } = useProjects();
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
@@ -51,7 +52,6 @@ export default function EditEventForm({
     },
     resolver: valibotResolver(eventSchema),
   });
-  const log = useLogger();
 
   const selectDefaultTime = React.useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
@@ -76,6 +76,11 @@ export default function EditEventForm({
   );
 
   async function onSubmit(data: v.InferInput<typeof eventSchema>) {
+    if (!project) {
+      toast.error("No s'ha seleccionat cap projecte");
+      return;
+    }
+
     const dataToEdit = window.structuredClone(data);
     if (dataToEdit.allDay) {
       dataToEdit.dates.from = new Date(
@@ -95,7 +100,7 @@ export default function EditEventForm({
     }
 
     try {
-      await editEvent(event, dataToEdit, project!);
+      await editEvent(event, dataToEdit, project);
       toast.success("Editat correctament");
       form.reset({
         name: data.name,
@@ -105,9 +110,9 @@ export default function EditEventForm({
       });
       triggerRef.current?.click();
     } catch (e) {
-      captureException(e);
-      log.error("Error editing event", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_event",
         projectId: event.projectId,
         eventId: event.id,
       });
@@ -126,11 +131,11 @@ export default function EditEventForm({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.from) {
+    if (!newDates.from || !hour || !minute) {
       return;
     }
 
-    newDates.from.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.from.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.to || newDates.from > newDates.to) {
       newDates.to?.setHours(
         newDates.from.getHours() + 1,
@@ -145,11 +150,11 @@ export default function EditEventForm({
     const value = e.target.value;
     const [hour, minute] = value.split(":");
     const newDates = form.getValues("dates");
-    if (!newDates.to) {
+    if (!newDates.to || !hour || !minute) {
       return;
     }
 
-    newDates.to.setHours(parseInt(hour!), parseInt(minute!), 0, 0);
+    newDates.to.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
     if (!newDates.from || newDates.from > newDates.to) {
       newDates.from?.setHours(
         newDates.to.getHours() - 1,
@@ -166,11 +171,9 @@ export default function EditEventForm({
     }
 
     const newDates = form.getValues("dates");
-    selectDefaultTime(
-      newDates.from ?? newDates.to!,
-      newDates.to ?? newDates.from!,
-      checked,
-    );
+    const fromDate = newDates.from ?? newDates.to ?? new Date();
+    const toDate = newDates.to ?? newDates.from ?? new Date();
+    selectDefaultTime(fromDate, toDate, checked);
 
     form.setValue("allDay", checked);
   }
@@ -216,15 +219,15 @@ export default function EditEventForm({
             name="dates"
             render={({ field }) => (
               <div className="flex flex-row flex-wrap gap-2">
-                <FormItem className="flex-grow">
+                <FormItem className="grow">
                   <FormLabel>Dates</FormLabel>
                   <DatePicker
                     dates={field.value as DateRange}
                     onDatesChange={handleDatesChange}
                   />
                 </FormItem>
-                <div className="flex flex-grow flex-row gap-2">
-                  <FormItem className="w-auto flex-grow">
+                <div className="flex grow flex-row gap-2">
+                  <FormItem className="w-auto grow">
                     <FormLabel>Hora inici</FormLabel>
                     <Input
                       type="time"
@@ -238,7 +241,7 @@ export default function EditEventForm({
                       className="justify-center"
                     />
                   </FormItem>
-                  <FormItem className="w-auto flex-grow">
+                  <FormItem className="w-auto grow">
                     <FormLabel>Hora final</FormLabel>
                     <Input
                       type="time"
@@ -260,7 +263,7 @@ export default function EditEventForm({
           <FormField
             name="allDay"
             render={({ field }) => (
-              <FormItem className="flex flex-grow flex-row items-center gap-2 space-y-0">
+              <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
                 <FormControl>
                   <Checkbox
                     checked={field.value as boolean}

@@ -1,4 +1,26 @@
+stages:
+  - check
+  - deploy
+
+check:
+  stage: check
+  image: node:25.1-slim
+  before_script:
+    - npm install -g pnpm@latest-10
+    - pnpm install
+  script:
+    - pnpm lint
+    - pnpm typecheck
+    - pnpm test
+  artifacts:
+    paths:
+      - node_modules
+      - test-report.xml
+    reports:
+      junit: test-report.xml
+
 deploy:
+  stage: deploy
   image: alpine
   before_script:
     - apk add openssh-client sshpass

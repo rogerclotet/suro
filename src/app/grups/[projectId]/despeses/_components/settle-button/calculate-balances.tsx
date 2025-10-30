@@ -5,8 +5,11 @@ type UserId = Project["users"][number]["user"]["id"];
 
 export function calculateBalances(project: Project, spendings: Spending[]) {
   const balancesFromSpendings: Record<UserId, number> = project.users.reduce(
-    (acc, user) => ({ ...acc, [user.user.id]: 0 }),
-    {},
+    (acc, user) => {
+      acc[user.user.id] = 0;
+      return acc;
+    },
+    {} as Record<UserId, number>,
   );
 
   for (const spending of spendings) {

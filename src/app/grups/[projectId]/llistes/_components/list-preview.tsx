@@ -1,3 +1,5 @@
+import { CalendarFold, Check } from "lucide-react";
+import Link from "next/link";
 import type { List } from "@/app/_data/list";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,8 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { CalendarFold, Check } from "lucide-react";
-import Link from "next/link";
 
 export default function ListPreview({ list }: { list: List }) {
   const todoCount = list.items.filter((item) => !item.completed).length;

@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Check, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -18,14 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Check, Loader2 } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { createListItem } from "./actions";
 import NewCategoryModal from "./categories/new-category-modal";
 import { listItemSchema } from "./data";
@@ -41,7 +41,7 @@ export default function NewListItem({ list }: { list: List }) {
   });
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
@@ -72,9 +72,9 @@ export default function NewListItem({ list }: { list: List }) {
         form.setFocus("name");
       }, 1);
     } catch (e) {
-      captureException(e);
-      log.error("Error creating list item", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "create_list_item",
         projectId: list.projectId,
         listId: list.id,
       });
@@ -101,13 +101,13 @@ export default function NewListItem({ list }: { list: List }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-grow items-center gap-2"
+          className="flex grow items-center gap-2"
         >
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="flex-grow">
+              <FormItem className="grow">
                 <FormControl>
                   <Input
                     placeholder="Nou element"
@@ -139,7 +139,7 @@ export default function NewListItem({ list }: { list: List }) {
             render={({ field }) => (
               <FormItem>
                 <Select
-                  value={field.value}
+                  value={field.value ?? undefined}
                   onValueChange={handleCategoryChange}
                   disabled={form.formState.isSubmitting}
                 >

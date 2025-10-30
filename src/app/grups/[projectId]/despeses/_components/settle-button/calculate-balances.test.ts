@@ -1,6 +1,6 @@
+import { describe, expect, it } from "vitest";
 import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
-import { describe, expect, it } from "vitest";
 import { calculateBalances } from "./calculate-balances";
 
 describe("calculateBalances", () => {

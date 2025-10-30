@@ -1,10 +1,10 @@
 "use client";
 
+import React from "react";
 import type { Template } from "@/app/_data/list";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 export default function TemplatePreview({
   template,
@@ -14,9 +14,10 @@ export default function TemplatePreview({
   onChange: (selected: boolean) => void;
 }) {
   const [checked, setChecked] = React.useState(false);
+  const checkboxId = `template-${template.id}`;
 
   return (
-    <label className="cursor-pointer">
+    <label className="cursor-pointer" htmlFor={checkboxId}>
       <Card
         className={cn(
           "flex flex-row items-center gap-4 border-2 border-transparent px-4 py-1",
@@ -24,6 +25,7 @@ export default function TemplatePreview({
         )}
       >
         <Checkbox
+          id={checkboxId}
           defaultChecked={false}
           onCheckedChange={(checked) => {
             if (checked === "indeterminate") {

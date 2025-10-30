@@ -1,12 +1,12 @@
+import { Folders, ListTodo } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
-import { Folders, ListTodo } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import Files from "../../fitxers/_components/files";
 import UploadButton from "../../fitxers/_components/upload-button";
 import CheckList from "../../llistes/[listId]/_components/check-list";
@@ -15,10 +15,12 @@ import SettingsMenu from "./_components/settings-menu";
 import TimeRemaining from "./_components/time-remaining";
 
 export default async function EventPage({
-  params: { projectId, eventId },
+  params,
 }: {
-  params: { projectId: string; eventId: string };
+  params: Promise<{ projectId: string; eventId: string }>;
 }) {
+  const { projectId, eventId } = await params;
+
   const session = await auth();
   if (!session) {
     return redirect("/");
@@ -64,6 +66,7 @@ export default async function EventPage({
 
       {event.description && (
         <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
           dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
         />
       )}

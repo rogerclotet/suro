@@ -1,5 +1,8 @@
 "use client";
 
+import { LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,9 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { logOut } from "./actions";
 
 export default function Profile({ onNavigate }: { onNavigate: () => void }) {
@@ -45,7 +45,7 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
         </Link>
 
         <form action={logOut}>
-          <button>
+          <button type="submit">
             <DropdownMenuItem className="cursor-pointer gap-2">
               <LogOut /> Tancar sessió
             </DropdownMenuItem>

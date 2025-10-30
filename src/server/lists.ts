@@ -1,14 +1,12 @@
 "use server";
 
+import assert from "node:assert";
+import { and, asc, desc, eq } from "drizzle-orm";
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
-import assert from "assert";
-import { and, asc, desc, eq } from "drizzle-orm";
-import { Logger } from "next-axiom";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { listItems, lists, projects, templates } from "./db/schema";
-
-const log = new Logger();
 
 export async function getList(listId: string) {
   const session = await auth();
@@ -42,11 +40,11 @@ export async function getList(listId: string) {
 
     return result;
   } catch (e) {
-    log.error("Error getting list", {
-      error: e,
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_list",
       listId,
     });
-    await log.flush();
     return undefined;
   }
 }
@@ -83,8 +81,12 @@ export async function getEventList(projectId: string, eventId: string) {
 
     return result;
   } catch (e) {
-    log.error("Error getting event list", { error: e, projectId, eventId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_event_list",
+      projectId,
+      eventId,
+    });
     return undefined;
   }
 }
@@ -128,8 +130,11 @@ export async function getLists(projectId: string) {
 
     return project.lists;
   } catch (e) {
-    log.error("Error getting lists", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_lists",
+      projectId,
+    });
     return [];
   }
 }
@@ -159,8 +164,11 @@ export async function getTemplate(templateId: string) {
 
     return result as Template;
   } catch (e) {
-    log.error("Error getting template", { error: e, templateId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_template",
+      templateId,
+    });
     return undefined;
   }
 }
@@ -194,8 +202,11 @@ export async function getTemplates(projectId: string) {
       project,
     }));
   } catch (e) {
-    log.error("Error getting templates", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_templates",
+      projectId,
+    });
     return [];
   }
 }

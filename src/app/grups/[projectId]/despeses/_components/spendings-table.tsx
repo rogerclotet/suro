@@ -1,5 +1,7 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
+import React from "react";
 import type { Spending } from "@/app/_data/spending";
 import { useProjects } from "@/app/_state/project-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,8 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
-import React from "react";
 import { calculateBalances } from "./settle-button/calculate-balances";
 import UserBalance from "./user-balance";
 
@@ -65,7 +65,7 @@ export default function SpendingsTable({
         {project.users.map((u) => (
           <TableRow
             key={u.user.id}
-            className="hover:bg-card [&_.avatar]:transition-colors [&_.avatar]:hover:border-card"
+            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell className="flex items-center gap-4">
               <Avatar className="h-8 w-8">

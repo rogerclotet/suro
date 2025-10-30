@@ -1,8 +1,8 @@
 "use client";
 
-import LoadingPage from "@/components/ui/loading-page";
 import { redirect } from "next/navigation";
 import React from "react";
+import LoadingPage from "@/components/ui/loading-page";
 import type { Project } from "../_data/project";
 import { useProjects } from "../_state/project-state";
 

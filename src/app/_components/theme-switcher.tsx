@@ -1,5 +1,7 @@
 "use client";
 
+import { Moon, Sun, SunMoon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,8 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, SunMoon } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export default function ThemeSwitcher() {
   const { setTheme } = useTheme();

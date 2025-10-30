@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Edit } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Category } from "@/app/_data/category";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,14 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Edit } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { categorySchema } from "../../[listId]/_components/categories/data";
 import { editCategory } from "./actions";
 
@@ -34,7 +34,7 @@ export default function EditCategoryButton({
     resolver: valibotResolver(categorySchema),
   });
   const triggerRef = React.useRef<HTMLDivElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof categorySchema>) {
     try {
@@ -43,9 +43,10 @@ export default function EditCategoryButton({
       triggerRef.current?.click();
       form.reset({ name: data.name });
     } catch (e) {
-      captureException(e);
-      log.error("Error editing category", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_category",
+        projectId: category.projectId,
         categoryId: category.id,
       });
       toast.error(

@@ -1,5 +1,13 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Check, Loader2, Tag } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -17,14 +25,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import { Check, Loader2, Tag } from "lucide-react";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import NewCategoryModal from "../../../[listId]/_components/categories/new-category-modal";
 import { templateItemSchema } from "../../_components/create-template/data";
 
@@ -47,7 +47,7 @@ export default function TemplateItem({
   const { project } = useProjects();
   const newCategoryModalRef = React.useRef<HTMLDivElement>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -55,9 +55,9 @@ export default function TemplateItem({
 
       form.reset({ name: data.name, category: data.category });
     } catch (e) {
-      captureException(e);
-      log.error("Error updating template item", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "update_template_item",
         projectId: project?.id,
         templateId: template.id,
       });
@@ -102,7 +102,7 @@ export default function TemplateItem({
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="flex-grow">
+              <FormItem className="grow">
                 <FormControl>
                   <Input
                     {...field}

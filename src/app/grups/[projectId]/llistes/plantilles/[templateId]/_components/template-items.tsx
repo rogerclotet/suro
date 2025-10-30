@@ -1,9 +1,9 @@
 "use client";
 
-import { type Template } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import React, { Fragment } from "react";
+import type { Template } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import { updateTemplateItems } from "./actions";
 import NewTemplateItem from "./new-template-item";
 import TemplateItem from "./template-item";
@@ -18,19 +18,25 @@ export default function TemplateItems({ template }: { template: Template }) {
   const [animationParent] = useAutoAnimate();
   const { project } = useProjects();
 
+  const sorted = React.useCallback((items: ItemWithIndex[]) => {
+    return [...items].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
   const groupItemsByCategory = React.useCallback(
     (items: Template["items"]) => {
       const categories = new Map<string, ItemWithIndex[]>();
 
       for (let i = 0; i < items.length; i++) {
-        const item = items[i]!;
+        const item = items[i];
+        if (!item) continue;
+
         const category =
           project?.categories.find((c) => c.id === item.category)?.name ?? "";
         if (!categories.has(category)) {
           categories.set(category, []);
         }
 
-        categories.get(category)!.push({ ...item, index: i });
+        categories.get(category)?.push({ ...item, index: i });
       }
 
       const result = [];
@@ -42,7 +48,7 @@ export default function TemplateItems({ template }: { template: Template }) {
 
       return result;
     },
-    [project],
+    [project, sorted],
   );
 
   React.useEffect(() => {
@@ -51,10 +57,6 @@ export default function TemplateItems({ template }: { template: Template }) {
     }
     setItemsByCategory(groupItemsByCategory(items));
   }, [items, groupItemsByCategory, project]);
-
-  function sorted(items: ItemWithIndex[]) {
-    return [...items].sort((a, b) => a.name.localeCompare(b.name));
-  }
 
   async function handleItemChanged(
     index: number,

@@ -1,11 +1,11 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import type React from "react";
+import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
-import { captureException } from "@sentry/nextjs";
-import { useLogger } from "next-axiom";
-import React from "react";
-import { toast } from "sonner";
 import { clearCompletedItems } from "./actions";
 
 export default function ClearCompletedModal({
@@ -13,18 +13,18 @@ export default function ClearCompletedModal({
   triggerRef,
 }: {
   list: List;
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function handleClear() {
     try {
       await clearCompletedItems(list);
       toast.success("Elements completats esborrats");
     } catch (e) {
-      captureException(e);
-      log.error("Error clearing completed items", {
-        error: e,
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "clear_completed_items",
         projectId: list.projectId,
         listId: list.id,
       });

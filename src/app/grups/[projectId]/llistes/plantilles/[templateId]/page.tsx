@@ -1,3 +1,5 @@
+import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
+import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Breadcrumb,
@@ -11,17 +13,17 @@ import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
 import { getTemplate } from "@/server/lists";
-import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
-import Link from "next/link";
 import SettingsMenu from "../_components/settings/settings-menu";
 import TemplateItems from "./_components/template-items";
 
 export default async function TemplatePage({
-  params: { projectId, templateId },
+  params,
 }: {
-  params: { projectId: string; templateId: string };
+  params: Promise<{ projectId: string; templateId: string }>;
 }) {
   await checkAuth();
+
+  const { projectId, templateId } = await params;
 
   const template = await getTemplate(templateId);
   if (!template) {
@@ -79,6 +81,7 @@ export default async function TemplatePage({
 
       {template.description && (
         <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
           dangerouslySetInnerHTML={{
             __html: textToHtml(template.description),
           }}

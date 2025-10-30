@@ -1,8 +1,8 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
-import { Logger } from "next-axiom";
 import authConfig from "./auth.config";
+import { getPostHogServer } from "./lib/posthog-server";
 import { db } from "./server/db";
 import {
   accounts,
@@ -26,36 +26,39 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         throw new Error("User id not found");
       }
 
+      const userId = user.id;
+
       await db.transaction(async (trx) => {
         try {
           if (user.name === "" || !user.name) {
             await trx
               .update(users)
               .set({ name: user.email })
-              .where(eq(users.id, user.id!));
+              .where(eq(users.id, userId));
           }
 
           const result = await trx
             .insert(projects)
             .values({
               name: "Personal",
-              createdBy: user.id!,
+              createdBy: userId,
             })
             .returning({ id: projects.id });
 
-          if (result.length === 0) {
+          if (result.length === 0 || !result[0]) {
             throw new Error("Failed to create personal project");
           }
 
           await trx.insert(projectToUsers).values({
-            projectId: result[0]!.id,
-            userId: user.id!,
+            projectId: result[0].id,
+            userId: userId,
           });
         } catch (e) {
           trx.rollback();
-          const log = new Logger();
-          log.error("Failed to create user", { error: e });
-          await log.flush();
+          const posthog = getPostHogServer();
+          posthog.captureException(e, userId, {
+            action: "create_user",
+          });
           throw e;
         }
       });

@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { useMenuItems } from "./use-menu-items";
 
 export default function Navbar() {
@@ -30,7 +30,7 @@ export default function Navbar() {
               href={item.path}
               className={
                 isActive(item.path)
-                  ? "underline underline-offset-4 [text-decoration-thickness:0.15em]"
+                  ? "underline underline-offset-4 decoration-[0.15em]"
                   : ""
               }
             >

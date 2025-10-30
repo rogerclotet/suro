@@ -1,12 +1,10 @@
 "use server";
 
-import { auth } from "@/auth";
 import { and, asc, eq } from "drizzle-orm";
-import { Logger } from "next-axiom";
+import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { categories, projects, projectToUsers } from "./db/schema";
-
-const log = new Logger();
 
 export async function getProjects() {
   const session = await auth();
@@ -33,8 +31,10 @@ export async function getProjects() {
 
     return results.map((result) => result.project);
   } catch (e) {
-    log.error("Error getting projects", { error: e });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_projects",
+    });
     return [];
   }
 }
@@ -67,8 +67,11 @@ export async function getUserProject(projectId: string) {
 
     return result?.project;
   } catch (e) {
-    log.error("Error getting project", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_project",
+      projectId,
+    });
     return null;
   }
 }
@@ -88,8 +91,11 @@ export async function getInvitedProject(projectId: string) {
 
     return result;
   } catch (e) {
-    log.error("Error getting invited project", { error: e, projectId });
-    await log.flush();
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_invited_project",
+      projectId,
+    });
     return null;
   }
 }

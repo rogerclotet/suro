@@ -1,3 +1,5 @@
+import { Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -15,8 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { getProjects } from "@/server/projects";
-import { Edit, Trash2 } from "lucide-react";
-import Link from "next/link";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
 import EditProjectButton from "./edit-project-button";
@@ -136,7 +136,7 @@ export default async function ProjectsTable() {
         {projects.map((project) => (
           <TableRow
             key={project.id}
-            className="hover:bg-card [&_.avatar]:transition-colors [&_.avatar]:hover:border-card"
+            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell>
               <IdIcon id={project.id} />

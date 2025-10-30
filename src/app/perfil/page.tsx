@@ -1,5 +1,5 @@
-import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import ProfileEditor from "./_components/profile-editor/profile-editor";
 
 export default async function PerfilPage() {

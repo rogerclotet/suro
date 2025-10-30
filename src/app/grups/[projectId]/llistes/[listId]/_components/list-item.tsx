@@ -1,11 +1,11 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
 import React from "react";
+import type { List } from "@/app/_data/list";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import EditingListItem from "./editing-list-item";
 
 export default function ListItem(props: {
@@ -55,6 +55,12 @@ export default function ListItem(props: {
     <li
       className="flex h-10 touch-manipulation flex-row items-center gap-5"
       onClick={() => setEditing(!props.completed)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setEditing(!props.completed);
+        }
+      }}
       ref={setNodeRef}
       style={style}
     >
@@ -67,21 +73,27 @@ export default function ListItem(props: {
 
       <span
         className={cn(
-          "flex-grow",
+          "grow",
           props.completed ? "text-muted-foreground line-through" : "",
         )}
       >
         {props.name}
       </span>
 
-      <div
+      <button
+        type="button"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.stopPropagation();
+          }
+        }}
         className="py-2 pl-2 text-muted-foreground"
         {...listeners}
         {...attributes}
       >
         <GripVertical />
-      </div>
+      </button>
     </li>
   );
 }

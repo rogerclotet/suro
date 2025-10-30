@@ -1,12 +1,12 @@
+import type { NextRequest } from "next/server";
 import { getTemplates } from "@/server/lists";
-import { withAxiom, type AxiomRequest } from "next-axiom";
 
-export const GET = withAxiom(
-  async (
-    request: AxiomRequest,
-    { params: { projectId } }: { params: { projectId: string } },
-  ) => {
-    const templates = await getTemplates(projectId);
-    return Response.json(templates);
-  },
-);
+export const GET = async (
+  _request: NextRequest,
+  { params }: { params: Promise<{ projectId: string }> },
+) => {
+  const { projectId } = await params;
+
+  const templates = await getTemplates(projectId);
+  return Response.json(templates);
+};

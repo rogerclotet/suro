@@ -1,17 +1,17 @@
 "use client";
 
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import type { User } from "next-auth";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { captureException } from "@sentry/nextjs";
-import type { User } from "next-auth";
-import { useLogger } from "next-axiom";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type * as v from "valibot";
 import { editProfile } from "./actions";
 import { profileSchema } from "./data";
 
@@ -22,7 +22,7 @@ export default function ProfileEditor({ user }: { user: User }) {
     },
     resolver: valibotResolver(profileSchema),
   });
-  const log = useLogger();
+  const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof profileSchema>) {
     try {
@@ -30,8 +30,12 @@ export default function ProfileEditor({ user }: { user: User }) {
       form.reset({ name: data.name });
       toast.success("S'ha desat el perfil");
     } catch (e) {
-      captureException(e);
-      log.error("Error saving profile", { error: e, userId: user.id, data });
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "edit_profile",
+        userId: user.id,
+        data,
+      });
       toast.error("No s'ha pogut desar el perfil, torna-ho a provar més tard");
     }
   }
@@ -76,9 +80,7 @@ export default function ProfileEditor({ user }: { user: User }) {
 
         <FormItem>
           <Label>Email</Label>
-          <FormControl>
-            <Input value={user.email ?? ""} disabled />
-          </FormControl>
+          <Input value={user.email ?? ""} disabled />
         </FormItem>
 
         <Button

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMediaQuery } from "@uidotdev/usehooks";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,12 +21,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useMediaQuery } from "@uidotdev/usehooks";
-import * as React from "react";
 import { ClientOnly } from "../client-only";
 
 type Props = {
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   title: string;
   description: string;
   children: React.ReactNode;
