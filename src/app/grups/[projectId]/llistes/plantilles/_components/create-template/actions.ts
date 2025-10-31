@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
@@ -38,6 +39,16 @@ export async function createTemplate(
   const template = result[0];
 
   revalidatePath(`/grups/${projectId}/llistes/plantilles`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_template",
+    properties: {
+      projectId: projectId,
+      usersCount: project.users.length,
+      templateId: template.id,
+    },
+  });
 
   setTimeout(() => {
     sendProjectNotification({

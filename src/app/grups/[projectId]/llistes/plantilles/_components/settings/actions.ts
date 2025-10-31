@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
 import { templateSchema } from "../create-template/data";
@@ -25,6 +26,19 @@ export async function deleteTemplate(template: Template) {
   await db.delete(templates).where(eq(templates.id, template.id));
 
   revalidatePath(`/grups/${template.projectId}/llistes/plantilles`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "delete_template",
+    properties: {
+      projectId: template.projectId,
+      templateId: template.id,
+      usersCount: template.project.users.length,
+      itemsCount: template.items.length,
+      withCategoryCount: template.items.filter((item) => item.category !== null)
+        .length,
+    },
+  });
 }
 
 export async function updateTemplate(
@@ -54,4 +68,17 @@ export async function updateTemplate(
   revalidatePath(
     `/grups/${template.projectId}/llistes/plantilles/${template.id}`,
   );
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "update_template",
+    properties: {
+      projectId: template.projectId,
+      templateId: template.id,
+      usersCount: template.project.users.length,
+      itemsCount: template.items.length,
+      withCategoryCount: template.items.filter((item) => item.category !== null)
+        .length,
+    },
+  });
 }

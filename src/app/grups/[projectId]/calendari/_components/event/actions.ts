@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { events } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -48,6 +49,17 @@ export async function createEvent(
   });
 
   revalidatePath(`/grups/${project.id}/calendari`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_event",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+      hours: (endAt.getTime() - startAt.getTime()) / 3600000,
+      allDay: parsedData.allDay,
+    },
+  });
 
   setTimeout(() => {
     let timeRange = parsedData.dates.from?.toLocaleDateString("ca-ES", {

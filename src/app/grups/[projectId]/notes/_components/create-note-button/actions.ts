@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { notes } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -40,6 +41,17 @@ export async function createNote(
   const note = result[0];
 
   revalidatePath(`/grups/${project.id}/notes`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_note",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+      noteId: note.id,
+      format: parsedData.format,
+    },
+  });
 
   setTimeout(() => {
     sendProjectNotification({

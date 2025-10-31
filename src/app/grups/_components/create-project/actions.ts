@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
@@ -30,6 +31,14 @@ export async function createProject(data: v.InferInput<typeof projectSchema>) {
     .values({ projectId: project.id, userId: session.user.id });
 
   revalidatePath("/grups");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_project",
+    properties: {
+      projectId: project.id,
+    },
+  });
 
   return getUserProject(project.id);
 }

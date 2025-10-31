@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { spendings } from "@/server/db/schema";
 import { getUserProject } from "@/server/projects";
@@ -38,4 +39,15 @@ export async function settlePayments(
   );
 
   revalidatePath(`/grups/${projectId}/despeses`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "settle_payments",
+    properties: {
+      projectId: projectId,
+      usersCount: project.users.length,
+      amount: payments.reduce((acc, p) => acc + p.amount, 0),
+      currency: "EUR",
+    },
+  });
 }

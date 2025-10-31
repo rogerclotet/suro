@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
 import { listItemSchema } from "./data";
@@ -35,6 +36,18 @@ export async function createListItem(
   });
 
   revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_list_item",
+    properties: {
+      projectId: list.projectId,
+      listId: list.id,
+      itemsCount: list.items.length + 1,
+      usersCount: list.project.users.length,
+      hasCategory: !!parsed.categoryId,
+    },
+  });
 }
 
 export async function updateListItem(
@@ -61,6 +74,19 @@ export async function updateListItem(
     .where(eq(listItems.id, itemId));
 
   revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "update_list_item",
+    properties: {
+      projectId: list.projectId,
+      listId: list.id,
+      itemsCount: list.items.length,
+      usersCount: list.project.users.length,
+      hasCategory: !!categoryId,
+      completed: completed,
+    },
+  });
 }
 
 export async function deleteListItem(list: List, itemId: string) {
@@ -78,4 +104,15 @@ export async function deleteListItem(list: List, itemId: string) {
   await db.delete(listItems).where(eq(listItems.id, itemId));
 
   revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "delete_list_item",
+    properties: {
+      projectId: list.projectId,
+      listId: list.id,
+      itemsCount: list.items.length - 1,
+      usersCount: list.project.users.length,
+    },
+  });
 }

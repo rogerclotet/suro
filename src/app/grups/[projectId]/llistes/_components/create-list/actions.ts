@@ -6,6 +6,7 @@ import * as v from "valibot";
 import type { TemplateItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { listItems, lists, templates } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -41,8 +42,9 @@ export async function createList(
 
   const list = result[0];
 
+  let items: TemplateItem[] = [];
   if (parsedData.templates && parsedData.templates.length > 0) {
-    const items = await getItems(parsedData.templates, project);
+    items = await getItems(parsedData.templates, project);
 
     const itemDataToInsert = items.map<typeof listItems.$inferInsert>(
       (item) => ({
@@ -58,6 +60,18 @@ export async function createList(
   }
 
   revalidatePath(`/grups/${project.id}/llistes`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_list",
+    properties: {
+      projectId: project.id,
+      listId: list.id,
+      templatesCount: parsedData.templates?.length ?? 0,
+      itemsCount: items.length,
+      usersCount: project.users.length,
+    },
+  });
 
   setTimeout(() => {
     sendProjectNotification({

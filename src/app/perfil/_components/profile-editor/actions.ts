@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 import { profileSchema } from "./data";
@@ -22,4 +23,9 @@ export async function editProfile(data: v.InferInput<typeof profileSchema>) {
     .where(eq(users.id, session.user.id));
 
   revalidatePath("/");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "edit_profile",
+  });
 }

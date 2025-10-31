@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { File } from "@/app/_data/file";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { files } from "@/server/db/schema";
 import { editFileSchema } from "./schema";
@@ -33,4 +34,17 @@ export async function editFile(
   if (file.eventId) {
     revalidatePath(`/grups/${file.projectId}/calendari/${file.eventId}`);
   }
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "edit_file",
+    properties: {
+      projectId: file.project.id,
+      eventId: file.eventId,
+      fileId: file.id,
+      usersCount: file.project.users.length,
+      size: file.size,
+      type: file.type,
+    },
+  });
 }

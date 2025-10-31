@@ -35,6 +35,17 @@ export async function createLinkedList(event: Event) {
     revalidatePath(`/grups/${event.projectId}/llistes`);
     revalidatePath(`/grups/${event.projectId}/llistes/${listId}`);
 
+    getPostHogServer().capture({
+      distinctId: session.user.id,
+      event: "create_event_list",
+      properties: {
+        projectId: event.projectId,
+        eventId: event.id,
+        listId,
+        usersCount: event.project.users.length,
+      },
+    });
+
     return listId;
   } catch (e) {
     const posthog = getPostHogServer();
@@ -64,6 +75,17 @@ export async function linkEventList(event: Event, listId: string) {
       .where(eq(lists.id, listId));
 
     revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
+
+    getPostHogServer().capture({
+      distinctId: session.user.id,
+      event: "link_event_list",
+      properties: {
+        projectId: event.projectId,
+        eventId: event.id,
+        listId,
+        usersCount: event.project.users.length,
+      },
+    });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
@@ -91,6 +113,17 @@ export async function unlinkEventList(event: Event, list: List) {
       .where(eq(lists.id, list.id));
 
     revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
+
+    getPostHogServer().capture({
+      distinctId: session.user.id,
+      event: "unlink_event_list",
+      properties: {
+        projectId: event.projectId,
+        eventId: event.id,
+        listId: list.id,
+        usersCount: event.project.users.length,
+      },
+    });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
@@ -145,6 +178,18 @@ export async function editEvent(
       .where(eq(events.id, event.id));
 
     revalidatePath(`/grups/${event.projectId}/llistes/${event.id}`);
+
+    getPostHogServer().capture({
+      distinctId: session.user.id,
+      event: "edit_event",
+      properties: {
+        projectId: event.projectId,
+        eventId: event.id,
+        usersCount: event.project.users.length,
+        hours: (endAt.getTime() - startAt.getTime()) / 3600000,
+        allDay: parsedData.allDay,
+      },
+    });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
@@ -171,6 +216,18 @@ export async function deleteEvent(event: Event) {
     await db.delete(events).where(eq(events.id, event.id));
 
     revalidatePath(`/grups/${event.projectId}/calendari`);
+
+    getPostHogServer().capture({
+      distinctId: session.user.id,
+      event: "delete_event",
+      properties: {
+        projectId: event.projectId,
+        eventId: event.id,
+        usersCount: event.project.users.length,
+        hours: (event.endAt.getTime() - event.startAt.getTime()) / 3600000,
+        allDay: event.allDay,
+      },
+    });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {

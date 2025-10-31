@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
 import type { templateItemSchema } from "../../_components/create-template/data";
@@ -33,6 +34,17 @@ export async function createTemplateItem(
   revalidatePath(
     `/grups/${template.projectId}/llistes/plantilles/${template.id}`,
   );
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_template_item",
+    properties: {
+      projectId: template.projectId,
+      templateId: template.id,
+      usersCount: template.project.users.length,
+      hasCategory: !!data.category,
+    },
+  });
 }
 
 export async function updateTemplateItems(
@@ -59,4 +71,16 @@ export async function updateTemplateItems(
   revalidatePath(
     `/grups/${template.projectId}/llistes/plantilles/${template.id}`,
   );
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "update_template_items",
+    properties: {
+      projectId: template.projectId,
+      templateId: template.id,
+      usersCount: template.project.users.length,
+      itemsCount: items.length,
+      withCategoryCount: items.filter((item) => item.category !== null).length,
+    },
+  });
 }

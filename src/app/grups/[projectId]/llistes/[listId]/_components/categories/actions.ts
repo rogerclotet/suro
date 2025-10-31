@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { categories } from "@/server/db/schema";
 import { categorySchema } from "./data";
@@ -36,6 +37,16 @@ export async function createCategory(
   }
 
   revalidatePath(`/grups/${project.id}/llistes/categories`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_category",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+      categoryId: result[0].id,
+    },
+  });
 
   return result[0].id;
 }

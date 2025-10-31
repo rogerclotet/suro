@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
 
@@ -31,4 +32,15 @@ export async function importTemplates(
   );
 
   revalidatePath(`/grups/${project.id}/llistes/${listId}`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "import_templates",
+    properties: {
+      projectId: project.id,
+      listId,
+      itemsCount: items.length,
+      usersCount: project.users.length,
+    },
+  });
 }

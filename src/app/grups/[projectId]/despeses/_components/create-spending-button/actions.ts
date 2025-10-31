@@ -65,4 +65,15 @@ export async function createSpending(
   }, 0);
 
   revalidatePath(`/grups/${projectId}/despeses`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "create_spending",
+    properties: {
+      projectId: projectId,
+      usersCount: project.users.length,
+      amount: parsedData.amount,
+      currency: "EUR",
+    },
+  });
 }

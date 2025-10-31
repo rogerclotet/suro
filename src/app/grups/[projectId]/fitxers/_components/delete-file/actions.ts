@@ -50,4 +50,17 @@ export async function deleteFile(file: File) {
   if (file.eventId) {
     revalidatePath(`/grups/${file.project.id}/calendari/${file.eventId}`);
   }
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "delete_file",
+    properties: {
+      projectId: file.project.id,
+      eventId: file.eventId,
+      fileId: file.id,
+      usersCount: file.project.users.length,
+      size: file.size,
+      type: file.type,
+    },
+  });
 }

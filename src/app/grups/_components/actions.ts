@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
 import { projectSchema } from "./create-project/data";
@@ -32,6 +33,15 @@ export async function editProject(
     .where(eq(projects.id, project.id));
 
   revalidatePath("/grups");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "edit_project",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+    },
+  });
 }
 
 export async function deleteProject(project: Project) {
@@ -51,6 +61,15 @@ export async function deleteProject(project: Project) {
   await db.delete(projects).where(eq(projects.id, project.id));
 
   revalidatePath("/grups");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "delete_project",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+    },
+  });
 }
 
 export async function leaveProject(project: Project) {
@@ -77,4 +96,13 @@ export async function leaveProject(project: Project) {
     );
 
   revalidatePath("/grups");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "leave_project",
+    properties: {
+      projectId: project.id,
+      usersCount: project.users.length,
+    },
+  });
 }
