@@ -51,7 +51,7 @@ export default function TemplateItems({ template }: { template: Template }) {
 
   const itemsByCategory = useMemo(() => {
     if (!project) {
-      return new Map();
+      return [];
     }
     return groupItemsByCategory(items);
   }, [items, groupItemsByCategory, project]);
@@ -89,7 +89,7 @@ export default function TemplateItems({ template }: { template: Template }) {
       >
         <NewTemplateItem template={template} onCreate={handleItemAdded} />
 
-        {Array.from(itemsByCategory.entries()).map(([category, items]) => (
+        {itemsByCategory.map(({ category, items }) => (
           <Fragment key={category}>
             <h3 key={`title_${category}`} className="text-lg font-semibold">
               {category}
