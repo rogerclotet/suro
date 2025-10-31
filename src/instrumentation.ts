@@ -7,7 +7,10 @@ export const onRequestError = async (
   request: NextRequest,
   _context: NextResponse,
 ) => {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
+  if (
+    process.env.NEXT_RUNTIME === "nodejs" &&
+    process.env.NODE_ENV === "production"
+  ) {
     const { getPostHogServer } = await import("@/lib/posthog-server");
     const posthog = getPostHogServer();
 
