@@ -42,7 +42,7 @@ export async function settlePayments(
 
   getPostHogServer().capture({
     distinctId: session.user.id,
-    event: "settle_payments",
+    event: "settle_spendings",
     properties: {
       projectId: projectId,
       usersCount: project.users.length,

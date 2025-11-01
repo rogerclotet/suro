@@ -4,6 +4,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import type { UploadedFileData } from "uploadthing/types";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { files, projects } from "@/server/db/schema";
 import { sendNotificationsToUsers } from "@/server/push";
@@ -60,6 +61,17 @@ export const uploadFileRouter = {
           `/grups/${metadata.projectId}/calendari/${metadata.eventId}`,
         );
       }
+
+      getPostHogServer().capture({
+        distinctId: metadata.userId,
+        event: "upload_file",
+        properties: {
+          projectId: metadata.projectId,
+          eventId: metadata.eventId,
+          type: file.type,
+          size: file.size,
+        },
+      });
 
       sendNotification(
         file,
