@@ -37,7 +37,7 @@ export default async function EventPage({
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold">{event.name}</h1>
+          <h1 className="font-semibold text-xl">{event.name}</h1>
 
           <div className="flex items-center gap-2">
             <ClientOnly>
@@ -51,7 +51,7 @@ export default async function EventPage({
           </div>
         </div>
 
-        <div className="flex flex-wrap text-sm text-muted-foreground">
+        <div className="flex flex-wrap text-muted-foreground text-sm">
           <TimeRemaining
             event={event}
             className="mr-2 text-foreground opacity-70"
@@ -73,8 +73,8 @@ export default async function EventPage({
 
       <div className="grid grid-cols-1 items-stretch gap-4 pt-6 md:grid-cols-2">
         {list !== undefined && (
-          <div className="max-w-3xl space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
-            <h2 className="text-xl font-semibold">
+          <div className="max-w-3xl space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+            <h2 className="font-semibold text-xl">
               <Link
                 href={`/grups/${projectId}/llistes/${list.id}`}
                 className="flex items-center gap-2"
@@ -87,8 +87,8 @@ export default async function EventPage({
           </div>
         )}
 
-        <div className="space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
-          <h2 className="flex items-start justify-between text-xl font-semibold">
+        <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <h2 className="flex items-start justify-between font-semibold text-xl">
             <div className="flex items-center gap-2">
               <Folders />
               Fitxers

@@ -120,7 +120,7 @@ export default function ImportTemplatesModal({
         </CardHeader>
         <CardContent className="p-4 pt-0">
           {!itemsByCategory || Object.keys(itemsByCategory).length === 0 ? (
-            <div className="italic text-muted-foreground">
+            <div className="text-muted-foreground italic">
               No hi ha elements
             </div>
           ) : (

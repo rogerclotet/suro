@@ -44,7 +44,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
 
       {completedLists.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-md font-semibold text-muted-foreground">
+          <h2 className="font-semibold text-md text-muted-foreground">
             Completades:
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

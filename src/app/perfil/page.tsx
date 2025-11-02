@@ -10,7 +10,7 @@ export default async function PerfilPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="mt-1 text-xl font-semibold">Perfil</h1>
+      <h1 className="mt-1 font-semibold text-xl">Perfil</h1>
 
       <div className="mx-auto max-w-xl">
         <ProfileEditor user={session.user} />

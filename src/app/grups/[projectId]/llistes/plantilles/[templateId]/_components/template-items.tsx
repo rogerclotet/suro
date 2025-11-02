@@ -91,7 +91,7 @@ export default function TemplateItems({ template }: { template: Template }) {
 
         {itemsByCategory.map(({ category, items }) => (
           <Fragment key={category}>
-            <h3 key={`title_${category}`} className="text-lg font-semibold">
+            <h3 key={`title_${category}`} className="font-semibold text-lg">
               {category}
             </h3>
 

@@ -8,7 +8,7 @@ export default function Category({ category }: { category: CategoryType }) {
     <Card className="flex flex-row items-center justify-between gap-2 px-4 py-2">
       <div className="flex flex-col gap-1">
         {category.name}
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {category.items.length}{" "}
           {category.items.length === 1 ? "element" : "elements"}
         </span>

@@ -29,7 +29,7 @@ export default function EventPreview({ event }: { event: Event }) {
                   <Folders />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="text-base font-normal">Fitxers compartits</p>
+                  <p className="font-normal text-base">Fitxers compartits</p>
                 </TooltipContent>
               </Tooltip>
             )}

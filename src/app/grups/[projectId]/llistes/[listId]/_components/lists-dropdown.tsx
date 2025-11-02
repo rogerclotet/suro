@@ -27,7 +27,7 @@ export default function ListsDropdown({
 
   return (
     <Select value={listId} onValueChange={handleChange}>
-      <SelectTrigger className="gap-2 text-xl font-semibold">
+      <SelectTrigger className="gap-2 font-semibold text-xl">
         <SelectValue placeholder="Llista" />
       </SelectTrigger>
       <SelectContent>

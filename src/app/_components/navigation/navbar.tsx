@@ -30,7 +30,7 @@ export default function Navbar() {
               href={item.path}
               className={
                 isActive(item.path)
-                  ? "underline underline-offset-4 decoration-[0.15em]"
+                  ? "underline decoration-[0.15em] underline-offset-4"
                   : ""
               }
             >

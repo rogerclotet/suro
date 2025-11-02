@@ -18,7 +18,7 @@ export default function Files({ files }: { files: File[] }) {
 
         {eventFiles.length > 0 && (
           <div>
-            <h3 className="mb-4 text-lg font-semibold">
+            <h3 className="mb-4 font-semibold text-lg">
               {"Fitxers d'esdeveniments"}
             </h3>
             <GridView files={eventFiles} />
@@ -34,7 +34,7 @@ export default function Files({ files }: { files: File[] }) {
 
       {eventFiles.length > 0 && (
         <div>
-          <h3 className="mb-4 text-lg font-semibold">
+          <h3 className="mb-4 font-semibold text-lg">
             {"Fitxers d'esdeveniments"}
           </h3>
           <ListView files={eventFiles} />

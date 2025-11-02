@@ -14,7 +14,7 @@ export default function BottomNav() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-row bg-background text-xs lg:hidden">
+    <div className="fixed right-0 bottom-0 left-0 z-40 flex flex-row bg-background text-xs lg:hidden">
       {menuItems.map((item) =>
         item.disabled ? (
           <div
@@ -30,7 +30,7 @@ export default function BottomNav() {
             href={item.path}
             className={cn(
               "flex grow flex-col items-center justify-center gap-2 p-2 text-primary",
-              isActive(item.path) && "border-t-2 border-primary",
+              isActive(item.path) && "border-primary border-t-2",
             )}
           >
             {item.name}

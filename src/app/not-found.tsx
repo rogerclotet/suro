@@ -18,7 +18,7 @@ export default function NotFound() {
   }, [pathname]);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+    <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
       <Alert variant="destructive" className="max-w-lg">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>

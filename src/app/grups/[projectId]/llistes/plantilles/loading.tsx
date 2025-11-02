@@ -21,13 +21,13 @@ export default function Loading() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild className="text-xl font-semibold">
+            <BreadcrumbLink asChild className="font-semibold text-xl">
               <Link href={`/grups/${projectId}/llistes`}>Llistes</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="scale-150" />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-xl font-semibold">
+            <BreadcrumbPage className="font-semibold text-xl">
               Plantilles
             </BreadcrumbPage>
           </BreadcrumbItem>

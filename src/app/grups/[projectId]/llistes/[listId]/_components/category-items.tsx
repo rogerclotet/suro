@@ -36,7 +36,7 @@ export default function CategoryItems({
 
   return (
     <div ref={setNodeRef} style={style} className="rounded-md px-2">
-      <h3 key={`title_${category}`} className="text-lg font-semibold">
+      <h3 key={`title_${category}`} className="font-semibold text-lg">
         {category}
       </h3>
       <ul ref={animationParent}>
@@ -56,7 +56,7 @@ export default function CategoryItems({
             />
           ))
         ) : (
-          <div className="mb-2 h-10 rounded-md border-2 border-dashed border-[rgba(255,255,255,0.2)]" />
+          <div className="mb-2 h-10 rounded-md border-2 border-[rgba(255,255,255,0.2)] border-dashed" />
         )}
       </ul>
     </div>

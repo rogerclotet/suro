@@ -20,7 +20,7 @@ export default function FileCard({ file }: { file: File }) {
   return (
     <Card className="max-w-[180px]">
       <CardHeader>
-        <CardTitle className="text-md flex flex-row items-center justify-between gap-2">
+        <CardTitle className="flex flex-row items-center justify-between gap-2 text-md">
           <Link
             href={file.url}
             target="_blank"

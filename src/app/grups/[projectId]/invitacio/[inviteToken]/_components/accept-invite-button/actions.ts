@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
@@ -14,10 +15,8 @@ export async function acceptInvite(projectId: string, inviteToken: string) {
 
   const project = await db.query.projects.findFirst({
     where: eq(projects.id, projectId),
-    extras: {
-      usersCount: db
-        .$count(projectToUsers, eq(projectToUsers.projectId, projectId))
-        .as("usersCount"),
+    with: {
+      users: true,
     },
   });
 
@@ -34,12 +33,15 @@ export async function acceptInvite(projectId: string, inviteToken: string) {
     userId: session.user.id,
   });
 
+  revalidatePath(`/grups/${projectId}`);
+  revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
+
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "accept_invite",
     properties: {
       projectId: project.id,
-      usersCount: project.usersCount + 1,
+      usersCount: project.users.length + 1,
     },
   });
 }

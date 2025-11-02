@@ -28,6 +28,14 @@
       },
       "correctness": {
         "noChildrenProp": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "functions": ["clsx", "cva", "cn"]
+          }
+        }
       }
     },
     "domains": {

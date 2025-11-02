@@ -17,7 +17,7 @@ export default async function Page({
   const note = await getNote(noteId);
   if (!note) {
     return (
-      <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+      <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
         <Alert variant="destructive" className="max-w-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -40,7 +40,7 @@ export default async function Page({
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <h1 className="text-xl font-semibold">{note.name}</h1>
+        <h1 className="font-semibold text-xl">{note.name}</h1>
       </div>
       <p className="whitespace-pre-line">{note.contents}</p>
     </div>

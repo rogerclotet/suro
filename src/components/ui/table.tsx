@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="w-calc(100%+2rem) relative -mx-4 overflow-auto lg:-mx-8 lg:w-[calc(100%+4rem)] xl:mx-0 xl:w-full">
+    <div className="-mx-4 lg:-mx-8 relative w-calc(100%+2rem) overflow-auto lg:w-[calc(100%+4rem)] xl:mx-0 xl:w-full">
       <table
         ref={ref}
         className={cn("w-full caption-bottom text-sm", className)}
@@ -47,7 +47,7 @@ const TableFooter = forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "bg-muted/50 border-t font-medium last:[&>tr]:border-b-0",
+      "border-t bg-muted/50 font-medium last:[&>tr]:border-b-0",
       className,
     )}
     {...props}
@@ -62,7 +62,7 @@ const TableRow = forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "hover:bg-muted/50 border-b transition-colors data-[state=selected]:bg-muted",
+      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
       className,
     )}
     {...props}
@@ -103,7 +103,7 @@ const TableCaption = forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn("mt-4 text-muted-foreground text-sm", className)}
     {...props}
   />
 ));

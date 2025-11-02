@@ -118,7 +118,7 @@ export default function Calendar() {
       .slice(0, 3);
 
     return (
-      <div className="relative overflow-visible h-9 w-9">
+      <div className="relative h-9 w-9 overflow-visible">
         <CalendarDayButton
           className="text-sm"
           day={day}
@@ -127,7 +127,7 @@ export default function Calendar() {
         />
 
         {dayEvents && dayEvents.length > 0 && (
-          <div className="absolute right-0.5 top-0.5 flex flex-row-reverse gap-0.5">
+          <div className="absolute top-0.5 right-0.5 flex flex-row-reverse gap-0.5">
             {dayEvents.map((event) => {
               const color = eventColors.get(event.id);
               return (
@@ -197,7 +197,7 @@ export default function Calendar() {
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="mt-1 text-xl font-semibold">Calendari</h1>
+        <h1 className="mt-1 font-semibold text-xl">Calendari</h1>
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -232,7 +232,7 @@ export default function Calendar() {
 
         {date && (
           <div className="grow">
-            <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 text-xl font-semibold">
+            <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 font-semibold text-xl">
               {date.toLocaleString("ca-ES", {
                 dateStyle: "long",
               })}

@@ -19,7 +19,7 @@ export default async function ListesPage({
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-4">
-        <h1 className="mt-1 text-xl font-semibold">Llistes</h1>
+        <h1 className="mt-1 font-semibold text-xl">Llistes</h1>
 
         <div className="flex grow flex-col items-end justify-between gap-2 sm:flex-row sm:items-center">
           <div className="flex flex-row flex-wrap items-center justify-end gap-2">

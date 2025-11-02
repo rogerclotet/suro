@@ -43,7 +43,7 @@ export default function ProfileEditor({ user }: { user: User }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <h2 className="text-lg font-semibold">Editar informació:</h2>
+        <h2 className="font-semibold text-lg">Editar informació:</h2>
 
         <FormItem>
           <Label>Avatar</Label>
@@ -55,7 +55,7 @@ export default function ProfileEditor({ user }: { user: User }) {
               </AvatarFallback>
             </Avatar>
           </div>
-          <Label className="text-sm italic text-muted-foreground">
+          <Label className="text-muted-foreground text-sm italic">
             {
               "Ara mateix s'utilitza la foto de perfil del compte Google si s'entra d'aquesta manera, o la inicial en cas contrari"
             }
@@ -71,7 +71,7 @@ export default function ProfileEditor({ user }: { user: User }) {
               <FormControl>
                 <Input {...field} placeholder="Nom" />
               </FormControl>
-              <Label className="text-sm italic text-muted-foreground">
+              <Label className="text-muted-foreground text-sm italic">
                 Aquest nom serà visible públicament a tots els teus grups
               </Label>
             </FormItem>

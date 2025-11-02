@@ -19,7 +19,7 @@ export default async function CategoriesPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-row flex-wrap items-start justify-between gap-2">
-        <h1 className="mt-1 text-xl font-semibold">Categories</h1>
+        <h1 className="mt-1 font-semibold text-xl">Categories</h1>
 
         <div className="text-right">
           <NewCategoryButton />

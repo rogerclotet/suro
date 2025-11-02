@@ -27,7 +27,7 @@ export default async function ListPage({
   const list = lists.find((l) => l.id === listId);
   if (!list) {
     return (
-      <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+      <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
         <Alert variant="destructive" className="max-w-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -78,7 +78,7 @@ export default async function ListPage({
             startAt={list.event.startAt}
             endAt={list.event.endAt}
             allDay={list.event.allDay}
-            className="mt-0.5 text-sm text-muted-foreground"
+            className="mt-0.5 text-muted-foreground text-sm"
           />
         </div>
       )}

@@ -9,7 +9,7 @@ export default async function GrupsPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Gestionar grups</h1>
+        <h1 className="font-semibold text-xl">Gestionar grups</h1>
         <CreateProjectButton />
       </div>
 

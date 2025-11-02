@@ -14,7 +14,7 @@ function BalanceBar({
   if (positive) {
     return (
       <div
-        className="absolute bottom-0 left-[50%] top-0 bg-primary"
+        className="absolute top-0 bottom-0 left-[50%] bg-primary"
         style={{ right: `${50 - percent * 50}%` }}
       />
     );
@@ -22,7 +22,7 @@ function BalanceBar({
 
   return (
     <div
-      className="absolute bottom-0 right-[50%] top-0 bg-destructive"
+      className="absolute top-0 right-[50%] bottom-0 bg-destructive"
       style={{ left: `${50 - percent * 50}%` }}
     />
   );

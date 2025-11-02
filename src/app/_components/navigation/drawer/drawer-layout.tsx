@@ -30,8 +30,8 @@ export default function DrawerLayout() {
   }
 
   return (
-    <div className="fixed left-0 right-0 top-0 z-40">
-      <nav className="flex w-full mx-auto items-center justify-between gap-2 bg-primary py-2 text-primary-foreground lg:container lg:grid lg:grid-cols-3 lg:rounded-b-xl">
+    <div className="fixed top-0 right-0 left-0 z-40">
+      <nav className="mx-auto flex w-full items-center justify-between gap-2 bg-primary py-2 text-primary-foreground lg:container lg:grid lg:grid-cols-3 lg:rounded-b-xl">
         <div className="flex flex-row items-center gap-2">
           <Drawer direction="left" open={isOpen} onOpenChange={setIsOpen}>
             <DrawerTrigger asChild>
@@ -72,7 +72,10 @@ export default function DrawerLayout() {
                   </ul>
                 </div>
 
-                <ThemeSwitcher />
+                <div className="flex flex-row items-center justify-end gap-2">
+                  <NotificationBell />
+                  <ThemeSwitcher />
+                </div>
               </div>
             </DrawerContent>
           </Drawer>
@@ -89,10 +92,6 @@ export default function DrawerLayout() {
 
         <div className="hidden lg:flex lg:justify-center">
           <Navbar />
-        </div>
-
-        <div className="text-right">
-          <NotificationBell />
         </div>
       </nav>
     </div>

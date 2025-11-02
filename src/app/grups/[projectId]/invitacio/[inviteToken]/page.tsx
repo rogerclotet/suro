@@ -1,12 +1,10 @@
 import assert from "node:assert";
 import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
-import { revalidatePath } from "next/cache";
 import Redirect from "@/app/_components/redirect";
 import UsersList from "@/app/grups/_components/users-list";
 import { auth } from "@/auth";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,9 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { checkAuth } from "@/lib/check-auth";
-import { getPostHogServer } from "@/lib/posthog-server";
 import { getInvitedProject } from "@/server/projects";
-import { acceptInvite } from "./actions";
+import AcceptInviteButton from "./_components/accept-invite-button/accept-invite-button";
 
 export default async function InvitePage({
   params,
@@ -62,24 +59,7 @@ export default async function InvitePage({
           </div>
         </CardContent>
         <CardFooter className="justify-center">
-          <form
-            action={async () => {
-              "use server";
-              try {
-                await acceptInvite(projectId, inviteToken);
-                revalidatePath(`/grups/${projectId}/invitacio/${inviteToken}`);
-              } catch (e) {
-                const posthog = getPostHogServer();
-                posthog.captureException(e, session?.user.id, {
-                  distinctId: session?.user.id,
-                  action: "accept_invite",
-                  projectId,
-                });
-              }
-            }}
-          >
-            <Button>Acceptar invitació</Button>
-          </form>
+          <AcceptInviteButton projectId={projectId} inviteToken={inviteToken} />
         </CardFooter>
       </Card>
     </div>

@@ -29,7 +29,7 @@ export default async function DespesesPage({
   if (project.users.length === 1) {
     return (
       <div className="space-y-6">
-        <h1 className="mt-1 text-xl font-semibold">Despeses</h1>
+        <h1 className="mt-1 font-semibold text-xl">Despeses</h1>
         <Alert className="mx-auto max-w-lg">
           <Info className="h-4 w-4" />
           <AlertTitle>Informació</AlertTitle>
@@ -47,7 +47,7 @@ export default async function DespesesPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <h1 className="mt-1 text-xl font-semibold">Despeses</h1>
+        <h1 className="mt-1 font-semibold text-xl">Despeses</h1>
 
         <div className="flex flex-wrap items-center gap-2">
           <SettleButton spendings={projectSpendings} />
@@ -57,7 +57,7 @@ export default async function DespesesPage({
 
       <SpendingsTable spendings={projectSpendings} />
 
-      <h2 className="text-lg font-semibold">Últimes transaccions</h2>
+      <h2 className="font-semibold text-lg">Últimes transaccions</h2>
       <SpendingsList spendings={projectSpendings} />
     </div>
   );

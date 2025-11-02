@@ -28,7 +28,7 @@ export default async function TemplatePage({
   const template = await getTemplate(templateId);
   if (!template) {
     return (
-      <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+      <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
         <Alert variant="destructive" className="max-w-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -73,7 +73,7 @@ export default async function TemplatePage({
       </Breadcrumb>
 
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="flex items-center gap-2 text-xl font-semibold">
+        <h1 className="flex items-center gap-2 font-semibold text-xl">
           <LayoutTemplate /> {template.name}
         </h1>
         <SettingsMenu template={template} />

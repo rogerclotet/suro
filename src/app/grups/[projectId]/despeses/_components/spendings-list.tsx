@@ -8,7 +8,7 @@ export default function SpendingsList({
 }) {
   if (spendings.length === 0) {
     return (
-      <p className="italic text-muted-foreground">No hi ha transaccions</p>
+      <p className="text-muted-foreground italic">No hi ha transaccions</p>
     );
   }
 
