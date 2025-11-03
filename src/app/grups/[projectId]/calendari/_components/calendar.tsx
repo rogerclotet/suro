@@ -195,7 +195,7 @@ export default function Calendar() {
   }
 
   return (
-    <div className="mb-8 space-y-4">
+    <div className="space-y-4">
       <div className="text-right">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -209,7 +209,7 @@ export default function Calendar() {
         </Tooltip>
       </div>
 
-      <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-8">
+      <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:gap-8">
         <div className="flex flex-col items-center">
           <CalendarComponent
             mode="single"

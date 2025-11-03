@@ -45,7 +45,6 @@ export default async function DespesesPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-end gap-2">
         <SettleButton spendings={projectSpendings} />
-        {/* TODO Move to sidebar */}
         <CreateSpendingButton />
       </div>
 

@@ -1,8 +1,10 @@
-import { CornerRightUp } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getLists } from "@/server/lists";
+import CreateListButton from "./create-list/create-list-button";
 import ListPreview from "./list-preview";
 
 export default async function Lists({ projectId }: { projectId: string }) {
@@ -15,10 +17,10 @@ export default async function Lists({ projectId }: { projectId: string }) {
 
   if (lists.length === 0) {
     return (
-      <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right md:pr-14">
-        Encara no hi ha llistes, pots crear-ne una aquí{" "}
-        <CornerRightUp className="mb-4 shrink-0" />
-      </div>
+      <Alert>
+        <InfoIcon className="h-4 w-4" />
+        <AlertDescription>Encara no hi ha llistes</AlertDescription>
+      </Alert>
     );
   }
 
@@ -35,26 +37,30 @@ export default async function Lists({ projectId }: { projectId: string }) {
   completedLists.sort(compareLists);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {incompleteLists.map((list) => (
-          <ListPreview key={list.id} list={list} />
-        ))}
+    <>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {incompleteLists.map((list) => (
+            <ListPreview key={list.id} list={list} />
+          ))}
+        </div>
+
+        {completedLists.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="font-semibold text-md text-muted-foreground">
+              Completades:
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {completedLists.map((list) => (
+                <ListPreview key={list.id} list={list} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {completedLists.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="font-semibold text-md text-muted-foreground">
-            Completades:
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {completedLists.map((list) => (
-              <ListPreview key={list.id} list={list} />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      <CreateListButton projectId={projectId} />
+    </>
   );
 }
 

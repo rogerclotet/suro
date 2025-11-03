@@ -1,15 +1,9 @@
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { auth } from "@/auth";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import BottomNav from "../bottom-nav";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./app-sidebar/app-sidebar";
-import Breadcrumbs from "./breadcrumbs";
+import SidebarInsetContent from "./sidebar-inset-content";
 
 export default async function SidebarLayout({
   children,
@@ -26,27 +20,12 @@ export default async function SidebarLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={defaultOpen} className="h-screen">
       <AppSidebar />
+
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumbs />
-          </div>
-        </header>
-
-        <main className="mx-auto w-full grow px-4 py-4 lg:container">
-          {children}
-        </main>
-
-        {/* {session && <BottomNav />} */}
+        <SidebarInsetContent>{children}</SidebarInsetContent>
       </SidebarInset>
-      <BottomNav />
     </SidebarProvider>
   );
 }

@@ -26,7 +26,7 @@ export default function NotFound() {
           <p>{"No s'ha trobat la pàgina."}</p>
           <div className="mt-4">
             <Link href="/">
-              <Button variant="neutral" className="gap-2">
+              <Button variant="ghost" className="gap-2">
                 <ArrowLeft />
                 {"Tornar a l'inici"}
               </Button>

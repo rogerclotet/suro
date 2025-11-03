@@ -2,6 +2,7 @@
 
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   Collapsible,
@@ -20,24 +21,20 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import BottomNav from "../../bottom-nav";
 import { useMenuItems } from "../../use-menu-items";
 
 export default function NavApps() {
   const menuItems = useMenuItems();
+  const pathname = usePathname();
   const { isMobile, setOpenMobile, state } = useSidebar();
 
   const shouldDisplayChildrenInSidebar = useMemo(() => {
     return !isMobile && state === "expanded";
   }, [isMobile, state]);
 
-  const bottomNavItems = useMemo(() => {
-    if (!isMobile) {
-      return [];
-    }
-
-    return menuItems.flatMap((item) => item.children ?? []);
-  }, [menuItems, isMobile]);
+  const activeParent = useMemo(() => {
+    return menuItems.find((item) => pathname.includes(item.path));
+  }, [menuItems, pathname]);
 
   return (
     <SidebarGroup>
@@ -50,9 +47,7 @@ export default function NavApps() {
                 <Collapsible
                   key={item.name}
                   asChild
-                  defaultOpen={
-                    false /* TODO use active section to open the collapsible */
-                  }
+                  defaultOpen={activeParent === item}
                   className="group/collapsible"
                 >
                   <SidebarMenuItem>

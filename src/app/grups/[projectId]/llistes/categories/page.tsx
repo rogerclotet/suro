@@ -1,4 +1,4 @@
-import { CornerRightUp, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { checkAuth } from "@/lib/check-auth";
 import { getCategories } from "@/server/categories";
@@ -18,18 +18,14 @@ export default async function CategoriesPage({
 
   return (
     <div className="space-y-4">
-      {/* TODO Move to sidebar */}
       <NewCategoryButton />
 
       {categories.length === 0 ? (
-        <>
-          <div className="mb-4 flex flex-row items-center justify-end gap-4 pr-8 text-right sm:pr-16">
-            Encara no hi ha categories, en pots crear aquí{" "}
-            <CornerRightUp className="mb-4 shrink-0" />
-          </div>
-
-          <Description />
-        </>
+        <Description>
+          <p className="mt-4 text-muted-foreground">
+            Encara no hi ha categories
+          </p>
+        </Description>
       ) : (
         <>
           <Description />
@@ -47,7 +43,7 @@ export default async function CategoriesPage({
   );
 }
 
-function Description() {
+function Description({ children }: { children?: React.ReactNode }) {
   const description = `Les categories són útils per organitzar les llistes. 
     Pots classificar els elements d'una llista de manera que quedin agrupats i siguin més fàcils de trobar.`;
 
@@ -55,7 +51,10 @@ function Description() {
     <Alert>
       <Info className="h-4 w-4" />
       <AlertTitle>Informació</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
+      <AlertDescription className="space-y-2">
+        {children}
+        <p>{description}</p>
+      </AlertDescription>
     </Alert>
   );
 }

@@ -15,7 +15,6 @@ export default async function PlantillesPage({
 
   return (
     <div className="space-y-4">
-      {/* TODO Move to sidebar */}
       <CreateTemplateButton projectId={projectId} />
 
       <Suspense

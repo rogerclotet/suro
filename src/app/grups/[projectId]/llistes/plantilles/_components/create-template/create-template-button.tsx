@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Plus } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
@@ -9,6 +9,7 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
+import Action from "@/components/action";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -44,6 +45,7 @@ export default function CreateTemplateButton({
     try {
       const templateId = await createTemplate(projectId, data);
       toast.success(`Plantilla ${form.getValues().name} creada`);
+      triggerRef.current?.click();
       router.push(`/grups/${projectId}/llistes/plantilles/${templateId}`);
     } catch (e) {
       posthog.captureException(e, {
@@ -62,15 +64,12 @@ export default function CreateTemplateButton({
 
   return (
     <>
-      <Button
+      <Action
+        label="Crear plantilla"
+        icon={<PlusIcon />}
+        pathParts={["llistes", "plantilles"]}
         onClick={() => triggerRef.current?.click()}
-        variant="secondary"
-        size="sm"
-        className="gap-2"
-      >
-        <Plus />
-        Crear plantilla
-      </Button>
+      />
 
       <ModalForm
         triggerRef={triggerRef}

@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
+import Action from "@/components/action";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -193,9 +194,11 @@ export default function CreateEventButton({
 
   return (
     <>
-      <Button onClick={() => triggerRef.current?.click()} className="gap-2">
-        <Plus /> Crear esdeveniment
-      </Button>
+      <Action
+        icon={<Plus />}
+        label="Crear esdeveniment"
+        onClick={() => triggerRef.current?.click()}
+      />
 
       <ModalForm
         triggerRef={triggerRef}

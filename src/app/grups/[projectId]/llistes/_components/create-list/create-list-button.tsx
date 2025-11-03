@@ -2,7 +2,7 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { getTemplates } from "@/app/api/[projectId]/templates/api";
+import Action from "@/components/action";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -56,6 +57,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     try {
       const listId = await createList(project, data);
       toast.success(`Llista ${form.getValues().name} creada`);
+      triggerRef.current?.click();
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {
       posthog.captureException(e, {
@@ -69,22 +71,18 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     }
   }
 
-  function CreateButton({ onClick }: { onClick?: () => void }) {
-    return (
-      <Button onClick={onClick} variant="default" size="sm" className="gap-2">
-        <Plus />
-        Crear llista
-      </Button>
-    );
-  }
-
   if (!project || templates === undefined) {
-    return <CreateButton />;
+    return null;
   }
 
   return (
     <>
-      <CreateButton onClick={() => triggerRef.current?.click()} />
+      <Action
+        label="Crear llista"
+        icon={<PlusIcon />}
+        pathParts={["llistes"]}
+        onClick={() => triggerRef.current?.click()}
+      />
 
       <ModalForm
         triggerRef={triggerRef}

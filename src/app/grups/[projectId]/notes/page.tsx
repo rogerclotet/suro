@@ -13,7 +13,6 @@ export default async function Page({
   return (
     <div className="mb-8 space-y-4">
       <div className="text-right">
-        {/* TODO Move to sidebar */}
         <CreateNoteButton projectId={projectId} />
       </div>
 

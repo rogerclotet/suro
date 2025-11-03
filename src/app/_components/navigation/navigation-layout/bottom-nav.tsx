@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useMenuItems } from "./use-menu-items";
+import { useMenuItems } from "../use-menu-items";
 
-export default function BottomNav() {
+export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const menuItems = useMenuItems();
   const { isMobile } = useSidebar();
@@ -31,9 +31,12 @@ export default function BottomNav() {
     return items;
   }, [menuItems, isMobile, pathname]);
 
-  function isActive(path: string) {
-    return pathname === path;
-  }
+  const activeItem = useMemo(() => {
+    const activeItems = bottomNavItems.filter((item) =>
+      pathname.includes(item.path),
+    );
+    return activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
+  }, [bottomNavItems, pathname]);
 
   if (!isMobile) {
     return null;
@@ -41,7 +44,7 @@ export default function BottomNav() {
 
   return (
     <div
-      className={`fixed right-0 bottom-0 left-0 z-40 grid bg-background text-shadow-xs`}
+      className={cn("grid", className)}
       style={{
         gridTemplateColumns: `repeat(${bottomNavItems.length}, 1fr)`,
       }}
@@ -59,13 +62,17 @@ export default function BottomNav() {
           <Link
             key={item.name}
             href={item.path}
-            className={cn(
-              "flex flex-col items-center justify-center gap-2 p-2 text-primary",
-              isActive(item.path) && "border-primary border-t-2",
-            )}
+            className="flex flex-col items-center justify-center gap-1 p-1 text-primary text-sm"
           >
+            <div
+              className={cn(
+                "rounded-full px-4 py-1.5",
+                activeItem?.path === item.path && "bg-primary/20",
+              )}
+            >
+              {item.icon}
+            </div>
             {item.name}
-            {item.icon}
           </Link>
         ),
       )}

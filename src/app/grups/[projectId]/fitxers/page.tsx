@@ -1,6 +1,7 @@
-import { CornerRightUp } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import getProjectFiles from "@/server/files";
 import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
@@ -29,10 +30,10 @@ export default async function FilesPage({
       </div>
 
       {allFiles.length === 0 ? (
-        <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right sm:pr-16">
-          Encara no hi ha fitxers, en pots compartir aquí{" "}
-          <CornerRightUp className="mb-4 shrink-0" />
-        </div>
+        <Alert>
+          <InfoIcon className="h-4 w-4" />
+          <AlertDescription>Encara no hi ha fitxers</AlertDescription>
+        </Alert>
       ) : (
         <Files files={allFiles} />
       )}

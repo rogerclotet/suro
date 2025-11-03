@@ -1,4 +1,4 @@
-import { CornerRightUp, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,12 +16,12 @@ export default async function Templates({ projectId }: { projectId: string }) {
   if (templates.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="flex flex-row items-center justify-end gap-4 pr-8 text-right md:pr-14">
-          Encara no hi ha plantilles, pots crear-ne una aquí{" "}
-          <CornerRightUp className="mb-4 shrink-0" />
-        </div>
         <div className="text-muted-foreground">
-          <Description />
+          <Description>
+            <p className="mt-4 text-muted-foreground">
+              Encara no hi ha plantilles
+            </p>
+          </Description>
         </div>
       </div>
     );
@@ -41,7 +41,7 @@ export default async function Templates({ projectId }: { projectId: string }) {
   );
 }
 
-function Description() {
+function Description({ children }: { children?: React.ReactNode }) {
   const description = `Les plantilles són llistes amb elements que s'inclouran a les llistes que les utilitzin. 
   Es poden utilitzar per parts d'una llista que es repeteixen freqüentment per poder crear llistes més ràpidament.`;
 
@@ -49,7 +49,10 @@ function Description() {
     <Alert>
       <Info className="h-4 w-4" />
       <AlertTitle>Informació</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
+      <AlertDescription className="space-y-2">
+        {children}
+        <p>{description}</p>
+      </AlertDescription>
     </Alert>
   );
 }

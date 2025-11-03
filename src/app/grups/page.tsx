@@ -7,21 +7,20 @@ export default async function GrupsPage() {
   await checkAuth();
 
   return (
-    <div className="space-y-4">
-      <div className="text-right">
-        {/* TODO Move to sidebar */}
-        <CreateProjectButton />
+    <>
+      <div className="space-y-4">
+        <Suspense
+          fallback={
+            <div className="flex h-[200px] justify-center">
+              <span className="loading loading-spinner" />
+            </div>
+          }
+        >
+          <ProjectsTable />
+        </Suspense>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="flex h-[200px] justify-center">
-            <span className="loading loading-spinner" />
-          </div>
-        }
-      >
-        <ProjectsTable />
-      </Suspense>
-    </div>
+      <CreateProjectButton />
+    </>
   );
 }

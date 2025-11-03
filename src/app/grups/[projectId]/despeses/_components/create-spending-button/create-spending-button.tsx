@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
+import Action from "@/components/action";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -49,11 +50,12 @@ export default function CreateSpendingButton() {
       if (!project?.id) {
         throw new Error("No project selected");
       }
-      await createSpending(project.id, data);
-      toast.success("Despesa creada");
       triggerRef.current?.click();
+      await createSpending(project.id, data);
       form.reset();
+      toast.success("Despesa creada");
     } catch (e) {
+      triggerRef.current?.click();
       posthog.captureException(e, {
         distinctId: session?.user.id,
         action: "create_spending",
@@ -65,13 +67,11 @@ export default function CreateSpendingButton() {
 
   return (
     <>
-      <Button
-        size="sm"
-        className="gap-2"
+      <Action
+        icon={<Plus />}
+        label="Crear despesa"
         onClick={() => triggerRef.current?.click()}
-      >
-        <Plus /> Crear despesa
-      </Button>
+      />
 
       {project && (
         <ModalForm

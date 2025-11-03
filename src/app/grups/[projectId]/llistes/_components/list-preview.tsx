@@ -47,5 +47,5 @@ export default function ListPreview({ list }: { list: List }) {
 }
 
 export function ListPreviewSkeleton() {
-  return <Skeleton className="h-36 w-full" />;
+  return <Skeleton className="h-20 w-full bg-card" />;
 }

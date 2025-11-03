@@ -64,7 +64,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
   return (
     <>
       <Button
-        variant="neutral"
+        variant="ghost"
         size="sm"
         onClick={() => triggerRef.current?.click()}
         className="gap-2"
