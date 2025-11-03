@@ -1,14 +1,4 @@
-import { setTimeout } from "node:timers/promises";
-import Link from "next/link";
 import { Suspense } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { checkAuth } from "@/lib/check-auth";
 import CreateTemplateButton from "./_components/create-template/create-template-button";
 import { TemplatePreviewSkeleton } from "./_components/template-preview";
@@ -23,29 +13,10 @@ export default async function PlantillesPage({
 
   const { projectId } = await params;
 
-  await setTimeout(3000);
-
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild className="font-semibold text-xl">
-                <Link href={`/grups/${projectId}/llistes`}>Llistes</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="scale-150" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-semibold text-xl">
-                Plantilles
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <CreateTemplateButton projectId={projectId} />
-      </div>
+    <div className="space-y-4">
+      {/* TODO Move to sidebar */}
+      <CreateTemplateButton projectId={projectId} />
 
       <Suspense
         fallback={

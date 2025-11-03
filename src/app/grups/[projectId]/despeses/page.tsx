@@ -28,17 +28,14 @@ export default async function DespesesPage({
 
   if (project.users.length === 1) {
     return (
-      <div className="space-y-6">
-        <h1 className="mt-1 font-semibold text-xl">Despeses</h1>
-        <Alert className="mx-auto max-w-lg">
-          <Info className="h-4 w-4" />
-          <AlertTitle>Informació</AlertTitle>
-          <AlertDescription>
-            {`Aquesta secció està dissenyada per grups amb més d'un usuari,
+      <Alert className="mx-auto max-w-lg">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Informació</AlertTitle>
+        <AlertDescription>
+          {`Aquesta secció està dissenyada per grups amb més d'un usuari,
               i permet compartir despeses i calcular els pagaments que es fan en grup.`}
-          </AlertDescription>
-        </Alert>
-      </div>
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -46,13 +43,10 @@ export default async function DespesesPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <h1 className="mt-1 font-semibold text-xl">Despeses</h1>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <SettleButton spendings={projectSpendings} />
-          <CreateSpendingButton />
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <SettleButton spendings={projectSpendings} />
+        {/* TODO Move to sidebar */}
+        <CreateSpendingButton />
       </div>
 
       <SpendingsTable spendings={projectSpendings} />

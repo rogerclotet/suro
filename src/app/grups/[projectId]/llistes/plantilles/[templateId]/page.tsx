@@ -1,14 +1,6 @@
 import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { checkAuth } from "@/lib/check-auth";
 import { textToHtml } from "@/lib/utils";
@@ -23,7 +15,7 @@ export default async function TemplatePage({
 }) {
   await checkAuth();
 
-  const { projectId, templateId } = await params;
+  const { templateId } = await params;
 
   const template = await getTemplate(templateId);
   if (!template) {
@@ -50,28 +42,6 @@ export default async function TemplatePage({
 
   return (
     <div>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href={`/grups/${projectId}/llistes`}>Llistes</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href={`/grups/${projectId}/llistes/plantilles`}>
-                Plantilles
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{template.name}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="mb-4 flex items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 font-semibold text-xl">
           <LayoutTemplate /> {template.name}

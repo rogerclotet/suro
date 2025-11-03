@@ -20,7 +20,7 @@ export default function Redirect({ project }: { project?: Project }) {
   const projectId = project?.id ?? selectedProject?.id;
 
   if (!projectId || projects.length === 0) {
-    return <LoadingPage>Carregant...</LoadingPage>;
+    return <LoadingPage />;
   }
 
   return redirect(`/grups/${projectId}/llistes`);

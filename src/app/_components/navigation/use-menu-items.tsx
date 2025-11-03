@@ -1,4 +1,11 @@
-import { Calendar, FolderOpen, HandCoins, ListTodo } from "lucide-react";
+import {
+  Calendar,
+  FolderOpen,
+  HandCoins,
+  LayoutTemplateIcon,
+  ListTodo,
+  TagsIcon,
+} from "lucide-react";
 import { type ReactNode, useMemo } from "react";
 import { useProjects } from "@/app/_state/project-state";
 
@@ -7,6 +14,7 @@ export type MenuItem = {
   path: string;
   icon: ReactNode;
   disabled?: boolean;
+  children?: MenuItem[];
 };
 
 type MenuItemPart = {
@@ -14,6 +22,7 @@ type MenuItemPart = {
   pathPart: string;
   icon: ReactNode;
   disabled?: boolean;
+  children?: MenuItemPart[];
 };
 
 const itemParts: MenuItemPart[] = [
@@ -21,6 +30,18 @@ const itemParts: MenuItemPart[] = [
     name: "Llistes",
     pathPart: "llistes",
     icon: <ListTodo />,
+    children: [
+      {
+        name: "Plantilles",
+        pathPart: "plantilles",
+        icon: <LayoutTemplateIcon />,
+      },
+      {
+        name: "Categories",
+        pathPart: "categories",
+        icon: <TagsIcon />,
+      },
+    ],
   },
   {
     name: "Calendari",
@@ -44,19 +65,33 @@ export function useMenuItems(): MenuItem[] {
 
   const items = useMemo(() => {
     if (selectedProject === null) {
-      return itemParts.map(({ name, icon, disabled }) => ({
+      return itemParts.map(({ name, icon, disabled, children }) => ({
         name,
         path: "/",
         icon,
         disabled,
+        children: children?.map(({ name, icon, disabled }) => ({
+          name,
+          path: "/",
+          icon,
+          disabled,
+        })),
       }));
     }
 
-    return itemParts.map(({ name, pathPart, icon, disabled }) => ({
+    return itemParts.map(({ name, pathPart, icon, disabled, children }) => ({
       name,
       path: `/grups/${selectedProject.id}/${pathPart}`,
       icon,
       disabled,
+      children: children?.map(
+        ({ name, pathPart: childPathPart, icon, disabled }) => ({
+          name,
+          path: `/grups/${selectedProject.id}/${pathPart}/${childPathPart}`,
+          icon,
+          disabled,
+        }),
+      ),
     }));
   }, [selectedProject]);
 

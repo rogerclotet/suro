@@ -10,9 +10,8 @@ import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
-import BottomNav from "./_components/navigation/bottom-nav";
-import Drawer from "./_components/navigation/drawer/drawer";
-import ProjectsLoader from "./_components/projects-loader";
+import SidebarLayout from "./_components/navigation/navigation-layout/sidebar-layout";
+import ProjectsProvider from "./_components/projects-provider/projects-provider";
 import UserIdentifer from "./_components/user-identifyer";
 import { uploadFileRouter } from "./api/uploadthing/core";
 
@@ -51,20 +50,14 @@ export default async function RootLayout({
           <UserIdentifer />
           <ReactQueryProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-              <TooltipProvider>
-                <Drawer />
-                <div className="mx-auto mt-14 mb-20 w-full grow px-4 py-4 lg:container lg:mb-4">
-                  {children}
-                </div>
-                {session && (
-                  <>
-                    <ProjectsLoader />
-                    <BottomNav />
-                  </>
-                )}
-
-                <Toaster position="bottom-center" />
-              </TooltipProvider>
+              <SidebarLayout>
+                <TooltipProvider>
+                  <ProjectsProvider>
+                    {children}
+                    <Toaster position="bottom-center" />
+                  </ProjectsProvider>
+                </TooltipProvider>
+              </SidebarLayout>
             </ThemeProvider>
           </ReactQueryProvider>
         </SessionProvider>

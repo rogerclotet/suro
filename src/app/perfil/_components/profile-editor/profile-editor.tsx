@@ -1,12 +1,14 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Info } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -43,7 +45,21 @@ export default function ProfileEditor({ user }: { user: User }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <h2 className="font-semibold text-lg">Editar informació:</h2>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <p>
+              {
+                "Aquesta és la informació que es mostra a tots els teus grups i que es pot veure públicament."
+              }
+            </p>
+            <p>
+              {
+                "La imatge de perfil és la del compte Google si s'entra d'aquesta manera, o la inicial del teu nom en cas contrari"
+              }
+            </p>
+          </AlertDescription>
+        </Alert>
 
         <FormItem>
           <Label>Avatar</Label>
@@ -55,11 +71,6 @@ export default function ProfileEditor({ user }: { user: User }) {
               </AvatarFallback>
             </Avatar>
           </div>
-          <Label className="text-muted-foreground text-sm italic">
-            {
-              "Ara mateix s'utilitza la foto de perfil del compte Google si s'entra d'aquesta manera, o la inicial en cas contrari"
-            }
-          </Label>
         </FormItem>
 
         <FormField

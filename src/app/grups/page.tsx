@@ -7,9 +7,9 @@ export default async function GrupsPage() {
   await checkAuth();
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="font-semibold text-xl">Gestionar grups</h1>
+    <div className="space-y-4">
+      <div className="text-right">
+        {/* TODO Move to sidebar */}
         <CreateProjectButton />
       </div>
 

@@ -12,9 +12,8 @@ export default async function Page({
 
   return (
     <div className="mb-8 space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="mt-1 font-semibold text-xl">Notes</h1>
-
+      <div className="text-right">
+        {/* TODO Move to sidebar */}
         <CreateNoteButton projectId={projectId} />
       </div>
 

@@ -1,61 +1,80 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronsUpDownIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
-export default function ProjectSelector({
-  onSelect,
-}: {
-  onSelect: (projectId: string) => void;
-}) {
+export default function ProjectSelector() {
   const { projects, project, selectProject } = useProjects();
+  const router = useRouter();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const { data: session } = useSession();
 
-  function handleProjectSelect(projectId: string) {
-    const projectToSelect = projects.find((p) => p.id === projectId);
-    if (projectToSelect) {
-      selectProject(projectToSelect);
-    }
-    onSelect(projectId);
+  function handleProjectSelect(project: Project) {
+    selectProject(project);
+    setOpenMobile(false);
+    router.push(`/grups/${project.id}`);
   }
 
   if (!project || projects.length <= 1) {
-    return null;
+    return (
+      <Skeleton
+        className={cn(
+          "w-full",
+          state === "expanded" ? "w-12" : "h-8 rounded-full",
+        )}
+      />
+    );
   }
 
   return (
-    <Collapsible className="space-y-2 rounded-lg border">
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex w-full items-center justify-between"
-        >
-          {project?.name ?? "Seleccionar grup"}
-          <ChevronDown className="h-4 w-4" />
-          <span className="sr-only">Seleccionar grup</span>
-        </Button>
-      </CollapsibleTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton size="lg" tooltip="Grups">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-secondary text-secondary-foreground">
+              {project?.name?.charAt(0)?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span>{project.name}</span>
+            <span className="text-muted-foreground text-xs">
+              {project.users.length > 1
+                ? `${project.users.length} membres`
+                : session?.user.name}
+            </span>
+          </div>
+          <ChevronsUpDownIcon className="ml-auto" />
+        </SidebarMenuButton>
+      </DropdownMenuTrigger>
 
-      <CollapsibleContent className="space-y-2">
-        {project &&
-          projects
-            .filter((p) => p.id !== project.id)
-            .map((p) => (
-              <Button
-                key={p.id}
-                onClick={() => handleProjectSelect(p.id)}
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                {p.name}
-              </Button>
-            ))}
-      </CollapsibleContent>
-    </Collapsible>
+      <DropdownMenuContent
+        side={isMobile ? "bottom" : "right"}
+        align="start"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+      >
+        {projects.map((p) => (
+          <DropdownMenuItem
+            key={p.id}
+            onClick={() => handleProjectSelect(p)}
+            className="cursor-pointer"
+          >
+            {p.name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

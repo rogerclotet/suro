@@ -22,12 +22,9 @@ export default async function FilesPage({
 
   return (
     <div>
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="flex grow flex-row flex-wrap items-start justify-between gap-2">
-          <h1 className="mt-1 font-semibold text-xl">Fitxers</h1>
-          <ViewSelector />
-        </div>
-
+      <div className="mb-4 flex items-start justify-end gap-4">
+        {/* TODO Improve UX of view selector */}
+        {allFiles.length > 0 && <ViewSelector />}
         <UploadButton projectId={projectId} />
       </div>
 

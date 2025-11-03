@@ -1,3 +1,5 @@
+"use client";
+
 import type {} from "@redux-devtools/extension"; // required for devtools typing
 import { useEffect } from "react";
 import { create } from "zustand";

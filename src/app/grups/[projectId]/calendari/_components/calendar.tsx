@@ -196,9 +196,7 @@ export default function Calendar() {
 
   return (
     <div className="mb-8 space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="mt-1 font-semibold text-xl">Calendari</h1>
-
+      <div className="text-right">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={copyCalendarExportURL}>

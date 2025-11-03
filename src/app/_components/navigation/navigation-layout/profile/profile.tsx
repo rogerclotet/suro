@@ -1,20 +1,21 @@
 "use client";
 
-import { LogOut, User } from "lucide-react";
+import { ChevronsUpDownIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { logOut } from "./actions";
 
-export default function Profile({ onNavigate }: { onNavigate: () => void }) {
+export default function Profile() {
   const session = useSession();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   if (!session) {
     return null;
@@ -23,21 +24,35 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start gap-4">
+        <SidebarMenuButton
+          size="lg"
+          tooltip={session.data?.user.name ?? "Perfil"}
+          className="w-full justify-start gap-4"
+        >
           <Avatar className="h-8 w-8">
             <AvatarImage src={session.data?.user.image ?? undefined} />
             <AvatarFallback className="bg-secondary text-secondary-foreground">
               {session.data?.user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          {session.data?.user.name}
-        </Button>
+          <div className="flex flex-col">
+            <span>{session.data?.user.name}</span>
+            <span className="text-muted-foreground text-xs">
+              {session.data?.user.email}
+            </span>
+          </div>
+          <ChevronsUpDownIcon className="ml-auto" />
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent
+        side={isMobile ? "bottom" : "right"}
+        align="end"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+      >
         <Link href="/perfil">
           <DropdownMenuItem
             className="cursor-pointer gap-2"
-            onClick={onNavigate}
+            onClick={() => setOpenMobile(false)}
           >
             <User />
             Perfil
@@ -45,7 +60,11 @@ export default function Profile({ onNavigate }: { onNavigate: () => void }) {
         </Link>
 
         <form action={logOut}>
-          <button type="submit">
+          <button
+            type="submit"
+            className="w-full"
+            onClick={() => setOpenMobile(false)}
+          >
             <DropdownMenuItem className="cursor-pointer gap-2">
               <LogOut /> Tancar sessió
             </DropdownMenuItem>
