@@ -42,7 +42,7 @@ export default function ProjectSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton size="lg" tooltip="Grups">
+        <SidebarMenuButton size="lg" tooltip={project.name}>
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-secondary text-secondary-foreground">
               {project?.name?.charAt(0)?.toUpperCase()}

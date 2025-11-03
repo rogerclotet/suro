@@ -26,10 +26,12 @@ export default function AppSidebar() {
 
   return (
     <Sidebar variant="inset" collapsible="icon">
-      <SidebarHeader className="flex flex-row items-center gap-2">
-        <Image src="/favicon.png" alt="Logo" width={32} height={32} />
-        <span className="truncate font-bold text-xl">Família</span>
-      </SidebarHeader>
+      <Link href="/" onClick={() => setOpenMobile(false)}>
+        <SidebarHeader className="flex flex-row items-center gap-2">
+          <Image src="/favicon.png" alt="Logo" width={32} height={32} />
+          <span className="truncate font-bold text-xl">Família</span>
+        </SidebarHeader>
+      </Link>
 
       <SidebarContent>
         <SidebarGroup>
