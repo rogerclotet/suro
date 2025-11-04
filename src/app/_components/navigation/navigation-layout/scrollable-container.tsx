@@ -67,6 +67,57 @@ export function ScrollableContainer({
       calculateScrollState();
     };
 
+    // Handle touch events for mobile momentum scrolling
+    // iOS Safari doesn't fire scroll events during momentum scrolling
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    let lastScrollTop = element.scrollTop;
+    let momentumCheckCount = 0;
+
+    const handleTouchMove = () => {
+      // Check scroll state during touch move
+      calculateScrollState();
+      lastScrollTop = element.scrollTop;
+    };
+
+    const handleTouchEnd = () => {
+      // Check scroll state after touch ends
+      calculateScrollState();
+      lastScrollTop = element.scrollTop;
+      momentumCheckCount = 0;
+
+      // Clear any existing timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // Check periodically after touch ends to catch momentum scrolling
+      // This helps with iOS Safari momentum scrolling
+      const checkMomentum = () => {
+        const currentScrollTop = element.scrollTop;
+
+        // If scroll position changed, we're still in momentum scrolling
+        if (Math.abs(currentScrollTop - lastScrollTop) > 0.5) {
+          calculateScrollState();
+          lastScrollTop = currentScrollTop;
+          momentumCheckCount++;
+
+          // Continue checking if we haven't exceeded max attempts
+          if (momentumCheckCount < 20) {
+            // Check for up to 1 second (20 * 50ms)
+            scrollTimeout = setTimeout(checkMomentum, 50);
+          } else {
+            scrollTimeout = null;
+          }
+        } else {
+          // Scroll position hasn't changed, momentum has stopped
+          scrollTimeout = null;
+        }
+      };
+
+      // Start checking after a short delay
+      scrollTimeout = setTimeout(checkMomentum, 16);
+    };
+
     // Initial check after a brief delay to ensure layout is complete
     const initialCheck = () => {
       // Use requestAnimationFrame to ensure layout is settled
@@ -77,7 +128,12 @@ export function ScrollableContainer({
 
     initialCheck();
 
+    // Add scroll event listener
     element.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Add touch event listeners for mobile momentum scrolling
+    element.addEventListener("touchmove", handleTouchMove, { passive: true });
+    element.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     // Also check on resize in case content changes
     const resizeObserver = new ResizeObserver(() => {
@@ -88,7 +144,12 @@ export function ScrollableContainer({
 
     return () => {
       element.removeEventListener("scroll", handleScroll);
+      element.removeEventListener("touchmove", handleTouchMove);
+      element.removeEventListener("touchend", handleTouchEnd);
       resizeObserver.disconnect();
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
     };
   }, [calculateScrollState]);
 
@@ -125,7 +186,16 @@ export function ScrollableContainer({
   }, [calculateScrollState]);
 
   return (
-    <div ref={scrollRef} className={className}>
+    <div
+      ref={scrollRef}
+      className={className}
+      style={
+        {
+          // Enable momentum scrolling on iOS Safari
+          WebkitOverflowScrolling: "touch",
+        } as React.CSSProperties
+      }
+    >
       {children}
     </div>
   );
