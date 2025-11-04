@@ -28,7 +28,7 @@ export default function SidebarInsetContent({
           "z-10 flex h-16 shrink-0 items-center gap-2 bg-card px-6 text-card-foreground transition-[width,height,box-shadow] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:rounded-t-lg md:bg-background md:text-foreground",
           isMobile &&
             !scrollState.isAtTop &&
-            "shadow-[0_0_10px_5px_rgba(0,0,0,0.5)]",
+            "shadow-[0_0_1rem_1rem_rgba(0,0,0,0.4)]",
         )}
       >
         <Breadcrumbs />
@@ -53,7 +53,7 @@ export default function SidebarInsetContent({
           "transition-shadow duration-200 ease-linear",
           isMobile &&
             !scrollState.isAtBottom &&
-            "shadow-[0_0_10px_5px_rgba(0,0,0,0.5)]",
+            "shadow-[0_0_1rem_1rem_rgba(0,0,0,0.4)]",
         )}
       />
     </div>

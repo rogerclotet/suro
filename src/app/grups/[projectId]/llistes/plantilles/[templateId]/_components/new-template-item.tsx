@@ -93,7 +93,7 @@ export default function NewTemplateItem({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex grow items-center gap-2"
+          className="flex grow items-start gap-2"
         >
           <FormField
             control={form.control}
@@ -104,6 +104,7 @@ export default function NewTemplateItem({
                   <Input
                     placeholder="Nou element"
                     disabled={form.formState.isSubmitting}
+                    className="h-10"
                     {...field}
                   />
                 </FormControl>

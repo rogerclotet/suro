@@ -26,8 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import NewCategoryModal from "../categories/new-category-modal";
 import { createListItem } from "./actions";
-import NewCategoryModal from "./categories/new-category-modal";
 import { listItemSchema } from "./data";
 
 export default function NewListItem({ list }: { list: List }) {
@@ -68,9 +68,6 @@ export default function NewListItem({ list }: { list: List }) {
         completed: false,
         categoryId: data.categoryId ?? "",
       });
-      setTimeout(() => {
-        form.setFocus("name");
-      }, 1);
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -101,7 +98,7 @@ export default function NewListItem({ list }: { list: List }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex grow items-center gap-2"
+          className="flex grow items-start gap-2"
         >
           <FormField
             control={form.control}
@@ -112,6 +109,7 @@ export default function NewListItem({ list }: { list: List }) {
                   <Input
                     placeholder="Nou element"
                     disabled={form.formState.isSubmitting}
+                    className="h-10"
                     {...field}
                   />
                 </FormControl>

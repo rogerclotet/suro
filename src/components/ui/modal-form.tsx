@@ -26,7 +26,7 @@ import { ClientOnly } from "../client-only";
 type Props = {
   triggerRef: RefObject<HTMLDivElement | null>;
   title: string;
-  description: string;
+  description?: string;
   children: ReactNode;
 };
 
@@ -51,7 +51,9 @@ function ClientModalForm({ triggerRef, title, description, children }: Props) {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
           </DialogHeader>
           {children}
         </DialogContent>

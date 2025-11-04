@@ -54,6 +54,7 @@ export async function updateListItem(
   list: List,
   itemId: string,
   name: string,
+  details: string,
   completed: boolean,
   categoryId: string | null,
 ) {
@@ -68,9 +69,11 @@ export async function updateListItem(
     throw new Error("The user is not part of the project");
   }
 
+  console.log({ name, details, completed, categoryId });
+
   await db
     .update(listItems)
-    .set({ name, completed, categoryId, updatedBy: session.user.id })
+    .set({ name, details, completed, categoryId, updatedBy: session.user.id })
     .where(eq(listItems.id, itemId));
 
   revalidatePath(`/grups/${list.projectId}/llistes/${list.id}`);

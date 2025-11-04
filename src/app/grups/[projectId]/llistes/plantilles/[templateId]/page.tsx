@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, LayoutTemplate } from "lucide-react";
+import { AlertCircle, ArrowLeft, LayoutTemplateIcon } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default async function TemplatePage({
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
         <h1 className="flex items-center gap-2 font-semibold text-xl">
-          <LayoutTemplate /> {template.name}
+          <LayoutTemplateIcon /> {template.name}
         </h1>
         <SettingsMenu template={template} />
       </div>

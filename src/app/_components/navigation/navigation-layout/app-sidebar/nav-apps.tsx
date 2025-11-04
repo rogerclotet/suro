@@ -1,6 +1,5 @@
 "use client";
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ChevronRightIcon, FolderIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +27,6 @@ export default function NavApps() {
   const menuItems = useMenuItems();
   const pathname = usePathname();
   const { isMobile, setOpenMobile, state } = useSidebar();
-  const [animationParent] = useAutoAnimate();
 
   const shouldDisplayChildrenInSidebar = useMemo(() => {
     return !isMobile && state === "expanded";

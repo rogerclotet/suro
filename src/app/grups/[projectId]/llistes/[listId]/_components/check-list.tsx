@@ -16,9 +16,9 @@ import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import { deleteListItem, updateListItem } from "./actions";
 import CategoryItems from "./category-items";
-import NewListItem from "./new-list-item";
+import { deleteListItem, updateListItem } from "./list-item/actions";
+import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const { project } = useProjects();
@@ -37,6 +37,7 @@ export default function CheckList(props: { list: List }) {
   async function handleChange(
     item: List["items"][number],
     name: string,
+    details: string,
     completed: boolean,
     categoryId: string | null,
   ) {
@@ -45,12 +46,20 @@ export default function CheckList(props: { list: List }) {
     }
 
     item.name = name;
+    item.details = details;
     item.completed = completed;
     item.category =
       project?.categories.find((c) => c.id === categoryId) ?? null;
     item.updatedAt = new Date();
 
-    await updateListItem(props.list, item.id, name, completed, categoryId);
+    await updateListItem(
+      props.list,
+      item.id,
+      name,
+      details,
+      completed,
+      categoryId,
+    );
   }
 
   async function handleDelete(item: List["items"][number]) {
@@ -102,6 +111,7 @@ export default function CheckList(props: { list: List }) {
       props.list,
       itemId,
       item.name,
+      item.details ?? "",
       item.completed ?? false,
       category?.id ?? null,
     );

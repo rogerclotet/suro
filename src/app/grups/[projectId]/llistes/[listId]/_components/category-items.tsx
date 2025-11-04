@@ -2,7 +2,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { CSSProperties } from "react";
 import type { List } from "@/app/_data/list";
-import ListItem from "./list-item";
+import ListItem from "./list-item/list-item";
 
 export default function CategoryItems({
   items,
@@ -19,6 +19,7 @@ export default function CategoryItems({
   handleChange: (
     item: List["items"][number],
     name: string,
+    details: string,
     completed: boolean,
     categoryId: string | null,
   ) => Promise<void>;
@@ -35,8 +36,8 @@ export default function CategoryItems({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="rounded-md px-2">
-      <h3 key={`title_${category}`} className="font-semibold text-lg">
+    <div ref={setNodeRef} style={style} className="rounded-md">
+      <h3 key={`title_${category}`} className="px-2 font-semibold text-lg">
         {category}
       </h3>
       <ul ref={animationParent}>
@@ -45,12 +46,9 @@ export default function CategoryItems({
             <ListItem
               key={item.id}
               list={list}
-              id={item.id}
-              name={item.name}
-              completed={item.completed ?? false}
-              categoryId={item.category?.id ?? null}
-              onChange={(name, completed, categoryId) =>
-                handleChange(item, name, completed, categoryId)
+              item={item}
+              onChange={(name, details, completed, categoryId) =>
+                handleChange(item, name, details, completed, categoryId)
               }
               onDelete={() => handleDelete(item)}
             />

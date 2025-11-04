@@ -91,11 +91,11 @@ export default function TemplateItem({
   }
 
   return (
-    <li className="flex w-full items-center justify-between gap-4">
+    <li className="flex w-full items-center justify-between">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex w-full flex-row items-center gap-2"
+          className="flex w-full flex-row items-start gap-2"
           ref={formRef}
         >
           <FormField
@@ -108,7 +108,7 @@ export default function TemplateItem({
                     {...field}
                     onBlur={(e) => handleNameBlur(e)}
                     disabled={form.formState.isSubmitting}
-                    className="border-none"
+                    className="h-10"
                   />
                 </FormControl>
                 <FormMessage />
