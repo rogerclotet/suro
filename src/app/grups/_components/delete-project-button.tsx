@@ -49,11 +49,10 @@ export default function DeleteProjectButton({
   return (
     <>
       <Button
-        variant="ghost"
+        variant="ghostDestructive"
         size="icon"
         onClick={() => modalRef.current?.click()}
         aria-label="Eliminar"
-        className="hover:bg-destructive hover:text-destructive-foreground"
       >
         <Trash2 />
       </Button>

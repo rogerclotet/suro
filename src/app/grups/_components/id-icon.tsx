@@ -3,6 +3,7 @@
 import { Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -18,13 +19,13 @@ export default function IdIcon({ id }: { id: Project["id"] }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => copyIdToClipboard(id)}
-          className="inline-flex"
         >
           <Fingerprint />
-        </button>
+        </Button>
       </TooltipTrigger>
       <TooltipContent>
         <p>{id}</p>

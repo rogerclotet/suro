@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMenuItems } from "../use-menu-items";
 
 export default function Breadcrumbs() {
@@ -22,18 +23,27 @@ export default function Breadcrumbs() {
   const menuItems = useMenuItems();
 
   const allowedBreadcrumbs = useMemo(() => {
-    return menuItems.flatMap((item) =>
+    const explicitlyAllowedBreadcrumbs = ["grups"];
+    const breadcrumbsFromMenuItems = menuItems.flatMap((item) =>
       [item, ...(item.children ?? [])].map((item) =>
         item.path.split("/").pop(),
       ),
     );
+
+    return [...explicitlyAllowedBreadcrumbs, ...breadcrumbsFromMenuItems];
   }, [menuItems]);
 
   const breadcrumbs = useMemo(() => {
-    return pathname
+    const breadcrumbsFromPathname = pathname
       .replace(`/grups/${project?.id}`, "")
       .split("/")
       .filter((breadcrumb) => allowedBreadcrumbs.includes(breadcrumb));
+
+    if (breadcrumbsFromPathname.length === 0) {
+      return ["família"];
+    }
+
+    return breadcrumbsFromPathname;
   }, [pathname, project?.id, allowedBreadcrumbs]);
 
   const isCurrentPath = useMemo(
@@ -44,11 +54,11 @@ export default function Breadcrumbs() {
   const { isMobile } = useSidebar();
 
   if (!project) {
-    return null;
+    return <Skeleton className="h-8 w-24" />;
   }
 
   return (
-    <div className="flex items-center gap-2 px-6">
+    <div className="flex items-center gap-2">
       {isMobile && (
         <>
           <SidebarTrigger className="-ml-1" />

@@ -9,9 +9,7 @@ const fabVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-accent text-accent-foreground hover:shadow-lg active:scale-95 active:shadow-md",
-        surface:
-          "bg-surface text-surface-foreground hover:shadow-lg active:scale-95 active:shadow-md",
+          "bg-primary text-primary-foreground hover:shadow-lg active:scale-95 active:shadow-md",
         secondary:
           "bg-secondary text-secondary-foreground hover:shadow-lg active:scale-95 active:shadow-md",
       },

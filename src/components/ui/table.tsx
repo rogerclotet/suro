@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const Table = forwardRef<HTMLTableElement, HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="-mx-4 lg:-mx-8 relative w-calc(100%+2rem) overflow-auto lg:w-[calc(100%+4rem)] xl:mx-0 xl:w-full">
+    <div className="-mx-4 relative w-calc(100%+2rem) overflow-auto lg:mx-0 lg:w-full">
       <table
         ref={ref}
         className={cn("w-full caption-bottom text-sm", className)}

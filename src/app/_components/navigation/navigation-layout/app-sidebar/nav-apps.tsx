@@ -1,5 +1,6 @@
 "use client";
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,13 +28,16 @@ export default function NavApps() {
   const menuItems = useMenuItems();
   const pathname = usePathname();
   const { isMobile, setOpenMobile, state } = useSidebar();
+  const [animationParent] = useAutoAnimate();
 
   const shouldDisplayChildrenInSidebar = useMemo(() => {
     return !isMobile && state === "expanded";
   }, [isMobile, state]);
 
   const activeParent = useMemo(() => {
-    return menuItems.find((item) => pathname.includes(item.path));
+    return menuItems.find(
+      (item) => item.path !== "/" && pathname.includes(item.path),
+    );
   }, [menuItems, pathname]);
 
   return (
@@ -41,7 +45,7 @@ export default function NavApps() {
       <SidebarGroupLabel>Apps</SidebarGroupLabel>
       <SidebarGroupContent>
         {menuItems.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={`${item.name}-${item.path}`}>
             {item.children && shouldDisplayChildrenInSidebar ? (
               <SidebarMenu>
                 <Collapsible

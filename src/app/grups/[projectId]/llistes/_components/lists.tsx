@@ -2,7 +2,7 @@ import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { getLists } from "@/server/lists";
 import CreateListButton from "./create-list/create-list-button";
 import ListPreview from "./list-preview";
@@ -19,7 +19,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
     return (
       <Alert>
         <InfoIcon className="h-4 w-4" />
-        <AlertDescription>Encara no hi ha llistes</AlertDescription>
+        <AlertTitle>Encara no hi ha llistes</AlertTitle>
       </Alert>
     );
   }

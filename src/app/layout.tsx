@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import { GeistSans } from "geist/font/sans";
+import "@fontsource/convergence";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
@@ -31,11 +31,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html
-      lang="ca"
-      suppressHydrationWarning
-      className={`${GeistSans.variable}`}
-    >
+    <html lang="ca" suppressHydrationWarning>
       <body>
         <NextSSRPlugin
           /**

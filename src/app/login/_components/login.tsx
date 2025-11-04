@@ -60,7 +60,7 @@ export default function Login({ session }: { session?: Session | null }) {
             </Button>
 
             {loggedInWithResend && (
-              <Alert className="text-left text-secondary">
+              <Alert>
                 <Info className="h-4 w-4" />
                 <AlertTitle>Correu enviat</AlertTitle>
                 <AlertDescription className="text-wrap">

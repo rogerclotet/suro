@@ -33,7 +33,7 @@ export default function ProjectSelector() {
       <Skeleton
         className={cn(
           "w-full",
-          state === "expanded" ? "w-12" : "h-8 rounded-full",
+          state === "expanded" ? "h-13" : "aspect-square rounded-full",
         )}
       />
     );

@@ -1,7 +1,7 @@
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import getProjectFiles from "@/server/files";
 import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
@@ -32,7 +32,7 @@ export default async function FilesPage({
       {allFiles.length === 0 ? (
         <Alert>
           <InfoIcon className="h-4 w-4" />
-          <AlertDescription>Encara no hi ha fitxers</AlertDescription>
+          <AlertTitle>Encara no hi ha fitxers</AlertTitle>
         </Alert>
       ) : (
         <Files files={allFiles} />
