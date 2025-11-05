@@ -57,8 +57,14 @@ export default function EditListItemForm(props: {
   const { project } = useProjects();
 
   useEffect(() => {
-    form.setFocus("name");
-  }, [form]);
+    // Update the form values when the item changes
+    form.reset({
+      name: props.item.name,
+      details: props.item.details ?? "",
+      completed: props.item.completed ?? false,
+      categoryId: props.item.categoryId ?? "",
+    });
+  }, [form, props.item]);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (!form.formState.isDirty) {
@@ -67,11 +73,6 @@ export default function EditListItemForm(props: {
 
     try {
       const parsed = v.parse(listItemSchema, data);
-
-      if (parsed.name === "") {
-        await props.onDelete?.();
-        return;
-      }
 
       if (
         form.formState.dirtyFields.name &&
@@ -83,6 +84,8 @@ export default function EditListItemForm(props: {
         return;
       }
 
+      props.triggerRef.current?.click();
+
       await props.onChange(
         parsed.name,
         parsed.details ?? "",
@@ -90,7 +93,6 @@ export default function EditListItemForm(props: {
         parsed.categoryId === "" ? null : (parsed.categoryId ?? null),
       );
 
-      props.triggerRef.current?.click();
       form.reset({
         name: parsed.name,
         details: parsed.details ?? "",

@@ -13,7 +13,7 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { List } from "@/app/_data/list";
+import type { List, ListItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import CategoryItems from "./category-items";
@@ -22,16 +22,34 @@ import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const { project } = useProjects();
+
   const [dragging, setDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const keyboardSensor = useSensor(KeyboardSensor);
-
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
+  // Track optimistic updates: itemId -> updated item data
+  const [optimisticUpdates, setOptimisticUpdates] = useState<
+    Map<string, Partial<ListItem>>
+  >(new Map());
+
+  const list = useMemo(() => {
+    if (optimisticUpdates.size === 0) {
+      return props.list;
+    }
+    return {
+      ...props.list,
+      items: props.list.items.map((item) => {
+        const update = optimisticUpdates.get(item.id);
+        return update ? { ...item, ...update } : item;
+      }),
+    };
+  }, [props.list, optimisticUpdates]);
+
   const itemsByCategory = useMemo(
-    () => groupItemsByCategory(props.list.items, project),
-    [props.list.items, project],
+    () => groupItemsByCategory(list.items, project),
+    [list.items, project],
   );
 
   async function handleChange(
@@ -45,25 +63,26 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    item.name = name;
-    item.details = details;
-    item.completed = completed;
-    item.category =
-      project?.categories.find((c) => c.id === categoryId) ?? null;
-    item.updatedAt = new Date();
+    setOptimisticUpdates((prev) => {
+      const next = new Map(prev);
+      next.set(item.id, { name, details, completed, categoryId });
+      return next;
+    });
 
-    await updateListItem(
-      props.list,
-      item.id,
-      name,
-      details,
-      completed,
-      categoryId,
-    );
+    try {
+      await updateListItem(list, item.id, name, details, completed, categoryId);
+    } catch (e) {
+      setOptimisticUpdates((prev) => {
+        const next = new Map(prev);
+        next.delete(item.id);
+        return next;
+      });
+      throw e;
+    }
   }
 
   async function handleDelete(item: List["items"][number]) {
-    await deleteListItem(props.list, item.id);
+    await deleteListItem(list, item.id);
   }
 
   async function handleDragStart(_event: DragStartEvent) {
@@ -84,7 +103,7 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    const item = props.list.items.find((i) => i.id === itemId);
+    const item = list.items.find((i) => i.id === itemId);
     if (!item) {
       return;
     }
@@ -97,7 +116,7 @@ export default function CheckList(props: { list: List }) {
     }
 
     if (
-      props.list.items.find(
+      list.items.find(
         (i) => i.categoryId === (category?.id ?? null) && i.name === item.name,
       )
     ) {
@@ -105,16 +124,33 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    item.category = category;
+    // Apply optimistic update for category change
+    setOptimisticUpdates((prev) => {
+      const next = new Map(prev);
+      const currentUpdate = next.get(itemId) || {};
+      next.set(itemId, {
+        ...currentUpdate,
+        category,
+        categoryId: category?.id ?? null,
+      });
+      return next;
+    });
 
     await updateListItem(
-      props.list,
+      list,
       itemId,
       item.name,
       item.details ?? "",
       item.completed ?? false,
       category?.id ?? null,
     );
+
+    // Clear optimistic update after successful API call
+    setOptimisticUpdates((prev) => {
+      const next = new Map(prev);
+      next.delete(itemId);
+      return next;
+    });
   }
 
   return (
@@ -124,41 +160,28 @@ export default function CheckList(props: { list: List }) {
       onDragEnd={handleDragEnd}
       sensors={sensors}
     >
-      <div className="w-full">
-        <div className="mx-auto max-w-lg">
-          <NewListItem list={props.list} />
-        </div>
+      <div className="mx-auto max-w-lg">
+        <NewListItem list={list} />
+      </div>
 
-        <div className="mx-auto flex max-w-lg flex-col items-stretch gap-1">
-          {itemsByCategory
-            .sort((a, b) => {
-              if (a.items.length !== 0 && b.items.length !== 0) {
-                return a.category.localeCompare(b.category);
-              }
-              return b.items.length - a.items.length;
-            })
-            .map(({ category, items }) => (
-              <CategoryItems
-                key={category}
-                category={category}
-                items={items}
-                list={props.list}
-                isDragging={dragging}
-                handleChange={handleChange}
-                handleDelete={handleDelete}
-              />
-            ))}
-        </div>
+      <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
+        {itemsByCategory.map(({ category, items }) => (
+          <CategoryItems
+            key={`category-${category === "" ? "<none>" : category}`}
+            category={category}
+            items={items}
+            list={list}
+            isDragging={dragging}
+            handleChange={handleChange}
+            handleDelete={handleDelete}
+          />
+        ))}
       </div>
     </DndContext>
   );
 }
 
-function sorted(items: List["items"]) {
-  return [...items].sort(compareItems);
-}
-
-function compareItems(a: List["items"][number], b: List["items"][number]) {
+function compareItems(a: ListItem, b: ListItem) {
   if (a.completed && !b.completed) {
     return 1;
   }
@@ -175,11 +198,13 @@ function groupItemsByCategory(items: List["items"], project: Project | null) {
     return [];
   }
 
-  const categories = project.categories.reduce((acc, category) => {
-    acc.set(category.name, []);
-    return acc;
-  }, new Map<string, List["items"]>());
-  categories.set("", []);
+  const categories = project.categories.reduce(
+    (acc, category) => {
+      acc.set(category.name, []);
+      return acc;
+    },
+    new Map<string, List["items"]>([["", []]]),
+  );
 
   for (const item of items) {
     const category = item.category?.name ?? "";
@@ -188,10 +213,16 @@ function groupItemsByCategory(items: List["items"], project: Project | null) {
 
   const result = [];
   for (const [category, items] of categories.entries()) {
-    result.push({ category, items: sorted(items) });
+    items.sort(compareItems);
+    result.push({ category, items });
   }
 
-  result.sort((a, b) => a.category.localeCompare(b.category));
+  result.sort((a, b) => {
+    if (a.items.length !== 0 && b.items.length !== 0) {
+      return a.category.localeCompare(b.category);
+    }
+    return b.items.length - a.items.length;
+  });
 
   return result;
 }
