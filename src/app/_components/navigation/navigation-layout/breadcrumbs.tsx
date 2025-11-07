@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
@@ -92,13 +93,15 @@ export default function Breadcrumbs() {
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
-                    href={`/grups/${project.id}/${breadcrumb}`}
+                    asChild
                     className={cn(
                       "font-semibold capitalize",
                       index === breadcrumbs.length - 1 && "text-foreground",
                     )}
                   >
-                    {breadcrumb}
+                    <Link href={`/grups/${project.id}/${breadcrumb}`}>
+                      {breadcrumb}
+                    </Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
