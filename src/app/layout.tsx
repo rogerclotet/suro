@@ -22,9 +22,16 @@ export const metadata: Metadata = {
   title: "Família",
   description: "Gestor familiar",
   icons: [{ rel: "icon", url: "/favicon.png" }],
+  appleWebApp: {
+    title: "Família",
+    capable: true,
+    statusBarStyle: "black-translucent",
+    startupImage: "/favicon.png",
+  },
 };
 
 export const viewport: Viewport = {
+  colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fafafa" },
     { media: "(prefers-color-scheme: dark)", color: "#121621" },
