@@ -56,11 +56,7 @@ const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
     return (
       <Button
         ref={ref}
-        className={cn(
-          fabVariants({ variant, size, elevation }),
-          "absolute right-4 bottom-4",
-          className,
-        )}
+        className={cn(fabVariants({ variant, size, elevation }), className)}
         {...props}
       >
         {Icon && (

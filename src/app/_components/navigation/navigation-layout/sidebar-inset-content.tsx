@@ -44,7 +44,13 @@ export default function SidebarInsetContent({
       {/* TODO: add a condition to only show the FAB on mobile when the sidebar actions are in place */}
       {action && (
         <div className="relative h-0 w-full">
-          <FAB key={action.label} icon={action.icon} onClick={action.onClick} />
+          <FAB
+            key={action.label}
+            icon={action.icon}
+            onClick={action.onClick}
+            className="absolute right-4 bottom-4 z-20"
+            elevation="high"
+          />
         </div>
       )}
 
