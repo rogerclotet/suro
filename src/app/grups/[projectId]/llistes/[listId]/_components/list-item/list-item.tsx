@@ -2,7 +2,6 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
-import { useRef } from "react";
 import type { List, ListItem as ListItemType } from "@/app/_data/list";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -24,7 +23,6 @@ export default function ListItem(props: {
       id: `draggable-${props.item.id}`,
       data: { id: props.item.id },
     });
-  const editTriggerRef = useRef<HTMLDivElement>(null);
   const style = transform
     ? {
         transform: `translate3d(0, ${transform.y}px, 0)`,
@@ -40,67 +38,61 @@ export default function ListItem(props: {
     );
   }
 
-  function handleEditItem() {
-    editTriggerRef.current?.click();
-  }
-
   return (
-    <>
-      <li
-        className={cn(
-          "z-0 flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted",
-          isDragging && "z-50",
-        )}
-        onClick={handleEditItem}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-          }
-        }}
-        ref={setNodeRef}
-        style={style}
-      >
-        <div className="flex flex-row items-center">
-          <Checkbox
-            checked={props.item.completed ?? false}
-            onCheckedChange={handleCheckedChange}
-            className="h-6 w-6 transition-all"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-
-        <span
-          className={cn(
-            "wrap-anywhere grow",
-            props.item.completed ? "text-muted-foreground line-through" : "",
-          )}
-        >
-          {props.item.name}
-        </span>
-
-        <button
-          type="button"
+    <li
+      className={cn(
+        "z-0 flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted",
+        isDragging && "z-50",
+      )}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+        }
+      }}
+      ref={setNodeRef}
+      style={style}
+    >
+      <div className="flex flex-row items-center">
+        <Checkbox
+          checked={props.item.completed ?? false}
+          onCheckedChange={handleCheckedChange}
+          className="h-6 w-6 transition-all"
           onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.stopPropagation();
-            }
-          }}
-          className="cursor-grab text-muted-foreground"
-          {...listeners}
-          {...attributes}
-        >
-          <GripVertical />
-        </button>
-      </li>
+        />
+      </div>
 
       <EditListItemForm
         list={props.list}
         item={props.item}
         onChange={props.onChange}
         onDelete={props.onDelete}
-        triggerRef={editTriggerRef}
+        trigger={
+          <button
+            type="button"
+            className={cn(
+              "wrap-anywhere grow",
+              props.item.completed ? "text-muted-foreground line-through" : "",
+            )}
+          >
+            {props.item.name}
+          </button>
+        }
       />
-    </>
+
+      <button
+        type="button"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.stopPropagation();
+          }
+        }}
+        className="cursor-grab text-muted-foreground"
+        {...listeners}
+        {...attributes}
+      >
+        <GripVertical />
+      </button>
+    </li>
   );
 }

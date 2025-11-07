@@ -45,7 +45,6 @@ export default function TemplateItem({
     resolver: valibotResolver(templateItemSchema),
   });
   const { project } = useProjects();
-  const newCategoryModalRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
 
@@ -77,7 +76,6 @@ export default function TemplateItem({
     onChange: (value: string) => void,
   ) {
     if (value === "new") {
-      newCategoryModalRef.current?.click();
       return;
     }
 
@@ -154,7 +152,15 @@ export default function TemplateItem({
                           {category.name}
                         </SelectItem>
                       ))}
-                      <SelectItem value="new">+ Nova categoria</SelectItem>
+
+                      <NewCategoryModal
+                        trigger={
+                          <SelectItem value="new">+ Nova categoria</SelectItem>
+                        }
+                        onCreate={(categoryId) =>
+                          form.setValue("category", categoryId)
+                        }
+                      />
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -164,11 +170,6 @@ export default function TemplateItem({
           />
         </form>
       </Form>
-
-      <NewCategoryModal
-        triggerRef={newCategoryModalRef}
-        onCreate={(categoryId) => form.setValue("category", categoryId)}
-      />
     </li>
   );
 }

@@ -1,7 +1,4 @@
-"use client";
-
 import { Edit, Settings, Trash2 } from "lucide-react";
-import { useRef } from "react";
 import type { Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,51 +7,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ModalForm from "@/components/ui/modal-form";
 import DeleteTemplateModal from "./delete-template-modal";
 import EditTemplateForm from "./edit-template-form";
 
 export default function SettingsMenu({ template }: { template: Template }) {
-  const editDialogRef = useRef<HTMLDivElement>(null);
-  const deleteDialogRef = useRef<HTMLDivElement>(null);
-
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Settings />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={() => editDialogRef.current?.click()}
-            className="cursor-pointer gap-2"
-          >
-            <Edit />
-            Editar plantilla
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => deleteDialogRef.current?.click()}
-            className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
-          >
-            <Trash2 />
-            Eliminar plantilla
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ModalForm
-        triggerRef={editDialogRef}
-        title="Editar plantilla"
-        description="Editar el nom i la descripció de la plantilla"
-      >
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Settings />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
         <EditTemplateForm
           template={template}
-          onClose={() => editDialogRef.current?.click()}
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2">
+              <Edit />
+              Editar plantilla
+            </DropdownMenuItem>
+          }
         />
-      </ModalForm>
-      <DeleteTemplateModal template={template} triggerRef={deleteDialogRef} />
-    </>
+
+        <DeleteTemplateModal
+          template={template}
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground">
+              <Trash2 />
+              Eliminar plantilla
+            </DropdownMenuItem>
+          }
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

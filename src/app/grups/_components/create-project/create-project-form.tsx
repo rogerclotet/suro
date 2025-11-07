@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
+import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,14 +18,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm from "@/components/ui/modal-form";
+import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { createProject } from "./actions";
 import { projectSchema } from "./data";
 
 export default function CreateProjectForm({
-  triggerRef,
+  trigger,
 }: {
-  triggerRef: React.RefObject<HTMLDivElement | null>;
+  trigger: React.ReactNode;
 }) {
   const { selectProject } = useProjects();
   const form = useForm({
@@ -35,6 +36,32 @@ export default function CreateProjectForm({
   });
   const { data: session } = useSession();
 
+  return (
+    <ModalForm
+      trigger={trigger}
+      title="Crear grup"
+      description="Els grups permeten convidar altres usuaris i compartir llistes, calendari i fitxers amb ells"
+    >
+      <CreateProjectFormContent
+        form={form}
+        selectProject={selectProject}
+        sessionId={session?.user.id}
+      />
+    </ModalForm>
+  );
+}
+
+function CreateProjectFormContent({
+  form,
+  selectProject,
+  sessionId,
+}: {
+  form: ReturnType<typeof useForm<v.InferInput<typeof projectSchema>>>;
+  selectProject: (project: Project) => void;
+  sessionId?: string;
+}) {
+  const { close } = useModalForm();
+
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
     try {
       const project = await createProject(data);
@@ -43,52 +70,44 @@ export default function CreateProjectForm({
       }
       selectProject(project);
       toast.success(`Grup ${form.getValues().name} creat`);
+      form.reset();
+      close();
     } catch (e) {
       posthog.captureException(e, {
-        distinctId: session?.user.id,
+        distinctId: sessionId,
         action: "create_project",
       });
       toast.error("No s'ha pogut crear el grup, torna-ho a provar més tard");
-      return;
-    } finally {
-      form.reset();
-      triggerRef.current?.click();
     }
   }
 
   return (
-    <ModalForm
-      triggerRef={triggerRef}
-      title="Crear grup"
-      description="Els grups permeten convidar altres usuaris i compartir llistes, calendari i fitxers amb ells"
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input autoFocus {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button
-            disabled={form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <span className="loading loading-spinner" />
-            )}
-            Crear
-          </Button>
-        </form>
-      </Form>
-    </ModalForm>
+        <Button
+          disabled={form.formState.isSubmitting}
+          className="w-full space-x-2"
+        >
+          {form.formState.isSubmitting && (
+            <span className="loading loading-spinner" />
+          )}
+          Crear
+        </Button>
+      </form>
+    </Form>
   );
 }
