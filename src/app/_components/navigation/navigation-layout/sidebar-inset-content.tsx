@@ -25,7 +25,7 @@ export default function SidebarInsetContent({
     <div className="flex h-full flex-col">
       <header
         className={cn(
-          "z-10 flex h-16 shrink-0 items-center gap-2 bg-card px-6 text-card-foreground transition-[width,height,box-shadow] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:rounded-t-lg md:bg-background md:text-foreground",
+          "z-10 flex h-16 shrink-0 items-center gap-2 bg-sidebar px-6 text-sidebar-foreground transition-[width,height,box-shadow] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:rounded-t-lg md:bg-background md:text-foreground",
           isMobile &&
             !scrollState.isAtTop &&
             "shadow-[0_0_1rem_1rem_rgba(0,0,0,0.4)]",
@@ -50,7 +50,7 @@ export default function SidebarInsetContent({
 
       <BottomNav
         className={cn(
-          "transition-shadow duration-200 ease-linear",
+          "z-10 transition-shadow duration-200 ease-linear",
           isMobile &&
             !scrollState.isAtBottom &&
             "shadow-[0_0_1rem_1rem_rgba(0,0,0,0.4)]",

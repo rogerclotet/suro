@@ -15,6 +15,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { useMenuItems } from "../use-menu-items";
 
 export default function Breadcrumbs() {
@@ -54,7 +55,16 @@ export default function Breadcrumbs() {
   const { isMobile } = useSidebar();
 
   if (!project) {
-    return <Skeleton className="h-8 w-24" />;
+    return (
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-4"
+        />
+        <Skeleton className="h-8 w-24" />
+      </div>
+    );
   }
 
   return (
@@ -76,14 +86,17 @@ export default function Breadcrumbs() {
               {index > 0 && <BreadcrumbSeparator />}
 
               <BreadcrumbItem>
-                {index === breadcrumbs.length - 1 || isCurrentPath ? (
+                {isCurrentPath ? (
                   <BreadcrumbPage className="font-semibold capitalize">
                     {breadcrumb}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
                     href={`/grups/${project.id}/${breadcrumb}`}
-                    className="font-semibold capitalize"
+                    className={cn(
+                      "font-semibold capitalize",
+                      index === breadcrumbs.length - 1 && "text-foreground",
+                    )}
                   >
                     {breadcrumb}
                   </BreadcrumbLink>
