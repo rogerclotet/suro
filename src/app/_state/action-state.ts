@@ -1,9 +1,10 @@
+import type { LucideIcon } from "lucide-react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export interface Action {
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   pathParts?: string[];
   onClick: () => void;
 }

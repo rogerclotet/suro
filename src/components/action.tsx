@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useAction } from "@/app/_state/action-state";
 
@@ -10,7 +11,7 @@ export default function Action({
   onClick,
 }: {
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   pathParts?: string[];
   onClick: () => void;
 }) {

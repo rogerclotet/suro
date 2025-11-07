@@ -79,7 +79,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     <>
       <Action
         label="Crear llista"
-        icon={<PlusIcon />}
+        icon={PlusIcon}
         pathParts={["llistes"]}
         onClick={() => triggerRef.current?.click()}
       />

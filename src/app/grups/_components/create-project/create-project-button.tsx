@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Plus } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useRef } from "react";
@@ -59,7 +59,7 @@ export default function CreateProjectButton() {
   return (
     <>
       <Action
-        icon={<Plus />}
+        icon={PlusIcon}
         label="Crear grup"
         onClick={() => modalRef.current?.click()}
       />

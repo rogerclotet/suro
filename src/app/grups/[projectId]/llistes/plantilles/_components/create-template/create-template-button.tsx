@@ -66,7 +66,7 @@ export default function CreateTemplateButton({
     <>
       <Action
         label="Crear plantilla"
-        icon={<PlusIcon />}
+        icon={PlusIcon}
         pathParts={["llistes", "plantilles"]}
         onClick={() => triggerRef.current?.click()}
       />

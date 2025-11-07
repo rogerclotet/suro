@@ -12,7 +12,7 @@ export default function NewCategoryButton() {
     <>
       <Action
         label="Crear categoria"
-        icon={<PlusIcon />}
+        icon={PlusIcon}
         pathParts={["llistes", "categories"]}
         onClick={() => triggerRef.current?.click()}
       />

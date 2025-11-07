@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import type { LucideIcon } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -35,12 +36,21 @@ export interface FABProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof fabVariants> {
   label?: string;
-  icon?: React.ReactNode;
+  icon?: LucideIcon;
 }
 
 const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
   (
-    { className, variant, size, elevation, label, icon, children, ...props },
+    {
+      className,
+      variant,
+      size,
+      elevation,
+      label,
+      icon: Icon,
+      children,
+      ...props
+    },
     ref,
   ) => {
     return (
@@ -53,8 +63,15 @@ const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
         )}
         {...props}
       >
-        {icon && (
-          <span className="flex items-center justify-center">{icon}</span>
+        {Icon && (
+          <Icon
+            className={cn(
+              "size-6",
+              size === "sm" && "size-6",
+              size === "md" && "size-7",
+              size === "lg" && "size-9",
+            )}
+          />
         )}
         {label && <span className="font-semibold text-sm">{label}</span>}
         {children}

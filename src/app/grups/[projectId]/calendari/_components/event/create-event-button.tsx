@@ -2,7 +2,7 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2Icon, PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import {
@@ -195,7 +195,7 @@ export default function CreateEventButton({
   return (
     <>
       <Action
-        icon={<Plus />}
+        icon={PlusIcon}
         label="Crear esdeveniment"
         onClick={() => triggerRef.current?.click()}
       />
@@ -301,7 +301,7 @@ export default function CreateEventButton({
               className="w-full space-x-2"
             >
               {form.formState.isSubmitting && (
-                <Loader2 className="animate-spin" />
+                <Loader2Icon className="animate-spin" />
               )}
               Crear
             </Button>
