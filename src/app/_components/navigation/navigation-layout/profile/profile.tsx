@@ -8,9 +8,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import ThemeSwitcher from "../theme-switcher";
 import { logOut } from "./actions";
 
 export default function Profile() {
@@ -58,6 +60,10 @@ export default function Profile() {
             Perfil
           </DropdownMenuItem>
         </Link>
+
+        <ThemeSwitcher />
+
+        <DropdownMenuSeparator />
 
         <form action={logOut}>
           <button

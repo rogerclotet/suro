@@ -6,6 +6,12 @@ const Collapsible = CollapsiblePrimitive.Root;
 
 const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;
 
-const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent;
+const CollapsibleContent = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <CollapsiblePrimitive.CollapsibleContent className="transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+      {children}
+    </CollapsiblePrimitive.CollapsibleContent>
+  );
+};
 
 export { Collapsible, CollapsibleTrigger, CollapsibleContent };
