@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { type FormEvent, type RefObject, useCallback } from "react";
+import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -26,10 +26,10 @@ import { linkEventList } from "../actions";
 
 export default function LinkListForm({
   event,
-  triggerRef,
+  trigger,
 }: {
   event: Event;
-  triggerRef: RefObject<HTMLDivElement | null>;
+  trigger: React.ReactNode;
 }) {
   const { data: session } = useSession();
   const form = useForm({
@@ -70,7 +70,6 @@ export default function LinkListForm({
     async (data: v.InferInput<typeof linkEventListSchema>) => {
       try {
         await linkEventList(event, data.listId);
-        triggerRef.current?.click();
         toast.success("Llista enllaçada correctament");
       } catch (e) {
         posthog.captureException(e, {
@@ -84,7 +83,7 @@ export default function LinkListForm({
         );
       }
     },
-    [event, session?.user.id, triggerRef],
+    [event, session?.user.id],
   );
 
   const handleFormSubmit = useCallback(
@@ -97,7 +96,7 @@ export default function LinkListForm({
 
   return (
     <ModalForm
-      triggerRef={triggerRef}
+      trigger={trigger}
       title="Enllaçar llista"
       description="Selecciona la llista a enllaçar. Un esdeveniment només pot tenir una llista enllaçada, i una llista només pot estar enllaçada a un esdeveniment."
     >

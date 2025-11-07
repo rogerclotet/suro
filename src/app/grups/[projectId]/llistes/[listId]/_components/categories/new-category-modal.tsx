@@ -4,7 +4,6 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type { RefObject } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -24,10 +23,10 @@ import { createCategory } from "./actions";
 import { categorySchema } from "./data";
 
 export default function NewCategoryModal({
-  triggerRef,
+  trigger,
   onCreate,
 }: {
-  triggerRef: RefObject<HTMLDivElement | null>;
+  trigger: React.ReactNode;
   onCreate?: (categoryId: string) => void;
 }) {
   const { project, addCategory } = useProjects();
@@ -55,7 +54,6 @@ export default function NewCategoryModal({
       // Add to queue to allow components to update categories
       setTimeout(() => onCreate?.(categoryId), 0);
 
-      triggerRef.current?.click();
       form.reset();
 
       toast.success(`Categoria ${data.name} creada`);
@@ -73,7 +71,7 @@ export default function NewCategoryModal({
 
   return (
     <ModalForm
-      triggerRef={triggerRef}
+      trigger={trigger}
       title="Nova categoria"
       description="Crea i selecciona una cagegoria nova"
     >

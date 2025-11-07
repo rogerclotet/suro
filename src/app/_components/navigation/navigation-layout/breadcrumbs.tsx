@@ -89,7 +89,7 @@ export default function Breadcrumbs() {
               <BreadcrumbItem>
                 {isCurrentPath ? (
                   <BreadcrumbPage className="font-semibold capitalize">
-                    {breadcrumb}
+                    {breadcrumb.replace("-", " ")}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
@@ -100,7 +100,7 @@ export default function Breadcrumbs() {
                     )}
                   >
                     <Link href={`/grups/${project.id}/${breadcrumb}`}>
-                      {breadcrumb}
+                      {breadcrumb.replace("-", " ")}
                     </Link>
                   </BreadcrumbLink>
                 )}

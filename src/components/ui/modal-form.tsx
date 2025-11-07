@@ -1,7 +1,7 @@
 "use client";
 
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { type ReactNode, type RefObject, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,8 +23,22 @@ import {
 } from "@/components/ui/drawer";
 import { ClientOnly } from "../client-only";
 
+type ModalFormContextType = {
+  close: () => void;
+};
+
+const ModalFormContext = createContext<ModalFormContextType | null>(null);
+
+export function useModalForm() {
+  const context = useContext(ModalFormContext);
+  if (!context) {
+    throw new Error("useModalForm must be used within ModalForm");
+  }
+  return context;
+}
+
 type Props = {
-  triggerRef: RefObject<HTMLDivElement | null>;
+  trigger: ReactNode;
   title: string;
   description?: string;
   children: ReactNode;
@@ -38,16 +52,16 @@ export default function ModalForm(props: Props) {
   );
 }
 
-function ClientModalForm({ triggerRef, title, description, children }: Props) {
+function ClientModalForm({ trigger, title, description, children }: Props) {
   const [open, setOpen] = useState(false);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
+
+  const close = () => setOpen(false);
 
   if (isMdOrLarger) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <div className="hidden" ref={triggerRef} />
-        </DialogTrigger>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -55,7 +69,9 @@ function ClientModalForm({ triggerRef, title, description, children }: Props) {
               <DialogDescription>{description}</DialogDescription>
             )}
           </DialogHeader>
-          {children}
+          <ModalFormContext.Provider value={{ close }}>
+            {children}
+          </ModalFormContext.Provider>
         </DialogContent>
       </Dialog>
     );
@@ -63,15 +79,17 @@ function ClientModalForm({ triggerRef, title, description, children }: Props) {
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <div className="hidden" ref={triggerRef} />
-      </DrawerTrigger>
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>{description}</DrawerDescription>
+          {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        <div className="px-4">{children}</div>
+        <div className="px-4">
+          <ModalFormContext.Provider value={{ close }}>
+            {children}
+          </ModalFormContext.Provider>
+        </div>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel·lar</Button>

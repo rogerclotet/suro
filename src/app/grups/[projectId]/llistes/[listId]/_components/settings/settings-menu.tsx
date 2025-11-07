@@ -1,7 +1,4 @@
-"use client";
-
 import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
-import { useRef } from "react";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ModalForm from "@/components/ui/modal-form";
 import ClearCompletedModal from "./clear-completed-modal";
 import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
@@ -23,66 +19,53 @@ export default function SettingsMenu({
   list: List;
   templates: Template[];
 }) {
-  const clearCompletedDialogRef = useRef<HTMLDivElement>(null);
-  const importDialogRef = useRef<HTMLDivElement>(null);
-  const editDialogRef = useRef<HTMLDivElement>(null);
-  const deleteDialogRef = useRef<HTMLDivElement>(null);
-
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Settings />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={() => clearCompletedDialogRef.current?.click()}
-            className="cursor-pointer gap-2"
-          >
-            <ListX /> Esborrar completats
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => importDialogRef.current?.click()}
-            className="cursor-pointer gap-2"
-          >
-            <Import /> Importar plantilles
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => editDialogRef.current?.click()}
-            className="cursor-pointer gap-2"
-          >
-            <Edit />
-            Editar llista
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => deleteDialogRef.current?.click()}
-            className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
-          >
-            <Trash2 />
-            Eliminar llista
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ClearCompletedModal list={list} triggerRef={clearCompletedDialogRef} />
-      <ImportTemplatesModal
-        list={list}
-        templates={templates}
-        triggerRef={importDialogRef}
-      />
-      <ModalForm
-        triggerRef={editDialogRef}
-        title="Editar llista"
-        description="Editar el títol i la descripció de la llista"
-      >
-        <EditListForm
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Settings />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <ClearCompletedModal
           list={list}
-          onClose={() => editDialogRef.current?.click()}
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2">
+              <ListX /> Esborrar completats
+            </DropdownMenuItem>
+          }
         />
-      </ModalForm>
-      <DeleteListModal triggerRef={deleteDialogRef} list={list} />
-    </>
+
+        <ImportTemplatesModal
+          list={list}
+          templates={templates}
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2">
+              <Import /> Importar plantilles
+            </DropdownMenuItem>
+          }
+        />
+
+        <EditListForm
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2">
+              <Edit />
+              Editar llista
+            </DropdownMenuItem>
+          }
+          list={list}
+        />
+
+        <DeleteListModal
+          trigger={
+            <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground">
+              <Trash2 />
+              Eliminar llista
+            </DropdownMenuItem>
+          }
+          list={list}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

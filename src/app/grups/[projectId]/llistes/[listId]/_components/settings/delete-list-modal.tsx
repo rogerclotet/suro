@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type { RefObject } from "react";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
@@ -11,10 +11,10 @@ import { deleteList } from "./actions";
 
 export default function DeleteListModal({
   list,
-  triggerRef,
+  trigger,
 }: {
   list: List;
-  triggerRef: RefObject<HTMLDivElement | null>;
+  trigger: ReactNode;
 }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -45,7 +45,7 @@ export default function DeleteListModal({
       actionText="Eliminar"
       onAction={handleDelete}
       variant="destructive"
-      triggerRef={triggerRef}
+      trigger={trigger}
     />
   );
 }

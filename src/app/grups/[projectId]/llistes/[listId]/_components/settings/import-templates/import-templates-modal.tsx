@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { Fragment, type RefObject, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
@@ -17,11 +17,11 @@ import TemplatePreview from "./template-preview";
 export default function ImportTemplatesModal({
   list,
   templates,
-  triggerRef,
+  trigger,
 }: {
   list: List;
   templates: Template[];
-  triggerRef: RefObject<HTMLDivElement | null>;
+  trigger: React.ReactNode;
 }) {
   const [selected, setSelected] = useState<boolean[]>([]);
   const [itemsByCategory, setItemsByCategory] = useState<
@@ -71,7 +71,6 @@ export default function ImportTemplatesModal({
         list.id,
         Object.values(itemsByCategory).flat(),
       );
-      triggerRef.current?.click();
       setSelected([]);
     } catch (e) {
       posthog.captureException(e, {
@@ -97,7 +96,7 @@ export default function ImportTemplatesModal({
 
   return (
     <ModalForm
-      triggerRef={triggerRef}
+      trigger={trigger}
       title="Importar plantilles"
       description="Importar els elements de les plantilles seleccionades a la llista actual"
     >

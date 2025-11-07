@@ -13,7 +13,7 @@ export default function Action({
   label: string;
   icon: LucideIcon;
   pathParts?: string[];
-  onClick: () => void;
+  onClick?: () => void;
 }) {
   const { setAction } = useAction();
 
