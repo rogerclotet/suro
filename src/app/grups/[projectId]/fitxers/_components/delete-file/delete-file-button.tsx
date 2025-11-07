@@ -3,12 +3,14 @@
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { File } from "@/app/_data/file";
 import ModalAction from "@/components/ui/modal-action";
 import { deleteFile } from "./actions";
 
 export default function DeleteFileButton({ file }: { file: File }) {
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function handleDelete() {
@@ -30,20 +32,23 @@ export default function DeleteFileButton({ file }: { file: File }) {
   }
 
   return (
-    <ModalAction
-      title="Eliminar fitxer"
-      description="Estàs segur que vols eliminar aquest fitxer? Aquesta acció no es pot desfer"
-      actionText="Eliminar"
-      onAction={handleDelete}
-      variant="destructive"
-      trigger={
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 size={16} />
-        </button>
-      }
-    />
+    <>
+      <button
+        type="button"
+        onClick={() => triggerRef.current?.click()}
+        className="text-muted-foreground hover:text-destructive"
+      >
+        <Trash2 size={16} />
+      </button>
+
+      <ModalAction
+        title="Eliminar fitxer"
+        description="Estàs segur que vols eliminar aquest fitxer? Aquesta acció no es pot desfer"
+        actionText="Eliminar"
+        onAction={handleDelete}
+        variant="destructive"
+        triggerRef={triggerRef}
+      />
+    </>
   );
 }

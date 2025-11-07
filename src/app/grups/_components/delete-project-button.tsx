@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export default function DeleteProjectButton({
 }: {
   projectId: string;
 }) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
   const { data: session } = useSession();
 
@@ -45,17 +47,24 @@ export default function DeleteProjectButton({
   }
 
   return (
-    <ModalAction
-      title="Eliminar grup"
-      description={`Estàs segur que vols eliminar el grup ${projectToDelete.name}? Aquesta acció no es pot desfer.`}
-      actionText="Eliminar"
-      onAction={handleDelete}
-      variant="destructive"
-      trigger={
-        <Button variant="ghostDestructive" size="icon" aria-label="Eliminar">
-          <Trash2 />
-        </Button>
-      }
-    />
+    <>
+      <Button
+        variant="ghostDestructive"
+        size="icon"
+        onClick={() => modalRef.current?.click()}
+        aria-label="Eliminar"
+      >
+        <Trash2 />
+      </Button>
+
+      <ModalAction
+        title="Eliminar grup"
+        description={`Estàs segur que vols eliminar el grup ${projectToDelete.name}? Aquesta acció no es pot desfer.`}
+        actionText="Eliminar"
+        onAction={handleDelete}
+        variant="destructive"
+        triggerRef={modalRef}
+      />
+    </>
   );
 }

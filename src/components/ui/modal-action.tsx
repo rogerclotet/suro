@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, type RefObject, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,7 @@ type Props = {
   actionText: string;
   onAction: () => void;
   variant?: "default" | "destructive";
-  trigger: React.ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
   children?: ReactNode;
 };
 
@@ -49,7 +49,7 @@ function ClientModalAction({
   onAction,
   children,
   variant = "default",
-  trigger,
+  triggerRef,
 }: Props) {
   const [open, setOpen] = useState(false);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
@@ -62,13 +62,13 @@ function ClientModalAction({
   if (isMdOrLarger) {
     return (
       <AlertDialog>
-        <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+        <AlertDialogTrigger asChild>
+          <div className="hidden" ref={triggerRef} />
+        </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{title}</AlertDialogTitle>
-            {description && (
-              <AlertDialogDescription>{description}</AlertDialogDescription>
-            )}
+            <AlertDialogDescription>{description}</AlertDialogDescription>
           </AlertDialogHeader>
           {children}
           <AlertDialogFooter>
@@ -84,7 +84,9 @@ function ClientModalAction({
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+      <DrawerTrigger asChild>
+        <div className="hidden" ref={triggerRef} />
+      </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>

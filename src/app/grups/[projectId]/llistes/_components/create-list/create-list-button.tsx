@@ -6,6 +6,7 @@ import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -39,6 +40,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   });
   const router = useRouter();
   const { project } = useProjects();
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: templates } = useQuery({
     queryKey: ["templates", projectId],
     queryFn: () => getTemplates(projectId),
@@ -55,6 +57,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     try {
       const listId = await createList(project, data);
       toast.success(`Llista ${form.getValues().name} creada`);
+      triggerRef.current?.click();
       router.push(`/grups/${projectId}/llistes/${listId}`);
     } catch (e) {
       posthog.captureException(e, {
@@ -73,110 +76,117 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   }
 
   return (
-    <ModalForm
-      trigger={
-        <Action label="Crear llista" icon={PlusIcon} pathParts={["llistes"]} />
-      }
-      title="Crear llista"
-      description="Crear una llista nova"
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input autoFocus {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <>
+      <Action
+        label="Crear llista"
+        icon={PlusIcon}
+        pathParts={["llistes"]}
+        onClick={() => triggerRef.current?.click()}
+      />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripció</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={form.formState.isSubmitting} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {templates.length > 0 && (
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Crear llista"
+        description="Crear una llista nova"
+      >
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="templates"
-              render={() => (
-                <FormItem className="space-y-4">
-                  <FormLabel>Incloure plantilles</FormLabel>
-                  <FormDescription>
-                    {
-                      "S'inclouran els elements de les plantilles seleccionades a la nova llista"
-                    }
-                  </FormDescription>
-
-                  <div className="max-h-[20vh] space-y-2 overflow-y-auto">
-                    {templates.map((template) => (
-                      <FormField
-                        key={template.id}
-                        control={form.control}
-                        name="templates"
-                        render={({ field }) => (
-                          <FormItem key={template.id}>
-                            <div className="flex flex-row items-center gap-2">
-                              <FormControl>
-                                <Switch
-                                  checked={field.value?.includes(template.id)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...(field.value ?? []),
-                                          template.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== template.id,
-                                          ),
-                                        );
-                                  }}
-                                  disabled={form.formState.isSubmitting}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {template.name} ({template.items.length}{" "}
-                                elements)
-                              </FormLabel>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input autoFocus {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          )}
 
-          <Button
-            disabled={!form.formState.isDirty || form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <span className="loading loading-spinner" />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripció</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={form.formState.isSubmitting} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {templates.length > 0 && (
+              <FormField
+                control={form.control}
+                name="templates"
+                render={() => (
+                  <FormItem className="space-y-4">
+                    <FormLabel>Incloure plantilles</FormLabel>
+                    <FormDescription>
+                      {
+                        "S'inclouran els elements de les plantilles seleccionades a la nova llista"
+                      }
+                    </FormDescription>
+
+                    <div className="max-h-[20vh] space-y-2 overflow-y-auto">
+                      {templates.map((template) => (
+                        <FormField
+                          key={template.id}
+                          control={form.control}
+                          name="templates"
+                          render={({ field }) => (
+                            <FormItem key={template.id}>
+                              <div className="flex flex-row items-center gap-2">
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value?.includes(template.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...(field.value ?? []),
+                                            template.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== template.id,
+                                            ),
+                                          );
+                                    }}
+                                    disabled={form.formState.isSubmitting}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {template.name} ({template.items.length}{" "}
+                                  elements)
+                                </FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-            Crear
-          </Button>
-        </form>
-      </Form>
-    </ModalForm>
+
+            <Button
+              disabled={!form.formState.isDirty || form.formState.isSubmitting}
+              className="w-full space-x-2"
+            >
+              {form.formState.isSubmitting && (
+                <span className="loading loading-spinner" />
+              )}
+              Crear
+            </Button>
+          </form>
+        </Form>
+      </ModalForm>
+    </>
   );
 }

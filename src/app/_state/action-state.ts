@@ -6,7 +6,7 @@ export interface Action {
   label: string;
   icon: LucideIcon;
   pathParts?: string[];
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 export interface ActionState {

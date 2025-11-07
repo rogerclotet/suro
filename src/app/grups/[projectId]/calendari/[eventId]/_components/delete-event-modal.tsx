@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import type { RefObject } from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import ModalAction from "@/components/ui/modal-action";
@@ -10,10 +11,10 @@ import { deleteEvent } from "../actions";
 
 export default function DeleteEventModal({
   event,
-  trigger,
+  triggerRef,
 }: {
   event: Event;
-  trigger: React.ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -43,7 +44,7 @@ export default function DeleteEventModal({
       actionText="Eliminar"
       onAction={handleDelete}
       variant="destructive"
-      trigger={trigger}
+      triggerRef={triggerRef}
     />
   );
 }

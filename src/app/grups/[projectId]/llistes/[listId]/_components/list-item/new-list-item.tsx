@@ -4,6 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -39,6 +40,7 @@ export default function NewListItem({ list }: { list: List }) {
     resolver: valibotResolver(listItemSchema),
   });
   const { project } = useProjects();
+  const newCategoryModalRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
@@ -80,6 +82,7 @@ export default function NewListItem({ list }: { list: List }) {
 
   function handleCategoryChange(value: string) {
     if (value === "new") {
+      newCategoryModalRef.current?.click();
       return;
     }
 
@@ -150,15 +153,7 @@ export default function NewListItem({ list }: { list: List }) {
                         {category.name}
                       </SelectItem>
                     ))}
-
-                    <NewCategoryModal
-                      trigger={
-                        <SelectItem value="new">+ Nova categoria</SelectItem>
-                      }
-                      onCreate={(categoryId) =>
-                        form.setValue("categoryId", categoryId)
-                      }
-                    />
+                    <SelectItem value="new">+ Nova categoria</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -167,6 +162,11 @@ export default function NewListItem({ list }: { list: List }) {
           />
         </form>
       </Form>
+
+      <NewCategoryModal
+        triggerRef={newCategoryModalRef}
+        onCreate={(categoryId) => form.setValue("categoryId", categoryId)}
+      />
     </li>
   );
 }

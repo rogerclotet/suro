@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Category } from "@/app/_data/category";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export default function DeleteCategoryButton({
 }: {
   category: Category;
 }) {
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
 
   async function handleDelete() {
@@ -34,23 +36,26 @@ export default function DeleteCategoryButton({
   }
 
   return (
-    <ModalAction
-      trigger={
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive"
-          aria-label="Eliminar categoria"
-        >
-          <Trash2 />
-        </Button>
-      }
-      title="Eliminar categoria"
-      description={`Segur que vols eliminar la categoria ${category.name}?
+    <>
+      <Button
+        onClick={() => triggerRef.current?.click()}
+        variant="ghost"
+        size="icon"
+        className="text-destructive"
+        aria-label="Eliminar categoria"
+      >
+        <Trash2 />
+      </Button>
+
+      <ModalAction
+        triggerRef={triggerRef}
+        title="Eliminar categoria"
+        description={`Segur que vols eliminar la categoria ${category.name}?
           Aquesta acció no es pot desfer, i els elements d'aquesta categoria passaran a estar sense categoria.`}
-      actionText="Eliminar"
-      variant="destructive"
-      onAction={handleDelete}
-    />
+        actionText="Eliminar"
+        variant="destructive"
+        onAction={handleDelete}
+      />
+    </>
   );
 }

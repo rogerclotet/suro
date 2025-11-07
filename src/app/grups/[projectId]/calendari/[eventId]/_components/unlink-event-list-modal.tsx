@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import type { RefObject } from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
@@ -11,11 +12,11 @@ import { unlinkEventList } from "../actions";
 export default function UnlinkEventListModal({
   event,
   list,
-  trigger,
+  triggerRef,
 }: {
   event: Event;
   list: List | undefined;
-  trigger: React.ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
 
@@ -51,7 +52,7 @@ export default function UnlinkEventListModal({
       actionText="Desenllaçar"
       onAction={handleUnlink}
       variant="destructive"
-      trigger={trigger}
+      triggerRef={triggerRef}
     />
   );
 }

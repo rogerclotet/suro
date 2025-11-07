@@ -4,7 +4,6 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -20,16 +19,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm from "@/components/ui/modal-form";
 import { templateSchema } from "../create-template/data";
 import { updateTemplate } from "./actions";
 
 export default function EditTemplateForm({
   template,
-  trigger,
+  onClose,
 }: {
   template: Template;
-  trigger: ReactNode;
+  onClose: () => void;
 }) {
   const form = useForm({
     defaultValues: {
@@ -56,56 +54,50 @@ export default function EditTemplateForm({
       toast.error(
         "No s'ha pogut actualitzar la plantilla, torna-ho a provar més tard",
       );
+    } finally {
+      onClose();
     }
   }
 
   return (
-    <ModalForm
-      trigger={trigger}
-      title="Editar plantilla"
-      description="Editar el nom i la descripció de la plantilla"
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input autoFocus {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripció</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripció</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button
-            disabled={form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <Loader2 className="animate-spin" />
-            )}
-            Desar
-          </Button>
-        </form>
-      </Form>
-    </ModalForm>
+        <Button
+          disabled={form.formState.isSubmitting}
+          className="w-full space-x-2"
+        >
+          {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
+          Desar
+        </Button>
+      </form>
+    </Form>
   );
 }

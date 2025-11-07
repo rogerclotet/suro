@@ -1,7 +1,6 @@
 import {
   Calendar,
   FolderOpen,
-  GiftIcon,
   HandCoins,
   LayoutTemplateIcon,
   ListTodo,
@@ -58,11 +57,6 @@ const itemParts: MenuItemPart[] = [
     name: "Despeses",
     pathPart: "despeses",
     icon: <HandCoins />,
-  },
-  {
-    name: "Amic Invisible",
-    pathPart: "amic-invisible",
-    icon: <GiftIcon />,
   },
 ];
 

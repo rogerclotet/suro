@@ -5,13 +5,17 @@ import type { CheckedState } from "@radix-ui/react-checkbox";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { type ChangeEvent, type FormEvent, useCallback } from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  type RefObject,
+  useCallback,
+} from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,17 +29,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import ModalForm from "@/components/ui/modal-form";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
 import { editEvent } from "../actions";
 
 export default function EditEventForm({
   event,
-  trigger,
+  triggerRef,
 }: {
   event: Event;
-  trigger: React.ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
   const { project } = useProjects();
@@ -74,6 +78,54 @@ export default function EditEventForm({
       });
     },
     [form],
+  );
+
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof eventSchema>) => {
+      if (!project) {
+        toast.error("No s'ha seleccionat cap projecte");
+        return;
+      }
+
+      const dataToEdit = window.structuredClone(data);
+      if (dataToEdit.allDay) {
+        dataToEdit.dates.from = new Date(
+          Date.UTC(
+            data.dates.from?.getFullYear() ?? 0,
+            data.dates.from?.getMonth() ?? 0,
+            data.dates.from?.getDate() ?? 0,
+          ),
+        );
+        dataToEdit.dates.to = new Date(
+          Date.UTC(
+            data.dates.to?.getFullYear() ?? 0,
+            data.dates.to?.getMonth() ?? 0,
+            data.dates.to?.getDate() ?? 0,
+          ),
+        );
+      }
+
+      try {
+        await editEvent(event, dataToEdit, project);
+        toast.success("Editat correctament");
+        form.reset({
+          name: data.name,
+          description: data.description ?? "",
+          dates: { from: data.dates.from, to: data.dates.to },
+          allDay: data.allDay,
+        });
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "edit_event",
+          projectId: event.projectId,
+          eventId: event.id,
+        });
+        toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
+      }
+    },
+    [project, event, form, session?.user.id, triggerRef],
   );
 
   function handleDatesChange(dates: DateRange | undefined) {
@@ -134,95 +186,6 @@ export default function EditEventForm({
     form.setValue("allDay", checked);
   }
 
-  return (
-    <ModalForm
-      trigger={trigger}
-      title="Editar esdeveniment"
-      description="Editar el nom i descripció de l'esdeveniment"
-    >
-      <EditEventFormContent
-        form={form}
-        event={event}
-        project={project}
-        sessionId={session?.user.id}
-        handleDatesChange={handleDatesChange}
-        handleStartTimeChange={handleStartTimeChange}
-        handleEndTimeChange={handleEndTimeChange}
-        handleAllDayChange={handleAllDayChange}
-      />
-    </ModalForm>
-  );
-}
-
-function EditEventFormContent({
-  form,
-  event,
-  project,
-  sessionId,
-  handleDatesChange,
-  handleStartTimeChange,
-  handleEndTimeChange,
-  handleAllDayChange,
-}: {
-  form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
-  event: Event;
-  project: Project | null;
-  sessionId?: string;
-  handleDatesChange: (dates: DateRange | undefined) => void;
-  handleStartTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleEndTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleAllDayChange: (checked: CheckedState) => void;
-}) {
-  const { close } = useModalForm();
-
-  const onSubmit = useCallback(
-    async (data: v.InferInput<typeof eventSchema>) => {
-      if (!project) {
-        toast.error("No s'ha seleccionat cap projecte");
-        return;
-      }
-
-      const dataToEdit = window.structuredClone(data);
-      if (dataToEdit.allDay) {
-        dataToEdit.dates.from = new Date(
-          Date.UTC(
-            data.dates.from?.getFullYear() ?? 0,
-            data.dates.from?.getMonth() ?? 0,
-            data.dates.from?.getDate() ?? 0,
-          ),
-        );
-        dataToEdit.dates.to = new Date(
-          Date.UTC(
-            data.dates.to?.getFullYear() ?? 0,
-            data.dates.to?.getMonth() ?? 0,
-            data.dates.to?.getDate() ?? 0,
-          ),
-        );
-      }
-
-      try {
-        await editEvent(event, dataToEdit, project);
-        toast.success("Editat correctament");
-        form.reset({
-          name: data.name,
-          description: data.description ?? "",
-          dates: { from: data.dates.from, to: data.dates.to },
-          allDay: data.allDay,
-        });
-        close();
-      } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "edit_event",
-          projectId: event.projectId,
-          eventId: event.id,
-        });
-        toast.error("Error editant l'esdeveniment. Torna-ho a provar més tard");
-      }
-    },
-    [project, event, form, sessionId, close],
-  );
-
   const handleFormSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
@@ -232,102 +195,113 @@ function EditEventFormContent({
   );
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripció</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dates"
-          render={({ field }) => (
-            <div className="flex flex-row flex-wrap gap-2">
-              <FormItem className="grow">
-                <FormLabel>Dates</FormLabel>
-                <DatePicker
-                  dates={field.value as DateRange}
-                  onDatesChange={handleDatesChange}
-                />
+    <ModalForm
+      triggerRef={triggerRef}
+      title="Editar esdeveniment"
+      description="Editar el nom i descripció de l'esdeveniment"
+    >
+      <Form {...form}>
+        <form onSubmit={handleFormSubmit} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
               </FormItem>
-              <div className="flex grow flex-row gap-2">
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora inici</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.from)
-                    }
-                    onChange={handleStartTimeChange}
-                    className="justify-center"
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripció</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dates"
+            render={({ field }) => (
+              <div className="flex flex-row flex-wrap gap-2">
+                <FormItem className="grow">
+                  <FormLabel>Dates</FormLabel>
+                  <DatePicker
+                    dates={field.value as DateRange}
+                    onDatesChange={handleDatesChange}
                   />
                 </FormItem>
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora final</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.to)
-                    }
-                    onChange={handleEndTimeChange}
-                    className="justify-center"
-                  />
-                </FormItem>
+                <div className="flex grow flex-row gap-2">
+                  <FormItem className="w-auto grow">
+                    <FormLabel>Hora inici</FormLabel>
+                    <Input
+                      type="time"
+                      disabled={form.getValues().allDay}
+                      value={
+                        form.getValues().allDay
+                          ? ""
+                          : getTimeString(field.value?.from)
+                      }
+                      onChange={handleStartTimeChange}
+                      className="justify-center"
+                    />
+                  </FormItem>
+                  <FormItem className="w-auto grow">
+                    <FormLabel>Hora final</FormLabel>
+                    <Input
+                      type="time"
+                      disabled={form.getValues().allDay}
+                      value={
+                        form.getValues().allDay
+                          ? ""
+                          : getTimeString(field.value?.to)
+                      }
+                      onChange={handleEndTimeChange}
+                      className="justify-center"
+                    />
+                  </FormItem>
+                </div>
               </div>
-            </div>
-          )}
-        />
+            )}
+          />
 
-        <FormField
-          name="allDay"
-          render={({ field }) => (
-            <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value as boolean}
-                  onCheckedChange={handleAllDayChange}
-                />
-              </FormControl>
-              <FormLabel>Tot el dia</FormLabel>
-            </FormItem>
-          )}
-        />
+          <FormField
+            name="allDay"
+            render={({ field }) => (
+              <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value as boolean}
+                    onCheckedChange={handleAllDayChange}
+                  />
+                </FormControl>
+                <FormLabel>Tot el dia</FormLabel>
+              </FormItem>
+            )}
+          />
 
-        <Button disabled={form.formState.isSubmitting} className="w-full gap-2">
-          {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
-          Desar
-        </Button>
-      </form>
-    </Form>
+          <Button
+            disabled={form.formState.isSubmitting}
+            className="w-full gap-2"
+          >
+            {form.formState.isSubmitting && (
+              <Loader2 className="animate-spin" />
+            )}
+            Desar
+          </Button>
+        </form>
+      </Form>
+    </ModalForm>
   );
 }

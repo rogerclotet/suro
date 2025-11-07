@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Edit } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { type FormEvent, useCallback } from "react";
+import { type FormEvent, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import ModalForm from "@/components/ui/modal-form";
 import { editFile } from "./actions";
 import { editFileSchema } from "./schema";
 
@@ -30,50 +30,18 @@ export default function EditFileButton({ file }: { file: File }) {
     },
     resolver: valibotResolver(editFileSchema),
   });
+  const triggerRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession();
-
-  return (
-    <ModalForm
-      trigger={
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-primary"
-        >
-          <Edit size={16} />
-        </button>
-      }
-      title="Editar fitxer"
-      description="Edita el nom del fitxer"
-    >
-      <EditFileFormContent
-        form={form}
-        file={file}
-        sessionId={session?.user.id}
-      />
-    </ModalForm>
-  );
-}
-
-function EditFileFormContent({
-  form,
-  file,
-  sessionId,
-}: {
-  form: ReturnType<typeof useForm<v.InferInput<typeof editFileSchema>>>;
-  file: File;
-  sessionId?: string;
-}) {
-  const { close } = useModalForm();
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof editFileSchema>) => {
       try {
         await editFile(file, data);
         toast.success("Fitxer editat");
-        close();
+        triggerRef.current?.click();
       } catch (e) {
         posthog.captureException(e, {
-          distinctId: sessionId,
+          distinctId: session?.user.id,
           action: "edit_file",
           projectId: file.project.id,
           eventId: file.eventId,
@@ -82,7 +50,7 @@ function EditFileFormContent({
         toast.error("Error editant el fitxer. Torna-ho a provar més tard");
       }
     },
-    [file, sessionId, close],
+    [file, session?.user.id],
   );
 
   const handleFormSubmit = useCallback(
@@ -94,24 +62,40 @@ function EditFileFormContent({
   );
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <>
+      <button
+        type="button"
+        onClick={() => triggerRef.current?.click()}
+        className="text-muted-foreground hover:text-primary"
+      >
+        <Edit size={16} />
+      </button>
 
-        <Button className="w-full">Desar</Button>
-      </form>
-    </Form>
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Editar fitxer"
+        description="Edita el nom del fitxer"
+      >
+        <Form {...form}>
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button className="w-full">Desar</Button>
+          </form>
+        </Form>
+      </ModalForm>
+    </>
   );
 }

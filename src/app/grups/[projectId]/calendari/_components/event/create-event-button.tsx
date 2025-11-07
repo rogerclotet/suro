@@ -10,12 +10,12 @@ import {
   type FormEvent,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import type { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import ModalForm from "@/components/ui/modal-form";
 import { getTimeString } from "../../get-time-string";
 import { createEvent } from "./actions";
 import { eventSchema } from "./data";
@@ -53,6 +53,7 @@ export default function CreateEventButton({
     },
     resolver: valibotResolver(eventSchema),
   });
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   const selectDefaultTime = useCallback(
     (fromDate: Date, toDate: Date, allDay?: boolean) => {
@@ -79,6 +80,51 @@ export default function CreateEventButton({
   useEffect(() => {
     selectDefaultTime(defaultDate, defaultDate, true);
   }, [defaultDate, selectDefaultTime]);
+
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof eventSchema>) => {
+      if (!project) {
+        toast.error("No s'ha seleccionat cap projecte");
+        return;
+      }
+
+      const dataToCreate = window.structuredClone(data);
+      if (dataToCreate.allDay) {
+        dataToCreate.dates.from = new Date(
+          Date.UTC(
+            data.dates.from?.getFullYear() ?? 0,
+            data.dates.from?.getMonth() ?? 0,
+            data.dates.from?.getDate() ?? 0,
+          ),
+        );
+        dataToCreate.dates.to = new Date(
+          Date.UTC(
+            data.dates.to?.getFullYear() ?? 0,
+            data.dates.to?.getMonth() ?? 0,
+            data.dates.to?.getDate() ?? 0,
+          ),
+        );
+      }
+
+      try {
+        await createEvent(dataToCreate, project);
+        toast.success(`Esdeveniment ${data.name} creat`);
+        onCreate(data.dates.from, data.dates.to);
+        form.reset();
+        triggerRef.current?.click();
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "create_event",
+          projectId: project?.id,
+        });
+        toast.error(
+          "Error al crear l'esdeveniment. Torna-ho a provar més tard.",
+        );
+      }
+    },
+    [project, onCreate, form, session?.user.id],
+  );
 
   function handleDatesChange(dates: DateRange | undefined) {
     const from = dates?.from ?? new Date();
@@ -138,92 +184,6 @@ export default function CreateEventButton({
     form.setValue("allDay", checked);
   }
 
-  return (
-    <ModalForm
-      trigger={<Action icon={PlusIcon} label="Crear esdeveniment" />}
-      title="Crear esdeveniment"
-      description="Crear un esdeveniment nou"
-    >
-      <CreateEventFormContent
-        form={form}
-        project={project}
-        onCreate={onCreate}
-        sessionId={session?.user.id}
-        handleDatesChange={handleDatesChange}
-        handleStartTimeChange={handleStartTimeChange}
-        handleEndTimeChange={handleEndTimeChange}
-        handleAllDayChange={handleAllDayChange}
-      />
-    </ModalForm>
-  );
-}
-
-function CreateEventFormContent({
-  form,
-  project,
-  onCreate,
-  sessionId,
-  handleDatesChange,
-  handleStartTimeChange,
-  handleEndTimeChange,
-  handleAllDayChange,
-}: {
-  form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
-  project: Project | null;
-  onCreate: (from: Date | undefined, to: Date | undefined) => void;
-  sessionId?: string;
-  handleDatesChange: (dates: DateRange | undefined) => void;
-  handleStartTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleEndTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleAllDayChange: (checked: CheckedState) => void;
-}) {
-  const { close } = useModalForm();
-
-  const onSubmit = useCallback(
-    async (data: v.InferInput<typeof eventSchema>) => {
-      if (!project) {
-        toast.error("No s'ha seleccionat cap projecte");
-        return;
-      }
-
-      const dataToCreate = window.structuredClone(data);
-      if (dataToCreate.allDay) {
-        dataToCreate.dates.from = new Date(
-          Date.UTC(
-            data.dates.from?.getFullYear() ?? 0,
-            data.dates.from?.getMonth() ?? 0,
-            data.dates.from?.getDate() ?? 0,
-          ),
-        );
-        dataToCreate.dates.to = new Date(
-          Date.UTC(
-            data.dates.to?.getFullYear() ?? 0,
-            data.dates.to?.getMonth() ?? 0,
-            data.dates.to?.getDate() ?? 0,
-          ),
-        );
-      }
-
-      try {
-        await createEvent(dataToCreate, project);
-        toast.success(`Esdeveniment ${data.name} creat`);
-        onCreate(data.dates.from, data.dates.to);
-        form.reset();
-        close();
-      } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "create_event",
-          projectId: project?.id,
-        });
-        toast.error(
-          "Error al crear l'esdeveniment. Torna-ho a provar més tard.",
-        );
-      }
-    },
-    [project, onCreate, form, sessionId, close],
-  );
-
   const handleFormSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
@@ -233,107 +193,121 @@ function CreateEventFormContent({
   );
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <>
+      <Action
+        icon={PlusIcon}
+        label="Crear esdeveniment"
+        onClick={() => triggerRef.current?.click()}
+      />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripció</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dates"
-          render={({ field }) => (
-            <div className="flex flex-row flex-wrap gap-2">
-              <FormItem className="grow">
-                <FormLabel>Dates</FormLabel>
-                <DatePicker
-                  dates={field.value as DateRange}
-                  onDatesChange={handleDatesChange}
-                />
-              </FormItem>
-              <div className="flex grow flex-row gap-2">
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora inici</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.from)
-                    }
-                    onChange={handleStartTimeChange}
-                    className="justify-center"
-                  />
+      <ModalForm
+        triggerRef={triggerRef}
+        title="Crear esdeveniment"
+        description="Crear un esdeveniment nou"
+      >
+        <Form {...form}>
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora final</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.to)
-                    }
-                    onChange={handleEndTimeChange}
-                    className="justify-center"
-                  />
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripció</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-              </div>
-            </div>
-          )}
-        />
+              )}
+            />
 
-        <FormField
-          name="allDay"
-          render={({ field }) => (
-            <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value as boolean}
-                  onCheckedChange={handleAllDayChange}
-                />
-              </FormControl>
-              <FormLabel>Tot el dia</FormLabel>
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="dates"
+              render={({ field }) => (
+                <div className="flex flex-row flex-wrap gap-2">
+                  <FormItem className="grow">
+                    <FormLabel>Dates</FormLabel>
+                    <DatePicker
+                      dates={field.value as DateRange}
+                      onDatesChange={handleDatesChange}
+                    />
+                  </FormItem>
+                  <div className="flex grow flex-row gap-2">
+                    <FormItem className="w-auto grow">
+                      <FormLabel>Hora inici</FormLabel>
+                      <Input
+                        type="time"
+                        disabled={form.getValues().allDay}
+                        value={
+                          form.getValues().allDay
+                            ? ""
+                            : getTimeString(field.value?.from)
+                        }
+                        onChange={handleStartTimeChange}
+                        className="justify-center"
+                      />
+                    </FormItem>
+                    <FormItem className="w-auto grow">
+                      <FormLabel>Hora final</FormLabel>
+                      <Input
+                        type="time"
+                        disabled={form.getValues().allDay}
+                        value={
+                          form.getValues().allDay
+                            ? ""
+                            : getTimeString(field.value?.to)
+                        }
+                        onChange={handleEndTimeChange}
+                        className="justify-center"
+                      />
+                    </FormItem>
+                  </div>
+                </div>
+              )}
+            />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          className="w-full space-x-2"
-        >
-          {form.formState.isSubmitting && (
-            <Loader2Icon className="animate-spin" />
-          )}
-          Crear
-        </Button>
-      </form>
-    </Form>
+            <FormField
+              name="allDay"
+              render={({ field }) => (
+                <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value as boolean}
+                      onCheckedChange={handleAllDayChange}
+                    />
+                  </FormControl>
+                  <FormLabel>Tot el dia</FormLabel>
+                </FormItem>
+              )}
+            />
+
+            <Button
+              disabled={form.formState.isSubmitting}
+              className="w-full space-x-2"
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
+              Crear
+            </Button>
+          </form>
+        </Form>
+      </ModalForm>
+    </>
   );
 }

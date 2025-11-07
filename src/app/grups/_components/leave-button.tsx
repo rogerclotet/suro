@@ -3,6 +3,7 @@
 import { LogOut } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
@@ -12,6 +13,7 @@ import { leaveProject } from "./actions";
 
 export default function LeaveButton({ project }: { project: Project }) {
   const { data: session } = useSession();
+  const modalRef = useRef<HTMLDivElement>(null);
   const { projects, selectProject } = useProjects();
 
   async function handleLeave() {
@@ -35,22 +37,25 @@ export default function LeaveButton({ project }: { project: Project }) {
   }
 
   return (
-    <ModalAction
-      title="Sortir del grup"
-      description={`Estàs segur que vols sortir del grup ${project.name}? Aquesta acció no es pot desfer.`}
-      actionText="Sortir"
-      onAction={handleLeave}
-      variant="destructive"
-      trigger={
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Sortir del grup"
-          className="hover:bg-destructive hover:text-destructive-foreground"
-        >
-          <LogOut />
-        </Button>
-      }
-    />
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => modalRef.current?.click()}
+        aria-label="Sortir del grup"
+        className="hover:bg-destructive hover:text-destructive-foreground"
+      >
+        <LogOut />
+      </Button>
+
+      <ModalAction
+        title="Sortir del grup"
+        description={`Estàs segur que vols sortir del grup ${project.name}? Aquesta acció no es pot desfer.`}
+        actionText="Sortir"
+        onAction={handleLeave}
+        variant="destructive"
+        triggerRef={modalRef}
+      />
+    </>
   );
 }

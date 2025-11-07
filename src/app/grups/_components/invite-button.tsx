@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, Share2, UserPlus } from "lucide-react";
+import { useRef } from "react";
 import { RWebShare } from "react-web-share";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 
 export default function InviteButton({ project }: { project: Project }) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const inviteLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/grups/${project.id}/invitacio/${project.inviteToken}`
@@ -22,42 +24,49 @@ export default function InviteButton({ project }: { project: Project }) {
   const canShare = !!navigator.canShare;
 
   return (
-    <ModalForm
-      trigger={
-        <Button variant="ghost" size="icon" aria-label="Convidar">
-          <UserPlus />
-        </Button>
-      }
-      title="Convidar usuaris"
-      description="Pots convidar usuaris a aquest grup compartint el següent enllaç:"
-    >
-      <div className="space-y-2">
-        <Input readOnly value={inviteLink} />
-        <Button
-          variant={canShare ? "ghost" : "default"}
-          onClick={copyLinkToClipboard}
-          className="flex w-full items-center gap-2"
-        >
-          <Copy />
-          Copiar enllaç
-        </Button>
-        {canShare && (
-          <Button aria-label="Compartir" className="w-full">
-            <RWebShare
-              data={{
-                title: project.name,
-                text: `Uneix-te a ${project.users.map((u) => u.user.name).join(", ")}`,
-                url: inviteLink,
-              }}
-              closeText="Tancar"
-            >
-              <span className="flex items-center gap-2">
-                <Share2 /> Compartir
-              </span>
-            </RWebShare>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => modalRef.current?.click()}
+        aria-label="Convidar"
+      >
+        <UserPlus />
+      </Button>
+
+      <ModalForm
+        triggerRef={modalRef}
+        title="Convidar usuaris"
+        description="Pots convidar usuaris a aquest grup compartint el següent enllaç:"
+      >
+        <div className="space-y-2">
+          <Input readOnly value={inviteLink} />
+          <Button
+            variant={canShare ? "ghost" : "default"}
+            onClick={copyLinkToClipboard}
+            className="flex w-full items-center gap-2"
+          >
+            <Copy />
+            Copiar enllaç
           </Button>
-        )}
-      </div>
-    </ModalForm>
+          {canShare && (
+            <Button aria-label="Compartir" className="w-full">
+              <RWebShare
+                data={{
+                  title: project.name,
+                  text: `Uneix-te a ${project.users.map((u) => u.user.name).join(", ")}`,
+                  url: inviteLink,
+                }}
+                closeText="Tancar"
+              >
+                <span className="flex items-center gap-2">
+                  <Share2 /> Compartir
+                </span>
+              </RWebShare>
+            </Button>
+          )}
+        </div>
+      </ModalForm>
+    </>
   );
 }

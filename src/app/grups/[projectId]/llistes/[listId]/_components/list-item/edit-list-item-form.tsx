@@ -42,7 +42,7 @@ export default function EditListItemForm(props: {
     categoryId: string | null,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
-  trigger: React.ReactNode;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const form = useForm({
     defaultValues: {
@@ -84,6 +84,8 @@ export default function EditListItemForm(props: {
         return;
       }
 
+      props.triggerRef.current?.click();
+
       await props.onChange(
         parsed.name,
         parsed.details ?? "",
@@ -117,7 +119,7 @@ export default function EditListItemForm(props: {
   }
 
   return (
-    <ModalForm title={props.item.name} trigger={props.trigger}>
+    <ModalForm title={props.item.name} triggerRef={props.triggerRef}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField

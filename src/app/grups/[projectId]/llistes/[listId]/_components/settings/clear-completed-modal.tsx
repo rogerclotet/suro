@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import type { ReactNode } from "react";
+import type { RefObject } from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
@@ -10,10 +10,10 @@ import { clearCompletedItems } from "./actions";
 
 export default function ClearCompletedModal({
   list,
-  trigger,
+  triggerRef,
 }: {
   list: List;
-  trigger: ReactNode;
+  triggerRef: RefObject<HTMLDivElement | null>;
 }) {
   const { data: session } = useSession();
 
@@ -41,7 +41,7 @@ export default function ClearCompletedModal({
       actionText="Esborrar"
       onAction={handleClear}
       variant="destructive"
-      trigger={trigger}
+      triggerRef={triggerRef}
     />
   );
 }

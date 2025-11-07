@@ -47,7 +47,7 @@ export default function SidebarInsetContent({
           <FAB
             key={action.label}
             icon={action.icon}
-            onClick={action.onClick ?? undefined}
+            onClick={action.onClick}
             className="absolute right-4 bottom-4 z-20"
             elevation="high"
           />
