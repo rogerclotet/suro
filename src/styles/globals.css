@@ -8,7 +8,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-sidebar text-sidebar-foreground;
+
+    main {
+      @apply bg-background text-foreground;
+    }
 
     /* React Web Share */
     .rws-container {
