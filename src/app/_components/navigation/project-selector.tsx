@@ -1,11 +1,10 @@
 "use client";
 
-import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
+import { ChevronsUpDownIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import CreateProjectForm from "@/app/grups/_components/create-project/create-project-form";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -86,17 +85,6 @@ export default function ProjectSelector() {
             {p.name}
           </DropdownMenuItem>
         ))}
-
-        <DropdownMenuSeparator />
-
-        <CreateProjectForm
-          trigger={
-            <DropdownMenuItem>
-              <PlusIcon />
-              Crear grup
-            </DropdownMenuItem>
-          }
-        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
