@@ -4,5 +4,6 @@ export * from "./lists";
 export * from "./notes";
 export * from "./projects";
 export * from "./push";
+export * from "./secret-santa";
 export * from "./spendings";
 export * from "./users";
