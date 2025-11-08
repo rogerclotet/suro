@@ -1,13 +1,7 @@
 import { useMemo } from "react";
 import type { SecretSanta as SecretSantaType } from "@/app/_data/secret-santa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function SecretSanta({
