@@ -30,7 +30,7 @@ export default function ProjectSelector() {
     router.push(`/grups/${project.id}`);
   }
 
-  if (!project || projects.length <= 1) {
+  if (!project || projects.length === 0) {
     return (
       <Skeleton
         className={cn(
