@@ -14,7 +14,6 @@ import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import { Switch } from "@/components/ui/switch";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
 import { editEvent } from "../actions";
@@ -313,7 +313,7 @@ function EditEventFormContent({
           render={({ field }) => (
             <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
               <FormControl>
-                <Checkbox
+                <Switch
                   checked={field.value as boolean}
                   onCheckedChange={handleAllDayChange}
                 />

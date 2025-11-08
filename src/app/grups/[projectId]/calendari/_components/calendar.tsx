@@ -127,14 +127,14 @@ export default function Calendar() {
         />
 
         {dayEvents && dayEvents.length > 0 && (
-          <div className="absolute top-0.5 right-0.5 flex flex-row-reverse gap-0.5">
+          <div className="pointer-events-none absolute top-[3px] right-[3px] flex flex-row-reverse gap-px">
             {dayEvents.map((event) => {
               const color = eventColors.get(event.id);
               return (
                 <div
                   key={event.id}
                   className={cn(
-                    "event-indicator h-1.5 w-1.5 rounded-full",
+                    "z-10 h-2 w-2 rounded-full border border-muted/60",
                     // Explictly defining colors to avoid concatenating arbitrary values
                     // https://v2.tailwindcss.com/docs/just-in-time-mode#arbitrary-value-support
                     color === 2
