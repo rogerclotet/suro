@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { getFlags } from "@/server/flags";
 import CreateNoteButton from "./_components/create-note-button/create-note-button";
 import NoteList from "./_components/note-list";
 import { NotePreviewSkeleton } from "./_components/note-preview";
@@ -8,6 +10,11 @@ export default async function Page({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
+  const flags = await getFlags();
+  if (!flags.notes) {
+    redirect("/");
+  }
+
   const { projectId } = await params;
 
   return (
