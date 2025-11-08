@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { SecretSanta as SecretSantaType } from "@/app/_data/secret-santa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardDescription, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function SecretSanta({
@@ -55,21 +55,22 @@ export default function SecretSanta({
 
       <h3 className="font-semibold text-lg">Participants</h3>
 
-      <div className="flex flex-row flex-wrap gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
         {participants.map((participant) => {
           return (
-            <Card key={participant.id} className="w-32">
-              <CardHeader>
-                <CardDescription className="flex flex-col items-center gap-2">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-secondary text-secondary-foreground">
-                      {participant.user.name?.charAt(0)?.toUpperCase()}
-                    </AvatarFallback>
-                    <AvatarImage src={participant.user.image ?? undefined} />
-                  </Avatar>
-                  <p className="text-center">{participant.user.name}</p>
-                </CardDescription>
-              </CardHeader>
+            <Card
+              key={participant.id}
+              className="flex aspect-3/4 flex-col items-center justify-evenly gap-2 p-4"
+            >
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-secondary text-2xl text-secondary-foreground">
+                  {participant.user.name?.charAt(0)?.toUpperCase()}
+                </AvatarFallback>
+                <AvatarImage src={participant.user.image ?? undefined} />
+              </Avatar>
+              <p className="text-center text-card-foreground text-sm">
+                {participant.user.name}
+              </p>
             </Card>
           );
         })}
