@@ -8,10 +8,6 @@ export default function UserIdentifer() {
   const session = useSession();
 
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      return;
-    }
-
     if (!session.data) {
       posthog.reset();
       return;
