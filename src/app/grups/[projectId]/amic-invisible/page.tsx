@@ -5,7 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getFlags } from "@/server/flags";
 import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
-import CreateSecretSantaForm from "./create-secret-santa/form";
+import SecretSanta from "./_components/secret-santa";
+import CreateSecretSantaForm from "./create-secret-santa-form";
 
 export default async function AmicInvisiblePage({
   params,
@@ -63,10 +64,5 @@ export default async function AmicInvisiblePage({
     );
   }
 
-  return (
-    <div>
-      <h1>Amic Invisible</h1>
-      <p>{secretSanta.name}</p>
-    </div>
-  );
+  return <SecretSanta secretSanta={secretSanta} />;
 }

@@ -8,7 +8,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
-import { type SecretSanta, secretSantaSchema } from "@/app/_data/secret-santa";
+import {
+  type SecretSantaData,
+  secretSantaSchema,
+} from "@/app/_data/secret-santa";
 import Action from "@/components/action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -51,7 +54,7 @@ export default function CreateSecretSantaForm({
   });
   const [priceRangeMax, setPriceRangeMax] = useState(50);
 
-  async function onSubmit(data: SecretSanta) {
+  async function onSubmit(data: SecretSantaData) {
     try {
       await createSecretSanta(project, data);
       toast.success("Amic Invisible creat");
@@ -117,7 +120,7 @@ export default function CreateSecretSantaForm({
               <Field>
                 <FieldLabel htmlFor="priceRange">Rang de preu</FieldLabel>
                 <FieldDescription>
-                  <span>Preu orientatiu pels regals: </span>
+                  <span>Valor orientatiu pels regals: </span>
                   <span>
                     {field.value.min === 0 && field.value.max === 0
                       ? "No es mostrarà"

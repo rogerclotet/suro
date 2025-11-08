@@ -1,9 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import { boolean, jsonb, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import type {
-  Exclusions,
-  GiftIdea,
-  PriceRange,
+  ExclusionsData,
+  GiftIdeaData,
+  PriceRangeData,
 } from "@/app/_data/secret-santa";
 import { projects } from "./projects";
 import { users } from "./users";
@@ -21,13 +21,13 @@ export const secretSantas = createTable("secretSanta", {
       onUpdate: "cascade",
     }),
   name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
+  description: text("description").notNull().default(""),
   datetime: timestamp("datetime", {
     mode: "date",
     withTimezone: true,
   }).notNull(),
-  priceRange: jsonb("priceRange").$type<PriceRange>().notNull(),
-  exclusions: jsonb("exclusions").$type<Exclusions>().notNull().default([]),
+  priceRange: jsonb("priceRange").$type<PriceRangeData>().notNull(),
+  exclusions: jsonb("exclusions").$type<ExclusionsData>().notNull().default([]),
   assignmentsDone: boolean("assignmentsDone").notNull().default(false),
   createdAt: timestamp("createdAt", {
     mode: "date",
@@ -67,7 +67,7 @@ export const secretSantaParticipants = createTable("secretSantaParticipant", {
     () => users.id,
     { onDelete: "set null", onUpdate: "cascade" },
   ),
-  giftIdeas: jsonb("giftIdeas").$type<GiftIdea[]>().notNull().default([]),
+  giftIdeas: jsonb("giftIdeas").$type<GiftIdeaData[]>().notNull().default([]),
   createdAt: timestamp("createdAt", {
     mode: "date",
     withTimezone: true,

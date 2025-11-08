@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import type { getCurrentSecretSanta } from "@/server/secret-santa";
 
 export const exclusionsSchema = v.array(
   v.pipe(
@@ -17,12 +18,20 @@ export const exclusionsSchema = v.array(
   ),
 );
 
-export type Exclusions = v.InferOutput<typeof exclusionsSchema>;
+export type ExclusionsData = v.InferOutput<typeof exclusionsSchema>;
 
 export const priceRangeSchema = v.pipe(
   v.object({
-    min: v.pipe(v.number(), v.minValue(0)),
-    max: v.pipe(v.number(), v.minValue(0)),
+    min: v.pipe(
+      v.number(),
+      v.integer("No es poden introduir decimals"),
+      v.minValue(0, "No es poden introduir preus negatius"),
+    ),
+    max: v.pipe(
+      v.number(),
+      v.integer("No es poden introduir decimals"),
+      v.minValue(0, "No es poden introduir preus negatius"),
+    ),
   }),
   v.forward(
     v.partialCheck(
@@ -34,7 +43,7 @@ export const priceRangeSchema = v.pipe(
   ),
 );
 
-export type PriceRange = v.InferOutput<typeof priceRangeSchema>;
+export type PriceRangeData = v.InferOutput<typeof priceRangeSchema>;
 
 export const secretSantaSchema = v.object({
   name: v.pipe(v.string(), v.trim(), v.nonEmpty("No pot estar buit")),
@@ -54,7 +63,7 @@ export const secretSantaSchema = v.object({
   exclusions: v.optional(exclusionsSchema),
 });
 
-export type SecretSanta = v.InferOutput<typeof secretSantaSchema>;
+export type SecretSantaData = v.InferOutput<typeof secretSantaSchema>;
 
 export const giftIdeaSchema = v.object({
   name: v.pipe(v.string(), v.trim(), v.nonEmpty("No pot estar buit")),
@@ -62,4 +71,8 @@ export const giftIdeaSchema = v.object({
   url: v.optional(v.pipe(v.string(), v.trim(), v.url("No és una URL vàlida"))),
 });
 
-export type GiftIdea = v.InferOutput<typeof giftIdeaSchema>;
+export type GiftIdeaData = v.InferOutput<typeof giftIdeaSchema>;
+
+export type SecretSanta = NonNullable<
+  Awaited<ReturnType<typeof getCurrentSecretSanta>>
+>;

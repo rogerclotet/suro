@@ -5,7 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import type { SecretSanta } from "@/app/_data/secret-santa";
+import type { SecretSantaData } from "@/app/_data/secret-santa";
 import { secretSantaSchema } from "@/app/_data/secret-santa";
 import { auth } from "@/auth";
 import { db } from "./db";
@@ -19,6 +19,13 @@ export async function getCurrentSecretSanta(projectId: string) {
   assert(session, "Unauthenticated user");
 
   const secretSanta = await db.query.secretSantas.findFirst({
+    with: {
+      participants: {
+        with: {
+          user: true,
+        },
+      },
+    },
     where: eq(secretSantas.projectId, projectId),
     orderBy: [desc(secretSantas.datetime)],
   });
@@ -26,7 +33,10 @@ export async function getCurrentSecretSanta(projectId: string) {
   return secretSanta;
 }
 
-export async function createSecretSanta(project: Project, data: SecretSanta) {
+export async function createSecretSanta(
+  project: Project,
+  data: SecretSantaData,
+) {
   const session = await auth();
   assert(session, "Unauthenticated user");
 

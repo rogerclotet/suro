@@ -36,7 +36,7 @@ export default function SidebarInsetContent({
 
       <ScrollableContainer
         onScrollStateChange={setScrollState}
-        className="grow overflow-y-auto px-2 py-3 md:px-4 md:py-4"
+        className="grow overflow-y-auto p-3 md:px-6 md:py-2"
       >
         {children}
       </ScrollableContainer>
