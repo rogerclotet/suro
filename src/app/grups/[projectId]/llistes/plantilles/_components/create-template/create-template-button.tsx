@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import Action from "@/components/action";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { createTemplate } from "./actions";
 import { templateSchema } from "./data";
 
@@ -101,15 +101,11 @@ export default function CreateTemplateButton({
             )}
           />
 
-          <Button
-            disabled={form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <span className="loading loading-spinner" />
-            )}
-            Crear
-          </Button>
+          <SubmitButton
+            icon={<PlusIcon />}
+            text="Crear"
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

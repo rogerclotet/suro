@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Plus } from "lucide-react";
+import { Plus, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { createNote } from "./actions";
 import { noteSchema } from "./schema";
@@ -124,15 +125,11 @@ function CreateNoteFormContent({
           )}
         />
 
-        <Button
-          disabled={!form.formState.isDirty || form.formState.isSubmitting}
-          className="w-full space-x-2"
-        >
-          {form.formState.isSubmitting && (
-            <span className="loading loading-spinner" />
-          )}
-          Crear
-        </Button>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text="Crear"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );

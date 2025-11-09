@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Edit } from "lucide-react";
+import { Edit, SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { File } from "@/app/_data/file";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { editFile } from "./actions";
 import { editFileSchema } from "./schema";
 
@@ -110,7 +110,11 @@ function EditFileFormContent({
           )}
         />
 
-        <Button className="w-full">Desar</Button>
+        <SubmitButton
+          icon={<SaveIcon />}
+          text="Desar"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );

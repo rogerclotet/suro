@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2Icon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -14,7 +14,6 @@ import {
 } from "@/app/_data/secret-santa";
 import Action from "@/components/action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldContent,
@@ -28,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ModalForm from "@/components/ui/modal-form";
 import { Slider } from "@/components/ui/slider";
+import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { createSecretSanta } from "@/server/secret-santa";
@@ -222,16 +222,11 @@ export default function CreateSecretSantaForm({
           />
         </FieldGroup>
 
-        <Button
-          type="submit"
-          disabled={!form.formState.isDirty || form.formState.isSubmitting}
-          className="w-full space-x-2"
-        >
-          {form.formState.isSubmitting && (
-            <Loader2Icon className="animate-spin" />
-          )}
-          Crear
-        </Button>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text="Crear"
+          formState={form.formState}
+        />
       </form>
     </ModalForm>
   );

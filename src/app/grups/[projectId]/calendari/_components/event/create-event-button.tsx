@@ -2,7 +2,7 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
-import { Loader2Icon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import {
@@ -18,7 +18,6 @@ import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
-import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { getTimeString } from "../../get-time-string";
 import { createEvent } from "./actions";
@@ -324,15 +324,11 @@ function CreateEventFormContent({
           )}
         />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          className="w-full space-x-2"
-        >
-          {form.formState.isSubmitting && (
-            <Loader2Icon className="animate-spin" />
-          )}
-          Crear
-        </Button>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text="Crear"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );

@@ -12,7 +12,6 @@ import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
 import { getTemplates } from "@/app/api/[projectId]/templates/api";
 import Action from "@/components/action";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { createList } from "./actions";
 import { listSchema } from "./data";
@@ -166,15 +166,11 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
             />
           )}
 
-          <Button
-            disabled={!form.formState.isDirty || form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <span className="loading loading-spinner" />
-            )}
-            Crear
-          </Button>
+          <SubmitButton
+            icon={<PlusIcon />}
+            text="Crear"
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

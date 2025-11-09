@@ -1,24 +1,21 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2, SaveIcon } from "lucide-react";
+import { SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as v from "valibot";
 import type { List, ListItem } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import {
@@ -28,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { listItemSchema } from "./data";
@@ -118,98 +116,87 @@ export default function EditListItemForm(props: {
 
   return (
     <ModalForm title={props.item.name} trigger={props.trigger}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => {
-              const id = `${props.list.id}-${props.item.id}-${field.name}`;
-              return (
-                <FormItem className="grow">
-                  <FormLabel htmlFor={id}>Editar</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id={id}
-                      className={cn("border-none")}
-                      disabled={form.formState.isSubmitting}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Controller
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => {
+            const id = `${props.list.id}-${props.item.id}-${field.name}`;
+            return (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={id}>Editar</FieldLabel>
+                <FieldContent>
+                  <Input
+                    {...field}
+                    id={id}
+                    className={cn("border-none")}
+                    disabled={form.formState.isSubmitting}
+                  />
+                </FieldContent>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            );
+          }}
+        />
 
-          <FormField
-            control={form.control}
-            name="details"
-            render={({ field }) => {
-              const id = `${props.list.id}-${props.item.id}-${field.name}`;
-              return (
-                <FormItem>
-                  <FormLabel htmlFor={id}>Detalls</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} id={id} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+        <Controller
+          control={form.control}
+          name="details"
+          render={({ field, fieldState }) => {
+            const id = `${props.list.id}-${props.item.id}-${field.name}`;
+            return (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={id}>Detalls</FieldLabel>
+                <FieldContent>
+                  <Textarea {...field} id={id} />
+                </FieldContent>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            );
+          }}
+        />
 
-          <FormField
-            control={form.control}
-            name="categoryId"
-            render={({ field }) => {
-              const id = `${props.list.id}-${props.item.id}-${field.name}`;
-              return (
-                <FormItem>
-                  <FormLabel htmlFor={id}>Categoria</FormLabel>
-                  <FormControl>
-                    <Select
-                      {...field}
-                      value={field.value ?? undefined}
-                      onValueChange={(value) => {
-                        field.onChange(value === "-" ? null : value);
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger id={id}>
-                          <SelectValue placeholder="Sense categoria" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="-">Sense categoria</SelectItem>
-                        {project.categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+        <Controller
+          control={form.control}
+          name="categoryId"
+          render={({ field, fieldState }) => {
+            const id = `${props.list.id}-${props.item.id}-${field.name}`;
+            return (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={id}>Categoria</FieldLabel>
+                <FieldContent>
+                  <Select
+                    {...field}
+                    value={field.value ?? undefined}
+                    onValueChange={(value) => {
+                      field.onChange(value === "-" ? null : value);
+                    }}
+                  >
+                    <SelectTrigger id={id}>
+                      <SelectValue placeholder="Sense categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-">Sense categoria</SelectItem>
+                      {project.categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldContent>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            );
+          }}
+        />
 
-          <Button
-            type="submit"
-            disabled={!form.formState.isDirty || form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <SaveIcon />
-            )}
-            Desar
-          </Button>
-        </form>
-      </Form>
+        <SubmitButton
+          text="Desar"
+          icon={<SaveIcon />}
+          formState={form.formState}
+        />
+      </form>
     </ModalForm>
   );
 }

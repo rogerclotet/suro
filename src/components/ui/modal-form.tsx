@@ -64,7 +64,9 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
         <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle className="wrap-anywhere text-wrap">
+              {title}
+            </DialogTitle>
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
@@ -82,7 +84,7 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle className="wrap-anywhere text-wrap">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
         <div className="px-4">

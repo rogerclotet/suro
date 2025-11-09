@@ -1,3 +1,5 @@
+"use client";
+
 import { Edit, Settings, Trash2 } from "lucide-react";
 import type { Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
@@ -22,7 +24,10 @@ export default function SettingsMenu({ template }: { template: Template }) {
         <EditTemplateForm
           template={template}
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2"
+            >
               <Edit />
               Editar plantilla
             </DropdownMenuItem>
@@ -32,7 +37,10 @@ export default function SettingsMenu({ template }: { template: Template }) {
         <DeleteTemplateModal
           template={template}
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
+            >
               <Trash2 />
               Eliminar plantilla
             </DropdownMenuItem>

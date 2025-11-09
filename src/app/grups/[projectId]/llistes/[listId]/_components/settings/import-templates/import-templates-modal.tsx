@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { Fragment, useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ModalForm from "@/components/ui/modal-form";
+import { Spinner } from "@/components/ui/spinner";
 import { importTemplates } from "./actions";
 import TemplatePreview from "./template-preview";
 
@@ -152,7 +152,7 @@ export default function ImportTemplatesModal({
         disabled={submitting || selected.every((s) => !s)}
         className="space-x-2"
       >
-        {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+        {submitting && <Spinner />}
         Importar plantilles seleccionades
       </Button>
     </ModalForm>

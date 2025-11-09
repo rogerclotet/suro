@@ -15,8 +15,6 @@ export default async function PlantillesPage({
 
   return (
     <div className="space-y-4">
-      <CreateTemplateButton projectId={projectId} />
-
       <Suspense
         fallback={
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -28,6 +26,8 @@ export default async function PlantillesPage({
       >
         <Templates projectId={projectId} />
       </Suspense>
+
+      <CreateTemplateButton projectId={projectId} />
     </div>
   );
 }

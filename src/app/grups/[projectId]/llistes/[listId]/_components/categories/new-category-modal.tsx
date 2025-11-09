@@ -1,14 +1,13 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2 } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { createCategory } from "./actions";
 import { categorySchema } from "./data";
 
@@ -91,15 +91,11 @@ export default function NewCategoryModal({
             )}
           />
 
-          <Button
-            disabled={form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <Loader2 className="animate-spin" />
-            )}
-            Crear
-          </Button>
+          <SubmitButton
+            icon={<PlusIcon />}
+            text="Crear"
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

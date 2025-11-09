@@ -10,7 +10,6 @@ import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SubmitButton from "@/components/ui/submit-button";
 import { createSpending } from "./actions";
 import { spendingSchema } from "./data";
 
@@ -187,15 +187,11 @@ function CreateSpendingFormContent({
           )}
         />
 
-        <Button
-          className="w-full space-x-2"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting && (
-            <span className="loading loading-spinner" />
-          )}
-          Crear
-        </Button>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text="Crear"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );

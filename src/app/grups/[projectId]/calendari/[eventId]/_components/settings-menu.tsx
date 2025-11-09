@@ -65,6 +65,7 @@ export default function SettingsMenu({
           event={event}
           trigger={
             <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
               onClick={() => editDialogRef.current?.click()}
               className="cursor-pointer gap-2"
             >
@@ -85,7 +86,10 @@ export default function SettingsMenu({
 
             <LinkListForm
               trigger={
-                <DropdownMenuItem className="cursor-pointer gap-2">
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  className="cursor-pointer gap-2"
+                >
                   <ListTodo />
                   Enllaçar llista existent
                 </DropdownMenuItem>
@@ -96,7 +100,10 @@ export default function SettingsMenu({
         ) : (
           <UnlinkEventListModal
             trigger={
-              <DropdownMenuItem className="cursor-pointer gap-2">
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                className="cursor-pointer gap-2"
+              >
                 <ListX />
                 Desenllaçar llista
               </DropdownMenuItem>
@@ -105,10 +112,11 @@ export default function SettingsMenu({
             list={list}
           />
         )}
-        :
+
         <DeleteEventModal
           trigger={
             <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
               onClick={() => deleteDialogRef.current?.click()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >

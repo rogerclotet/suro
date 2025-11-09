@@ -1,9 +1,10 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -25,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import NewCategoryModal from "../categories/new-category-modal";
 import { createListItem } from "./actions";
 import { listItemSchema } from "./data";
@@ -40,6 +42,7 @@ export default function NewListItem({ list }: { list: List }) {
   });
   const { project } = useProjects();
   const { data: session } = useSession();
+  const newListModalRef = useRef<HTMLButtonElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
@@ -80,6 +83,7 @@ export default function NewListItem({ list }: { list: List }) {
 
   function handleCategoryChange(value: string) {
     if (value === "new") {
+      newListModalRef.current?.click();
       return;
     }
 
@@ -120,11 +124,7 @@ export default function NewListItem({ list }: { list: List }) {
               variant="ghost"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Check />
-              )}
+              {form.formState.isSubmitting ? <Spinner /> : <Check />}
             </Button>
           )}
 
@@ -151,14 +151,7 @@ export default function NewListItem({ list }: { list: List }) {
                       </SelectItem>
                     ))}
 
-                    <NewCategoryModal
-                      trigger={
-                        <SelectItem value="new">+ Nova categoria</SelectItem>
-                      }
-                      onCreate={(categoryId) =>
-                        form.setValue("categoryId", categoryId)
-                      }
-                    />
+                    <SelectItem value="new">+ Nova categoria</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -167,6 +160,13 @@ export default function NewListItem({ list }: { list: List }) {
           />
         </form>
       </Form>
+
+      <NewCategoryModal
+        trigger={
+          <button ref={newListModalRef} type="button" className="hidden" />
+        }
+        onCreate={(categoryId) => form.setValue("categoryId", categoryId)}
+      />
     </li>
   );
 }

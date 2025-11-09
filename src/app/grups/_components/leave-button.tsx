@@ -42,12 +42,7 @@ export default function LeaveButton({ project }: { project: Project }) {
       onAction={handleLeave}
       variant="destructive"
       trigger={
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Sortir del grup"
-          className="hover:bg-destructive hover:text-destructive-foreground"
-        >
+        <Button variant="ghost" size="icon" aria-label="Sortir del grup">
           <LogOut />
         </Button>
       }

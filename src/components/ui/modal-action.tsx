@@ -21,8 +21,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 import { ClientOnly } from "../client-only";
-import { Button } from "./button";
+import { Button, buttonVariants } from "./button";
 
 type Props = {
   title: string;
@@ -54,18 +55,15 @@ function ClientModalAction({
   const [open, setOpen] = useState(false);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
 
-  const actionButtonStyle =
-    variant === "destructive"
-      ? "bg-destructive text-destructive-foreground"
-      : "bg-primary text-primary-foreground";
-
   if (isMdOrLarger) {
     return (
       <AlertDialog>
         <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{title}</AlertDialogTitle>
+            <AlertDialogTitle className="wrap-anywhere text-wrap">
+              {title}
+            </AlertDialogTitle>
             {description && (
               <AlertDialogDescription>{description}</AlertDialogDescription>
             )}
@@ -73,7 +71,10 @@ function ClientModalAction({
           {children}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
-            <AlertDialogAction onClick={onAction} className={actionButtonStyle}>
+            <AlertDialogAction
+              onClick={onAction}
+              className={cn(buttonVariants({ variant }))}
+            >
               {actionText}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -87,7 +88,7 @@ function ClientModalAction({
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle className="wrap-anywhere text-wrap">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
         {children}

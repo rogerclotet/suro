@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Info } from "lucide-react";
+import { Info, SaveIcon } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
@@ -10,10 +10,10 @@ import { toast } from "sonner";
 import type * as v from "valibot";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SubmitButton from "@/components/ui/submit-button";
 import { editProfile } from "./actions";
 import { profileSchema } from "./data";
 
@@ -94,15 +94,11 @@ export default function ProfileEditor({ user }: { user: User }) {
           <Input value={user.email ?? ""} disabled />
         </FormItem>
 
-        <Button
-          className="space-x-2"
-          disabled={!form.formState.isDirty || form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting && (
-            <span className="loading loading-spinner" />
-          )}
-          Desar canvis
-        </Button>
+        <SubmitButton
+          icon={<SaveIcon />}
+          text="Desar"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );

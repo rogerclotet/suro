@@ -1,13 +1,13 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2Icon } from "lucide-react";
+import { SquaresExcludeIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import { exclusionSchema, type SecretSanta } from "@/app/_data/secret-santa";
-import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldError } from "@/components/ui/field";
+import SubmitButton from "@/components/ui/submit-button";
 import { createExclusion } from "@/server/secret-santa";
 import Participant from "../participant";
 
@@ -102,16 +102,11 @@ export default function CreateExclusionForm({
         )}
       />
 
-      <Button
-        type="submit"
-        disabled={!form.formState.isDirty || form.formState.isSubmitting}
-        className="w-full space-x-2"
-      >
-        {form.formState.isSubmitting && (
-          <Loader2Icon className="animate-spin" />
-        )}
-        Excloure
-      </Button>
+      <SubmitButton
+        icon={<SquaresExcludeIcon />}
+        text="Excloure"
+        formState={form.formState}
+      />
     </form>
   );
 }

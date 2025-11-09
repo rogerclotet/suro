@@ -4,6 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -47,6 +48,7 @@ export default function NewTemplateItem({
   });
   const { project } = useProjects();
   const { data: session } = useSession();
+  const newTemplateItemModalRef = useRef<HTMLButtonElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     if (data.name === "") {
@@ -75,6 +77,7 @@ export default function NewTemplateItem({
 
   function handleCategoryChange(value: string) {
     if (value === "new") {
+      newTemplateItemModalRef.current?.click();
       return;
     }
 
@@ -146,14 +149,7 @@ export default function NewTemplateItem({
                       </SelectItem>
                     ))}
 
-                    <NewCategoryModal
-                      trigger={
-                        <SelectItem value="new">+ Nova categoria</SelectItem>
-                      }
-                      onCreate={(categoryId) =>
-                        form.setValue("category", categoryId)
-                      }
-                    />
+                    <SelectItem value="new">+ Nova categoria</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -162,6 +158,17 @@ export default function NewTemplateItem({
           />
         </form>
       </Form>
+
+      <NewCategoryModal
+        trigger={
+          <button
+            ref={newTemplateItemModalRef}
+            type="button"
+            className="hidden"
+          />
+        }
+        onCreate={(categoryId) => form.setValue("category", categoryId)}
+      />
     </li>
   );
 }

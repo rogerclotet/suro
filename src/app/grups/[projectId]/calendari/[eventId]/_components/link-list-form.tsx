@@ -2,6 +2,7 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useQuery } from "@tanstack/react-query";
+import { LinkIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
@@ -11,7 +12,6 @@ import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
 import {
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import SubmitButton from "@/components/ui/submit-button";
 import { linkEventListSchema } from "../../_components/event/data";
 import { linkEventList } from "../actions";
 
@@ -105,27 +106,39 @@ export default function LinkListForm({
           <FormField
             control={form.control}
             name="listId"
-            render={({ field }) => (
-              <FormItem>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecciona una llista" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {lists?.map((list) => (
-                      <SelectItem key={list.id} value={list.id}>
-                        {list.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger disabled={!lists || lists.length === 0}>
+                        <SelectValue
+                          placeholder={
+                            lists && lists.length > 0
+                              ? "Selecciona una llista"
+                              : "No hi ha llistes disponibles"
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {lists?.map((list) => (
+                        <SelectItem key={list.id} value={list.id}>
+                          {list.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              );
+            }}
           />
 
-          <Button className="w-full">Enllaçar</Button>
+          <SubmitButton
+            text="Enllaçar"
+            icon={<LinkIcon />}
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

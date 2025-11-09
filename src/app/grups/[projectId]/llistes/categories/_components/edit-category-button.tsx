@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Edit } from "lucide-react";
+import { Edit, SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { categorySchema } from "../../[listId]/_components/categories/data";
 import { editCategory } from "./actions";
 
@@ -89,14 +90,11 @@ export default function EditCategoryButton({
             )}
           />
 
-          <Button
-            disabled={!form.formState.isDirty || form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting && (
-              <span className="loading loading-spinner" />
-            )}
-            Desar
-          </Button>
+          <SubmitButton
+            icon={<SaveIcon />}
+            text="Desar"
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

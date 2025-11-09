@@ -47,6 +47,7 @@ export default function TemplateItem({
   const { project } = useProjects();
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
+  const newTemplateItemModalRef = useRef<HTMLButtonElement>(null);
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -76,6 +77,7 @@ export default function TemplateItem({
     onChange: (value: string) => void,
   ) {
     if (value === "new") {
+      newTemplateItemModalRef.current?.click();
       return;
     }
 
@@ -153,14 +155,7 @@ export default function TemplateItem({
                         </SelectItem>
                       ))}
 
-                      <NewCategoryModal
-                        trigger={
-                          <SelectItem value="new">+ Nova categoria</SelectItem>
-                        }
-                        onCreate={(categoryId) =>
-                          form.setValue("category", categoryId)
-                        }
-                      />
+                      <SelectItem value="new">+ Nova categoria</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -170,6 +165,17 @@ export default function TemplateItem({
           />
         </form>
       </Form>
+
+      <NewCategoryModal
+        trigger={
+          <button
+            ref={newTemplateItemModalRef}
+            type="button"
+            className="hidden"
+          />
+        }
+        onCreate={(categoryId) => form.setValue("category", categoryId)}
+      />
     </li>
   );
 }

@@ -70,7 +70,7 @@ export default function ListItem(props: {
           <button
             type="button"
             className={cn(
-              "wrap-anywhere grow",
+              "wrap-break-word grow overflow-hidden text-left",
               props.item.completed ? "text-muted-foreground line-through" : "",
             )}
           >

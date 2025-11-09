@@ -17,10 +17,14 @@ export default async function Lists({ projectId }: { projectId: string }) {
 
   if (lists.length === 0) {
     return (
-      <Alert>
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>Encara no hi ha llistes</AlertTitle>
-      </Alert>
+      <>
+        <Alert>
+          <InfoIcon className="h-4 w-4" />
+          <AlertTitle>Encara no hi ha llistes</AlertTitle>
+        </Alert>
+
+        <CreateListButton projectId={projectId} />
+      </>
     );
   }
 

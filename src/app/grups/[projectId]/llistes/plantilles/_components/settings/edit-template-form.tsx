@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2 } from "lucide-react";
+import { SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { templateSchema } from "../create-template/data";
 import { updateTemplate } from "./actions";
 
@@ -95,15 +95,11 @@ export default function EditTemplateForm({
             )}
           />
 
-          <Button
-            disabled={form.formState.isSubmitting}
-            className="w-full space-x-2"
-          >
-            {form.formState.isSubmitting && (
-              <Loader2 className="animate-spin" />
-            )}
-            Desar
-          </Button>
+          <SubmitButton
+            icon={<SaveIcon />}
+            text="Desar"
+            formState={form.formState}
+          />
         </form>
       </Form>
     </ModalForm>

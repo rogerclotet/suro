@@ -1,3 +1,5 @@
+"use client";
+
 import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,10 @@ export default function SettingsMenu({
         <ClearCompletedModal
           list={list}
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2"
+            >
               <ListX /> Esborrar completats
             </DropdownMenuItem>
           }
@@ -40,7 +45,10 @@ export default function SettingsMenu({
           list={list}
           templates={templates}
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2"
+            >
               <Import /> Importar plantilles
             </DropdownMenuItem>
           }
@@ -48,7 +56,10 @@ export default function SettingsMenu({
 
         <EditListForm
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2"
+            >
               <Edit />
               Editar llista
             </DropdownMenuItem>
@@ -58,7 +69,10 @@ export default function SettingsMenu({
 
         <DeleteListModal
           trigger={
-            <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground">
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
+            >
               <Trash2 />
               Eliminar llista
             </DropdownMenuItem>

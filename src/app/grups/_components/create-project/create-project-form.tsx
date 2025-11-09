@@ -1,6 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -8,7 +9,6 @@ import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import SubmitButton from "@/components/ui/submit-button";
 import { createProject } from "./actions";
 import { projectSchema } from "./data";
 
@@ -98,15 +99,11 @@ function CreateProjectFormContent({
           )}
         />
 
-        <Button
-          disabled={form.formState.isSubmitting}
-          className="w-full space-x-2"
-        >
-          {form.formState.isSubmitting && (
-            <span className="loading loading-spinner" />
-          )}
-          Crear
-        </Button>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text="Crear"
+          formState={form.formState}
+        />
       </form>
     </Form>
   );
