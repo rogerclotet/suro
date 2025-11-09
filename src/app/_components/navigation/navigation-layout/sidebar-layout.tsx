@@ -13,7 +13,9 @@ export default async function SidebarLayout({
   const session = await auth();
 
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  const sidebarState = cookieStore.get("sidebar_state")?.value;
+  const defaultOpen =
+    sidebarState === undefined ? true : sidebarState === "true";
 
   if (!session) {
     return children;
