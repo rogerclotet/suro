@@ -1,7 +1,7 @@
 "use server";
 
 import assert from "node:assert";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
@@ -19,6 +19,8 @@ import {
   secretSantas,
 } from "./db/schema/secret-santa";
 import { getUserProject } from "./projects";
+
+const MAX_ASSIGNMENTS_RETRIES = 10;
 
 export async function getCurrentSecretSanta(projectId: string) {
   const session = await auth();
@@ -193,4 +195,145 @@ export async function deleteExclusion(
       exclusionsCount: secretSanta.exclusions.length - 1,
     },
   });
+}
+
+export async function startSecretSanta(secretSanta: SecretSanta) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const project = await getUserProject(secretSanta.projectId);
+  if (project?.createdBy !== session.user.id) {
+    throw new Error("Only the creator of the project can start a secret santa");
+  }
+
+  if (secretSanta.assignmentsDone) {
+    throw new Error("The secret santa has already been started");
+  }
+
+  let assignments: { participant: string; assignedTo: string }[] | null = null;
+  for (let i = 0; i < MAX_ASSIGNMENTS_RETRIES; i++) {
+    try {
+      assignments = assignSecretSanta(secretSanta);
+      break;
+    } catch (_error) {
+      getPostHogServer().capture({
+        distinctId: session?.user.id,
+        event: "secret_santa_assignments_retry",
+        properties: {
+          projectId: secretSanta.projectId,
+          secretSantaId: secretSanta.id,
+          usersCount: secretSanta.participants.length,
+          exclusionsCount: secretSanta.exclusions.length,
+          totalExclusions: secretSanta.exclusions.flat().length,
+          retry: i,
+        },
+      });
+    }
+  }
+
+  if (!assignments) {
+    getPostHogServer().capture({
+      distinctId: session?.user.id,
+      event: "secret_santa_assignments_failed",
+      properties: {
+        projectId: secretSanta.projectId,
+        secretSantaId: secretSanta.id,
+        usersCount: secretSanta.participants.length,
+        exclusionsCount: secretSanta.exclusions.length,
+        totalExclusions: secretSanta.exclusions.flat().length,
+        retries: MAX_ASSIGNMENTS_RETRIES,
+      },
+    });
+
+    return {
+      error:
+        "No s'han pogut trobar assignacions vàlides, prova de canviar les exclusions i torna-ho a provar",
+    };
+  }
+
+  await db.transaction(async (trx) => {
+    try {
+      for (const assignment of assignments) {
+        await trx
+          .update(secretSantaParticipants)
+          .set({
+            assignedTo: assignment.assignedTo,
+          })
+          .where(eq(secretSantaParticipants.userId, assignment.participant));
+      }
+
+      await trx
+        .update(secretSantas)
+        .set({
+          assignmentsDone: true,
+        })
+        .where(eq(secretSantas.id, secretSanta.id));
+
+      return true;
+    } catch (error) {
+      trx.rollback();
+      throw error;
+    }
+  });
+
+  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "start_secret_santa",
+    properties: {
+      projectId: secretSanta.projectId,
+      secretSantaId: secretSanta.id,
+      usersCount: secretSanta.participants.length,
+      exclusionsCount: secretSanta.exclusions.length,
+      totalExclusions: secretSanta.exclusions.flat().length,
+    },
+  });
+}
+
+function assignSecretSanta(secretSanta: SecretSanta) {
+  const participants = secretSanta.participants.map((p) => p.userId);
+  const assignments: { participant: string; assignedTo: string }[] = [];
+
+  for (const participant of participants) {
+    const affectedExclusions = secretSanta.exclusions.filter((e) =>
+      e.includes(participant),
+    );
+
+    const eligibleParticipants = participants.filter(
+      (p) =>
+        p !== participant &&
+        assignments.every((a) => a.assignedTo !== p) &&
+        affectedExclusions.every((e) => !e.includes(p)),
+    );
+
+    const assignedTo =
+      eligibleParticipants[
+        Math.floor(Math.random() * eligibleParticipants.length)
+      ];
+    if (!assignedTo) {
+      throw new Error("No eligible participants found");
+    }
+
+    assignments.push({ participant, assignedTo });
+  }
+
+  return assignments;
+}
+
+export async function getAssignment(secretSantaId: string) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const assignments = await db.query.secretSantaParticipants.findFirst({
+    where: and(
+      eq(secretSantaParticipants.secretSantaId, secretSantaId),
+      eq(secretSantaParticipants.userId, session.user.id),
+    ),
+    with: {
+      assignedTo: true,
+    },
+  });
+
+  return assignments?.assignedTo;
 }

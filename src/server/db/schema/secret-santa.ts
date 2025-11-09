@@ -88,6 +88,10 @@ export const secretSantaParticipantsRelations = relations(
       fields: [secretSantaParticipants.userId],
       references: [users.id],
     }),
+    assignedTo: one(users, {
+      fields: [secretSantaParticipants.assignedTo],
+      references: [users.id],
+    }),
     secretSanta: one(secretSantas, {
       fields: [secretSantaParticipants.secretSantaId],
       references: [secretSantas.id],

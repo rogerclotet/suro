@@ -9,7 +9,7 @@ import { exclusionSchema, type SecretSanta } from "@/app/_data/secret-santa";
 import { Field, FieldContent, FieldError } from "@/components/ui/field";
 import SubmitButton from "@/components/ui/submit-button";
 import { createExclusion } from "@/server/secret-santa";
-import Participant from "../participant";
+import Participant from "../setup/participant";
 
 export default function CreateExclusionForm({
   secretSanta,

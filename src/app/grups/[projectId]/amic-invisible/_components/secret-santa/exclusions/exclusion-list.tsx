@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
 import { cn } from "@/lib/utils";
 import { deleteExclusion } from "@/server/secret-santa";
-import Participant from "../participant";
+import Participant from "../setup/participant";
 
 export default function ExclusionList({
   secretSanta,

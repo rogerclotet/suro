@@ -5,8 +5,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getFlags } from "@/server/flags";
 import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
-import SecretSanta from "./_components/secret-santa/secret-santa";
-import CreateSecretSantaForm from "./create-secret-santa-form";
+import CreateSecretSantaForm from "./_components/secret-santa/setup/create-secret-santa-form";
+import SecretSantaSetup from "./_components/secret-santa/setup/setup";
+import SecretSantaStarted from "./_components/secret-santa/started/started";
 
 const description =
   "L'amic invisible consisteix en fer un sorteig on a cada persona se li assigna un altre participant de forma aleatòria, i aquest li prepararà un regal, de manera que no se sap qui li ha fet a qui.";
@@ -72,5 +73,9 @@ export default async function AmicInvisiblePage({
     );
   }
 
-  return <SecretSanta secretSanta={secretSanta} />;
+  if (secretSanta.assignmentsDone) {
+    return <SecretSantaStarted secretSanta={secretSanta} />;
+  }
+
+  return <SecretSantaSetup secretSanta={secretSanta} />;
 }

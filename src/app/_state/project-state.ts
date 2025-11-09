@@ -1,7 +1,8 @@
 "use client";
 
 import type {} from "@redux-devtools/extension"; // required for devtools typing
-import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { Project } from "../_data/project";
@@ -51,6 +52,12 @@ export function useProjects() {
   const selectProjectId = useProjectsStore((state) => state.selectProjectId);
   const addCategory = useProjectsStore((state) => state.addCategory);
 
+  const { data: session } = useSession();
+  const isAdmin = useMemo(
+    () => session?.user.id === project?.createdBy,
+    [session, project],
+  );
+
   useEffect(() => {
     const projectId = localStorage.getItem("selectedProjectId");
     if (projectId) {
@@ -98,5 +105,12 @@ export function useProjects() {
     selectProjectId(project.id);
   }
 
-  return { setProjects, projects, project, selectProject, addCategory };
+  return {
+    setProjects,
+    projects,
+    project,
+    selectProject,
+    addCategory,
+    isAdmin,
+  };
 }

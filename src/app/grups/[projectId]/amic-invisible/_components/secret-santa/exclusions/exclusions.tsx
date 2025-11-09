@@ -1,7 +1,6 @@
 "use client";
 
 import { SquaresExcludeIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useRef } from "react";
 import type { SecretSanta } from "@/app/_data/secret-santa";
 import { useProjects } from "@/app/_state/project-state";
@@ -16,10 +15,7 @@ export default function Exclusions({
 }: {
   secretSanta: SecretSanta;
 }) {
-  const { data: session } = useSession();
-  const { project } = useProjects();
-
-  const isAdmin = session?.user.id === project?.createdBy;
+  const { isAdmin } = useProjects();
   if (isAdmin) {
     return <AdminExclusions secretSanta={secretSanta} />;
   }
