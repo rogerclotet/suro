@@ -15,10 +15,6 @@ export const GET = async (
 ) => {
   const { projectId } = await params;
   const posthog = getPostHogServer();
-  const session = await auth();
-  if (!session) {
-    return new Response("Unauthorized", { status: 401 });
-  }
 
   const project = await db.query.projects.findFirst({
     columns: { name: true },
@@ -83,6 +79,7 @@ export const GET = async (
   );
 
   if (error) {
+    const session = await auth();
     posthog.captureException(error, session?.user.id, {
       action: "generate_calendar_ics",
       projectId: projectId,
