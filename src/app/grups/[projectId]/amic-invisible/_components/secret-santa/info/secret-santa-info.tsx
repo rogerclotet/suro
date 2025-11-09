@@ -17,7 +17,7 @@ export default function SecretSantaInfo({
 
       <p className="text-foreground/80">{description}</p>
 
-      <p className="text-muted-foreground text-sm">
+      <p className="h-6 text-muted-foreground text-sm">
         <TimeInfo datetime={datetime} />
       </p>
 

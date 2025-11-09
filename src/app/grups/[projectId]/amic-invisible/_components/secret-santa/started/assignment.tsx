@@ -23,7 +23,7 @@ export default function Assignment({ user }: { user: User }) {
       >
         <div
           className={cn(
-            "transform-3d relative size-full transition duration-500",
+            "transform-3d relative size-full transition duration-500 ease-in-out",
             isFlipped ? "rotate-y-180" : "",
           )}
         >
