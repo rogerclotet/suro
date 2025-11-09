@@ -1,24 +1,20 @@
 import * as v from "valibot";
 import type { getCurrentSecretSanta } from "@/server/secret-santa";
 
-export const exclusionsSchema = v.array(
-  v.pipe(
-    v.object({
-      from: v.string(),
-      to: v.string(),
-    }),
-    v.forward(
-      v.partialCheck(
-        [["from"], ["to"]],
-        (input) => input.from !== input.to,
-        "El pagador i el destinatari no poden ser la mateixa persona",
-      ),
-      ["to"],
+export const exclusionSchema = v.object({
+  exclusions: v.pipe(
+    v.pipe(
+      v.array(v.string()),
+      v.minLength(2, "Les exclusions han de tenir com a mínim 2 participants"),
+    ),
+    v.check(
+      (input) => new Set(input).size === input.length,
+      "Els participants no poden ser repetits",
     ),
   ),
-);
+});
 
-export type ExclusionsData = v.InferOutput<typeof exclusionsSchema>;
+export type ExclusionData = v.InferOutput<typeof exclusionSchema>["exclusions"];
 
 export const priceRangeSchema = v.pipe(
   v.object({
@@ -60,7 +56,6 @@ export const secretSantaSchema = v.object({
     v.array(v.string()),
     v.minLength(2, "Es necessiten com a mínim 2 participants"),
   ),
-  exclusions: v.optional(exclusionsSchema),
 });
 
 export type SecretSantaData = v.InferOutput<typeof secretSantaSchema>;

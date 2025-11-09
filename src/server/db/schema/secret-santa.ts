@@ -1,7 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import { boolean, jsonb, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import type {
-  ExclusionsData,
+  ExclusionData,
   GiftIdeaData,
   PriceRangeData,
 } from "@/app/_data/secret-santa";
@@ -27,7 +27,10 @@ export const secretSantas = createTable("secretSanta", {
     withTimezone: true,
   }).notNull(),
   priceRange: jsonb("priceRange").$type<PriceRangeData>().notNull(),
-  exclusions: jsonb("exclusions").$type<ExclusionsData>().notNull().default([]),
+  exclusions: jsonb("exclusions")
+    .$type<ExclusionData[]>()
+    .notNull()
+    .default([]),
   assignmentsDone: boolean("assignmentsDone").notNull().default(false),
   createdAt: timestamp("createdAt", {
     mode: "date",

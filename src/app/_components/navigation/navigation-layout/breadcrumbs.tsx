@@ -19,13 +19,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMenuItems } from "../use-menu-items";
 
+const explicitlyAllowedBreadcrumbs = ["grups"];
+
 export default function Breadcrumbs() {
   const pathname = usePathname();
   const { project } = useProjects();
   const menuItems = useMenuItems();
 
   const allowedBreadcrumbs = useMemo(() => {
-    const explicitlyAllowedBreadcrumbs = ["grups"];
     const breadcrumbsFromMenuItems = menuItems.flatMap((item) =>
       [item, ...(item.children ?? [])].map((item) =>
         item.path.split("/").pop(),
@@ -87,7 +88,8 @@ export default function Breadcrumbs() {
               {index > 0 && <BreadcrumbSeparator />}
 
               <BreadcrumbItem>
-                {isCurrentPath ? (
+                {isCurrentPath ||
+                explicitlyAllowedBreadcrumbs.includes(breadcrumb) ? (
                   <BreadcrumbPage className="font-semibold capitalize">
                     {breadcrumb.replace("-", " ")}
                   </BreadcrumbPage>

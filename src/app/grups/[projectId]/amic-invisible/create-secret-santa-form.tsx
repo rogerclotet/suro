@@ -22,6 +22,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +48,6 @@ export default function CreateSecretSantaForm({
         max: 30,
       },
       participants: project.users.map((user) => user.user.id),
-      exclusions: [],
     },
     resolver: valibotResolver(secretSantaSchema),
     mode: "onChange",
@@ -89,10 +89,14 @@ export default function CreateSecretSantaForm({
             name="name"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="name">Nom</FieldLabel>
                 <FieldContent>
-                  <Input id="name" {...field} />
+                  <Input
+                    id="name"
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                  />
                   <FieldError errors={[fieldState.error]} />
                 </FieldContent>
               </Field>
@@ -103,10 +107,14 @@ export default function CreateSecretSantaForm({
             name="description"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="description">Descripció</FieldLabel>
                 <FieldContent>
-                  <Textarea id="description" {...field} />
+                  <Textarea
+                    id="description"
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                  />
                   <FieldError errors={[fieldState.error]} />
                 </FieldContent>
               </Field>
@@ -117,7 +125,7 @@ export default function CreateSecretSantaForm({
             name="priceRange"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="priceRange">Rang de preu</FieldLabel>
                 <FieldDescription>
                   <span>Valor orientatiu pels regals: </span>
@@ -164,18 +172,23 @@ export default function CreateSecretSantaForm({
                     id="datetime"
                     value={field.value.toISOString().slice(0, 16)}
                     onChange={(e) => field.onChange(new Date(e.target.value))}
+                    aria-invalid={fieldState.invalid}
                   />
                   <FieldError errors={[fieldState.error]} />
                 </FieldContent>
               </Field>
             )}
           />
+        </FieldGroup>
 
+        <FieldSeparator />
+
+        <FieldGroup>
           <Controller
             name="participants"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Participants</FieldLabel>
                 <FieldContent>
                   {project.users.map((user) => (
@@ -204,20 +217,6 @@ export default function CreateSecretSantaForm({
 
                   <FieldError errors={[fieldState.error]} />
                 </FieldContent>
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="exclusions"
-            control={form.control}
-            render={() => (
-              <Field>
-                <FieldLabel>Exclusions</FieldLabel>
-                <FieldDescription className="italic">
-                  No implementat encara.
-                </FieldDescription>
-                <FieldContent></FieldContent>
               </Field>
             )}
           />

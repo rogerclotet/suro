@@ -15,8 +15,8 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
-      <Alert variant="destructive" className="max-w-lg">
+    <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center p-4">
+      <Alert variant="destructive" className="max-w-lg bg-card">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>

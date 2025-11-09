@@ -5,14 +5,20 @@ import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import type { SecretSantaData } from "@/app/_data/secret-santa";
-import { secretSantaSchema } from "@/app/_data/secret-santa";
+import type {
+  ExclusionData,
+  SecretSanta,
+  SecretSantaData,
+} from "@/app/_data/secret-santa";
+import { exclusionSchema, secretSantaSchema } from "@/app/_data/secret-santa";
 import { auth } from "@/auth";
+import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import {
   secretSantaParticipants,
   secretSantas,
 } from "./db/schema/secret-santa";
+import { getUserProject } from "./projects";
 
 export async function getCurrentSecretSanta(projectId: string) {
   const session = await auth();
@@ -53,7 +59,7 @@ export async function createSecretSanta(
     );
   }
 
-  await db.transaction(async (trx) => {
+  const id = await db.transaction(async (trx) => {
     try {
       const result = await trx
         .insert(secretSantas)
@@ -62,7 +68,6 @@ export async function createSecretSanta(
           description: validatedData.output.description,
           priceRange: validatedData.output.priceRange,
           datetime: validatedData.output.datetime,
-          exclusions: validatedData.output.exclusions,
           projectId: project.id,
           createdBy: session.user.id,
         })
@@ -79,6 +84,8 @@ export async function createSecretSanta(
           userId: participant,
         });
       }
+
+      return id;
     } catch (error) {
       trx.rollback();
       throw error;
@@ -86,4 +93,104 @@ export async function createSecretSanta(
   });
 
   revalidatePath(`/grups/${project.id}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "create_secret_santa",
+    properties: {
+      projectId: project.id,
+      secretSantaId: id,
+      usersCount: validatedData.output.participants.length,
+    },
+  });
+}
+
+export async function createExclusion(
+  secretSanta: SecretSanta,
+  exclusions: v.InferInput<typeof exclusionSchema>,
+) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const project = await getUserProject(secretSanta.projectId);
+  if (project?.createdBy !== session.user.id) {
+    throw new Error("Only the creator of the project can create an exclusion");
+  }
+
+  const validatedData = v.safeParse(exclusionSchema, exclusions);
+  if (!validatedData.success) {
+    throw new Error(
+      `Invalid data: ${validatedData.issues.map((issue) => issue.message).join(", ")}`,
+    );
+  }
+
+  if (
+    secretSanta.exclusions.some((exclusion) =>
+      areEqualExclusions(exclusion, validatedData.output.exclusions),
+    )
+  ) {
+    return { error: "L'exclusió ja existeix" };
+  }
+
+  await db
+    .update(secretSantas)
+    .set({
+      exclusions: [...secretSanta.exclusions, validatedData.output.exclusions],
+    })
+    .where(eq(secretSantas.id, secretSanta.id));
+
+  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "create_exclusion",
+    properties: {
+      projectId: secretSanta.projectId,
+      secretSantaId: secretSanta.id,
+      usersCount: secretSanta.participants.length,
+      exclusionsCount: secretSanta.exclusions.length + 1,
+    },
+  });
+}
+
+function areEqualExclusions(exclusions1: string[], exclusions2: string[]) {
+  return (
+    exclusions1.length === exclusions2.length &&
+    exclusions1.every((e) => exclusions2.includes(e))
+  );
+}
+
+export async function deleteExclusion(
+  secretSanta: SecretSanta,
+  exclusion: ExclusionData,
+) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const project = await getUserProject(secretSanta.projectId);
+  if (project?.createdBy !== session.user.id) {
+    throw new Error("Only the creator of the project can delete an exclusion");
+  }
+
+  await db
+    .update(secretSantas)
+    .set({
+      exclusions: secretSanta.exclusions.filter(
+        (e) => !areEqualExclusions(e, exclusion),
+      ),
+    })
+    .where(eq(secretSantas.id, secretSanta.id));
+
+  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "delete_exclusion",
+    properties: {
+      projectId: secretSanta.projectId,
+      secretSantaId: secretSanta.id,
+      usersCount: secretSanta.participants.length,
+      exclusionsCount: secretSanta.exclusions.length - 1,
+    },
+  });
 }

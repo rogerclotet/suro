@@ -16,7 +16,7 @@ export default function GlobalError({
 
   return (
     <html lang="ca">
-      <body>
+      <body className="p-4">
         <NextError statusCode={0} />
       </body>
     </html>

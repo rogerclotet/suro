@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getFlags } from "@/server/flags";
 import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
-import SecretSanta from "./_components/secret-santa";
+import SecretSanta from "./_components/secret-santa/secret-santa";
 import CreateSecretSantaForm from "./create-secret-santa-form";
 
 export default async function AmicInvisiblePage({
