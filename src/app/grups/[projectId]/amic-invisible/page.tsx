@@ -8,6 +8,9 @@ import { getCurrentSecretSanta } from "@/server/secret-santa";
 import SecretSanta from "./_components/secret-santa/secret-santa";
 import CreateSecretSantaForm from "./create-secret-santa-form";
 
+const description =
+  "L'amic invisible consisteix en fer un sorteig on a cada persona se li assigna un altre participant de forma aleatòria, i aquest li prepararà un regal, de manera que no se sap qui li ha fet a qui.";
+
 export default async function AmicInvisiblePage({
   params,
 }: {
@@ -29,13 +32,18 @@ export default async function AmicInvisiblePage({
     redirect("/");
   }
 
-  if (project.users.length === 1) {
+  if (project.users.length < 3) {
     return (
       <Alert className="mx-auto max-w-lg">
         <InfoIcon className="h-4 w-4" />
         <AlertTitle>Informació</AlertTitle>
-        <AlertDescription>
-          {"Per crear un amic invisible el grup ha de tenir més d'un usuari."}
+        <AlertDescription className="mt-2 space-y-2">
+          <p>
+            {
+              "Aquesta secció està pensada per grups de 3 o més persones, i permet fer un amic invisible entre ells."
+            }
+          </p>
+          <p>{description}</p>
         </AlertDescription>
       </Alert>
     );
