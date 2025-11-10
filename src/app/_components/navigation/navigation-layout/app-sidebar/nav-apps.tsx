@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRightIcon, FolderIcon } from "lucide-react";
+import { ChevronRightIcon, SquircleIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
@@ -55,7 +55,7 @@ export default function NavApps() {
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton tooltip={item.name}>
-                        <FolderIcon />
+                        {item.icon}
                         <span>{item.name}</span>
                         <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                       </SidebarMenuButton>
@@ -68,11 +68,12 @@ export default function NavApps() {
                               href={item.path}
                               onClick={() => setOpenMobile(false)}
                             >
-                              {item.icon}
+                              <SquircleIcon />
                               <span>{item.name}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+
                         {item.children.map((child) => (
                           <SidebarMenuSubItem key={child.name}>
                             <SidebarMenuSubButton asChild>

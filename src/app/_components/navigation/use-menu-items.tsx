@@ -7,6 +7,7 @@ import {
   GiftIcon,
   HandCoins,
   LayoutTemplateIcon,
+  LightbulbIcon,
   ListTodo,
   TagsIcon,
 } from "lucide-react";
@@ -72,6 +73,13 @@ const itemParts: MenuItemPart[] = [
     name: "Amic Invisible",
     pathPart: "amic-invisible",
     icon: <GiftIcon />,
+    children: [
+      {
+        name: "Llista d'idees",
+        pathPart: "idees",
+        icon: <LightbulbIcon />,
+      },
+    ],
   },
 ];
 
