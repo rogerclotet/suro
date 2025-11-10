@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
-import CreateGiftIdeaButton from "./create-gift-idea/button";
 import GiftIdeas from "./gift-ideas";
 
 export default async function IdeasPage({
@@ -36,8 +35,6 @@ export default async function IdeasPage({
         giftIdeas={participant.giftIdeas}
         secretSantaId={secretSanta.id}
       />
-
-      <CreateGiftIdeaButton />
     </div>
   );
 }

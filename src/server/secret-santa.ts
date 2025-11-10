@@ -7,10 +7,15 @@ import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import type {
   ExclusionData,
+  GiftIdeaData,
   SecretSanta,
   SecretSantaData,
 } from "@/app/_data/secret-santa";
-import { exclusionSchema, secretSantaSchema } from "@/app/_data/secret-santa";
+import {
+  exclusionSchema,
+  giftIdeasSchema,
+  secretSantaSchema,
+} from "@/app/_data/secret-santa";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
@@ -336,4 +341,40 @@ export async function getAssignment(secretSantaId: string) {
   });
 
   return assignments?.assignedTo;
+}
+
+export async function updateGiftIdeas(
+  projectId: string,
+  secretSantaId: string,
+  giftIdeas: GiftIdeaData[],
+) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const participant = await db.query.secretSantaParticipants.findFirst({
+    where: and(
+      eq(secretSantaParticipants.secretSantaId, secretSantaId),
+      eq(secretSantaParticipants.userId, session.user.id),
+    ),
+  });
+
+  if (!participant) {
+    throw new Error("Secret Santa participant not found");
+  }
+
+  const validatedData = v.safeParse(giftIdeasSchema, giftIdeas);
+  if (!validatedData.success) {
+    throw new Error(
+      `Invalid data: ${validatedData.issues.map((issue) => issue.message).join(", ")}`,
+    );
+  }
+
+  await db
+    .update(secretSantaParticipants)
+    .set({
+      giftIdeas: validatedData.output,
+    })
+    .where(eq(secretSantaParticipants.id, participant.id));
+
+  revalidatePath(`/grups/${projectId}/amic-invisible/idees`);
 }

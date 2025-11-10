@@ -38,6 +38,7 @@ export default function CategoryItems(props: {
       >
         {props.category}
       </h3>
+
       <ul ref={animationParent}>
         {props.items.length > 0 ? (
           props.items.map((item) => (

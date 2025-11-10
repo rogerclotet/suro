@@ -30,7 +30,7 @@ export default async function CategoriesPage({
         <>
           <Description />
 
-          <ul className="mx-auto max-w-xl space-y-4">
+          <ul className="mx-auto max-w-xl space-y-2">
             {categories.map((category) => (
               <li key={category.id}>
                 <Category category={category} />

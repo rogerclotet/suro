@@ -17,7 +17,10 @@ export default function ListPreview({ list }: { list: List }) {
   const completed = list.items.length > 0 && todoCount === 0;
 
   return (
-    <Link href={`/grups/${list.projectId}/llistes/${list.id}`}>
+    <Link
+      href={`/grups/${list.projectId}/llistes/${list.id}`}
+      className="block break-inside-avoid-column"
+    >
       <Card className={cn("h-full", completed ? "opacity-50" : "")}>
         <CardHeader>
           <CardTitle>{list.name}</CardTitle>

@@ -42,7 +42,7 @@ export default function Assignment({ user }: { user: User }) {
 function AssignmentCardFront({ user }: { user: User }) {
   return (
     <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-2xl">
-      <CardHeader className="items-center justify-center">
+      <CardHeader className="flex h-auto w-full items-center justify-center">
         <Avatar className="aspect-square h-auto w-[80%]">
           <AvatarFallback className="text-8xl">
             {user.name?.charAt(0)?.toUpperCase()}
@@ -50,8 +50,10 @@ function AssignmentCardFront({ user }: { user: User }) {
           <AvatarImage src={user.image ?? undefined} />
         </Avatar>
       </CardHeader>
-      <CardContent className="text-center font-bold text-2xl text-primary">
-        {user.name}
+      <CardContent className="flex h-16 items-center justify-center">
+        <span className="line-clamp-2 text-ellipsis font-bold text-2xl text-primary">
+          {user.name}
+        </span>
       </CardContent>
     </Card>
   );
@@ -59,11 +61,11 @@ function AssignmentCardFront({ user }: { user: User }) {
 
 function AssignmentCardBack() {
   return (
-    <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-2xl">
-      <CardHeader className="items-center justify-center">
+    <Card className="flex aspect-3/4 w-full flex-col items-center justify-evenly drop-shadow-2xl">
+      <CardHeader className="flex h-auto w-full items-center justify-center">
         <BadgeQuestionMarkIcon className="aspect-square h-auto w-[80%] text-muted" />
       </CardHeader>
-      <CardContent className="text-center text-muted-foreground">
+      <CardContent className="flex h-16 items-center justify-center text-center text-muted-foreground">
         Toca per veure el teu amic invisible
       </CardContent>
     </Card>

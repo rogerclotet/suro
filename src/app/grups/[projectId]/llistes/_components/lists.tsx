@@ -43,7 +43,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
   return (
     <>
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
           {incompleteLists.map((list) => (
             <ListPreview key={list.id} list={list} />
           ))}
@@ -54,7 +54,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
             <h2 className="font-semibold text-md text-muted-foreground">
               Completades:
             </h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
               {completedLists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}

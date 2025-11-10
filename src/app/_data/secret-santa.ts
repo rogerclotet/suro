@@ -61,10 +61,16 @@ export const secretSantaSchema = v.object({
 export type SecretSantaData = v.InferOutput<typeof secretSantaSchema>;
 
 export const giftIdeaSchema = v.object({
+  id: v.pipe(v.number(), v.integer()),
   name: v.pipe(v.string(), v.trim(), v.nonEmpty("No pot estar buit")),
-  description: v.optional(v.string()),
-  url: v.optional(v.pipe(v.string(), v.trim(), v.url("No és una URL vàlida"))),
+  description: v.pipe(v.string(), v.trim()),
+  url: v.union([
+    v.pipe(v.string(), v.trim(), v.url("No és una URL vàlida")),
+    v.literal(""),
+  ]),
 });
+
+export const giftIdeasSchema = v.array(giftIdeaSchema);
 
 export type GiftIdeaData = v.InferOutput<typeof giftIdeaSchema>;
 

@@ -12,6 +12,7 @@ export default function TemplatePreview({ template }: { template: Template }) {
   return (
     <Link
       href={`/grups/${template.projectId}/llistes/plantilles/${template.id}`}
+      className="block break-inside-avoid-column"
     >
       <Card>
         <CardHeader>

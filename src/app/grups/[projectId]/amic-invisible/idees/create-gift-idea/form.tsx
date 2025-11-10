@@ -2,9 +2,13 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Link2Icon, PlusIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { GiftIdeaData } from "@/app/_data/secret-santa";
 import { giftIdeaSchema } from "@/app/_data/secret-santa";
+import { useProjects } from "@/app/_state/project-state";
 import {
   Field,
   FieldContent,
@@ -17,6 +21,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -24,21 +29,30 @@ export default function GiftIdeaForm({
   giftIdea,
   onChange,
 }: {
-  giftIdea?: GiftIdeaData;
-  onChange?: (data: GiftIdeaData) => void;
+  giftIdea: GiftIdeaData;
+  onChange?: (data: GiftIdeaData) => Promise<void>;
 }) {
   const form = useForm<GiftIdeaData>({
-    defaultValues: giftIdea ?? {
-      name: "",
-      description: "",
-      url: "",
-    },
+    defaultValues: giftIdea,
     resolver: valibotResolver(giftIdeaSchema),
     mode: "onChange",
   });
+  const { close } = useModalForm();
+  const { data: session } = useSession();
+  const { project } = useProjects();
 
   async function onSubmit(data: GiftIdeaData) {
-    onChange?.(data);
+    try {
+      await onChange?.(data);
+      close();
+    } catch (error) {
+      posthog.captureException(error, {
+        distinctId: session?.user.id,
+        action: "create_gift_idea",
+        projectId: project?.id,
+      });
+      toast.error("No s'ha pogut crear l'idea, torna-ho a provar més tard");
+    }
   }
 
   return (

@@ -32,7 +32,7 @@ export default async function Templates({ projectId }: { projectId: string }) {
       <div>
         <Description />
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
         {templates.map((template) => (
           <TemplatePreview key={template.id} template={template} />
         ))}
