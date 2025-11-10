@@ -36,6 +36,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
       templates: [] as string[],
     },
     resolver: valibotResolver(listSchema),
+    mode: "onChange",
   });
   const router = useRouter();
   const { project } = useProjects();

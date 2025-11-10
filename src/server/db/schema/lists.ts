@@ -131,7 +131,6 @@ export const lists = createTable(
       .notNull()
       .primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
-    private: boolean("private").default(false),
     createdAt: timestamp("createdAt", {
       mode: "date",
       withTimezone: true,
