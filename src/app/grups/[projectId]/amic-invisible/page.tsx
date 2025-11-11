@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getFlags } from "@/server/flags";
 import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
-import CreateSecretSantaForm from "./_components/secret-santa/setup/create-secret-santa-form";
+import CreateButton from "./_components/secret-santa/setup/create-button";
 import SecretSantaSetup from "./_components/secret-santa/setup/setup";
 import SecretSantaStarted from "./_components/secret-santa/started/started";
 
@@ -68,7 +68,7 @@ export default async function AmicInvisiblePage({
           </AlertDescription>
         </Alert>
 
-        {isAdmin && <CreateSecretSantaForm project={project} />}
+        {isAdmin && <CreateButton />}
       </>
     );
   }

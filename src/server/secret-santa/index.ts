@@ -1,7 +1,7 @@
 "use server";
 
 import assert from "node:assert";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
@@ -41,7 +41,10 @@ export async function getCurrentSecretSanta(projectId: string) {
         },
       },
     },
-    where: eq(secretSantas.projectId, projectId),
+    where: and(
+      eq(secretSantas.projectId, projectId),
+      isNull(secretSantas.archivedAt),
+    ),
     orderBy: [desc(secretSantas.datetime)],
   });
 
@@ -110,6 +113,76 @@ export async function createSecretSanta(
       projectId: project.id,
       secretSantaId: id,
       usersCount: validatedData.output.participants.length,
+    },
+  });
+}
+
+export async function updateSecretSanta(
+  secretSanta: SecretSanta,
+  data: SecretSantaData,
+) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const project = await getUserProject(secretSanta.projectId);
+  if (project?.createdBy !== session.user.id) {
+    throw new Error(
+      "Only the creator of the project can update a secret santa",
+    );
+  }
+
+  const validatedData = v.safeParse(secretSantaSchema, data);
+  if (!validatedData.success) {
+    throw new Error(
+      `Invalid data: ${validatedData.issues.map((issue) => issue.message).join(", ")}`,
+    );
+  }
+
+  await db
+    .update(secretSantas)
+    .set(validatedData.output)
+    .where(eq(secretSantas.id, secretSanta.id));
+
+  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "update_secret_santa",
+    properties: {
+      projectId: secretSanta.projectId,
+      secretSantaId: secretSanta.id,
+      usersCount: secretSanta.participants.length,
+    },
+  });
+}
+
+export async function archiveSecretSanta(secretSanta: SecretSanta) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const project = await getUserProject(secretSanta.projectId);
+  if (project?.createdBy !== session.user.id) {
+    throw new Error(
+      "Only the creator of the project can archive a secret santa",
+    );
+  }
+
+  await db
+    .update(secretSantas)
+    .set({
+      archivedAt: new Date(),
+    })
+    .where(eq(secretSantas.id, secretSanta.id));
+
+  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  getPostHogServer().capture({
+    distinctId: session?.user.id,
+    event: "archive_secret_santa",
+    properties: {
+      projectId: secretSanta.projectId,
+      secretSantaId: secretSanta.id,
+      usersCount: secretSanta.participants.length,
     },
   });
 }
@@ -266,7 +339,7 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
           .set({
             assignedTo: assignment.assignedTo,
           })
-          .where(eq(secretSantaParticipants.id, assignment.participant));
+          .where(eq(secretSantaParticipants.userId, assignment.participant));
       }
 
       await trx

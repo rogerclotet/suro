@@ -32,6 +32,10 @@ export const secretSantas = createTable("secretSanta", {
     .notNull()
     .default([]),
   assignmentsDone: boolean("assignmentsDone").notNull().default(false),
+  archivedAt: timestamp("archivedAt", {
+    mode: "date",
+    withTimezone: true,
+  }),
   createdAt: timestamp("createdAt", {
     mode: "date",
     withTimezone: true,

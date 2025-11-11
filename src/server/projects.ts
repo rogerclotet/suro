@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
@@ -24,6 +24,7 @@ const projectQuery = {
         secretSantas: {
           columns: { assignmentsDone: true, datetime: true },
           orderBy: desc(secretSantas.datetime),
+          where: isNull(secretSantas.archivedAt),
           limit: 1,
         },
       },
@@ -94,6 +95,7 @@ export async function getInvitedProject(projectId: string) {
         secretSantas: {
           columns: { assignmentsDone: true, datetime: true },
           orderBy: desc(secretSantas.datetime),
+          where: isNull(secretSantas.archivedAt),
           limit: 1,
         },
       },

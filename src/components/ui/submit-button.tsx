@@ -16,7 +16,7 @@ export default function SubmitButton<T>({
     <Button
       {...props}
       type="submit"
-      disabled={!formState.isDirty || formState.isSubmitting}
+      disabled={formState.isSubmitting}
       className="w-full space-x-2"
     >
       {formState.isSubmitting ? <Spinner /> : icon}

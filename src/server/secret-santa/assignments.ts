@@ -3,7 +3,7 @@ import { pickRandom } from "./pick-random";
 import type { Assignment } from "./types";
 
 export function generateAssignments(secretSanta: SecretSanta) {
-  const participantIds = secretSanta.participants.map((p) => p.id);
+  const participantIds = secretSanta.participants.map((p) => p.userId);
   const assignments: Assignment[] = [];
 
   for (const participant of participantIds) {

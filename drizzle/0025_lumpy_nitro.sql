@@ -1,0 +1,1 @@
+ALTER TABLE "f_secretSanta" ADD COLUMN "archivedAt" timestamp with time zone;
