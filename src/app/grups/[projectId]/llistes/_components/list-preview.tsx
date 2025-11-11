@@ -16,8 +16,6 @@ export default function ListPreview({ list }: { list: List }) {
   const todoCount = list.items.filter((item) => !item.completed).length;
   const completed = list.items.length > 0 && todoCount === 0;
 
-  console.log(todoCount, completed);
-
   return (
     <Link
       href={`/grups/${list.projectId}/llistes/${list.id}`}

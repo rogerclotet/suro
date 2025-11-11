@@ -16,7 +16,7 @@ describe("generateAssignments", () => {
 
   it("should assign secret santa without exclusions", () => {
     const secretSanta = {
-      participants: [{ userId: "1" }, { userId: "2" }, { userId: "3" }],
+      participants: [{ id: "1" }, { id: "2" }, { id: "3" }],
       exclusions: [],
     } as unknown as SecretSanta;
 
@@ -50,12 +50,7 @@ describe("generateAssignments", () => {
 
   it("should assign secret santa with exclusions", () => {
     const secretSanta = {
-      participants: [
-        { userId: "1" },
-        { userId: "2" },
-        { userId: "3" },
-        { userId: "4" },
-      ],
+      participants: [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }],
       exclusions: [
         ["1", "2"],
         ["3", "4"],
@@ -98,12 +93,7 @@ describe("generateAssignments", () => {
 
   it("should throw an error if no eligible participants are found", () => {
     const secretSanta = {
-      participants: [
-        { userId: "1" },
-        { userId: "2" },
-        { userId: "3" },
-        { userId: "4" },
-      ],
+      participants: [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }],
       exclusions: [
         ["1", "2"],
         ["1", "3"],

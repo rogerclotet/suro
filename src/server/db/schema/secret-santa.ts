@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  foreignKey,
   jsonb,
   text,
   timestamp,
@@ -86,10 +87,7 @@ export const secretSantaParticipants = createTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    assignedTo: varchar("assignedTo", { length: 255 }).references(
-      () => users.id,
-      { onDelete: "set null", onUpdate: "cascade" },
-    ),
+    assignedTo: varchar("assignedTo", { length: 255 }),
     giftIdeas: jsonb("giftIdeas").$type<GiftIdeaData[]>().notNull().default([]),
     createdAt: timestamp("createdAt", {
       mode: "date",
@@ -100,7 +98,14 @@ export const secretSantaParticipants = createTable(
       withTimezone: true,
     }).$onUpdate(() => new Date()),
   },
-  (sp) => [unique("unique_user_secret_santa").on(sp.userId, sp.secretSantaId)],
+  (sp) => [
+    unique("unique_user_secret_santa").on(sp.userId, sp.secretSantaId),
+    foreignKey({
+      columns: [sp.assignedTo],
+      foreignColumns: [sp.id],
+      name: "assigned_to_participant_fk",
+    }),
+  ],
 );
 
 export const secretSantaParticipantsRelations = relations(
@@ -110,9 +115,9 @@ export const secretSantaParticipantsRelations = relations(
       fields: [secretSantaParticipants.userId],
       references: [users.id],
     }),
-    assignedTo: one(users, {
+    assignedTo: one(secretSantaParticipants, {
       fields: [secretSantaParticipants.assignedTo],
-      references: [users.id],
+      references: [secretSantaParticipants.id],
     }),
     secretSanta: one(secretSantas, {
       fields: [secretSantaParticipants.secretSantaId],

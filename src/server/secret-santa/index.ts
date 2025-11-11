@@ -385,7 +385,7 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
           .set({
             assignedTo: assignment.assignedTo,
           })
-          .where(eq(secretSantaParticipants.userId, assignment.participant));
+          .where(eq(secretSantaParticipants.id, assignment.participant));
       }
 
       await trx
@@ -427,11 +427,15 @@ export async function getAssignment(secretSantaId: string) {
       eq(secretSantaParticipants.userId, session.user.id),
     ),
     with: {
-      assignedTo: true,
+      assignedTo: {
+        with: {
+          user: true,
+        },
+      },
     },
   });
 
-  return assignments?.assignedTo;
+  return assignments?.assignedTo?.user;
 }
 
 export async function updateGiftIdeas(
