@@ -1,4 +1,4 @@
-import { CalendarFold, Check } from "lucide-react";
+import { CalendarFold, CheckIcon } from "lucide-react";
 import Link from "next/link";
 import type { List } from "@/app/_data/list";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ export default function ListPreview({ list }: { list: List }) {
   const todoCount = list.items.filter((item) => !item.completed).length;
   const completed = list.items.length > 0 && todoCount === 0;
 
+  console.log(todoCount, completed);
+
   return (
     <Link
       href={`/grups/${list.projectId}/llistes/${list.id}`}
@@ -25,18 +27,15 @@ export default function ListPreview({ list }: { list: List }) {
         <CardHeader>
           <CardTitle>{list.name}</CardTitle>
 
-          {completed ||
-            (todoCount > 0 && (
-              <CardAction>
-                {completed ? (
-                  <Check />
-                ) : (
-                  todoCount > 0 && (
-                    <Badge variant="secondary">{todoCount}</Badge>
-                  )
-                )}
-              </CardAction>
-            ))}
+          {(completed || todoCount > 0) && (
+            <CardAction>
+              {completed ? (
+                <CheckIcon />
+              ) : (
+                todoCount > 0 && <Badge variant="secondary">{todoCount}</Badge>
+              )}
+            </CardAction>
+          )}
 
           {list.event || list.description ? (
             <CardDescription className="flex flex-col gap-2">
