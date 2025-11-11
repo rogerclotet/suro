@@ -48,9 +48,16 @@ export const secretSantas = createTable("secretSanta", {
   }),
 });
 
-export const secretSantaRelations = relations(secretSantas, ({ many }) => ({
-  participants: many(secretSantaParticipants),
-}));
+export const secretSantaRelations = relations(
+  secretSantas,
+  ({ one, many }) => ({
+    project: one(projects, {
+      fields: [secretSantas.projectId],
+      references: [projects.id],
+    }),
+    participants: many(secretSantaParticipants),
+  }),
+);
 
 export const secretSantaParticipants = createTable("secretSantaParticipant", {
   id: varchar("id", { length: 255 })

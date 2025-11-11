@@ -12,6 +12,7 @@ import {
   TagsIcon,
 } from "lucide-react";
 import { type ReactNode, useMemo } from "react";
+import type { Project } from "@/app/_data/project";
 import { useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
 
@@ -21,6 +22,7 @@ export type MenuItem = {
   icon: ReactNode;
   disabled?: boolean;
   children?: MenuItem[];
+  isActive?: (project: Project) => boolean;
 };
 
 type MenuItemPart = {
@@ -29,6 +31,7 @@ type MenuItemPart = {
   icon: ReactNode;
   disabled?: boolean;
   children?: MenuItemPart[];
+  isActive?: (project: Project) => boolean;
 };
 
 const itemParts: MenuItemPart[] = [
@@ -78,6 +81,10 @@ const itemParts: MenuItemPart[] = [
         name: "Llista d'idees",
         pathPart: "idees",
         icon: <LightbulbIcon />,
+        isActive: (project) =>
+          project.secretSantas.some(
+            (s) => s.assignmentsDone && s.datetime > new Date(),
+          ),
       },
     ],
   },
@@ -87,7 +94,7 @@ export function useMenuItems(): MenuItem[] {
   const { project: selectedProject } = useProjects();
   const { flags } = useFlags();
 
-  const filteredItemParts = useMemo(() => {
+  const enabledFeatureItemParts = useMemo(() => {
     return itemParts.filter((item) => {
       switch (item.pathPart) {
         case "notes":
@@ -100,39 +107,55 @@ export function useMenuItems(): MenuItem[] {
     });
   }, [flags]);
 
-  const items = useMemo(() => {
-    if (selectedProject === null) {
-      return filteredItemParts.map(({ name, icon, disabled, children }) => ({
-        name,
-        path: "/",
-        icon,
-        disabled,
-        children: children?.map(({ name, icon, disabled }) => ({
-          name,
-          path: "/",
-          icon,
-          disabled,
-        })),
-      }));
-    }
+  const activeItemParts = useMemo(() => {
+    return enabledFeatureItemParts
+      .filter((item) => {
+        if (selectedProject === null) {
+          return item.isActive === undefined;
+        }
 
-    return filteredItemParts.map(
+        return item.isActive === undefined || item.isActive(selectedProject);
+      })
+      .map((item) => {
+        const children = item.children?.filter((child) => {
+          if (selectedProject === null) {
+            return child.isActive === undefined;
+          }
+          return (
+            child.isActive === undefined || child.isActive(selectedProject)
+          );
+        });
+
+        return {
+          ...item,
+          children:
+            children?.length && children.length > 0 ? children : undefined,
+        };
+      });
+  }, [enabledFeatureItemParts, selectedProject]);
+
+  const items = useMemo(() => {
+    return activeItemParts.map(
       ({ name, pathPart, icon, disabled, children }) => ({
         name,
-        path: `/grups/${selectedProject.id}/${pathPart}`,
+        path: selectedProject
+          ? `/grups/${selectedProject.id}/${pathPart}`
+          : "#",
         icon,
         disabled,
         children: children?.map(
           ({ name, pathPart: childPathPart, icon, disabled }) => ({
             name,
-            path: `/grups/${selectedProject.id}/${pathPart}/${childPathPart}`,
+            path: selectedProject
+              ? `/grups/${selectedProject.id}/${pathPart}/${childPathPart}`
+              : "#",
             icon,
             disabled,
           }),
         ),
       }),
     );
-  }, [selectedProject, filteredItemParts]);
+  }, [activeItemParts, selectedProject]);
 
   return items;
 }

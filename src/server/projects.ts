@@ -1,10 +1,35 @@
 "use server";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
-import { categories, projects, projectToUsers } from "./db/schema";
+import {
+  categories,
+  projects,
+  projectToUsers,
+  secretSantas,
+} from "./db/schema";
+
+const projectQuery = {
+  columns: {},
+  with: {
+    project: {
+      columns: { id: true, name: true, createdBy: true, inviteToken: true },
+      with: {
+        users: { columns: {}, with: { user: true } },
+        categories: {
+          orderBy: asc(categories.name),
+        },
+        secretSantas: {
+          columns: { assignmentsDone: true, datetime: true },
+          orderBy: desc(secretSantas.datetime),
+          limit: 1,
+        },
+      },
+    },
+  },
+} as const;
 
 export async function getProjects() {
   const session = await auth();
@@ -14,18 +39,7 @@ export async function getProjects() {
 
   try {
     const results = await db.query.projectToUsers.findMany({
-      columns: {},
-      with: {
-        project: {
-          columns: { id: true, name: true, createdBy: true, inviteToken: true },
-          with: {
-            users: { columns: {}, with: { user: true } },
-            categories: {
-              orderBy: asc(categories.name),
-            },
-          },
-        },
-      },
+      ...projectQuery,
       where: eq(projectToUsers.userId, session.user.id),
     });
 
@@ -47,18 +61,7 @@ export async function getUserProject(projectId: string) {
 
   try {
     const result = await db.query.projectToUsers.findFirst({
-      columns: {},
-      with: {
-        project: {
-          columns: { id: true, name: true, createdBy: true, inviteToken: true },
-          with: {
-            users: { columns: {}, with: { user: true } },
-            categories: {
-              orderBy: asc(categories.name),
-            },
-          },
-        },
-      },
+      ...projectQuery,
       where: and(
         eq(projectToUsers.projectId, projectId),
         eq(projectToUsers.userId, session.user.id),
@@ -85,7 +88,15 @@ export async function getInvitedProject(projectId: string) {
   try {
     const result = await db.query.projects.findFirst({
       columns: { id: true, name: true, createdBy: true, inviteToken: true },
-      with: { users: { columns: {}, with: { user: true } }, categories: true },
+      with: {
+        users: { columns: {}, with: { user: true } },
+        categories: true,
+        secretSantas: {
+          columns: { assignmentsDone: true, datetime: true },
+          orderBy: desc(secretSantas.datetime),
+          limit: 1,
+        },
+      },
       where: and(eq(projects.id, projectId)),
     });
 
