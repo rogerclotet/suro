@@ -33,7 +33,7 @@ export default async function AmicInvisiblePage({
     redirect("/");
   }
 
-  if (project.users.length < 3) {
+  if (project.users.length < 2) {
     return (
       <Alert className="mx-auto max-w-lg">
         <InfoIcon className="h-4 w-4" />
@@ -41,7 +41,7 @@ export default async function AmicInvisiblePage({
         <AlertDescription className="mt-2 space-y-2">
           <p>
             {
-              "Aquesta secció està pensada per grups de 3 o més persones, i permet fer un amic invisible entre ells."
+              "Aquesta secció està pensada per grups de 2 o més persones, i permet fer un amic invisible entre ells."
             }
           </p>
           <p>{description}</p>
