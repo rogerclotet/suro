@@ -266,7 +266,7 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
           .set({
             assignedTo: assignment.assignedTo,
           })
-          .where(eq(secretSantaParticipants.userId, assignment.participant));
+          .where(eq(secretSantaParticipants.id, assignment.participant));
       }
 
       await trx
