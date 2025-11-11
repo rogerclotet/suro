@@ -1,5 +1,12 @@
 import { relations, sql } from "drizzle-orm";
-import { boolean, jsonb, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  jsonb,
+  text,
+  timestamp,
+  unique,
+  varchar,
+} from "drizzle-orm/pg-core";
 import type {
   ExclusionData,
   GiftIdeaData,
@@ -63,34 +70,38 @@ export const secretSantaRelations = relations(
   }),
 );
 
-export const secretSantaParticipants = createTable("secretSantaParticipant", {
-  id: varchar("id", { length: 255 })
-    .$defaultFn(randomId)
-    .notNull()
-    .primaryKey(),
-  userId: varchar("userId", { length: 255 })
-    .notNull()
-    .references(() => users.id, { onUpdate: "cascade" }),
-  secretSantaId: varchar("secretSantaId", { length: 255 })
-    .notNull()
-    .references(() => secretSantas.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    }),
-  assignedTo: varchar("assignedTo", { length: 255 }).references(
-    () => users.id,
-    { onDelete: "set null", onUpdate: "cascade" },
-  ),
-  giftIdeas: jsonb("giftIdeas").$type<GiftIdeaData[]>().notNull().default([]),
-  createdAt: timestamp("createdAt", {
-    mode: "date",
-    withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp("updatedAt", {
-    mode: "date",
-    withTimezone: true,
-  }).$onUpdate(() => new Date()),
-});
+export const secretSantaParticipants = createTable(
+  "secretSantaParticipant",
+  {
+    id: varchar("id", { length: 255 })
+      .$defaultFn(randomId)
+      .notNull()
+      .primaryKey(),
+    userId: varchar("userId", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onUpdate: "cascade" }),
+    secretSantaId: varchar("secretSantaId", { length: 255 })
+      .notNull()
+      .references(() => secretSantas.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    assignedTo: varchar("assignedTo", { length: 255 }).references(
+      () => users.id,
+      { onDelete: "set null", onUpdate: "cascade" },
+    ),
+    giftIdeas: jsonb("giftIdeas").$type<GiftIdeaData[]>().notNull().default([]),
+    createdAt: timestamp("createdAt", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: timestamp("updatedAt", {
+      mode: "date",
+      withTimezone: true,
+    }).$onUpdate(() => new Date()),
+  },
+  (sp) => [unique("unique_user_secret_santa").on(sp.userId, sp.secretSantaId)],
+);
 
 export const secretSantaParticipantsRelations = relations(
   secretSantaParticipants,

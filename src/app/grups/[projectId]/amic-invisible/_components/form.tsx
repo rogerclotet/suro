@@ -1,7 +1,6 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -34,10 +33,16 @@ const DEFAULT_PRICE_RANGE_MAX = 50;
 
 export default function SecretSantaForm({
   initialData,
+  assignmentsDone,
   onChange,
+  submitText,
+  submitIcon,
 }: {
   initialData?: SecretSantaData;
+  assignmentsDone?: boolean;
   onChange?: (data: SecretSantaData) => Promise<void>;
+  submitText: string;
+  submitIcon: React.ReactNode;
 }) {
   const { data: session } = useSession();
   const { project } = useProjects();
@@ -67,7 +72,7 @@ export default function SecretSantaForm({
     }
 
     await onChange?.(data);
-    form.reset();
+    form.reset(form.getValues());
   }
 
   if (!project) {
@@ -192,6 +197,7 @@ export default function SecretSantaForm({
                           );
                         }
                       }}
+                      disabled={assignmentsDone}
                     />
                     <Avatar className="h-6 w-6">
                       <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
@@ -211,8 +217,8 @@ export default function SecretSantaForm({
       </FieldGroup>
 
       <SubmitButton
-        icon={<PlusIcon />}
-        text="Crear"
+        icon={submitIcon}
+        text={submitText}
         formState={form.formState}
       />
     </form>

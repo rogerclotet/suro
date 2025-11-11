@@ -54,7 +54,7 @@ export const secretSantaSchema = v.object({
   ),
   participants: v.pipe(
     v.array(v.string()),
-    v.minLength(2, "Es necessiten com a mínim 2 participants"),
+    v.minLength(3, "Es necessiten com a mínim 3 participants"),
   ),
 });
 

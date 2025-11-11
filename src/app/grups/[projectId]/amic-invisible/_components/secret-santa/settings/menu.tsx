@@ -1,8 +1,9 @@
 "use client";
 
-import { ArchiveIcon, Edit, Settings } from "lucide-react";
+import { ArchiveIcon, Edit, SaveIcon, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
+import { useRef } from "react";
 import { toast } from "sonner";
 import type { SecretSanta, SecretSantaData } from "@/app/_data/secret-santa";
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,12 @@ export default function SettingsMenu({
   secretSanta: SecretSanta;
 }) {
   const { data: session } = useSession();
+  const editDialogRef = useRef<HTMLDivElement>(null);
 
   async function handleEdit(data: SecretSantaData) {
     try {
       await updateSecretSanta(secretSanta, data);
+      editDialogRef.current?.click();
       toast.success("Amic Invisible actualitzat correctament");
     } catch (error) {
       posthog.captureException(error, {
@@ -71,6 +74,7 @@ export default function SettingsMenu({
           trigger={
             <DropdownMenuItem
               onSelect={(e) => e.preventDefault()}
+              ref={editDialogRef}
               className="cursor-pointer gap-2"
             >
               <Edit />
@@ -80,7 +84,10 @@ export default function SettingsMenu({
         >
           <SecretSantaForm
             initialData={getSecretSantaData(secretSanta)}
+            assignmentsDone={secretSanta.assignmentsDone}
             onChange={handleEdit}
+            submitText="Desar"
+            submitIcon={<SaveIcon />}
           />
         </ModalForm>
 

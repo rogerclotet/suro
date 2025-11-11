@@ -61,7 +61,11 @@ export default function CreateButton() {
       title="Crear Amic Invisible"
       description={`Crear un amic invisible pel grup ${project.name}`}
     >
-      <SecretSantaForm onChange={handleCreate} />
+      <SecretSantaForm
+        onChange={handleCreate}
+        submitText="Crear"
+        submitIcon={<PlusIcon />}
+      />
     </ModalForm>
   );
 }

@@ -183,6 +183,13 @@
       "when": 1762870089221,
       "tag": "0025_lumpy_nitro",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1762880322222,
+      "tag": "0026_lyrical_vance_astro",
+      "breakpoints": true
     }
   ]
 }

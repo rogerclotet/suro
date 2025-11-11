@@ -138,10 +138,56 @@ export async function updateSecretSanta(
     );
   }
 
-  await db
-    .update(secretSantas)
-    .set(validatedData.output)
-    .where(eq(secretSantas.id, secretSanta.id));
+  await db.transaction(async (trx) => {
+    try {
+      await trx
+        .update(secretSantas)
+        .set(validatedData.output)
+        .where(eq(secretSantas.id, secretSanta.id));
+
+      if (secretSanta.assignmentsDone) {
+        // Don't update participants if it has already been started
+        return;
+      }
+
+      for (const participant of validatedData.output.participants) {
+        if (secretSanta.participants.some((p) => p.userId === participant)) {
+          continue;
+        }
+
+        await trx
+          .insert(secretSantaParticipants)
+          .values({
+            secretSantaId: secretSanta.id,
+            userId: participant,
+          })
+          .onConflictDoNothing({
+            target: [
+              secretSantaParticipants.userId,
+              secretSantaParticipants.secretSantaId,
+            ],
+          });
+      }
+
+      for (const participant of secretSanta.participants) {
+        if (!validatedData.output.participants.includes(participant.userId)) {
+          await trx
+            .delete(secretSantaParticipants)
+            .where(eq(secretSantaParticipants.userId, participant.userId));
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      getPostHogServer().captureException(error, session?.user.id, {
+        action: "update_secret_santa",
+        projectId: secretSanta.projectId,
+        secretSantaId: secretSanta.id,
+        usersCount: secretSanta.participants.length,
+      });
+      trx.rollback();
+      throw error;
+    }
+  });
 
   revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
 
