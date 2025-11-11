@@ -18,12 +18,14 @@ import {
 } from "@/app/_data/secret-santa";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
-import { db } from "./db";
+import { db } from "../db";
 import {
   secretSantaParticipants,
   secretSantas,
-} from "./db/schema/secret-santa";
-import { getUserProject } from "./projects";
+} from "../db/schema/secret-santa";
+import { getUserProject } from "../projects";
+import { generateAssignments } from "./assignments";
+import type { Assignment } from "./types";
 
 const MAX_ASSIGNMENTS_RETRIES = 10;
 
@@ -215,10 +217,10 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
     throw new Error("The secret santa has already been started");
   }
 
-  let assignments: { participant: string; assignedTo: string }[] | null = null;
+  let assignments: Assignment[] | null = null;
   for (let i = 0; i < MAX_ASSIGNMENTS_RETRIES; i++) {
     try {
-      assignments = assignSecretSanta(secretSanta);
+      assignments = generateAssignments(secretSanta);
       break;
     } catch (_error) {
       getPostHogServer().capture({
@@ -294,36 +296,6 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
       totalExclusions: secretSanta.exclusions.flat().length,
     },
   });
-}
-
-function assignSecretSanta(secretSanta: SecretSanta) {
-  const participants = secretSanta.participants.map((p) => p.userId);
-  const assignments: { participant: string; assignedTo: string }[] = [];
-
-  for (const participant of participants) {
-    const affectedExclusions = secretSanta.exclusions.filter((e) =>
-      e.includes(participant),
-    );
-
-    const eligibleParticipants = participants.filter(
-      (p) =>
-        p !== participant &&
-        assignments.every((a) => a.assignedTo !== p) &&
-        affectedExclusions.every((e) => !e.includes(p)),
-    );
-
-    const assignedTo =
-      eligibleParticipants[
-        Math.floor(Math.random() * eligibleParticipants.length)
-      ];
-    if (!assignedTo) {
-      throw new Error("No eligible participants found");
-    }
-
-    assignments.push({ participant, assignedTo });
-  }
-
-  return assignments;
 }
 
 export async function getAssignment(secretSantaId: string) {
