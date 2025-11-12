@@ -15,7 +15,7 @@ import { getFlags } from "@/server/flags";
 import FlagsProvider from "./_components/flags-loader";
 import SidebarLayout from "./_components/navigation/navigation-layout/sidebar-layout";
 import ProjectsProvider from "./_components/projects-provider/projects-provider";
-import UserIdentifer from "./_components/user-identifyer";
+import UserIdentifier from "./_components/user-identifier";
 import { uploadFileRouter } from "./api/uploadthing/core";
 
 v.setGlobalConfig({ lang: "ca" });
@@ -61,7 +61,7 @@ export default async function RootLayout({
           routerConfig={extractRouterConfig(uploadFileRouter)}
         />
         <SessionProvider session={session}>
-          <UserIdentifer />
+          <UserIdentifier />
           <FlagsProvider flags={flags} />
 
           <ReactQueryProvider>

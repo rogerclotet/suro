@@ -11,9 +11,10 @@ import {
   notificationUnsupported,
   registerAndSubscribe,
 } from "@/app/push";
-import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 
-export default function NotificationBell() {
+export default function NotificationToggle() {
   const [enabled, setEnabled] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -59,8 +60,14 @@ export default function NotificationBell() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleSubscription}>
+    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
       {enabled ? <Bell /> : <BellOff />}
-    </Button>
+      <span>Notificacions</span>
+      <Switch
+        checked={enabled}
+        onCheckedChange={toggleSubscription}
+        className="ml-auto"
+      />
+    </DropdownMenuItem>
   );
 }

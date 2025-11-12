@@ -14,6 +14,7 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import ThemeSwitcher from "../theme-switcher";
 import { logOut } from "./actions";
+import NotificationSwitcher from "./notification-toggle";
 
 export default function Profile() {
   const session = useSession();
@@ -60,6 +61,8 @@ export default function Profile() {
             Perfil
           </DropdownMenuItem>
         </Link>
+
+        <NotificationSwitcher />
 
         <ThemeSwitcher />
 

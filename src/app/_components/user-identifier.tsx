@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useEffect } from "react";
 
-export default function UserIdentifer() {
+export default function UserIdentifier() {
   const session = useSession();
 
   useEffect(() => {
