@@ -58,7 +58,7 @@ export default function Participant({
   return (
     <Card
       className={cn(
-        "flex aspect-3/4 flex-col items-center justify-evenly p-1.5",
+        "flex aspect-3/4 flex-col items-center justify-evenly gap-0 p-1.5",
         className,
       )}
     >
