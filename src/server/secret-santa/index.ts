@@ -24,6 +24,7 @@ import {
   secretSantas,
 } from "../db/schema/secret-santa";
 import { getUserProject } from "../projects";
+import { sendNotificationsToUsers } from "../push";
 import { generateAssignments } from "./assignments";
 import type { Assignment } from "./types";
 
@@ -403,6 +404,15 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
   });
 
   revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+
+  sendNotificationsToUsers({
+    users: secretSanta.participants
+      .map((p) => p.userId)
+      .filter((u) => u !== session?.user.id),
+    title: secretSanta.name,
+    body: "S'ha realitzat el sorteig, ja pots veure el teu amic invisible",
+    path: `/grups/${secretSanta.projectId}/amic-invisible`,
+  });
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
