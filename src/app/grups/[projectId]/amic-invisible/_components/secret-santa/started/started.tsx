@@ -20,9 +20,9 @@ export default async function SecretSantaStarted({
 
       <Separator />
 
-      <h3 className="mb-12 font-semibold text-lg">El teu amic invisible</h3>
+      <h3 className="font-semibold text-lg">El teu amic invisible</h3>
 
-      <Assignment user={assignment} />
+      <Assignment assignment={assignment} />
     </div>
   );
 }

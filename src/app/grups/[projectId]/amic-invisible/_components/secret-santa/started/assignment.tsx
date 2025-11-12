@@ -6,8 +6,14 @@ import type { User } from "@/app/_data/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import type { getAssignment } from "@/server/secret-santa";
+import AssignmentGiftIdeas from "./assignment-gift-ideas";
 
-export default function Assignment({ user }: { user: User }) {
+export default function Assignment({
+  assignment,
+}: {
+  assignment: NonNullable<Awaited<ReturnType<typeof getAssignment>>>;
+}) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   function handleFlip() {
@@ -15,26 +21,35 @@ export default function Assignment({ user }: { user: User }) {
   }
 
   return (
-    <div className="flex items-center justify-center">
-      <button
-        type="button"
-        onClick={handleFlip}
-        className="perspective-[100rem] aspect-3/4 h-auto w-[60%] min-w-[200px] max-w-[300px] cursor-pointer"
-      >
-        <div
-          className={cn(
-            "transform-3d relative size-full transition duration-500 ease-in-out",
-            isFlipped ? "rotate-y-180" : "",
-          )}
+    <div className="columns-1 gap-4 space-y-4 lg:columns-2">
+      <div className="flex items-center justify-center py-12">
+        <button
+          type="button"
+          onClick={handleFlip}
+          className="perspective-[100rem] aspect-3/4 h-auto w-[60%] min-w-[200px] max-w-[300px] cursor-pointer"
         >
-          <div className="backface-hidden absolute inset-0 size-full">
-            <AssignmentCardBack />
+          <div
+            className={cn(
+              "transform-3d relative size-full transition duration-500 ease-in-out",
+              isFlipped ? "rotate-y-180" : "",
+            )}
+          >
+            <div className="backface-hidden absolute inset-0 size-full">
+              <AssignmentCardBack />
+            </div>
+            <div className="backface-hidden transform-[rotateY(180deg)] absolute inset-0 size-full">
+              <AssignmentCardFront user={assignment.user} />
+            </div>
           </div>
-          <div className="backface-hidden transform-[rotateY(180deg)] absolute inset-0 size-full">
-            <AssignmentCardFront user={user} />
-          </div>
+        </button>
+      </div>
+
+      {isFlipped && (
+        <div className="fade-in-0 [sm,md]:slide-in-from-top-5 lg:slide-in-from-left-5 animate-in space-y-4 duration-500">
+          <h4 className="font-semibold">Idees de regals</h4>
+          <AssignmentGiftIdeas giftIdeas={assignment.giftIdeas} />
         </div>
-      </button>
+      )}
     </div>
   );
 }

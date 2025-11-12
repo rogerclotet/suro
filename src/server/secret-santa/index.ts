@@ -445,7 +445,7 @@ export async function getAssignment(secretSantaId: string) {
     },
   });
 
-  return assignments?.assignedTo?.user;
+  return assignments?.assignedTo;
 }
 
 export async function updateGiftIdeas(
