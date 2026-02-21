@@ -10,8 +10,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Generated i18n artifacts.
-    "src/paraglide/**",
   ]),
 ]);
 
