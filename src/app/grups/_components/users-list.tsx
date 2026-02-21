@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export default function UsersList({ users }: { users: Project["users"] }) {
   return (
-    <div className="-space-x-2 flex flex-row">
+    <div className="flex flex-row -space-x-2">
       {users.slice(0, 3).map((user) => (
         <Tooltip key={user.user.id}>
           <TooltipTrigger>
