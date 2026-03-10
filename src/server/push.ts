@@ -5,6 +5,10 @@ import { auth } from "@/auth";
 import { env } from "@/env";
 import { db } from "./db";
 import { pushSubscriptions } from "./db/schema";
+import {
+  dedupePushSubscriptions,
+  isExpiredSubscriptionError,
+} from "./push-utils";
 
 export async function sendProjectNotification({
   project,
@@ -66,6 +70,15 @@ export async function sendNotificationsToUsers({
   const subscriptions = await db.query.pushSubscriptions.findMany({
     where: inArray(pushSubscriptions.userId, users),
   });
+  const { uniqueSubscriptions, duplicateIds, invalidIds } =
+    dedupePushSubscriptions(subscriptions);
+
+  const idsToPrune = [...duplicateIds, ...invalidIds];
+  if (idsToPrune.length > 0) {
+    await db
+      .delete(pushSubscriptions)
+      .where(inArray(pushSubscriptions.id, idsToPrune));
+  }
 
   const pushPayload = JSON.stringify({
     title,
@@ -74,17 +87,29 @@ export async function sendNotificationsToUsers({
     image,
   });
 
-  const notificationPromises = [];
-  for (const subscription of subscriptions) {
-    notificationPromises.push(
-      sendNotification(subscription.subscription, pushPayload),
-    );
-  }
+  const notificationPromises = uniqueSubscriptions.map((subscription) =>
+    sendNotification(subscription.subscription, pushPayload),
+  );
 
   const results = await Promise.allSettled(notificationPromises);
-  for (const result of results) {
+  const expiredSubscriptionIds: string[] = [];
+  for (const [index, result] of results.entries()) {
     if (result.status === "rejected") {
+      if (isExpiredSubscriptionError(result.reason)) {
+        const subscription = uniqueSubscriptions[index];
+        if (subscription) {
+          expiredSubscriptionIds.push(subscription.id);
+        }
+        continue;
+      }
+
       console.error("Failed to send notification", result.reason);
     }
+  }
+
+  if (expiredSubscriptionIds.length > 0) {
+    await db
+      .delete(pushSubscriptions)
+      .where(inArray(pushSubscriptions.id, expiredSubscriptionIds));
   }
 }
