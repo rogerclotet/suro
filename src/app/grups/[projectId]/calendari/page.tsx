@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { getEvents } from "@/server/events";
 import Calendar from "./_components/calendar";
 import getMonthString from "./_components/event/get-month-string";
+import { getMonthEnd } from "./_components/event/month-range";
 
 export default async function CalendarPage({
   params,
@@ -44,10 +45,7 @@ export default async function CalendarPage({
         return [];
       }
 
-      const monthEnd = new Date(monthStart);
-      monthEnd.setMonth(monthStart.getMonth() + 1);
-      monthEnd.setDate(0);
-
+      const monthEnd = getMonthEnd(monthStart);
       return await getEvents(projectId, monthStart, monthEnd);
     },
   });

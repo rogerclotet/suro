@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import getProjectFiles from "@/server/files";
+import { getUserProject } from "@/server/projects";
 import Files from "./_components/files";
 import UploadButton from "./_components/upload-button";
 import ViewSelector from "./_components/view-selector";
@@ -16,6 +17,11 @@ export default async function FilesPage({
 
   const session = await auth();
   if (!session) {
+    return redirect("/");
+  }
+
+  const project = await getUserProject(projectId);
+  if (!project) {
     return redirect("/");
   }
 

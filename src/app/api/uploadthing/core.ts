@@ -6,7 +6,7 @@ import type { UploadedFileData } from "uploadthing/types";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
-import { files, projects } from "@/server/db/schema";
+import { events, files, projects, projectToUsers } from "@/server/db/schema";
 import { sendNotificationsToUsers } from "@/server/push";
 
 const f = createUploadthing();
@@ -33,9 +33,30 @@ export const uploadFileRouter = {
         throw new UploadThingError("Project ID not found");
       }
 
+      const membership = await db.query.projectToUsers.findFirst({
+        columns: { projectId: true },
+        where: and(
+          eq(projectToUsers.projectId, projectId),
+          eq(projectToUsers.userId, session.user.id),
+        ),
+      });
+      if (!membership) {
+        throw new UploadThingError("Unauthorized");
+      }
+
       let eventId = req.headers.get("x-event-id");
       if (eventId === "") {
         eventId = null;
+      }
+
+      if (eventId) {
+        const event = await db.query.events.findFirst({
+          columns: { id: true },
+          where: and(eq(events.id, eventId), eq(events.projectId, projectId)),
+        });
+        if (!event) {
+          throw new UploadThingError("Event not found");
+        }
       }
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`

@@ -177,7 +177,8 @@ export async function editEvent(
       })
       .where(eq(events.id, event.id));
 
-    revalidatePath(`/grups/${event.projectId}/llistes/${event.id}`);
+    revalidatePath(`/grups/${event.projectId}/calendari`);
+    revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
 
     getPostHogServer().capture({
       distinctId: session.user.id,

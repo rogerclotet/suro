@@ -1,11 +1,11 @@
 "use server";
 
 import assert from "node:assert";
-import { and, asc, eq, gte, lte, or } from "drizzle-orm";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
-import { events } from "./db/schema";
+import { events, projectToUsers } from "./db/schema";
 
 export async function getEvent(projectId: string, eventId: string) {
   const session = await auth();
@@ -59,10 +59,23 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
   assert(session, "Unauthenticated user");
 
   try {
+    const membership = await db.query.projectToUsers.findFirst({
+      columns: { projectId: true },
+      where: and(
+        eq(projectToUsers.projectId, projectId),
+        eq(projectToUsers.userId, session.user.id),
+      ),
+    });
+
+    if (!membership) {
+      throw new Error("Project not found");
+    }
+
     const results = await db.query.events.findMany({
       where: and(
         eq(events.projectId, projectId),
-        or(gte(events.startAt, from), lte(events.endAt, to)),
+        lte(events.startAt, to),
+        gte(events.endAt, from),
       ),
       with: {
         project: {
@@ -78,13 +91,6 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
       },
       orderBy: asc(events.startAt),
     });
-
-    if (
-      results?.[0]?.project.users.find((u) => u.userId === session.user.id) ===
-      undefined
-    ) {
-      throw new Error("Project not found");
-    }
 
     return results.map((result) => ({
       ...result,

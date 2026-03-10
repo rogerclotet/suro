@@ -1,6 +1,22 @@
 import { queryOptions } from "@tanstack/react-query";
 import type { Event } from "@/app/_data/event";
 import getMonthString from "./get-month-string";
+import { getMonthEnd } from "./month-range";
+
+type EventResponse = Omit<Event, "startAt" | "endAt"> & {
+  startAt: string | Date;
+  endAt: string | Date;
+};
+
+export function normalizeEvents(data: EventResponse[]) {
+  return data
+    .map((event) => ({
+      ...event,
+      startAt: new Date(event.startAt),
+      endAt: new Date(event.endAt),
+    }))
+    .sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
+}
 
 export function eventsQueryOptions(
   monthStart: Date | undefined,
@@ -14,25 +30,19 @@ export function eventsQueryOptions(
         return [];
       }
 
-      const monthEnd = new Date(monthStart);
-      monthEnd.setMonth(monthStart.getMonth() + 1);
-      monthEnd.setDate(0);
+      const monthEnd = getMonthEnd(monthStart);
 
       const res = await fetch(
         `/api/${projectId}/events?from=${monthStart.valueOf()}&to=${monthEnd.valueOf()}`,
       );
-      const events = (await res.json()) as Event[];
+      if (!res.ok) {
+        throw new Error("No s'han pogut obtenir els esdeveniments");
+      }
+
+      const events = (await res.json()) as EventResponse[];
       return events;
     },
-    select: (data) => {
-      return data
-        .sort((a, b) => a.startAt.getTime() - b.startAt.getTime())
-        .map((event) => ({
-          ...event,
-          startAt: new Date(event.startAt),
-          endAt: new Date(event.endAt),
-        }));
-    },
+    select: normalizeEvents,
     staleTime: 60 * 1000,
   });
 }

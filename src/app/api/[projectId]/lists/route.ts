@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getLists } from "@/server/lists";
+import { getUserProject } from "@/server/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,11 @@ export const GET = async (
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const lists = await getLists(projectId);
-  if (
-    !lists[0]?.project.users.some((user) => user.userId === session.user.id)
-  ) {
+  const project = await getUserProject(projectId);
+  if (!project) {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  const lists = await getLists(projectId);
   return Response.json(lists);
 };

@@ -54,14 +54,13 @@ export default function LinkListForm({
         createdAt: string;
         updatedAt: string;
       })[];
-      lists.map<List>((list) => {
+      return lists.map<List>((list) => {
         return {
           ...list,
           createdAt: new Date(list.createdAt),
           updatedAt: new Date(list.updatedAt),
         };
       });
-      return lists as List[];
     },
     select: (data) => data?.filter((list) => list.eventId === null),
     staleTime: 60 * 1000,

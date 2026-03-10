@@ -1,8 +1,26 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "./db";
-import { files } from "./db/schema";
+import { files, projectToUsers } from "./db/schema";
 
 export default async function getProjectFiles(projectId: string) {
+  const session = await auth();
+  if (!session) {
+    return [];
+  }
+
+  const membership = await db.query.projectToUsers.findFirst({
+    columns: { projectId: true },
+    where: and(
+      eq(projectToUsers.projectId, projectId),
+      eq(projectToUsers.userId, session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    return [];
+  }
+
   return await db.query.files.findMany({
     where: eq(files.projectId, projectId),
     with: {
