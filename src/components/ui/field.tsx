@@ -195,18 +195,21 @@ function FieldError({
       return null;
     }
 
-    if (errors?.length === 1 && errors[0]?.message) {
-      return errors[0].message;
+    const messages = Array.from(
+      new Set(
+        errors.flatMap((error) => (error?.message ? [error.message] : [])),
+      ),
+    );
+
+    if (messages.length === 1) {
+      return messages[0];
     }
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {errors.map(
-          (error, index) =>
-            error?.message && (
-              <li key={`error-${error.message}-${index}`}>{error.message}</li>
-            ),
-        )}
+        {messages.map((message) => (
+          <li key={message}>{message}</li>
+        ))}
       </ul>
     );
   }, [children, errors]);
