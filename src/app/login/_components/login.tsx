@@ -16,12 +16,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getSafeRedirectTo } from "@/lib/auth-redirect";
 import { loginWithGoogle, loginWithResend } from "./actions";
 
 export default function Login({ session }: { session?: Session | null }) {
   const [loggedInWithResend, setLoggedInWithResend] = useState(false);
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("to") ?? "/";
+  const redirectTo = getSafeRedirectTo(searchParams.get("to"));
 
   if (session) {
     return redirect(redirectTo);
@@ -49,6 +50,7 @@ export default function Login({ session }: { session?: Session | null }) {
             action={handleResendSignIn}
             className="space-y-4 rounded-lg border-2 border-muted p-4 text-center"
           >
+            <input type="hidden" name="redirectTo" value={redirectTo} />
             <Input
               name="email"
               type="email"
@@ -72,6 +74,7 @@ export default function Login({ session }: { session?: Session | null }) {
             )}
           </form>
           <form action={loginWithGoogle} className="text-center">
+            <input type="hidden" name="redirectTo" value={redirectTo} />
             <Button className="gap-4">
               <SiGoogle />
               Entrar amb Google
