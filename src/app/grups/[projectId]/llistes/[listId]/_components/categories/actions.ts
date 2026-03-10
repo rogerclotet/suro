@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { categories } from "@/server/db/schema";
 import { categorySchema } from "./data";
@@ -13,14 +13,8 @@ export async function createCategory(
   project: Project,
   data: v.InferInput<typeof categorySchema>,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (project.users.find((u) => u.user.id === session.user.id) === undefined) {
-    throw new Error("The user is not part of the project");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
   const parsedData = v.parse(categorySchema, data);
 
@@ -28,7 +22,7 @@ export async function createCategory(
     .insert(categories)
     .values({
       ...parsedData,
-      projectId: project.id,
+      projectId: serverProject.id,
     })
     .returning({ id: categories.id });
 
@@ -36,14 +30,14 @@ export async function createCategory(
     throw new Error("Error creating category");
   }
 
-  revalidatePath(`/grups/${project.id}/llistes/categories`);
+  revalidatePath(`/grups/${serverProject.id}/llistes/categories`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "create_category",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
       categoryId: result[0].id,
     },
   });

@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { notes } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -14,14 +14,8 @@ export async function createNote(
   project: Project,
   data: v.InferInput<typeof noteSchema>,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (project.users.find((u) => u.user.id === session.user.id) === undefined) {
-    throw new Error("The user is not part of the project");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
   const parsedData = v.parse(noteSchema, data);
 
@@ -30,7 +24,7 @@ export async function createNote(
     .values({
       ...parsedData,
       createdBy: session.user.id,
-      projectId: project.id,
+      projectId: serverProject.id,
     })
     .returning({ id: notes.id });
 
@@ -40,14 +34,14 @@ export async function createNote(
 
   const note = result[0];
 
-  revalidatePath(`/grups/${project.id}/notes`);
+  revalidatePath(`/grups/${serverProject.id}/notes`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "create_note",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
       noteId: note.id,
       format: parsedData.format,
     },
@@ -55,10 +49,10 @@ export async function createNote(
 
   setTimeout(() => {
     sendProjectNotification({
-      project,
+      project: serverProject,
       body: `Nova nota: ${parsedData.name}`,
-      title: project.name,
-      path: `/grups/${project.id}/notes/${note.id}`,
+      title: serverProject.name,
+      path: `/grups/${serverProject.id}/notes/${note.id}`,
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating note",

@@ -3,8 +3,13 @@
 import { revalidatePath } from "next/cache";
 import type { Template } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import {
+  getProjectCategoryId,
+  requireList,
+  requireProject,
+  requireSession,
+} from "@/server/action-auth";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
 
@@ -13,34 +18,34 @@ export async function importTemplates(
   listId: string,
   items: Template["items"],
 ) {
-  const session = await auth();
-  if (!session) {
-    return;
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
+  const serverList = await requireList(listId);
+
+  if (serverList.projectId !== serverProject.id) {
+    throw new Error("List is not part of the project");
   }
 
-  if (project.users.find((u) => u.user.id === session.user.id) === undefined) {
-    throw new Error("The user is not part of the project");
-  }
-
-  await db.insert(listItems).values(
-    items.map((item) => ({
+  const itemsToInsert = await Promise.all(
+    items.map(async (item) => ({
       listId,
       name: item.name,
-      categoryId: item.category,
+      categoryId: await getProjectCategoryId(serverProject.id, item.category),
       createdBy: session.user.id,
     })),
   );
+  await db.insert(listItems).values(itemsToInsert);
 
-  revalidatePath(`/grups/${project.id}/llistes/${listId}`);
+  revalidatePath(`/grups/${serverProject.id}/llistes/${listId}`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "import_templates",
     properties: {
-      projectId: project.id,
+      projectId: serverProject.id,
       listId,
       itemsCount: items.length,
-      usersCount: project.users.length,
+      usersCount: serverProject.users.length,
     },
   });
 }

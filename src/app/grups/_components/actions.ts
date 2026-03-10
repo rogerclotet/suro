@@ -4,8 +4,8 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
 import { projectSchema } from "./create-project/data";
@@ -14,12 +14,10 @@ export async function editProject(
   project: Project,
   data: v.InferInput<typeof projectSchema>,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
-  if (project.createdBy !== session.user.id) {
+  if (serverProject.createdBy !== session.user.id) {
     throw new Error("Only the creator can edit the project");
   }
 
@@ -38,27 +36,25 @@ export async function editProject(
     distinctId: session.user.id,
     event: "edit_project",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
     },
   });
 }
 
 export async function deleteProject(project: Project) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
-  if (project.createdBy !== session.user.id) {
+  if (serverProject.createdBy !== session.user.id) {
     throw new Error("Only the creator can delete the project");
   }
 
-  if (project.users.length > 1) {
+  if (serverProject.users.length > 1) {
     throw new Error("Cannot delete a project with users");
   }
 
-  await db.delete(projects).where(eq(projects.id, project.id));
+  await db.delete(projects).where(eq(projects.id, serverProject.id));
 
   revalidatePath("/grups");
 
@@ -66,23 +62,21 @@ export async function deleteProject(project: Project) {
     distinctId: session.user.id,
     event: "delete_project",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
     },
   });
 }
 
 export async function leaveProject(project: Project) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
-  if (project.createdBy === session.user.id) {
+  if (serverProject.createdBy === session.user.id) {
     throw new Error("Cannot leave a project you created");
   }
 
-  if (project.users.length <= 1) {
+  if (serverProject.users.length <= 1) {
     throw new Error("Cannot leave a project with only one user");
   }
 
@@ -90,7 +84,7 @@ export async function leaveProject(project: Project) {
     .delete(projectToUsers)
     .where(
       and(
-        eq(projectToUsers.projectId, project.id),
+        eq(projectToUsers.projectId, serverProject.id),
         eq(projectToUsers.userId, session.user.id),
       ),
     );
@@ -101,8 +95,8 @@ export async function leaveProject(project: Project) {
     distinctId: session.user.id,
     event: "leave_project",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
     },
   });
 }

@@ -1,48 +1,50 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import {
+  requireEvent,
+  requireList,
+  requireSession,
+} from "@/server/action-auth";
 import { db } from "@/server/db";
 import { events, lists } from "@/server/db/schema";
 import { eventSchema } from "../_components/event/data";
 
 export async function createLinkedList(event: Event) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
+  const session = await requireSession();
+  const serverEvent = await requireEvent(event.projectId, event.id);
 
   try {
     const res = await db
       .insert(lists)
       .values({
-        name: event.name,
-        description: `Llista per ${event.name}`,
-        projectId: event.projectId,
-        eventId: event.id,
+        name: serverEvent.name,
+        description: `Llista per ${serverEvent.name}`,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
         createdBy: session.user.id,
       })
       .returning({ id: lists.id });
 
     const listId = res[0]?.id;
 
-    revalidatePath(`/grups/${event.projectId}/llistes`);
-    revalidatePath(`/grups/${event.projectId}/llistes/${listId}`);
+    revalidatePath(`/grups/${serverEvent.projectId}/llistes`);
+    revalidatePath(`/grups/${serverEvent.projectId}/llistes/${listId}`);
 
     getPostHogServer().capture({
       distinctId: session.user.id,
       event: "create_event_list",
       properties: {
-        projectId: event.projectId,
-        eventId: event.id,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
         listId,
-        usersCount: event.project.users.length,
+        usersCount: serverEvent.project.users.length,
       },
     });
 
@@ -51,8 +53,8 @@ export async function createLinkedList(event: Event) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "create_event_list",
-      projectId: event.projectId,
-      eventId: event.id,
+      projectId: serverEvent.projectId,
+      eventId: serverEvent.id,
     });
 
     throw new Error("Error creating list");
@@ -60,38 +62,48 @@ export async function createLinkedList(event: Event) {
 }
 
 export async function linkEventList(event: Event, listId: string) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
+  const session = await requireSession();
+  const serverEvent = await requireEvent(event.projectId, event.id);
+  const serverList = await requireList(listId);
+
+  if (serverList.projectId !== serverEvent.projectId) {
+    throw new Error("List and event are not in the same project");
   }
 
   try {
     await db
       .update(lists)
       .set({
-        eventId: event.id,
+        eventId: serverEvent.id,
         updatedBy: session.user.id,
       })
-      .where(eq(lists.id, listId));
+      .where(
+        and(
+          eq(lists.id, serverList.id),
+          eq(lists.projectId, serverEvent.projectId),
+        ),
+      );
 
-    revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
+    revalidatePath(
+      `/grups/${serverEvent.projectId}/calendari/${serverEvent.id}`,
+    );
 
     getPostHogServer().capture({
       distinctId: session.user.id,
       event: "link_event_list",
       properties: {
-        projectId: event.projectId,
-        eventId: event.id,
-        listId,
-        usersCount: event.project.users.length,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
+        listId: serverList.id,
+        usersCount: serverEvent.project.users.length,
       },
     });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "link_event_list",
-      listId,
-      eventId: event.id,
+      listId: serverList.id,
+      eventId: serverEvent.id,
     });
 
     throw new Error("Error linking list");
@@ -99,9 +111,15 @@ export async function linkEventList(event: Event, listId: string) {
 }
 
 export async function unlinkEventList(event: Event, list: List) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
+  const session = await requireSession();
+  const serverEvent = await requireEvent(event.projectId, event.id);
+  const serverList = await requireList(list.id);
+
+  if (
+    serverList.projectId !== serverEvent.projectId ||
+    serverList.eventId !== serverEvent.id
+  ) {
+    throw new Error("List is not linked to the event");
   }
 
   try {
@@ -110,26 +128,28 @@ export async function unlinkEventList(event: Event, list: List) {
       .set({
         eventId: null,
       })
-      .where(eq(lists.id, list.id));
+      .where(eq(lists.id, serverList.id));
 
-    revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
+    revalidatePath(
+      `/grups/${serverEvent.projectId}/calendari/${serverEvent.id}`,
+    );
 
     getPostHogServer().capture({
       distinctId: session.user.id,
       event: "unlink_event_list",
       properties: {
-        projectId: event.projectId,
-        eventId: event.id,
-        listId: list.id,
-        usersCount: event.project.users.length,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
+        listId: serverList.id,
+        usersCount: serverEvent.project.users.length,
       },
     });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "unlink_event_list",
-      listId: list.id,
-      eventId: event.id,
+      listId: serverList.id,
+      eventId: serverEvent.id,
     });
 
     throw new Error("Error unlinking list");
@@ -139,16 +159,10 @@ export async function unlinkEventList(event: Event, list: List) {
 export async function editEvent(
   event: Event,
   data: v.InferInput<typeof eventSchema>,
-  project: Project,
+  _project: Project,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (!project.users.some((u) => u.user.id === session.user.id)) {
-    throw new Error("Unauthorized");
-  }
+  const session = await requireSession();
+  const serverEvent = await requireEvent(event.projectId, event.id);
 
   const parsedData = v.parse(eventSchema, data);
   if (
@@ -175,18 +189,20 @@ export async function editEvent(
         endAt,
         updatedBy: session.user.id,
       })
-      .where(eq(events.id, event.id));
+      .where(eq(events.id, serverEvent.id));
 
-    revalidatePath(`/grups/${event.projectId}/calendari`);
-    revalidatePath(`/grups/${event.projectId}/calendari/${event.id}`);
+    revalidatePath(`/grups/${serverEvent.projectId}/calendari`);
+    revalidatePath(
+      `/grups/${serverEvent.projectId}/calendari/${serverEvent.id}`,
+    );
 
     getPostHogServer().capture({
       distinctId: session.user.id,
       event: "edit_event",
       properties: {
-        projectId: event.projectId,
-        eventId: event.id,
-        usersCount: event.project.users.length,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
+        usersCount: serverEvent.project.users.length,
         hours: (endAt.getTime() - startAt.getTime()) / 3600000,
         allDay: parsedData.allDay,
       },
@@ -195,8 +211,8 @@ export async function editEvent(
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "edit_event",
-      projectId: event.projectId,
-      eventId: event.id,
+      projectId: serverEvent.projectId,
+      eventId: serverEvent.id,
     });
 
     throw new Error("Error editing event");
@@ -204,37 +220,33 @@ export async function editEvent(
 }
 
 export async function deleteEvent(event: Event) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (!event.project.users.some((u) => u.userId === session.user.id)) {
-    throw new Error("Unauthorized");
-  }
+  const session = await requireSession();
+  const serverEvent = await requireEvent(event.projectId, event.id);
 
   try {
-    await db.delete(events).where(eq(events.id, event.id));
+    await db.delete(events).where(eq(events.id, serverEvent.id));
 
-    revalidatePath(`/grups/${event.projectId}/calendari`);
+    revalidatePath(`/grups/${serverEvent.projectId}/calendari`);
 
     getPostHogServer().capture({
       distinctId: session.user.id,
       event: "delete_event",
       properties: {
-        projectId: event.projectId,
-        eventId: event.id,
-        usersCount: event.project.users.length,
-        hours: (event.endAt.getTime() - event.startAt.getTime()) / 3600000,
-        allDay: event.allDay,
+        projectId: serverEvent.projectId,
+        eventId: serverEvent.id,
+        usersCount: serverEvent.project.users.length,
+        hours:
+          (serverEvent.endAt.getTime() - serverEvent.startAt.getTime()) /
+          3600000,
+        allDay: serverEvent.allDay,
       },
     });
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "delete_event",
-      projectId: event.projectId,
-      eventId: event.id,
+      projectId: serverEvent.projectId,
+      eventId: serverEvent.id,
     });
 
     throw new Error("Error deleting event");

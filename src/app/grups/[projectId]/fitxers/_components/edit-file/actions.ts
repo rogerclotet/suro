@@ -5,8 +5,8 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { File } from "@/app/_data/file";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { requireOwnedFile, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { files } from "@/server/db/schema";
 import { editFileSchema } from "./schema";
@@ -15,36 +15,35 @@ export async function editFile(
   file: File,
   data: v.InferInput<typeof editFileSchema>,
 ) {
-  const session = await auth();
+  const session = await requireSession();
   assert(session, "Unauthenticated user");
-
-  if (file.uploadedBy.id !== session.user.id) {
-    throw new Error("Unauthorized");
-  }
+  const serverFile = await requireOwnedFile(file.id);
 
   const parsed = v.parse(editFileSchema, data);
 
   await db
     .update(files)
     .set({ name: parsed.name })
-    .where(eq(files.id, file.id));
+    .where(eq(files.id, serverFile.id));
 
-  revalidatePath(`/grups/${file.project.id}/fitxers`);
+  revalidatePath(`/grups/${serverFile.project.id}/fitxers`);
 
-  if (file.eventId) {
-    revalidatePath(`/grups/${file.projectId}/calendari/${file.eventId}`);
+  if (serverFile.eventId) {
+    revalidatePath(
+      `/grups/${serverFile.projectId}/calendari/${serverFile.eventId}`,
+    );
   }
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "edit_file",
     properties: {
-      projectId: file.project.id,
-      eventId: file.eventId,
-      fileId: file.id,
-      usersCount: file.project.users.length,
-      size: file.size,
-      type: file.type,
+      projectId: serverFile.project.id,
+      eventId: serverFile.eventId,
+      fileId: serverFile.id,
+      usersCount: serverFile.project.users.length,
+      size: serverFile.size,
+      type: serverFile.type,
     },
   });
 }

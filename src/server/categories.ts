@@ -26,3 +26,35 @@ export async function getCategories(projectId: string) {
 
   return results.map((r) => ({ ...r, project }));
 }
+
+export async function getCategory(categoryId: string) {
+  const session = await auth();
+  if (!session) {
+    return undefined;
+  }
+
+  const result = await db.query.categories.findFirst({
+    where: eq(categories.id, categoryId),
+    with: {
+      items: {
+        columns: { id: true },
+      },
+      project: {
+        columns: { id: true, name: true, createdBy: true, inviteToken: true },
+        with: {
+          users: { columns: {}, with: { user: true } },
+          categories: true,
+        },
+      },
+    },
+  });
+
+  if (
+    result?.project.users.find((u) => u.user.id === session.user.id) ===
+    undefined
+  ) {
+    return undefined;
+  }
+
+  return result;
+}

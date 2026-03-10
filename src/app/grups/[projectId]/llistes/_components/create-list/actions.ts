@@ -5,8 +5,12 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { TemplateItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import {
+  getProjectCategoryId,
+  requireProject,
+  requireSession,
+} from "@/server/action-auth";
 import { db } from "@/server/db";
 import { listItems, lists, templates } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -16,14 +20,8 @@ export async function createList(
   project: Project,
   data: v.InferInput<typeof listSchema>,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (project.users.find((u) => u.user.id === session.user.id) === undefined) {
-    throw new Error("The user is not part of the project");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
   const parsedData = v.parse(listSchema, data);
 
@@ -32,7 +30,7 @@ export async function createList(
     .values({
       ...parsedData,
       createdBy: session.user.id,
-      projectId: project.id,
+      projectId: serverProject.id,
     })
     .returning({ id: lists.id });
 
@@ -44,41 +42,41 @@ export async function createList(
 
   let items: TemplateItem[] = [];
   if (parsedData.templates && parsedData.templates.length > 0) {
-    items = await getItems(parsedData.templates, project);
+    items = await getItems(parsedData.templates, serverProject.id);
 
-    const itemDataToInsert = items.map<typeof listItems.$inferInsert>(
-      (item) => ({
+    const itemDataToInsert = await Promise.all(
+      items.map(async (item) => ({
         name: item.name,
-        categoryId: item.category !== "" ? item.category : null,
+        categoryId: await getProjectCategoryId(serverProject.id, item.category),
         completed: false,
         createdBy: session.user.id,
         listId: list.id,
-      }),
+      })),
     );
 
     await db.insert(listItems).values(itemDataToInsert);
   }
 
-  revalidatePath(`/grups/${project.id}/llistes`);
+  revalidatePath(`/grups/${serverProject.id}/llistes`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "create_list",
     properties: {
-      projectId: project.id,
+      projectId: serverProject.id,
       listId: list.id,
       templatesCount: parsedData.templates?.length ?? 0,
       itemsCount: items.length,
-      usersCount: project.users.length,
+      usersCount: serverProject.users.length,
     },
   });
 
   setTimeout(() => {
     sendProjectNotification({
-      project,
+      project: serverProject,
       body: `Nova llista: ${parsedData.name}`,
-      title: project.name,
-      path: `/grups/${project.id}/llistes/${list.id}`,
+      title: serverProject.name,
+      path: `/grups/${serverProject.id}/llistes/${list.id}`,
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating list",
@@ -90,11 +88,11 @@ export async function createList(
   return list.id;
 }
 
-async function getItems(templateIds: string[], project: Project) {
+async function getItems(templateIds: string[], projectId: string) {
   const results = await db.query.templates.findMany({
     where: and(
       inArray(templates.id, templateIds),
-      eq(templates.projectId, project.id),
+      eq(templates.projectId, projectId),
     ),
   });
 

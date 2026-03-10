@@ -35,3 +35,23 @@ export default async function getProjectFiles(projectId: string) {
     orderBy: [desc(files.createdAt)],
   });
 }
+
+export async function getUserFile(fileId: string) {
+  const session = await auth();
+  if (!session) {
+    return undefined;
+  }
+
+  return await db.query.files.findFirst({
+    where: and(eq(files.id, fileId), eq(files.uploadedBy, session.user.id)),
+    with: {
+      uploadedBy: true,
+      project: {
+        with: {
+          users: true,
+        },
+      },
+      event: true,
+    },
+  });
+}

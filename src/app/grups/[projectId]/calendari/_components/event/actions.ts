@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { events } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
@@ -14,14 +14,8 @@ export async function createEvent(
   data: v.InferInput<typeof eventSchema>,
   project: Project,
 ) {
-  const session = await auth();
-  if (!session) {
-    throw new Error("Not logged in");
-  }
-
-  if (!project.users.some((user) => user.user.id === session.user.id)) {
-    throw new Error("The user is not part of the project");
-  }
+  const session = await requireSession();
+  const serverProject = await requireProject(project.id);
 
   const parsedData = v.parse(eventSchema, data);
   if (
@@ -44,18 +38,18 @@ export async function createEvent(
     startAt,
     endAt,
     allDay: parsedData.allDay,
-    projectId: project.id,
+    projectId: serverProject.id,
     createdBy: session.user.id,
   });
 
-  revalidatePath(`/grups/${project.id}/calendari`);
+  revalidatePath(`/grups/${serverProject.id}/calendari`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "create_event",
     properties: {
-      projectId: project.id,
-      usersCount: project.users.length,
+      projectId: serverProject.id,
+      usersCount: serverProject.users.length,
       hours: (endAt.getTime() - startAt.getTime()) / 3600000,
       allDay: parsedData.allDay,
     },
@@ -72,10 +66,10 @@ export async function createEvent(
     }
 
     sendProjectNotification({
-      project,
+      project: serverProject,
       body: `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
-      title: project.name,
-      path: `/grups/${project.id}/calendari`,
+      title: serverProject.name,
+      path: `/grups/${serverProject.id}/calendari`,
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating event",
