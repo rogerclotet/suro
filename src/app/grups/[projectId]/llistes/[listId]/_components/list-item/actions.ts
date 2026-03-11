@@ -71,6 +71,9 @@ export async function updateListItem(
     })
     .where(and(eq(listItems.id, itemId), eq(listItems.listId, serverList.id)));
 
+  revalidatePath(`/grups/${serverList.projectId}/llistes`);
+  revalidatePath(`/grups/${serverList.projectId}/llistes/${serverList.id}`);
+
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "update_list_item",
