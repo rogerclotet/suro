@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -43,6 +43,7 @@ export default function NewListItem({ list }: { list: List }) {
   const { project } = useProjects();
   const { data: session } = useSession();
   const newListModalRef = useRef<HTMLButtonElement>(null);
+  const [submitCount, setSubmitCount] = useState(0);
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
@@ -69,6 +70,7 @@ export default function NewListItem({ list }: { list: List }) {
         completed: false,
         categoryId: data.categoryId ?? "",
       });
+      setSubmitCount((c) => c + 1);
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -108,9 +110,11 @@ export default function NewListItem({ list }: { list: List }) {
               <FormItem className="grow">
                 <FormControl>
                   <Input
+                    key={submitCount}
                     placeholder="Nou element"
                     disabled={form.formState.isSubmitting}
                     className="h-10"
+                    autoFocus={submitCount > 0}
                     {...field}
                   />
                 </FormControl>
