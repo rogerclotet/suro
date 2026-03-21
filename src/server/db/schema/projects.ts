@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import { primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
 import { categories, lists, templates } from "./lists";
 import { notes } from "./notes";
+import { pots } from "./pots";
 import { secretSantas } from "./secret-santa";
 import { spendings } from "./spendings";
 import { users } from "./users";
@@ -26,6 +27,7 @@ export const projectsRelations = relations(projects, ({ many }) => ({
   categories: many(categories),
   notes: many(notes),
   spendings: many(spendings),
+  pots: many(pots),
   secretSantas: many(secretSantas),
 }));
 

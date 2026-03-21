@@ -197,6 +197,13 @@
       "when": 1762887144602,
       "tag": "0027_friendly_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1774033825988,
+      "tag": "0028_sad_phalanx",
+      "breakpoints": true
     }
   ]
 }

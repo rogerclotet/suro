@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
 import { calculateBalances } from "./calculate-balances";
 import { generateProposals } from "./generate-proposals";
@@ -10,6 +9,8 @@ vi.mock("./calculate-balances", () => ({
   calculateBalances: vi.fn(),
 }));
 
+type Member = { user: { id: string } };
+
 describe("generate proposals", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -19,11 +20,14 @@ describe("generate proposals", () => {
     vi.restoreAllMocks();
   });
 
-  const project = { id: "project-id" } as Project;
+  const members: Member[] = [
+    { user: { id: "user1" } },
+    { user: { id: "user2" } },
+  ];
 
   it("should generate empty proposals for empty spendings", () => {
     const spendings: Spending[] = [];
-    const proposals = generateProposals(project, spendings);
+    const proposals = generateProposals(members, spendings);
     expect(proposals).toEqual([]);
   });
 
@@ -38,11 +42,11 @@ describe("generate proposals", () => {
       user2: 100,
     });
 
-    const proposals = generateProposals(project, spendings);
+    const proposals = generateProposals(members, spendings);
 
     expect(calculateBalancesMock).toHaveBeenNthCalledWith(
       1,
-      project,
+      members,
       spendings,
     );
 
@@ -53,8 +57,15 @@ describe("generate proposals", () => {
   });
 
   it("should generate proposals for spendings from more than two users", () => {
-    // Just to have a spending for the currency
     const spendings = [createSpending(100, "EUR", "user1", "user2")];
+
+    const fiveMembers: Member[] = [
+      { user: { id: "user1" } },
+      { user: { id: "user2" } },
+      { user: { id: "user3" } },
+      { user: { id: "user4" } },
+      { user: { id: "user5" } },
+    ];
 
     calculateBalancesMock.mockReturnValueOnce({
       user1: 5735,
@@ -64,11 +75,11 @@ describe("generate proposals", () => {
       user5: -3465,
     });
 
-    const proposals = generateProposals(project, spendings);
+    const proposals = generateProposals(fiveMembers, spendings);
 
     expect(calculateBalancesMock).toHaveBeenNthCalledWith(
       1,
-      project,
+      fiveMembers,
       spendings,
     );
 

@@ -7,8 +7,6 @@ import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
 import {
   Form,
@@ -31,7 +29,17 @@ import SubmitButton from "@/components/ui/submit-button";
 import { createSpending } from "./actions";
 import { spendingSchema } from "./data";
 
-export default function CreateSpendingButton() {
+type Member = {
+  user: { id: string; name: string | null; image: string | null };
+};
+
+export default function CreateSpendingButton({
+  members,
+  potId,
+}: {
+  members: Member[];
+  potId: string;
+}) {
   const { data: session } = useSession();
   const form = useForm<v.InferInput<typeof spendingSchema>>({
     defaultValues: {
@@ -42,41 +50,39 @@ export default function CreateSpendingButton() {
     },
     resolver: valibotResolver(spendingSchema),
   });
-  const { project } = useProjects();
 
   return (
-    <>
-      {project && (
-        <ModalForm
-          trigger={<Action icon={PlusIcon} label="Crear despesa" />}
-          title="Crear despesa"
-          description="Crear una nova despesa"
-        >
-          <CreateSpendingFormContent
-            form={form}
-            project={project}
-            sessionId={session?.user.id}
-          />
-        </ModalForm>
-      )}
-    </>
+    <ModalForm
+      trigger={<Action icon={PlusIcon} label="Crear despesa" />}
+      title="Crear despesa"
+      description="Crear una nova despesa"
+    >
+      <CreateSpendingFormContent
+        form={form}
+        members={members}
+        potId={potId}
+        sessionId={session?.user.id}
+      />
+    </ModalForm>
   );
 }
 
 function CreateSpendingFormContent({
   form,
-  project,
+  members,
+  potId,
   sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof spendingSchema>>>;
-  project: Project;
+  members: Member[];
+  potId: string;
   sessionId?: string;
 }) {
   const { close } = useModalForm();
 
   async function onSubmit(data: v.InferInput<typeof spendingSchema>) {
     try {
-      await createSpending(project.id, data);
+      await createSpending(potId, data);
       form.reset();
       toast.success("Despesa creada");
       close();
@@ -84,7 +90,7 @@ function CreateSpendingFormContent({
       posthog.captureException(e, {
         distinctId: sessionId,
         action: "create_spending",
-        projectId: project.id,
+        potId,
       });
       toast.error("No s'ha pogut crear la despesa, torna-ho a provar més tard");
     }
@@ -146,7 +152,7 @@ function CreateSpendingFormContent({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {project.users.map((u) => (
+                  {members.map((u) => (
                     <SelectItem key={u.user.id} value={u.user.id}>
                       {u.user.name}
                     </SelectItem>
@@ -175,7 +181,7 @@ function CreateSpendingFormContent({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {project.users.map((u) => (
+                  {members.map((u) => (
                     <SelectItem key={u.user.id} value={u.user.id}>
                       {u.user.name}
                     </SelectItem>

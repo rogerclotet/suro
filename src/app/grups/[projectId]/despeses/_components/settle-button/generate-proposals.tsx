@@ -1,16 +1,17 @@
-import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
 import { calculateBalances } from "./calculate-balances";
 import type { SettlingPayment } from "./data";
 
-export function generateProposals(project: Project, spendings: Spending[]) {
+type Member = { user: { id: string } };
+
+export function generateProposals(members: Member[], spendings: Spending[]) {
   if (spendings.length === 0) {
     return [];
   }
 
   const currency = spendings[0]?.currency ?? "EUR";
 
-  const balances = Object.entries(calculateBalances(project, spendings)).map(
+  const balances = Object.entries(calculateBalances(members, spendings)).map(
     ([userId, balance]) => ({
       userId,
       balance,
@@ -60,7 +61,7 @@ export function generateProposals(project: Project, spendings: Spending[]) {
 
   toPay.forEach((toPays, _fromUserId) => {
     toPays.forEach((amount, toUserId) => {
-      if (Math.round(amount) === 0) {
+      if (amount === 0) {
         toPays.delete(toUserId);
       }
     });
@@ -69,7 +70,7 @@ export function generateProposals(project: Project, spendings: Spending[]) {
   const proposals: SettlingPayment[] = Array.from(toPay).flatMap(
     ([fromUserId, toPays]) => {
       return Array.from(toPays).map(([toUserId, amount]) => ({
-        amount: Math.round(amount),
+        amount,
         currency,
         to: toUserId,
         from: fromUserId,

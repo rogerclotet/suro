@@ -1,16 +1,13 @@
-import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
 
-type UserId = Project["users"][number]["user"]["id"];
+type Member = { user: { id: string } };
+type UserId = string;
 
-export function calculateBalances(project: Project, spendings: Spending[]) {
-  const balancesFromSpendings: Record<UserId, number> = project.users.reduce(
-    (acc, user) => {
-      acc[user.user.id] = 0;
-      return acc;
-    },
-    {} as Record<UserId, number>,
-  );
+export function calculateBalances(members: Member[], spendings: Spending[]) {
+  const balancesFromSpendings: Record<UserId, number> = {};
+  for (const member of members) {
+    balancesFromSpendings[member.user.id] = 0;
+  }
 
   for (const spending of spendings) {
     if (spending.from) {
@@ -26,7 +23,7 @@ export function calculateBalances(project: Project, spendings: Spending[]) {
           balancesFromSpendings,
           spending.amount,
           spending.from.id,
-          project.users,
+          members,
         );
       }
     }
@@ -49,17 +46,31 @@ function addBalanceForSharedSpending(
   balancesFromSpendings: Record<UserId, number>,
   amount: number,
   from: UserId,
-  users: Project["users"],
+  members: Member[],
 ) {
-  const amountPerUser = amount / users.length;
+  const memberCount = members.length;
+  const base = Math.floor(amount / memberCount);
+  const remainder = amount - base * memberCount;
 
-  balancesFromSpendings[from] =
-    (balancesFromSpendings[from] ?? 0) + (amount - amountPerUser);
+  // Payer gets priority for the extra cents from rounding,
+  // then other members in order.
+  const sortedIds = members
+    .map((m) => m.user.id)
+    .sort((a, b) => {
+      if (a === from) return -1;
+      if (b === from) return 1;
+      return 0;
+    });
 
-  for (const i in balancesFromSpendings) {
-    if (i !== from) {
-      balancesFromSpendings[i] =
-        (balancesFromSpendings[i] ?? 0) - amountPerUser;
+  for (let i = 0; i < sortedIds.length; i++) {
+    const memberId = sortedIds[i]!;
+    const share = base + (i < remainder ? 1 : 0);
+    if (memberId === from) {
+      balancesFromSpendings[from] =
+        (balancesFromSpendings[from] ?? 0) + (amount - share);
+    } else {
+      balancesFromSpendings[memberId] =
+        (balancesFromSpendings[memberId] ?? 0) - share;
     }
   }
 }

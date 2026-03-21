@@ -3,11 +3,9 @@
 import { Check, Handshake } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { Project } from "@/app/_data/project";
 import type { Spending } from "@/app/_data/spending";
-import { useProjects } from "@/app/_state/project-state";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
@@ -16,20 +14,24 @@ import { settlePayments } from "./actions";
 import type { SettlingPayment } from "./data";
 import { generateProposals } from "./generate-proposals";
 
-export default function SettleButton({ spendings }: { spendings: Spending[] }) {
-  const [pending, setPending] = useState<SettlingPayment[]>();
+type Member = { user: { id: string; name: string | null } };
+
+export default function SettleButton({
+  spendings,
+  members,
+  potId,
+}: {
+  spendings: Spending[];
+  members: Member[];
+  potId: string;
+}) {
   const [selected, setSelected] = useState<SettlingPayment[]>([]);
-  const { project } = useProjects();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    if (!project) {
-      return;
-    }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPending(generateProposals(project, spendings));
-    setSelected([]);
-  }, [spendings, project]);
+  const pending = useMemo(
+    () => generateProposals(members, spendings),
+    [spendings, members],
+  );
 
   function handleProposalChange(index: number, selected: boolean) {
     const payment = pending?.[index];
@@ -46,7 +48,7 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
 
   return (
     <>
-      {pending !== undefined && (
+      {pending && (
         <ModalForm
           trigger={
             <Button variant="ghost" size="sm" className="gap-2">
@@ -61,7 +63,8 @@ export default function SettleButton({ spendings }: { spendings: Spending[] }) {
             pending={pending}
             selected={selected}
             onProposalChange={handleProposalChange}
-            project={project}
+            members={members}
+            potId={potId}
             sessionId={session?.user.id}
           />
         </ModalForm>
@@ -74,30 +77,29 @@ function SettleButtonContent({
   pending,
   selected,
   onProposalChange,
-  project,
+  members,
+  potId,
   sessionId,
 }: {
   pending: SettlingPayment[];
   selected: SettlingPayment[];
   onProposalChange: (index: number, selected: boolean) => void;
-  project: Project | null;
+  members: Member[];
+  potId: string;
   sessionId?: string;
 }) {
   const { close } = useModalForm();
 
   async function handleSubmit() {
     try {
-      if (!project?.id) {
-        throw new Error("No project selected");
-      }
-      await settlePayments(project.id, selected);
+      await settlePayments(potId, selected);
       close();
       toast.success("Deutes saldats correctament");
     } catch (e) {
       posthog.captureException(e, {
         distinctId: sessionId,
         action: "settle_payments",
-        projectId: project?.id,
+        potId,
       });
       toast.error("Error al saldar deutes");
     }
@@ -121,6 +123,7 @@ function SettleButtonContent({
               <li key={`${payment.from}-${payment.to}-${payment.amount}`}>
                 <SettleProposal
                   payment={payment}
+                  members={members}
                   onChange={(selected) => onProposalChange(index, selected)}
                 />
               </li>

@@ -2,28 +2,25 @@
 
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import MonetaryAmount from "../../monetary-amount";
 import type { SettlingPayment } from "../data";
 
+type Member = { user: { id: string; name: string | null } };
+
 export default function SettleProposal({
   payment,
+  members,
   onChange,
 }: {
   payment: SettlingPayment;
+  members: Member[];
   onChange: (selected: boolean) => void;
 }) {
   const [checked, setChecked] = useState(false);
-  const { project } = useProjects();
   const checkboxId = `settle-${payment.from}-${payment.to}-${payment.amount}`;
-
-  if (!project) {
-    return null;
-  }
 
   return (
     <label className="cursor-pointer" htmlFor={checkboxId}>
@@ -48,11 +45,11 @@ export default function SettleProposal({
         <div className="flex flex-col">
           <div className="flex flex-row flex-wrap items-center gap-2">
             <span className="font-semibold text-foreground">
-              {getUserName(payment.from, project)}
+              {getUserName(payment.from, members)}
             </span>
             <ArrowRight className="h-4 w-4" />{" "}
             <span className="font-semibold text-foreground">
-              {getUserName(payment.to, project)}
+              {getUserName(payment.to, members)}
             </span>
           </div>
           <MonetaryAmount amount={payment.amount} currency={payment.currency} />
@@ -62,8 +59,6 @@ export default function SettleProposal({
   );
 }
 
-function getUserName(userId: string, project: Project) {
-  return (
-    project.users.find((u) => u.user.id === userId)?.user.name ?? "Desconegut"
-  );
+function getUserName(userId: string, members: Member[]) {
+  return members.find((u) => u.user.id === userId)?.user.name ?? "Desconegut";
 }

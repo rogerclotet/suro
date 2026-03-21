@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pots } from "./pots";
 import { projects } from "./projects";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
@@ -33,6 +34,10 @@ export const spendings = createTable("spending", {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+  potId: varchar("potId").references(() => pots.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
 });
 
 export const spendingsRelations = relations(spendings, ({ one }) => ({
@@ -42,5 +47,9 @@ export const spendingsRelations = relations(spendings, ({ one }) => ({
     fields: [spendings.projectId],
     references: [projects.id],
     relationName: "project",
+  }),
+  pot: one(pots, {
+    fields: [spendings.potId],
+    references: [pots.id],
   }),
 }));

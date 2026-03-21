@@ -1,15 +1,16 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
-import { spendings } from "@/server/db/schema";
-import { getUserProject } from "@/server/projects";
+import { pots, spendings } from "@/server/db/schema";
+import { getPot } from "@/server/pots";
 import type { SettlingPayment } from "./data";
 
 export async function settlePayments(
-  projectId: string,
+  potId: string,
   payments: SettlingPayment[],
 ) {
   const session = await auth();
@@ -17,12 +18,13 @@ export async function settlePayments(
     throw new Error("Unauthorized");
   }
 
-  const project = await getUserProject(projectId);
-  if (!project) {
-    throw new Error("Project not found");
+  const pot = await getPot(potId);
+  if (!pot) {
+    throw new Error("Pot not found");
   }
 
-  if (!project.users.some((u) => u.user.id === session.user.id)) {
+  const potUserIds = new Set(pot.users.map((u) => u.user.id));
+  if (!potUserIds.has(session.user.id)) {
     throw new Error("Unauthorized");
   }
 
@@ -34,18 +36,27 @@ export async function settlePayments(
       from: p.from,
       to: p.to,
       createdBy: session.user.id,
-      projectId,
+      projectId: pot.projectId,
+      potId,
     })),
   );
 
-  revalidatePath(`/grups/${projectId}/despeses`);
+  // Mark pot as settled
+  await db
+    .update(pots)
+    .set({ settledAt: new Date() })
+    .where(eq(pots.id, potId));
+
+  revalidatePath(`/grups/${pot.projectId}/despeses`);
+  revalidatePath(`/grups/${pot.projectId}/despeses/${potId}`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "settle_spendings",
     properties: {
-      projectId: projectId,
-      usersCount: project.users.length,
+      projectId: pot.projectId,
+      potId,
+      usersCount: pot.users.length,
       amount: payments.reduce((acc, p) => acc + p.amount, 0),
       currency: "EUR",
     },

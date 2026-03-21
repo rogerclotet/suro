@@ -1,17 +1,19 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
-import { spendings } from "@/server/db/schema";
+import { pots, spendings } from "@/server/db/schema";
+import { getPot } from "@/server/pots";
 import { getUserProject } from "@/server/projects";
 import { sendProjectNotification } from "@/server/push";
 import { spendingSchema } from "./data";
 
 export async function createSpending(
-  projectId: string,
+  potId: string,
   data: v.InferInput<typeof spendingSchema>,
 ) {
   const session = await auth();
@@ -19,7 +21,12 @@ export async function createSpending(
     throw new Error("Unauthorized");
   }
 
-  const project = await getUserProject(projectId);
+  const pot = await getPot(potId);
+  if (!pot) {
+    throw new Error("Pot not found");
+  }
+
+  const project = await getUserProject(pot.projectId);
   if (project?.users.find((u) => u.user.id === session.user.id) === undefined) {
     throw new Error("The user is not part of the project");
   }
@@ -37,25 +44,32 @@ export async function createSpending(
       from: parsedData.from,
       to: parsedData.to,
       createdBy: session.user.id,
-      projectId: projectId,
+      projectId: pot.projectId,
+      potId,
     });
+
+    // Reopen the pot if it was settled
+    if (pot.settledAt !== null) {
+      await db.update(pots).set({ settledAt: null }).where(eq(pots.id, potId));
+    }
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
       action: "create_spending",
-      projectId: projectId,
+      potId,
+      projectId: pot.projectId,
     });
     throw new Error("Error creating spending", { cause: e });
   }
 
   setTimeout(() => {
     sendProjectNotification({
-      project,
+      project: project!,
       body: parsedData.description
         ? `Nova despesa: ${parsedData.description} (${parsedData.amount}€)`
         : `Nova despesa: ${parsedData.amount}€`,
-      title: project.name,
-      path: `/grups/${project.id}/despeses`,
+      title: project!.name,
+      path: `/grups/${pot.projectId}/despeses/${potId}`,
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating spending",
@@ -64,14 +78,16 @@ export async function createSpending(
     });
   }, 0);
 
-  revalidatePath(`/grups/${projectId}/despeses`);
+  revalidatePath(`/grups/${pot.projectId}/despeses`);
+  revalidatePath(`/grups/${pot.projectId}/despeses/${potId}`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
     event: "create_spending",
     properties: {
-      projectId: projectId,
-      usersCount: project.users.length,
+      projectId: pot.projectId,
+      potId,
+      usersCount: pot.users.length,
       amount: parsedData.amount,
       currency: "EUR",
     },
