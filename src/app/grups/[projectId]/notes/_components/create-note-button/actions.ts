@@ -53,6 +53,8 @@ export async function createNote(
       body: `Nova nota: ${parsedData.name}`,
       title: serverProject.name,
       path: `/grups/${serverProject.id}/notes/${note.id}`,
+      type: "note_created",
+      section: "notes",
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating note",

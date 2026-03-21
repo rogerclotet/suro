@@ -14,6 +14,7 @@ import * as v from "valibot";
 import { getFlags } from "@/server/flags";
 import FlagsProvider from "./_components/flags-loader";
 import SidebarLayout from "./_components/navigation/navigation-layout/sidebar-layout";
+import NotificationProvider from "./_components/notifications/notification-provider";
 import ProjectsProvider from "./_components/projects-provider/projects-provider";
 import UserIdentifier from "./_components/user-identifier";
 import { uploadFileRouter } from "./api/uploadthing/core";
@@ -69,6 +70,7 @@ export default async function RootLayout({
               <SidebarLayout>
                 <TooltipProvider>
                   <ProjectsProvider>
+                    <NotificationProvider />
                     {children}
                     <Toaster position="bottom-center" />
                   </ProjectsProvider>

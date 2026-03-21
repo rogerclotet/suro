@@ -70,6 +70,8 @@ export async function createSpending(
         : `Nova despesa: ${parsedData.amount}€`,
       title: project!.name,
       path: `/grups/${pot.projectId}/despeses/${potId}`,
+      type: "spending_created",
+      section: "despeses",
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating spending",

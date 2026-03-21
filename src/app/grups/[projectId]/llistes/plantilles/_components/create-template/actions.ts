@@ -56,6 +56,8 @@ export async function createTemplate(
       body: `Nova plantilla: ${parsedData.name}`,
       title: project.name,
       path: `/grups/${project.id}/llistes/plantilles/${template.id}`,
+      type: "template_created",
+      section: "llistes",
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating template",

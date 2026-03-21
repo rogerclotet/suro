@@ -77,6 +77,8 @@ export async function createList(
       body: `Nova llista: ${parsedData.name}`,
       title: serverProject.name,
       path: `/grups/${serverProject.id}/llistes/${list.id}`,
+      type: "list_created",
+      section: "llistes",
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating list",

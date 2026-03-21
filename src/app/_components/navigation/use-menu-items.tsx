@@ -21,6 +21,7 @@ import { useProjects } from "@/app/_state/project-state";
 export type MenuItem = {
   name: string;
   path: string;
+  section: string;
   icon: ReactNode;
   disabled?: boolean;
   children?: MenuItem[];
@@ -143,6 +144,7 @@ export function useMenuItems(): MenuItem[] {
         path: selectedProject
           ? `/grups/${selectedProject.id}/${pathPart}`
           : "#",
+        section: pathPart,
         icon,
         disabled,
         children: children?.map(
@@ -151,6 +153,7 @@ export function useMenuItems(): MenuItem[] {
             path: selectedProject
               ? `/grups/${selectedProject.id}/${pathPart}/${childPathPart}`
               : "#",
+            section: pathPart,
             icon,
             disabled,
           }),
@@ -178,6 +181,7 @@ export function useBottomNavItems(): BottomNavItem[] {
     const moreItem: BottomNavItem = {
       name: "Més",
       path: "#more",
+      section: "more",
       icon: <EllipsisIcon />,
       overflow,
     };

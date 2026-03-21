@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMenuItems } from "../use-menu-items";
 
-const explicitlyAllowedBreadcrumbs = ["grups", "perfil"];
+const explicitlyAllowedBreadcrumbs = ["grups", "perfil", "notificacions"];
 
 function MobileHeader() {
   const { project, projects, selectProject } = useProjects();
@@ -39,6 +39,7 @@ function MobileHeader() {
 
   const currentSectionName = useMemo(() => {
     if (pathname === "/perfil") return "Perfil";
+    if (pathname === "/notificacions") return "Notificacions";
     const activeItem = menuItems.find(
       (item) => item.path !== "/" && pathname.includes(item.path),
     );

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useNotifications } from "@/app/_state/notification-state";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import NotificationDot from "../../notifications/notification-dot";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
 import MoreSheet from "./more-sheet";
 
@@ -13,6 +15,7 @@ export default function BottomNav({ className }: { className?: string }) {
   const bottomNavItems = useBottomNavItems();
   const { isMobile } = useSidebar();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { hasUnreadInSections, totalUnread } = useNotifications();
 
   const activeItem = useMemo(() => {
     const activeItems = bottomNavItems.filter(
@@ -46,6 +49,11 @@ export default function BottomNav({ className }: { className?: string }) {
           const isActive = !isMore && activeItem?.path === item.path;
 
           if (isMore) {
+            const overflowSections =
+              (item as BottomNavItem).overflow?.map((o) => o.section) ?? [];
+            const hasOverflowUnread =
+              hasUnreadInSections(overflowSections) || totalUnread > 0;
+
             return (
               <button
                 key="more"
@@ -53,8 +61,9 @@ export default function BottomNav({ className }: { className?: string }) {
                 onClick={() => setMoreOpen(true)}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground transition-colors"
               >
-                <div className="rounded-full px-4 py-1.5 [&_svg]:size-5">
+                <div className="relative rounded-full px-4 py-1.5 [&_svg]:size-5">
                   {item.icon}
+                  <NotificationDot count={hasOverflowUnread ? 1 : 0} />
                 </div>
                 <span className="text-xs">{item.name}</span>
               </button>

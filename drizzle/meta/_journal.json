@@ -211,6 +211,13 @@
       "when": 1774096239927,
       "tag": "0029_bright_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1774117323780,
+      "tag": "0030_wise_big_bertha",
+      "breakpoints": true
     }
   ]
 }

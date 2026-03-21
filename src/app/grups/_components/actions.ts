@@ -8,6 +8,7 @@ import { getPostHogServer } from "@/lib/posthog-server";
 import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
+import { sendProjectNotification } from "@/server/push";
 import { utapi } from "@/server/uploadthing";
 import { projectSchema } from "./create-project/data";
 
@@ -135,4 +136,18 @@ export async function leaveProject(project: Project) {
       usersCount: serverProject.users.length,
     },
   });
+
+  const userName = session.user.name ?? "Algú";
+  setTimeout(() => {
+    sendProjectNotification({
+      project: serverProject,
+      body: `${userName} ha deixat el grup`,
+      title: serverProject.name,
+      path: `/grups/${serverProject.id}`,
+      type: "member_left",
+      section: "grups",
+    }).catch((err) => {
+      console.error("Failed to send notification after leaving project", err);
+    });
+  }, 0);
 }

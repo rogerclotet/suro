@@ -73,6 +73,8 @@ export async function createPot(
         body: `Nou pot creat: ${parsedData.name}`,
         title: project.name,
         path: `/grups/${project.id}/despeses/${pot.id}`,
+        type: "pot_created",
+        section: "despeses",
       }).catch((err) => {
         console.error(
           "Failed to send push notification after creating pot",

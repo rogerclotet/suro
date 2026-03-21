@@ -70,6 +70,8 @@ export async function createEvent(
       body: `Esdeveniment nou: ${parsedData.name} (${timeRange})`,
       title: serverProject.name,
       path: `/grups/${serverProject.id}/calendari`,
+      type: "event_created",
+      section: "calendari",
     }).catch((err) => {
       console.error(
         "Failed to send push notification after creating event",

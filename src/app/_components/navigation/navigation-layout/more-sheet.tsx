@@ -1,8 +1,9 @@
 "use client";
 
-import { LayoutGridIcon, LogOut } from "lucide-react";
+import { BellIcon, LayoutGridIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useNotifications } from "@/app/_state/notification-state";
 import {
   Sheet,
   SheetContent,
@@ -10,6 +11,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import UserAvatar from "@/components/user-avatar";
+import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
 import { logOut } from "./profile/actions";
 
@@ -23,6 +25,7 @@ export default function MoreSheet({
   overflowItems: MenuItem[];
 }) {
   const { data: session } = useSession();
+  const { totalUnread } = useNotifications();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -45,6 +48,23 @@ export default function MoreSheet({
           ))}
 
           <div className="my-1 border-t border-border" />
+
+          <Link
+            href="/notificacions"
+            onClick={() => onOpenChange(false)}
+            className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
+          >
+            <span className="relative">
+              <BellIcon />
+              <NotificationDot count={totalUnread} />
+            </span>
+            <span>Notificacions</span>
+            {totalUnread > 0 && (
+              <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                {totalUnread}
+              </span>
+            )}
+          </Link>
 
           <Link
             href="/grups"

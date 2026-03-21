@@ -2,6 +2,7 @@ export * from "./events";
 export * from "./files";
 export * from "./lists";
 export * from "./notes";
+export * from "./notifications";
 export * from "./pots";
 export * from "./projects";
 export * from "./push";

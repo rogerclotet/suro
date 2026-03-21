@@ -13,6 +13,7 @@ import {
   projectToUsers,
   users,
 } from "@/server/db/schema";
+import { createNotification } from "@/server/notifications";
 import { sendNotificationsToUsers } from "@/server/push";
 import { utapi } from "@/server/uploadthing";
 
@@ -101,7 +102,7 @@ export const uploadFileRouter = {
         },
       });
 
-      sendNotification(
+      sendFileNotification(
         file,
         metadata.userId,
         metadata.projectId,
@@ -201,12 +202,17 @@ export const uploadFileRouter = {
 
 export type UploadFileRouter = typeof uploadFileRouter;
 
-function sendNotification(
+function sendFileNotification(
   file: UploadedFileData,
   userId: string,
   projectId: string,
   eventId: string | null,
 ) {
+  const path = eventId
+    ? `/grups/${projectId}/calendari/${eventId}`
+    : `/grups/${projectId}/fitxers`;
+  const section = eventId ? "calendari" : "fitxers";
+
   setTimeout(() => {
     db.query.projects
       .findFirst({
@@ -222,7 +228,7 @@ function sendNotification(
         },
         where: and(eq(projects.id, projectId)),
       })
-      .then((project) => {
+      .then(async (project) => {
         if (!project) {
           console.error(
             "Could not find project after uploading file",
@@ -231,21 +237,25 @@ function sendNotification(
           return;
         }
 
-        sendNotificationsToUsers({
+        await createNotification({
+          type: "file_uploaded",
+          title: project.name,
+          body: `Fitxer ${file.name} afegit`,
+          path,
+          section,
+          image: file.type.includes("image") ? file.url : undefined,
+          projectId: project.id,
+          createdBy: userId,
+        });
+
+        await sendNotificationsToUsers({
           users: project.users
             .filter((u) => u.user.id !== userId)
             .map((u) => u.user.id),
           body: `Fitxer ${file.name} afegit`,
           title: project.name,
-          path: eventId
-            ? `/grups/${project.id}/calendari/${eventId}`
-            : `/grups/${project.id}/fitxers`,
+          path,
           image: file.type.includes("image") ? file.url : undefined,
-        }).catch((err) => {
-          console.error(
-            "Failed to send push notification after uploading file",
-            err,
-          );
         });
       })
       .catch((err) => {
