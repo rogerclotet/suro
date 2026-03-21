@@ -8,11 +8,17 @@ import { getPostHogServer } from "@/lib/posthog-server";
 import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
+import { utapi } from "@/server/uploadthing";
 import { projectSchema } from "./create-project/data";
+
+const editProjectSchema = v.object({
+  name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
+  color: v.optional(v.string()),
+});
 
 export async function editProject(
   project: Project,
-  data: v.InferInput<typeof projectSchema>,
+  data: v.InferInput<typeof editProjectSchema>,
 ) {
   const session = await requireSession();
   const serverProject = await requireProject(project.id);
@@ -21,16 +27,17 @@ export async function editProject(
     throw new Error("Only the creator can edit the project");
   }
 
-  const parsed = v.parse(projectSchema, data);
+  const parsed = v.parse(editProjectSchema, data);
 
   await db
     .update(projects)
     .set({
       name: parsed.name,
+      ...(parsed.color ? { color: parsed.color } : {}),
     })
     .where(eq(projects.id, project.id));
 
-  revalidatePath("/grups");
+  revalidatePath("/");
 
   getPostHogServer().capture({
     distinctId: session.user.id,
@@ -39,6 +46,35 @@ export async function editProject(
       projectId: serverProject.id,
       usersCount: serverProject.users.length,
     },
+  });
+}
+
+export async function removeProjectImage(projectId: string) {
+  const session = await requireSession();
+  const serverProject = await requireProject(projectId);
+
+  if (serverProject.createdBy !== session.user.id) {
+    throw new Error("Only the creator can edit the project");
+  }
+
+  if (serverProject.image) {
+    const key = serverProject.image.split("/").pop();
+    if (key) {
+      await utapi.deleteFiles([key]);
+    }
+  }
+
+  await db
+    .update(projects)
+    .set({ image: null })
+    .where(eq(projects.id, projectId));
+
+  revalidatePath("/");
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "remove_project_image",
+    properties: { projectId },
   });
 }
 

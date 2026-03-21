@@ -20,6 +20,8 @@ export const users = createTable("user", {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
+  customImage: varchar("customImage", { length: 512 }),
+  avatarColor: varchar("avatarColor", { length: 20 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

@@ -15,7 +15,14 @@ const projectQuery = {
   columns: {},
   with: {
     project: {
-      columns: { id: true, name: true, createdBy: true, inviteToken: true },
+      columns: {
+        id: true,
+        name: true,
+        createdBy: true,
+        inviteToken: true,
+        image: true,
+        color: true,
+      },
       with: {
         users: { columns: {}, with: { user: true } },
         categories: {
@@ -88,7 +95,14 @@ export async function getInvitedProject(projectId: string) {
 
   try {
     const result = await db.query.projects.findFirst({
-      columns: { id: true, name: true, createdBy: true, inviteToken: true },
+      columns: {
+        id: true,
+        name: true,
+        createdBy: true,
+        inviteToken: true,
+        image: true,
+        color: true,
+      },
       with: {
         users: { columns: {}, with: { user: true } },
         categories: true,

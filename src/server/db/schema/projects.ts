@@ -18,6 +18,8 @@ export const projects = createTable("project", {
     .notNull()
     .references(() => users.id, { onUpdate: "cascade" }),
   inviteToken: uuid("inviteToken").defaultRandom().notNull(),
+  image: varchar("image", { length: 512 }),
+  color: varchar("color", { length: 20 }).notNull().default("blue"),
 });
 
 export const projectsRelations = relations(projects, ({ many }) => ({

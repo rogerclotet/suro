@@ -3,8 +3,8 @@
 import { BadgeQuestionMarkIcon } from "lucide-react";
 import { useState } from "react";
 import type { User } from "@/app/_data/user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import UserAvatar from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 import type { getAssignment } from "@/server/secret-santa";
 import AssignmentGiftIdeas from "./assignment-gift-ideas";
@@ -58,12 +58,10 @@ function AssignmentCardFront({ user }: { user: User }) {
   return (
     <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-2xl">
       <CardHeader className="flex h-auto w-full items-center justify-center">
-        <Avatar className="aspect-square h-auto w-[80%]">
-          <AvatarFallback className="text-8xl">
-            {user.name?.charAt(0)?.toUpperCase()}
-          </AvatarFallback>
-          <AvatarImage src={user.image ?? undefined} />
-        </Avatar>
+        <UserAvatar
+          user={user}
+          className="aspect-square h-auto w-[80%] text-8xl"
+        />
       </CardHeader>
       <CardContent className="flex h-16 items-center justify-center">
         <span className="line-clamp-2 text-ellipsis font-bold text-2xl text-primary">

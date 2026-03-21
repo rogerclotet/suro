@@ -1,11 +1,11 @@
 import type { Project } from "@/app/_data/project";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
-import { cn } from "@/lib/utils";
+import UserAvatar from "@/components/user-avatar";
 
 export default function UsersList({ users }: { users: Project["users"] }) {
   return (
@@ -14,7 +14,7 @@ export default function UsersList({ users }: { users: Project["users"] }) {
         <Tooltip key={user.user.id}>
           <TooltipTrigger>
             <UserAvatar
-              className="avatar border-2 border-background"
+              className="border-2 border-background avatar"
               user={user.user}
             />
           </TooltipTrigger>
@@ -36,27 +36,6 @@ export default function UsersList({ users }: { users: Project["users"] }) {
           </TooltipContent>
         </Tooltip>
       )}
-    </div>
-  );
-}
-
-function UserAvatar({
-  user,
-  className,
-}: {
-  user: Project["users"][number]["user"];
-  className?: string;
-}) {
-  return (
-    <div key={user.id}>
-      <div className="w-8">
-        <Avatar className={cn("h-8 w-8", className)}>
-          <AvatarImage src={user.image ?? undefined} />
-          <AvatarFallback className="bg-secondary text-secondary-foreground">
-            {user.name?.charAt(0)?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      </div>
     </div>
   );
 }

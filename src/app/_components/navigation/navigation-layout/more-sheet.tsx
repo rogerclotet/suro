@@ -3,13 +3,13 @@
 import { LayoutGridIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import UserAvatar from "@/components/user-avatar";
 import type { MenuItem } from "../use-menu-items";
 import { logOut } from "./profile/actions";
 
@@ -62,12 +62,7 @@ export default function MoreSheet({
             onClick={() => onOpenChange(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent"
           >
-            <Avatar className="size-5 shrink-0">
-              <AvatarImage src={session?.user?.image ?? undefined} />
-              <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
-                {session?.user?.name?.charAt(0)?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar user={session?.user ?? {}} className="size-5" />
             <div className="flex flex-col">
               <span className="text-sm font-medium">{session?.user?.name}</span>
               <span className="text-xs text-muted-foreground">

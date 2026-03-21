@@ -24,6 +24,10 @@ export default {
     },
     async session({ session, user }) {
       session.user.id = user.id;
+      session.user.customImage = (user as unknown as Record<string, unknown>)
+        .customImage as string | null;
+      session.user.avatarColor = (user as unknown as Record<string, unknown>)
+        .avatarColor as string | null;
       return session;
     },
   },

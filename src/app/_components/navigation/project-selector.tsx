@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ProjectAvatar from "@/components/project-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,11 +45,7 @@ export default function ProjectSelector() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton size="lg" tooltip={project.name}>
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-secondary text-secondary-foreground">
-              {project?.name?.charAt(0)?.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <ProjectAvatar project={project} />
           <div className="flex flex-col">
             <span>{project.name}</span>
             <span className="text-muted-foreground text-xs">
@@ -82,11 +78,7 @@ export default function ProjectSelector() {
                 : ""
             }
           >
-            <Avatar className="h-6 w-6 shrink-0">
-              <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
-                {p.name?.charAt(0)?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <ProjectAvatar project={p} className="h-6 w-6 text-xs" />
             <span className="min-w-0 truncate">{p.name}</span>
           </DropdownMenuItem>
         ))}

@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import type { Spending } from "@/app/_data/spending";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import UserAvatar from "@/components/user-avatar";
 import { calculateBalances } from "./settle-button/calculate-balances";
 import UserBalance from "./user-balance";
 
@@ -50,12 +50,7 @@ export default function SpendingsTable({
             className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell className="flex items-center gap-4">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={u.user.image ?? undefined} />
-                <AvatarFallback className="bg-secondary text-secondary-foreground">
-                  {u.user.name?.charAt(0)?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar user={u.user} />
               {u.user.name}
             </TableCell>
             <TableCell className="p-0 pr-4">

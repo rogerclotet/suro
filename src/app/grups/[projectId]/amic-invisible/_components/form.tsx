@@ -10,7 +10,6 @@ import {
   secretSantaSchema,
 } from "@/app/_data/secret-santa";
 import { useProjects } from "@/app/_state/project-state";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Field,
   FieldContent,
@@ -26,6 +25,7 @@ import { Slider } from "@/components/ui/slider";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import UserAvatar from "@/components/user-avatar";
 
 const DEFAULT_MIN_PRICE = 0;
 const DEFAULT_MAX_PRICE = 30;
@@ -199,12 +199,7 @@ export default function SecretSantaForm({
                       }}
                       disabled={assignmentsDone}
                     />
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
-                        {user.user.name?.charAt(0)?.toUpperCase()}
-                      </AvatarFallback>
-                      <AvatarImage src={user.user.image ?? undefined} />
-                    </Avatar>
+                    <UserAvatar user={user.user} className="h-6 w-6 text-xs" />
                     <Label htmlFor={user.user.id}>{user.user.name}</Label>
                   </div>
                 ))}

@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ProjectAvatar from "@/components/project-avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMenuItems } from "../use-menu-items";
 
-const explicitlyAllowedBreadcrumbs = ["grups"];
+const explicitlyAllowedBreadcrumbs = ["grups", "perfil"];
 
 function MobileHeader() {
   const { project, projects, selectProject } = useProjects();
@@ -38,6 +38,7 @@ function MobileHeader() {
   const menuItems = useMenuItems();
 
   const currentSectionName = useMemo(() => {
+    if (pathname === "/perfil") return "Perfil";
     const activeItem = menuItems.find(
       (item) => item.path !== "/" && pathname.includes(item.path),
     );
@@ -63,11 +64,7 @@ function MobileHeader() {
       <div className="flex min-w-0 items-center gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex min-w-0 max-w-[40vw] shrink items-center gap-1.5 rounded-lg px-1 py-0.5 transition-colors hover:bg-accent focus:outline-none">
-            <Avatar className="h-7 w-7 shrink-0">
-              <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
-                {project.name?.charAt(0)?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <ProjectAvatar project={project} className="h-7 w-7 text-xs" />
             <span className="truncate text-sm text-muted-foreground">
               {project.name}
             </span>
@@ -88,11 +85,7 @@ function MobileHeader() {
                     : ""
                 }
               >
-                <Avatar className="mr-2 h-5 w-5">
-                  <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
-                    {p.name?.charAt(0)?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <ProjectAvatar project={p} className="mr-2 h-5 w-5 text-xs" />
                 {p.name}
               </DropdownMenuItem>
             ))}

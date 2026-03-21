@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 import type { User } from "@/app/_data/user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import UserAvatar from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 
 export default function Participant({
@@ -62,12 +62,13 @@ export default function Participant({
         className,
       )}
     >
-      <Avatar className="aspect-square h-auto w-[60%]">
-        <AvatarFallback className={cn(avatarFallbackVariants({ nameSize }))}>
-          {user.name?.charAt(0)?.toUpperCase()}
-        </AvatarFallback>
-        <AvatarImage src={user.image ?? undefined} />
-      </Avatar>
+      <UserAvatar
+        user={user}
+        className={cn(
+          "aspect-square h-auto w-[60%]",
+          avatarFallbackVariants({ nameSize }),
+        )}
+      />
 
       <div className={cn(nameContainerVariants({ nameSize }))}>
         <p className={cn(nameLabelVariants({ nameSize }))}>{user.name}</p>

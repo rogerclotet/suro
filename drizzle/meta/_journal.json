@@ -204,6 +204,13 @@
       "when": 1774033825988,
       "tag": "0028_sad_phalanx",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1774096239927,
+      "tag": "0029_bright_maggott",
+      "breakpoints": true
     }
   ]
 }

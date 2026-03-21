@@ -3,7 +3,6 @@
 import { ChevronsUpDownIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import UserAvatar from "@/components/user-avatar";
 import ThemeSwitcher from "../theme-switcher";
 import { logOut } from "./actions";
 import NotificationSwitcher from "./notification-toggle";
@@ -32,12 +32,7 @@ export default function Profile() {
           tooltip={session.data?.user.name ?? "Perfil"}
           className="w-full justify-start gap-4"
         >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={session.data?.user.image ?? undefined} />
-            <AvatarFallback className="bg-secondary text-secondary-foreground">
-              {session.data?.user.name?.charAt(0)?.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar user={session.data?.user ?? {}} />
           <div className="flex flex-col">
             <span>{session.data?.user.name}</span>
             <span className="text-muted-foreground text-xs">

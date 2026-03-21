@@ -6,8 +6,15 @@ import type { UploadedFileData } from "uploadthing/types";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
-import { events, files, projects, projectToUsers } from "@/server/db/schema";
+import {
+  events,
+  files,
+  projects,
+  projectToUsers,
+  users,
+} from "@/server/db/schema";
 import { sendNotificationsToUsers } from "@/server/push";
+import { utapi } from "@/server/uploadthing";
 
 const f = createUploadthing();
 
@@ -102,6 +109,92 @@ export const uploadFileRouter = {
       );
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      return {};
+    }),
+  profileImageUploader: f({
+    image: { maxFileSize: "2MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const session = await auth();
+      if (!session) {
+        throw new UploadThingError("Unauthorized");
+      }
+
+      const user = await db.query.users.findFirst({
+        columns: { customImage: true },
+        where: eq(users.id, session.user.id),
+      });
+
+      return { userId: session.user.id, oldImage: user?.customImage ?? null };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      if (metadata.oldImage) {
+        const key = metadata.oldImage.split("/").pop();
+        if (key) {
+          await utapi.deleteFiles([key]);
+        }
+      }
+
+      await db
+        .update(users)
+        .set({ customImage: file.url })
+        .where(eq(users.id, metadata.userId));
+
+      revalidatePath("/");
+
+      getPostHogServer().capture({
+        distinctId: metadata.userId,
+        event: "upload_profile_image",
+      });
+
+      return {};
+    }),
+
+  groupImageUploader: f({
+    image: { maxFileSize: "2MB", maxFileCount: 1 },
+  })
+    .middleware(async ({ req }) => {
+      const session = await auth();
+      if (!session) {
+        throw new UploadThingError("Unauthorized");
+      }
+
+      const projectId = req.headers.get("x-project-id");
+      if (!projectId) {
+        throw new UploadThingError("Project ID not found");
+      }
+
+      const project = await db.query.projects.findFirst({
+        columns: { id: true, createdBy: true, image: true },
+        where: eq(projects.id, projectId),
+      });
+      if (!project || project.createdBy !== session.user.id) {
+        throw new UploadThingError("Unauthorized");
+      }
+
+      return { userId: session.user.id, projectId, oldImage: project.image };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      if (metadata.oldImage) {
+        const key = metadata.oldImage.split("/").pop();
+        if (key) {
+          await utapi.deleteFiles([key]);
+        }
+      }
+
+      await db
+        .update(projects)
+        .set({ image: file.url })
+        .where(eq(projects.id, metadata.projectId));
+
+      revalidatePath("/");
+
+      getPostHogServer().capture({
+        distinctId: metadata.userId,
+        event: "upload_group_image",
+        properties: { projectId: metadata.projectId },
+      });
+
       return {};
     }),
 } satisfies FileRouter;
