@@ -24,7 +24,7 @@ export default function SubsectionTabs() {
   }
 
   return (
-    <div className="flex gap-1 overflow-x-auto border-b border-border bg-background px-3">
+    <div className="flex gap-1 overflow-x-auto border-b border-border/50 bg-background/80 px-3 backdrop-blur-md">
       {subsectionItems.map((item) => {
         const isActive = activeItem?.path === item.path;
 
