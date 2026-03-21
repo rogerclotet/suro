@@ -33,10 +33,15 @@ export default function FileListItem({ file }: { file: File }) {
         </div>
       </Link>
 
-      <div className="flex grow flex-col justify-around gap-0.5">
+      <div className="flex min-w-0 grow flex-col justify-around gap-0.5">
         <div className="flex flex-row items-center gap-2">
-          <Link href={file.url} target="_blank" rel="noopener noreferrer">
-            <span className="wrap-anywhere line-clamp-1">{file.name}</span>
+          <Link
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-w-0 truncate"
+          >
+            <span className="truncate">{file.name}</span>
           </Link>
 
           {file.uploadedBy.id === session?.data?.user.id && (
