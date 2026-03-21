@@ -25,7 +25,7 @@ export default function FileCard({ file }: { file: File }) {
             href={file.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="line-clamp-1"
+            className="min-w-0 truncate"
           >
             {file.name}
           </Link>
