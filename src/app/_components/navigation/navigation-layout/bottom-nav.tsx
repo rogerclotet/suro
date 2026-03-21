@@ -2,80 +2,107 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useMenuItems } from "../use-menu-items";
+import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
+import MoreSheet from "./more-sheet";
 
 export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
-  const menuItems = useMenuItems();
+  const bottomNavItems = useBottomNavItems();
   const { isMobile } = useSidebar();
-
-  const bottomNavItems = useMemo(() => {
-    if (!isMobile) {
-      return [];
-    }
-
-    const items = menuItems.filter(
-      (item) =>
-        item.path !== "/" && pathname.includes(item.path) && item.children,
-    );
-
-    if (items.length === 0) {
-      return [];
-    }
-
-    items.push(...items.flatMap((item) => item.children ?? []));
-
-    return items;
-  }, [menuItems, isMobile, pathname]);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const activeItem = useMemo(() => {
-    const activeItems = bottomNavItems.filter((item) =>
-      pathname.includes(item.path),
+    const activeItems = bottomNavItems.filter(
+      (item) => item.path !== "#more" && pathname.includes(item.path),
     );
     return activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
   }, [bottomNavItems, pathname]);
+
+  const overflowItems = useMemo(() => {
+    const moreItem = bottomNavItems.find((item) => item.path === "#more");
+    return (moreItem as BottomNavItem | undefined)?.overflow ?? [];
+  }, [bottomNavItems]);
 
   if (!isMobile) {
     return null;
   }
 
   return (
-    <div
-      className={cn("grid", className)}
-      style={{
-        gridTemplateColumns: `repeat(${bottomNavItems.length}, 1fr)`,
-      }}
-    >
-      {bottomNavItems.map((item) =>
-        item.disabled ? (
-          <div
-            key={item.name}
-            className="flex flex-col items-center justify-center gap-2 bg-muted p-2 text-muted-foreground"
-          >
-            {item.name}
-            {item.icon}
-          </div>
-        ) : (
-          <Link
-            key={item.name}
-            href={item.path}
-            className="flex flex-col items-center justify-center gap-1 p-1 text-primary text-sm"
-          >
-            <div
+    <>
+      <nav
+        className={cn(
+          "grid border-t border-border bg-background pb-[env(safe-area-inset-bottom)]",
+          className,
+        )}
+        style={{
+          gridTemplateColumns: `repeat(${bottomNavItems.length}, 1fr)`,
+        }}
+      >
+        {bottomNavItems.map((item) => {
+          const isMore = item.path === "#more";
+          const isActive = !isMore && activeItem?.path === item.path;
+
+          if (isMore) {
+            return (
+              <button
+                key="more"
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground transition-colors"
+              >
+                <div className="rounded-full px-4 py-1.5 [&_svg]:size-5">
+                  {item.icon}
+                </div>
+                <span className="text-xs">{item.name}</span>
+              </button>
+            );
+          }
+
+          if (item.disabled) {
+            return (
+              <div
+                key={item.name}
+                className="flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground/50"
+              >
+                <div className="rounded-full px-4 py-1.5 [&_svg]:size-5">
+                  {item.icon}
+                </div>
+                <span className="text-xs">{item.name}</span>
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={item.name}
+              href={item.path}
               className={cn(
-                "rounded-full px-4 py-1.5",
-                activeItem?.path === item.path && "bg-primary/20",
+                "flex flex-col items-center justify-center gap-0.5 py-2 transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground",
               )}
             >
-              {item.icon}
-            </div>
-            {item.name}
-          </Link>
-        ),
-      )}
-    </div>
+              <div
+                className={cn(
+                  "rounded-full px-4 py-1.5 transition-colors [&_svg]:size-5",
+                  isActive && "bg-primary/20",
+                )}
+              >
+                {item.icon}
+              </div>
+              <span className="text-xs">{item.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <MoreSheet
+        open={moreOpen}
+        onOpenChange={setMoreOpen}
+        overflowItems={overflowItems}
+      />
+    </>
   );
 }

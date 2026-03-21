@@ -2,6 +2,7 @@
 
 import {
   Calendar,
+  EllipsisIcon,
   FileTextIcon,
   FolderOpen,
   GiftIcon,
@@ -11,6 +12,7 @@ import {
   ListTodo,
   TagsIcon,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { type ReactNode, useMemo } from "react";
 import type { Project } from "@/app/_data/project";
 import { useFlags } from "@/app/_state/flags-state";
@@ -158,4 +160,45 @@ export function useMenuItems(): MenuItem[] {
   }, [activeItemParts, selectedProject]);
 
   return items;
+}
+
+const MAX_BOTTOM_NAV_ITEMS = 4;
+
+export type BottomNavItem = MenuItem & {
+  overflow?: MenuItem[];
+};
+
+export function useBottomNavItems(): BottomNavItem[] {
+  const menuItems = useMenuItems();
+
+  return useMemo(() => {
+    const visible = menuItems.slice(0, MAX_BOTTOM_NAV_ITEMS);
+    const overflow = menuItems.slice(MAX_BOTTOM_NAV_ITEMS);
+
+    const moreItem: BottomNavItem = {
+      name: "Més",
+      path: "#more",
+      icon: <EllipsisIcon />,
+      overflow,
+    };
+
+    return [...visible, moreItem];
+  }, [menuItems]);
+}
+
+export function useSubsectionItems(): MenuItem[] {
+  const menuItems = useMenuItems();
+  const pathname = usePathname();
+
+  return useMemo(() => {
+    const activeParent = menuItems.find(
+      (item) => item.path !== "/" && pathname.includes(item.path),
+    );
+
+    if (!activeParent?.children?.length) {
+      return [];
+    }
+
+    return [activeParent, ...activeParent.children];
+  }, [menuItems, pathname]);
 }

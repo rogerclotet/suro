@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import BottomNav from "./bottom-nav";
 import Breadcrumbs from "./breadcrumbs";
 import { ScrollableContainer, type ScrollState } from "./scrollable-container";
+import SubsectionTabs from "./subsection-tabs";
 
 export default function SidebarInsetContent({
   children,
@@ -25,7 +26,8 @@ export default function SidebarInsetContent({
     <div className="flex h-full flex-col">
       <header
         className={cn(
-          "z-10 flex h-16 shrink-0 items-center gap-2 bg-sidebar px-6 text-sidebar-foreground transition-[width,height,box-shadow] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:rounded-t-lg md:bg-background md:text-foreground",
+          "z-10 flex shrink-0 items-center gap-2 bg-sidebar px-4 text-sidebar-foreground transition-[width,height,box-shadow] duration-200 ease-linear md:h-16 md:rounded-t-lg md:bg-background md:px-6 md:text-foreground group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
+          isMobile ? "py-2.5" : "",
           isMobile &&
             !scrollState.isAtTop &&
             "shadow-[0_0_1rem_1rem_rgba(0,0,0,0.4)]",
@@ -34,6 +36,8 @@ export default function SidebarInsetContent({
         <Breadcrumbs />
       </header>
 
+      <SubsectionTabs />
+
       <ScrollableContainer
         onScrollStateChange={setScrollState}
         className="grow overflow-y-auto p-3 md:px-6 md:py-2"
@@ -41,7 +45,6 @@ export default function SidebarInsetContent({
         {children}
       </ScrollableContainer>
 
-      {/* TODO: add a condition to only show the FAB on mobile when the sidebar actions are in place */}
       {action && (
         <div className="relative h-0 w-full">
           <FAB
