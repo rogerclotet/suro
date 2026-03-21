@@ -82,7 +82,12 @@ export default function ProjectSelector() {
                 : ""
             }
           >
-            {p.name}
+            <Avatar className="h-6 w-6 shrink-0">
+              <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
+                {p.name?.charAt(0)?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="min-w-0 truncate">{p.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
