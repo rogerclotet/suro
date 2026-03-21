@@ -30,8 +30,8 @@ export default function Login({ session }: { session?: Session | null }) {
       <div className="w-full max-w-xs space-y-6">
         {/* Logo + heading */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-card shadow-sm border border-border">
-            <Image src="/favicon.png" alt="Logo" width={36} height={36} />
+          <div className="inline-flex items-center justify-center">
+            <Image src="/favicon.png" alt="Logo" width={56} height={56} />
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
