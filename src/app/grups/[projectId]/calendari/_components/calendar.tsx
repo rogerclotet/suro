@@ -14,11 +14,6 @@ import {
   Calendar as CalendarComponent,
   CalendarDayButton,
 } from "@/components/ui/calendar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/touch-tooltip";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
@@ -196,19 +191,6 @@ export default function Calendar() {
 
   return (
     <div className="space-y-4">
-      <div className="text-right">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={copyCalendarExportURL}>
-              <CalendarArrowDown />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Exportar calendari</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
       <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:gap-8">
         <div className="flex flex-col items-center">
           <CalendarComponent
@@ -226,6 +208,15 @@ export default function Calendar() {
               DayButton: CustomDayButton,
             }}
           />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={copyCalendarExportURL}
+            className="mt-2 w-full gap-2"
+          >
+            <CalendarArrowDown className="size-4" />
+            Exportar calendari
+          </Button>
         </div>
 
         {date && (

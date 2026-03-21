@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
+import Action from "@/components/action";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -40,15 +41,7 @@ export default function CreatePotButton() {
     <>
       {project && (
         <ModalForm
-          trigger={
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Crear pot
-            </button>
-          }
+          trigger={<Action icon={PlusIcon} label="Crear pot" />}
           title="Crear pot"
           description="Crea un nou pot de despeses compartides"
         >

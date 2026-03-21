@@ -53,10 +53,15 @@ const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
     },
     ref,
   ) => {
+    const isExtended = !!label;
     return (
       <Button
         ref={ref}
-        className={cn(fabVariants({ variant, size, elevation }), className)}
+        className={cn(
+          fabVariants({ variant, size, elevation }),
+          isExtended && "w-auto px-4 gap-2",
+          className,
+        )}
         {...props}
       >
         {Icon && (

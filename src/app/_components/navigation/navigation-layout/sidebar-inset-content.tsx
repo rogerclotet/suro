@@ -60,7 +60,7 @@ export default function SidebarInsetContent({
 
         <header
           ref={headerRef}
-          className="absolute inset-x-0 top-0 z-20 flex items-center gap-2 bg-sidebar/85 px-4 py-2.5 text-sidebar-foreground backdrop-blur-md"
+          className="absolute inset-x-0 top-0 z-20 flex min-h-[52px] items-center gap-2 bg-sidebar/85 px-4 py-2.5 text-sidebar-foreground backdrop-blur-md"
         >
           <Breadcrumbs />
         </header>
@@ -80,6 +80,7 @@ export default function SidebarInsetContent({
           >
             <FAB
               key={action.label}
+              label={action.label}
               icon={action.icon}
               onClick={action.onClick ?? undefined}
               elevation="high"

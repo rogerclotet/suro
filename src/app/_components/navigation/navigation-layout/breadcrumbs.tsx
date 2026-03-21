@@ -72,7 +72,10 @@ function MobileHeader() {
             <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="start" className="min-w-48 rounded-lg">
+          <DropdownMenuContent
+            align="start"
+            className="min-w-48 max-w-[calc(100vw-2rem)] rounded-lg"
+          >
             <DropdownMenuLabel>Grups</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {projects.map((p) => (
@@ -80,14 +83,18 @@ function MobileHeader() {
                 key={p.id}
                 onClick={() => handleProjectSelect(p)}
                 disabled={project.id === p.id}
-                className={
+                className={cn(
+                  "py-3",
                   project.id === p.id
                     ? "bg-secondary text-secondary-foreground"
-                    : ""
-                }
+                    : "",
+                )}
               >
-                <ProjectAvatar project={p} className="mr-2 h-5 w-5 text-xs" />
-                {p.name}
+                <ProjectAvatar
+                  project={p}
+                  className="h-5 w-5 shrink-0 text-xs"
+                />
+                <span className="min-w-0 truncate">{p.name}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

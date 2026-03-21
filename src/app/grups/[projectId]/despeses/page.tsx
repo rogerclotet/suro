@@ -44,9 +44,7 @@ export default async function DespesesPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <CreatePotButton />
-      </div>
+      <CreatePotButton />
 
       {pots.length === 0 ? (
         <div className="text-center text-muted-foreground py-12">
