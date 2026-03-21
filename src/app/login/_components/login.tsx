@@ -7,14 +7,6 @@ import { redirect, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getSafeRedirectTo } from "@/lib/auth-redirect";
 import { loginWithGoogle, loginWithResend } from "./actions";
@@ -34,54 +26,81 @@ export default function Login({ session }: { session?: Session | null }) {
   }
 
   return (
-    <div className="container mx-auto flex h-screen w-sm items-center justify-center">
-      <Card>
-        <CardHeader>
-          <div className="mx-auto mb-4 rounded-full bg-background p-4">
-            <Image src="/favicon.png" alt="Logo" width={64} height={64} />
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-xs space-y-6">
+        {/* Logo + heading */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center">
+            <Image src="/favicon.png" alt="Logo" width={56} height={56} />
           </div>
-          <CardTitle className="text-center">Iniciar sessió</CardTitle>
-          <CardDescription className="text-center">
-            {"Has d'iniciar sessió per a accedir a l'aplicació"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form
-            action={handleResendSignIn}
-            className="space-y-4 rounded-lg border-2 border-muted p-4 text-center"
-          >
-            <input type="hidden" name="redirectTo" value={redirectTo} />
-            <Input
-              name="email"
-              type="email"
-              placeholder="exemple@exemple.com"
-            />
-            <Button className="gap-4">
-              <Mail />
-              Entrar amb email
-            </Button>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Benvingut/da
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Inicia sessió per accedir a la teva família
+            </p>
+          </div>
+        </div>
 
-            {loggedInWithResend && (
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Correu enviat</AlertTitle>
-                <AlertDescription className="text-wrap">
-                  {
-                    "T'hem enviat un email amb un enllaç per iniciar la sessió. Comprova la safata d'entrada."
-                  }
-                </AlertDescription>
-              </Alert>
-            )}
-          </form>
-          <form action={loginWithGoogle} className="text-center">
-            <input type="hidden" name="redirectTo" value={redirectTo} />
-            <Button className="gap-4">
-              <SiGoogle />
-              Entrar amb Google
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        {/* Primary CTA: Google */}
+        <form action={loginWithGoogle}>
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-card border border-border rounded-xl text-foreground font-medium text-sm shadow-sm hover:bg-accent hover:text-accent-foreground active:scale-[0.99] transition-all duration-150 cursor-pointer"
+          >
+            <SiGoogle
+              className="w-4 h-4 shrink-0"
+              style={{ color: "#4285F4" }}
+            />
+            Continua amb Google
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground tracking-wide">
+            o bé
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* Secondary: Email magic link */}
+        <form action={handleResendSignIn} className="space-y-2.5">
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+          <Input
+            name="email"
+            type="email"
+            placeholder="el-teu@correu.com"
+            required
+            className="h-10 rounded-xl bg-card border-border text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
+          />
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm text-muted-foreground border border-border bg-card hover:bg-accent hover:text-accent-foreground active:scale-[0.99] transition-all duration-150 cursor-pointer"
+          >
+            <Mail className="w-4 h-4 shrink-0" />
+            Continua amb correu electrònic
+          </button>
+        </form>
+
+        {/* Success state */}
+        {loggedInWithResend && (
+          <Alert className="rounded-xl border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertTitle className="text-blue-800 dark:text-blue-300 text-sm font-medium">
+              Correu enviat
+            </AlertTitle>
+            <AlertDescription className="text-blue-600 dark:text-blue-400 text-xs leading-relaxed">
+              {
+                "T'hem enviat un email amb un enllaç per iniciar la sessió. Comprova la safata d'entrada."
+              }
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
     </div>
   );
 }
