@@ -18,7 +18,7 @@ export default function FileCard({ file }: { file: File }) {
   const session = useSession();
 
   return (
-    <Card className="max-w-[180px]">
+    <Card className="max-w-[180px] overflow-hidden">
       <CardHeader>
         <CardTitle className="flex flex-row items-center justify-between gap-2 text-md">
           <Link

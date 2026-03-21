@@ -34,7 +34,7 @@ export default function FileListItem({ file }: { file: File }) {
       </Link>
 
       <div className="flex min-w-0 grow flex-col justify-around gap-0.5">
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex min-w-0 flex-row items-center gap-2">
           <Link
             href={file.url}
             target="_blank"
