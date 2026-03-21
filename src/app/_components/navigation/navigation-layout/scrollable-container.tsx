@@ -10,6 +10,7 @@ export type ScrollState = {
 type ScrollableContainerProps = {
   children: ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   onScrollStateChange?: (state: ScrollState) => void;
 };
 
@@ -19,6 +20,7 @@ const BOTTOM_THRESHOLD = 5.0;
 export function ScrollableContainer({
   children,
   className,
+  style,
   onScrollStateChange,
 }: ScrollableContainerProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -193,6 +195,7 @@ export function ScrollableContainer({
         {
           // Enable momentum scrolling on iOS Safari
           WebkitOverflowScrolling: "touch",
+          ...style,
         } as React.CSSProperties
       }
     >
