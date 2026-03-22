@@ -20,7 +20,6 @@ import { getProjects } from "@/server/projects";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
 import EditProjectButton from "./edit-project-button";
-import IdIcon from "./id-icon";
 import InviteButton from "./invite-button";
 import LeaveButton from "./leave-button";
 
@@ -126,7 +125,6 @@ export default async function ProjectsTable() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
           <TableHead>Grup</TableHead>
           <TableHead>Usuaris</TableHead>
           <TableHead className="text-right">Accions</TableHead>
@@ -139,12 +137,9 @@ export default async function ProjectsTable() {
             className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
           >
             <TableCell>
-              <IdIcon id={project.id} />
-            </TableCell>
-            <TableCell>
               <Link href={`/grups/${project.id}`}>{project.name}</Link>
             </TableCell>
-            <TableCell className="p-0">
+            <TableCell className="align-middle">
               <UsersList users={project.users} />
             </TableCell>
             <TableCell className="flex flex-row items-center justify-end gap-1">
