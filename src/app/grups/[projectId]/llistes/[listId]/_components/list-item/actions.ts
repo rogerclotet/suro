@@ -12,6 +12,7 @@ import {
 } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { listItems } from "@/server/db/schema";
+import { enqueueListNotificationDigest } from "@/server/notification-digests";
 import { listItemSchema } from "./data";
 
 export async function createListItem(
@@ -47,6 +48,24 @@ export async function createListItem(
       hasCategory: !!parsed.categoryId,
     },
   });
+
+  const userName = session.user.name ?? "Algú";
+  setTimeout(() => {
+    enqueueListNotificationDigest({
+      actorId: session.user.id,
+      actorName: userName,
+      listId: serverList.id,
+      listName: serverList.name,
+      project: {
+        id: serverList.project.id,
+        name: serverList.project.name,
+        userIds: serverList.project.users.map((user) => user.userId),
+      },
+      type: "list_items_added",
+    }).catch((err) => {
+      console.error("Failed to enqueue list item creation digest", err);
+    });
+  }, 0);
 }
 
 export async function updateListItem(
@@ -59,6 +78,11 @@ export async function updateListItem(
 ) {
   const session = await requireSession();
   const serverList = await requireList(list.id);
+  const existingItem = serverList.items.find((item) => item.id === itemId);
+
+  if (!existingItem) {
+    throw new Error("List item not found");
+  }
 
   await db
     .update(listItems)
@@ -86,6 +110,26 @@ export async function updateListItem(
       completed: completed,
     },
   });
+
+  if (!existingItem.completed && completed) {
+    const userName = session.user.name ?? "Algú";
+    setTimeout(() => {
+      enqueueListNotificationDigest({
+        actorId: session.user.id,
+        actorName: userName,
+        listId: serverList.id,
+        listName: serverList.name,
+        project: {
+          id: serverList.project.id,
+          name: serverList.project.name,
+          userIds: serverList.project.users.map((user) => user.userId),
+        },
+        type: "list_items_completed",
+      }).catch((err) => {
+        console.error("Failed to enqueue list item completion digest", err);
+      });
+    }, 0);
+  }
 }
 
 export async function deleteListItem(list: List, itemId: string) {

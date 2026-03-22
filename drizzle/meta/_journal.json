@@ -218,6 +218,13 @@
       "when": 1774117323780,
       "tag": "0030_wise_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1774188143412,
+      "tag": "0031_fast_calypso",
+      "breakpoints": true
     }
   ]
 }

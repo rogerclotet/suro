@@ -9,6 +9,7 @@ import {
   projects,
   projectToUsers,
 } from "./db/schema";
+import { flushNotificationDigests } from "./notification-digests";
 
 export async function createNotification({
   type,
@@ -50,6 +51,8 @@ export async function getNotificationsForUser(
   userId: string,
   { limit = 100, offset = 0 }: { limit?: number; offset?: number } = {},
 ) {
+  await flushNotificationDigests();
+
   const results = await db
     .select({
       id: notifications.id,
@@ -110,6 +113,8 @@ export async function getUnreadCountsForUser(
   userId: string,
   projectId: string,
 ) {
+  await flushNotificationDigests([projectId]);
+
   const results = await db
     .select({
       section: notifications.section,
@@ -147,6 +152,8 @@ export async function getUnreadCountsForUser(
 }
 
 export async function getTotalUnreadCount(userId: string) {
+  await flushNotificationDigests();
+
   const [result] = await db
     .select({ count: count() })
     .from(notifications)
