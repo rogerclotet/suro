@@ -1,7 +1,8 @@
 "use client";
 
-import { Edit, Settings, Trash2 } from "lucide-react";
+import { Copy, Edit, Settings, Trash2 } from "lucide-react";
 import type { Template } from "@/app/_data/list";
+import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,8 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import DeleteTemplateModal from "./delete-template-modal";
 import EditTemplateForm from "./edit-template-form";
+import ExportTemplateModal from "./export-template-modal";
 
 export default function SettingsMenu({ template }: { template: Template }) {
+  const { projects } = useProjects();
+  const hasOtherProjects = projects.some((p) => p.id !== template.projectId);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,6 +38,21 @@ export default function SettingsMenu({ template }: { template: Template }) {
             </DropdownMenuItem>
           }
         />
+
+        {hasOtherProjects && (
+          <ExportTemplateModal
+            template={template}
+            trigger={
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                className="cursor-pointer gap-2"
+              >
+                <Copy />
+                Exportar a un altre grup
+              </DropdownMenuItem>
+            }
+          />
+        )}
 
         <DeleteTemplateModal
           template={template}

@@ -5,7 +5,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { getPostHogServer } from "@/lib/posthog-server";
-import { requireSession, requireTemplate } from "@/server/action-auth";
+import {
+  requireProject,
+  requireSession,
+  requireTemplate,
+} from "@/server/action-auth";
 import { db } from "@/server/db";
 import { templates } from "@/server/db/schema";
 import { templateSchema } from "../create-template/data";
@@ -29,6 +33,43 @@ export async function deleteTemplate(template: Template) {
       withCategoryCount: serverTemplate.items.filter(
         (item) => item.category !== null,
       ).length,
+    },
+  });
+}
+
+export async function exportTemplate(
+  template: Template,
+  targetProjectId: string,
+) {
+  const session = await requireSession();
+  const serverTemplate = await requireTemplate(template.id);
+  const targetProject = await requireProject(targetProjectId);
+
+  const result = await db
+    .insert(templates)
+    .values({
+      name: serverTemplate.name,
+      description: serverTemplate.description,
+      items: serverTemplate.items,
+      createdBy: session.user.id,
+      projectId: targetProject.id,
+    })
+    .returning({ id: templates.id });
+
+  if (!result || result.length < 1 || !result[0]) {
+    throw new Error("Error exporting template");
+  }
+
+  revalidatePath(`/grups/${targetProject.id}/llistes/plantilles`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "export_template",
+    properties: {
+      sourceProjectId: serverTemplate.projectId,
+      targetProjectId: targetProject.id,
+      templateId: serverTemplate.id,
+      itemsCount: serverTemplate.items.length,
     },
   });
 }
