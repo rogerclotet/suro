@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronsUpDownIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
@@ -21,13 +21,20 @@ import { cn } from "@/lib/utils";
 export default function ProjectSelector() {
   const { projects, project, selectProject } = useProjects();
   const router = useRouter();
+  const pathname = usePathname();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { data: session } = useSession();
 
-  function handleProjectSelect(project: Project) {
-    selectProject(project);
+  function handleProjectSelect(newProject: Project) {
+    selectProject(newProject);
     setOpenMobile(false);
-    router.push(`/grups/${project.id}`);
+    const currentSection = pathname
+      .split(`/grups/${project?.id}/`)[1]
+      ?.split("/")[0];
+    const targetPath = currentSection
+      ? `/grups/${newProject.id}/${currentSection}`
+      : `/grups/${newProject.id}`;
+    router.push(targetPath);
   }
 
   if (!project || projects.length === 0) {

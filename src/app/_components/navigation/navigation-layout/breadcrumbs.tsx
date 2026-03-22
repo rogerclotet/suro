@@ -48,7 +48,13 @@ function MobileHeader() {
 
   function handleProjectSelect(p: Project) {
     selectProject(p);
-    router.push(`/grups/${p.id}`);
+    const currentSection = pathname
+      .split(`/grups/${project?.id}/`)[1]
+      ?.split("/")[0];
+    const targetPath = currentSection
+      ? `/grups/${p.id}/${currentSection}`
+      : `/grups/${p.id}`;
+    router.push(targetPath);
   }
 
   if (!project) {
