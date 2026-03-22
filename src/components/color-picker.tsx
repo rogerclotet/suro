@@ -28,7 +28,7 @@ export default function ColorPicker({ value, onChange }: ColorPickerProps) {
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-full transition-transform hover:scale-110",
               isSelected &&
-                "ring-ring ring-2 ring-offset-2 ring-offset-background",
+                "ring-2 ring-ring ring-offset-2 ring-offset-background",
             )}
             style={{ backgroundColor: color.bg }}
             aria-label={key}

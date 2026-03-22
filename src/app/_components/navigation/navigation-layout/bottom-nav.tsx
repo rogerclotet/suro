@@ -37,7 +37,7 @@ export default function BottomNav({ className }: { className?: string }) {
     <>
       <nav
         className={cn(
-          "grid border-t border-border/50 bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md",
+          "grid border-border/50 border-t bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md",
           className,
         )}
         style={{

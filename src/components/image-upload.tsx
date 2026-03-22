@@ -91,7 +91,7 @@ export default function ImageUpload({
               return "";
             },
           }}
-          className="ut-button:bg-secondary ut-button:px-3 ut-button:font-medium ut-button:text-secondary-foreground ut-allowed-content:hidden ring-offset-background ut-button:ring-offset-background transition-colors after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:focus-visible:ring-offset-2 [&_label]:!h-8 [&_label]:!w-full [&_label]:!rounded-md [&_label]:!bg-secondary [&_label]:!text-secondary-foreground !gap-0"
+          className="[&_label]:!h-8 [&_label]:!w-full [&_label]:!rounded-md [&_label]:!bg-secondary [&_label]:!text-secondary-foreground !gap-0 ut-allowed-content:hidden ut-button:bg-secondary ut-button:px-3 ut-button:font-medium ut-button:text-secondary-foreground ring-offset-background ut-button:ring-offset-background transition-colors after:ut-button:bg-accent after:ut-button:opacity-70 ut-button:focus-visible:outline-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ut-button:focus-visible:ring-2 ut-button:focus-visible:ring-ring focus-visible:ring-offset-2 ut-button:focus-visible:ring-offset-2"
         />
         {visibleActions?.map((action) => {
           const Icon = action.icon ?? Trash2;

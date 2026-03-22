@@ -21,9 +21,11 @@ export default function SidebarInsetContent({
   const headerRef = useRef<HTMLElement>(null);
   const tabsWrapperRef = useRef<HTMLDivElement>(null);
   const bottomNavWrapperRef = useRef<HTMLDivElement>(null);
+  const fabWrapperRef = useRef<HTMLDivElement>(null);
   const [topOffset, setTopOffset] = useState(0);
   const [bottomOffset, setBottomOffset] = useState(0);
   const [tabsTop, setTabsTop] = useState(0);
+  const [fabHeight, setFabHeight] = useState(0);
 
   useLayoutEffect(() => {
     if (!isMobile) return;
@@ -45,6 +47,23 @@ export default function SidebarInsetContent({
     return () => ro.disconnect();
   }, [isMobile]);
 
+  useLayoutEffect(() => {
+    if (!action) return;
+    const el = fabWrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setFabHeight(fabWrapperRef.current?.offsetHeight ?? 0);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [action]);
+
+  // Extra bottom padding so content scrolls clear of the FAB.
+  // On mobile the FAB sits 16px above the bottom nav; on desktop it's 16px from the bottom edge.
+  const FAB_GAP = 16;
+  const FAB_MARGIN = 8;
+  const fabClearance = action ? fabHeight + FAB_GAP + FAB_MARGIN : 0;
+
   if (isMobile) {
     return (
       <div className="relative h-full overflow-hidden">
@@ -52,7 +71,7 @@ export default function SidebarInsetContent({
           className="h-full overflow-y-auto px-3"
           style={{
             paddingTop: topOffset + 12,
-            paddingBottom: bottomOffset + 12,
+            paddingBottom: bottomOffset + 12 + fabClearance,
           }}
         >
           {children}
@@ -75,8 +94,9 @@ export default function SidebarInsetContent({
 
         {action && (
           <div
+            ref={fabWrapperRef}
             className="absolute right-4 z-20"
-            style={{ bottom: bottomOffset + 16 }}
+            style={{ bottom: bottomOffset + FAB_GAP }}
           >
             <FAB
               key={action.label}
@@ -102,7 +122,7 @@ export default function SidebarInsetContent({
     <div className="flex h-full flex-col">
       <header
         className={cn(
-          "z-10 flex shrink-0 items-center gap-2 bg-sidebar px-4 text-sidebar-foreground transition-[width,height] duration-200 ease-linear md:h-16 md:rounded-t-lg md:bg-background md:px-6 md:text-foreground group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
+          "z-10 flex shrink-0 items-center gap-2 bg-sidebar px-4 text-sidebar-foreground transition-[width,height] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:h-16 md:rounded-t-lg md:bg-background md:px-6 md:text-foreground",
         )}
       >
         <Breadcrumbs />
@@ -110,21 +130,26 @@ export default function SidebarInsetContent({
 
       <SubsectionTabs />
 
-      <ScrollableContainer className="grow overflow-y-auto p-3 md:px-6 md:py-2">
-        {children}
-      </ScrollableContainer>
+      <div className="relative grow overflow-hidden">
+        <ScrollableContainer
+          className="h-full overflow-y-auto p-3 md:px-6 md:py-2"
+          style={action ? { paddingBottom: fabClearance } : undefined}
+        >
+          {children}
+        </ScrollableContainer>
 
-      {action && (
-        <div className="relative h-0 w-full">
-          <FAB
-            key={action.label}
-            icon={action.icon}
-            onClick={action.onClick ?? undefined}
-            className="absolute right-4 bottom-4 z-20"
-            elevation="high"
-          />
-        </div>
-      )}
+        {action && (
+          <div ref={fabWrapperRef} className="absolute right-4 bottom-4 z-20">
+            <FAB
+              key={action.label}
+              label={action.label}
+              icon={action.icon}
+              onClick={action.onClick ?? undefined}
+              elevation="high"
+            />
+          </div>
+        )}
+      </div>
 
       <BottomNav />
     </div>

@@ -59,7 +59,7 @@ const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
         ref={ref}
         className={cn(
           fabVariants({ variant, size, elevation }),
-          isExtended && "w-auto px-4 gap-2",
+          isExtended && "w-auto gap-2 px-4",
           className,
         )}
         {...props}

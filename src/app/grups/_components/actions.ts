@@ -10,7 +10,6 @@ import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
 import { sendProjectNotification } from "@/server/push";
 import { utapi } from "@/server/uploadthing";
-import { projectSchema } from "./create-project/data";
 
 const editProjectSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),

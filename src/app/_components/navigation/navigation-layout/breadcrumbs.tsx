@@ -72,7 +72,7 @@ function MobileHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex min-w-0 max-w-[40vw] shrink items-center gap-1.5 rounded-lg px-1 py-0.5 transition-colors hover:bg-accent focus:outline-none">
             <ProjectAvatar project={project} className="h-7 w-7 text-xs" />
-            <span className="truncate text-sm text-muted-foreground">
+            <span className="truncate text-muted-foreground text-sm">
               {project.name}
             </span>
             <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
@@ -109,7 +109,7 @@ function MobileHeader() {
         {currentSectionName && (
           <>
             <span className="text-muted-foreground/50">|</span>
-            <span className="text-lg font-semibold leading-tight">
+            <span className="font-semibold text-lg leading-tight">
               {currentSectionName}
             </span>
           </>

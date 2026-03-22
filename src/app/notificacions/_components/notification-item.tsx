@@ -4,7 +4,6 @@ import {
   Calendar,
   FileTextIcon,
   FolderOpen,
-  GiftIcon,
   HandCoins,
   ListTodo,
   Upload,

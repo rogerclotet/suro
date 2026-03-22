@@ -68,7 +68,7 @@ export async function createSpending(
       body: parsedData.description
         ? `Nova despesa: ${parsedData.description} (${parsedData.amount}€)`
         : `Nova despesa: ${parsedData.amount}€`,
-      title: project!.name,
+      title: project?.name,
       path: `/grups/${pot.projectId}/despeses/${potId}`,
       type: "spending_created",
       section: "despeses",

@@ -14,7 +14,7 @@ export default function UsersList({ users }: { users: Project["users"] }) {
         <Tooltip key={user.user.id}>
           <TooltipTrigger>
             <UserAvatar
-              className="border-2 border-background avatar"
+              className="avatar border-2 border-background"
               user={user.user}
             />
           </TooltipTrigger>

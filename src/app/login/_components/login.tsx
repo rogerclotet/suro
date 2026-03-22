@@ -26,18 +26,18 @@ export default function Login({ session }: { session?: Session | null }) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-xs space-y-6">
         {/* Logo + heading */}
-        <div className="text-center space-y-3">
+        <div className="space-y-3 text-center">
           <div className="inline-flex items-center justify-center">
             <Image src="/favicon.png" alt="Logo" width={56} height={56} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="font-semibold text-2xl text-foreground tracking-tight">
               Benvingut/da
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-muted-foreground text-sm">
               Inicia sessió per accedir a la teva família
             </p>
           </div>
@@ -48,10 +48,10 @@ export default function Login({ session }: { session?: Session | null }) {
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-card border border-border rounded-xl text-foreground font-medium text-sm shadow-sm hover:bg-accent hover:text-accent-foreground active:scale-[0.99] transition-all duration-150 cursor-pointer"
+            className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
           >
             <SiGoogle
-              className="w-4 h-4 shrink-0"
+              className="h-4 w-4 shrink-0"
               style={{ color: "#4285F4" }}
             />
             Continua amb Google
@@ -60,11 +60,11 @@ export default function Login({ session }: { session?: Session | null }) {
 
         {/* Divider */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground tracking-wide">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-muted-foreground text-xs tracking-wide">
             o bé
           </span>
-          <div className="flex-1 h-px bg-border" />
+          <div className="h-px flex-1 bg-border" />
         </div>
 
         {/* Secondary: Email magic link */}
@@ -75,13 +75,13 @@ export default function Login({ session }: { session?: Session | null }) {
             type="email"
             placeholder="el-teu@correu.com"
             required
-            className="h-10 rounded-xl bg-card border-border text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
+            className="h-10 rounded-xl border-border bg-card text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
           />
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm text-muted-foreground border border-border bg-card hover:bg-accent hover:text-accent-foreground active:scale-[0.99] transition-all duration-150 cursor-pointer"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-muted-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
           >
-            <Mail className="w-4 h-4 shrink-0" />
+            <Mail className="h-4 w-4 shrink-0" />
             Continua amb correu electrònic
           </button>
         </form>
@@ -90,10 +90,10 @@ export default function Login({ session }: { session?: Session | null }) {
         {loggedInWithResend && (
           <Alert className="rounded-xl border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50">
             <Info className="h-4 w-4 text-blue-500" />
-            <AlertTitle className="text-blue-800 dark:text-blue-300 text-sm font-medium">
+            <AlertTitle className="font-medium text-blue-800 text-sm dark:text-blue-300">
               Correu enviat
             </AlertTitle>
-            <AlertDescription className="text-blue-600 dark:text-blue-400 text-xs leading-relaxed">
+            <AlertDescription className="text-blue-600 text-xs leading-relaxed dark:text-blue-400">
               {
                 "T'hem enviat un email amb un enllaç per iniciar la sessió. Comprova la safata d'entrada."
               }

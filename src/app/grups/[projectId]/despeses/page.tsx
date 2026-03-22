@@ -47,7 +47,7 @@ export default async function DespesesPage({
       <CreatePotButton />
 
       {pots.length === 0 ? (
-        <div className="text-center text-muted-foreground py-12">
+        <div className="py-12 text-center text-muted-foreground">
           <p>No hi ha cap pot.</p>
           <p className="text-sm">
             Crea un pot per començar a compartir despeses.

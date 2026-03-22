@@ -47,7 +47,7 @@ export default function MoreSheet({
             </Link>
           ))}
 
-          <div className="my-1 border-t border-border" />
+          <div className="my-1 border-border border-t" />
 
           <Link
             href="/notificacions"
@@ -60,7 +60,7 @@ export default function MoreSheet({
             </span>
             <span>Notificacions</span>
             {totalUnread > 0 && (
-              <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+              <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
                 {totalUnread}
               </span>
             )}
@@ -75,7 +75,7 @@ export default function MoreSheet({
             <span>Gestionar grups</span>
           </Link>
 
-          <div className="my-1 border-t border-border" />
+          <div className="my-1 border-border border-t" />
 
           <Link
             href="/perfil"
@@ -84,8 +84,8 @@ export default function MoreSheet({
           >
             <UserAvatar user={session?.user ?? {}} className="size-5" />
             <div className="flex flex-col">
-              <span className="text-sm font-medium">{session?.user?.name}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="font-medium text-sm">{session?.user?.name}</span>
+              <span className="text-muted-foreground text-xs">
                 {session?.user?.email}
               </span>
             </div>

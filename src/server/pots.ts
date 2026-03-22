@@ -1,11 +1,11 @@
 "use server";
 
 import assert from "node:assert";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
-import { pots, potToUsers, spendings } from "./db/schema";
+import { pots, spendings } from "./db/schema";
 
 export async function getProjectPots(projectId: string) {
   const session = await auth();

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, isNull, ne, notInArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNull, ne, notInArray } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "./db";
 import {
