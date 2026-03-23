@@ -58,6 +58,28 @@ export async function updateList(
   });
 }
 
+export async function toggleFavorite(list: List) {
+  const session = await requireSession();
+  const serverList = await requireList(list.id);
+
+  await db
+    .update(lists)
+    .set({ favorite: !serverList.favorite })
+    .where(eq(lists.id, serverList.id));
+
+  revalidatePath(`/grups/${serverList.projectId}/llistes`);
+
+  getPostHogServer().capture({
+    distinctId: session.user.id,
+    event: "toggle_favorite_list",
+    properties: {
+      projectId: serverList.projectId,
+      listId: serverList.id,
+      favorite: !serverList.favorite,
+    },
+  });
+}
+
 export async function clearCompletedItems(list: List) {
   const session = await requireSession();
   const serverList = await requireList(list.id);

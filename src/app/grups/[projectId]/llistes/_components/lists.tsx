@@ -37,8 +37,8 @@ export default async function Lists({ projectId }: { projectId: string }) {
       list.items.length > 0 && list.items.every((item) => item.completed),
   );
 
-  incompleteLists.sort(compareLists);
-  completedLists.sort(compareLists);
+  incompleteLists.sort(compareListsWithFavorites);
+  completedLists.sort(compareListsWithFavorites);
 
   return (
     <>
@@ -66,6 +66,12 @@ export default async function Lists({ projectId }: { projectId: string }) {
       <CreateListButton projectId={projectId} />
     </>
   );
+}
+
+function compareListsWithFavorites(a: List, b: List) {
+  if (a.favorite && !b.favorite) return -1;
+  if (!a.favorite && b.favorite) return 1;
+  return compareLists(a, b);
 }
 
 function compareLists(a: List, b: List) {

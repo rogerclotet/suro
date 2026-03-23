@@ -225,6 +225,13 @@
       "when": 1774188143412,
       "tag": "0031_fast_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1774274878233,
+      "tag": "0032_gifted_serpent_society",
+      "breakpoints": true
     }
   ]
 }

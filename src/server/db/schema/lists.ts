@@ -154,6 +154,7 @@ export const lists = createTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
+    favorite: boolean("favorite").default(false).notNull(),
   },
   (l) => ({
     projectIdIdx: index("list_projectId_idx").on(l.projectId),
