@@ -1,4 +1,4 @@
-import { CalendarFold, CheckIcon, StarIcon } from "lucide-react";
+import { CalendarFold, CheckIcon } from "lucide-react";
 import Link from "next/link";
 import type { List } from "@/app/_data/list";
 import { Badge } from "@/components/ui/badge";
@@ -24,12 +24,6 @@ export default function ListPreview({ list }: { list: List }) {
             <CardTitle>{list.name}</CardTitle>
 
             <CardAction className="flex items-center gap-1.5">
-              {list.favorite && (
-                <StarIcon
-                  size={13}
-                  className="fill-yellow-400 text-yellow-400"
-                />
-              )}
               {completed ? (
                 <CheckIcon />
               ) : (

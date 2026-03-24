@@ -1,4 +1,4 @@
-import { InfoIcon, StarIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
@@ -49,9 +49,8 @@ export default async function Lists({ projectId }: { projectId: string }) {
       <div className="space-y-6">
         {favoriteLists.length > 0 && (
           <div className="space-y-4">
-            <h2 className="flex items-center gap-2 font-semibold text-md text-muted-foreground">
-              <StarIcon size={15} className="fill-yellow-400 text-yellow-400" />
-              Preferits
+            <h2 className="font-semibold text-md text-muted-foreground">
+              Preferides
             </h2>
             <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
               {favoriteLists.map((list) => (

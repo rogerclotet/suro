@@ -39,7 +39,7 @@ export default function SettingsMenu({
             size={16}
             className={list.favorite ? "fill-yellow-400 text-yellow-400" : ""}
           />
-          {list.favorite ? "Treure de preferits" : "Afegir a preferits"}
+          {list.favorite ? "Treure de preferides" : "Afegir a preferides"}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
