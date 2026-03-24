@@ -1,14 +1,16 @@
 "use client";
 
-import { Edit, Import, ListX, Settings, Trash2 } from "lucide-react";
+import { Edit, Import, ListX, Settings, Star, Trash2 } from "lucide-react";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toggleFavorite } from "./actions";
 import ClearCompletedModal from "./clear-completed-modal";
 import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
@@ -29,6 +31,19 @@ export default function SettingsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <DropdownMenuItem
+          className="cursor-pointer gap-2"
+          onSelect={() => toggleFavorite(list)}
+        >
+          <Star
+            size={16}
+            className={list.favorite ? "fill-yellow-400 text-yellow-400" : ""}
+          />
+          {list.favorite ? "Treure de preferits" : "Afegir a preferits"}
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
         <ClearCompletedModal
           list={list}
           trigger={

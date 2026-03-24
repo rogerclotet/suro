@@ -1,4 +1,4 @@
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, StarIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
@@ -37,17 +37,37 @@ export default async function Lists({ projectId }: { projectId: string }) {
       list.items.length > 0 && list.items.every((item) => item.completed),
   );
 
-  incompleteLists.sort(compareListsWithFavorites);
-  completedLists.sort(compareListsWithFavorites);
+  const favoriteLists = incompleteLists.filter((list) => list.favorite);
+  const regularLists = incompleteLists.filter((list) => !list.favorite);
+
+  favoriteLists.sort(compareLists);
+  regularLists.sort(compareLists);
+  completedLists.sort(compareLists);
 
   return (
     <>
       <div className="space-y-6">
-        <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
-          {incompleteLists.map((list) => (
-            <ListPreview key={list.id} list={list} />
-          ))}
-        </div>
+        {favoriteLists.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="flex items-center gap-2 font-semibold text-md text-muted-foreground">
+              <StarIcon size={15} className="fill-yellow-400 text-yellow-400" />
+              Preferits
+            </h2>
+            <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
+              {favoriteLists.map((list) => (
+                <ListPreview key={list.id} list={list} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {regularLists.length > 0 && (
+          <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
+            {regularLists.map((list) => (
+              <ListPreview key={list.id} list={list} />
+            ))}
+          </div>
+        )}
 
         {completedLists.length > 0 && (
           <div className="space-y-4">
@@ -66,12 +86,6 @@ export default async function Lists({ projectId }: { projectId: string }) {
       <CreateListButton projectId={projectId} />
     </>
   );
-}
-
-function compareListsWithFavorites(a: List, b: List) {
-  if (a.favorite && !b.favorite) return -1;
-  if (!a.favorite && b.favorite) return 1;
-  return compareLists(a, b);
 }
 
 function compareLists(a: List, b: List) {

@@ -68,6 +68,7 @@ export async function toggleFavorite(list: List) {
     .where(eq(lists.id, serverList.id));
 
   revalidatePath(`/grups/${serverList.projectId}/llistes`);
+  revalidatePath(`/grups/${serverList.projectId}/llistes/${serverList.id}`);
 
   getPostHogServer().capture({
     distinctId: session.user.id,
