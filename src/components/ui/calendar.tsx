@@ -12,6 +12,12 @@ import {
   getDefaultClassNames,
 } from "react-day-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  type AppDateLocale,
+  DEFAULT_DATE_LOCALE,
+  formatLocalizedDateData,
+  formatLocalizedShortMonth,
+} from "@/lib/date-locale";
 import { cn } from "@/lib/utils";
 
 function Calendar({
@@ -22,9 +28,11 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  dateLocale = DEFAULT_DATE_LOCALE,
   ...props
 }: ComponentProps<typeof DayPicker> & {
   buttonVariant?: ComponentProps<typeof Button>["variant"];
+  dateLocale?: AppDateLocale;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -40,7 +48,7 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          formatLocalizedShortMonth(date, dateLocale),
         ...formatters,
       }}
       classNames={{
@@ -187,7 +195,9 @@ function Calendar({
             <ChevronDownIcon className={cn("size-6", className)} {...props} />
           );
         },
-        DayButton: CalendarDayButton,
+        DayButton: (dayButtonProps) => (
+          <CalendarDayButton {...dayButtonProps} dateLocale={dateLocale} />
+        ),
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -208,8 +218,11 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
+  dateLocale = DEFAULT_DATE_LOCALE,
   ...props
-}: ComponentProps<typeof DayButton>) {
+}: ComponentProps<typeof DayButton> & {
+  dateLocale?: AppDateLocale;
+}) {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = useRef<HTMLButtonElement>(null);
@@ -222,7 +235,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={formatLocalizedDateData(day.date, dateLocale)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

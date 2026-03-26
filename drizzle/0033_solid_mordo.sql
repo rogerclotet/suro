@@ -1,0 +1,1 @@
+ALTER TABLE "f_user" ADD COLUMN "dateLocale" varchar(10) DEFAULT 'ca-ES';

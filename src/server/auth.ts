@@ -13,6 +13,7 @@ declare module "next-auth" {
       id: string;
       customImage?: string | null;
       avatarColor?: string | null;
+      dateLocale?: string | null;
     } & DefaultSession["user"];
   }
 }

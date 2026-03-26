@@ -28,6 +28,8 @@ export default {
         .customImage as string | null;
       session.user.avatarColor = (user as unknown as Record<string, unknown>)
         .avatarColor as string | null;
+      session.user.dateLocale = (user as unknown as Record<string, unknown>)
+        .dateLocale as string | null;
       return session;
     },
   },

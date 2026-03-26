@@ -22,6 +22,7 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
   customImage: varchar("customImage", { length: 512 }),
   avatarColor: varchar("avatarColor", { length: 20 }),
+  dateLocale: varchar("dateLocale", { length: 10 }).default("ca-ES"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

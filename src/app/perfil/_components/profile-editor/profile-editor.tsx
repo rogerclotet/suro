@@ -15,12 +15,27 @@ import ImageUpload, {
   Undo2,
 } from "@/components/image-upload";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
 import UserAvatar from "@/components/user-avatar";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
+import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
 import { editProfile, removeProfileImage, resetProfileImage } from "./actions";
 import { profileSchema } from "./data";
 
@@ -31,6 +46,7 @@ interface ProfileUser {
   image: string | null;
   customImage: string | null;
   avatarColor: string | null;
+  dateLocale: string | null;
 }
 
 export default function ProfileEditor({ user }: { user: ProfileUser }) {
@@ -38,6 +54,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
     defaultValues: {
       name: user.name ?? "",
       avatarColor: user.avatarColor,
+      dateLocale: normalizeDateLocale(user.dateLocale),
     },
     resolver: valibotResolver(profileSchema),
   });
@@ -72,7 +89,11 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
   async function onSubmit(data: v.InferInput<typeof profileSchema>) {
     try {
       await editProfile(data);
-      form.reset({ name: data.name, avatarColor: data.avatarColor });
+      form.reset({
+        name: data.name,
+        avatarColor: data.avatarColor,
+        dateLocale: data.dateLocale,
+      });
       toast.success("S'ha desat el perfil");
     } catch (e) {
       posthog.captureException(e, {
@@ -169,6 +190,34 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
                 <Label className="text-muted-foreground text-sm italic">
                   El color de fons es mostra quan no hi ha imatge de perfil
                 </Label>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dateLocale"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Format de data</Label>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un format" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {DATE_LOCALE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Aquest format es fa servir per mostrar dates al calendari.
+                </FormDescription>
+                <FormMessage />
               </FormItem>
             )}
           />

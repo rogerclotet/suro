@@ -20,7 +20,11 @@ export async function editProfile(data: v.InferInput<typeof profileSchema>) {
 
   await db
     .update(users)
-    .set({ name: parsedData.name, avatarColor: parsedData.avatarColor ?? null })
+    .set({
+      name: parsedData.name,
+      avatarColor: parsedData.avatarColor ?? null,
+      dateLocale: parsedData.dateLocale,
+    })
     .where(eq(users.id, session.user.id));
 
   revalidatePath("/");

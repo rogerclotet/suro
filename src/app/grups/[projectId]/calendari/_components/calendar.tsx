@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ca } from "date-fns/locale";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ComponentProps, useMemo, useState } from "react";
@@ -14,6 +13,12 @@ import {
   Calendar as CalendarComponent,
   CalendarDayButton,
 } from "@/components/ui/calendar";
+import {
+  type AppDateLocale,
+  formatLocalizedLongDate,
+  getDateFnsLocale,
+  parseDateOnly,
+} from "@/lib/date-locale";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
@@ -54,18 +59,22 @@ function Events({
   );
 }
 
-export default function Calendar() {
+export default function Calendar({
+  dateLocale,
+}: {
+  dateLocale: AppDateLocale;
+}) {
   const searchParams = useSearchParams();
   const day = searchParams.get("d");
 
   const today = useMemo(() => {
-    const today = day ? new Date(day) : new Date();
+    const today = day ? parseDateOnly(day) : new Date();
     today.setHours(0, 0, 0, 0);
     return today;
   }, [day]);
 
   const monthStart = useMemo(() => {
-    const date = day ? new Date(day) : new Date();
+    const date = day ? parseDateOnly(day) : new Date();
     date.setHours(0, 0, 0, 0);
     date.setDate(1);
     return date;
@@ -118,6 +127,7 @@ export default function Calendar() {
           className="text-sm"
           day={day}
           modifiers={modifiers}
+          dateLocale={dateLocale}
           {...props}
         />
 
@@ -199,7 +209,8 @@ export default function Calendar() {
             selected={date}
             onSelect={handleDaySelect}
             onMonthChange={setCurrentMonth}
-            locale={ca}
+            locale={getDateFnsLocale(dateLocale)}
+            dateLocale={dateLocale}
             className="mx-auto"
             classNames={{
               caption_label: "text-md",
@@ -222,9 +233,7 @@ export default function Calendar() {
         {date && (
           <div className="grow">
             <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 font-semibold text-xl">
-              {date.toLocaleString("ca-ES", {
-                dateStyle: "long",
-              })}
+              {formatLocalizedLongDate(date, dateLocale)}
 
               <CreateEventButton
                 defaultDate={date}

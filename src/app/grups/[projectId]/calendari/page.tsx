@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { normalizeDateLocale, parseDateOnly } from "@/lib/date-locale";
 import { getEvents } from "@/server/events";
 import Calendar from "./_components/calendar";
 import getMonthString from "./_components/event/get-month-string";
@@ -26,13 +27,13 @@ export default async function CalendarPage({
   }
 
   if (day) {
-    const date = new Date(day);
+    const date = parseDateOnly(day);
     if (Number.isNaN(date.getTime())) {
       redirect(`/grups/${projectId}/calendari`);
     }
   }
 
-  const monthStart = day ? new Date(day) : new Date();
+  const monthStart = day ? parseDateOnly(day) : new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
@@ -52,7 +53,7 @@ export default async function CalendarPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Calendar />
+      <Calendar dateLocale={normalizeDateLocale(session.user.dateLocale)} />
     </HydrationBoundary>
   );
 }
