@@ -20,6 +20,15 @@ type Props = HTMLAttributes<HTMLDivElement> & {
 };
 
 export function DatePicker({ dates, onDatesChange, className }: Props) {
+  function handleSelect(range: DateRange | undefined) {
+    if (range?.from && !range.to) {
+      // Single click: normalize to same-day range immediately
+      onDatesChange({ from: range.from, to: range.from });
+    } else {
+      onDatesChange(range);
+    }
+  }
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -51,9 +60,10 @@ export function DatePicker({ dates, onDatesChange, className }: Props) {
           <Calendar
             autoFocus
             mode="range"
+            min={1}
             defaultMonth={dates?.from}
             selected={dates}
-            onSelect={onDatesChange}
+            onSelect={handleSelect}
             locale={ca}
           />
         </PopoverContent>

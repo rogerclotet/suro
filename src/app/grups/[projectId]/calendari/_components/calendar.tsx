@@ -81,8 +81,8 @@ export default function Calendar() {
   const router = useRouter();
 
   const currentEvents = useMemo(
-    () => events?.filter((event) => isCurrentDayEvent(event, today)),
-    [events, today],
+    () => events?.filter((event) => isCurrentDayEvent(event, date)),
+    [events, date],
   );
 
   const eventColors = useMemo(() => {

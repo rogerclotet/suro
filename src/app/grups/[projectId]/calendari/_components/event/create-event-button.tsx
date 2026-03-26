@@ -1,39 +1,23 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import type { CheckedState } from "@radix-ui/react-checkbox";
 import { PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import {
-  type ChangeEvent,
-  type FormEvent,
-  useCallback,
-  useEffect,
-} from "react";
-import type { DateRange } from "react-day-picker";
+import { type FormEvent, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
-import { DatePicker } from "@/components/ui/date-picker";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { Switch } from "@/components/ui/switch";
-import { getTimeString } from "../../get-time-string";
 import { createEvent } from "./actions";
 import { eventSchema } from "./data";
+import EventFormFields from "./event-form-fields";
+import { useEventDates } from "./use-event-dates";
 
 export default function CreateEventButton({
   defaultDate,
@@ -54,89 +38,19 @@ export default function CreateEventButton({
     resolver: valibotResolver(eventSchema),
   });
 
-  const selectDefaultTime = useCallback(
-    (fromDate: Date, toDate: Date, allDay?: boolean) => {
-      const defaultStartAt = new Date(fromDate.getTime());
-      const defaultEndAt = new Date(toDate.getTime());
-
-      if (allDay) {
-        defaultStartAt.setHours(0, 0, 0, 0);
-        defaultEndAt.setHours(0, 0, 0, 0);
-      } else {
-        const now = new Date();
-        defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
-        defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
-      }
-
-      form.setValue("dates", {
-        from: defaultStartAt,
-        to: defaultEndAt,
-      });
-    },
-    [form],
-  );
+  const {
+    handleDatesChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+    handleAllDayChange,
+  } = useEventDates({ form, preserveTimes: false });
 
   useEffect(() => {
-    selectDefaultTime(defaultDate, defaultDate, true);
-  }, [defaultDate, selectDefaultTime]);
-
-  function handleDatesChange(dates: DateRange | undefined) {
-    const from = dates?.from ?? new Date();
-    const to = dates?.to ?? from;
-
-    selectDefaultTime(from, to, form.getValues("allDay"));
-  }
-
-  function handleStartTimeChange(e: ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    const [hour, minute] = value.split(":");
-    const newDates = form.getValues("dates");
-    if (!newDates.from || !hour || !minute) {
-      return;
-    }
-
-    newDates.from.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    if (!newDates.to || newDates.from > newDates.to) {
-      newDates.to?.setHours(
-        newDates.from.getHours() + 1,
-        newDates.from.getMinutes(),
-      );
-    }
-
-    form.setValue("dates", newDates);
-  }
-
-  function handleEndTimeChange(e: ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    const [hour, minute] = value.split(":");
-    const newDates = form.getValues("dates");
-    if (!newDates.to || !hour || !minute) {
-      return;
-    }
-
-    newDates.to.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    if (!newDates.from || newDates.from > newDates.to) {
-      newDates.from?.setHours(
-        newDates.to.getHours() - 1,
-        newDates.to.getMinutes(),
-      );
-    }
-
-    form.setValue("dates", newDates);
-  }
-
-  function handleAllDayChange(checked: CheckedState) {
-    if (checked === "indeterminate") {
-      return;
-    }
-
-    const newDates = form.getValues("dates");
-    const fromDate = newDates.from ?? newDates.to ?? new Date();
-    const toDate = newDates.to ?? newDates.from ?? new Date();
-    selectDefaultTime(fromDate, toDate, checked);
-
-    form.setValue("allDay", checked);
-  }
+    const date = new Date(defaultDate.getTime());
+    date.setHours(0, 0, 0, 0);
+    form.setValue("dates", { from: date, to: date });
+    form.setValue("allDay", true);
+  }, [defaultDate, form]);
 
   return (
     <ModalForm
@@ -172,10 +86,16 @@ function CreateEventFormContent({
   project: Project | null;
   onCreate: (from: Date | undefined, to: Date | undefined) => void;
   sessionId?: string;
-  handleDatesChange: (dates: DateRange | undefined) => void;
-  handleStartTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleEndTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleAllDayChange: (checked: CheckedState) => void;
+  handleDatesChange: Parameters<typeof EventFormFields>[0]["handleDatesChange"];
+  handleStartTimeChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleStartTimeChange"];
+  handleEndTimeChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleEndTimeChange"];
+  handleAllDayChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleAllDayChange"];
 }) {
   const { close } = useModalForm();
 
@@ -235,93 +155,12 @@ function CreateEventFormContent({
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripció</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dates"
-          render={({ field }) => (
-            <div className="flex flex-row flex-wrap gap-2">
-              <FormItem className="grow">
-                <FormLabel>Dates</FormLabel>
-                <DatePicker
-                  dates={field.value as DateRange}
-                  onDatesChange={handleDatesChange}
-                />
-              </FormItem>
-              <div className="flex grow flex-row gap-2">
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora inici</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.from)
-                    }
-                    onChange={handleStartTimeChange}
-                    className="justify-center"
-                  />
-                </FormItem>
-                <FormItem className="w-auto grow">
-                  <FormLabel>Hora final</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.to)
-                    }
-                    onChange={handleEndTimeChange}
-                    className="justify-center"
-                  />
-                </FormItem>
-              </div>
-            </div>
-          )}
-        />
-
-        <FormField
-          name="allDay"
-          render={({ field }) => (
-            <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
-              <FormControl>
-                <Switch
-                  checked={field.value as boolean}
-                  onCheckedChange={handleAllDayChange}
-                />
-              </FormControl>
-              <FormLabel>Tot el dia</FormLabel>
-            </FormItem>
-          )}
+        <EventFormFields
+          form={form}
+          handleDatesChange={handleDatesChange}
+          handleStartTimeChange={handleStartTimeChange}
+          handleEndTimeChange={handleEndTimeChange}
+          handleAllDayChange={handleAllDayChange}
         />
 
         <SubmitButton
