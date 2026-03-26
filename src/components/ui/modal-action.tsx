@@ -21,6 +21,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  getDialogTransformOriginStyle,
+  TriggerOriginSlot,
+} from "@/components/ui/trigger-origin";
 import { cn } from "@/lib/utils";
 import { ClientOnly } from "../client-only";
 import { Button, buttonVariants } from "./button";
@@ -53,13 +57,23 @@ function ClientModalAction({
   trigger,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [triggerOrigin, setTriggerOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
 
   if (isMdOrLarger) {
     return (
       <AlertDialog>
-        <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogTrigger asChild>
+          <TriggerOriginSlot onOriginChange={setTriggerOrigin}>
+            {trigger}
+          </TriggerOriginSlot>
+        </AlertDialogTrigger>
+        <AlertDialogContent
+          style={getDialogTransformOriginStyle(triggerOrigin)}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="wrap-anywhere text-wrap">
               {title}

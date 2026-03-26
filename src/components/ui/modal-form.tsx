@@ -21,6 +21,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  getDialogTransformOriginStyle,
+  TriggerOriginSlot,
+} from "@/components/ui/trigger-origin";
 import { ClientOnly } from "../client-only";
 
 type ModalFormContextType = {
@@ -54,6 +58,10 @@ export default function ModalForm(props: Props) {
 
 function ClientModalForm({ trigger, title, description, children }: Props) {
   const [open, setOpen] = useState(false);
+  const [triggerOrigin, setTriggerOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
 
   const close = () => setOpen(false);
@@ -61,8 +69,15 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
   if (isMdOrLarger) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogTrigger asChild>
+          <TriggerOriginSlot onOriginChange={setTriggerOrigin}>
+            {trigger}
+          </TriggerOriginSlot>
+        </DialogTrigger>
+        <DialogContent
+          className="sm:max-w-[425px]"
+          style={getDialogTransformOriginStyle(triggerOrigin)}
+        >
           <DialogHeader>
             <DialogTitle className="wrap-anywhere text-wrap">
               {title}
