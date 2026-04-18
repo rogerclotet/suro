@@ -51,18 +51,18 @@ async function subscribe(
 ): Promise<void> {
   try {
     const registration = await navigator.serviceWorker.ready;
-    const currentSubsctiption =
+    const existingSubscription =
       await registration.pushManager.getSubscription();
-    if (currentSubsctiption) {
-      onSubscribe(currentSubsctiption);
-      return;
-    }
 
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    });
-    // submit subscription to server
+    const subscription =
+      existingSubscription ??
+      (await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      }));
+
+    // Always submit to server to ensure the subscription is stored,
+    // even if the browser already has one (e.g. after a DB reset).
     await submitSubscription(subscription);
     onSubscribe(subscription);
   } catch (err) {
@@ -83,6 +83,7 @@ export async function checkPermissionStateAndAct(
       await registerAndSubscribe(onSubscribe);
       break;
     case "prompt":
+      await registerAndSubscribe(onSubscribe);
       break;
   }
 }
