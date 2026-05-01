@@ -354,6 +354,15 @@ function createListFromOffline(offlineList: OfflineList): List {
   };
 }
 
+// JSON.parse turns Date fields into strings; server components give Date objects.
+// This handles both so seedFromServer/updateLocalFromServer work in either case.
+function toTimestamp(value: Date | string | number | null | undefined): number {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return new Date(value).getTime();
+  return Date.now();
+}
+
 // Returns the set of entity IDs that have a genuine pending queue entry.
 // Items marked "pending" in IDB but absent from the queue are orphans —
 // their queue entry was removed (sync success or max retries) without the
@@ -423,9 +432,9 @@ async function seedFromServer(serverList: List): Promise<void> {
       listId: item.listId,
       categoryId: item.categoryId,
       categoryName: item.category?.name ?? null,
-      createdAt: item.createdAt?.getTime() ?? Date.now(),
+      createdAt: toTimestamp(item.createdAt),
       createdBy: item.createdBy,
-      updatedAt: item.updatedAt?.getTime() ?? Date.now(),
+      updatedAt: toTimestamp(item.updatedAt),
       updatedBy: item.updatedBy,
       _syncStatus: "synced",
       _localVersion: 1,
@@ -450,9 +459,9 @@ async function updateLocalFromServer(serverList: List): Promise<void> {
       projectId: serverList.projectId,
       eventId: serverList.eventId,
       favorite: serverList.favorite,
-      createdAt: serverList.createdAt?.getTime() ?? Date.now(),
+      createdAt: toTimestamp(serverList.createdAt),
       createdBy: serverList.createdBy,
-      updatedAt: serverList.updatedAt?.getTime() ?? Date.now(),
+      updatedAt: toTimestamp(serverList.updatedAt),
       updatedBy: serverList.updatedBy,
       _syncStatus: "synced",
       _localVersion: 1,
@@ -480,9 +489,9 @@ async function updateLocalFromServer(serverList: List): Promise<void> {
       listId: item.listId,
       categoryId: item.categoryId,
       categoryName: item.category?.name ?? null,
-      createdAt: item.createdAt?.getTime() ?? Date.now(),
+      createdAt: toTimestamp(item.createdAt),
       createdBy: item.createdBy,
-      updatedAt: item.updatedAt?.getTime() ?? Date.now(),
+      updatedAt: toTimestamp(item.updatedAt),
       updatedBy: item.updatedBy,
       _syncStatus: "synced",
       _localVersion: 1,
