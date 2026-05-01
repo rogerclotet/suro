@@ -46,7 +46,7 @@ export default async function PotPage({
             members={potMembers}
             potId={potId}
           />
-          <CreateSpendingButton members={potMembers} potId={potId} />
+          <CreateSpendingButton members={potMembers} pot={pot} />
         </div>
       </div>
 

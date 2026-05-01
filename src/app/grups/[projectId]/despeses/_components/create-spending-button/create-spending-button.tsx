@@ -7,6 +7,7 @@ import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
+import type { Pot } from "@/app/_data/pot";
 import Action from "@/components/action";
 import {
   Form,
@@ -26,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
-import { createSpending } from "./actions";
+import { createSpendingOffline } from "@/lib/offline/offline-spendings";
 import { spendingSchema } from "./data";
 
 type Member = {
@@ -35,10 +36,10 @@ type Member = {
 
 export default function CreateSpendingButton({
   members,
-  potId,
+  pot,
 }: {
   members: Member[];
-  potId: string;
+  pot: Pot;
 }) {
   const { data: session } = useSession();
   const form = useForm<v.InferInput<typeof spendingSchema>>({
@@ -60,7 +61,7 @@ export default function CreateSpendingButton({
       <CreateSpendingFormContent
         form={form}
         members={members}
-        potId={potId}
+        pot={pot}
         sessionId={session?.user.id}
       />
     </ModalForm>
@@ -70,19 +71,24 @@ export default function CreateSpendingButton({
 function CreateSpendingFormContent({
   form,
   members,
-  potId,
+  pot,
   sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof spendingSchema>>>;
   members: Member[];
-  potId: string;
+  pot: Pot;
   sessionId?: string;
 }) {
   const { close } = useModalForm();
 
   async function onSubmit(data: v.InferInput<typeof spendingSchema>) {
     try {
-      await createSpending(potId, data);
+      await createSpendingOffline(pot, {
+        amount: Number(data.amount),
+        description: data.description,
+        from: data.from,
+        to: data.to ?? "",
+      });
       form.reset();
       toast.success("Despesa creada");
       close();
@@ -90,7 +96,7 @@ function CreateSpendingFormContent({
       posthog.captureException(e, {
         distinctId: sessionId,
         action: "create_spending",
-        potId,
+        potId: pot.id,
       });
       toast.error("No s'ha pogut crear la despesa, torna-ho a provar més tard");
     }

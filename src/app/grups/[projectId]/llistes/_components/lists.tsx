@@ -100,8 +100,9 @@ function compareLists(a: List, b: List) {
     0,
   );
 
-  return (
+  const diff =
     Math.max(updatedAtB, itemsUpdatedAtB) -
-    Math.max(updatedAtA, itemsUpdatedAtA)
-  );
+    Math.max(updatedAtA, itemsUpdatedAtA);
+
+  return diff !== 0 ? diff : a.name.localeCompare(b.name);
 }

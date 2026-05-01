@@ -27,8 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { createListItemOffline } from "@/lib/offline/offline-actions";
 import NewCategoryModal from "../categories/new-category-modal";
-import { createListItem } from "./actions";
 import { listItemSchema } from "./data";
 
 export default function NewListItem({ list }: { list: List }) {
@@ -64,7 +64,10 @@ export default function NewListItem({ list }: { list: List }) {
     }
 
     try {
-      await createListItem(list, data);
+      const categoryName = project?.categories.find(
+        (c) => c.id === data.categoryId,
+      )?.name;
+      await createListItemOffline(list, data, categoryName);
       form.reset({
         name: "",
         completed: false,
@@ -72,6 +75,7 @@ export default function NewListItem({ list }: { list: List }) {
       });
       setSubmitCount((c) => c + 1);
     } catch (e) {
+      console.error("[new-list-item] createListItemOffline failed:", e);
       posthog.captureException(e, {
         distinctId: session?.user.id,
         action: "create_list_item",

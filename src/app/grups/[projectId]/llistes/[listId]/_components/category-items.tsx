@@ -1,12 +1,27 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { CSSProperties } from "react";
+import { autoAnimate } from "@formkit/auto-animate";
+import { type CSSProperties, memo, useCallback, useRef } from "react";
 import type { List } from "@/app/_data/list";
 import ListItem from "./list-item/list-item";
 
-export default function CategoryItems(props: {
+// useAutoAnimate fires the callback ref twice in React Strict Mode (dev), creating
+// duplicate MutationObservers that cancel each other's FLIP animations. This hook
+// prevents double-initialization by tracking the controller and calling destroy() on cleanup.
+function useStableAutoAnimate() {
+  const controllerRef = useRef<{ destroy?: () => void } | null>(null);
+  return useCallback((node: HTMLUListElement | null) => {
+    if (node && !controllerRef.current) {
+      controllerRef.current = autoAnimate(node) as { destroy?: () => void };
+    } else if (!node && controllerRef.current) {
+      controllerRef.current?.destroy?.();
+      controllerRef.current = null;
+    }
+  }, []);
+}
+
+export default memo(function CategoryItems(props: {
   items: List["items"];
   category: string;
   list: List;
@@ -20,7 +35,7 @@ export default function CategoryItems(props: {
   ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
 }) {
-  const [animationParent] = useAutoAnimate();
+  const animationParent = useStableAutoAnimate();
   const { isOver, setNodeRef } = useDroppable({
     id: props.category === "" ? "droppable" : `droppable-${props.category}`,
     data: { category: props.category },
@@ -58,4 +73,4 @@ export default function CategoryItems(props: {
       </ul>
     </div>
   );
-}
+});

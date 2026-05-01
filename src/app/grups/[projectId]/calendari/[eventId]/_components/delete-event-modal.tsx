@@ -6,7 +6,7 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import ModalAction from "@/components/ui/modal-action";
-import { deleteEvent } from "../actions";
+import { deleteEventOffline } from "@/lib/offline/offline-events";
 
 export default function DeleteEventModal({
   event,
@@ -20,7 +20,7 @@ export default function DeleteEventModal({
 
   async function handleDelete() {
     try {
-      await deleteEvent(event);
+      await deleteEventOffline(event);
       router.push(`/grups/${event.projectId}/calendari`);
       toast.success(`Esdeveniment ${event.name} eliminat`);
     } catch (e) {

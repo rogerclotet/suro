@@ -4,7 +4,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
-import { type FormEvent, useCallback, useEffect } from "react";
+import { type FormEvent, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -76,16 +76,6 @@ function EditListItemFormContent(props: {
   const { data: session } = useSession();
   const { project } = useProjects();
   const { close } = useModalForm();
-
-  useEffect(() => {
-    // Update the form values when the item changes
-    form.reset({
-      name: item.name,
-      details: item.details ?? "",
-      completed: item.completed ?? false,
-      categoryId: item.categoryId ?? "",
-    });
-  }, [form, item]);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof listItemSchema>) => {

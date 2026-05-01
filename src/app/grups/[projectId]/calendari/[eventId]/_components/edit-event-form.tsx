@@ -26,9 +26,9 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
+import { updateEventOffline } from "@/lib/offline/offline-events";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
-import { editEvent } from "../actions";
 
 export default function EditEventForm({
   event,
@@ -201,7 +201,19 @@ function EditEventFormContent({
       }
 
       try {
-        await editEvent(event, dataToEdit, project);
+        await updateEventOffline(
+          event,
+          {
+            name: dataToEdit.name,
+            description: dataToEdit.description,
+            dates: {
+              from: dataToEdit.dates.from!,
+              to: dataToEdit.dates.to!,
+            },
+            allDay: dataToEdit.allDay,
+          },
+          project,
+        );
         toast.success("Editat correctament");
         form.reset({
           name: data.name,

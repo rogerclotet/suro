@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useAction } from "@/app/_state/action-state";
 import { FAB } from "@/components/ui/fab";
+import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import BottomNav from "./bottom-nav";
@@ -126,6 +127,9 @@ export default function SidebarInsetContent({
         )}
       >
         <Breadcrumbs />
+        <div className="ml-auto">
+          <OfflineIndicator />
+        </div>
       </header>
 
       <SubsectionTabs />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMediaQuery } from "@uidotdev/usehooks";
+import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +25,6 @@ import {
   getDialogTransformOriginStyle,
   TriggerOriginSlot,
 } from "@/components/ui/trigger-origin";
-import { ClientOnly } from "../client-only";
 
 type ModalFormContextType = {
   close: () => void;
@@ -48,12 +47,17 @@ type Props = {
   children: ReactNode;
 };
 
+// Render the trigger immediately so item text is visible during SSR and before
+// hydration. Only gate the dialog/drawer itself on client readiness, since it
+// depends on useMediaQuery which requires a DOM environment.
 export default function ModalForm(props: Props) {
-  return (
-    <ClientOnly>
-      <ClientModalForm {...props} />
-    </ClientOnly>
-  );
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return <>{props.trigger}</>;
+  }
+
+  return <ClientModalForm {...props} />;
 }
 
 function ClientModalForm({ trigger, title, description, children }: Props) {

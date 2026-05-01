@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { createPot } from "./actions";
+import { createPotOffline } from "@/lib/offline/offline-spendings";
 import { potSchema } from "./data";
 
 export default function CreatePotButton() {
@@ -70,11 +70,16 @@ function CreatePotFormContent({
 
   async function onSubmit(data: v.InferInput<typeof potSchema>) {
     try {
-      const potId = await createPot(project.id, data);
+      const potId = await createPotOffline(project.id, {
+        name: data.name,
+        memberIds: data.memberIds,
+      });
       form.reset();
       toast.success("Pot creat");
       close();
-      router.push(`/grups/${project.id}/despeses/${potId}`);
+      if (potId) {
+        router.push(`/grups/${project.id}/despeses/${potId}`);
+      }
     } catch (e) {
       posthog.captureException(e, {
         distinctId: sessionId,

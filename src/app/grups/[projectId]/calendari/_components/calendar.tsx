@@ -3,7 +3,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ComponentProps, useMemo, useState } from "react";
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
@@ -19,13 +25,69 @@ import {
   getDateFnsLocale,
   parseDateOnly,
 } from "@/lib/date-locale";
+import { db } from "@/lib/offline/db";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import getMonthString from "./event/get-month-string";
+import { getMonthEnd } from "./event/month-range";
 import { eventsQueryOptions } from "./event/query";
 
 const EVENT_COLORS = 5;
+
+// Returns locally-created events that are still pending sync for the given month.
+function useOfflineEvents(
+  monthStart: Date,
+  projectId: string | undefined,
+): Event[] {
+  const [offlineEvents, setOfflineEvents] = useState<Event[]>([]);
+
+  const load = useCallback(() => {
+    if (!projectId) return;
+    const monthEnd = getMonthEnd(monthStart);
+    db.events
+      .where("projectId")
+      .equals(projectId)
+      .filter(
+        (e) =>
+          e._syncStatus === "pending" &&
+          !e._deleted &&
+          e.startAt < monthEnd.getTime() &&
+          e.endAt > monthStart.getTime(),
+      )
+      .toArray()
+      .then((items) => {
+        setOfflineEvents(
+          items.map(
+            (e) =>
+              ({
+                id: e.id,
+                name: e.name,
+                description: e.description,
+                startAt: new Date(e.startAt),
+                endAt: new Date(e.endAt),
+                allDay: e.allDay,
+                projectId: e.projectId,
+                createdAt: new Date(e.createdAt),
+                createdBy: e.createdBy,
+                updatedAt: new Date(e.updatedAt),
+                updatedBy: e.updatedBy,
+                files: [],
+              }) as unknown as Event,
+          ),
+        );
+      })
+      .catch(() => {});
+  }, [monthStart, projectId]);
+
+  useEffect(() => {
+    load();
+    window.addEventListener("sync-completed", load);
+    return () => window.removeEventListener("sync-completed", load);
+  }, [load]);
+
+  return offlineEvents;
+}
 
 function Events({
   isLoading,
@@ -83,11 +145,22 @@ export default function Calendar({
   const [date, setDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(monthStart);
   const { project } = useProjects();
-  const { data: events, isLoading } = useQuery(
+  const { data: serverEvents, isLoading } = useQuery(
     eventsQueryOptions(currentMonth, project?.id),
   );
+  const offlineEvents = useOfflineEvents(currentMonth, project?.id);
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  // Merge server events with locally-pending offline events.
+  const events = useMemo<Event[] | undefined>(() => {
+    if (!serverEvents && offlineEvents.length === 0) return serverEvents;
+    const serverIds = new Set(serverEvents?.map((e) => e.id) ?? []);
+    return [
+      ...(serverEvents ?? []),
+      ...offlineEvents.filter((e) => !serverIds.has(e.id)),
+    ];
+  }, [serverEvents, offlineEvents]);
 
   const currentEvents = useMemo(
     () => events?.filter((event) => isCurrentDayEvent(event, date)),
@@ -241,7 +314,10 @@ export default function Calendar({
               />
             </h2>
 
-            <Events isLoading={isLoading} currentEvents={currentEvents} />
+            <Events
+              isLoading={isLoading && !events}
+              currentEvents={currentEvents}
+            />
           </div>
         )}
       </div>

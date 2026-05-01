@@ -45,7 +45,13 @@ export default function ListItem(props: {
         isDragging && "z-50",
       )}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        const tag = (e.target as HTMLElement).tagName;
+        if (
+          (e.key === "Enter" || e.key === " ") &&
+          tag !== "INPUT" &&
+          tag !== "TEXTAREA" &&
+          tag !== "SELECT"
+        ) {
           e.preventDefault();
         }
       }}

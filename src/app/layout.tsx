@@ -1,4 +1,6 @@
 import { auth } from "@/auth";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { ConflictModal } from "@/components/ui/conflict-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import ReactQueryProvider from "@/providers/react-query-provider";
@@ -52,6 +54,7 @@ export default async function RootLayout({
   return (
     <html lang="ca" suppressHydrationWarning>
       <body>
+        <ServiceWorkerRegister />
         <NextSSRPlugin
           /**
            * The `extractRouterConfig` will extract **only** the route configs
@@ -73,6 +76,7 @@ export default async function RootLayout({
                     <NotificationProvider />
                     {children}
                     <Toaster position="bottom-center" />
+                    <ConflictModal />
                   </ProjectsProvider>
                 </TooltipProvider>
               </SidebarLayout>

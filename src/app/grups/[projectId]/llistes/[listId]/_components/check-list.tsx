@@ -11,13 +11,17 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
+import {
+  deleteListItemOffline,
+  updateListItemOffline,
+} from "@/lib/offline/offline-actions";
+import { useOfflineList } from "@/lib/offline/use-offline-list";
 import CategoryItems from "./category-items";
-import { deleteListItem, updateListItem } from "./list-item/actions";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
@@ -29,63 +33,92 @@ export default function CheckList(props: { list: List }) {
   const keyboardSensor = useSensor(KeyboardSensor);
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
+  // Use offline-first data
+  const { list: offlineList } = useOfflineList(props.list, props.list.id);
+
   // Track optimistic updates: itemId -> updated item data
   const [optimisticUpdates, setOptimisticUpdates] = useState<
     Map<string, Partial<ListItem>>
   >(new Map());
 
+  // Use offline list as base, with optimistic overlay
+  const baseList = offlineList ?? props.list;
+
   const list = useMemo(() => {
     if (optimisticUpdates.size === 0) {
-      return props.list;
+      return baseList;
     }
     return {
-      ...props.list,
-      items: props.list.items.map((item) => {
+      ...baseList,
+      items: baseList.items.map((item) => {
         const update = optimisticUpdates.get(item.id);
         return update ? { ...item, ...update } : item;
       }),
     };
-  }, [props.list, optimisticUpdates]);
+  }, [baseList, optimisticUpdates]);
+
+  // Keep refs to latest values so stable callbacks can always read current state
+  const listRef = useRef(list);
+  const projectRef = useRef(project);
+  // eslint-disable-next-line react-hooks/refs
+  listRef.current = list;
+  // eslint-disable-next-line react-hooks/refs
+  projectRef.current = project;
 
   const itemsByCategory = useMemo(
     () => groupItemsByCategory(list.items, project),
     [list.items, project],
   );
 
-  async function handleChange(
-    item: List["items"][number],
-    name: string,
-    details: string,
-    completed: boolean,
-    categoryId: string | null,
-  ) {
-    if (name === "") {
-      return;
-    }
+  const handleChange = useCallback(
+    async (
+      item: List["items"][number],
+      name: string,
+      details: string,
+      completed: boolean,
+      categoryId: string | null,
+    ) => {
+      if (name === "") {
+        return;
+      }
 
-    setOptimisticUpdates((prev) => {
-      const next = new Map(prev);
-      next.set(item.id, { name, details, completed, categoryId });
-      return next;
-    });
+      const category = projectRef.current?.categories.find(
+        (c) => c.id === categoryId,
+      );
 
-    try {
-      await updateListItem(list, item.id, name, details, completed, categoryId);
-    } catch (e) {
       setOptimisticUpdates((prev) => {
         const next = new Map(prev);
-        next.delete(item.id);
+        next.set(item.id, { name, details, completed, categoryId, category });
         return next;
       });
-      throw e;
-    }
-  }
 
-  async function handleDelete(item: List["items"][number]) {
-    await deleteListItem(list, item.id);
-  }
+      try {
+        await updateListItemOffline(
+          listRef.current,
+          item.id,
+          name,
+          details,
+          completed,
+          categoryId,
+          category?.name,
+        );
+      } catch (e) {
+        setOptimisticUpdates((prev) => {
+          const next = new Map(prev);
+          next.delete(item.id);
+          return next;
+        });
+        throw e;
+      }
+    },
+    [],
+  );
 
-  async function handleDragStart(_event: DragStartEvent) {
+  const handleDelete = useCallback(async (item: List["items"][number]) => {
+    await deleteListItemOffline(listRef.current, item.id);
+  }, []);
+
+  function handleDragStart(_event: DragStartEvent) {
     setDragging(true);
   }
 
@@ -103,20 +136,22 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    const item = list.items.find((i) => i.id === itemId);
+    const currentList = listRef.current;
+    const item = currentList.items.find((i) => i.id === itemId);
     if (!item) {
       return;
     }
 
     const category =
-      project?.categories.find((c) => c.name === categoryName) ?? null;
+      projectRef.current?.categories.find((c) => c.name === categoryName) ??
+      null;
 
     if (category === item.category) {
       return;
     }
 
     if (
-      list.items.find(
+      currentList.items.find(
         (i) => i.categoryId === (category?.id ?? null) && i.name === item.name,
       )
     ) {
@@ -127,7 +162,7 @@ export default function CheckList(props: { list: List }) {
     // Apply optimistic update for category change
     setOptimisticUpdates((prev) => {
       const next = new Map(prev);
-      const currentUpdate = next.get(itemId) || {};
+      const currentUpdate = next.get(itemId) ?? {};
       next.set(itemId, {
         ...currentUpdate,
         category,
@@ -136,13 +171,14 @@ export default function CheckList(props: { list: List }) {
       return next;
     });
 
-    await updateListItem(
-      list,
+    await updateListItemOffline(
+      currentList,
       itemId,
       item.name,
       item.details ?? "",
       item.completed ?? false,
       category?.id ?? null,
+      category?.name,
     );
 
     // Clear optimistic update after successful API call
@@ -155,6 +191,7 @@ export default function CheckList(props: { list: List }) {
 
   return (
     <DndContext
+      id="list-dnd"
       modifiers={[restrictToVerticalAxis]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -182,39 +219,46 @@ export default function CheckList(props: { list: List }) {
 }
 
 function compareItems(a: ListItem, b: ListItem) {
-  if (a.completed && !b.completed) {
-    return 1;
-  }
-
-  if (!a.completed && b.completed) {
-    return -1;
-  }
-
-  return a.name.localeCompare(b.name);
+  if (a.completed && !b.completed) return 1;
+  if (!a.completed && b.completed) return -1;
+  const nameCompare = a.name.localeCompare(b.name);
+  return nameCompare !== 0 ? nameCompare : a.id.localeCompare(b.id);
 }
 
 function groupItemsByCategory(items: List["items"], project: Project | null) {
-  if (!project) {
-    return [];
+  // Build categories from project if available, otherwise extract from items
+  const categoryNames = new Set<string>([""]);
+
+  if (project) {
+    for (const category of project.categories) {
+      categoryNames.add(category.name);
+    }
   }
 
-  const categories = project.categories.reduce(
-    (acc, category) => {
-      acc.set(category.name, []);
-      return acc;
-    },
-    new Map<string, List["items"]>([["", []]]),
-  );
+  // Also include any categories found in items (for offline support)
+  for (const item of items) {
+    if (item.category?.name) {
+      categoryNames.add(item.category.name);
+    }
+  }
+
+  const categories = new Map<string, List["items"]>();
+  for (const name of categoryNames) {
+    categories.set(name, []);
+  }
 
   for (const item of items) {
     const category = item.category?.name ?? "";
+    if (!categories.has(category)) {
+      categories.set(category, []);
+    }
     categories.get(category)?.push(item);
   }
 
   const result = [];
-  for (const [category, items] of categories.entries()) {
-    items.sort(compareItems);
-    result.push({ category, items });
+  for (const [category, categoryItems] of categories.entries()) {
+    categoryItems.sort(compareItems);
+    result.push({ category, items: categoryItems });
   }
 
   result.sort((a, b) => {

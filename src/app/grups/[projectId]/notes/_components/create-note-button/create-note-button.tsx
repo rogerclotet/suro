@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
-import { createNote } from "./actions";
+import { createNoteOffline } from "@/lib/offline/offline-notes";
 import { noteSchema } from "./schema";
 
 export default function CreateNoteButton({ projectId }: { projectId: string }) {
@@ -79,11 +79,17 @@ function CreateNoteFormContent({
     }
 
     try {
-      const noteId = await createNote(project, data);
+      const noteId = await createNoteOffline(project, {
+        name: data.name,
+        contents: data.contents,
+        format: "text",
+      });
       toast.success(`Nota ${form.getValues().name} creada`);
       form.reset();
       close();
-      router.push(`/grups/${projectId}/notes/${noteId}`);
+      if (noteId) {
+        router.push(`/grups/${projectId}/notes/${noteId}`);
+      }
     } catch (e) {
       posthog.captureException(e, {
         distinctId: sessionId,

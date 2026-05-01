@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -115,6 +116,7 @@ function MobileHeader() {
           </>
         )}
       </div>
+      <OfflineIndicator />
     </div>
   );
 }

@@ -14,7 +14,7 @@ import Action from "@/components/action";
 import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { createEvent } from "./actions";
+import { createEventOffline } from "@/lib/offline/offline-events";
 import { eventSchema } from "./data";
 import EventFormFields from "./event-form-fields";
 import { useEventDates } from "./use-event-dates";
@@ -125,7 +125,18 @@ function CreateEventFormContent({
       }
 
       try {
-        await createEvent(dataToCreate, project);
+        await createEventOffline(
+          {
+            name: dataToCreate.name,
+            description: dataToCreate.description,
+            dates: {
+              from: dataToCreate.dates.from!,
+              to: dataToCreate.dates.to!,
+            },
+            allDay: dataToCreate.allDay,
+          },
+          project,
+        );
         toast.success(`Esdeveniment ${data.name} creat`);
         onCreate(data.dates.from, data.dates.to);
         form.reset();
