@@ -1,7 +1,7 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import { autoAnimate } from "@formkit/auto-animate";
+import { type AnimationController, autoAnimate } from "@formkit/auto-animate";
 import { type CSSProperties, memo, useCallback, useRef } from "react";
 import type { List } from "@/app/_data/list";
 import ListItem from "./list-item/list-item";
@@ -10,12 +10,12 @@ import ListItem from "./list-item/list-item";
 // duplicate MutationObservers that cancel each other's FLIP animations. This hook
 // prevents double-initialization by tracking the controller and calling destroy() on cleanup.
 function useStableAutoAnimate() {
-  const controllerRef = useRef<{ destroy?: () => void } | null>(null);
+  const controllerRef = useRef<AnimationController | null>(null);
   return useCallback((node: HTMLUListElement | null) => {
     if (node && !controllerRef.current) {
-      controllerRef.current = autoAnimate(node) as { destroy?: () => void };
+      controllerRef.current = autoAnimate(node);
     } else if (!node && controllerRef.current) {
-      controllerRef.current?.destroy?.();
+      controllerRef.current.destroy?.();
       controllerRef.current = null;
     }
   }, []);

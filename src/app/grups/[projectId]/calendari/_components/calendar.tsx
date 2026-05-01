@@ -36,11 +36,13 @@ import { eventsQueryOptions } from "./event/query";
 const EVENT_COLORS = 5;
 
 // Returns locally-created events that are still pending sync for the given month.
+type CalendarEvent = Omit<Event, "project">;
+
 function useOfflineEvents(
   monthStart: Date,
   projectId: string | undefined,
-): Event[] {
-  const [offlineEvents, setOfflineEvents] = useState<Event[]>([]);
+): CalendarEvent[] {
+  const [offlineEvents, setOfflineEvents] = useState<CalendarEvent[]>([]);
 
   const load = useCallback(() => {
     if (!projectId) return;
@@ -58,23 +60,20 @@ function useOfflineEvents(
       .toArray()
       .then((items) => {
         setOfflineEvents(
-          items.map(
-            (e) =>
-              ({
-                id: e.id,
-                name: e.name,
-                description: e.description,
-                startAt: new Date(e.startAt),
-                endAt: new Date(e.endAt),
-                allDay: e.allDay,
-                projectId: e.projectId,
-                createdAt: new Date(e.createdAt),
-                createdBy: e.createdBy,
-                updatedAt: new Date(e.updatedAt),
-                updatedBy: e.updatedBy,
-                files: [],
-              }) as unknown as Event,
-          ),
+          items.map((e) => ({
+            id: e.id,
+            name: e.name,
+            description: e.description,
+            startAt: new Date(e.startAt),
+            endAt: new Date(e.endAt),
+            allDay: e.allDay,
+            projectId: e.projectId,
+            createdAt: new Date(e.createdAt),
+            createdBy: e.createdBy,
+            updatedAt: new Date(e.updatedAt),
+            updatedBy: e.updatedBy,
+            files: [],
+          })),
         );
       })
       .catch(() => {});
@@ -94,7 +93,7 @@ function Events({
   currentEvents,
 }: {
   isLoading: boolean;
-  currentEvents: Event[] | undefined;
+  currentEvents: CalendarEvent[] | undefined;
 }) {
   if (isLoading || currentEvents === undefined) {
     return (
@@ -153,7 +152,7 @@ export default function Calendar({
   const router = useRouter();
 
   // Merge server events with locally-pending offline events.
-  const events = useMemo<Event[] | undefined>(() => {
+  const events = useMemo<CalendarEvent[] | undefined>(() => {
     if (!serverEvents && offlineEvents.length === 0) return serverEvents;
     const serverIds = new Set(serverEvents?.map((e) => e.id) ?? []);
     return [
@@ -325,7 +324,7 @@ export default function Calendar({
   );
 }
 
-function isCurrentDayEvent(event: Event, date?: Date) {
+function isCurrentDayEvent(event: CalendarEvent, date?: Date) {
   if (!date || !event.startAt || !event.endAt) {
     return false;
   }

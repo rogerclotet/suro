@@ -1,6 +1,9 @@
 import { Folders } from "lucide-react";
 import Link from "next/link";
 import type { Event } from "@/app/_data/event";
+
+type CalendarEvent = Omit<Event, "project">;
+
 import {
   Card,
   CardContent,
@@ -16,7 +19,7 @@ import {
 import { textToHtml } from "@/lib/utils";
 import TimeRange from "./time-range";
 
-export default function EventPreview({ event }: { event: Event }) {
+export default function EventPreview({ event }: { event: CalendarEvent }) {
   return (
     <Link prefetch href={`/grups/${event.projectId}/calendari/${event.id}`}>
       <Card key={event.id}>
