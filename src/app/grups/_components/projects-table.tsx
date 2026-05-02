@@ -142,11 +142,13 @@ export default async function ProjectsTable() {
             <TableCell className="align-middle">
               <UsersList users={project.users} />
             </TableCell>
-            <TableCell className="flex flex-row items-center justify-end gap-1">
-              <InviteButton project={project} />
-              <LeaveButton project={project} />
-              <EditButton project={project} />
-              <DeleteButton project={project} />
+            <TableCell className="align-middle">
+              <div className="flex flex-row items-center justify-end gap-1">
+                <InviteButton project={project} />
+                <LeaveButton project={project} />
+                <EditButton project={project} />
+                <DeleteButton project={project} />
+              </div>
             </TableCell>
           </TableRow>
         ))}

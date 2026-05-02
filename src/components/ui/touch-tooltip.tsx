@@ -11,7 +11,7 @@ import type {
   TooltipProviderProps,
   TooltipTriggerProps,
 } from "@radix-ui/react-tooltip";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useSyncExternalStore } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import {
   Tooltip as OriginalTooltip,
@@ -20,19 +20,22 @@ import {
   TooltipTrigger as OriginalTooltipTrigger,
 } from "./tooltip";
 
-const TouchContext = createContext<boolean | undefined>(undefined);
+const TouchContext = createContext<boolean>(false);
 const useTouch = () => useContext(TouchContext);
 
 export const TooltipProvider = ({
   children,
   ...props
 }: TooltipProviderProps) => {
-  const [isTouch, _setTouch] = useState<boolean | undefined>(() => {
-    if (typeof window === "undefined") {
-      return undefined;
-    }
-    return window.matchMedia("(pointer: coarse)").matches;
-  });
+  const isTouch = useSyncExternalStore(
+    (callback) => {
+      const mq = window.matchMedia("(pointer: coarse)");
+      mq.addEventListener("change", callback);
+      return () => mq.removeEventListener("change", callback);
+    },
+    () => window.matchMedia("(pointer: coarse)").matches,
+    () => false,
+  );
 
   return (
     <TouchContext.Provider value={isTouch}>
