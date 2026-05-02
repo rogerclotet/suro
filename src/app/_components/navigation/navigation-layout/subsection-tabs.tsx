@@ -24,25 +24,27 @@ export default function SubsectionTabs() {
   }
 
   return (
-    <div className="flex gap-1 overflow-x-auto border-border/50 border-b bg-background/80 px-3 backdrop-blur-md">
-      {subsectionItems.map((item) => {
-        const isActive = activeItem?.path === item.path;
+    <div className="bg-background/80 px-3 py-2 backdrop-blur-md">
+      <div className="flex gap-0.5 rounded-[10px] bg-muted p-[3px]">
+        {subsectionItems.map((item) => {
+          const isActive = activeItem?.path === item.path;
 
-        return (
-          <Link
-            key={item.path}
-            href={item.path}
-            className={cn(
-              "shrink-0 border-b-2 px-3 py-2.5 text-sm transition-colors",
-              isActive
-                ? "border-primary font-semibold text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {item.name}
-          </Link>
-        );
-      })}
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={cn(
+                "flex-1 rounded-lg px-3 py-[7px] text-center text-sm transition-all",
+                isActive
+                  ? "bg-accent font-medium text-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              {item.name}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

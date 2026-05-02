@@ -105,37 +105,41 @@ export default function NewListItem({ list }: { list: List }) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex grow items-start gap-2"
+          className="flex grow flex-col gap-2 sm:flex-row sm:items-start"
         >
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="grow">
-                <FormControl>
-                  <Input
-                    key={submitCount}
-                    placeholder="Nou element"
-                    disabled={form.formState.isSubmitting}
-                    className="h-10"
-                    autoFocus={submitCount > 0}
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
+          {/* Input + confirm button — always a row */}
+          <div className="flex grow items-start gap-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="grow">
+                  <FormControl>
+                    <Input
+                      key={submitCount}
+                      placeholder="Nou element"
+                      disabled={form.formState.isSubmitting}
+                      className="h-10"
+                      autoFocus={submitCount > 0}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {form.formState.isDirty && (
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? <Spinner /> : <Check />}
+              </Button>
             )}
-          />
+          </div>
 
-          {form.formState.isDirty && (
-            <Button
-              size="icon"
-              variant="ghost"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? <Spinner /> : <Check />}
-            </Button>
-          )}
-
+          {/* Category — full width below on mobile, fixed width beside on sm+ */}
           <FormField
             control={form.control}
             name="categoryId"
@@ -147,7 +151,7 @@ export default function NewListItem({ list }: { list: List }) {
                   disabled={form.formState.isSubmitting}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full sm:w-40">
                       <SelectValue placeholder="Sense categoria" />
                     </SelectTrigger>
                   </FormControl>

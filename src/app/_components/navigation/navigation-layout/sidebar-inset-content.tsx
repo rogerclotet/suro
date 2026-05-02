@@ -80,7 +80,8 @@ export default function SidebarInsetContent({
 
         <header
           ref={headerRef}
-          className="absolute inset-x-0 top-0 z-20 flex min-h-[52px] items-center gap-2 bg-sidebar/85 px-4 py-2.5 text-sidebar-foreground backdrop-blur-md"
+          className="absolute inset-x-0 top-0 z-20 flex min-h-[52px] items-center gap-2 bg-sidebar/85 px-4 pb-2.5 text-sidebar-foreground backdrop-blur-md"
+          style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top))" }}
         >
           <Breadcrumbs />
         </header>

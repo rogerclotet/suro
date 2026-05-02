@@ -2,10 +2,9 @@
 
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { usePathname } from "next/navigation";
+import { useMemo, useState } from "react";
 import { Fragment } from "react/jsx-runtime";
-import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
 import {
@@ -16,47 +15,28 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import GroupSwitcherSheet from "../group-switcher-sheet";
 import { useMenuItems } from "../use-menu-items";
 
 const explicitlyAllowedBreadcrumbs = ["grups", "perfil", "notificacions"];
 
+// Standalone pages (not scoped to a group) show their own title instead of the group switcher.
+const standalonePages: Record<string, string> = {
+  "/perfil": "Perfil",
+  "/notificacions": "Notificacions",
+  "/grups": "Grups",
+};
+
 function MobileHeader() {
-  const { project, projects, selectProject } = useProjects();
-  const router = useRouter();
+  const { project } = useProjects();
   const pathname = usePathname();
-  const menuItems = useMenuItems();
+  const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false);
 
-  const currentSectionName = useMemo(() => {
-    if (pathname === "/perfil") return "Perfil";
-    if (pathname === "/notificacions") return "Notificacions";
-    const activeItem = menuItems.find(
-      (item) => item.path !== "/" && pathname.includes(item.path),
-    );
-    return activeItem?.name;
-  }, [menuItems, pathname]);
-
-  function handleProjectSelect(p: Project) {
-    selectProject(p);
-    const currentSection = pathname
-      .split(`/grups/${project?.id}/`)[1]
-      ?.split("/")[0];
-    const targetPath = currentSection
-      ? `/grups/${p.id}/${currentSection}`
-      : `/grups/${p.id}`;
-    router.push(targetPath);
-  }
+  const standaloneTitle = standalonePages[pathname];
 
   if (!project) {
     return (
@@ -67,56 +47,36 @@ function MobileHeader() {
     );
   }
 
-  return (
-    <div className="flex w-full items-center justify-between">
-      <div className="flex min-w-0 items-center gap-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex min-w-0 max-w-[40vw] shrink items-center gap-1.5 rounded-lg px-1 py-0.5 transition-colors hover:bg-accent focus:outline-none">
-            <ProjectAvatar project={project} className="h-7 w-7 text-xs" />
-            <span className="truncate text-muted-foreground text-sm">
-              {project.name}
-            </span>
-            <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            align="start"
-            className="min-w-48 max-w-[calc(100vw-2rem)] rounded-lg"
-          >
-            <DropdownMenuLabel>Grups</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {projects.map((p) => (
-              <DropdownMenuItem
-                key={p.id}
-                onClick={() => handleProjectSelect(p)}
-                disabled={project.id === p.id}
-                className={cn(
-                  "py-3",
-                  project.id === p.id
-                    ? "bg-secondary text-secondary-foreground"
-                    : "",
-                )}
-              >
-                <ProjectAvatar
-                  project={p}
-                  className="h-5 w-5 shrink-0 text-xs"
-                />
-                <span className="min-w-0 truncate">{p.name}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {currentSectionName && (
-          <>
-            <span className="text-muted-foreground/50">|</span>
-            <span className="font-semibold text-lg leading-tight">
-              {currentSectionName}
-            </span>
-          </>
-        )}
+  // Non-group pages: show the page title, no group switcher
+  if (standaloneTitle) {
+    return (
+      <div className="flex w-full items-center justify-between">
+        <span className="font-semibold text-lg leading-tight">
+          {standaloneTitle}
+        </span>
+        <OfflineIndicator />
       </div>
+    );
+  }
+
+  // Group pages: full-width group switcher button, no section title
+  return (
+    <div className="flex w-full items-center justify-between gap-2">
+      <button
+        type="button"
+        onClick={() => setGroupSwitcherOpen(true)}
+        className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 transition-colors hover:bg-accent focus:outline-none"
+      >
+        <ProjectAvatar project={project} className="h-7 w-7 shrink-0 text-xs" />
+        <span className="truncate font-semibold text-base">{project.name}</span>
+        <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
+      </button>
       <OfflineIndicator />
+
+      <GroupSwitcherSheet
+        open={groupSwitcherOpen}
+        onOpenChange={setGroupSwitcherOpen}
+      />
     </div>
   );
 }

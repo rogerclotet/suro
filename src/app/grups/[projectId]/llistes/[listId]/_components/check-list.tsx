@@ -189,6 +189,9 @@ export default function CheckList(props: { list: List }) {
     });
   }
 
+  const doneCount = list.items.filter((i) => i.completed).length;
+  const totalCount = list.items.length;
+
   return (
     <DndContext
       id="list-dnd"
@@ -198,6 +201,19 @@ export default function CheckList(props: { list: List }) {
       sensors={sensors}
     >
       <div className="mx-auto max-w-lg">
+        {totalCount > 0 && (
+          <div className="mb-3 flex items-center gap-2.5">
+            <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
+              <div
+                className="h-full rounded-sm bg-primary transition-[width] duration-300 ease-in-out"
+                style={{ width: `${(doneCount / totalCount) * 100}%` }}
+              />
+            </div>
+            <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
+              {doneCount}/{totalCount}
+            </span>
+          </div>
+        )}
         <NewListItem list={list} />
       </div>
 

@@ -4,6 +4,7 @@ import type { List } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { getLists } from "@/server/lists";
+import CollapsibleCompletedSection from "./collapsible-completed-section";
 import CreateListButton from "./create-list/create-list-button";
 import ListPreview from "./list-preview";
 
@@ -48,11 +49,11 @@ export default async function Lists({ projectId }: { projectId: string }) {
     <>
       <div className="space-y-6">
         {favoriteLists.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="font-semibold text-md text-muted-foreground">
+          <div className="space-y-2">
+            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preferides
             </h2>
-            <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
+            <div className="flex flex-col gap-2 sm:columns-2 sm:block sm:space-y-2 xl:columns-3">
               {favoriteLists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}
@@ -61,25 +62,21 @@ export default async function Lists({ projectId }: { projectId: string }) {
         )}
 
         {regularLists.length > 0 && (
-          <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
-            {regularLists.map((list) => (
-              <ListPreview key={list.id} list={list} />
-            ))}
-          </div>
-        )}
-
-        {completedLists.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="font-semibold text-md text-muted-foreground">
-              Completades:
-            </h2>
-            <div className="columns-1 gap-2 space-y-2 sm:columns-2 xl:columns-3">
-              {completedLists.map((list) => (
+          <div className="space-y-2">
+            {favoriteLists.length > 0 && (
+              <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Altres
+              </h2>
+            )}
+            <div className="flex flex-col gap-2 sm:columns-2 sm:block sm:space-y-2 xl:columns-3">
+              {regularLists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}
             </div>
           </div>
         )}
+
+        <CollapsibleCompletedSection lists={completedLists} />
       </div>
 
       <CreateListButton projectId={projectId} />

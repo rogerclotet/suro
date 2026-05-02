@@ -37,13 +37,14 @@ export default function BottomNav({ className }: { className?: string }) {
     <>
       <nav
         className={cn(
-          "grid border-border/50 border-t bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md",
+          "relative grid bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md",
           className,
         )}
         style={{
           gridTemplateColumns: `repeat(${bottomNavItems.length}, 1fr)`,
         }}
       >
+        <div className="pointer-events-none absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-background to-transparent" />
         {bottomNavItems.map((item) => {
           const isMore = item.path === "#more";
           const isActive = !isMore && activeItem?.path === item.path;
