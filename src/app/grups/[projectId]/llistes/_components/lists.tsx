@@ -53,7 +53,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
             <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preferides
             </h2>
-            <div className="flex flex-col gap-2 sm:columns-2 sm:block sm:space-y-2 xl:columns-3">
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
               {favoriteLists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}
@@ -68,7 +68,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
                 Altres
               </h2>
             )}
-            <div className="flex flex-col gap-2 sm:columns-2 sm:block sm:space-y-2 xl:columns-3">
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
               {regularLists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}
