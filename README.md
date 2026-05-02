@@ -1,6 +1,6 @@
 # Suro
 
-Family/group management app.
+Group management app.
 
 ## How to develop
 
