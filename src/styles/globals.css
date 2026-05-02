@@ -38,8 +38,8 @@
     /* Richer, darker green primary for good contrast on light backgrounds */
     --primary: oklch(0.5 0.13 139.5);
     --primary-foreground: oklch(1 0 0);
-    --secondary: oklch(0.55 0.08 50);
-    --secondary-foreground: oklch(0.985 0 0);
+    --secondary: rgb(249 226 175);
+    --secondary-foreground: oklch(0.18 0.04 60);
     --muted: oklch(0.92 0.02 65);
     --muted-foreground: oklch(0.48 0.04 55);
     --accent: oklch(0.88 0.028 60);
@@ -108,8 +108,8 @@
     --popover-foreground: oklch(0.86 0.012 75);
     --primary: oklch(0.8411 0.1051 139.5336);
     --primary-foreground: oklch(0.2364 0.0405 139.2369);
-    --secondary: oklch(0.62 0.07 60);
-    --secondary-foreground: oklch(0.21 0.03 50);
+    --secondary: rgb(249 226 175);
+    --secondary-foreground: oklch(0.18 0.04 60);
     --muted: oklch(0.27 0.025 40);
     --muted-foreground: oklch(0.68 0.028 60);
     --accent: oklch(0.38 0.04 45);

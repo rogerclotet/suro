@@ -50,7 +50,7 @@ export default function ListPreview({
         </div>
 
         {todoCount > 0 ? (
-          <div className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-secondary px-1.5 text-xs font-bold text-white">
+          <div className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-secondary px-1.5 text-xs font-bold text-secondary-foreground">
             {todoCount}
           </div>
         ) : completed && compact ? (
