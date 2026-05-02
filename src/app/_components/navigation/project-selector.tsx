@@ -38,13 +38,17 @@ export default function ProjectSelector() {
   }
 
   if (!project || projects.length === 0) {
+    if (state !== "expanded") {
+      return <Skeleton className="size-8 rounded-full" />;
+    }
     return (
-      <Skeleton
-        className={cn(
-          "w-full",
-          state === "expanded" ? "h-13" : "aspect-square rounded-full",
-        )}
-      />
+      <div className="flex w-full items-center gap-2 overflow-hidden rounded-md p-4 md:p-2">
+        <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+        <div className="flex flex-1 flex-col">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      </div>
     );
   }
 

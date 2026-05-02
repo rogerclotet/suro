@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useNotifications } from "@/app/_state/notification-state";
-import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import NotificationDot from "../../notifications/notification-dot";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
@@ -13,7 +12,6 @@ import MoreSheet from "./more-sheet";
 export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const bottomNavItems = useBottomNavItems();
-  const { isMobile } = useSidebar();
   const [moreOpen, setMoreOpen] = useState(false);
   const { hasUnreadInSections, totalUnread } = useNotifications();
 
@@ -29,12 +27,8 @@ export default function BottomNav({ className }: { className?: string }) {
     return (moreItem as BottomNavItem | undefined)?.overflow ?? [];
   }, [bottomNavItems]);
 
-  if (!isMobile) {
-    return null;
-  }
-
   return (
-    <>
+    <div className="md:hidden">
       <nav
         className={cn(
           "relative grid bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md",
@@ -113,6 +107,6 @@ export default function BottomNav({ className }: { className?: string }) {
         onOpenChange={setMoreOpen}
         overflowItems={overflowItems}
       />
-    </>
+    </div>
   );
 }

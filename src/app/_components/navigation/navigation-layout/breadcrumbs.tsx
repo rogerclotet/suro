@@ -16,7 +16,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
-import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import GroupSwitcherSheet from "../group-switcher-sheet";
@@ -40,9 +39,11 @@ function MobileHeader() {
 
   if (!project) {
     return (
-      <div className="flex w-full items-center justify-between">
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-8 w-8 rounded-full" />
+      <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex flex-1 items-center gap-2 px-1 py-0.5">
+          <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+          <Skeleton className="h-5 w-32" />
+        </div>
       </div>
     );
   }
@@ -103,7 +104,7 @@ function DesktopBreadcrumbs() {
       .filter((breadcrumb) => allowedBreadcrumbs.includes(breadcrumb));
 
     if (breadcrumbsFromPathname.length === 0) {
-      return ["família"];
+      return ["suro"];
     }
 
     return breadcrumbsFromPathname;
@@ -153,11 +154,14 @@ function DesktopBreadcrumbs() {
 }
 
 export default function Breadcrumbs() {
-  const { isMobile } = useSidebar();
-
-  if (isMobile) {
-    return <MobileHeader />;
-  }
-
-  return <DesktopBreadcrumbs />;
+  return (
+    <>
+      <div className="w-full md:hidden">
+        <MobileHeader />
+      </div>
+      <div className="hidden md:block">
+        <DesktopBreadcrumbs />
+      </div>
+    </>
+  );
 }

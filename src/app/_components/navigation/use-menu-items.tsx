@@ -96,6 +96,15 @@ const itemParts: MenuItemPart[] = [
 export function useMenuItems(): MenuItem[] {
   const { project: selectedProject } = useProjects();
   const { flags } = useFlags();
+  const pathname = usePathname();
+
+  // Use the project ID already in the URL so paths resolve before project state loads
+  const urlProjectId = useMemo(() => {
+    const segs = pathname.split("/");
+    return segs[1] === "grups" ? segs[2] : undefined;
+  }, [pathname]);
+
+  const effectiveProjectId = selectedProject?.id ?? urlProjectId;
 
   const enabledFeatureItemParts = useMemo(() => {
     return itemParts.filter((item) => {
@@ -141,8 +150,8 @@ export function useMenuItems(): MenuItem[] {
     return activeItemParts.map(
       ({ name, pathPart, icon, disabled, children }) => ({
         name,
-        path: selectedProject
-          ? `/grups/${selectedProject.id}/${pathPart}`
+        path: effectiveProjectId
+          ? `/grups/${effectiveProjectId}/${pathPart}`
           : "#",
         section: pathPart,
         icon,
@@ -150,8 +159,8 @@ export function useMenuItems(): MenuItem[] {
         children: children?.map(
           ({ name, pathPart: childPathPart, icon, disabled }) => ({
             name,
-            path: selectedProject
-              ? `/grups/${selectedProject.id}/${pathPart}/${childPathPart}`
+            path: effectiveProjectId
+              ? `/grups/${effectiveProjectId}/${pathPart}/${childPathPart}`
               : "#",
             section: pathPart,
             icon,
@@ -160,7 +169,7 @@ export function useMenuItems(): MenuItem[] {
         ),
       }),
     );
-  }, [activeItemParts, selectedProject]);
+  }, [activeItemParts, effectiveProjectId]);
 
   return items;
 }
