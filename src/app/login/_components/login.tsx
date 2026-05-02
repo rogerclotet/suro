@@ -31,7 +31,7 @@ export default function Login({ session }: { session?: Session | null }) {
         {/* Logo + heading */}
         <div className="space-y-3 text-center">
           <div className="inline-flex items-center justify-center">
-            <Image src="/favicon.png" alt="Logo" width={56} height={56} />
+            <Image src="/logo.png" alt="Suro" width={64} height={64} />
           </div>
           <div>
             <h1 className="font-semibold text-2xl text-foreground tracking-tight">
