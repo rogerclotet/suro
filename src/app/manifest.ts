@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Família",
-    short_name: "Família",
-    description: "Gestor familiar",
+    name: "Suro",
+    short_name: "Suro",
+    description: "Gestor de grups",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
-    theme_color: "#121621",
-    background_color: "#121621",
+    theme_color: "#1a0e08",
+    background_color: "#1a0e08",
     icons: [
       {
         src: "/android-chrome-192x192.png",

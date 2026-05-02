@@ -125,7 +125,7 @@ export interface SyncMetadata {
   syncInProgress: boolean;
 }
 
-const db = new Dexie("familia") as Dexie & {
+const db = new Dexie("suro") as Dexie & {
   lists: EntityTable<OfflineList, "id">;
   listItems: EntityTable<OfflineListItem, "id">;
   categories: EntityTable<OfflineCategory, "id">;

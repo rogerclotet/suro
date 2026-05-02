@@ -43,7 +43,7 @@ export const GET = async (
         title: e.name,
         description: e.description ?? undefined,
         startInputType: "utc",
-        url: `https://familia.clotet.dev/grups/${projectId}/calendari/${e.id}`,
+        url: `https://suro.clotet.dev/grups/${projectId}/calendari/${e.id}`,
         organizer: {
           name: e.createdBy.name ?? undefined,
           email: e.createdBy.email,

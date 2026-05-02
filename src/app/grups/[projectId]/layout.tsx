@@ -34,6 +34,6 @@ export async function generateMetadata({
 
   return {
     title: `${project.name}`,
-    description: "Família - Gestor familiar",
+    description: "Suro - Gestor de grups",
   };
 }

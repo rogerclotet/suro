@@ -38,7 +38,7 @@ export default function Login({ session }: { session?: Session | null }) {
               Benvingut/da
             </h1>
             <p className="mt-1 text-muted-foreground text-sm">
-              Inicia sessió per accedir a la teva família
+              Inicia sessió per entrar al teu Suro
             </p>
           </div>
         </div>
@@ -88,12 +88,12 @@ export default function Login({ session }: { session?: Session | null }) {
 
         {/* Success state */}
         {loggedInWithResend && (
-          <Alert className="rounded-xl border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50">
-            <Info className="h-4 w-4 text-blue-500" />
-            <AlertTitle className="font-medium text-blue-800 text-sm dark:text-blue-300">
+          <Alert className="rounded-xl border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/50">
+            <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertTitle className="font-medium text-green-800 text-sm dark:text-green-300">
               Correu enviat
             </AlertTitle>
-            <AlertDescription className="text-blue-600 text-xs leading-relaxed dark:text-blue-400">
+            <AlertDescription className="text-green-700 text-xs leading-relaxed dark:text-green-400">
               {
                 "T'hem enviat un email amb un enllaç per iniciar la sessió. Comprova la safata d'entrada."
               }

@@ -20,7 +20,7 @@ export default function ProjectAvatar({
 }: ProjectAvatarProps) {
   const catppuccin =
     CATPPUCCIN_COLORS[project.color as CatppuccinColor] ??
-    CATPPUCCIN_COLORS.blue;
+    CATPPUCCIN_COLORS.peach;
 
   return (
     <Avatar className={cn("h-8 w-8", className)}>

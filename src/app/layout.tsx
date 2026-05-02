@@ -24,11 +24,11 @@ import { uploadFileRouter } from "./api/uploadthing/core";
 v.setGlobalConfig({ lang: "ca" });
 
 export const metadata: Metadata = {
-  title: "Família",
-  description: "Gestor familiar",
+  title: "Suro",
+  description: "Gestor de grups",
   icons: [{ rel: "icon", url: "/favicon.png" }],
   appleWebApp: {
-    title: "Família",
+    title: "Suro",
     capable: true,
     statusBarStyle: "black-translucent",
     startupImage: "/favicon.png",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#121621" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f1e6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a0e08" },
   ],
 };
 

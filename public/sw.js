@@ -1,4 +1,4 @@
-const CACHE_NAME = "familia-v2";
+const CACHE_NAME = "suro-v1";
 
 const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.png"];
 
@@ -225,16 +225,16 @@ async function offlinePage(requestUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Família</title>
+  <title>Suro</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
       min-height: 100dvh;
-      background: #353a50;
-      background: oklch(0.2677 0.0224 262.4632);
-      color: #d8d9e4;
-      color: oklch(0.8608 0.0043 271.3631);
+      background: #2a1a14;
+      background: oklch(0.225 0.025 40);
+      color: #ece2d2;
+      color: oklch(0.86 0.012 75);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -243,8 +243,8 @@ async function offlinePage(requestUrl) {
     .card {
       width: 100%;
       max-width: 340px;
-      background: #2b2f42;
-      background: oklch(0.217 0.0193 262.0781);
+      background: #221610;
+      background: oklch(0.19 0.025 38);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 0.75rem;
       padding: 1.75rem;
@@ -260,7 +260,7 @@ async function offlinePage(requestUrl) {
       margin-bottom: 1.125rem;
     }
     h1 { font-size: 1rem; font-weight: 600; margin-bottom: 0.375rem; }
-    p { font-size: 0.8125rem; color: #979cb8; color: oklch(0.6754 0.0363 265.1136); line-height: 1.55; margin-bottom: 1.25rem; }
+    p { font-size: 0.8125rem; color: #b6a791; color: oklch(0.68 0.028 60); line-height: 1.55; margin-bottom: 1.25rem; }
     .actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
@@ -274,9 +274,9 @@ async function offlinePage(requestUrl) {
     .btn:hover { opacity: 0.82; }
     .btn-ghost {
       background: rgba(255,255,255,0.07);
-      color: #d8d9e4; color: oklch(0.8608 0.0043 271.3631);
+      color: #ece2d2; color: oklch(0.86 0.012 75);
     }
-    .btn-primary { background: #4c7ef3; color: #fff; }
+    .btn-primary { background: #6fa05a; background: oklch(0.6 0.13 139.5); color: #fff; }
     .sections {
       margin-top: 1.125rem;
       padding-top: 1.125rem;
@@ -285,7 +285,7 @@ async function offlinePage(requestUrl) {
     .sections-label {
       font-size: 0.6875rem; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.06em;
-      color: #6b7090; color: oklch(0.52 0.028 265);
+      color: #8c7a64; color: oklch(0.55 0.03 55);
       margin-bottom: 0.625rem;
     }
     .section-links { display: flex; flex-wrap: wrap; gap: 0.375rem; justify-content: center; }
@@ -296,7 +296,7 @@ async function offlinePage(requestUrl) {
       border: 1px solid rgba(255,255,255,0.09);
       border-radius: 0.375rem;
       font-size: 0.8125rem;
-      color: #d8d9e4; color: oklch(0.8608 0.0043 271.3631);
+      color: #ece2d2; color: oklch(0.86 0.012 75);
       text-decoration: none;
       transition: background 0.15s ease;
     }
@@ -306,7 +306,7 @@ async function offlinePage(requestUrl) {
 <body>
   <div class="card">
     <div class="icon-wrap">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(0.6754 0.0363 265.1136)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(0.68 0.028 60)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="2" y1="2" x2="22" y2="22"/>
         <path d="M8.5 16.5a5 5 0 0 1 7 0"/>
         <path d="M2 8.82a15 15 0 0 1 4.17-2.65"/>
@@ -355,7 +355,7 @@ self.addEventListener("push", (event) => {
   const { title, body, tag, icon, badge, image, timestamp, path } = payload;
 
   event.waitUntil(
-    self.registration.showNotification(title ?? "Família", {
+    self.registration.showNotification(title ?? "Suro", {
       body,
       tag,
       icon: icon ?? `${self.location.origin}/favicon.png`,

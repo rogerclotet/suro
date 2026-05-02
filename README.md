@@ -1,4 +1,4 @@
-# Família
+# Suro
 
 Family/group management app.
 
