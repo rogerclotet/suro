@@ -2,6 +2,10 @@ import { nanoid } from "nanoid";
 import type { Note } from "@/app/_data/note";
 import type { Project } from "@/app/_data/project";
 import { createNote as serverCreateNote } from "@/app/[locale]/groups/[projectId]/notes/_components/create-note-button/actions";
+import {
+  deleteNote as serverDeleteNote,
+  editNote as serverEditNote,
+} from "@/app/[locale]/groups/[projectId]/notes/[noteId]/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
 
@@ -87,10 +91,16 @@ export async function updateNoteOffline(
 ): Promise<void> {
   const online = await isActuallyOnline();
 
-  // Note: No server update action exists currently
-  // This is for future expansion when note editing is added
   if (online) {
-    console.warn("Note update not supported on server yet");
+    try {
+      await serverEditNote(note, data);
+      return;
+    } catch (error) {
+      console.warn(
+        "Server action failed, falling back to offline mode:",
+        error,
+      );
+    }
   }
 
   const now = Date.now();
@@ -140,9 +150,17 @@ export async function updateNoteOffline(
 export async function deleteNoteOffline(note: Note): Promise<void> {
   const online = await isActuallyOnline();
 
-  // Note: No server delete action exists currently
   if (online) {
-    console.warn("Note delete not supported on server yet");
+    try {
+      await serverDeleteNote(note);
+      await db.notes.delete(note.id);
+      return;
+    } catch (error) {
+      console.warn(
+        "Server action failed, falling back to offline mode:",
+        error,
+      );
+    }
   }
 
   const now = Date.now();

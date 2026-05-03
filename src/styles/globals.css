@@ -26,6 +26,61 @@
     }
   }
 
+  .rich-text {
+    p {
+      @apply my-2;
+    }
+    p:first-child {
+      @apply mt-0;
+    }
+    p:last-child {
+      @apply mb-0;
+    }
+    h2 {
+      @apply mt-4 mb-2 font-semibold text-lg;
+    }
+    h3 {
+      @apply mt-3 mb-2 font-semibold text-base;
+    }
+    ul,
+    ol {
+      @apply my-2 space-y-1 pl-6;
+    }
+    ul {
+      @apply list-disc;
+    }
+    ol {
+      @apply list-decimal;
+    }
+    li > p {
+      @apply my-0;
+    }
+    blockquote {
+      @apply my-2 border-muted-foreground/40 border-l-4 pl-3 text-muted-foreground italic;
+    }
+    a {
+      @apply text-secondary underline underline-offset-2;
+    }
+    strong {
+      @apply font-semibold;
+    }
+    em {
+      @apply italic;
+    }
+    s {
+      @apply line-through;
+    }
+  }
+
+  .rich-text-editor .ProseMirror {
+    @apply min-h-[160px] outline-none;
+
+    p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      @apply pointer-events-none float-left h-0 text-muted-foreground;
+    }
+  }
+
   :root {
     /* Warm, earthy cork/beige neutrals so cards float on a soft tan canvas
        and the green primary pops as the highlight */

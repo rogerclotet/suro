@@ -77,6 +77,13 @@ vi.mock(
   }),
 );
 
+const mockServerUpdateNote = vi.fn().mockResolvedValue(undefined);
+const mockServerDeleteNote = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/app/[locale]/groups/[projectId]/notes/[noteId]/actions", () => ({
+  editNote: (...a: unknown[]) => mockServerUpdateNote(...a),
+  deleteNote: (...a: unknown[]) => mockServerDeleteNote(...a),
+}));
+
 const mockServerCreatePot = vi.fn().mockResolvedValue("server-pot-id");
 const mockServerCreateSpending = vi.fn().mockResolvedValue(undefined);
 vi.mock(
@@ -174,6 +181,8 @@ describe("offline actions", () => {
     mockServerUpdateEvent.mockResolvedValue(undefined);
     mockServerDeleteEvent.mockResolvedValue(undefined);
     mockServerCreateNote.mockResolvedValue("server-note-id");
+    mockServerUpdateNote.mockResolvedValue(undefined);
+    mockServerDeleteNote.mockResolvedValue(undefined);
     mockServerCreatePot.mockResolvedValue("server-pot-id");
     mockServerCreateSpending.mockResolvedValue(undefined);
   });

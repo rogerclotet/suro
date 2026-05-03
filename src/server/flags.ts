@@ -8,7 +8,6 @@ export async function getFlags() {
   const session = await auth();
   if (!session?.user.id || !session?.user.email) {
     return {
-      notes: false,
       amicInvisible: false,
     };
   }
@@ -18,7 +17,6 @@ export async function getFlags() {
   });
 
   const flags = {
-    notes: remoteFlags.notes === true,
     amicInvisible: remoteFlags["amic-invisible"] === true,
   } satisfies Flags;
 

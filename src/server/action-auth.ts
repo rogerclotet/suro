@@ -8,6 +8,7 @@ import { categories } from "./db/schema";
 import { getEvent } from "./events";
 import { getUserFile } from "./files";
 import { getList, getTemplate } from "./lists";
+import { getNote } from "./notes";
 import { getUserProject } from "./projects";
 
 export async function requireSession() {
@@ -62,6 +63,15 @@ export async function requireEvent(projectId: string, eventId: string) {
   }
 
   return event;
+}
+
+export async function requireNote(noteId: string) {
+  const note = await getNote(noteId);
+  if (!note) {
+    throw new Error("Note not found");
+  }
+
+  return note;
 }
 
 export async function requireOwnedFile(fileId: string) {

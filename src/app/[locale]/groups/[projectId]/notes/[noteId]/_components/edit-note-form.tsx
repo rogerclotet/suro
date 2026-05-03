@@ -1,16 +1,14 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { PlusIcon } from "lucide-react";
+import { SaveIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
-import Action from "@/components/action";
+import type { Note } from "@/app/_data/note";
 import {
   Form,
   FormControl,
@@ -23,90 +21,77 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import SubmitButton from "@/components/ui/submit-button";
-import { useRouter } from "@/i18n/navigation";
-import { createNoteOffline } from "@/lib/offline/offline-notes";
-import { noteSchema } from "./schema";
+import { updateNoteOffline } from "@/lib/offline/offline-notes";
+import { noteSchema } from "../../_components/create-note-button/schema";
 
-export default function CreateNoteButton({ projectId }: { projectId: string }) {
-  const form = useForm({
+export default function EditNoteForm({
+  note,
+  trigger,
+}: {
+  note: Note;
+  trigger: React.ReactNode;
+}) {
+  const { data: session } = useSession();
+  const t = useTranslations("notes");
+  const form = useForm<v.InferInput<typeof noteSchema>>({
     defaultValues: {
-      name: "",
-      contents: "",
+      name: note.name,
+      contents: note.contents,
       format: "html",
     },
     resolver: valibotResolver(noteSchema),
   });
-  const { project } = useProjects();
-  const { data: session } = useSession();
-  const t = useTranslations("notes");
 
   return (
     <ModalForm
-      trigger={
-        <Action
-          label={t("createTitle")}
-          icon={PlusIcon}
-          pathParts={["notes"]}
-        />
-      }
-      title={t("createTitle")}
-      description={t("createDescription")}
+      trigger={trigger}
+      title={t("editTitle")}
+      description={t("editDescription")}
     >
-      <CreateNoteFormContent
+      <EditNoteFormContent
         form={form}
-        project={project}
-        projectId={projectId}
+        note={note}
         sessionId={session?.user.id}
       />
     </ModalForm>
   );
 }
 
-function CreateNoteFormContent({
+function EditNoteFormContent({
   form,
-  project,
-  projectId,
+  note,
   sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof noteSchema>>>;
-  project: Project | null;
-  projectId: string;
+  note: Note;
   sessionId?: string;
 }) {
   const { close } = useModalForm();
-  const router = useRouter();
   const t = useTranslations("notes");
   const tCommon = useTranslations("common");
-  const tLists = useTranslations("lists");
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {
-    if (!project) {
-      toast.error(tLists("noProjectSelected"));
-      return;
-    }
-
     try {
-      const noteId = await createNoteOffline(project, {
+      await updateNoteOffline(note, {
         name: data.name,
         contents: data.contents,
         format: data.format ?? "html",
       });
-      toast.success(t("createSuccess", { name: form.getValues().name }));
-      form.reset();
+      toast.success(t("editSuccess", { name: data.name }));
+      form.reset({
+        name: data.name,
+        contents: data.contents,
+        format: data.format ?? "html",
+      });
       close();
-      if (noteId) {
-        router.push({
-          pathname: "/groups/[projectId]/notes/[noteId]",
-          params: { projectId, noteId },
-        });
-      }
     } catch (e) {
       posthog.captureException(e, {
         distinctId: sessionId,
-        action: "create_note",
-        projectId,
+        action: "edit_note",
+        projectId: note.projectId,
+        noteId: note.id,
       });
-      toast.error(t("createError"));
+      toast.error(t("editError"));
     }
   }
 
@@ -120,7 +105,7 @@ function CreateNoteFormContent({
             <FormItem>
               <FormLabel>{tCommon("name")}</FormLabel>
               <FormControl>
-                <Input autoFocus {...field} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -147,8 +132,8 @@ function CreateNoteFormContent({
         />
 
         <SubmitButton
-          icon={<PlusIcon />}
-          text={tCommon("create")}
+          icon={<SaveIcon />}
+          text={tCommon("save")}
           formState={form.formState}
         />
       </form>

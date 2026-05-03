@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export interface Flags {
-  notes: boolean;
   amicInvisible: boolean;
 }
 
@@ -15,7 +14,6 @@ export const useFlagsState = create<FlagsState>()(
   devtools(
     (set) => ({
       flags: {
-        notes: false,
         amicInvisible: false,
       },
       setFlags: (flags) => set({ flags }),

@@ -116,8 +116,6 @@ export function useMenuItems(): MenuItem[] {
   const enabledFeatureItemParts = useMemo(() => {
     return itemParts.filter((item) => {
       switch (item.pathPart) {
-        case "notes":
-          return flags.notes;
         case "secret-santa":
           return flags.amicInvisible;
         default:
