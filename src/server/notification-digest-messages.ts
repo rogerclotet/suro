@@ -1,22 +1,35 @@
+import { translateNotificationBody } from "./notification-i18n";
+
 export type DigestType = "list_items_completed" | "list_items_added";
 
-export function getNotificationDigestBody({
+export function getNotificationDigestParams({
+  actorName,
+  count,
+  listName,
+}: {
+  actorName: string;
+  count: number;
+  listName: string;
+}) {
+  return { actorName, count, listName };
+}
+
+export async function getNotificationDigestBody({
   actorName,
   count,
   listName,
   type,
+  locale,
 }: {
   actorName: string;
   count: number;
   listName: string;
   type: DigestType;
+  locale?: string | null;
 }) {
-  const noun = count === 1 ? "element" : "elements";
-
-  switch (type) {
-    case "list_items_completed":
-      return `${actorName} ha marcat ${count} ${noun} com a completats a la llista ${listName}`;
-    case "list_items_added":
-      return `${actorName} ha afegit ${count} ${noun} a la llista ${listName}`;
-  }
+  return translateNotificationBody(
+    type,
+    getNotificationDigestParams({ actorName, count, listName }),
+    locale,
+  );
 }

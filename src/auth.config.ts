@@ -30,6 +30,8 @@ export default {
         .avatarColor as string | null;
       session.user.dateLocale = (user as unknown as Record<string, unknown>)
         .dateLocale as string | null;
+      session.user.locale = (user as unknown as Record<string, unknown>)
+        .locale as string | null;
       return session;
     },
   },

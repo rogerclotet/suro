@@ -1,0 +1,91 @@
+import assert from "node:assert";
+import { AlertCircle } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import Redirect from "@/app/_components/redirect";
+import UsersList from "@/app/[locale]/groups/_components/users-list";
+import { auth } from "@/auth";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { checkAuth } from "@/lib/check-auth";
+import { getInvitedProject } from "@/server/projects";
+import AcceptInviteButton from "./_components/accept-invite-button/accept-invite-button";
+
+export default async function InvitePage({
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}) {
+  const { projectId, inviteToken } = await params;
+
+  await checkAuth();
+
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const t = await getTranslations("invitation");
+
+  const project = await getInvitedProject(projectId);
+
+  if (project?.users.some((user) => user.user.id === session.user.id)) {
+    // Already joined
+    return <Redirect project={project} />;
+  }
+
+  if (project?.inviteToken !== inviteToken) {
+    return (
+      <Alert variant="destructive" className="mx-auto mt-20 max-w-lg">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>{t("invalidTitle")}</AlertTitle>
+      </Alert>
+    );
+  }
+
+  return (
+    <div className="mt-20 flex items-center justify-center">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {t("groupTitle")}{" "}
+            <span className="font-bold text-secondary">{project.name}</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-row items-center gap-4">
+            {t("participants")} <UsersList users={project.users} />
+          </div>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <AcceptInviteButton projectId={projectId} inviteToken={inviteToken} />
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ projectId: string; inviteToken: string }>;
+}): Promise<Metadata> {
+  const { projectId, inviteToken: _inviteToken } = await params;
+
+  const project = await getInvitedProject(projectId);
+
+  if (!project) {
+    return {};
+  }
+
+  const t = await getTranslations("invitation");
+
+  return {
+    title: `${project.name}`,
+    description: t("metadataDescription", { projectName: project.name }),
+  };
+}

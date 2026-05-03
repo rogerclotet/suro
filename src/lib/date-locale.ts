@@ -1,14 +1,15 @@
 import type { Locale } from "date-fns";
-import { ca, enUS } from "date-fns/locale";
+import { ca, enUS, es } from "date-fns/locale";
+import type { routing } from "@/i18n/routing";
 
 export const DATE_LOCALE_OPTIONS = [
   {
     value: "ca-ES",
-    label: "Català (23/02/2026)",
+    label: "DD/MM/AAAA",
   },
   {
     value: "en-US",
-    label: "English (2/23/2026)",
+    label: "MM/DD/AAAA",
   },
 ] as const;
 
@@ -29,6 +30,24 @@ export function normalizeDateLocale(locale?: string | null): AppDateLocale {
 export function getDateFnsLocale(locale?: string | null): Locale {
   switch (normalizeDateLocale(locale)) {
     case "en-US":
+      return enUS;
+    default:
+      return ca;
+  }
+}
+
+/**
+ * Map a UI locale (`ca` / `es` / `en`) to the matching date-fns Locale,
+ * used for translating month names, day names, and relative-time strings.
+ * Independent of the user's date-format preference (DD/MM vs MM/DD).
+ */
+export function getDateFnsLocaleForUi(
+  uiLocale: (typeof routing.locales)[number],
+): Locale {
+  switch (uiLocale) {
+    case "es":
+      return es;
+    case "en":
       return enUS;
     default:
       return ca;

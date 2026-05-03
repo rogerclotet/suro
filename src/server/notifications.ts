@@ -15,6 +15,7 @@ export async function createNotification({
   type,
   title,
   body,
+  bodyParams,
   path,
   section,
   image,
@@ -24,6 +25,7 @@ export async function createNotification({
   type: string;
   title?: string;
   body: string;
+  bodyParams?: Record<string, unknown> | null;
   path?: string;
   section: string;
   image?: string;
@@ -36,6 +38,7 @@ export async function createNotification({
       type,
       title,
       body,
+      bodyParams: bodyParams ?? null,
       path,
       section,
       image,
@@ -59,6 +62,7 @@ export async function getNotificationsForUser(
       type: notifications.type,
       title: notifications.title,
       body: notifications.body,
+      bodyParams: notifications.bodyParams,
       path: notifications.path,
       section: notifications.section,
       image: notifications.image,
@@ -96,6 +100,7 @@ export async function getNotificationsForUser(
     type: r.type,
     title: r.title,
     body: r.body,
+    bodyParams: r.bodyParams,
     path: r.path,
     section: r.section,
     image: r.image,

@@ -45,7 +45,7 @@ const mockServerUpdateListItem = vi.fn().mockResolvedValue(undefined);
 const mockServerDeleteListItem = vi.fn().mockResolvedValue(undefined);
 
 vi.mock(
-  "@/app/grups/[projectId]/llistes/[listId]/_components/list-item/actions",
+  "@/app/[locale]/groups/[projectId]/lists/[listId]/_components/list-item/actions",
   () => ({
     createListItem: (...a: unknown[]) => mockServerCreateListItem(...a),
     updateListItem: (...a: unknown[]) => mockServerUpdateListItem(...a),
@@ -57,18 +57,21 @@ const mockServerCreateEvent = vi.fn().mockResolvedValue(undefined);
 const mockServerUpdateEvent = vi.fn().mockResolvedValue(undefined);
 const mockServerDeleteEvent = vi.fn().mockResolvedValue(undefined);
 
-vi.mock("@/app/grups/[projectId]/calendari/_components/event/actions", () => ({
-  createEvent: (...a: unknown[]) => mockServerCreateEvent(...a),
-}));
+vi.mock(
+  "@/app/[locale]/groups/[projectId]/calendar/_components/event/actions",
+  () => ({
+    createEvent: (...a: unknown[]) => mockServerCreateEvent(...a),
+  }),
+);
 
-vi.mock("@/app/grups/[projectId]/calendari/[eventId]/actions", () => ({
+vi.mock("@/app/[locale]/groups/[projectId]/calendar/[eventId]/actions", () => ({
   editEvent: (...a: unknown[]) => mockServerUpdateEvent(...a),
   deleteEvent: (...a: unknown[]) => mockServerDeleteEvent(...a),
 }));
 
 const mockServerCreateNote = vi.fn().mockResolvedValue("server-note-id");
 vi.mock(
-  "@/app/grups/[projectId]/notes/_components/create-note-button/actions",
+  "@/app/[locale]/groups/[projectId]/notes/_components/create-note-button/actions",
   () => ({
     createNote: (...a: unknown[]) => mockServerCreateNote(...a),
   }),
@@ -77,13 +80,13 @@ vi.mock(
 const mockServerCreatePot = vi.fn().mockResolvedValue("server-pot-id");
 const mockServerCreateSpending = vi.fn().mockResolvedValue(undefined);
 vi.mock(
-  "@/app/grups/[projectId]/despeses/_components/create-pot-button/actions",
+  "@/app/[locale]/groups/[projectId]/expenses/_components/create-pot-button/actions",
   () => ({
     createPot: (...a: unknown[]) => mockServerCreatePot(...a),
   }),
 );
 vi.mock(
-  "@/app/grups/[projectId]/despeses/_components/create-spending-button/actions",
+  "@/app/[locale]/groups/[projectId]/expenses/_components/create-spending-button/actions",
   () => ({
     createSpending: (...a: unknown[]) => mockServerCreateSpending(...a),
   }),

@@ -1,8 +1,8 @@
 "use client";
 
 import { BellIcon, LayoutGridIcon, LogOut } from "lucide-react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useNotifications } from "@/app/_state/notification-state";
 import {
   Drawer,
@@ -11,6 +11,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import UserAvatar from "@/components/user-avatar";
+import { Link } from "@/i18n/navigation";
 import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
 import { logOut } from "./profile/actions";
@@ -26,34 +27,48 @@ export default function MoreSheet({
 }) {
   const { data: session } = useSession();
   const { totalUnread } = useNotifications();
+  const t = useTranslations("nav");
+  const tAuth = useTranslations("auth");
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="flex max-h-[85dvh] flex-col px-4 pb-4">
         <DrawerHeader className="shrink-0 px-0">
-          <DrawerTitle>Més</DrawerTitle>
+          <DrawerTitle>{t("more")}</DrawerTitle>
         </DrawerHeader>
 
         <nav
           className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
           data-vaul-no-drag
         >
-          {overflowItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.path}
-              onClick={() => onOpenChange(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </Link>
-          ))}
+          {overflowItems.map((item) =>
+            item.href === "#" ? (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                href={item.href as never}
+                onClick={() => onOpenChange(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </Link>
+            ),
+          )}
 
           <div className="my-1 border-border border-t" />
 
           <Link
-            href="/notificacions"
+            href="/notifications"
             onClick={() => onOpenChange(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
           >
@@ -61,7 +76,7 @@ export default function MoreSheet({
               <BellIcon />
               <NotificationDot count={totalUnread} />
             </span>
-            <span>Notificacions</span>
+            <span>{t("notifications")}</span>
             {totalUnread > 0 && (
               <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
                 {totalUnread}
@@ -70,18 +85,18 @@ export default function MoreSheet({
           </Link>
 
           <Link
-            href="/grups"
+            href="/groups"
             onClick={() => onOpenChange(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
           >
             <LayoutGridIcon />
-            <span>Gestionar grups</span>
+            <span>{t("manageGroups")}</span>
           </Link>
 
           <div className="my-1 border-border border-t" />
 
           <Link
-            href="/perfil"
+            href="/profile"
             onClick={() => onOpenChange(false)}
             className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent"
           >
@@ -101,7 +116,7 @@ export default function MoreSheet({
               onClick={() => onOpenChange(false)}
             >
               <LogOut />
-              <span>Tancar sessió</span>
+              <span>{tAuth("signOut")}</span>
             </button>
           </form>
         </nav>

@@ -1,0 +1,26 @@
+import type { Note } from "@/app/_data/note";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "@/i18n/navigation";
+
+export default function NotePreview({ note }: { note: Note }) {
+  return (
+    <Link
+      href={
+        {
+          pathname: "/groups/[projectId]/notes/[noteId]",
+          params: { projectId: note.projectId, noteId: note.id },
+        } as never
+      }
+      className="h-36 w-full rounded-md bg-card p-2 text-sm drop-shadow-sm"
+    >
+      <h3 className="line-clamp-1 font-semibold">{note.name}</h3>
+      <div className="mt-2 line-clamp-5 whitespace-pre-line">
+        {note.contents}
+      </div>
+    </Link>
+  );
+}
+
+export function NotePreviewSkeleton() {
+  return <Skeleton className="h-36 w-full" />;
+}

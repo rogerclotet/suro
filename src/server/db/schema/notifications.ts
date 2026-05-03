@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   index,
   integer,
+  jsonb,
   primaryKey,
   text,
   timestamp,
@@ -19,6 +20,7 @@ export const notifications = createTable("notification", {
   type: varchar("type", { length: 50 }).notNull(),
   title: varchar("title", { length: 255 }),
   body: text("body").notNull(),
+  bodyParams: jsonb("bodyParams").$type<Record<string, unknown> | null>(),
   path: varchar("path", { length: 512 }),
   section: varchar("section", { length: 50 }).notNull(),
   image: varchar("image", { length: 512 }),

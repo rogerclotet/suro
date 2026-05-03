@@ -239,6 +239,20 @@
       "when": 1774540280490,
       "tag": "0033_solid_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1777801962825,
+      "tag": "0034_tranquil_frog_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1777803152761,
+      "tag": "0035_crazy_red_skull",
+      "breakpoints": true
     }
   ]
 }

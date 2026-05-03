@@ -1,4 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import {
   AlertDialog,
@@ -62,6 +63,7 @@ function ClientModalAction({
     y: number;
   } | null>(null);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
+  const tCommon = useTranslations("common");
 
   if (isMdOrLarger) {
     return (
@@ -84,7 +86,7 @@ function ClientModalAction({
           </AlertDialogHeader>
           {children}
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
+            <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={onAction}
               className={cn(buttonVariants({ variant }))}
@@ -113,7 +115,7 @@ function ClientModalAction({
             </Button>
           </DrawerClose>
           <DrawerClose asChild>
-            <Button variant="outline">Cancel·lar</Button>
+            <Button variant="outline">{tCommon("cancel")}</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

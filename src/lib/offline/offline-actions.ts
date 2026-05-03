@@ -4,7 +4,7 @@ import {
   createListItem as serverCreateListItem,
   deleteListItem as serverDeleteListItem,
   updateListItem as serverUpdateListItem,
-} from "@/app/grups/[projectId]/llistes/[listId]/_components/list-item/actions";
+} from "@/app/[locale]/groups/[projectId]/lists/[listId]/_components/list-item/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
 

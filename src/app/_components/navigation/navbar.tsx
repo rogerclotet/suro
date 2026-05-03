@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useMenuItems } from "./use-menu-items";
 
 export default function Navbar() {
@@ -10,13 +9,13 @@ export default function Navbar() {
   const menuItems = useMenuItems();
 
   function isActive(path: string) {
-    return path !== "/" && pathname.includes(path);
+    return path !== "/" && pathname.startsWith(path);
   }
 
   return (
     <div className="flex flex-row items-center gap-2">
       {menuItems.map((item) => {
-        if (item.disabled) {
+        if (item.disabled || item.href === "#") {
           return (
             <Button key={item.name} variant="ghost" disabled>
               {item.name}
@@ -27,7 +26,7 @@ export default function Navbar() {
         return (
           <Button key={item.name} variant="ghost" asChild>
             <Link
-              href={item.path}
+              href={item.href as never}
               className={
                 isActive(item.path)
                   ? "underline decoration-[0.15em] underline-offset-4"

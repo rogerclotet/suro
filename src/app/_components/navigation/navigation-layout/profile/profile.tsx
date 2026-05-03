@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronsUpDownIcon, LogOut, User } from "lucide-react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import UserAvatar from "@/components/user-avatar";
+import { Link } from "@/i18n/navigation";
 import ThemeSwitcher from "../theme-switcher";
 import { logOut } from "./actions";
 import NotificationSwitcher from "./notification-toggle";
@@ -19,6 +20,8 @@ import NotificationSwitcher from "./notification-toggle";
 export default function Profile() {
   const session = useSession();
   const { isMobile, setOpenMobile } = useSidebar();
+  const tNav = useTranslations("nav");
+  const tAuth = useTranslations("auth");
 
   if (!session) {
     return null;
@@ -29,7 +32,7 @@ export default function Profile() {
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
           size="lg"
-          tooltip={session.data?.user.name ?? "Perfil"}
+          tooltip={session.data?.user.name ?? tNav("profile")}
           className="w-full justify-start gap-4"
         >
           <UserAvatar user={session.data?.user ?? {}} />
@@ -47,13 +50,13 @@ export default function Profile() {
         align="end"
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
       >
-        <Link href="/perfil">
+        <Link href="/profile">
           <DropdownMenuItem
             className="cursor-pointer gap-2"
             onClick={() => setOpenMobile(false)}
           >
             <User />
-            Perfil
+            {tNav("profile")}
           </DropdownMenuItem>
         </Link>
 
@@ -70,7 +73,7 @@ export default function Profile() {
             onClick={() => setOpenMobile(false)}
           >
             <DropdownMenuItem className="cursor-pointer gap-2">
-              <LogOut /> Tancar sessió
+              <LogOut /> {tAuth("signOut")}
             </DropdownMenuItem>
           </button>
         </form>

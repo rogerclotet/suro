@@ -13,6 +13,7 @@ import {
   projectToUsers,
   users,
 } from "@/server/db/schema";
+import { translateNotificationBody } from "@/server/notification-i18n";
 import { createNotification } from "@/server/notifications";
 import { sendNotificationsToUsers } from "@/server/push";
 import { utapi } from "@/server/uploadthing";
@@ -83,11 +84,12 @@ export const uploadFileRouter = {
         eventId: metadata.eventId,
       });
 
-      revalidatePath(`/grups/${metadata.projectId}/fitxers`);
+      revalidatePath(`/[locale]/groups/${metadata.projectId}/files`, "page");
 
       if (metadata.eventId) {
         revalidatePath(
-          `/grups/${metadata.projectId}/calendari/${metadata.eventId}`,
+          `/[locale]/groups/${metadata.projectId}/calendar/${metadata.eventId}`,
+          "page",
         );
       }
 
@@ -209,9 +211,9 @@ function sendFileNotification(
   eventId: string | null,
 ) {
   const path = eventId
-    ? `/grups/${projectId}/calendari/${eventId}`
-    : `/grups/${projectId}/fitxers`;
-  const section = eventId ? "calendari" : "fitxers";
+    ? `/groups/${projectId}/calendar/${eventId}`
+    : `/groups/${projectId}/files`;
+  const section = eventId ? "calendar" : "files";
 
   setTimeout(() => {
     db.query.projects
@@ -237,10 +239,18 @@ function sendFileNotification(
           return;
         }
 
+        const params = { name: file.name };
+        const fallbackBody = await translateNotificationBody(
+          "file_uploaded",
+          params,
+          null,
+        );
+
         await createNotification({
           type: "file_uploaded",
           title: project.name,
-          body: `Fitxer ${file.name} afegit`,
+          body: fallbackBody,
+          bodyParams: params,
           path,
           section,
           image: file.type.includes("image") ? file.url : undefined,
@@ -252,7 +262,9 @@ function sendFileNotification(
           users: project.users
             .filter((u) => u.user.id !== userId)
             .map((u) => u.user.id),
-          body: `Fitxer ${file.name} afegit`,
+          body: fallbackBody,
+          bodyKey: "file_uploaded",
+          bodyParams: params,
           title: project.name,
           path,
           image: file.type.includes("image") ? file.url : undefined,

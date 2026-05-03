@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronsUpDownIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 export default function ProjectSelector() {
   const { projects, project, selectProject } = useProjects();
@@ -24,17 +24,24 @@ export default function ProjectSelector() {
   const pathname = usePathname();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { data: session } = useSession();
+  const tNav = useTranslations("nav");
+  const tGroups = useTranslations("groups");
 
   function handleProjectSelect(newProject: Project) {
     selectProject(newProject);
     setOpenMobile(false);
+    // pathname is the canonical template, e.g. "/groups/[projectId]/lists"
     const currentSection = pathname
-      .split(`/grups/${project?.id}/`)[1]
+      .split("/groups/[projectId]/")[1]
       ?.split("/")[0];
-    const targetPath = currentSection
-      ? `/grups/${newProject.id}/${currentSection}`
-      : `/grups/${newProject.id}`;
-    router.push(targetPath);
+    if (currentSection) {
+      router.push(`/groups/${newProject.id}/${currentSection}` as never);
+    } else {
+      router.push({
+        pathname: "/groups/[projectId]",
+        params: { projectId: newProject.id },
+      });
+    }
   }
 
   if (!project || projects.length === 0) {
@@ -61,7 +68,7 @@ export default function ProjectSelector() {
             <span>{project.name}</span>
             <span className="text-muted-foreground text-xs">
               {project.users.length > 1
-                ? `${project.users.length} membres`
+                ? tGroups("memberCount", { count: project.users.length })
                 : session?.user.name}
             </span>
           </div>
@@ -74,7 +81,7 @@ export default function ProjectSelector() {
         align="start"
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
       >
-        <DropdownMenuLabel>Grups</DropdownMenuLabel>
+        <DropdownMenuLabel>{tNav("groups")}</DropdownMenuLabel>
 
         <DropdownMenuSeparator />
 

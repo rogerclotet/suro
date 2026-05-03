@@ -3,6 +3,7 @@
 import assert from "node:assert";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import type {
@@ -105,7 +106,7 @@ export async function createSecretSanta(
     }
   });
 
-  revalidatePath(`/grups/${project.id}/amic-invisible`);
+  revalidatePath(`/[locale]/groups/${project.id}/secret-santa`, "page");
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
@@ -190,7 +191,10 @@ export async function updateSecretSanta(
     }
   });
 
-  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+  revalidatePath(
+    `/[locale]/groups/${secretSanta.projectId}/secret-santa`,
+    "page",
+  );
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
@@ -221,7 +225,10 @@ export async function archiveSecretSanta(secretSanta: SecretSanta) {
     })
     .where(eq(secretSantas.id, secretSanta.id));
 
-  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+  revalidatePath(
+    `/[locale]/groups/${secretSanta.projectId}/secret-santa`,
+    "page",
+  );
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
@@ -258,7 +265,8 @@ export async function createExclusion(
       areEqualExclusions(exclusion, validatedData.output.exclusions),
     )
   ) {
-    return { error: "L'exclusió ja existeix" };
+    const t = await getTranslations("secretSanta");
+    return { error: t("exclusionAlreadyExists") };
   }
 
   await db
@@ -268,7 +276,10 @@ export async function createExclusion(
     })
     .where(eq(secretSantas.id, secretSanta.id));
 
-  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+  revalidatePath(
+    `/[locale]/groups/${secretSanta.projectId}/secret-santa`,
+    "page",
+  );
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
@@ -310,7 +321,10 @@ export async function deleteExclusion(
     })
     .where(eq(secretSantas.id, secretSanta.id));
 
-  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+  revalidatePath(
+    `/[locale]/groups/${secretSanta.projectId}/secret-santa`,
+    "page",
+  );
 
   getPostHogServer().capture({
     distinctId: session?.user.id,
@@ -372,9 +386,9 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
       },
     });
 
+    const t = await getTranslations("secretSanta");
     return {
-      error:
-        "No s'han pogut trobar assignacions vàlides, prova de canviar les exclusions i torna-ho a provar",
+      error: t("noValidAssignments"),
     };
   }
 
@@ -403,15 +417,19 @@ export async function startSecretSanta(secretSanta: SecretSanta) {
     }
   });
 
-  revalidatePath(`/grups/${secretSanta.projectId}/amic-invisible`);
+  revalidatePath(
+    `/[locale]/groups/${secretSanta.projectId}/secret-santa`,
+    "page",
+  );
 
+  const tNotifications = await getTranslations("secretSanta");
   sendNotificationsToUsers({
     users: secretSanta.participants
       .map((p) => p.userId)
       .filter((u) => u !== session?.user.id),
     title: secretSanta.name,
-    body: "S'ha realitzat el sorteig, ja pots veure el teu amic invisible",
-    path: `/grups/${secretSanta.projectId}/amic-invisible`,
+    body: tNotifications("drawAnnouncement"),
+    path: `/groups/${secretSanta.projectId}/secret-santa`,
   });
 
   getPostHogServer().capture({
@@ -481,5 +499,5 @@ export async function updateGiftIdeas(
     })
     .where(eq(secretSantaParticipants.id, participant.id));
 
-  revalidatePath(`/grups/${projectId}/amic-invisible/idees`);
+  revalidatePath(`/[locale]/groups/${projectId}/secret-santa/ideas`, "page");
 }

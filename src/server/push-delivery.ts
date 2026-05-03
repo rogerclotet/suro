@@ -4,19 +4,28 @@ import { env } from "@/env";
 import { db } from "./db";
 import { pushSubscriptions } from "./db/schema";
 import {
+  buildLocalizedUrl,
+  translateNotificationBody,
+} from "./notification-i18n";
+import {
   dedupePushSubscriptions,
   isExpiredSubscriptionError,
 } from "./push-utils";
+import { getUsersLocaleMap } from "./user-locales";
 
 export async function sendNotificationsToUsers({
   users,
   body,
+  bodyKey,
+  bodyParams,
   title,
   path,
   image,
 }: {
   users: string[];
   body: string;
+  bodyKey?: string;
+  bodyParams?: Record<string, unknown> | null;
   title?: string;
   path?: string;
   image?: string;
@@ -44,16 +53,40 @@ export async function sendNotificationsToUsers({
       .where(inArray(pushSubscriptions.id, idsToPrune));
   }
 
-  const pushPayload = JSON.stringify({
-    title,
-    body,
-    path,
-    image,
-  });
+  const userLocales = bodyKey
+    ? await getUsersLocaleMap(uniqueSubscriptions.map((s) => s.userId))
+    : new Map<string, string>();
 
-  const notificationPromises = uniqueSubscriptions.map((subscription) =>
-    sendNotification(subscription.subscription, pushPayload),
-  );
+  const notificationPromises = uniqueSubscriptions.map(async (subscription) => {
+    let localizedBody = body;
+    let localizedPath = path;
+
+    if (bodyKey) {
+      const locale = userLocales.get(subscription.userId);
+      localizedBody = await translateNotificationBody(
+        bodyKey,
+        bodyParams ?? null,
+        locale,
+        body,
+      );
+      if (path && locale) {
+        localizedPath = await buildLocalizedUrl(
+          path,
+          // biome-ignore lint/suspicious/noExplicitAny: locale was already normalized in getUsersLocaleMap
+          locale as any,
+        );
+      }
+    }
+
+    const pushPayload = JSON.stringify({
+      title,
+      body: localizedBody,
+      path: localizedPath,
+      image,
+    });
+
+    return sendNotification(subscription.subscription, pushPayload);
+  });
 
   const results = await Promise.allSettled(notificationPromises);
   const expiredSubscriptionIds: string[] = [];

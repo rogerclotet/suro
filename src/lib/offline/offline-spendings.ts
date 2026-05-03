@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
 import type { Pot } from "@/app/_data/pot";
 import type { Spending } from "@/app/_data/spending";
-import { createPot as serverCreatePot } from "@/app/grups/[projectId]/despeses/_components/create-pot-button/actions";
-import { createSpending as serverCreateSpending } from "@/app/grups/[projectId]/despeses/_components/create-spending-button/actions";
+import { createPot as serverCreatePot } from "@/app/[locale]/groups/[projectId]/expenses/_components/create-pot-button/actions";
+import { createSpending as serverCreateSpending } from "@/app/[locale]/groups/[projectId]/expenses/_components/create-spending-button/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
 

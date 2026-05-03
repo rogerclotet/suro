@@ -1,5 +1,8 @@
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig = {
   output: "standalone",
@@ -27,7 +30,7 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
 } satisfies NextConfig;
 
-export default withPostHogConfig(nextConfig, {
+export default withPostHogConfig(withNextIntl(nextConfig), {
   personalApiKey: process.env.POSTHOG_API_KEY ?? "",
   envId: process.env.POSTHOG_ENV_ID ?? "",
   host: "https://eu.i.posthog.com",

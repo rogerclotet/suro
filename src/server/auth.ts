@@ -14,6 +14,7 @@ declare module "next-auth" {
       customImage?: string | null;
       avatarColor?: string | null;
       dateLocale?: string | null;
+      locale?: string | null;
     } & DefaultSession["user"];
   }
 }

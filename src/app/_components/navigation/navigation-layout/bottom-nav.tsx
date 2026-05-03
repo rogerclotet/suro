@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useNotifications } from "@/app/_state/notification-state";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import NotificationDot from "../../notifications/notification-dot";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
@@ -17,7 +16,7 @@ export default function BottomNav({ className }: { className?: string }) {
 
   const activeItem = useMemo(() => {
     const activeItems = bottomNavItems.filter(
-      (item) => item.path !== "#more" && pathname.includes(item.path),
+      (item) => item.path !== "#more" && pathname.startsWith(item.path),
     );
     return activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
   }, [bottomNavItems, pathname]);
@@ -38,7 +37,7 @@ export default function BottomNav({ className }: { className?: string }) {
           gridTemplateColumns: `repeat(${bottomNavItems.length}, 1fr)`,
         }}
       >
-        <div className="pointer-events-none absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 -top-3 h-3 bg-gradient-to-t from-background/70 to-transparent" />
         {bottomNavItems.map((item) => {
           const isMore = item.path === "#more";
           const isActive = !isMore && activeItem?.path === item.path;
@@ -65,7 +64,7 @@ export default function BottomNav({ className }: { className?: string }) {
             );
           }
 
-          if (item.disabled) {
+          if (item.disabled || item.href === "#") {
             return (
               <div
                 key={item.name}
@@ -82,7 +81,7 @@ export default function BottomNav({ className }: { className?: string }) {
           return (
             <Link
               key={item.name}
-              href={item.path}
+              href={item.href as never}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 py-2 transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",

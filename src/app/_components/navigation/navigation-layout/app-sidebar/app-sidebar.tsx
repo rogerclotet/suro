@@ -2,9 +2,9 @@
 
 import { BellIcon, LayoutGridIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useNotifications } from "@/app/_state/notification-state";
-import CreateProjectForm from "@/app/grups/_components/create-project/create-project-form";
+import CreateProjectForm from "@/app/[locale]/groups/_components/create-project/create-project-form";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
+import { Link } from "@/i18n/navigation";
 import ProjectSelector from "../../project-selector";
 import Profile from "../profile/profile";
 import NavApps from "./nav-apps";
@@ -32,6 +33,8 @@ import NavApps from "./nav-apps";
 export default function AppSidebar() {
   const { setOpenMobile } = useSidebar();
   const { totalUnread } = useNotifications();
+  const tNav = useTranslations("nav");
+  const tGroups = useTranslations("groups");
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -44,7 +47,7 @@ export default function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Grups</SidebarGroupLabel>
+          <SidebarGroupLabel>{tNav("groups")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -53,9 +56,9 @@ export default function AppSidebar() {
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/grups" onClick={() => setOpenMobile(false)}>
+                  <Link href="/groups" onClick={() => setOpenMobile(false)}>
                     <LayoutGridIcon />
-                    Gestionar grups
+                    {tNav("manageGroups")}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -67,13 +70,15 @@ export default function AppSidebar() {
                   <TooltipTrigger asChild>
                     <SidebarGroupAction>
                       <PlusIcon />
-                      <span className="sr-only">Crear grup</span>
+                      <span className="sr-only">{tGroups("createTitle")}</span>
                     </SidebarGroupAction>
                   </TooltipTrigger>
                 }
               />
 
-              <TooltipContent side="right">Crear grup</TooltipContent>
+              <TooltipContent side="right">
+                {tGroups("createTitle")}
+              </TooltipContent>
             </Tooltip>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -85,9 +90,9 @@ export default function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/notificacions" onClick={() => setOpenMobile(false)}>
+              <Link href="/notifications" onClick={() => setOpenMobile(false)}>
                 <BellIcon />
-                Notificacions
+                {tNav("notifications")}
                 {totalUnread > 0 && (
                   <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
                     {totalUnread}

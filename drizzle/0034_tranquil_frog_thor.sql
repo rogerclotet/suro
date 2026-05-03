@@ -1,0 +1,1 @@
+ALTER TABLE "f_user" ADD COLUMN "locale" varchar(5) DEFAULT 'ca' NOT NULL;

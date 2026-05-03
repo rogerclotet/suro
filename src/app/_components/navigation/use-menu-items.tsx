@@ -12,14 +12,25 @@ import {
   ListTodo,
   TagsIcon,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 import type { Project } from "@/app/_data/project";
 import { useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
+import { usePathname } from "@/i18n/navigation";
+
+export type MenuItemHref =
+  | "#"
+  | { pathname: string; params: Record<string, string> };
 
 export type MenuItem = {
   name: string;
+  href: MenuItemHref;
+  /**
+   * Canonical internal pathname template (e.g. "/groups/[projectId]/lists").
+   * Use for active-state matching against `usePathname()` (also returns canonical).
+   */
   path: string;
   section: string;
   icon: ReactNode;
@@ -29,7 +40,7 @@ export type MenuItem = {
 };
 
 type MenuItemPart = {
-  name: string;
+  nameKey: string;
   pathPart: string;
   icon: ReactNode;
   disabled?: boolean;
@@ -39,50 +50,50 @@ type MenuItemPart = {
 
 const itemParts: MenuItemPart[] = [
   {
-    name: "Llistes",
-    pathPart: "llistes",
+    nameKey: "lists",
+    pathPart: "lists",
     icon: <ListTodo />,
     children: [
       {
-        name: "Plantilles",
-        pathPart: "plantilles",
+        nameKey: "templates",
+        pathPart: "templates",
         icon: <LayoutTemplateIcon />,
       },
       {
-        name: "Categories",
+        nameKey: "categories",
         pathPart: "categories",
         icon: <TagsIcon />,
       },
     ],
   },
   {
-    name: "Calendari",
-    pathPart: "calendari",
+    nameKey: "calendar",
+    pathPart: "calendar",
     icon: <Calendar />,
   },
   {
-    name: "Fitxers",
-    pathPart: "fitxers",
+    nameKey: "files",
+    pathPart: "files",
     icon: <FolderOpen />,
   },
   {
-    name: "Notes",
+    nameKey: "notes",
     pathPart: "notes",
     icon: <FileTextIcon />,
   },
   {
-    name: "Despeses",
-    pathPart: "despeses",
+    nameKey: "expenses",
+    pathPart: "expenses",
     icon: <HandCoins />,
   },
   {
-    name: "Amic Invisible",
-    pathPart: "amic-invisible",
+    nameKey: "secretSanta",
+    pathPart: "secret-santa",
     icon: <GiftIcon />,
     children: [
       {
-        name: "Llista d'idees",
-        pathPart: "idees",
+        nameKey: "ideas",
+        pathPart: "ideas",
         icon: <LightbulbIcon />,
         isActive: (project) =>
           project.secretSantas.some(
@@ -96,14 +107,10 @@ const itemParts: MenuItemPart[] = [
 export function useMenuItems(): MenuItem[] {
   const { project: selectedProject } = useProjects();
   const { flags } = useFlags();
-  const pathname = usePathname();
+  const params = useParams<{ projectId?: string }>();
+  const t = useTranslations("nav");
 
-  // Use the project ID already in the URL so paths resolve before project state loads
-  const urlProjectId = useMemo(() => {
-    const segs = pathname.split("/");
-    return segs[1] === "grups" ? segs[2] : undefined;
-  }, [pathname]);
-
+  const urlProjectId = params?.projectId;
   const effectiveProjectId = selectedProject?.id ?? urlProjectId;
 
   const enabledFeatureItemParts = useMemo(() => {
@@ -111,7 +118,7 @@ export function useMenuItems(): MenuItem[] {
       switch (item.pathPart) {
         case "notes":
           return flags.notes;
-        case "amic-invisible":
+        case "secret-santa":
           return flags.amicInvisible;
         default:
           return true;
@@ -148,28 +155,49 @@ export function useMenuItems(): MenuItem[] {
 
   const items = useMemo(() => {
     return activeItemParts.map(
-      ({ name, pathPart, icon, disabled, children }) => ({
-        name,
-        path: effectiveProjectId
-          ? `/grups/${effectiveProjectId}/${pathPart}`
-          : "#",
-        section: pathPart,
-        icon,
-        disabled,
-        children: children?.map(
-          ({ name, pathPart: childPathPart, icon, disabled }) => ({
-            name,
-            path: effectiveProjectId
-              ? `/grups/${effectiveProjectId}/${pathPart}/${childPathPart}`
-              : "#",
-            section: pathPart,
-            icon,
-            disabled,
-          }),
-        ),
-      }),
+      ({ nameKey, pathPart, icon, disabled, children }) => {
+        const path = `/groups/[projectId]/${pathPart}`;
+        const href: MenuItemHref = effectiveProjectId
+          ? {
+              pathname: path,
+              params: { projectId: effectiveProjectId },
+            }
+          : "#";
+
+        return {
+          name: t(nameKey),
+          href,
+          path,
+          section: pathPart,
+          icon,
+          disabled,
+          children: children?.map(
+            ({
+              nameKey: childNameKey,
+              pathPart: childPathPart,
+              icon,
+              disabled,
+            }) => {
+              const childTemplate = `/groups/[projectId]/${pathPart}/${childPathPart}`;
+              return {
+                name: t(childNameKey),
+                href: effectiveProjectId
+                  ? {
+                      pathname: childTemplate,
+                      params: { projectId: effectiveProjectId },
+                    }
+                  : ("#" as MenuItemHref),
+                path: childTemplate,
+                section: pathPart,
+                icon,
+                disabled,
+              };
+            },
+          ),
+        };
+      },
     );
-  }, [activeItemParts, effectiveProjectId]);
+  }, [activeItemParts, effectiveProjectId, t]);
 
   return items;
 }
@@ -182,13 +210,15 @@ export type BottomNavItem = MenuItem & {
 
 export function useBottomNavItems(): BottomNavItem[] {
   const menuItems = useMenuItems();
+  const t = useTranslations("nav");
 
   return useMemo(() => {
     const visible = menuItems.slice(0, MAX_BOTTOM_NAV_ITEMS);
     const overflow = menuItems.slice(MAX_BOTTOM_NAV_ITEMS);
 
     const moreItem: BottomNavItem = {
-      name: "Més",
+      name: t("more"),
+      href: "#",
       path: "#more",
       section: "more",
       icon: <EllipsisIcon />,
@@ -196,7 +226,7 @@ export function useBottomNavItems(): BottomNavItem[] {
     };
 
     return [...visible, moreItem];
-  }, [menuItems]);
+  }, [menuItems, t]);
 }
 
 export function useSubsectionItems(): MenuItem[] {
@@ -205,7 +235,7 @@ export function useSubsectionItems(): MenuItem[] {
 
   return useMemo(() => {
     const activeParent = menuItems.find(
-      (item) => item.path !== "/" && pathname.includes(item.path),
+      (item) => item.path !== "#" && pathname.startsWith(item.path),
     );
 
     if (!activeParent?.children?.length) {

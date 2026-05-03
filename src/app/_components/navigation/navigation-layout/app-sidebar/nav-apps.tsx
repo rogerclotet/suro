@@ -1,8 +1,6 @@
 "use client";
 
 import { ChevronRightIcon, SquircleIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   Collapsible,
@@ -21,7 +19,8 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useMenuItems } from "../../use-menu-items";
+import { Link, usePathname } from "@/i18n/navigation";
+import { type MenuItemHref, useMenuItems } from "../../use-menu-items";
 
 export default function NavApps() {
   const menuItems = useMenuItems();
@@ -34,7 +33,7 @@ export default function NavApps() {
 
   const activeParent = useMemo(() => {
     return menuItems.find(
-      (item) => item.path !== "/" && pathname.includes(item.path),
+      (item) => item.path !== "#" && pathname.startsWith(item.path),
     );
   }, [menuItems, pathname]);
 
@@ -64,26 +63,26 @@ export default function NavApps() {
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
-                            <Link
-                              href={item.path}
+                            <NavLink
+                              href={item.href}
                               onClick={() => setOpenMobile(false)}
                             >
                               <SquircleIcon />
                               <span>{item.name}</span>
-                            </Link>
+                            </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
 
                         {item.children.map((child) => (
                           <SidebarMenuSubItem key={child.name}>
                             <SidebarMenuSubButton asChild>
-                              <Link
-                                href={child.path}
+                              <NavLink
+                                href={child.href}
                                 onClick={() => setOpenMobile(false)}
                               >
                                 {child.icon}
                                 <span>{child.name}</span>
-                              </Link>
+                              </NavLink>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -94,15 +93,42 @@ export default function NavApps() {
               </SidebarMenu>
             ) : (
               <SidebarMenuButton asChild tooltip={item.name}>
-                <Link href={item.path} onClick={() => setOpenMobile(false)}>
+                <NavLink href={item.href} onClick={() => setOpenMobile(false)}>
                   {item.icon}
                   <span>{item.name}</span>
-                </Link>
+                </NavLink>
               </SidebarMenuButton>
             )}
           </SidebarMenuItem>
         ))}
       </SidebarGroupContent>
     </SidebarGroup>
+  );
+}
+
+function NavLink({
+  href,
+  onClick,
+  children,
+  ...props
+}: Omit<React.ComponentPropsWithoutRef<"a">, "href"> & {
+  href: MenuItemHref;
+  onClick: () => void;
+}) {
+  if (href === "#") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        {...(props as React.ComponentPropsWithoutRef<"button">)}
+      >
+        {children}
+      </button>
+    );
+  }
+  return (
+    <Link href={href as never} onClick={onClick} {...(props as object)}>
+      {children}
+    </Link>
   );
 }

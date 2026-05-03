@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import type { Note } from "@/app/_data/note";
 import type { Project } from "@/app/_data/project";
-import { createNote as serverCreateNote } from "@/app/grups/[projectId]/notes/_components/create-note-button/actions";
+import { createNote as serverCreateNote } from "@/app/[locale]/groups/[projectId]/notes/_components/create-note-button/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
 

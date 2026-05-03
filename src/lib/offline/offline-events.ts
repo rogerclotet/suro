@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
-import { createEvent as serverCreateEvent } from "@/app/grups/[projectId]/calendari/_components/event/actions";
+import { createEvent as serverCreateEvent } from "@/app/[locale]/groups/[projectId]/calendar/_components/event/actions";
 import {
   deleteEvent as serverDeleteEvent,
   editEvent as serverEditEvent,
-} from "@/app/grups/[projectId]/calendari/[eventId]/actions";
+} from "@/app/[locale]/groups/[projectId]/calendar/[eventId]/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
 

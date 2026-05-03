@@ -1,13 +1,14 @@
 "use client";
 
-import { redirect } from "next/navigation";
 import { useEffect } from "react";
 import LoadingPage from "@/components/ui/loading-page";
+import { useRouter } from "@/i18n/navigation";
 import type { Project } from "../_data/project";
 import { useProjects } from "../_state/project-state";
 
 export default function Redirect({ project }: { project?: Project }) {
   const { projects, project: selectedProject, selectProject } = useProjects();
+  const router = useRouter();
 
   useEffect(() => {
     if (project) {
@@ -19,9 +20,14 @@ export default function Redirect({ project }: { project?: Project }) {
 
   const projectId = project?.id ?? selectedProject?.id;
 
-  if (!projectId || projects.length === 0) {
-    return <LoadingPage />;
-  }
+  useEffect(() => {
+    if (projectId && projects.length > 0) {
+      router.push({
+        pathname: "/groups/[projectId]/lists",
+        params: { projectId },
+      });
+    }
+  }, [projectId, projects.length, router]);
 
-  return redirect(`/grups/${projectId}/llistes`);
+  return <LoadingPage />;
 }

@@ -8,6 +8,8 @@ export { sendNotificationsToUsers } from "./push-delivery";
 export async function sendProjectNotification({
   project,
   body,
+  bodyKey,
+  bodyParams,
   title,
   path,
   image,
@@ -16,6 +18,8 @@ export async function sendProjectNotification({
 }: {
   project: Project;
   body: string;
+  bodyKey?: string;
+  bodyParams?: Record<string, unknown> | null;
   title?: string;
   path?: string;
   image?: string;
@@ -27,11 +31,11 @@ export async function sendProjectNotification({
     throw new Error("Unauthorized");
   }
 
-  // Always persist the notification to the database
   await createNotification({
     type,
     title,
     body,
+    bodyParams: bodyParams ?? null,
     path,
     section,
     image,
@@ -49,6 +53,8 @@ export async function sendProjectNotification({
   await sendNotificationsToUsers({
     users: usersToNotify.map((u) => u.user.id),
     body,
+    bodyKey,
+    bodyParams,
     title,
     path,
     image,

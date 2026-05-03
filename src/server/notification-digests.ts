@@ -4,6 +4,7 @@ import { notificationDigests, notifications, projects } from "./db/schema";
 import {
   type DigestType,
   getNotificationDigestBody,
+  getNotificationDigestParams,
 } from "./notification-digest-messages";
 import { sendNotificationsToUsers } from "./push-delivery";
 
@@ -76,7 +77,14 @@ export async function flushNotificationDigests(
       continue;
     }
 
-    const body = getNotificationDigestBody({
+    const params = getNotificationDigestParams({
+      actorName: digest.actorName,
+      count: digest.count,
+      listName: digest.listName,
+    });
+
+    // Default body in app's default locale, used as fallback
+    const fallbackBody = await getNotificationDigestBody({
       actorName: digest.actorName,
       count: digest.count,
       listName: digest.listName,
@@ -85,8 +93,9 @@ export async function flushNotificationDigests(
 
     await db.insert(notifications).values({
       type: digest.type,
-      body,
-      path: `/grups/${digest.projectId}/llistes/${digest.listId}`,
+      body: fallbackBody,
+      bodyParams: params,
+      path: `/groups/${digest.projectId}/lists/${digest.listId}`,
       section: digest.section,
       projectId: digest.projectId,
       createdBy: digest.createdBy,
@@ -99,8 +108,10 @@ export async function flushNotificationDigests(
 
     await sendNotificationsToUsers({
       users: usersToNotify,
-      body,
-      path: `/grups/${digest.projectId}/llistes/${digest.listId}`,
+      body: fallbackBody,
+      bodyKey: digest.type,
+      bodyParams: params,
+      path: `/groups/${digest.projectId}/lists/${digest.listId}`,
       title: project.name,
     });
   }
@@ -158,7 +169,7 @@ export async function enqueueListNotificationDigest({
 
   await db.insert(notificationDigests).values({
     type,
-    section: "llistes",
+    section: "lists",
     actorName,
     count: 1,
     listId,

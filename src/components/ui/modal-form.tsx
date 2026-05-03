@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
+import { useTranslations } from "next-intl";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,6 +68,7 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
     y: number;
   } | null>(null);
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
+  const tCommon = useTranslations("common");
 
   const close = () => setOpen(false);
 
@@ -113,7 +115,7 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
         </div>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
-            <Button variant="outline">Cancel·lar</Button>
+            <Button variant="outline">{tCommon("cancel")}</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

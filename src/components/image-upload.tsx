@@ -3,6 +3,7 @@
 import { Camera, Loader2, type LucideIcon, Trash2, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,6 +42,7 @@ export default function ImageUpload({
   const router = useRouter();
   const { data: session } = useSession();
   const [uploaded, setUploaded] = useState(false);
+  const t = useTranslations("common");
 
   const visibleActions =
     uploaded && uploadedActions?.length ? uploadedActions : actions;
@@ -54,7 +56,7 @@ export default function ImageUpload({
           headers={headers}
           onClientUploadComplete={() => {
             setUploaded(true);
-            toast.success("Imatge actualitzada");
+            toast.success(t("imageUpdated"));
             onUploadComplete?.();
             router.refresh();
           }}
@@ -63,27 +65,29 @@ export default function ImageUpload({
               distinctId: session?.user.id,
               action: `upload_${endpoint}`,
             });
-            toast.error("No s'ha pogut pujar la imatge");
+            toast.error(t("imageUploadError"));
           }}
           content={{
             button({ ready, isUploading }) {
               if (isUploading) {
                 return (
                   <div className="flex items-center gap-2 text-nowrap text-sm">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Pujant...
+                    <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                    {t("uploading")}
                   </div>
                 );
               }
               if (ready) {
                 return (
                   <div className="flex items-center gap-2 text-nowrap text-sm">
-                    <Camera className="h-4 w-4" /> Canviar imatge
+                    <Camera className="h-4 w-4" /> {t("changeImage")}
                   </div>
                 );
               }
               return (
                 <div className="flex items-center gap-2 text-nowrap text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Carregant...
+                  <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                  {t("loadingEllipsis")}
                 </div>
               );
             },
@@ -106,11 +110,11 @@ export default function ImageUpload({
                 try {
                   await action.onAction();
                   setUploaded(false);
-                  toast.success("Imatge actualitzada");
+                  toast.success(t("imageUpdated"));
                   onActionComplete?.();
                   router.refresh();
                 } catch {
-                  toast.error("No s'ha pogut actualitzar la imatge");
+                  toast.error(t("imageUpdateError"));
                 }
               }}
             >
