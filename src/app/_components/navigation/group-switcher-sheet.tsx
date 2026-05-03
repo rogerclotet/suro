@@ -6,11 +6,11 @@ import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 
 export default function GroupSwitcherSheet({
@@ -37,13 +37,16 @@ export default function GroupSwitcherSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-6">
-        <SheetHeader className="mb-3.5 items-start px-0">
-          <SheetTitle className="text-sm">Canvia de grup</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="flex max-h-[85dvh] flex-col px-4 pb-6">
+        <DrawerHeader className="mb-3.5 shrink-0 items-start px-0 pb-0">
+          <DrawerTitle className="text-sm">Canvia de grup</DrawerTitle>
+        </DrawerHeader>
 
-        <div className="flex flex-col gap-1">
+        <div
+          className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
+          data-vaul-no-drag
+        >
           {projects.map((p) => {
             const isActive = p.id === project?.id;
             return (
@@ -86,7 +89,7 @@ export default function GroupSwitcherSheet({
           <LayoutGridIcon size={16} />
           Gestionar grups
         </button>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }

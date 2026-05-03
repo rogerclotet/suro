@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useNotifications } from "@/app/_state/notification-state";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import UserAvatar from "@/components/user-avatar";
 import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
@@ -28,13 +28,16 @@ export default function MoreSheet({
   const { totalUnread } = useNotifications();
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl">
-        <SheetHeader>
-          <SheetTitle>Més</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="flex max-h-[85dvh] flex-col px-4 pb-4">
+        <DrawerHeader className="shrink-0 px-0">
+          <DrawerTitle>Més</DrawerTitle>
+        </DrawerHeader>
 
-        <nav className="flex flex-col gap-1 px-4 pb-4">
+        <nav
+          className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
+          data-vaul-no-drag
+        >
           {overflowItems.map((item) => (
             <Link
               key={item.name}
@@ -102,7 +105,7 @@ export default function MoreSheet({
             </button>
           </form>
         </nav>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
