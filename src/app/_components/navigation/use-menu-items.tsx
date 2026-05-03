@@ -200,7 +200,7 @@ export function useMenuItems(): MenuItem[] {
   return items;
 }
 
-const MAX_BOTTOM_NAV_ITEMS = 4;
+const MAX_BOTTOM_NAV_ITEMS = 5;
 
 export type BottomNavItem = MenuItem & {
   overflow?: MenuItem[];
