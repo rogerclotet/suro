@@ -22,7 +22,7 @@ export default async function SidebarLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen} className="h-screen">
+    <SidebarProvider defaultOpen={defaultOpen} className="h-dvh">
       <AppSidebar />
 
       <SidebarInset>
