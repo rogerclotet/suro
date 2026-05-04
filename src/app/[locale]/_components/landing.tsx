@@ -10,6 +10,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import LanguageSwitcher from "./language-switcher";
 import PrivacyContent from "./privacy-content";
 import PrivacyDialog from "./privacy-dialog";
 
@@ -74,9 +75,12 @@ export default async function Landing() {
             <Image src="/logo.png" alt="Suro" width={36} height={36} priority />
             <span className="font-semibold text-foreground text-lg">Suro</span>
           </div>
-          <Button asChild variant="outline">
-            <Link href="/login">{t("navSignIn")}</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button asChild variant="outline">
+              <Link href="/login">{t("navSignIn")}</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -165,14 +169,18 @@ export default async function Landing() {
       </section>
 
       <section className="px-6 py-14 md:py-20">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-primary px-8 py-12 text-center text-primary-foreground shadow-lg md:px-12 md:py-16">
+        <div className="mx-auto max-w-3xl rounded-2xl bg-secondary px-8 py-12 text-center text-secondary-foreground shadow-lg md:px-12 md:py-16">
           <h2 className="text-balance font-semibold text-3xl tracking-tight md:text-4xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-pretty text-base text-primary-foreground/85 leading-relaxed">
+          <p className="mx-auto mt-4 max-w-xl text-pretty text-base text-secondary-foreground/80 leading-relaxed">
             {t("ctaBody")}
           </p>
-          <Button asChild size="lg" variant="secondary" className="mt-8">
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90"
+          >
             <Link href="/login">{t("ctaButton")}</Link>
           </Button>
         </div>

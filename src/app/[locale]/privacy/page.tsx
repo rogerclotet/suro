@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import LanguageSwitcher from "../_components/language-switcher";
 import PrivacyContent from "../_components/privacy-content";
 
 export async function generateMetadata({
@@ -33,12 +34,15 @@ export default async function PrivacyPage({
             <Image src="/logo.png" alt="Suro" width={32} height={32} />
             <span className="font-semibold text-foreground">Suro</span>
           </Link>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/">
-              <ArrowLeft />
-              {tErrors("backHome")}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/">
+                <ArrowLeft />
+                {tErrors("backHome")}
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
