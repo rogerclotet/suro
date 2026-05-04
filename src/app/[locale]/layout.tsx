@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { InstallPromptButton } from "@/components/install-prompt-button";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { ConflictModal } from "@/components/ui/conflict-modal";
 import { Toaster } from "@/components/ui/sonner";
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body>
         <ServiceWorkerRegister />
+        <InstallPromptButton />
         <NextSSRPlugin
           /**
            * The `extractRouterConfig` will extract **only** the route configs
