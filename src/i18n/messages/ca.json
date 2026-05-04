@@ -274,6 +274,7 @@
     "eventFiles": "Fitxers d'esdeveniments"
   },
   "notes": {
+    "empty": "Encara no hi ha notes",
     "createTitle": "Crear nota",
     "createDescription": "Crear una nota nova",
     "createSuccess": "Nota {name} creada",

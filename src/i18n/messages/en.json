@@ -274,6 +274,7 @@
     "eventFiles": "Event files"
   },
   "notes": {
+    "empty": "No notes yet",
     "createTitle": "Create note",
     "createDescription": "Create a new note",
     "createSuccess": "Note {name} created",
