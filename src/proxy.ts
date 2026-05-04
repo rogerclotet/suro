@@ -65,6 +65,38 @@ export function proxy(request: NextRequest, _event: NextFetchEvent) {
   }
 
   const response = intlMiddleware(sanitized);
+
+  // The PWA manifest declares start_url: "/", and Chrome's installability
+  // check on Android falls back to "Add shortcut to home screen" when
+  // start_url returns a redirect. Convert next-intl's "/" → "/<locale>"
+  // 307 into an internal rewrite so the URL stays "/" but the response is
+  // a 200 from the locale-prefixed route.
+  if (
+    pathname === "/" &&
+    response.status >= 300 &&
+    response.status < 400 &&
+    response.headers.has("location")
+  ) {
+    const location = response.headers.get("location");
+    if (location) {
+      const target = new URL(location, sanitized.nextUrl);
+      if (target.origin === sanitized.nextUrl.origin) {
+        const rewriteUrl = sanitized.nextUrl.clone();
+        rewriteUrl.pathname = target.pathname;
+        rewriteUrl.search = target.search;
+        const rewritten = NextResponse.rewrite(rewriteUrl);
+        for (const cookie of response.cookies.getAll()) {
+          rewritten.cookies.set(cookie);
+        }
+        rewritten.headers.set(
+          pathnameHeader,
+          `${target.pathname}${target.search}`,
+        );
+        return rewritten;
+      }
+    }
+  }
+
   response.headers.set(
     pathnameHeader,
     `${sanitized.nextUrl.pathname}${sanitized.nextUrl.search}`,
