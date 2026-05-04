@@ -31,7 +31,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: t("title"),
     short_name: t("appShortName"),
     description: t("description"),
-    start_url: "/",
+    start_url: `/${locale}`,
     display: "standalone",
     orientation: "portrait",
     theme_color: "#1a0e08",
