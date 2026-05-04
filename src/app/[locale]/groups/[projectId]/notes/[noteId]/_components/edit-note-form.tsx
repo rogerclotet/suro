@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import SubmitButton from "@/components/ui/submit-button";
 import { updateNoteOffline } from "@/lib/offline/offline-notes";
 import { noteSchema } from "../../_components/create-note-button/schema";

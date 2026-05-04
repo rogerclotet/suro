@@ -1,36 +1,42 @@
 import { relations, sql } from "drizzle-orm";
-import { primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
 import { projects } from "./projects";
 import { spendings } from "./spendings";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
 
-export const pots = createTable("pot", {
-  id: varchar("id", { length: 255 })
-    .$defaultFn(randomId)
-    .notNull()
-    .primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  projectId: varchar("projectId")
-    .notNull()
-    .references(() => projects.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
+export const pots = createTable(
+  "pot",
+  {
+    id: varchar("id", { length: 255 })
+      .$defaultFn(randomId)
+      .notNull()
+      .primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    projectId: varchar("projectId")
+      .notNull()
+      .references(() => projects.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    settledAt: timestamp("settledAt", {
+      mode: "date",
+      withTimezone: true,
     }),
-  settledAt: timestamp("settledAt", {
-    mode: "date",
-    withTimezone: true,
+    createdAt: timestamp("createdAt", {
+      mode: "date",
+      withTimezone: true,
+    })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    createdBy: varchar("createdBy", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onUpdate: "cascade" }),
+  },
+  (p) => ({
+    projectIdIdx: index("pot_projectId_idx").on(p.projectId),
   }),
-  createdAt: timestamp("createdAt", {
-    mode: "date",
-    withTimezone: true,
-  })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  createdBy: varchar("createdBy", { length: 255 })
-    .notNull()
-    .references(() => users.id, { onUpdate: "cascade" }),
-});
+);
 
 export const potsRelations = relations(pots, ({ one, many }) => ({
   project: one(projects, {
@@ -60,6 +66,7 @@ export const potToUsers = createTable(
   },
   (ptu) => ({
     pk: primaryKey({ columns: [ptu.potId, ptu.userId] }),
+    userIdIdx: index("potToUser_userId_idx").on(ptu.userId),
   }),
 );
 

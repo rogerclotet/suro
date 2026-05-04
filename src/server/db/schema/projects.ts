@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  index,
+  primaryKey,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { categories, lists, templates } from "./lists";
 import { notes } from "./notes";
 import { pots } from "./pots";
@@ -52,6 +58,7 @@ export const projectToUsers = createTable(
   },
   (ptu) => ({
     pk: primaryKey({ columns: [ptu.projectId, ptu.userId] }),
+    userIdIdx: index("projectToUser_userId_idx").on(ptu.userId),
   }),
 );
 

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import type { Project } from "../_data/project";
 
 interface ProjectState {
@@ -44,13 +45,25 @@ const useProjectsStore = create<ProjectState>()(
 );
 
 export function useProjects() {
-  const setProjects = useProjectsStore((state) => state.setProjects);
-  const projects = useProjectsStore((state) => state.projects);
-  const project = useProjectsStore((state) => state.project);
-  const selectProjectInStore = useProjectsStore((state) => state.selectProject);
-  const projectId = useProjectsStore((state) => state.projectId);
-  const selectProjectId = useProjectsStore((state) => state.selectProjectId);
-  const addCategory = useProjectsStore((state) => state.addCategory);
+  const {
+    setProjects,
+    projects,
+    project,
+    selectProject: selectProjectInStore,
+    projectId,
+    selectProjectId,
+    addCategory,
+  } = useProjectsStore(
+    useShallow((state) => ({
+      setProjects: state.setProjects,
+      projects: state.projects,
+      project: state.project,
+      selectProject: state.selectProject,
+      projectId: state.projectId,
+      selectProjectId: state.selectProjectId,
+      addCategory: state.addCategory,
+    })),
+  );
 
   const { data: session } = useSession();
   const isAdmin = useMemo(

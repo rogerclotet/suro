@@ -260,6 +260,13 @@
       "when": 1777876516942,
       "tag": "0036_mysterious_puma",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1777877796308,
+      "tag": "0037_slimy_wolf_cub",
+      "breakpoints": true
     }
   ]
 }

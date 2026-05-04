@@ -27,15 +27,15 @@ export default async function EventPage({
     return redirect("/");
   }
 
-  const event = await getEvent(projectId, eventId);
+  const [event, list, tCommon, tCal] = await Promise.all([
+    getEvent(projectId, eventId),
+    getEventList(projectId, eventId),
+    getTranslations("common"),
+    getTranslations("calendar"),
+  ]);
   if (event === undefined) {
     return redirect(`/groups/${projectId}/calendar`);
   }
-
-  const tCommon = await getTranslations("common");
-  const tCal = await getTranslations("calendar");
-
-  const list = await getEventList(projectId, event.id);
 
   return (
     <div className="space-y-6">

@@ -22,12 +22,13 @@ export default async function ListPage({
 
   const { projectId, listId } = await params;
 
-  const tCommon = await getTranslations("common");
-  const tErrors = await getTranslations("errors");
-  const tLists = await getTranslations("lists");
-
-  const lists = await getLists(projectId);
-  const templates = await getTemplates(projectId);
+  const [tCommon, tErrors, tLists, lists, templates] = await Promise.all([
+    getTranslations("common"),
+    getTranslations("errors"),
+    getTranslations("lists"),
+    getLists(projectId),
+    getTemplates(projectId),
+  ]);
 
   const list = lists.find((l) => l.id === listId);
   if (!list) {

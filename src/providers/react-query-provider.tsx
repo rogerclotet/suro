@@ -5,7 +5,18 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { type PropsWithChildren, useEffect, useState } from "react";
 
 function ReactQueryProvider({ children }: PropsWithChildren) {
-  const [client] = useState(new QueryClient());
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60_000,
+            gcTime: 5 * 60_000,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  );
   const [enableDevTools, setEnableDevTools] = useState(false);
 
   useEffect(() => {

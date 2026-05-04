@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
 import { createNoteOffline } from "@/lib/offline/offline-notes";

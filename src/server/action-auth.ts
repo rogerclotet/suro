@@ -1,6 +1,7 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
+import { cache } from "react";
 import { auth } from "@/auth";
 import { getCategory } from "./categories";
 import { db } from "./db";
@@ -29,17 +30,19 @@ export async function requireProject(projectId: string) {
   return project;
 }
 
-export async function isProjectMember(projectId: string, userId: string) {
-  const membership = await db.query.projectToUsers.findFirst({
-    columns: { projectId: true },
-    where: and(
-      eq(projectToUsers.projectId, projectId),
-      eq(projectToUsers.userId, userId),
-    ),
-  });
+export const isProjectMember = cache(
+  async (projectId: string, userId: string) => {
+    const membership = await db.query.projectToUsers.findFirst({
+      columns: { projectId: true },
+      where: and(
+        eq(projectToUsers.projectId, projectId),
+        eq(projectToUsers.userId, userId),
+      ),
+    });
 
-  return Boolean(membership);
-}
+    return Boolean(membership);
+  },
+);
 
 export async function requireProjectMembership(projectId: string) {
   const session = await requireSession();

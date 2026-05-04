@@ -1,6 +1,5 @@
-"use server";
-
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { cache } from "react";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
@@ -39,7 +38,7 @@ const projectQuery = {
   },
 } as const;
 
-export async function getProjects() {
+export const getProjects = cache(async () => {
   const session = await auth();
   if (!session) {
     return [];
@@ -59,9 +58,9 @@ export async function getProjects() {
     });
     return [];
   }
-}
+});
 
-export async function getUserProject(projectId: string) {
+export const getUserProject = cache(async (projectId: string) => {
   const session = await auth();
   if (!session) {
     return null;
@@ -85,9 +84,9 @@ export async function getUserProject(projectId: string) {
     });
     return null;
   }
-}
+});
 
-export async function getInvitedProject(projectId: string) {
+export const getInvitedProject = cache(async (projectId: string) => {
   const session = await auth();
   if (!session) {
     return null;
@@ -125,4 +124,4 @@ export async function getInvitedProject(projectId: string) {
     });
     return null;
   }
-}
+});
