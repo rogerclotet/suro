@@ -1,29 +1,5 @@
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichText } from "@/lib/sanitize-rich-text";
 import { cn } from "@/lib/utils";
-
-const ALLOWED_TAGS = [
-  "p",
-  "br",
-  "strong",
-  "em",
-  "s",
-  "h2",
-  "h3",
-  "ul",
-  "ol",
-  "li",
-  "blockquote",
-  "a",
-];
-
-const ALLOWED_ATTR = ["href", "target", "rel"];
-
-function sanitize(html: string) {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-  });
-}
 
 export function RichTextContent({
   format,
@@ -39,7 +15,7 @@ export function RichTextContent({
       <div
         className={cn("rich-text", className)}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Sanitized via DOMPurify above before render
-        dangerouslySetInnerHTML={{ __html: sanitize(content) }}
+        dangerouslySetInnerHTML={{ __html: sanitizeRichText(content) }}
       />
     );
   }

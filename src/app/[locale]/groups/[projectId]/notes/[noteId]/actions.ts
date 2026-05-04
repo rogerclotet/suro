@@ -5,6 +5,7 @@ import * as v from "valibot";
 import type { Note } from "@/app/_data/note";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
+import { sanitizeRichText } from "@/lib/sanitize-rich-text";
 import { requireNote, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { notes } from "@/server/db/schema";
@@ -18,13 +19,17 @@ export async function editNote(
   const serverNote = await requireNote(note.id);
 
   const parsedData = v.parse(noteSchema, data);
+  const safeContents =
+    parsedData.format === "html"
+      ? sanitizeRichText(parsedData.contents)
+      : parsedData.contents;
 
   try {
     await db
       .update(notes)
       .set({
         name: parsedData.name,
-        contents: parsedData.contents,
+        contents: safeContents,
         format: parsedData.format,
         updatedBy: session.user.id,
         updatedAt: new Date(),

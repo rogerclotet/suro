@@ -4,6 +4,7 @@ import assert from "node:assert";
 import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { isProjectMember } from "./action-auth";
 import { db } from "./db";
 import { spendings } from "./db/schema";
 
@@ -12,6 +13,10 @@ export async function getProjectSpendings(projectId: string) {
   assert(session, "Unauthenticated user");
 
   try {
+    if (!(await isProjectMember(projectId, session.user.id))) {
+      return [];
+    }
+
     const result = await db.query.spendings.findMany({
       where: eq(spendings.projectId, projectId),
       with: {

@@ -110,6 +110,21 @@ export async function getEvents(projectId: string, from: Date, to: Date) {
 }
 
 export async function getEventsToExport(projectId: string) {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  const membership = await db.query.projectToUsers.findFirst({
+    columns: { projectId: true },
+    where: and(
+      eq(projectToUsers.projectId, projectId),
+      eq(projectToUsers.userId, session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    throw new Error("Project not found");
+  }
+
   const results = await db.query.events.findMany({
     where: eq(events.projectId, projectId),
     with: {

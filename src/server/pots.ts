@@ -4,6 +4,7 @@ import assert from "node:assert";
 import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { isProjectMember } from "./action-auth";
 import { db } from "./db";
 import { pots, spendings } from "./db/schema";
 
@@ -12,6 +13,10 @@ export async function getProjectPots(projectId: string) {
   assert(session, "Unauthenticated user");
 
   try {
+    if (!(await isProjectMember(projectId, session.user.id))) {
+      return [];
+    }
+
     const result = await db.query.pots.findMany({
       where: eq(pots.projectId, projectId),
       with: {
@@ -48,7 +53,15 @@ export async function getPot(potId: string) {
       },
     });
 
-    return result ?? null;
+    if (!result) {
+      return null;
+    }
+
+    if (!(await isProjectMember(result.projectId, session.user.id))) {
+      return null;
+    }
+
+    return result;
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {
@@ -64,6 +77,15 @@ export async function getPotSpendings(potId: string) {
   assert(session, "Unauthenticated user");
 
   try {
+    const pot = await db.query.pots.findFirst({
+      columns: { projectId: true },
+      where: eq(pots.id, potId),
+    });
+
+    if (!pot || !(await isProjectMember(pot.projectId, session.user.id))) {
+      return [];
+    }
+
     const result = await db.query.spendings.findMany({
       where: eq(spendings.potId, potId),
       with: {

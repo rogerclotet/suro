@@ -73,6 +73,11 @@ export async function createSecretSanta(
     );
   }
 
+  const memberIds = new Set(project.users.map((u) => u.user.id));
+  if (validatedData.output.participants.some((id) => !memberIds.has(id))) {
+    throw new Error("All participants must be members of the project");
+  }
+
   const id = await db.transaction(async (trx) => {
     try {
       const result = await trx
@@ -138,6 +143,11 @@ export async function updateSecretSanta(
     throw new Error(
       `Invalid data: ${validatedData.issues.map((issue) => issue.message).join(", ")}`,
     );
+  }
+
+  const memberIds = new Set(project.users.map((u) => u.user.id));
+  if (validatedData.output.participants.some((id) => !memberIds.has(id))) {
+    throw new Error("All participants must be members of the project");
   }
 
   await db.transaction(async (trx) => {
@@ -258,6 +268,11 @@ export async function createExclusion(
     throw new Error(
       `Invalid data: ${validatedData.issues.map((issue) => issue.message).join(", ")}`,
     );
+  }
+
+  const participantIds = new Set(secretSanta.participants.map((p) => p.userId));
+  if (validatedData.output.exclusions.some((id) => !participantIds.has(id))) {
+    throw new Error("Exclusions must reference current participants");
   }
 
   if (

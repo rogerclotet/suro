@@ -28,6 +28,18 @@ export async function settlePayments(
     throw new Error("Unauthorized");
   }
 
+  for (const payment of payments) {
+    if (!potUserIds.has(payment.from) || !potUserIds.has(payment.to)) {
+      throw new Error("Settlement participants must be members of the pot");
+    }
+    if (payment.from === payment.to) {
+      throw new Error("Settlement source and destination must differ");
+    }
+    if (!Number.isFinite(payment.amount) || payment.amount <= 0) {
+      throw new Error("Settlement amount must be positive");
+    }
+  }
+
   await db.insert(spendings).values(
     payments.map((p) => ({
       amount: p.amount,

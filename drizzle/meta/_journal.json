@@ -253,6 +253,13 @@
       "when": 1777803152761,
       "tag": "0035_crazy_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1777876516942,
+      "tag": "0036_mysterious_puma",
+      "breakpoints": true
     }
   ]
 }

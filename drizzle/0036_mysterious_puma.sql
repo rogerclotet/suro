@@ -1,0 +1,1 @@
+ALTER TABLE "f_project" ADD COLUMN "inviteTokenExpiresAt" timestamp with time zone;

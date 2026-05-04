@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getCategory } from "./categories";
 import { db } from "./db";
-import { categories } from "./db/schema";
+import { categories, projectToUsers } from "./db/schema";
 import { getEvent } from "./events";
 import { getUserFile } from "./files";
 import { getList, getTemplate } from "./lists";
@@ -27,6 +27,27 @@ export async function requireProject(projectId: string) {
   }
 
   return project;
+}
+
+export async function isProjectMember(projectId: string, userId: string) {
+  const membership = await db.query.projectToUsers.findFirst({
+    columns: { projectId: true },
+    where: and(
+      eq(projectToUsers.projectId, projectId),
+      eq(projectToUsers.userId, userId),
+    ),
+  });
+
+  return Boolean(membership);
+}
+
+export async function requireProjectMembership(projectId: string) {
+  const session = await requireSession();
+  if (!(await isProjectMember(projectId, session.user.id))) {
+    throw new Error("Project not found");
+  }
+
+  return session;
 }
 
 export async function requireCategory(categoryId: string) {

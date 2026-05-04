@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import type { Project } from "@/app/_data/project";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { sanitizeRichText } from "@/lib/sanitize-rich-text";
 import { requireProject, requireSession } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { notes } from "@/server/db/schema";
@@ -19,11 +20,16 @@ export async function createNote(
   const serverProject = await requireProject(project.id);
 
   const parsedData = v.parse(noteSchema, data);
+  const safeContents =
+    parsedData.format === "html"
+      ? sanitizeRichText(parsedData.contents)
+      : parsedData.contents;
 
   const result = await db
     .insert(notes)
     .values({
       ...parsedData,
+      contents: safeContents,
       createdBy: session.user.id,
       projectId: serverProject.id,
     })

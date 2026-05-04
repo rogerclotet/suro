@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
+import { primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { categories, lists, templates } from "./lists";
 import { notes } from "./notes";
 import { pots } from "./pots";
@@ -18,6 +18,10 @@ export const projects = createTable("project", {
     .notNull()
     .references(() => users.id, { onUpdate: "cascade" }),
   inviteToken: uuid("inviteToken").defaultRandom().notNull(),
+  inviteTokenExpiresAt: timestamp("inviteTokenExpiresAt", {
+    mode: "date",
+    withTimezone: true,
+  }),
   image: varchar("image", { length: 512 }),
   color: varchar("color", { length: 20 }).notNull().default("blue"),
 });

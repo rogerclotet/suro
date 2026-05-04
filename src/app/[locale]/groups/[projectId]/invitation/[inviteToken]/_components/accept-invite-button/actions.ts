@@ -31,6 +31,13 @@ export async function acceptInvite(projectId: string, inviteToken: string) {
     throw new Error("Invalid invite token");
   }
 
+  if (
+    project.inviteTokenExpiresAt &&
+    project.inviteTokenExpiresAt.getTime() < Date.now()
+  ) {
+    throw new Error("Invite token expired");
+  }
+
   await db.insert(projectToUsers).values({
     projectId: project.id,
     userId: session.user.id,

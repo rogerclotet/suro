@@ -5,6 +5,7 @@ import { createEvents, type EventAttributes } from "ics";
 import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
+import { isProjectMember } from "@/server/action-auth";
 import { db } from "@/server/db";
 import { projects } from "@/server/db/schema";
 import { getEventsToExport } from "@/server/events";
@@ -15,6 +16,15 @@ export const GET = async (
 ) => {
   const { projectId } = await params;
   const posthog = getPostHogServer();
+
+  const session = await auth();
+  if (!session) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  if (!(await isProjectMember(projectId, session.user.id))) {
+    return new Response("Project not found", { status: 404 });
+  }
 
   const project = await db.query.projects.findFirst({
     columns: { name: true },
