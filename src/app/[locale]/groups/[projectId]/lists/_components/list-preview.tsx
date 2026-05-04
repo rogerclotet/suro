@@ -22,8 +22,9 @@ export default function ListPreview({
   const progress = totalCount > 0 ? completedCount / totalCount : null;
 
   const itemPreview =
-    !compact && !list.description && totalCount > 0
+    !compact && !list.description && todoCount > 0
       ? list.items
+          .filter((item) => !item.completed)
           .slice(0, 3)
           .map((item) => item.name)
           .join(", ")
@@ -63,8 +64,8 @@ export default function ListPreview({
             {itemPreview && (
               <div className="mt-0.5 truncate text-muted-foreground/70 text-xs">
                 {itemPreview}
-                {totalCount > 3 && (
-                  <span className="ml-1">+{totalCount - 3}</span>
+                {todoCount > 3 && (
+                  <span className="ml-1">+{todoCount - 3}</span>
                 )}
               </div>
             )}
