@@ -9,7 +9,6 @@
   }
   body {
     @apply bg-sidebar text-sidebar-foreground;
-    padding-top: env(safe-area-inset-top);
 
     main {
       @apply bg-background text-foreground;

@@ -28,7 +28,10 @@ export default async function PrivacyPage({
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="px-6 py-5">
+      <header
+        className="px-6 pb-5"
+        style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}
+      >
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Suro" width={32} height={32} />
