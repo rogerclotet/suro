@@ -1,4 +1,4 @@
-const CACHE_NAME = "suro-v1";
+const CACHE_NAME = "suro-v2";
 
 const PRECACHE_URLS = ["/", "/manifest.webmanifest", "/favicon.png"];
 
