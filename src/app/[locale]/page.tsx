@@ -1,8 +1,13 @@
 import Redirect from "@/app/_components/redirect";
-import { checkAuth } from "@/lib/check-auth";
+import { auth } from "@/auth";
+import Landing from "./_components/landing";
 
 export default async function HomePage() {
-  await checkAuth();
+  const session = await auth();
+
+  if (!session) {
+    return <Landing />;
+  }
 
   return <Redirect />;
 }

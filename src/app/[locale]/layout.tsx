@@ -107,7 +107,7 @@ export default async function LocaleLayout({
                 <SidebarLayout>
                   <TooltipProvider>
                     <ProjectsProvider>
-                      <NotificationProvider />
+                      {session && <NotificationProvider />}
                       {children}
                       <Toaster position="bottom-center" />
                       <ConflictModal />
