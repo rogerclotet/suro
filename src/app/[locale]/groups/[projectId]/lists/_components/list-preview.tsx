@@ -17,6 +17,17 @@ export default function ListPreview({
   const locale = useLocale();
   const todoCount = list.items.filter((item) => !item.completed).length;
   const completed = list.items.length > 0 && todoCount === 0;
+  const totalCount = list.items.length;
+  const completedCount = totalCount - todoCount;
+  const progress = totalCount > 0 ? completedCount / totalCount : null;
+
+  const itemPreview =
+    !compact && !list.description && totalCount > 0
+      ? list.items
+          .slice(0, 3)
+          .map((item) => item.name)
+          .join(", ")
+      : null;
 
   return (
     <Link
@@ -27,44 +38,67 @@ export default function ListPreview({
     >
       <div
         className={cn(
-          "flex items-center gap-3 rounded-[12px] border border-transparent bg-card transition-colors hover:border-border hover:bg-accent",
+          "flex flex-col rounded-[12px] border border-transparent bg-card transition-colors hover:border-border hover:bg-accent",
           compact ? "px-3 py-[10px]" : "px-4 py-[14px]",
           completed && compact && "opacity-50",
         )}
       >
-        <div className="min-w-0 flex-1">
-          <div
-            className={cn(
-              "truncate font-semibold",
-              compact ? "text-sm" : "text-base",
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <div
+              className={cn(
+                "truncate font-semibold",
+                compact ? "text-sm" : "text-base",
+              )}
+            >
+              {list.name}
+            </div>
+
+            {list.description && (
+              <div className="mt-0.5 truncate text-muted-foreground text-xs">
+                {list.description}
+              </div>
             )}
-          >
-            {list.name}
+
+            {itemPreview && (
+              <div className="mt-0.5 truncate text-muted-foreground/70 text-xs">
+                {itemPreview}
+                {totalCount > 3 && (
+                  <span className="ml-1">+{totalCount - 3}</span>
+                )}
+              </div>
+            )}
+
+            {list.event && (
+              <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                <CalendarFold size={11} />
+                {list.event.startAt.toLocaleString(locale, {
+                  dateStyle: "medium",
+                })}
+              </div>
+            )}
           </div>
 
-          {list.description && (
-            <div className="mt-0.5 truncate text-muted-foreground text-xs">
-              {list.description}
+          {todoCount > 0 ? (
+            <div className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-secondary px-1.5 font-bold text-secondary-foreground text-xs">
+              {todoCount}
             </div>
-          )}
-
-          {list.event && (
-            <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-              <CalendarFold size={11} />
-              {list.event.startAt.toLocaleString(locale, {
-                dateStyle: "medium",
-              })}
-            </div>
-          )}
+          ) : completed && compact ? (
+            <CheckIcon size={18} className="shrink-0 text-primary" />
+          ) : null}
         </div>
 
-        {todoCount > 0 ? (
-          <div className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-secondary px-1.5 font-bold text-secondary-foreground text-xs">
-            {todoCount}
+        {!compact && progress !== null && (
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all",
+                completed ? "bg-primary" : "bg-primary/50",
+              )}
+              style={{ width: `${progress * 100}%` }}
+            />
           </div>
-        ) : completed && compact ? (
-          <CheckIcon size={18} className="shrink-0 text-primary" />
-        ) : null}
+        )}
       </div>
     </Link>
   );
