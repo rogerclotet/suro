@@ -1,6 +1,17 @@
 # Suro
 
-Group management app.
+A shared corkboard for the people you do life with. Suro keeps your group's lists, calendar, files, notes, shared expenses and Secret Santa in one place. Built for flatmates, family and friend groups.
+
+## What's inside
+
+- **Lists**: shopping, packing, to-dos. Categorize items, save reusable templates, check things off together in real time.
+- **Calendar**: shared events with the option to link a list to an event (so the packing list lives next to the trip).
+- **Files & notes**: share photos, PDFs and rich-text notes with the whole group.
+- **Expenses**: track who paid for what, split fairly, and let Suro suggest the simplest way to settle up.
+- **Secret Santa**: private gift exchange with custom exclusions and a hidden ideas list only your match can see.
+- **Notifications**: in-app and push, only when something actually changes in your group.
+
+The interface is available in Catalan, Spanish and English.
 
 ## How to develop
 

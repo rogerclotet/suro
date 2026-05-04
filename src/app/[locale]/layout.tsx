@@ -43,17 +43,40 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
 
+  const title = t("title");
+  const description = t("description");
+  const ogImage = {
+    url: "/android-chrome-512x512.png",
+    width: 512,
+    height: 512,
+    alt: title,
+  };
+
   return {
-    title: t("title"),
-    description: t("description"),
+    title,
+    description,
     icons: [{ rel: "icon", url: "/favicon.png" }],
     appleWebApp: {
-      title: t("title"),
+      title,
       capable: true,
       statusBarStyle: "black-translucent",
       startupImage: "/favicon.png",
     },
     manifest: `/${locale}/manifest.webmanifest`,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale,
+      siteName: title,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
