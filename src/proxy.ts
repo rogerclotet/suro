@@ -6,10 +6,14 @@ export const pathnameHeader = "x-pathname";
 
 const intlMiddleware = createMiddleware(routing);
 
-// The reverse proxy forwards the container's internal port via X-Forwarded-Port
-// (and sometimes inside X-Forwarded-Host). next-intl reads those when building
-// redirect URLs, which leaks the upstream port into the public Location header.
-function sanitizeForwardedPort(request: NextRequest): NextRequest {
+// next-intl reads X-Forwarded-Host/Port when building redirect URLs.
+// Two failure modes:
+//   Production: proxy sets x-forwarded-host: domain.com:3000 (internal port
+//     leaks into Location header) → strip the port.
+//   Local dev: Next.js dev server sets x-forwarded-host: localhost:3000 (same
+//     host as the `host` header) → stripping the port drops it from the
+//     redirect. Delete the header instead so next-intl falls back to `host`.
+function sanitizeForwardedHeaders(request: NextRequest): NextRequest {
   const headers = new Headers(request.headers);
   let mutated = false;
 
@@ -19,9 +23,21 @@ function sanitizeForwardedPort(request: NextRequest): NextRequest {
   }
 
   const xfh = headers.get("x-forwarded-host");
-  if (xfh?.includes(":")) {
-    headers.set("x-forwarded-host", xfh.replace(/:\d+$/, ""));
-    mutated = true;
+  if (xfh) {
+    const xfhHostname = xfh.split(":")[0] ?? xfh;
+    const hostHostname = (headers.get("host") ?? "").split(":")[0];
+
+    if (xfhHostname === hostHostname) {
+      // Same hostname as host header — locally-injected header (dev server or
+      // local proxy). Remove it so next-intl uses the host header directly.
+      headers.delete("x-forwarded-host");
+      mutated = true;
+    } else if (xfh !== xfhHostname) {
+      // Different hostname — real reverse proxy forwarding. Strip the leaked
+      // internal port from the public domain name.
+      headers.set("x-forwarded-host", xfhHostname);
+      mutated = true;
+    }
   }
 
   if (!mutated) return request;
@@ -29,7 +45,7 @@ function sanitizeForwardedPort(request: NextRequest): NextRequest {
 }
 
 export function proxy(request: NextRequest, _event: NextFetchEvent) {
-  const sanitized = sanitizeForwardedPort(request);
+  const sanitized = sanitizeForwardedHeaders(request);
 
   // Skip i18n routing for API routes and static assets — let them through.
   const { pathname } = sanitized.nextUrl;
