@@ -1,14 +1,13 @@
-"use server";
-
 import assert from "node:assert";
 import { desc, eq } from "drizzle-orm";
+import { cache } from "react";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { isProjectMember } from "./action-auth";
 import { db } from "./db";
 import { pots, spendings } from "./db/schema";
 
-export async function getProjectPots(projectId: string) {
+export const getProjectPots = cache(async (projectId: string) => {
   const session = await auth();
   assert(session, "Unauthenticated user");
 
@@ -39,9 +38,9 @@ export async function getProjectPots(projectId: string) {
     });
     return [];
   }
-}
+});
 
-export async function getPot(potId: string) {
+export const getPot = cache(async (potId: string) => {
   const session = await auth();
   assert(session, "Unauthenticated user");
 
@@ -70,9 +69,9 @@ export async function getPot(potId: string) {
     });
     return null;
   }
-}
+});
 
-export async function getPotSpendings(potId: string) {
+export const getPotSpendings = cache(async (potId: string) => {
   const session = await auth();
   assert(session, "Unauthenticated user");
 
@@ -105,4 +104,4 @@ export async function getPotSpendings(potId: string) {
     });
     return [];
   }
-}
+});

@@ -1,14 +1,13 @@
-"use server";
-
 import assert from "node:assert";
 import { and, asc, desc, eq } from "drizzle-orm";
+import { cache } from "react";
 import type { Template } from "@/app/_data/list";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
 import { listItems, lists, projects, templates } from "./db/schema";
 
-export async function getList(listId: string) {
+export const getList = cache(async (listId: string) => {
   const session = await auth();
   assert(session, "Unauthenticated user");
 
@@ -47,51 +46,53 @@ export async function getList(listId: string) {
     });
     return undefined;
   }
-}
+});
 
-export async function getEventList(projectId: string, eventId: string) {
-  const session = await auth();
-  assert(session, "Unauthenticated user");
+export const getEventList = cache(
+  async (projectId: string, eventId: string) => {
+    const session = await auth();
+    assert(session, "Unauthenticated user");
 
-  try {
-    const result = await db.query.lists.findFirst({
-      with: {
-        project: {
-          with: {
-            users: true,
+    try {
+      const result = await db.query.lists.findFirst({
+        with: {
+          project: {
+            with: {
+              users: true,
+            },
           },
-        },
-        items: {
-          with: {
-            category: true,
+          items: {
+            with: {
+              category: true,
+            },
+            orderBy: [asc(listItems.completed), asc(listItems.name)],
           },
-          orderBy: [asc(listItems.completed), asc(listItems.name)],
+          event: true,
         },
-        event: true,
-      },
-      where: and(eq(lists.eventId, eventId), eq(lists.projectId, projectId)),
-    });
+        where: and(eq(lists.eventId, eventId), eq(lists.projectId, projectId)),
+      });
 
-    if (
-      result?.project.users.find((u) => u.userId === session.user.id) ===
-      undefined
-    ) {
-      throw new Error("List not found");
+      if (
+        result?.project.users.find((u) => u.userId === session.user.id) ===
+        undefined
+      ) {
+        throw new Error("List not found");
+      }
+
+      return result;
+    } catch (e) {
+      const posthog = getPostHogServer();
+      posthog.captureException(e, session.user.id, {
+        action: "get_event_list",
+        projectId,
+        eventId,
+      });
+      return undefined;
     }
+  },
+);
 
-    return result;
-  } catch (e) {
-    const posthog = getPostHogServer();
-    posthog.captureException(e, session.user.id, {
-      action: "get_event_list",
-      projectId,
-      eventId,
-    });
-    return undefined;
-  }
-}
-
-export async function getLists(projectId: string) {
+export const getLists = cache(async (projectId: string) => {
   const session = await auth();
   if (!session) {
     return [];
@@ -137,9 +138,9 @@ export async function getLists(projectId: string) {
     });
     return [];
   }
-}
+});
 
-export async function getTemplate(templateId: string) {
+export const getTemplate = cache(async (templateId: string) => {
   const session = await auth();
   assert(session, "Unauthenticated user");
 
@@ -171,9 +172,9 @@ export async function getTemplate(templateId: string) {
     });
     return undefined;
   }
-}
+});
 
-export async function getTemplates(projectId: string) {
+export const getTemplates = cache(async (projectId: string) => {
   const session = await auth();
   if (!session) {
     return [];
@@ -209,4 +210,4 @@ export async function getTemplates(projectId: string) {
     });
     return [];
   }
-}
+});
