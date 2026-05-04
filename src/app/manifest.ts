@@ -1,24 +1,37 @@
 import type { MetadataRoute } from "next";
+import { cookies, headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+import { type Locale, routing } from "@/i18n/routing";
 
-export async function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+function isLocale(value: string | undefined): value is Locale {
+  return !!value && (routing.locales as readonly string[]).includes(value);
 }
 
-export default async function manifest({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<MetadataRoute.Manifest> {
-  const { locale } = await params;
+async function resolveLocale(): Promise<Locale> {
+  const cookieStore = await cookies();
+  const fromCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  if (isLocale(fromCookie)) return fromCookie;
+
+  const acceptLanguage = (await headers()).get("accept-language") ?? "";
+  for (const part of acceptLanguage.split(",")) {
+    const tag = part.split(";")[0]?.trim().toLowerCase();
+    if (!tag) continue;
+    const base = tag.split("-")[0];
+    if (isLocale(base)) return base;
+  }
+
+  return routing.defaultLocale;
+}
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const locale = await resolveLocale();
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
     name: t("title"),
     short_name: t("appShortName"),
     description: t("description"),
-    start_url: `/${locale}`,
+    start_url: "/",
     display: "standalone",
     orientation: "portrait",
     theme_color: "#1a0e08",

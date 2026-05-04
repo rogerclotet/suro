@@ -1,6 +1,6 @@
 const CACHE_NAME = "suro-v1";
 
-const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.png"];
+const PRECACHE_URLS = ["/", "/manifest.webmanifest", "/favicon.png"];
 
 // Sections that should be proactively cached when any section is visited.
 const SECTION_PATHS = ["llistes", "calendari", "notes", "despeses"];
