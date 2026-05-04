@@ -28,10 +28,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
+    id: "/",
     name: t("title"),
     short_name: t("appShortName"),
     description: t("description"),
     start_url: "/",
+    scope: "/",
     display: "standalone",
     orientation: "portrait",
     theme_color: "#1a0e08",
