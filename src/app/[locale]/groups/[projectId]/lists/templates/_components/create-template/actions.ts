@@ -22,7 +22,7 @@ export async function createTemplate(
 
   const project = await getUserProject(projectId);
 
-  if (project?.users.find((u) => u.user.id === session.user.id) === undefined) {
+  if (!project) {
     throw new Error("The user is not part of the project");
   }
 
