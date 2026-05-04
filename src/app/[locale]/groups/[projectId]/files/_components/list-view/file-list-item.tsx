@@ -24,6 +24,14 @@ export default function FileListItem({ file }: { file: File }) {
         <div className="flex w-16 shrink-0 items-center justify-center overflow-hidden">
           {file.type.includes("image") ? (
             <Image src={file.url} alt={file.name} width={42} height={42} />
+          ) : file.thumbnailUrl ? (
+            <Image
+              src={file.thumbnailUrl}
+              alt={file.name}
+              width={42}
+              height={42}
+              className="aspect-square rounded object-cover object-top"
+            />
           ) : (
             <Image
               src="/pdf.svg"

@@ -267,6 +267,13 @@
       "when": 1777877796308,
       "tag": "0037_slimy_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1777884500362,
+      "tag": "0038_careful_wallop",
+      "breakpoints": true
     }
   ]
 }

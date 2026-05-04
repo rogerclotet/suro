@@ -15,6 +15,7 @@ import {
 } from "@/server/db/schema";
 import { translateNotificationBody } from "@/server/notification-i18n";
 import { createNotification } from "@/server/notifications";
+import { generatePdfThumbnail } from "@/server/pdf-thumbnail";
 import { sendNotificationsToUsers } from "@/server/push";
 import { utapi } from "@/server/uploadthing";
 
@@ -74,9 +75,15 @@ export const uploadFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
 
+      const thumbnail =
+        file.type === "application/pdf"
+          ? await generatePdfThumbnail(file.url)
+          : null;
+
       await db.insert(files).values({
         name: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
         url: file.url,
+        thumbnailUrl: thumbnail?.url ?? null,
         type: file.type,
         size: file.size,
         uploadedBy: metadata.userId,

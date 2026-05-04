@@ -14,6 +14,7 @@ export const files = createTable(
       .primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     url: varchar("url", { length: 255 }).notNull(),
+    thumbnailUrl: varchar("thumbnailUrl", { length: 255 }),
     type: varchar("type", { length: 255 }).notNull(),
     size: integer("size").notNull(),
     uploadedBy: varchar("uploadedBy", { length: 255 })

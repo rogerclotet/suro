@@ -26,9 +26,12 @@ export async function deleteFile(file: File) {
     return;
   }
 
-  const fileKey = serverFile.url.split("/").slice(-1);
+  const keysToDelete = [serverFile.url, serverFile.thumbnailUrl]
+    .filter((u): u is string => !!u)
+    .map((u) => u.split("/").slice(-1)[0])
+    .filter((k): k is string => !!k);
   try {
-    await utapi.deleteFiles(fileKey);
+    await utapi.deleteFiles(keysToDelete);
   } catch (e) {
     const posthog = getPostHogServer();
     posthog.captureException(e, session.user.id, {

@@ -9,9 +9,9 @@ const cspReportOnly = [
   // next/script + dev hot reload need 'unsafe-inline'/'unsafe-eval'; tighten later via nonces
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://utfs.io https://*.googleusercontent.com",
+  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io",
+  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -32,11 +32,16 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "sharp"],
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "utfs.io",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ufs.sh",
       },
     ],
   },

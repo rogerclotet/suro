@@ -1,0 +1,1 @@
+ALTER TABLE "f_file" ADD COLUMN "thumbnailUrl" varchar(255);

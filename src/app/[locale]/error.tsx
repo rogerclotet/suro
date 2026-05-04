@@ -24,7 +24,7 @@ export default function ErrorPage({
         <AlertTitle>{tCommon("error")}</AlertTitle>
         <AlertDescription>
           <p>{tCommon("errorOccurred")}</p>
-          <p className="italic">{error.message}</p>
+          <p className="break-words italic">{error.message}</p>
         </AlertDescription>
       </Alert>
     </div>
