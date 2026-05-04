@@ -93,13 +93,23 @@ function FilePreviewContent({ file }: { file: File }) {
 
   if (file.thumbnailUrl) {
     return (
-      <Image
-        src={file.thumbnailUrl}
-        alt={file.name}
-        width={350}
-        height={350}
-        className="h-full w-full object-cover object-top"
-      />
+      <div className="relative h-full w-full">
+        <Image
+          src={file.thumbnailUrl}
+          alt={file.name}
+          width={350}
+          height={350}
+          className="h-full w-full object-cover object-top"
+        />
+        <Image
+          src="/pdf.svg"
+          alt=""
+          aria-hidden
+          width={32}
+          height={32}
+          className="absolute right-2 bottom-2 drop-shadow-md"
+        />
+      </div>
     );
   }
 
