@@ -6,6 +6,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { getRandomColor } from "@/lib/catppuccin-colors";
 import { categories, lists, templates } from "./lists";
 import { notes } from "./notes";
 import { pots } from "./pots";
@@ -29,7 +30,7 @@ export const projects = createTable("project", {
     withTimezone: true,
   }),
   image: varchar("image", { length: 512 }),
-  color: varchar("color", { length: 20 }).notNull().default("blue"),
+  color: varchar("color", { length: 20 }).notNull().$defaultFn(getRandomColor),
 });
 
 export const projectsRelations = relations(projects, ({ many }) => ({

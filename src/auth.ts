@@ -2,7 +2,6 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
-import { getRandomColor } from "./lib/catppuccin-colors";
 import { getPostHogServer } from "./lib/posthog-server";
 import { db } from "./server/db";
 import {
@@ -43,7 +42,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             .values({
               name: "Personal",
               createdBy: userId,
-              color: getRandomColor(),
             })
             .returning({ id: projects.id });
 

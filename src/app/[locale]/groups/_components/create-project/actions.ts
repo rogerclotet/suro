@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 import { auth } from "@/auth";
-import { getRandomColor } from "@/lib/catppuccin-colors";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "@/server/db";
 import { projects, projectToUsers } from "@/server/db/schema";
@@ -23,7 +22,6 @@ export async function createProject(data: v.InferInput<typeof projectSchema>) {
     .values({
       ...parsedData,
       createdBy: session.user.id,
-      color: getRandomColor(),
     })
     .returning({ id: projects.id });
   if (!result || result.length < 1 || !result[0]) {

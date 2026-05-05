@@ -274,6 +274,13 @@
       "when": 1777884500362,
       "tag": "0038_careful_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1778016225656,
+      "tag": "0039_wide_wallop",
+      "breakpoints": true
     }
   ]
 }
