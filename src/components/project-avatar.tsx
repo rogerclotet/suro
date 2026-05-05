@@ -23,7 +23,10 @@ export default function ProjectAvatar({
     CATPPUCCIN_COLORS.peach;
 
   return (
-    <Avatar className={cn("h-8 w-8", className)}>
+    <Avatar
+      key={project.image ?? "no-image"}
+      className={cn("h-8 w-8", className)}
+    >
       {project.image && <AvatarImage src={project.image} alt={project.name} />}
       <AvatarFallback
         delayMs={0}
