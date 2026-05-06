@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   primaryKey,
@@ -24,6 +25,7 @@ export const users = createTable("user", {
   avatarColor: varchar("avatarColor", { length: 20 }),
   dateLocale: varchar("dateLocale", { length: 10 }).default("ca-ES"),
   locale: varchar("locale", { length: 5 }).default("ca").notNull(),
+  onboardingCompleted: boolean("onboardingCompleted").default(false).notNull(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

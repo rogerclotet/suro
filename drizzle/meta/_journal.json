@@ -281,6 +281,13 @@
       "when": 1778016225656,
       "tag": "0039_wide_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1778063084040,
+      "tag": "0040_mature_cyclops",
+      "breakpoints": true
     }
   ]
 }

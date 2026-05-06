@@ -525,5 +525,26 @@
     "read": "Leídas",
     "markAllRead": "Marcar todo como leído",
     "timeAgoNow": "ahora"
+  },
+  "onboarding": {
+    "welcomeTitle": "¡Bienvenido a Suro!",
+    "welcomeBody": "Suro es un tablón compartido para la gente con la que compartes tu día a día. Vamos a hacer un recorrido rápido por lo que puedes hacer.",
+    "listsTitle": "Listas",
+    "listsBody": "Crea listas de la compra, tareas pendientes y listas de equipaje. Categoriza elementos, guarda plantillas reutilizables y marca cosas juntos en tiempo real.",
+    "calendarTitle": "Calendario",
+    "calendarBody": "Planifica viajes, cenas y cumpleaños. Vincula una lista a cualquier evento para tener todo lo que necesitas en un solo lugar.",
+    "filesTitle": "Archivos",
+    "filesBody": "Comparte fotos, PDFs y documentos con tu grupo. No más buscar en el historial del chat.",
+    "notesTitle": "Notas",
+    "notesBody": "Escribe y comparte notas con formato con tu grupo. Ideal para notas de reuniones, planes de viaje o recetas.",
+    "expensesTitle": "Gastos",
+    "expensesBody": "Registra quién pagó qué, divide los costes de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.",
+    "profileTitle": "Configura tu perfil",
+    "profileBody": "Añade tu nombre y elige un avatar para que los miembros de tu grupo te reconozcan.",
+    "next": "Siguiente",
+    "skip": "Saltar",
+    "back": "Atrás",
+    "finish": "Terminar",
+    "letsGo": "¡Vamos!"
   }
 }

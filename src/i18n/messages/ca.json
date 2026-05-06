@@ -525,5 +525,26 @@
     "read": "Llegides",
     "markAllRead": "Marcar tot com a llegit",
     "timeAgoNow": "ara"
+  },
+  "onboarding": {
+    "welcomeTitle": "Benvingut a Suro!",
+    "welcomeBody": "Suro és un tauler compartit per a la gent amb qui comparteixes el dia a dia. Fem un recorregut ràpid per tot el que pots fer.",
+    "listsTitle": "Llistes",
+    "listsBody": "Crea llistes de la compra, tasques pendents i llistes d'equipatge. Categoritza elements, desa plantilles reutilitzables i marca coses junts en temps real.",
+    "calendarTitle": "Calendari",
+    "calendarBody": "Planifica viatges, sopars i aniversaris. Vincula una llista a qualsevol esdeveniment per tenir tot el que necessites en un sol lloc.",
+    "filesTitle": "Fitxers",
+    "filesBody": "Comparteix fotos, PDFs i documents amb el teu grup. No més buscar a l'historial del xat.",
+    "notesTitle": "Notes",
+    "notesBody": "Escriu i comparteix notes amb format amb el teu grup. Ideal per a notes de reunions, plans de viatge o receptes.",
+    "expensesTitle": "Despeses",
+    "expensesBody": "Registra qui ha pagat què, divideix els costos de manera justa i deixa que Suro calculi la manera més senzilla de saldar comptes.",
+    "profileTitle": "Configura el teu perfil",
+    "profileBody": "Afegeix el teu nom i tria un avatar perquè els membres del teu grup et reconeguin.",
+    "next": "Següent",
+    "skip": "Saltar",
+    "back": "Enrere",
+    "finish": "Acabar",
+    "letsGo": "Som-hi!"
   }
 }

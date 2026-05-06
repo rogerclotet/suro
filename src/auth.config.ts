@@ -32,6 +32,9 @@ export default {
         .dateLocale as string | null;
       session.user.locale = (user as unknown as Record<string, unknown>)
         .locale as string | null;
+      session.user.onboardingCompleted = (
+        user as unknown as Record<string, unknown>
+      ).onboardingCompleted as boolean;
       return session;
     },
   },

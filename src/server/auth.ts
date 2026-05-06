@@ -15,6 +15,7 @@ declare module "next-auth" {
       avatarColor?: string | null;
       dateLocale?: string | null;
       locale?: string | null;
+      onboardingCompleted?: boolean;
     } & DefaultSession["user"];
   }
 }

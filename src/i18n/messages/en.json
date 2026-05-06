@@ -525,5 +525,26 @@
     "read": "Read",
     "markAllRead": "Mark all as read",
     "timeAgoNow": "just now"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Suro!",
+    "welcomeBody": "Suro is a shared corkboard for the people you do life with. Let's take a quick tour of what you can do.",
+    "listsTitle": "Lists",
+    "listsBody": "Create shopping lists, to-dos, and packing lists. Categorize items, save reusable templates, and check things off together in real time.",
+    "calendarTitle": "Calendar",
+    "calendarBody": "Plan trips, dinners and birthdays. Link a list to any event so everything you need is in one place.",
+    "filesTitle": "Files",
+    "filesBody": "Share photos, PDFs and documents with your group. No more digging through chat history.",
+    "notesTitle": "Notes",
+    "notesBody": "Write and share rich-text notes with your group. Great for meeting notes, travel plans, or recipes.",
+    "expensesTitle": "Expenses",
+    "expensesBody": "Track who paid for what, split costs fairly, and let Suro work out the simplest way to settle up.",
+    "profileTitle": "Set up your profile",
+    "profileBody": "Add your name and pick an avatar so your group members can recognize you.",
+    "next": "Next",
+    "skip": "Skip",
+    "back": "Back",
+    "finish": "Finish",
+    "letsGo": "Let's go!"
   }
 }
