@@ -22,7 +22,6 @@ export const CATPPUCCIN_COLOR_KEYS = Object.keys(
 ) as CatppuccinColor[];
 
 export function getRandomColor(): CatppuccinColor {
-  return CATPPUCCIN_COLOR_KEYS[
-    Math.floor(Math.random() * CATPPUCCIN_COLOR_KEYS.length)
-  ]!;
+  const index = Math.floor(Math.random() * CATPPUCCIN_COLOR_KEYS.length);
+  return CATPPUCCIN_COLOR_KEYS[index] ?? "blue";
 }

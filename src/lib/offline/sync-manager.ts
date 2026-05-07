@@ -125,7 +125,7 @@ class SyncManagerClass {
 
         try {
           await this.processSyncItem(item);
-          await db.syncQueue.delete(item.id!);
+          await db.syncQueue.delete(item.id);
           syncedCount++;
         } catch (error) {
           if (isNetworkError(error)) break;
@@ -231,12 +231,12 @@ class SyncManagerClass {
 
       if (ConflictResolver.canAutoResolve(conflict)) {
         await ConflictResolver.autoResolve(conflict);
-        await db.syncQueue.delete(item.id!);
+        await db.syncQueue.delete(item.id);
         return;
       }
 
       await this.markConflict(item.entityType, item.entityId, error.serverData);
-      await db.syncQueue.delete(item.id!);
+      await db.syncQueue.delete(item.id);
 
       window.dispatchEvent(
         new CustomEvent("sync-conflict", {
@@ -251,7 +251,7 @@ class SyncManagerClass {
     const newRetryCount = item.retryCount + 1;
 
     if (newRetryCount >= MAX_RETRY_COUNT) {
-      await db.syncQueue.delete(item.id!);
+      await db.syncQueue.delete(item.id);
       // Mark the IDB entity as synced so it doesn't stay orphaned as "pending"
       // with no queue entry forever. The server has the authoritative state;
       // the next seedFromServer will overwrite the IDB data with fresh server data.
@@ -265,7 +265,7 @@ class SyncManagerClass {
       return;
     }
 
-    await db.syncQueue.update(item.id!, {
+    await db.syncQueue.update(item.id, {
       retryCount: newRetryCount,
       lastError: (error as Error).message,
     });
@@ -312,7 +312,7 @@ class SyncManagerClass {
 
     for (const item of pendingItems) {
       // Update both entityId AND timestamp to be after server's updatedAt
-      await db.syncQueue.update(item.id!, {
+      await db.syncQueue.update(item.id, {
         entityId: serverId,
         timestamp: serverUpdatedAt + 1,
       });
@@ -495,7 +495,7 @@ class SyncManagerClass {
         item.lastError?.includes("fetch") ||
         item.lastError?.includes("network")
       ) {
-        await db.syncQueue.update(item.id!, {
+        await db.syncQueue.update(item.id, {
           retryCount: 0,
           lastError: undefined,
         });

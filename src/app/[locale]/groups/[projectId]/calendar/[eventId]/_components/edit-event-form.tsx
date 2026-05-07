@@ -205,16 +205,18 @@ function EditEventFormContent({
         );
       }
 
+      const { from, to } = dataToEdit.dates;
+      if (!from || !to) {
+        return;
+      }
+
       try {
         await updateEventOffline(
           event,
           {
             name: dataToEdit.name,
             description: dataToEdit.description,
-            dates: {
-              from: dataToEdit.dates.from!,
-              to: dataToEdit.dates.to!,
-            },
+            dates: { from, to },
             allDay: dataToEdit.allDay,
           },
           project,

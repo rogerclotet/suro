@@ -34,7 +34,6 @@ pnpm install
 ### Run linter and tests
 
 ```bash
-pnpm eslint
 pnpm biome:check
 pnpm typecheck
 pnpm test

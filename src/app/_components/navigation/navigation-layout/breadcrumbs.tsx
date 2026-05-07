@@ -17,7 +17,6 @@ import {
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, usePathname } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 import GroupSwitcherSheet from "../group-switcher-sheet";
 import { useMenuItems } from "../use-menu-items";
 

@@ -28,7 +28,10 @@ export async function createSpending(
   }
 
   const project = await getUserProject(pot.projectId);
-  if (project?.users.find((u) => u.user.id === session.user.id) === undefined) {
+  if (!project) {
+    throw new Error("Project not found");
+  }
+  if (!project.users.find((u) => u.user.id === session.user.id)) {
     throw new Error("The user is not part of the project");
   }
 
@@ -82,11 +85,11 @@ export async function createSpending(
         null,
       );
       await sendProjectNotification({
-        project: project!,
+        project,
         body: fallbackBody,
         bodyKey,
         bodyParams: params,
-        title: project?.name,
+        title: project.name,
         path: `/groups/${pot.projectId}/expenses/${potId}`,
         type: "spending_created",
         section: "expenses",

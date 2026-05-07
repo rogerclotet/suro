@@ -106,7 +106,7 @@ export type EntityType =
   | "spending";
 
 export interface SyncQueueItem {
-  id?: number;
+  id: number;
   entityType: EntityType;
   operation: "create" | "update" | "delete";
   entityId: string;

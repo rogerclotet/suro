@@ -62,8 +62,7 @@ function addBalanceForSharedSpending(
       return 0;
     });
 
-  for (let i = 0; i < sortedIds.length; i++) {
-    const memberId = sortedIds[i]!;
+  for (const [i, memberId] of sortedIds.entries()) {
     const share = base + (i < remainder ? 1 : 0);
     if (memberId === from) {
       balancesFromSpendings[from] =

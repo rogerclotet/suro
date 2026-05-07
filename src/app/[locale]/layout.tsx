@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import "@fontsource/convergence";
+import "@fontsource/convergence/index.css";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { SessionProvider } from "next-auth/react";

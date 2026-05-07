@@ -32,8 +32,8 @@ export default async function IdeasPage({
     redirect(secretSantaPath);
   }
 
-  const participant = secretSanta!.participants.find(
-    (p) => p.userId === session!.user.id,
+  const participant = secretSanta?.participants.find(
+    (p) => p.userId === session?.user.id,
   );
   if (!participant) {
     redirect(secretSantaPath);
@@ -44,8 +44,8 @@ export default async function IdeasPage({
       <h2 className="font-semibold text-2xl">{t("ideasTitle")}</h2>
 
       <GiftIdeas
-        giftIdeas={participant!.giftIdeas}
-        secretSantaId={secretSanta!.id}
+        giftIdeas={participant?.giftIdeas}
+        secretSantaId={secretSanta?.id}
       />
     </div>
   );

@@ -14,4 +14,4 @@ const CollapsibleContent = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent };
+export { Collapsible, CollapsibleContent, CollapsibleTrigger };

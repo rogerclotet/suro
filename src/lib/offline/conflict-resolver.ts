@@ -14,8 +14,37 @@ export interface Conflict {
 
 type EntityType = "list" | "listItem" | "category";
 
-export class ConflictResolver {
-  static canAutoResolve(conflict: Conflict): boolean {
+function getTable(entityType: string) {
+  switch (entityType) {
+    case "list":
+      return db.lists;
+    case "listItem":
+      return db.listItems;
+    case "category":
+      return db.categories;
+    default:
+      return null;
+  }
+}
+
+function mergeData(
+  local: Record<string, unknown>,
+  server: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged = { ...server };
+
+  for (const [key, value] of Object.entries(local)) {
+    if (key.startsWith("_")) continue;
+    if (value !== null && value !== undefined) {
+      merged[key] = value;
+    }
+  }
+
+  return merged;
+}
+
+export const ConflictResolver = {
+  canAutoResolve(conflict: Conflict): boolean {
     const { entityType, localData, serverData } = conflict;
 
     if (entityType === "listItem") {
@@ -50,11 +79,11 @@ export class ConflictResolver {
     }
 
     return false;
-  }
+  },
 
-  static async autoResolve(conflict: Conflict): Promise<void> {
+  async autoResolve(conflict: Conflict): Promise<void> {
     const { entityType, entityId, localData, serverData } = conflict;
-    const table = ConflictResolver.getTable(entityType);
+    const table = getTable(entityType);
     if (!table) return;
 
     // For different items, just sync status
@@ -77,14 +106,14 @@ export class ConflictResolver {
         _lastModified: Date.now(),
       });
     }
-  }
+  },
 
-  static async resolveManually(
+  async resolveManually(
     entityType: EntityType,
     entityId: string,
     resolution: ConflictResolution,
   ): Promise<void> {
-    const table = ConflictResolver.getTable(entityType);
+    const table = getTable(entityType);
     if (!table) return;
 
     const entity = await table.get(entityId);
@@ -130,7 +159,7 @@ export class ConflictResolver {
 
       case "merge": {
         // Merge: use server as base, overlay local non-null values
-        const merged = ConflictResolver.mergeData(localData, serverData);
+        const merged = mergeData(localData, serverData);
         await table.update(entityId, {
           ...merged,
           _syncStatus: "pending",
@@ -145,38 +174,9 @@ export class ConflictResolver {
         break;
       }
     }
-  }
+  },
 
-  private static mergeData(
-    local: Record<string, unknown>,
-    server: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const merged = { ...server };
-
-    for (const [key, value] of Object.entries(local)) {
-      if (key.startsWith("_")) continue;
-      if (value !== null && value !== undefined) {
-        merged[key] = value;
-      }
-    }
-
-    return merged;
-  }
-
-  private static getTable(entityType: string) {
-    switch (entityType) {
-      case "list":
-        return db.lists;
-      case "listItem":
-        return db.listItems;
-      case "category":
-        return db.categories;
-      default:
-        return null;
-    }
-  }
-
-  static async getConflicts(): Promise<Conflict[]> {
+  async getConflicts(): Promise<Conflict[]> {
     const conflicts: Conflict[] = [];
 
     const conflictedLists = await db.lists
@@ -216,5 +216,5 @@ export class ConflictResolver {
     }
 
     return conflicts;
-  }
-}
+  },
+};

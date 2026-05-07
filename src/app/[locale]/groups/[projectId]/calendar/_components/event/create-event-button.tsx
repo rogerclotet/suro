@@ -129,15 +129,17 @@ function CreateEventFormContent({
         );
       }
 
+      const { from, to } = dataToCreate.dates;
+      if (!from || !to) {
+        return;
+      }
+
       try {
         await createEventOffline(
           {
             name: dataToCreate.name,
             description: dataToCreate.description,
-            dates: {
-              from: dataToCreate.dates.from!,
-              to: dataToCreate.dates.to!,
-            },
+            dates: { from, to },
             allDay: dataToCreate.allDay,
           },
           project,

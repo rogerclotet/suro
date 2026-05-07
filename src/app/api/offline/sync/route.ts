@@ -65,61 +65,53 @@ export async function POST(request: NextRequest) {
   try {
     switch (entityType) {
       case "listItem":
+        if (!listId) {
+          return Response.json({ message: "Missing listId" }, { status: 400 });
+        }
         return await handleListItemSync(
           session.user.id,
           operation,
           entityId,
-          listId!,
+          listId,
           payload,
           clientTimestamp,
         );
 
       case "list":
-        return await handleListSync(
-          session.user.id,
-          operation,
-          entityId,
-          projectId!,
-          payload,
-          clientTimestamp,
-        );
-
       case "event":
-        return await handleEventSync(
-          session.user.id,
-          operation,
-          entityId,
-          projectId!,
-          payload,
-          clientTimestamp,
-        );
-
       case "note":
-        return await handleNoteSync(
+      case "pot": {
+        if (!projectId) {
+          return Response.json(
+            { message: "Missing projectId" },
+            { status: 400 },
+          );
+        }
+        const handlers = {
+          list: handleListSync,
+          event: handleEventSync,
+          note: handleNoteSync,
+          pot: handlePotSync,
+        } as const;
+        return await handlers[entityType](
           session.user.id,
           operation,
           entityId,
-          projectId!,
+          projectId,
           payload,
           clientTimestamp,
         );
-
-      case "pot":
-        return await handlePotSync(
-          session.user.id,
-          operation,
-          entityId,
-          projectId!,
-          payload,
-          clientTimestamp,
-        );
+      }
 
       case "spending":
+        if (!potId) {
+          return Response.json({ message: "Missing potId" }, { status: 400 });
+        }
         return await handleSpendingSync(
           session.user.id,
           operation,
           entityId,
-          potId!,
+          potId,
           payload,
           clientTimestamp,
         );

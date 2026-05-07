@@ -43,14 +43,14 @@ export default async function PotPage({
   }
 
   const potSpendings = await getPotSpendings(potId);
-  const potMembers = pot!.users;
+  const potMembers = pot.users;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h1 className="font-semibold text-xl">{pot!.name}</h1>
-          {pot!.settledAt && (
+          <h1 className="font-semibold text-xl">{pot.name}</h1>
+          {pot.settledAt && (
             <Badge variant="secondary">{t("potSettled")}</Badge>
           )}
         </div>
@@ -60,7 +60,7 @@ export default async function PotPage({
             members={potMembers}
             potId={potId}
           />
-          <CreateSpendingButton members={potMembers} pot={pot!} />
+          <CreateSpendingButton members={potMembers} pot={pot} />
         </div>
       </div>
 

@@ -235,6 +235,6 @@ export async function deleteListItemOffline(
 // Re-export original actions for cases where offline isn't needed
 export {
   serverCreateListItem as createListItem,
-  serverUpdateListItem as updateListItem,
   serverDeleteListItem as deleteListItem,
+  serverUpdateListItem as updateListItem,
 };
