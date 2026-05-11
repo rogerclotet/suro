@@ -32,6 +32,14 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  experimental: {
+    // Restore pre-v15 Router Cache duration for dynamic routes.
+    // Next.js 15+ defaults to 0 (every navigation refetches from server).
+    // 30s makes back/forward and same-session revisits instant.
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "sharp"],
   images: {
     remotePatterns: [

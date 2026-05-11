@@ -1,14 +1,15 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { GripVertical } from "lucide-react";
+import { CalendarFold, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { List } from "@/app/_data/list";
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingPage from "@/components/ui/loading-page";
 import { db } from "@/lib/offline/db";
 import { projectListsQueryKey } from "@/lib/queries/use-project-lists";
-import { cn } from "@/lib/utils";
+import { cn, textToHtml } from "@/lib/utils";
+import TimeRange from "../../calendar/_components/event/time-range";
 
 function getUrlIds(): { listId: string | null; projectId: string | null } {
   if (typeof window === "undefined") return { listId: null, projectId: null };
@@ -20,7 +21,6 @@ function getUrlIds(): { listId: string | null; projectId: string | null } {
   return { listId, projectId };
 }
 
-// Groups items by category, maintaining the same sort order as CheckList
 function groupByCategory(items: ListItem[]) {
   const byCategory = new Map<string, ListItem[]>();
   for (const item of items) {
@@ -121,7 +121,9 @@ export default function Loading() {
   return <IDBListPreview name={data.name} items={data.items} />;
 }
 
-// Pixel-accurate preview using data from TQ cache — matches ListsClientContainer + CheckList exactly
+// Pixel-accurate preview using TQ cache — matches ListsClientContainer + CheckList exactly.
+// ClientOnly wraps ShareButton so it is absent on the first real render too; we only show
+// the SettingsMenu placeholder to keep the button count consistent.
 function TQListPreview({
   data,
 }: {
@@ -137,7 +139,7 @@ function TQListPreview({
 
   return (
     <div className="space-y-6">
-      {/* Header — matches ListsClientContainer's h1 + ListsDropdown */}
+      {/* Header — matches ListsClientContainer h1 + ListsDropdown SelectTrigger */}
       <div className="flex items-center justify-between gap-4">
         <h1>
           <div className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 font-semibold text-xl">
@@ -145,23 +147,39 @@ function TQListPreview({
             <span className="h-4 w-4 shrink-0 opacity-50" />
           </div>
         </h1>
-        {/* Spacer for share + settings buttons */}
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-md" />
-          <div className="h-9 w-9 rounded-md" />
-        </div>
+        {/* Only SettingsMenu — ShareButton is hidden by ClientOnly on first render */}
+        <div className="size-9 rounded-md" />
       </div>
 
-      <ListBodyPreview
-        name={list.name}
-        items={items}
-        listsCount={lists.length}
-      />
+      {/* Event info — matches ListsClientContainer's event section */}
+      {list.event && (
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="flex items-center gap-2">
+            <CalendarFold />
+            <span>{list.event.name}</span>
+          </h2>
+          <TimeRange
+            startAt={list.event.startAt}
+            endAt={list.event.endAt}
+            allDay={list.event.allDay}
+            className="mt-0.5 text-muted-foreground text-sm"
+          />
+        </div>
+      )}
+
+      {/* Description */}
+      {list.description && (
+        <p
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized same as ListsClientContainer
+          dangerouslySetInnerHTML={{ __html: textToHtml(list.description) }}
+        />
+      )}
+
+      <ListBodyPreview items={items} listsCount={lists.length} />
     </div>
   );
 }
 
-// Simplified preview using IDB data — matches same CSS as TQListPreview
 function IDBListPreview({ name, items }: { name: string; items: ListItem[] }) {
   return (
     <div className="space-y-6">
@@ -172,13 +190,10 @@ function IDBListPreview({ name, items }: { name: string; items: ListItem[] }) {
             <span className="h-4 w-4 shrink-0 opacity-50" />
           </div>
         </h1>
-        <div className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-md" />
-          <div className="h-9 w-9 rounded-md" />
-        </div>
+        <div className="size-9 rounded-md" />
       </div>
 
-      <ListBodyPreview name={name} items={items} listsCount={1} />
+      <ListBodyPreview items={items} listsCount={1} />
     </div>
   );
 }
@@ -187,7 +202,6 @@ function ListBodyPreview({
   items,
   listsCount,
 }: {
-  name: string;
   items: ListItem[];
   listsCount: number;
 }) {
@@ -197,7 +211,7 @@ function ListBodyPreview({
 
   return (
     <>
-      {/* Progress bar + new item input — matches CheckList's mx-auto max-w-lg block */}
+      {/* Progress bar + NewListItem — matches CheckList's mx-auto max-w-lg block */}
       <div className="mx-auto max-w-lg">
         {totalCount > 0 && (
           <div className="mb-3 flex items-center gap-2.5">
@@ -212,10 +226,15 @@ function ListBodyPreview({
             </span>
           </div>
         )}
-        {/* Placeholder matching NewListItem's height */}
+        {/* Matches NewListItem's responsive layout: stacked on mobile, row on sm+ */}
         {listsCount > 0 && (
-          <li className="flex w-full items-center justify-between gap-4 opacity-0">
-            <div className="h-10 grow rounded-md border bg-transparent" />
+          <li className="flex w-full items-center justify-between gap-4">
+            <div className="flex grow flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="flex grow items-start gap-2">
+                <div className="h-10 grow rounded-md border border-input bg-background" />
+              </div>
+              <div className="h-10 w-full rounded-md border border-input bg-background sm:w-40" />
+            </div>
           </li>
         )}
       </div>

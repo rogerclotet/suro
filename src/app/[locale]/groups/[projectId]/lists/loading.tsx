@@ -1,11 +1,13 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { List } from "@/app/_data/list";
 import LoadingPage from "@/components/ui/loading-page";
 import { db, type OfflineList } from "@/lib/offline/db";
 import { projectListsQueryKey } from "@/lib/queries/use-project-lists";
+import CollapsibleCompletedSection from "./_components/collapsible-completed-section";
 import ListPreview from "./_components/list-preview";
 
 function getProjectIdFromPath(): string | undefined {
@@ -28,12 +30,28 @@ function offlineToPreview(l: OfflineList): List {
   } as unknown as List;
 }
 
+// Same sort as lists.tsx — most recently updated first (considers item updatedAt too)
+function compareLists(a: List, b: List) {
+  const updatedAtA = a.updatedAt?.getTime() ?? a.createdAt?.getTime() ?? 0;
+  const itemsUpdatedAtA = a.items.reduce(
+    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    0,
+  );
+  const updatedAtB = b.updatedAt?.getTime() ?? b.createdAt?.getTime() ?? 0;
+  const itemsUpdatedAtB = b.items.reduce(
+    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    0,
+  );
+  const diff =
+    Math.max(updatedAtB, itemsUpdatedAtB) -
+    Math.max(updatedAtA, itemsUpdatedAtA);
+  return diff !== 0 ? diff : a.name.localeCompare(b.name);
+}
+
 export default function Loading() {
   const queryClient = useQueryClient();
+  const tLists = useTranslations("lists");
 
-  // Read projectId from URL. Safe for SSR: returns undefined on the server,
-  // so both server and client render the spinner on initial load (no hydration mismatch).
-  // On client-side navigation (no SSR), the TQ path runs synchronously.
   const [projectId] = useState(() =>
     typeof window !== "undefined" ? getProjectIdFromPath() : undefined,
   );
@@ -45,7 +63,7 @@ export default function Loading() {
     );
   });
 
-  // IndexedDB fallback when TQ cache is cold (e.g. first session load)
+  // IndexedDB fallback when TQ cache is cold
   useEffect(() => {
     if (lists !== null || !projectId) return;
 
@@ -68,13 +86,50 @@ export default function Loading() {
     (list) =>
       list.items.length === 0 || list.items.some((item) => !item.completed),
   );
+  const completedLists = lists.filter(
+    (list) =>
+      list.items.length > 0 && list.items.every((item) => item.completed),
+  );
+
+  const favoriteLists = incompleteLists.filter((l) => l.favorite);
+  const regularLists = incompleteLists.filter((l) => !l.favorite);
+
+  favoriteLists.sort(compareLists);
+  regularLists.sort(compareLists);
+  completedLists.sort(compareLists);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
-        {incompleteLists.map((list) => (
-          <ListPreview key={list.id} list={list} />
-        ))}
+      <div className="space-y-6">
+        {favoriteLists.length > 0 && (
+          <div className="space-y-2">
+            <h2 className="px-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              {tLists("favorites")}
+            </h2>
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+              {favoriteLists.map((list) => (
+                <ListPreview key={list.id} list={list} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {regularLists.length > 0 && (
+          <div className="space-y-2">
+            {favoriteLists.length > 0 && (
+              <h2 className="px-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                {tLists("others")}
+              </h2>
+            )}
+            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+              {regularLists.map((list) => (
+                <ListPreview key={list.id} list={list} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <CollapsibleCompletedSection lists={completedLists} />
       </div>
     </div>
   );
