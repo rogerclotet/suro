@@ -1,23 +1,89 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { List } from "@/app/_data/list";
+import { Checkbox } from "@/components/ui/checkbox";
 import LoadingPage from "@/components/ui/loading-page";
-import { db, type OfflineList, type OfflineListItem } from "@/lib/offline/db";
+import { db } from "@/lib/offline/db";
+import { projectListsQueryKey } from "@/lib/queries/use-project-lists";
+import { cn } from "@/lib/utils";
+
+function getUrlIds(): { listId: string | null; projectId: string | null } {
+  if (typeof window === "undefined") return { listId: null, projectId: null };
+  const segments = window.location.pathname.split("/").filter(Boolean);
+  const groupsIdx = segments.indexOf("groups");
+  if (groupsIdx === -1) return { listId: null, projectId: null };
+  const projectId = segments[groupsIdx + 1] ?? null;
+  const listId = segments.at(-1) ?? null;
+  return { listId, projectId };
+}
+
+// Groups items by category, maintaining the same sort order as CheckList
+function groupByCategory(items: ListItem[]) {
+  const byCategory = new Map<string, ListItem[]>();
+  for (const item of items) {
+    const cat = item.category ?? "";
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat)?.push(item);
+  }
+  const result = [...byCategory.entries()].map(([category, catItems]) => ({
+    category,
+    items: catItems.sort((a, b) => {
+      if (a.completed && !b.completed) return 1;
+      if (!a.completed && b.completed) return -1;
+      return a.name.localeCompare(b.name);
+    }),
+  }));
+  result.sort((a, b) => {
+    if (a.items.length !== 0 && b.items.length !== 0)
+      return a.category.localeCompare(b.category);
+    return b.items.length - a.items.length;
+  });
+  return result;
+}
+
+interface ListItem {
+  id: string;
+  name: string;
+  completed: boolean;
+  category: string;
+}
 
 type State = "checking" | "found" | "not-found";
 
-interface OfflineData {
-  list: OfflineList;
-  items: OfflineListItem[];
-}
+type PreviewData =
+  | { source: "tq"; list: List; lists: List[] }
+  | { source: "idb"; name: string; items: ListItem[] };
 
 export default function Loading() {
-  const [state, setState] = useState<State>("checking");
-  const [data, setData] = useState<OfflineData | null>(null);
+  const queryClient = useQueryClient();
 
+  const [state, setState] = useState<State>(() => {
+    const { listId, projectId } = getUrlIds();
+    if (!listId || !projectId) return "checking";
+    const lists = queryClient.getQueryData<List[]>(
+      projectListsQueryKey(projectId),
+    );
+    return lists?.some((l) => l.id === listId) ? "found" : "checking";
+  });
+
+  const [data, setData] = useState<PreviewData | null>(() => {
+    const { listId, projectId } = getUrlIds();
+    if (!listId || !projectId) return null;
+    const lists = queryClient.getQueryData<List[]>(
+      projectListsQueryKey(projectId),
+    );
+    const list = lists?.find((l) => l.id === listId);
+    if (!list || !lists) return null;
+    return { source: "tq", list, lists };
+  });
+
+  // IDB fallback when TQ cache is cold
   useEffect(() => {
-    const segments = window.location.pathname.split("/").filter(Boolean);
-    const listId = segments.at(-1);
+    if (state === "found") return;
+    const { listId } = getUrlIds();
     if (!listId) {
       setState("not-found");
       return;
@@ -29,56 +95,115 @@ export default function Loading() {
     ])
       .then(([list, items]) => {
         if (list && items.length > 0) {
-          setData({ list, items });
+          const visibleItems: ListItem[] = items
+            .filter((i) => !i._deleted)
+            .map((i) => ({
+              id: i.id,
+              name: i.name,
+              completed: i.completed ?? false,
+              category: i.categoryName ?? "",
+            }));
+          setData({ source: "idb", name: list.name, items: visibleItems });
           setState("found");
         } else {
           setState("not-found");
         }
       })
       .catch(() => setState("not-found"));
-  }, []);
+  }, [state]);
 
-  if (state !== "found" || !data) {
-    return <LoadingPage />;
+  if (state !== "found" || !data) return <LoadingPage />;
+
+  if (data.source === "tq") {
+    return <TQListPreview data={data} />;
   }
 
-  return <OfflineListPreview data={data} />;
+  return <IDBListPreview name={data.name} items={data.items} />;
 }
 
-function OfflineListPreview({ data }: { data: OfflineData }) {
-  const { list, items } = data;
-
-  const visibleItems = items
-    .filter((i) => !i._deleted)
-    .sort((a, b) => {
-      if (a.completed && !b.completed) return 1;
-      if (!a.completed && b.completed) return -1;
-      return a.name.localeCompare(b.name);
-    });
-
-  const doneCount = visibleItems.filter((i) => i.completed).length;
-  const totalCount = visibleItems.length;
-
-  // Group by category name
-  const byCategory = new Map<string, OfflineListItem[]>();
-  for (const item of visibleItems) {
-    const cat = item.categoryName ?? "";
-    if (!byCategory.has(cat)) byCategory.set(cat, []);
-    byCategory.get(cat)?.push(item);
-  }
+// Pixel-accurate preview using data from TQ cache — matches ListsClientContainer + CheckList exactly
+function TQListPreview({
+  data,
+}: {
+  data: Extract<PreviewData, { source: "tq" }>;
+}) {
+  const { list, lists } = data;
+  const items = list.items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    completed: item.completed ?? false,
+    category: item.category?.name ?? "",
+  }));
 
   return (
     <div className="space-y-6">
+      {/* Header — matches ListsClientContainer's h1 + ListsDropdown */}
       <div className="flex items-center justify-between gap-4">
-        <h1 className="font-semibold text-xl">{list.name}</h1>
+        <h1>
+          <div className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 font-semibold text-xl">
+            <span>{list.name}</span>
+            <span className="h-4 w-4 shrink-0 opacity-50" />
+          </div>
+        </h1>
+        {/* Spacer for share + settings buttons */}
+        <div className="flex items-center gap-2">
+          <div className="h-9 w-9 rounded-md" />
+          <div className="h-9 w-9 rounded-md" />
+        </div>
       </div>
 
+      <ListBodyPreview
+        name={list.name}
+        items={items}
+        listsCount={lists.length}
+      />
+    </div>
+  );
+}
+
+// Simplified preview using IDB data — matches same CSS as TQListPreview
+function IDBListPreview({ name, items }: { name: string; items: ListItem[] }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h1>
+          <div className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 font-semibold text-xl">
+            <span>{name}</span>
+            <span className="h-4 w-4 shrink-0 opacity-50" />
+          </div>
+        </h1>
+        <div className="flex items-center gap-2">
+          <div className="h-9 w-9 rounded-md" />
+          <div className="h-9 w-9 rounded-md" />
+        </div>
+      </div>
+
+      <ListBodyPreview name={name} items={items} listsCount={1} />
+    </div>
+  );
+}
+
+function ListBodyPreview({
+  items,
+  listsCount,
+}: {
+  name: string;
+  items: ListItem[];
+  listsCount: number;
+}) {
+  const doneCount = items.filter((i) => i.completed).length;
+  const totalCount = items.length;
+  const grouped = groupByCategory(items);
+
+  return (
+    <>
+      {/* Progress bar + new item input — matches CheckList's mx-auto max-w-lg block */}
       <div className="mx-auto max-w-lg">
         {totalCount > 0 && (
           <div className="mb-3 flex items-center gap-2.5">
             <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
               <div
-                className="h-full rounded-sm bg-primary"
+                className="h-full rounded-sm bg-primary transition-[width] duration-300 ease-in-out"
                 style={{ width: `${(doneCount / totalCount) * 100}%` }}
               />
             </div>
@@ -87,40 +212,49 @@ function OfflineListPreview({ data }: { data: OfflineData }) {
             </span>
           </div>
         )}
+        {/* Placeholder matching NewListItem's height */}
+        {listsCount > 0 && (
+          <li className="flex w-full items-center justify-between gap-4 opacity-0">
+            <div className="h-10 grow rounded-md border bg-transparent" />
+          </li>
+        )}
       </div>
 
+      {/* Category groups — matches CheckList's items section */}
       <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
-        {[...byCategory.entries()].map(([category, catItems]) => (
-          <div key={category || "__none__"}>
-            {category && (
-              <p className="mb-1 text-muted-foreground text-xs uppercase tracking-wide">
-                {category}
-              </p>
-            )}
-            <ul className="flex flex-col gap-1">
+        {grouped.map(({ category, items: catItems }) => (
+          <div key={category || "__none__"} className="rounded-md">
+            <h3 className="px-2 font-semibold text-lg">{category}</h3>
+            <ul>
               {catItems.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center gap-3 rounded-md px-2 py-1.5"
+                  className="z-0 flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
                 >
+                  <div className="flex flex-row items-center">
+                    <Checkbox
+                      checked={item.completed}
+                      className="h-6 w-6 transition-all"
+                      onCheckedChange={() => {}}
+                    />
+                  </div>
                   <span
-                    className={`h-4 w-4 shrink-0 rounded-sm border border-primary ${item.completed ? "bg-primary" : ""}`}
-                  />
-                  <span
-                    className={
+                    className={cn(
+                      "wrap-break-word grow overflow-hidden text-left",
                       item.completed
                         ? "text-muted-foreground line-through"
-                        : undefined
-                    }
+                        : "",
+                    )}
                   >
                     {item.name}
                   </span>
+                  <GripVertical className="text-muted-foreground" />
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 }
