@@ -43,6 +43,6 @@ export function eventsQueryOptions(
       return events;
     },
     select: normalizeEvents,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60_000,
   });
 }

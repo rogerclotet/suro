@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useAction } from "@/app/_state/action-state";
 import { FAB } from "@/components/ui/fab";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
+import { SyncIndicator } from "@/components/ui/sync-indicator";
 import BottomNav from "./bottom-nav";
 import Breadcrumbs from "./breadcrumbs";
 import { ScrollableContainer } from "./scrollable-container";
@@ -39,7 +40,8 @@ export default function SidebarInsetContent({
         style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top))" }}
       >
         <Breadcrumbs />
-        <div className="ml-auto hidden md:block">
+        <div className="ml-auto hidden items-center md:flex">
+          <SyncIndicator />
           <OfflineIndicator />
         </div>
       </header>

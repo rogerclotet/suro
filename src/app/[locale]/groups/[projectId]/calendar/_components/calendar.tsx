@@ -13,7 +13,7 @@ import {
 } from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
-import type { Event } from "@/app/_data/event";
+import type { CalendarEvent as CalendarEventType } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,10 @@ import {
   getDateFnsLocaleForUi,
   parseDateOnly,
 } from "@/lib/date-locale";
+import {
+  cacheEventsToIDB,
+  loadMonthEventsFromIDB,
+} from "@/lib/offline/calendar-cache";
 import { db } from "@/lib/offline/db";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
@@ -36,8 +40,8 @@ import { eventsQueryOptions } from "./event/query";
 
 const EVENT_COLORS = 5;
 
-// Returns locally-created events that are still pending sync for the given month.
-type CalendarEvent = Omit<Event, "project">;
+// Local alias for the exported CalendarEvent type
+type CalendarEvent = CalendarEventType;
 
 function useOfflineEvents(
   monthStart: Date,
@@ -154,15 +158,38 @@ export default function Calendar({
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  // Merge server events with locally-pending offline events.
+  // IndexedDB fallback: load cached events for the current month so month
+  // switching feels instant even while TQ fetches from the server.
+  const monthEnd = useMemo(() => getMonthEnd(currentMonth), [currentMonth]);
+  const [idbEvents, setIdbEvents] = useState<CalendarEvent[]>([]);
+  useEffect(() => {
+    if (!project?.id) return;
+    loadMonthEventsFromIDB(currentMonth, monthEnd, project.id)
+      .then(setIdbEvents)
+      .catch(() => {});
+  }, [currentMonth, monthEnd, project?.id]);
+
+  // Write server events to IndexedDB after each successful fetch so future
+  // renders can use them as an instant fallback.
+  useEffect(() => {
+    if (serverEvents && serverEvents.length > 0) {
+      cacheEventsToIDB(serverEvents).catch(() => {});
+    }
+  }, [serverEvents]);
+
+  // Merge: prefer server data; fall back to IDB while TQ is loading; always
+  // layer pending offline events on top, deduped by ID.
   const events = useMemo<CalendarEvent[] | undefined>(() => {
-    if (!serverEvents && offlineEvents.length === 0) return serverEvents;
-    const serverIds = new Set(serverEvents?.map((e) => e.id) ?? []);
+    const base =
+      serverEvents ??
+      (isLoading && idbEvents.length > 0 ? idbEvents : undefined);
+    if (!base && offlineEvents.length === 0) return undefined;
+    const baseIds = new Set(base?.map((e) => e.id) ?? []);
     return [
-      ...(serverEvents ?? []),
-      ...offlineEvents.filter((e) => !serverIds.has(e.id)),
+      ...(base ?? []),
+      ...offlineEvents.filter((e) => !baseIds.has(e.id)),
     ];
-  }, [serverEvents, offlineEvents]);
+  }, [serverEvents, isLoading, idbEvents, offlineEvents]);
 
   const currentEvents = useMemo(
     () => events?.filter((event) => isCurrentDayEvent(event, date)),

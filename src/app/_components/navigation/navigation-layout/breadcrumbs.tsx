@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SyncIndicator } from "@/components/ui/sync-indicator";
 import { Link, usePathname } from "@/i18n/navigation";
 import GroupSwitcherSheet from "../group-switcher-sheet";
 import { useMenuItems } from "../use-menu-items";
@@ -106,7 +107,10 @@ function MobileHeader() {
         <span className="font-semibold text-lg leading-tight">
           {tNav(standaloneTitleKey)}
         </span>
-        <OfflineIndicator />
+        <div className="flex items-center">
+          <SyncIndicator />
+          <OfflineIndicator />
+        </div>
       </div>
     );
   }
@@ -122,7 +126,10 @@ function MobileHeader() {
         <span className="truncate font-semibold text-base">{project.name}</span>
         <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
       </button>
-      <OfflineIndicator />
+      <div className="flex items-center">
+        <SyncIndicator />
+        <OfflineIndicator />
+      </div>
 
       <GroupSwitcherSheet
         open={groupSwitcherOpen}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarFold, RefreshCw } from "lucide-react";
+import { CalendarFold } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { List, Template } from "@/app/_data/list";
@@ -32,7 +32,6 @@ export default function ListsClientContainer({
   initialLists: List[];
 }) {
   const [currentListId, setCurrentListId] = useState(initialListId);
-  const [isSyncing, setIsSyncing] = useState(false);
   const locale = useLocale();
   const tLists = useTranslations("lists");
   const tErrors = useTranslations("errors");
@@ -41,7 +40,7 @@ export default function ListsClientContainer({
   // Lists live in TanStack Query — cached in memory across navigation,
   // background-refreshed after staleTime (2 min). initialLists seeds the
   // cache on first load so there's no extra network fetch.
-  const { data: lists = initialLists, isRefetching } = useProjectLists(
+  const { data: lists = initialLists } = useProjectLists(
     projectId,
     initialLists,
   );
@@ -107,15 +106,12 @@ export default function ListsClientContainer({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="flex items-center gap-2">
+        <h1>
           <ListsDropdown
             listId={currentListId}
             lists={lists}
             onListChange={handleListChange}
           />
-          {(isSyncing || isRefetching) && (
-            <RefreshCw className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
-          )}
         </h1>
 
         <div className="flex items-center gap-2">
@@ -164,7 +160,7 @@ export default function ListsClientContainer({
         />
       )}
 
-      <CheckList list={currentList} onSyncChange={setIsSyncing} />
+      <CheckList list={currentList} />
     </div>
   );
 }
