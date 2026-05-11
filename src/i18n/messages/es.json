@@ -167,7 +167,17 @@
     "languagePlaceholder": "Selecciona un idioma",
     "languageDescription": "Este idioma se utiliza para la interfaz y las notificaciones.",
     "saved": "Perfil guardado",
-    "saveError": "No se ha podido guardar el perfil, vuelve a intentarlo más tarde"
+    "saveError": "No se ha podido guardar el perfil, vuelve a intentarlo más tarde",
+    "pushNotifications": "Notificaciones push",
+    "pushNotificationsGranted": "Activadas",
+    "pushNotificationsDenied": "Bloqueadas",
+    "pushNotificationsPrompt": "Aún no solicitadas",
+    "pushNotificationsDeniedHint": "Las notificaciones están bloqueadas por tu navegador. Para activarlas, abre la configuración del navegador o del sistema, busca este sitio en Notificaciones y establécelo como Permitir.",
+    "pushNotificationsEnable": "Activar notificaciones",
+    "pushNotificationsDisable": "Desactivar notificaciones",
+    "pushNotificationsActive": "Las notificaciones están activas",
+    "pushNotificationsSuccess": "Notificaciones activadas",
+    "pushNotificationsDisabledToast": "Notificaciones desactivadas"
   },
   "groups": {
     "header": "Grupos",
@@ -524,7 +534,11 @@
     "unread": "No leídas",
     "read": "Leídas",
     "markAllRead": "Marcar todo como leído",
-    "timeAgoNow": "ahora"
+    "timeAgoNow": "ahora",
+    "permissionPromptBanner": "Activa las notificaciones push para recibir actualizaciones incluso cuando la aplicación no esté abierta.",
+    "permissionDeniedBanner": "Las notificaciones push están bloqueadas.",
+    "permissionEnable": "Activar",
+    "permissionDeniedHint": "Para desbloquearlas, ve a la configuración de tu navegador o del sistema y permite las notificaciones para este sitio."
   },
   "onboarding": {
     "welcomeTitle": "¡Bienvenido a Suro!",

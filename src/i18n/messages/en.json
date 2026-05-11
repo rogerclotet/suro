@@ -167,7 +167,17 @@
     "languagePlaceholder": "Select a language",
     "languageDescription": "This language is used for the interface and notifications.",
     "saved": "Profile saved",
-    "saveError": "Could not save the profile, please try again later"
+    "saveError": "Could not save the profile, please try again later",
+    "pushNotifications": "Push notifications",
+    "pushNotificationsGranted": "Enabled",
+    "pushNotificationsDenied": "Blocked",
+    "pushNotificationsPrompt": "Not yet requested",
+    "pushNotificationsDeniedHint": "Notifications are blocked by your browser. To enable them, open your browser or OS settings, find this site under Notifications, and set it to Allow.",
+    "pushNotificationsEnable": "Enable notifications",
+    "pushNotificationsDisable": "Disable notifications",
+    "pushNotificationsActive": "Notifications are active",
+    "pushNotificationsSuccess": "Notifications enabled",
+    "pushNotificationsDisabledToast": "Notifications disabled"
   },
   "groups": {
     "header": "Groups",
@@ -524,7 +534,11 @@
     "unread": "Unread",
     "read": "Read",
     "markAllRead": "Mark all as read",
-    "timeAgoNow": "just now"
+    "timeAgoNow": "just now",
+    "permissionPromptBanner": "Enable push notifications to get updates even when the app isn't open.",
+    "permissionDeniedBanner": "Push notifications are currently blocked.",
+    "permissionEnable": "Enable",
+    "permissionDeniedHint": "To unblock them, go to your browser or OS settings and allow notifications for this site."
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Suro!",

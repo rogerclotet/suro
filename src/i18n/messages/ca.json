@@ -167,7 +167,17 @@
     "languagePlaceholder": "Selecciona un idioma",
     "languageDescription": "Aquest idioma s'utilitza per a la interfície i les notificacions.",
     "saved": "S'ha desat el perfil",
-    "saveError": "No s'ha pogut desar el perfil, torna-ho a provar més tard"
+    "saveError": "No s'ha pogut desar el perfil, torna-ho a provar més tard",
+    "pushNotifications": "Notificacions push",
+    "pushNotificationsGranted": "Activades",
+    "pushNotificationsDenied": "Bloquejades",
+    "pushNotificationsPrompt": "Encara no sol·licitades",
+    "pushNotificationsDeniedHint": "Les notificacions estan bloquejades pel teu navegador. Per activar-les, obre la configuració del teu navegador o del sistema, cerca aquest lloc a Notificacions i estableix-lo com a Permet.",
+    "pushNotificationsEnable": "Activar notificacions",
+    "pushNotificationsDisable": "Desactivar notificacions",
+    "pushNotificationsActive": "Les notificacions estan actives",
+    "pushNotificationsSuccess": "Notificacions activades",
+    "pushNotificationsDisabledToast": "Notificacions desactivades"
   },
   "groups": {
     "header": "Grups",
@@ -524,7 +534,11 @@
     "unread": "No llegides",
     "read": "Llegides",
     "markAllRead": "Marcar tot com a llegit",
-    "timeAgoNow": "ara"
+    "timeAgoNow": "ara",
+    "permissionPromptBanner": "Activa les notificacions push per rebre actualitzacions fins i tot quan l'aplicació no estigui oberta.",
+    "permissionDeniedBanner": "Les notificacions push estan bloquejades.",
+    "permissionEnable": "Activar",
+    "permissionDeniedHint": "Per desbloquejar-les, ves a la configuració del teu navegador o del sistema i permet les notificacions per a aquest lloc."
   },
   "onboarding": {
     "welcomeTitle": "Benvingut a Suro!",
