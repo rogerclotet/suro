@@ -8,6 +8,7 @@ import { db, type OfflineList, type OfflineListItem } from "./db";
 export interface OfflineListResult {
   list: List | undefined;
   isLoading: boolean;
+  isSyncing: boolean;
   hasOfflineChanges: boolean;
   hasPendingItems: boolean;
   hasConflicts: boolean;
@@ -41,11 +42,14 @@ export function useOfflineList(
 
   // Start with null (unknown), not assumed online
   const [isOnline, setIsOnline] = useState<boolean | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [offlineList, setOfflineList] = useState<OfflineList | undefined>(
     undefined,
   );
   const [offlineItems, setOfflineItems] = useState<OfflineListItem[]>([]);
-  const hasSyncedRef = useRef(false);
+  // Tracks which listIds have been seeded into IndexedDB this session.
+  // A Set (not a boolean) so it persists across list switches without requiring remount.
+  const seededListsRef = useRef(new Set<string>());
 
   // Track online status with actual connectivity check
   useEffect(() => {
@@ -100,20 +104,11 @@ export function useOfflineList(
     loadOfflineData();
   }, [loadOfflineData]);
 
-  // Seed IndexedDB with initial server data on first load
-  useEffect(() => {
-    if (initialList && !hasSyncedRef.current) {
-      seedFromServer(initialList).then(() => {
-        hasSyncedRef.current = true;
-        loadOfflineData();
-      });
-    }
-  }, [initialList, loadOfflineData]);
-
   // Background sync when online
   const syncFromServer = useCallback(async () => {
     if (!isOnline || !listId) return;
 
+    setIsSyncing(true);
     try {
       const response = await fetch(`/api/offline/lists/${listId}`);
       if (!response.ok) return;
@@ -123,16 +118,30 @@ export function useOfflineList(
       await loadOfflineData();
     } catch (error) {
       console.warn("Failed to sync list from server:", error);
+    } finally {
+      setIsSyncing(false);
     }
   }, [isOnline, listId, loadOfflineData]);
 
+  // Seed IndexedDB with initial server data the first time each list is opened.
+  // seededListsRef persists across list switches so revisiting a list doesn't re-seed.
+  useEffect(() => {
+    if (initialList && !seededListsRef.current.has(listId)) {
+      seededListsRef.current.add(listId); // mark before async to prevent double-seed
+      seedFromServer(initialList).then(() => {
+        loadOfflineData();
+        if (isOnline) syncFromServer();
+      });
+    }
+  }, [initialList, listId, loadOfflineData, isOnline, syncFromServer]);
+
   // Auto-sync on coming online
   useEffect(() => {
-    if (isOnline && hasSyncedRef.current) {
+    if (isOnline && seededListsRef.current.has(listId)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       syncFromServer();
     }
-  }, [isOnline, syncFromServer]);
+  }, [isOnline, listId, syncFromServer]);
 
   // Refresh data when sync completes (items may have new IDs)
   useEffect(() => {
@@ -169,18 +178,21 @@ export function useOfflineList(
     (item) => item._syncStatus === "conflict",
   );
 
-  // Merge offline data with initial list structure
-  // useMemo prevents new object references on every render — stable refs are required for useAutoAnimate
+  // Merge offline data with initial list structure.
+  // useMemo prevents new object references on every render — stable refs are required for useAutoAnimate.
   // Intentionally excludes isOnline — merge is based on _syncStatus, not connectivity,
   // so connectivity transitions don't cause re-renders that flash stale data.
+  // listId is included to discard stale IndexedDB state from a previously-viewed list
+  // during the async window between a list switch and the next loadOfflineData call.
   const mergedList = useMemo(
-    () => getMergedList(initialList, offlineList, offlineItems),
-    [initialList, offlineList, offlineItems],
+    () => getMergedList(initialList, offlineList, offlineItems, listId),
+    [initialList, offlineList, offlineItems, listId],
   );
 
   return {
     list: mergedList,
     isLoading: offlineList === undefined && initialList === undefined,
+    isSyncing,
     hasOfflineChanges: hasPendingItems,
     hasPendingItems,
     hasConflicts,
@@ -193,36 +205,43 @@ function getMergedList(
   initialList: List | undefined,
   offlineList: OfflineList | undefined,
   offlineItems: OfflineListItem[],
+  listId: string,
 ): List | undefined {
+  // Discard stale IndexedDB data from a previously-viewed list.
+  // This can happen briefly during a list switch before loadOfflineData re-runs.
+  const activeOfflineList =
+    offlineList?.id === listId ? offlineList : undefined;
+  const activeOfflineItems = offlineItems.filter((i) => i.listId === listId);
+
   // Need at least one data source
-  if (!initialList && !offlineList) {
+  if (!initialList && !activeOfflineList) {
     return undefined;
   }
 
   // If IndexedDB is fully synced with no local changes, return the server data
   // unchanged. This preserves the object reference and prevents unnecessary
   // re-renders and sort instability when IndexedDB loads after the first render.
-  const hasPendingOrConflict = offlineItems.some(
+  const hasPendingOrConflict = activeOfflineItems.some(
     (i) => i._syncStatus === "pending" || i._syncStatus === "conflict",
   );
-  const listHasPending = offlineList?._syncStatus === "pending";
+  const listHasPending = activeOfflineList?._syncStatus === "pending";
 
   if (initialList && !listHasPending && !hasPendingOrConflict) {
     return initialList;
   }
 
   // We have local changes — merge them on top of server data
-  if (offlineList) {
-    const baseList = initialList ?? createListFromOffline(offlineList);
-    const mergedItems = mergeItems(baseList.items, offlineItems);
+  if (activeOfflineList) {
+    const baseList = initialList ?? createListFromOffline(activeOfflineList);
+    const mergedItems = mergeItems(baseList.items, activeOfflineItems);
 
     return {
       ...baseList,
       // Only override list metadata when the list itself has pending local changes
       ...(listHasPending && {
-        name: offlineList.name,
-        description: offlineList.description,
-        favorite: offlineList.favorite,
+        name: activeOfflineList.name,
+        description: activeOfflineList.description,
+        favorite: activeOfflineList.favorite,
       }),
       items: mergedItems,
     };
@@ -230,10 +249,10 @@ function getMergedList(
 
   // No IndexedDB data yet — use server data with any pending items overlaid
   if (initialList) {
-    if (offlineItems.length === 0) {
+    if (activeOfflineItems.length === 0) {
       return initialList;
     }
-    const mergedItems = mergeItems(initialList.items, offlineItems);
+    const mergedItems = mergeItems(initialList.items, activeOfflineItems);
     return {
       ...initialList,
       items: mergedItems,

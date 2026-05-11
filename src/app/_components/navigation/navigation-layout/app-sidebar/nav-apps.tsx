@@ -12,6 +12,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -56,15 +57,23 @@ export default function NavApps() {
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                          tooltip={item.name}
-                          isActive={isItemActive}
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.name}
+                        isActive={isItemActive}
+                      >
+                        <NavLink
+                          href={item.href}
+                          onClick={() => setOpenMobile(false)}
                         >
                           {item.icon}
                           <span>{item.name}</span>
-                          <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                        </SidebarMenuButton>
+                        </NavLink>
+                      </SidebarMenuButton>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuAction className="data-[state=open]:rotate-90">
+                          <ChevronRightIcon />
+                        </SidebarMenuAction>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>

@@ -8,6 +8,7 @@ import { getLists } from "@/server/lists";
 import CollapsibleCompletedSection from "./collapsible-completed-section";
 import CreateListButton from "./create-list/create-list-button";
 import ListPreview from "./list-preview";
+import ListsTQPrimer from "./lists-tq-primer";
 
 export default async function Lists({ projectId }: { projectId: string }) {
   const session = await auth();
@@ -82,6 +83,7 @@ export default async function Lists({ projectId }: { projectId: string }) {
       </div>
 
       <CreateListButton projectId={projectId} />
+      <ListsTQPrimer projectId={projectId} lists={lists} />
     </>
   );
 }

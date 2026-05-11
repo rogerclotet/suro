@@ -11,7 +11,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
@@ -24,7 +24,10 @@ import { useOfflineList } from "@/lib/offline/use-offline-list";
 import CategoryItems from "./category-items";
 import NewListItem from "./list-item/new-list-item";
 
-export default function CheckList(props: { list: List }) {
+export default function CheckList(props: {
+  list: List;
+  onSyncChange?: (isSyncing: boolean) => void;
+}) {
   const { project } = useProjects();
 
   const [dragging, setDragging] = useState(false);
@@ -34,7 +37,23 @@ export default function CheckList(props: { list: List }) {
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
   // Use offline-first data
-  const { list: offlineList } = useOfflineList(props.list, props.list.id);
+  const { list: offlineList, isSyncing } = useOfflineList(
+    props.list,
+    props.list.id,
+  );
+
+  // Reset local optimistic state when switching to a different list
+  const listId = props.list.id;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: listId is a trigger, not used inside the effect
+  useEffect(() => {
+    setOptimisticUpdates(new Map());
+  }, [listId]);
+
+  // Propagate syncing state to parent (e.g. for header indicator)
+  const { onSyncChange } = props;
+  useEffect(() => {
+    onSyncChange?.(isSyncing);
+  }, [isSyncing, onSyncChange]);
 
   // Track optimistic updates: itemId -> updated item data
   const [optimisticUpdates, setOptimisticUpdates] = useState<
