@@ -83,7 +83,7 @@ export interface SpendingFormData {
   amount: number;
   description?: string;
   from: string;
-  to: string;
+  to?: string;
 }
 
 export async function createSpendingOffline(
@@ -118,7 +118,7 @@ export async function createSpendingOffline(
     currency: "EUR",
     description: data.description ?? null,
     from: data.from,
-    to: data.to,
+    to: data.to ?? null,
     projectId: pot.projectId,
     potId: pot.id,
     createdAt: now,

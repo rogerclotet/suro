@@ -838,7 +838,7 @@ async function handleSpendingSync(
           currency: "EUR",
           description: (payload.description as string) || null,
           from: payload.from as string,
-          to: payload.to as string,
+          to: (payload.to as string) || null,
           projectId: pot.projectId,
           potId,
           createdBy: userId,
@@ -884,7 +884,7 @@ async function handleSpendingSync(
           amount: Math.round((payload.amount as number) * 100),
           description: (payload.description as string) || null,
           from: payload.from as string,
-          to: payload.to as string,
+          to: (payload.to as string) || null,
         })
         .where(and(eq(spendings.id, entityId), eq(spendings.potId, potId)))
         .returning();

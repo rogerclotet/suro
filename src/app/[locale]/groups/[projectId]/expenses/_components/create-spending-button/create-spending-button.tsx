@@ -91,7 +91,7 @@ function CreateSpendingFormContent({
         amount: Number(data.amount),
         description: data.description,
         from: data.from,
-        to: data.to ?? "",
+        to: data.to,
       });
       form.reset();
       toast.success(t("createSpendingSuccess"));
