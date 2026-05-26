@@ -22,6 +22,24 @@ if [ "$(docker ps -q -f name=$DB_CONTAINER_NAME)" ]; then
 fi
 
 if [ "$(docker ps -q -a -f name=$DB_CONTAINER_NAME)" ]; then
+  # Guard against a container that was created without a published port (older
+  # versions of this script did this). Without the mapping the dev server on
+  # the host can't reach Postgres and you get ECONNREFUSED on every request.
+  PORT_MAPPING=$(docker inspect "$DB_CONTAINER_NAME" --format '{{json .NetworkSettings.Ports}}')
+  if [ "$PORT_MAPPING" = "{}" ] || [ "$PORT_MAPPING" = "null" ]; then
+    echo "Error: container '$DB_CONTAINER_NAME' exists but has no published ports."
+    echo "It was likely created by an older version of this script."
+    echo ""
+    echo "To preserve data and fix the mapping, run:"
+    echo "  VOL=\$(docker inspect $DB_CONTAINER_NAME --format '{{range .Mounts}}{{if eq .Destination \"/var/lib/postgresql\"}}{{.Name}}{{end}}{{end}}')"
+    echo "  docker commit $DB_CONTAINER_NAME ${DB_CONTAINER_NAME}-snap"
+    echo "  docker rm -f $DB_CONTAINER_NAME"
+    echo "  docker run -d --name $DB_CONTAINER_NAME -p 5432:5432 -v \$VOL:/var/lib/postgresql ${DB_CONTAINER_NAME}-snap"
+    echo ""
+    echo "Or, to wipe and start fresh:"
+    echo "  docker rm -f $DB_CONTAINER_NAME && ./start-database.sh"
+    exit 1
+  fi
   docker start "$DB_CONTAINER_NAME"
   echo "Existing database container '$DB_CONTAINER_NAME' started"
   exit 0
