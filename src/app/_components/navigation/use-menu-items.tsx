@@ -16,7 +16,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 import type { Project } from "@/app/_data/project";
-import { useFlags } from "@/app/_state/flags-state";
+import { type Flags, useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
 import { usePathname } from "@/i18n/navigation";
 
@@ -47,6 +47,8 @@ type MenuItemPart = {
   children?: MenuItemPart[];
   isActive?: (project: Project) => boolean;
 };
+
+const DEFAULT_SECTION = "lists";
 
 const itemParts: MenuItemPart[] = [
   {
@@ -103,6 +105,33 @@ const itemParts: MenuItemPart[] = [
     ],
   },
 ];
+
+function isItemAvailable(item: MenuItemPart, project: Project, flags: Flags) {
+  if (item.pathPart === "secret-santa" && !flags.amicInvisible) {
+    return false;
+  }
+  return item.isActive === undefined || item.isActive(project);
+}
+
+/**
+ * Returns the section path part to navigate to when switching to `project`,
+ * preserving `currentSection` if it is available in the target project and
+ * falling back to the default section otherwise.
+ */
+export function resolveSectionForProject(
+  project: Project,
+  flags: Flags,
+  currentSection: string | undefined,
+): string {
+  if (!currentSection) {
+    return DEFAULT_SECTION;
+  }
+  const item = itemParts.find((i) => i.pathPart === currentSection);
+  if (item && isItemAvailable(item, project, flags)) {
+    return currentSection;
+  }
+  return DEFAULT_SECTION;
+}
 
 export function useMenuItems(): MenuItem[] {
   const { project: selectedProject } = useProjects();

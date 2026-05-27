@@ -4,6 +4,7 @@ import { ChevronsUpDownIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
+import { useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
 import {
@@ -17,9 +18,11 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { resolveSectionForProject } from "./use-menu-items";
 
 export default function ProjectSelector() {
   const { projects, project, selectProject } = useProjects();
+  const { flags } = useFlags();
   const router = useRouter();
   const pathname = usePathname();
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -34,14 +37,12 @@ export default function ProjectSelector() {
     const currentSection = pathname
       .split("/groups/[projectId]/")[1]
       ?.split("/")[0];
-    if (currentSection) {
-      router.push(`/groups/${newProject.id}/${currentSection}` as never);
-    } else {
-      router.push({
-        pathname: "/groups/[projectId]",
-        params: { projectId: newProject.id },
-      });
-    }
+    const targetSection = resolveSectionForProject(
+      newProject,
+      flags,
+      currentSection,
+    );
+    router.push(`/groups/${newProject.id}/${targetSection}` as never);
   }
 
   if (!project || projects.length === 0) {

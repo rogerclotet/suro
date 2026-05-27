@@ -3,6 +3,7 @@
 import { CheckIcon, LayoutGridIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
+import { useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { resolveSectionForProject } from "./use-menu-items";
 
 export default function GroupSwitcherSheet({
   open,
@@ -22,6 +24,7 @@ export default function GroupSwitcherSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const { projects, project, selectProject } = useProjects();
+  const { flags } = useFlags();
   const router = useRouter();
   const pathname = usePathname();
   const tGroups = useTranslations("groups");
@@ -34,14 +37,8 @@ export default function GroupSwitcherSheet({
     const currentSection = pathname
       .split("/groups/[projectId]/")[1]
       ?.split("/")[0];
-    if (currentSection) {
-      router.push(`/groups/${p.id}/${currentSection}` as never);
-    } else {
-      router.push({
-        pathname: "/groups/[projectId]",
-        params: { projectId: p.id },
-      });
-    }
+    const targetSection = resolveSectionForProject(p, flags, currentSection);
+    router.push(`/groups/${p.id}/${targetSection}` as never);
   }
 
   return (
