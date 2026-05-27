@@ -67,18 +67,24 @@ export default function CalendarDemo() {
           </span>
         </button>
         {open && (
-          <ul className="mt-2 flex flex-col gap-2 pl-6">
+          <ul className="mt-2 pl-2">
             {items.map((it) => (
-              <li key={it.id} className="flex items-center gap-3">
-                <Checkbox
-                  id={`demo-cal-${it.id}`}
-                  checked={it.completed}
-                  onCheckedChange={() => toggle(it.id)}
-                />
+              <li
+                key={it.id}
+                className="flex flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
+              >
+                <div className="flex flex-row items-center">
+                  <Checkbox
+                    id={`demo-cal-${it.id}`}
+                    checked={it.completed}
+                    onCheckedChange={() => toggle(it.id)}
+                    className="h-6 w-6 transition-all"
+                  />
+                </div>
                 <label
                   htmlFor={`demo-cal-${it.id}`}
                   className={cn(
-                    "cursor-pointer text-sm",
+                    "wrap-break-word grow cursor-pointer overflow-hidden text-left",
                     it.completed && "text-muted-foreground line-through",
                   )}
                 >

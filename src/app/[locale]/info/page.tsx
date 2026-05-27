@@ -3,9 +3,20 @@ import {
   SiTelegram,
   SiWhatsapp,
 } from "@icons-pack/react-simple-icons";
-import { Home, Wallet } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  FileText,
+  Gift,
+  Home,
+  ListChecks,
+  PiggyBank,
+  StickyNote,
+  Wallet,
+} from "lucide-react";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import CalendarDemo from "./_components/calendar-demo";
 import ExpensesDemo from "./_components/expenses-demo";
 import FeatureSection from "./_components/feature-section";
@@ -38,6 +49,16 @@ export default async function InfoPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("info");
+  const tNav = await getTranslations("nav");
+
+  const heroFeatures = [
+    { icon: ListChecks, label: tNav("lists") },
+    { icon: Calendar, label: tNav("calendar") },
+    { icon: FileText, label: tNav("files") },
+    { icon: StickyNote, label: tNav("notes") },
+    { icon: PiggyBank, label: tNav("expenses") },
+    { icon: Gift, label: tNav("secretSanta") },
+  ];
 
   const audience = [
     {
@@ -54,34 +75,40 @@ export default async function InfoPage({
     },
   ];
 
+  const iconClass = "h-5 w-5";
   const differentiators = [
     {
       title: t("diffSplitwiseTitle"),
       body: t("diffSplitwiseBody"),
-      icons: [Wallet],
+      icons: <Wallet className={iconClass} aria-hidden />,
     },
     {
       title: t("diffChatsTitle"),
       body: t("diffChatsBody"),
-      icons: [SiWhatsapp, SiTelegram],
+      icons: (
+        <>
+          <SiWhatsapp className={iconClass} aria-hidden />
+          <SiTelegram className={iconClass} aria-hidden />
+        </>
+      ),
     },
     {
       title: t("diffNotionTitle"),
       body: t("diffNotionBody"),
-      icons: [SiNotion],
+      icons: <SiNotion className={iconClass} aria-hidden />,
     },
     {
       title: t("diffFamilyAppsTitle"),
       body: t("diffFamilyAppsBody"),
-      icons: [Home],
+      icons: <Home className={iconClass} aria-hidden />,
     },
   ];
 
   return (
     <main className="min-h-screen bg-background">
-      <InfoStickyHeader title={t("heroTitle")} />
+      <InfoStickyHeader />
 
-      <section className="relative px-6 pt-6 pb-16 md:pt-10 md:pb-20">
+      <section className="relative px-6 pt-20 pb-16 md:pt-32 md:pb-24 lg:pt-44">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -90,15 +117,29 @@ export default async function InfoPage({
               "radial-gradient(ellipse 70% 80% at 50% 0%, oklch(0.78 0.14 80 / 0.22), transparent 75%)",
           }}
         />
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative mx-auto max-w-4xl text-left md:text-center">
           <h1 className="text-balance font-semibold text-4xl text-foreground tracking-tight md:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+          <p className="mt-6 max-w-2xl text-pretty text-base text-muted-foreground leading-relaxed md:mx-auto md:text-lg">
             {t("heroSubtitle")}
           </p>
+          <ul className="mt-12 grid max-w-md grid-cols-3 gap-x-3 gap-y-6 sm:mx-auto sm:max-w-2xl sm:grid-cols-6">
+            {heroFeatures.map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="flex flex-col items-center gap-2 text-muted-foreground"
+              >
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="text-balance font-medium text-foreground text-xs">
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div id="info-hero-sentinel" aria-hidden className="h-px" />
       </section>
 
       <section className="px-6 py-14 md:py-20">
@@ -133,7 +174,7 @@ export default async function InfoPage({
 
       <div className="mt-8 border-border border-t bg-muted/30">
         <section className="px-6 pt-14 pb-2 md:pt-20">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-left md:text-center">
             <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
               {t("featuresEyebrow")}
             </p>
@@ -181,7 +222,7 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-left md:text-center">
             <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
               {t("audienceEyebrow")}
             </p>
@@ -209,7 +250,7 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-left md:text-center">
             <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
               {t("diffEyebrow")}
             </p>
@@ -228,13 +269,7 @@ export default async function InfoPage({
               >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    {icons.map((Icon) => (
-                      <Icon
-                        key={Icon.displayName ?? Icon.name}
-                        className="h-5 w-5"
-                        aria-hidden
-                      />
-                    ))}
+                    {icons}
                   </div>
                   <h3 className="font-semibold text-lg text-popover-foreground">
                     {title}
@@ -260,6 +295,27 @@ export default async function InfoPage({
           <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
             {t("roadmapBody")}
           </p>
+        </div>
+      </section>
+
+      <section className="px-6 py-14 md:py-20">
+        <div className="mx-auto max-w-3xl">
+          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            {t("privacyEyebrow")}
+          </p>
+          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            {t("privacyTitle")}
+          </h2>
+          <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+            {t("privacyBody")}
+          </p>
+          <Link
+            href="/privacy"
+            className="mt-6 inline-flex items-center gap-1.5 font-medium text-foreground text-sm transition-colors hover:text-primary"
+          >
+            {t("privacyLink")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
