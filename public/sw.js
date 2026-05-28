@@ -359,7 +359,7 @@ self.addEventListener("push", (event) => {
       body,
       tag,
       icon: icon ?? `${self.location.origin}/favicon.png`,
-      badge: badge ?? `${self.location.origin}/favicon.png`,
+      badge: badge ?? `${self.location.origin}/notification-badge.png`,
       image,
       timestamp,
       data: { path },
