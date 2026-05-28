@@ -13,7 +13,11 @@ export async function cacheEventsToIDB(events: CalendarEvent[]): Promise<void> {
 
   const ids = events.map((e) => e.id);
   const existing = await db.events.bulkGet(ids);
-  const existingMap = new Map(existing.filter(Boolean).map((e) => [e!.id, e!]));
+  const existingMap = new Map(
+    existing
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .map((e) => [e.id, e]),
+  );
 
   const toWrite = events
     .filter((e) => existingMap.get(e.id)?._syncStatus !== "pending")

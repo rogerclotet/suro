@@ -106,7 +106,7 @@ export default function Login({
             </div>
             <a
               href="/api/preview-login"
-              className="flex w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/50 px-4 py-2.5 font-mono text-muted-foreground text-xs transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+              className="flex w-full items-center justify-center rounded-xl border border-border border-dashed bg-muted/50 px-4 py-2.5 font-mono text-muted-foreground text-xs transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
             >
               {previewEmail}
             </a>

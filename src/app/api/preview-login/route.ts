@@ -15,7 +15,9 @@ export async function GET(request: Request): Promise<NextResponse> {
   await db
     .delete(verificationTokens)
     .where(eq(verificationTokens.identifier, email));
-  await db.insert(verificationTokens).values({ identifier: email, token, expires });
+  await db
+    .insert(verificationTokens)
+    .values({ identifier: email, token, expires });
 
   const { origin } = new URL(request.url);
   const callbackUrl = new URL("/api/auth/callback/resend", origin);
