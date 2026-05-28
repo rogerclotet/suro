@@ -599,7 +599,8 @@
     "invalidTitle": "Invalid invitation",
     "groupTitle": "Group invitation",
     "participants": "Participants:",
-    "metadataDescription": "Invitation to join the group {projectName}",
+    "metadataInviteTitle": "You're invited to Suro",
+    "metadataInviteBody": "Open the link to join the group on Suro.",
     "accept": "Accept invitation",
     "acceptError": "Could not accept the invitation",
     "acceptSuccess": "You joined the group"

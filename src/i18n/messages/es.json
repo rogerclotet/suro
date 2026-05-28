@@ -599,7 +599,8 @@
     "invalidTitle": "Invitación no válida",
     "groupTitle": "Invitación al grupo",
     "participants": "Participantes:",
-    "metadataDescription": "Invitación para unirse al grupo {projectName}",
+    "metadataInviteTitle": "Te han invitado a Suro",
+    "metadataInviteBody": "Abre el enlace para unirte al grupo en Suro.",
     "accept": "Aceptar invitación",
     "acceptError": "No se ha podido aceptar la invitación",
     "acceptSuccess": "Te has unido al grupo"
