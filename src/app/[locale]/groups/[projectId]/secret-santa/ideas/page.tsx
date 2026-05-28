@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { getPathname } from "@/i18n/navigation";
+import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
 import GiftIdeas from "./gift-ideas";
 
@@ -16,6 +17,14 @@ export default async function IdeasPage({
   const session = await auth();
   if (!session) {
     redirect("/");
+  }
+
+  const project = await getUserProject(projectId);
+  if (!project) {
+    redirect("/");
+  }
+  if (!project.features.secretSanta) {
+    redirect(`/groups/${projectId}/lists`);
   }
 
   const locale = await getLocale();

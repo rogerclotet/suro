@@ -103,6 +103,11 @@ export const routing = defineRouting({
       es: "/grupos/[projectId]/amigo-invisible/ideas",
       en: "/groups/[projectId]/secret-santa/ideas",
     },
+    "/groups/[projectId]/settings": {
+      ca: "/grups/[projectId]/configuracio",
+      es: "/grupos/[projectId]/configuracion",
+      en: "/groups/[projectId]/settings",
+    },
     "/groups/[projectId]/invitation/[inviteToken]": {
       ca: "/grups/[projectId]/invitacio/[inviteToken]",
       es: "/grupos/[projectId]/invitacion/[inviteToken]",

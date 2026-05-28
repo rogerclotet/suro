@@ -18,10 +18,14 @@ check:
   before_script:
     - npm install -g pnpm@latest-10
     - pnpm install
+  variables:
+    SKIP_ENV_VALIDATION: "1"
+    NEXT_TELEMETRY_DISABLED: "1"
   script:
     - pnpm biome:check
     - pnpm typecheck
     - pnpm test
+    - pnpm run build
   artifacts:
     paths:
       - node_modules

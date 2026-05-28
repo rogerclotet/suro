@@ -21,6 +21,7 @@ const projectQuery = {
         inviteToken: true,
         image: true,
         color: true,
+        features: true,
       },
       with: {
         users: { columns: {}, with: { user: true } },
@@ -101,6 +102,7 @@ export const getInvitedProject = cache(async (projectId: string) => {
         inviteToken: true,
         image: true,
         color: true,
+        features: true,
       },
       with: {
         users: { columns: {}, with: { user: true } },

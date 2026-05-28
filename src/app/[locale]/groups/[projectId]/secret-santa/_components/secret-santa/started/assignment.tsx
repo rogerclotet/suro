@@ -49,7 +49,10 @@ export default function Assignment({
       {isFlipped && (
         <div className="fade-in-0 [sm,md]:slide-in-from-top-5 lg:slide-in-from-left-5 animate-in space-y-4 duration-500">
           <h4 className="font-semibold">{t("giftIdeas")}</h4>
-          <AssignmentGiftIdeas giftIdeas={assignment.giftIdeas} />
+          <AssignmentGiftIdeas
+            giftIdeas={assignment.giftIdeas}
+            userName={assignment.user.name ?? ""}
+          />
         </div>
       )}
     </div>
