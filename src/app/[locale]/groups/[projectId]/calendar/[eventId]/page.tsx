@@ -1,4 +1,4 @@
-import { Folders, ListTodo } from "lucide-react";
+import { Folders, ListTodo, NotebookText, Wallet } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
@@ -8,9 +8,12 @@ import { Link } from "@/i18n/navigation";
 import { textToHtml } from "@/lib/utils";
 import { getEvent } from "@/server/events";
 import { getEventList } from "@/server/lists";
+import { getEventNotes } from "@/server/notes";
+import { getEventPot } from "@/server/pots";
 import Files from "../../files/_components/files";
 import UploadButton from "../../files/_components/upload-button";
 import CheckList from "../../lists/[listId]/_components/check-list";
+import NotePreview from "../../notes/_components/note-preview";
 import TimeRange from "../_components/event/time-range";
 import SettingsMenu from "./_components/settings-menu";
 import TimeRemaining from "./_components/time-remaining";
@@ -27,15 +30,20 @@ export default async function EventPage({
     return redirect("/");
   }
 
-  const [event, list, tCommon, tCal] = await Promise.all([
+  const [event, list, eventNotes, eventPot, tCommon, tCal] = await Promise.all([
     getEvent(projectId, eventId),
     getEventList(projectId, eventId),
+    getEventNotes(projectId, eventId),
+    getEventPot(projectId, eventId),
     getTranslations("common"),
     getTranslations("calendar"),
   ]);
   if (event === undefined) {
     return redirect(`/groups/${projectId}/calendar`);
   }
+
+  const pot = eventPot ?? undefined;
+  const canCreatePot = event.project.users.length >= 2;
 
   return (
     <div className="space-y-6">
@@ -57,7 +65,12 @@ export default async function EventPage({
                 }}
               />
             </ClientOnly>
-            <SettingsMenu event={event} list={list} />
+            <SettingsMenu
+              event={event}
+              list={list}
+              pot={pot}
+              canCreatePot={canCreatePot}
+            />
           </div>
         </div>
 
@@ -81,9 +94,9 @@ export default async function EventPage({
         />
       )}
 
-      <div className="grid grid-cols-1 items-stretch gap-4 pt-6 md:grid-cols-2">
+      <div className="columns-1 gap-4 space-y-4 pt-6 md:columns-2">
         {list !== undefined && (
-          <div className="max-w-3xl space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="font-semibold text-xl">
               <Link
                 href={{
@@ -100,7 +113,27 @@ export default async function EventPage({
           </div>
         )}
 
-        <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+        {pot !== undefined && (
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+            <h2 className="font-semibold text-xl">
+              <Link
+                href={{
+                  pathname: "/groups/[projectId]/expenses/[potId]",
+                  params: { projectId, potId: pot.id },
+                }}
+                className="flex items-center gap-2"
+              >
+                <Wallet />
+                {pot.name !== event.name ? pot.name : tCal("potSection")}
+              </Link>
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {pot.users.map((u) => u.user.name).join(", ")}
+            </p>
+          </div>
+        )}
+
+        <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
           <h2 className="flex items-start justify-between font-semibold text-xl">
             <div className="flex items-center gap-2">
               <Folders />
@@ -112,6 +145,20 @@ export default async function EventPage({
 
           {event.files.length > 0 && <Files files={event.files} />}
         </div>
+
+        {eventNotes.length > 0 && (
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+            <h2 className="flex items-center gap-2 font-semibold text-xl">
+              <NotebookText />
+              {tCal("notesSection")}
+            </h2>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+              {eventNotes.map((note) => (
+                <NotePreview key={note.id} note={note} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

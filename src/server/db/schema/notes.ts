@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import { index, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createTable } from "./create-table";
+import { events } from "./events";
 import { projects } from "./projects";
 import { users } from "./users";
 import { randomId } from "./utils";
@@ -42,9 +43,14 @@ export const notes = createTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    eventId: varchar("eventId").references(() => events.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
   },
   (n) => ({
     projectIdIdx: index("note_projectId_idx").on(n.projectId),
+    eventIdIdx: index("note_eventId_idx").on(n.eventId),
   }),
 );
 
@@ -61,4 +67,5 @@ export const notesRelations = relations(notes, ({ one }) => ({
     fields: [notes.updatedBy],
     references: [users.id],
   }),
+  event: one(events, { fields: [notes.eventId], references: [events.id] }),
 }));

@@ -295,6 +295,13 @@
       "when": 1779956588677,
       "tag": "0041_cold_living_mummy",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1779995927155,
+      "tag": "0042_public_namorita",
+      "breakpoints": true
     }
   ]
 }

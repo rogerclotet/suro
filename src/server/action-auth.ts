@@ -10,6 +10,7 @@ import { getEvent } from "./events";
 import { getUserFile } from "./files";
 import { getList, getTemplate } from "./lists";
 import { getNote } from "./notes";
+import { getPot } from "./pots";
 import { getUserProject } from "./projects";
 
 export async function requireSession() {
@@ -96,6 +97,15 @@ export async function requireNote(noteId: string) {
   }
 
   return note;
+}
+
+export async function requirePot(potId: string) {
+  const pot = await getPot(potId);
+  if (!pot) {
+    throw new Error("Pot not found");
+  }
+
+  return pot;
 }
 
 export async function requireOwnedFile(fileId: string) {

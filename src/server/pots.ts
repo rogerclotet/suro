@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { cache } from "react";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
@@ -49,6 +49,7 @@ export const getPot = cache(async (potId: string) => {
       where: eq(pots.id, potId),
       with: {
         users: { columns: {}, with: { user: true } },
+        event: true,
       },
     });
 
@@ -66,6 +67,34 @@ export const getPot = cache(async (potId: string) => {
     posthog.captureException(e, session.user.id, {
       action: "get_pot",
       potId,
+    });
+    return null;
+  }
+});
+
+export const getEventPot = cache(async (projectId: string, eventId: string) => {
+  const session = await auth();
+  assert(session, "Unauthenticated user");
+
+  try {
+    if (!(await isProjectMember(projectId, session.user.id))) {
+      return null;
+    }
+
+    const result = await db.query.pots.findFirst({
+      where: and(eq(pots.projectId, projectId), eq(pots.eventId, eventId)),
+      with: {
+        users: { columns: {}, with: { user: true } },
+      },
+    });
+
+    return result ?? null;
+  } catch (e) {
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_event_pot",
+      projectId,
+      eventId,
     });
     return null;
   }

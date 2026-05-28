@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { index, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
+import { events } from "./events";
 import { projects } from "./projects";
 import { spendings } from "./spendings";
 import { users } from "./users";
@@ -32,9 +33,14 @@ export const pots = createTable(
     createdBy: varchar("createdBy", { length: 255 })
       .notNull()
       .references(() => users.id, { onUpdate: "cascade" }),
+    eventId: varchar("eventId").references(() => events.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
   },
   (p) => ({
     projectIdIdx: index("pot_projectId_idx").on(p.projectId),
+    eventIdIdx: index("pot_eventId_idx").on(p.eventId),
   }),
 );
 
@@ -49,6 +55,7 @@ export const potsRelations = relations(pots, ({ one, many }) => ({
   }),
   users: many(potToUsers),
   spendings: many(spendings),
+  event: one(events, { fields: [pots.eventId], references: [events.id] }),
 }));
 
 export const potToUsers = createTable(

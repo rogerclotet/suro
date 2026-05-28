@@ -1,0 +1,145 @@
+"use client";
+
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { useQuery } from "@tanstack/react-query";
+import { LinkIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
+import { type FormEvent, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type * as v from "valibot";
+import type { Event } from "@/app/_data/event";
+import type { Note } from "@/app/_data/note";
+import { useProjects } from "@/app/_state/project-state";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import ModalForm from "@/components/ui/modal-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SubmitButton from "@/components/ui/submit-button";
+import { linkEventNoteSchema } from "../../_components/event/data";
+import { linkEventNote } from "../actions";
+
+export default function LinkNoteForm({
+  event,
+  trigger,
+}: {
+  event: Event;
+  trigger: React.ReactNode;
+}) {
+  const { data: session } = useSession();
+  const t = useTranslations("calendar");
+  const form = useForm({
+    defaultValues: {
+      noteId: "",
+    },
+    resolver: valibotResolver(linkEventNoteSchema),
+  });
+  const { project } = useProjects();
+  const { data: notes } = useQuery({
+    queryKey: ["notes", project?.id],
+    queryFn: async () => {
+      if (!project) {
+        return [];
+      }
+      const res = await fetch(`/api/${project.id}/notes`);
+      if (!res.ok) {
+        throw new Error(t("linkNoteLoadError"));
+      }
+      const notes = (await res.json()) as (Note & {
+        createdAt: string;
+        updatedAt: string;
+      })[];
+      return notes.map<Note>((note) => {
+        return {
+          ...note,
+          createdAt: note.createdAt ? new Date(note.createdAt) : null,
+          updatedAt: note.updatedAt ? new Date(note.updatedAt) : null,
+        };
+      });
+    },
+    select: (data) => data?.filter((note) => note.eventId === null),
+    staleTime: 60 * 1000,
+  });
+
+  const onSubmit = useCallback(
+    async (data: v.InferInput<typeof linkEventNoteSchema>) => {
+      try {
+        await linkEventNote(event, data.noteId);
+        toast.success(t("linkNoteSuccess"));
+      } catch (e) {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "link_event_note",
+          projectId: event.projectId,
+          eventId: event.id,
+        });
+        toast.error(t("linkNoteError"));
+      }
+    },
+    [event, session?.user.id, t],
+  );
+
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void form.handleSubmit(onSubmit)(e);
+    },
+    [form, onSubmit],
+  );
+
+  return (
+    <ModalForm
+      trigger={trigger}
+      title={t("linkNoteTitle")}
+      description={t("linkNoteDescription")}
+    >
+      <Form {...form}>
+        <form onSubmit={handleFormSubmit} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="noteId"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger disabled={!notes || notes.length === 0}>
+                        <SelectValue
+                          placeholder={
+                            notes && notes.length > 0
+                              ? t("linkNotePlaceholder")
+                              : t("linkNoteNoNotes")
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {notes?.map((note) => (
+                        <SelectItem key={note.id} value={note.id}>
+                          {note.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              );
+            }}
+          />
+
+          <SubmitButton
+            text={t("linkNoteButton")}
+            icon={<LinkIcon />}
+            formState={form.formState}
+          />
+        </form>
+      </Form>
+    </ModalForm>
+  );
+}
