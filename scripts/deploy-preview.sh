@@ -45,7 +45,7 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
 
   # Start a per-MR Postgres container if not already running.
   # Data lives in a named volume so it survives app redeployments within the same MR.
-  if ! docker inspect "\${DB_CONTAINER}" >/dev/null 2>&1; then
+  if ! docker container inspect "\${DB_CONTAINER}" >/dev/null 2>&1; then
     docker run -d \\
       --name "\${DB_CONTAINER}" \\
       --restart unless-stopped \\
