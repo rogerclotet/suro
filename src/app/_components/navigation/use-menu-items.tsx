@@ -10,13 +10,13 @@ import {
   LayoutTemplateIcon,
   LightbulbIcon,
   ListTodo,
+  SettingsIcon,
   TagsIcon,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 import type { Project } from "@/app/_data/project";
-import { type Flags, useFlags } from "@/app/_state/flags-state";
 import { useProjects } from "@/app/_state/project-state";
 import { usePathname } from "@/i18n/navigation";
 
@@ -104,10 +104,15 @@ const itemParts: MenuItemPart[] = [
       },
     ],
   },
+  {
+    nameKey: "settings",
+    pathPart: "settings",
+    icon: <SettingsIcon />,
+  },
 ];
 
-function isItemAvailable(item: MenuItemPart, project: Project, flags: Flags) {
-  if (item.pathPart === "secret-santa" && !flags.amicInvisible) {
+function isItemAvailable(item: MenuItemPart, project: Project) {
+  if (item.pathPart === "secret-santa" && !project.features.secretSanta) {
     return false;
   }
   return item.isActive === undefined || item.isActive(project);
@@ -120,22 +125,20 @@ function isItemAvailable(item: MenuItemPart, project: Project, flags: Flags) {
  */
 export function resolveSectionForProject(
   project: Project,
-  flags: Flags,
   currentSection: string | undefined,
 ): string {
   if (!currentSection) {
     return DEFAULT_SECTION;
   }
   const item = itemParts.find((i) => i.pathPart === currentSection);
-  if (item && isItemAvailable(item, project, flags)) {
+  if (item && isItemAvailable(item, project)) {
     return currentSection;
   }
   return DEFAULT_SECTION;
 }
 
 export function useMenuItems(): MenuItem[] {
-  const { project: selectedProject } = useProjects();
-  const { flags } = useFlags();
+  const { project: selectedProject, isAdmin } = useProjects();
   const params = useParams<{ projectId?: string }>();
   const t = useTranslations("nav");
 
@@ -146,12 +149,14 @@ export function useMenuItems(): MenuItem[] {
     return itemParts.filter((item) => {
       switch (item.pathPart) {
         case "secret-santa":
-          return flags.amicInvisible;
+          return selectedProject?.features.secretSanta ?? false;
+        case "settings":
+          return Boolean(selectedProject) && isAdmin;
         default:
           return true;
       }
     });
-  }, [flags]);
+  }, [selectedProject, isAdmin]);
 
   const activeItemParts = useMemo(() => {
     return enabledFeatureItemParts

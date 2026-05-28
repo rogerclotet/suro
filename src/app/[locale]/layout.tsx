@@ -16,14 +16,12 @@ import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
-import FlagsProvider from "@/app/_components/flags-loader";
 import SidebarLayout from "@/app/_components/navigation/navigation-layout/sidebar-layout";
 import NotificationProvider from "@/app/_components/notifications/notification-provider";
 import ProjectsProvider from "@/app/_components/projects-provider/projects-provider";
 import UserIdentifier from "@/app/_components/user-identifier";
 import { uploadFileRouter } from "@/app/api/uploadthing/core";
 import { routing } from "@/i18n/routing";
-import { getFlags } from "@/server/flags";
 
 const VALIBOT_LANG: Record<string, string> = {
   ca: "ca",
@@ -109,7 +107,6 @@ export default async function LocaleLayout({
   v.setGlobalConfig({ lang: VALIBOT_LANG[locale] ?? "en" });
 
   const session = await auth();
-  const flags = await getFlags();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -127,7 +124,6 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <SessionProvider session={session}>
             <UserIdentifier />
-            <FlagsProvider flags={flags} />
 
             <ReactQueryProvider>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

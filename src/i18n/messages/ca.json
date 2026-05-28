@@ -231,6 +231,7 @@
     "expenses": "Despeses",
     "secretSanta": "Amic Invisible",
     "ideas": "Llista d'idees",
+    "settings": "Configuració",
     "more": "Més",
     "notifications": "Notificacions",
     "manageGroups": "Gestionar grups",
@@ -306,6 +307,16 @@
     "switchGroup": "Canvia de grup",
     "memberCount": "{count, plural, =1 {1 membre} other {# membres}}",
     "joinShareText": "Uneix-te a {names}"
+  },
+  "groupSettings": {
+    "title": "Configuració del grup",
+    "description": "Personalitza les funcionalitats disponibles en aquest grup.",
+    "featuresTitle": "Funcionalitats",
+    "featuresDescription": "Activa o desactiva funcionalitats opcionals per a aquest grup. Les desactivades no apareixeran al menú.",
+    "featureSecretSantaLabel": "Amic Invisible",
+    "featureSecretSantaDescription": "Organitza un sorteig d'amic invisible amb els membres del grup. Pots desactivar-lo fora de temporada per mantenir el menú net.",
+    "updateSuccess": "Configuració actualitzada",
+    "updateError": "No s'ha pogut actualitzar la configuració, torna-ho a provar més tard"
   },
   "lists": {
     "empty": "Encara no hi ha llistes",

@@ -231,6 +231,7 @@
     "expenses": "Expenses",
     "secretSanta": "Secret Santa",
     "ideas": "Ideas list",
+    "settings": "Settings",
     "more": "More",
     "notifications": "Notifications",
     "manageGroups": "Manage groups",
@@ -306,6 +307,16 @@
     "switchGroup": "Switch group",
     "memberCount": "{count, plural, =1 {1 member} other {# members}}",
     "joinShareText": "Join {names}"
+  },
+  "groupSettings": {
+    "title": "Group settings",
+    "description": "Customize which features are available in this group.",
+    "featuresTitle": "Features",
+    "featuresDescription": "Enable or disable optional features for this group. Disabled features stay hidden from the menu.",
+    "featureSecretSantaLabel": "Secret Santa",
+    "featureSecretSantaDescription": "Run a Secret Santa draw with the group's members. Turn it off out of season to keep the menu uncluttered.",
+    "updateSuccess": "Settings updated",
+    "updateError": "Could not update settings, please try again later"
   },
   "lists": {
     "empty": "No lists yet",
