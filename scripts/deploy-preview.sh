@@ -71,13 +71,12 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
     --env-file "\${PREVIEW_ENV_FILE}" \\
     -e DATABASE_URL="\${DATABASE_URL}" \\
     -e AUTH_URL="https://\${HOST}" \\
-    --label "traefik.enable=true" \\
-    --label "traefik.docker.network=\${PREVIEW_DOCKER_NETWORK}" \\
-    --label "traefik.http.routers.\${CONTAINER}.rule=Host(\\\`\${HOST}\\\`)" \\
-    --label "traefik.http.routers.\${CONTAINER}.entrypoints=websecure" \\
-    --label "traefik.http.routers.\${CONTAINER}.tls.certresolver=letsencrypt" \\
-    --label "traefik.http.services.\${CONTAINER}.loadbalancer.server.port=3000" \\
     "\${IMAGE}"
+
+  sed -e "s|__CONTAINER__|\${CONTAINER}|g" \\
+      -e "s|__HOST__|\${HOST}|g" \\
+    "\${WORKDIR}/scripts/preview-route.yml.tmpl" \\
+    > "\${TRAEFIK_ROUTES_DIR}/mr-\${IID}.yml"
 
   echo "Preview ready: https://\${HOST}"
 EOF

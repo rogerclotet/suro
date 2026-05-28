@@ -57,7 +57,8 @@ Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr c
 
 The deploy host must have:
 
-- **Traefik** running with the Docker provider, attached to a shared network (`$PREVIEW_DOCKER_NETWORK`, e.g. `web`), with a Let's Encrypt resolver named `letsencrypt`.
+- **Pangolin/Traefik** already running (uses the `pangolin` Docker network, cert resolver `letsencrypt`). Routing uses Traefik's **file provider** — no Docker provider needed.
+  - One-time: change the file provider in `/srv/pangolin/config/traefik/traefik_config.yml` from `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir /srv/pangolin/config/traefik/routes && mv /srv/pangolin/config/traefik/dynamic_config.yml /srv/pangolin/config/traefik/routes/` and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
 - Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
 - Postgres image pullable (used as per-MR sidecar containers); no host Postgres required.
 - `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.

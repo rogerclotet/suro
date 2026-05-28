@@ -22,6 +22,8 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
   DB_VOLUME="suro-mr-\${IID}-db"
   WORKDIR="\${PREVIEW_HOST_DIR}/mr-\${IID}"
 
+  rm -f "\${TRAEFIK_ROUTES_DIR}/mr-\${IID}.yml"
+
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true
   docker stop "\${DB_CONTAINER}" 2>/dev/null || true
