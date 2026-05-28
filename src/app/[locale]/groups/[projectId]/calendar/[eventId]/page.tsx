@@ -141,12 +141,12 @@ export default async function EventPage({
         </div>
 
         {eventNotes.length > 0 && (
-          <div className="space-y-4 border-muted border-y py-6 md:col-span-2 md:rounded-lg md:border-x md:px-6">
+          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="flex items-center gap-2 font-semibold text-xl">
               <NotebookText />
               {tCal("notesSection")}
             </h2>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               {eventNotes.map((note) => (
                 <NotePreview key={note.id} note={note} />
               ))}
