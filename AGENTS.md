@@ -59,7 +59,7 @@ The deploy host must have:
 
 - **Traefik** running with the Docker provider, attached to a shared network (`$PREVIEW_DOCKER_NETWORK`, e.g. `web`), with a Let's Encrypt resolver named `letsencrypt`.
 - Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
-- Postgres reachable from inside containers on `$PREVIEW_DOCKER_NETWORK`; a CI user with `CREATEDB` privilege.
+- Postgres image pullable (used as per-MR sidecar containers); no host Postgres required.
 - `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.
 - `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH.
 

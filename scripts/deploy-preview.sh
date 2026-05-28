@@ -4,15 +4,13 @@
 #
 # Required env (from GitLab CI):
 #   CI_MERGE_REQUEST_IID, CI_COMMIT_SHA, CI_REPOSITORY_URL
-#   SSH_USERNAME, SSH_PASSWORD, SSH_IP
+#   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
-# Required env on the remote (typically exported via ~/.bashrc):
-#   PREVIEW_HOST_DIR        — parent dir holding per-MR working copies (e.g. ~/suro-previews)
-#   PREVIEW_DOMAIN          — wildcard base, e.g. preview.suro.app
-#   PREVIEW_PG_ADMIN_URL    — psql URL with CREATEDB privilege
-#   PREVIEW_DB_URL_TEMPLATE — connection string with literal "{db}" placeholder
-#   PREVIEW_ENV_FILE        — host path to shared preview env file (e.g. /etc/suro/preview.env)
-#   PREVIEW_DOCKER_NETWORK  — docker network attached to Traefik (e.g. web)
+# Required env on the remote (deploy.env):
+#   PREVIEW_HOST_DIR    — parent dir for per-MR working copies
+#   PREVIEW_DOMAIN      — wildcard base, e.g. preview.suro.app
+#   PREVIEW_ENV_FILE    — path to shared preview secrets (Resend, Uploadthing, etc.)
+#   PREVIEW_DOCKER_NETWORK — Docker network attached to Traefik
 
 : "${CI_MERGE_REQUEST_IID:?missing}"
 : "${CI_COMMIT_SHA:?missing}"
@@ -32,7 +30,8 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
 
   CONTAINER="suro-mr-\${IID}"
   IMAGE="suro:mr-\${IID}"
-  DB="suro_mr_\${IID}"
+  DB_CONTAINER="suro-mr-\${IID}-db"
+  DB_VOLUME="suro-mr-\${IID}-db"
   HOST="mr-\${IID}.\${PREVIEW_DOMAIN}"
   WORKDIR="\${PREVIEW_HOST_DIR}/mr-\${IID}"
 
@@ -44,15 +43,26 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
   git fetch origin "\${SHA}"
   git checkout --force --detach "\${SHA}"
 
-  psql "\${PREVIEW_PG_ADMIN_URL}" -tAc "SELECT 1 FROM pg_database WHERE datname='\${DB}'" \\
-    | grep -q 1 || createdb -d "\${PREVIEW_PG_ADMIN_URL}" "\${DB}"
+  # Start a per-MR Postgres container if not already running.
+  # Data lives in a named volume so it survives app redeployments within the same MR.
+  if ! docker inspect "\${DB_CONTAINER}" >/dev/null 2>&1; then
+    docker run -d \\
+      --name "\${DB_CONTAINER}" \\
+      --restart unless-stopped \\
+      --network "\${PREVIEW_DOCKER_NETWORK}" \\
+      -v "\${DB_VOLUME}:/var/lib/postgresql/data" \\
+      -e POSTGRES_DB=suro \\
+      -e POSTGRES_PASSWORD=preview \\
+      postgres:17-alpine
+    until docker exec "\${DB_CONTAINER}" pg_isready -U postgres -q; do sleep 1; done
+  fi
+
+  DATABASE_URL="postgresql://postgres:preview@\${DB_CONTAINER}:5432/suro"
 
   docker build -t "\${IMAGE}" .
 
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true
-
-  DATABASE_URL=\$(printf '%s' "\${PREVIEW_DB_URL_TEMPLATE}" | sed "s|{db}|\${DB}|g")
 
   docker run -d \\
     --name "\${CONTAINER}" \\
