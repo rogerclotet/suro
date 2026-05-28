@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { ThemeColorMeta } from "@/components/theme-color-meta";
 import { ConflictModal } from "@/components/ui/conflict-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
@@ -85,10 +86,10 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   colorScheme: "light dark",
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7e4d7" },
-    { media: "(prefers-color-scheme: dark)", color: "#17100c" },
-  ],
+  // Single default that matches `defaultTheme="dark"` for first paint / no-JS.
+  // `ThemeColorMeta` then keeps this in sync with the user's resolved theme,
+  // which can differ from the system `prefers-color-scheme`.
+  themeColor: "#17100c",
 };
 
 export default async function LocaleLayout({
@@ -127,6 +128,7 @@ export default async function LocaleLayout({
 
             <ReactQueryProvider>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                <ThemeColorMeta />
                 <SidebarLayout>
                   <TooltipProvider>
                     <ProjectsProvider>
