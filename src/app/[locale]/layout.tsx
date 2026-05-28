@@ -35,6 +35,18 @@ export async function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+function getSiteUrl(): URL | undefined {
+  const fromEnv =
+    process.env.NEXTAUTH_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+  if (!fromEnv) return undefined;
+  try {
+    return new URL(fromEnv);
+  } catch {
+    return undefined;
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -45,14 +57,9 @@ export async function generateMetadata({
 
   const title = t("title");
   const description = t("description");
-  const ogImage = {
-    url: "/android-chrome-512x512.png",
-    width: 512,
-    height: 512,
-    alt: title,
-  };
 
   return {
+    metadataBase: getSiteUrl(),
     title,
     description,
     icons: [{ rel: "icon", url: "/favicon.png" }],
@@ -68,13 +75,11 @@ export async function generateMetadata({
       type: "website",
       locale,
       siteName: title,
-      images: [ogImage],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
     },
   };
 }
