@@ -8,8 +8,9 @@
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
 # Required env on the remote (deploy.env):
+#   PREVIEW_WORKDIR     — parent dir for per-MR compose files
 #   PREVIEW_DOMAIN      — wildcard base, e.g. suro.clotet.dev
-#   PREVIEW_ENV_FILE    — path to shared preview secrets (Resend, Uploadthing, etc.)
+#   PREVIEW_ENV_FILE    — path to shared preview secrets
 #   PREVIEW_DOCKER_NETWORK — Docker network attached to Traefik
 #   TRAEFIK_ROUTES_DIR  — directory watched by Traefik's file provider
 
@@ -34,38 +35,77 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
   DB_CONTAINER="suro-mr-\${IID}-db"
   DB_VOLUME="suro-mr-\${IID}-db"
   HOST="mr-\${IID}.\${PREVIEW_DOMAIN}"
+  WORKDIR="\${PREVIEW_WORKDIR}/mr-\${IID}"
 
-  # Start a per-MR Postgres container if not already running.
-  # Data lives in a named volume so it survives app redeployments within the same MR.
-  if ! docker container inspect "\${DB_CONTAINER}" >/dev/null 2>&1; then
-    docker run -d \\
-      --name "\${DB_CONTAINER}" \\
-      --restart unless-stopped \\
-      --network "\${PREVIEW_DOCKER_NETWORK}" \\
-      -v "\${DB_VOLUME}:/var/lib/postgresql/data" \\
-      -e POSTGRES_DB=suro \\
-      -e POSTGRES_PASSWORD=preview \\
-      postgres:17-alpine
-    until docker exec "\${DB_CONTAINER}" pg_isready -U postgres -q; do sleep 1; done
-  fi
+  mkdir -p "\${WORKDIR}"
 
-  DATABASE_URL="postgresql://postgres:preview@\${DB_CONTAINER}:5432/suro"
+  # Write compose file using placeholders to avoid shell quoting issues.
+  TMPL=\$(mktemp)
+  cat > "\${TMPL}" <<'COMPOSEEOF'
+services:
+  app:
+    image: __IMAGE__
+    container_name: __CONTAINER__
+    restart: unless-stopped
+    networks:
+      - traefik
+    env_file:
+      - __ENV_FILE__
+    environment:
+      DATABASE_URL: "postgresql://postgres:preview@db:5432/suro"
+      NEXTAUTH_URL: "https://__HOST__"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    container_name: __DB_CONTAINER__
+    restart: unless-stopped
+    networks:
+      - traefik
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: suro
+      POSTGRES_PASSWORD: preview
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  traefik:
+    external: true
+    name: __NETWORK__
+
+volumes:
+  db_data:
+    name: __DB_VOLUME__
+COMPOSEEOF
+
+  sed -e "s|__IMAGE__|\${IMAGE}|g" \\
+      -e "s|__CONTAINER__|\${CONTAINER}|g" \\
+      -e "s|__DB_CONTAINER__|\${DB_CONTAINER}|g" \\
+      -e "s|__DB_VOLUME__|\${DB_VOLUME}|g" \\
+      -e "s|__HOST__|\${HOST}|g" \\
+      -e "s|__NETWORK__|\${PREVIEW_DOCKER_NETWORK}|g" \\
+      -e "s|__ENV_FILE__|\${PREVIEW_ENV_FILE}|g" \\
+    "\${TMPL}" > "\${WORKDIR}/compose.yml"
+  rm "\${TMPL}"
 
   docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-  docker pull "\${IMAGE}"
+  docker compose -f "\${WORKDIR}/compose.yml" pull
   docker logout "$CI_REGISTRY"
 
+  # Stop any containers from a previous non-compose deploy before handing off to compose.
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true
+  docker stop "\${DB_CONTAINER}" 2>/dev/null || true
+  docker rm "\${DB_CONTAINER}" 2>/dev/null || true
 
-  docker run -d \\
-    --name "\${CONTAINER}" \\
-    --restart unless-stopped \\
-    --network "\${PREVIEW_DOCKER_NETWORK}" \\
-    --env-file "\${PREVIEW_ENV_FILE}" \\
-    -e DATABASE_URL="\${DATABASE_URL}" \\
-    -e AUTH_URL="https://\${HOST}" \\
-    "\${IMAGE}"
+  docker compose -f "\${WORKDIR}/compose.yml" up -d --remove-orphans
 
   # Write Traefik route using placeholders to avoid backtick quoting issues.
   TMPL=\$(mktemp)
