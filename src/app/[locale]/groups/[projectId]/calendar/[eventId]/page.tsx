@@ -43,6 +43,7 @@ export default async function EventPage({
   }
 
   const pot = eventPot ?? undefined;
+  const canCreatePot = event.project.users.length >= 2;
 
   return (
     <div className="space-y-6">
@@ -64,7 +65,12 @@ export default async function EventPage({
                 }}
               />
             </ClientOnly>
-            <SettingsMenu event={event} list={list} pot={pot} />
+            <SettingsMenu
+              event={event}
+              list={list}
+              pot={pot}
+              canCreatePot={canCreatePot}
+            />
           </div>
         </div>
 
@@ -88,9 +94,9 @@ export default async function EventPage({
         />
       )}
 
-      <div className="grid grid-cols-1 items-start gap-4 pt-6 md:grid-cols-2">
+      <div className="columns-1 gap-4 space-y-4 pt-6 md:columns-2">
         {list !== undefined && (
-          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="font-semibold text-xl">
               <Link
                 href={{
@@ -108,7 +114,7 @@ export default async function EventPage({
         )}
 
         {pot !== undefined && (
-          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="font-semibold text-xl">
               <Link
                 href={{
@@ -127,7 +133,7 @@ export default async function EventPage({
           </div>
         )}
 
-        <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+        <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
           <h2 className="flex items-start justify-between font-semibold text-xl">
             <div className="flex items-center gap-2">
               <Folders />
@@ -141,7 +147,7 @@ export default async function EventPage({
         </div>
 
         {eventNotes.length > 0 && (
-          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="flex items-center gap-2 font-semibold text-xl">
               <NotebookText />
               {tCal("notesSection")}

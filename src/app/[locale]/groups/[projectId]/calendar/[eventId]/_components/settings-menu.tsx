@@ -45,10 +45,12 @@ export default function SettingsMenu({
   event,
   list,
   pot,
+  canCreatePot,
 }: {
   event: Event;
   list: List | undefined;
   pot: Pot | undefined;
+  canCreatePot: boolean;
 }) {
   const { data: session } = useSession();
   const editDialogRef = useRef<HTMLButtonElement>(null);
@@ -180,30 +182,7 @@ export default function SettingsMenu({
           event={event}
         />
 
-        {pot === undefined ? (
-          <>
-            <DropdownMenuItem
-              onClick={handleCreateLinkedPot}
-              className="cursor-pointer gap-2"
-            >
-              <PiggyBank />
-              {t("createPotMenuItem")}
-            </DropdownMenuItem>
-
-            <LinkPotForm
-              trigger={
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="cursor-pointer gap-2"
-                >
-                  <Wallet />
-                  {t("linkExistingPotMenuItem")}
-                </DropdownMenuItem>
-              }
-              event={event}
-            />
-          </>
-        ) : (
+        {pot !== undefined ? (
           <UnlinkEventPotModal
             trigger={
               <DropdownMenuItem
@@ -217,6 +196,31 @@ export default function SettingsMenu({
             event={event}
             pot={pot}
           />
+        ) : (
+          canCreatePot && (
+            <>
+              <DropdownMenuItem
+                onClick={handleCreateLinkedPot}
+                className="cursor-pointer gap-2"
+              >
+                <PiggyBank />
+                {t("createPotMenuItem")}
+              </DropdownMenuItem>
+
+              <LinkPotForm
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <Wallet />
+                    {t("linkExistingPotMenuItem")}
+                  </DropdownMenuItem>
+                }
+                event={event}
+              />
+            </>
+          )
         )}
 
         <DeleteEventModal
