@@ -35,9 +35,6 @@ yarn-error.log*
 .env*.local
 deploy.env
 
-# per-MR preview working copies (cloned on the deploy host)
-/previews/
-
 # vercel
 .vercel
 

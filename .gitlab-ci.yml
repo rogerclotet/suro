@@ -1,5 +1,6 @@
 stages:
   - check
+  - build
   - deploy
 
 workflow:
@@ -33,9 +34,41 @@ check:
     reports:
       junit: test-report.xml
 
+build_preview:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build --build-arg SKIP_ENV_VALIDATION=1 -t $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID .
+    - docker push $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+
 deploy:
   stage: deploy
   image: alpine
+  needs: [build]
   before_script:
     - apk add openssh-client sshpass
   script:
@@ -47,6 +80,7 @@ deploy:
 deploy_preview:
   stage: deploy
   image: alpine
+  needs: [build_preview]
   before_script:
     - apk add openssh-client sshpass
   script:
@@ -54,7 +88,7 @@ deploy_preview:
     - scripts/deploy-preview.sh
   environment:
     name: review/mr-$CI_MERGE_REQUEST_IID
-    url: https://mr-$CI_MERGE_REQUEST_IID.preview.suro.app
+    url: https://mr-$CI_MERGE_REQUEST_IID.suro.clotet.dev
     on_stop: stop_preview
     auto_stop_in: 1 week
   rules:

@@ -3,18 +3,21 @@
 # Boot or update an ephemeral preview environment for a GitLab merge request.
 #
 # Required env (from GitLab CI):
-#   CI_MERGE_REQUEST_IID, CI_COMMIT_SHA, CI_REPOSITORY_URL
+#   CI_MERGE_REQUEST_IID
+#   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
 # Required env on the remote (deploy.env):
-#   PREVIEW_HOST_DIR    — parent dir for per-MR working copies
-#   PREVIEW_DOMAIN      — wildcard base, e.g. preview.suro.app
+#   PREVIEW_DOMAIN      — wildcard base, e.g. suro.clotet.dev
 #   PREVIEW_ENV_FILE    — path to shared preview secrets (Resend, Uploadthing, etc.)
 #   PREVIEW_DOCKER_NETWORK — Docker network attached to Traefik
+#   TRAEFIK_ROUTES_DIR  — directory watched by Traefik's file provider
 
 : "${CI_MERGE_REQUEST_IID:?missing}"
-: "${CI_COMMIT_SHA:?missing}"
-: "${CI_REPOSITORY_URL:?missing}"
+: "${CI_REGISTRY:?missing}"
+: "${CI_REGISTRY_USER:?missing}"
+: "${CI_REGISTRY_PASSWORD:?missing}"
+: "${CI_REGISTRY_IMAGE:?missing}"
 : "${SSH_USERNAME:?missing}"
 : "${SSH_PASSWORD:?missing}"
 : "${SSH_IP:?missing}"
@@ -25,23 +28,12 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
   . $SSH_PROJECT_DIRECTORY/deploy.env
 
   IID="$CI_MERGE_REQUEST_IID"
-  SHA="$CI_COMMIT_SHA"
-  REPO_URL="$CI_REPOSITORY_URL"
+  IMAGE="$CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID"
 
   CONTAINER="suro-mr-\${IID}"
-  IMAGE="suro:mr-\${IID}"
   DB_CONTAINER="suro-mr-\${IID}-db"
   DB_VOLUME="suro-mr-\${IID}-db"
   HOST="mr-\${IID}.\${PREVIEW_DOMAIN}"
-  WORKDIR="\${PREVIEW_HOST_DIR}/mr-\${IID}"
-
-  mkdir -p "\${PREVIEW_HOST_DIR}"
-  if [ ! -d "\${WORKDIR}/.git" ]; then
-    git clone "\${REPO_URL}" "\${WORKDIR}"
-  fi
-  cd "\${WORKDIR}"
-  git fetch origin "\${SHA}"
-  git checkout --force --detach "\${SHA}"
 
   # Start a per-MR Postgres container if not already running.
   # Data lives in a named volume so it survives app redeployments within the same MR.
@@ -59,7 +51,9 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
 
   DATABASE_URL="postgresql://postgres:preview@\${DB_CONTAINER}:5432/suro"
 
-  docker build --build-arg SKIP_ENV_VALIDATION=1 -t "\${IMAGE}" .
+  docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  docker pull "\${IMAGE}"
+  docker logout "$CI_REGISTRY"
 
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true
@@ -73,10 +67,28 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
     -e AUTH_URL="https://\${HOST}" \\
     "\${IMAGE}"
 
+  # Write Traefik route using placeholders to avoid backtick quoting issues.
+  TMPL=\$(mktemp)
+  cat > "\${TMPL}" <<'ROUTEEOF'
+http:
+  routers:
+    __CONTAINER__:
+      rule: "Host(\`__HOST__\`)"
+      entryPoints:
+        - websecure
+      service: __CONTAINER__
+      tls:
+        certResolver: letsencrypt
+  services:
+    __CONTAINER__:
+      loadBalancer:
+        servers:
+          - url: "http://__CONTAINER__:3000"
+ROUTEEOF
   sed -e "s|__CONTAINER__|\${CONTAINER}|g" \\
       -e "s|__HOST__|\${HOST}|g" \\
-    "\${WORKDIR}/scripts/preview-route.yml.tmpl" \\
-    > "\${TRAEFIK_ROUTES_DIR}/mr-\${IID}.yml"
+    "\${TMPL}" > "\${TRAEFIK_ROUTES_DIR}/mr-\${IID}.yml"
+  rm "\${TMPL}"
 
   echo "Preview ready: https://\${HOST}"
 EOF
