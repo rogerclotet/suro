@@ -61,6 +61,8 @@ services:
       NEXT_PUBLIC_POSTHOG_KEY: "$NEXT_PUBLIC_POSTHOG_KEY"
       NEXT_PUBLIC_POSTHOG_HOST: "$NEXT_PUBLIC_POSTHOG_HOST"
       NEXT_PUBLIC_VAPID_PUBLIC_KEY: "$NEXT_PUBLIC_VAPID_PUBLIC_KEY"
+      SEED_DB: "true"
+      PREVIEW_AUTH_EMAIL: "$PREVIEW_AUTH_EMAIL"
     depends_on:
       db:
         condition: service_healthy
