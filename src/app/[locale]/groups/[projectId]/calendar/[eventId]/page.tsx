@@ -88,9 +88,9 @@ export default async function EventPage({
         />
       )}
 
-      <div className="grid grid-cols-1 items-stretch gap-4 pt-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-4 pt-6 md:grid-cols-2">
         {list !== undefined && (
-          <div className="max-w-3xl space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="font-semibold text-xl">
               <Link
                 href={{
@@ -108,7 +108,7 @@ export default async function EventPage({
         )}
 
         {pot !== undefined && (
-          <div className="max-w-3xl space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+          <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
             <h2 className="font-semibold text-xl">
               <Link
                 href={{
@@ -127,20 +127,6 @@ export default async function EventPage({
           </div>
         )}
 
-        {eventNotes.length > 0 && (
-          <div className="max-w-3xl space-y-4 border-muted border-y py-6 md:col-span-2 md:rounded-lg md:border-x md:px-6">
-            <h2 className="flex items-center gap-2 font-semibold text-xl">
-              <NotebookText />
-              {tCal("notesSection")}
-            </h2>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-              {eventNotes.map((note) => (
-                <NotePreview key={note.id} note={note} />
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
           <h2 className="flex items-start justify-between font-semibold text-xl">
             <div className="flex items-center gap-2">
@@ -153,6 +139,20 @@ export default async function EventPage({
 
           {event.files.length > 0 && <Files files={event.files} />}
         </div>
+
+        {eventNotes.length > 0 && (
+          <div className="space-y-4 border-muted border-y py-6 md:col-span-2 md:rounded-lg md:border-x md:px-6">
+            <h2 className="flex items-center gap-2 font-semibold text-xl">
+              <NotebookText />
+              {tCal("notesSection")}
+            </h2>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+              {eventNotes.map((note) => (
+                <NotePreview key={note.id} note={note} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

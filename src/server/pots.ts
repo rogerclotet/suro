@@ -49,6 +49,7 @@ export const getPot = cache(async (potId: string) => {
       where: eq(pots.id, potId),
       with: {
         users: { columns: {}, with: { user: true } },
+        event: true,
       },
     });
 

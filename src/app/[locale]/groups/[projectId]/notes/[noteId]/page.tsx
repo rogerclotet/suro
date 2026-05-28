@@ -4,6 +4,7 @@ import { RichTextContent } from "@/components/ui/rich-text-content";
 import ShareButton from "@/components/ui/share-button";
 import { checkAuth } from "@/lib/check-auth";
 import { getNote } from "@/server/notes";
+import EventBacklink from "../../calendar/_components/event/event-backlink";
 import SettingsMenu from "./_components/settings-menu";
 
 export default async function Page({
@@ -42,6 +43,8 @@ export default async function Page({
           <SettingsMenu note={note} />
         </div>
       </div>
+
+      {note.event && <EventBacklink event={note.event} />}
 
       <RichTextContent format={note.format} content={note.contents} />
     </div>

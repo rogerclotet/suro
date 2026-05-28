@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { getPathname } from "@/i18n/navigation";
 import { getPot, getPotSpendings } from "@/server/pots";
 import { getUserProject } from "@/server/projects";
+import EventBacklink from "../../calendar/_components/event/event-backlink";
 import CreateSpendingButton from "../_components/create-spending-button/create-spending-button";
 import SettleButton from "../_components/settle-button/settle-button";
 import SpendingsList from "../_components/spendings-list";
@@ -63,6 +64,8 @@ export default async function PotPage({
           <CreateSpendingButton members={potMembers} pot={pot} />
         </div>
       </div>
+
+      {pot.event && <EventBacklink event={pot.event} />}
 
       <SpendingsTable spendings={potSpendings} members={potMembers} />
 

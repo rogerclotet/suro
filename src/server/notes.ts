@@ -20,6 +20,7 @@ export async function getNote(noteId: string) {
             users: true,
           },
         },
+        event: true,
       },
       where: eq(notes.id, noteId),
     });
