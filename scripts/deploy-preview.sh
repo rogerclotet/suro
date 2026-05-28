@@ -59,7 +59,7 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
 
   DATABASE_URL="postgresql://postgres:preview@\${DB_CONTAINER}:5432/suro"
 
-  docker build -t "\${IMAGE}" .
+  docker build --build-arg SKIP_ENV_VALIDATION=1 -t "\${IMAGE}" .
 
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true

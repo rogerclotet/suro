@@ -21,6 +21,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Allow callers (e.g. preview CI) to skip runtime env validation at build time.
+ARG SKIP_ENV_VALIDATION=0
+ENV SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION
 
 RUN \
     if [ -f pnpm-lock.yaml ]; then pnpm run build; \
