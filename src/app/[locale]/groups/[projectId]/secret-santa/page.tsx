@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getFlags } from "@/server/flags";
 import { getUserProject } from "@/server/projects";
 import { getCurrentSecretSanta } from "@/server/secret-santa";
 import CreateButton from "./_components/secret-santa/setup/create-button";
@@ -15,11 +14,6 @@ export default async function AmicInvisiblePage({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
-  const flags = await getFlags();
-  if (!flags.amicInvisible) {
-    redirect("/");
-  }
-
   const session = await auth();
   if (!session) {
     redirect("/");
@@ -29,6 +23,10 @@ export default async function AmicInvisiblePage({
   const project = await getUserProject(projectId);
   if (!project) {
     redirect("/");
+  }
+
+  if (!project.features.secretSanta) {
+    redirect(`/groups/${projectId}/lists`);
   }
 
   const t = await getTranslations("secretSanta");

@@ -288,6 +288,13 @@
       "when": 1778063084040,
       "tag": "0040_mature_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1779956588677,
+      "tag": "0041_cold_living_mummy",
+      "breakpoints": true
     }
   ]
 }

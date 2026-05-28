@@ -231,6 +231,7 @@
     "expenses": "Gastos",
     "secretSanta": "Amigo Invisible",
     "ideas": "Lista de ideas",
+    "settings": "Configuración",
     "more": "Más",
     "notifications": "Notificaciones",
     "manageGroups": "Gestionar grupos",
@@ -306,6 +307,16 @@
     "switchGroup": "Cambia de grupo",
     "memberCount": "{count, plural, =1 {1 miembro} other {# miembros}}",
     "joinShareText": "Únete a {names}"
+  },
+  "groupSettings": {
+    "title": "Configuración del grupo",
+    "description": "Personaliza las funcionalidades disponibles en este grupo.",
+    "featuresTitle": "Funcionalidades",
+    "featuresDescription": "Activa o desactiva funcionalidades opcionales para este grupo. Las desactivadas no aparecerán en el menú.",
+    "featureSecretSantaLabel": "Amigo Invisible",
+    "featureSecretSantaDescription": "Organiza un sorteo de amigo invisible con los miembros del grupo. Puedes desactivarlo fuera de temporada para mantener el menú limpio.",
+    "updateSuccess": "Configuración actualizada",
+    "updateError": "No se ha podido actualizar la configuración, inténtalo más tarde"
   },
   "lists": {
     "empty": "Aún no hay listas",
