@@ -1,6 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import { boolean, index, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { files } from "./files";
+import { notes } from "./notes";
+import { pots } from "./pots";
 import { projects } from "./projects";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
@@ -60,5 +62,7 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
     relationName: "project",
   }),
   files: many(files),
+  notes: many(notes),
+  pot: one(pots),
   createdBy: one(users, { fields: [events.createdBy], references: [users.id] }),
 }));

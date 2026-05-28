@@ -1,6 +1,6 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getPostHogServer } from "@/lib/posthog-server";
 import { db } from "./db";
@@ -39,6 +39,41 @@ export async function getNote(noteId: string) {
       noteId,
     });
     return undefined;
+  }
+}
+
+export async function getEventNotes(projectId: string, eventId: string) {
+  const session = await auth();
+  if (!session) {
+    return [];
+  }
+
+  try {
+    const project = await db.query.projects.findFirst({
+      with: {
+        users: true,
+      },
+      where: eq(projects.id, projectId),
+    });
+
+    if (
+      project?.users.find((u) => u.userId === session.user.id) === undefined
+    ) {
+      throw new Error("Project not found");
+    }
+
+    return await db.query.notes.findMany({
+      where: and(eq(notes.projectId, projectId), eq(notes.eventId, eventId)),
+      orderBy: [desc(notes.updatedAt)],
+    });
+  } catch (e) {
+    const posthog = getPostHogServer();
+    posthog.captureException(e, session.user.id, {
+      action: "get_event_notes",
+      projectId,
+      eventId,
+    });
+    return [];
   }
 }
 

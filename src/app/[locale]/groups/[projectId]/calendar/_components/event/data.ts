@@ -13,3 +13,11 @@ export const eventSchema = v.object({
 export const linkEventListSchema = v.object({
   listId: v.string(),
 });
+
+export const linkEventNoteSchema = v.object({
+  noteId: v.string(),
+});
+
+export const linkEventPotSchema = v.object({
+  potId: v.string(),
+});
