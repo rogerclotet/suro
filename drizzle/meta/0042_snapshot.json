@@ -1,6 +1,6 @@
 {
-  "id": "b6dc910b-e83c-45c8-b115-df160d6bfada",
-  "prevId": "7eeed86e-2647-4b69-8c24-5c512f016865",
+  "id": "b20b36cb-543c-4fb9-8ec7-ed1610f09dae",
+  "prevId": "b6dc910b-e83c-45c8-b115-df160d6bfada",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -797,6 +797,12 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -805,6 +811,21 @@
           "columns": [
             {
               "expression": "projectId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "note_eventId_idx": {
+          "name": "note_eventId_idx",
+          "columns": [
+            {
+              "expression": "eventId",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -842,6 +863,15 @@
           "columnsFrom": ["projectId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "f_note_eventId_f_event_id_fk": {
+          "name": "f_note_eventId_f_event_id_fk",
+          "tableFrom": "f_note",
+          "tableTo": "f_event",
+          "columnsFrom": ["eventId"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "cascade"
         }
       },
@@ -1249,6 +1279,12 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "eventId": {
+          "name": "eventId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -1257,6 +1293,21 @@
           "columns": [
             {
               "expression": "projectId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pot_eventId_idx": {
+          "name": "pot_eventId_idx",
+          "columns": [
+            {
+              "expression": "eventId",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1285,6 +1336,15 @@
           "columnsFrom": ["createdBy"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "cascade"
+        },
+        "f_pot_eventId_f_event_id_fk": {
+          "name": "f_pot_eventId_f_event_id_fk",
+          "tableFrom": "f_pot",
+          "tableTo": "f_event",
+          "columnsFrom": ["eventId"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "cascade"
         }
       },

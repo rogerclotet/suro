@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { GiftIdeaData } from "@/app/_data/secret-santa";
 import Action from "@/components/action";
 import ModalForm from "@/components/ui/modal-form";
@@ -15,11 +16,13 @@ export default function CreateGiftIdeaButton({
   nextId: number;
   onCreate: (data: GiftIdeaData) => Promise<void>;
 }) {
+  const t = useTranslations("secretSanta");
+
   return (
     <ModalForm
-      trigger={<Action icon={PlusIcon} label="Afegir idea" />}
-      title="Afegir idea"
-      description="Afegir una idea per a l'Amic Invisible"
+      trigger={<Action icon={PlusIcon} label={t("ideaCreateAction")} />}
+      title={t("ideaCreateTitle")}
+      description={t("ideaCreateDescription")}
     >
       <GiftIdeaForm
         giftIdea={{ id: nextId, name: "", description: "", url: "" }}

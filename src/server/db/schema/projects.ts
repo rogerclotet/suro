@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   index,
+  jsonb,
   primaryKey,
   timestamp,
   uuid,
@@ -14,6 +15,14 @@ import { secretSantas } from "./secret-santa";
 import { spendings } from "./spendings";
 import { users } from "./users";
 import { createTable, randomId } from "./utils";
+
+export type ProjectFeatures = {
+  secretSanta: boolean;
+};
+
+export const DEFAULT_PROJECT_FEATURES: ProjectFeatures = {
+  secretSanta: false,
+};
 
 export const projects = createTable("project", {
   id: varchar("id", { length: 255 })
@@ -31,6 +40,10 @@ export const projects = createTable("project", {
   }),
   image: varchar("image", { length: 512 }),
   color: varchar("color", { length: 20 }).notNull().$defaultFn(getRandomColor),
+  features: jsonb("features")
+    .$type<ProjectFeatures>()
+    .notNull()
+    .default(DEFAULT_PROJECT_FEATURES),
 });
 
 export const projectsRelations = relations(projects, ({ many }) => ({

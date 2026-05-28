@@ -1,21 +1,30 @@
 "use client";
 
 import { Copy, Share2, UserPlus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RWebShare } from "react-web-share";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
+import { getPathname } from "@/i18n/navigation";
 
 export default function InviteButton({ project }: { project: Project }) {
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
+  const invitePath = getPathname({
+    locale,
+    href: {
+      pathname: "/groups/[projectId]/invitation/[inviteToken]",
+      params: { projectId: project.id, inviteToken: project.inviteToken },
+    },
+  });
   const inviteLink =
     typeof window !== "undefined"
-      ? `${window.location.origin}/groups/${project.id}/invitation/${project.inviteToken}`
+      ? `${window.location.origin}${invitePath}`
       : "";
 
   async function copyLinkToClipboard() {

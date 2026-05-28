@@ -69,23 +69,12 @@ export default async function InvitePage({
   );
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ projectId: string; inviteToken: string }>;
-}): Promise<Metadata> {
-  const { projectId, inviteToken: _inviteToken } = await params;
-
-  const project = await getInvitedProject(projectId);
-
-  if (!project) {
-    return {};
-  }
-
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("invitation");
 
   return {
-    title: `${project.name}`,
-    description: t("metadataDescription", { projectName: project.name }),
+    title: t("metadataInviteTitle"),
+    description: t("metadataInviteBody"),
+    robots: { index: false, follow: false },
   };
 }

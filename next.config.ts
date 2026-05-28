@@ -82,7 +82,7 @@ export default withPostHogConfig(withNextIntl(nextConfig), {
   envId: process.env.POSTHOG_ENV_ID ?? "",
   host: "https://eu.i.posthog.com",
   sourcemaps: {
-    enabled: true,
+    enabled: !!process.env.POSTHOG_API_KEY,
     deleteAfterUpload: true,
   },
 });

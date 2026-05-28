@@ -1,0 +1,1 @@
+ALTER TABLE "f_project" ADD COLUMN "features" jsonb DEFAULT '{"secretSanta":false}'::jsonb NOT NULL;
