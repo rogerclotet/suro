@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { SecretSanta } from "@/app/_data/secret-santa";
 import { useProjects } from "@/app/_state/project-state";
 import SettingsMenu from "../settings/menu";
@@ -12,6 +13,7 @@ export default function SecretSantaInfo({
 }) {
   const { name, description, datetime, priceRange } = secretSanta;
   const { isAdmin } = useProjects();
+  const t = useTranslations("secretSanta");
 
   const hasMinimumPrice = priceRange.min > 0;
   const hasPriceRange = priceRange.max > 0;
@@ -32,7 +34,7 @@ export default function SecretSantaInfo({
 
       {hasPriceRange && (
         <p className="text-muted-foreground text-sm">
-          <span>Valor orientatiu per persona: </span>
+          <span>{t("priceRangeHint")}</span>
           <span>
             {hasMinimumPrice
               ? `${priceRange.min}€ - ${priceRange.max}€`
