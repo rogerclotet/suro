@@ -7,6 +7,11 @@
 #   CI_COMMIT_SHA
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
+#
+# Required env on the remote (deploy.env):
+#   PROD_DOMAIN            — production hostname for the Traefik route
+#   PREVIEW_DOCKER_NETWORK — Docker network shared with Traefik/gerbil
+#   TRAEFIK_ROUTES_DIR     — directory watched by Traefik's file provider
 
 : "${CI_COMMIT_SHA:?missing}"
 : "${CI_REGISTRY:?missing}"
@@ -35,14 +40,30 @@
 
     docker run --name=familia --restart=unless-stopped -d \\
       --env-file .env \\
-      -p \$PORT:3000 \\
       --network "\$PREVIEW_DOCKER_NETWORK" \\
-      --label "traefik.enable=true" \\
-      --label "traefik.docker.network=\$PREVIEW_DOCKER_NETWORK" \\
-      --label "traefik.http.routers.familia.rule=Host(\\\`\$PROD_DOMAIN\\\`)" \\
-      --label "traefik.http.routers.familia.entrypoints=websecure" \\
-      --label "traefik.http.routers.familia.tls.certresolver=letsencrypt" \\
-      --label "traefik.http.services.familia.loadbalancer.server.port=3000" \\
       "\$IMAGE"
+
+    # Routing uses Traefik's file provider (no Docker provider, so labels are
+    # ignored): write the production route pointing at the container by name
+    # over the shared network, mirroring scripts/deploy-preview.sh.
+    TMPL=\$(mktemp)
+    cat > "\$TMPL" <<'ROUTEEOF'
+http:
+  routers:
+    familia:
+      rule: "Host(\`__HOST__\`)"
+      entryPoints:
+        - websecure
+      service: familia
+      tls:
+        certResolver: letsencrypt
+  services:
+    familia:
+      loadBalancer:
+        servers:
+          - url: "http://familia:3000"
+ROUTEEOF
+    sed -e "s|__HOST__|\$PROD_DOMAIN|g" "\$TMPL" > "\$TRAEFIK_ROUTES_DIR/familia.yml"
+    rm "\$TMPL"
 EOF
 )
