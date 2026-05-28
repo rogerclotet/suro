@@ -41,5 +41,5 @@
     ".next/dev/types/**/*.ts",
     "postcss.config.mjs"
   ],
-  "exclude": ["public", "node_modules"]
+  "exclude": ["public", "node_modules", "previews"]
 }
