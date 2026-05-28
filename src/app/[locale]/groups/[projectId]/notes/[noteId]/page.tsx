@@ -30,7 +30,13 @@ export default async function Page({
             <ShareButton
               title={note.name}
               text=""
-              path={`/groups/${note.projectId}/notes/${note.id}`}
+              href={{
+                pathname: "/groups/[projectId]/notes/[noteId]",
+                params: {
+                  projectId: note.projectId,
+                  noteId: note.id,
+                },
+              }}
             />
           </ClientOnly>
           <SettingsMenu note={note} />

@@ -119,7 +119,13 @@ export default function ListsClientContainer({
             <ShareButton
               title={currentList.name}
               text={currentList.description ?? ""}
-              path={`/groups/${currentList.projectId}/lists/${currentList.id}`}
+              href={{
+                pathname: "/groups/[projectId]/lists/[listId]",
+                params: {
+                  projectId: currentList.projectId,
+                  listId: currentList.id,
+                },
+              }}
             />
           </ClientOnly>
           <SettingsMenu list={currentList} templates={templates} />

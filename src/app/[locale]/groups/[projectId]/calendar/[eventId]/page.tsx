@@ -48,7 +48,13 @@ export default async function EventPage({
               <ShareButton
                 title={event.name}
                 text={event.description ?? ""}
-                path={`/groups/${event.projectId}/calendar/${event.id}`}
+                href={{
+                  pathname: "/groups/[projectId]/calendar/[eventId]",
+                  params: {
+                    projectId: event.projectId,
+                    eventId: event.id,
+                  },
+                }}
               />
             </ClientOnly>
             <SettingsMenu event={event} list={list} />
