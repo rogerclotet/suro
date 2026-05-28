@@ -47,6 +47,22 @@ After edits, run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-
 
 Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr create --target-branch main` to open merge requests — `gh` won't work here.
 
+## Deploys
+
+- **Prod**: pushes to `main` run `scripts/deploy.sh`, which SSHes into the host, pulls, rebuilds the `familia` image, and restarts the container behind Traefik (`$PROD_DOMAIN`).
+- **MR previews**: every MR pipeline runs `scripts/deploy-preview.sh`, which boots `suro-mr-<iid>` against its own Postgres DB (`suro_mr_<iid>`) at `https://mr-<iid>.preview.suro.app`. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
+- Migrations run at container start via `scripts/entrypoint.sh` → `scripts/migrate.mjs`, against the runtime `DATABASE_URL` — so previews migrate into their own DB.
+
+### Host prerequisites (one-time)
+
+The deploy host must have:
+
+- **Traefik** running with the Docker provider, attached to a shared network (`$PREVIEW_DOCKER_NETWORK`, e.g. `web`), with a Let's Encrypt resolver named `letsencrypt`.
+- Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
+- Postgres reachable from inside containers on `$PREVIEW_DOCKER_NETWORK`; a CI user with `CREATEDB` privilege.
+- `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.
+- `~/.bashrc` on the deploy user exports: `PREVIEW_HOST_DIR`, `PREVIEW_DOMAIN`, `PREVIEW_PG_ADMIN_URL`, `PREVIEW_DB_URL_TEMPLATE` (must contain `{db}`), `PREVIEW_ENV_FILE`, `PREVIEW_DOCKER_NETWORK`, `PROD_DOMAIN` — plus the existing `SSH_*`/`PORT`/`SSH_PROJECT_DIRECTORY` used by prod deploy.
+
 ## Don't
 
 - Don't commit `.env`. Update `.env.example` **and** `src/env.js` together when adding a var.

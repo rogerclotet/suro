@@ -2,6 +2,16 @@ stages:
   - check
   - deploy
 
+workflow:
+  rules:
+    # Run for MRs (so preview jobs fire) and for the default branch (prod deploy).
+    # Skip branch pipelines that have an open MR — the MR pipeline supersedes them.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 check:
   stage: check
   image: node:25.1-slim
@@ -29,3 +39,35 @@ deploy:
     - scripts/deploy.sh
   only:
     - main
+
+deploy_preview:
+  stage: deploy
+  image: alpine
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/deploy-preview.sh
+    - scripts/deploy-preview.sh
+  environment:
+    name: review/mr-$CI_MERGE_REQUEST_IID
+    url: https://mr-$CI_MERGE_REQUEST_IID.preview.suro.app
+    on_stop: stop_preview
+    auto_stop_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+stop_preview:
+  stage: deploy
+  image: alpine
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/teardown-preview.sh
+    - scripts/teardown-preview.sh
+  environment:
+    name: review/mr-$CI_MERGE_REQUEST_IID
+    action: stop
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
