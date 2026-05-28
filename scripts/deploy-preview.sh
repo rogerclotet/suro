@@ -5,6 +5,7 @@
 # Required env (from GitLab CI):
 #   CI_MERGE_REQUEST_IID
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
+#   NEXT_PUBLIC_POSTHOG_KEY, NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_VAPID_PUBLIC_KEY
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
 # Required env on the remote (deploy.env):
@@ -19,6 +20,9 @@
 : "${CI_REGISTRY_USER:?missing}"
 : "${CI_REGISTRY_PASSWORD:?missing}"
 : "${CI_REGISTRY_IMAGE:?missing}"
+: "${NEXT_PUBLIC_POSTHOG_KEY:?missing}"
+: "${NEXT_PUBLIC_POSTHOG_HOST:?missing}"
+: "${NEXT_PUBLIC_VAPID_PUBLIC_KEY:?missing}"
 : "${SSH_USERNAME:?missing}"
 : "${SSH_PASSWORD:?missing}"
 : "${SSH_IP:?missing}"
@@ -54,6 +58,9 @@ services:
     environment:
       DATABASE_URL: "postgresql://postgres:preview@db:5432/suro"
       NEXTAUTH_URL: "https://__HOST__"
+      NEXT_PUBLIC_POSTHOG_KEY: "$NEXT_PUBLIC_POSTHOG_KEY"
+      NEXT_PUBLIC_POSTHOG_HOST: "$NEXT_PUBLIC_POSTHOG_HOST"
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: "$NEXT_PUBLIC_VAPID_PUBLIC_KEY"
     depends_on:
       db:
         condition: service_healthy
