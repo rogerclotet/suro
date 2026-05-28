@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Settings, Trash2 } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Note } from "@/app/_data/note";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteNoteModal from "./delete-note-modal";
-import EditNoteForm from "./edit-note-form";
 
 export default function SettingsMenu({ note }: { note: Note }) {
   const t = useTranslations("notes");
@@ -24,19 +23,6 @@ export default function SettingsMenu({ note }: { note: Note }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <EditNoteForm
-          note={note}
-          trigger={
-            <DropdownMenuItem
-              onSelect={(e) => e.preventDefault()}
-              className="cursor-pointer gap-2"
-            >
-              <Edit />
-              {t("editTitle")}
-            </DropdownMenuItem>
-          }
-        />
-
         <DeleteNoteModal
           note={note}
           trigger={

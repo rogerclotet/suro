@@ -520,6 +520,10 @@
     "notFound": "Note not found.",
     "noteLabel": "Note",
     "contentsPlaceholder": "Write something...",
+    "titlePlaceholder": "Untitled note",
+    "emptyPreview": "Empty note",
+    "saving": "Saving…",
+    "saved": "Saved",
     "editor": {
       "bold": "Bold",
       "italic": "Italic",
