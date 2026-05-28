@@ -13,14 +13,18 @@ import {
 
 export default function AssignmentGiftIdeas({
   giftIdeas,
+  userName,
 }: {
   giftIdeas: GiftIdeaData[];
+  userName: string;
 }) {
   const t = useTranslations("secretSanta");
 
   if (giftIdeas.length === 0) {
     return (
-      <p className="text-muted-foreground italic">{t("matchIdeasIntro")}</p>
+      <p className="text-muted-foreground italic">
+        {t("matchIdeasIntro", { name: userName })}
+      </p>
     );
   }
 

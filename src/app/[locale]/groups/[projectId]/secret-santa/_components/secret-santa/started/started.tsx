@@ -23,7 +23,9 @@ export default async function SecretSantaStarted({
 
       <Separator />
 
-      <h3 className="font-semibold text-lg">{t("yourMatch")}</h3>
+      <h3 className="font-semibold text-lg">
+        {t("yourMatch", { name: assignment.user.name ?? "" })}
+      </h3>
 
       <Assignment assignment={assignment} />
     </div>

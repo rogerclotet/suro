@@ -1,6 +1,7 @@
 "use client";
 
 import { SquaresExcludeIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import type { SecretSanta } from "@/app/_data/secret-santa";
 import { useProjects } from "@/app/_state/project-state";
@@ -34,6 +35,7 @@ export default function Exclusions({
 function AdminExclusions({ secretSanta }: { secretSanta: SecretSanta }) {
   const maxExclusions = Math.floor(secretSanta.participants.length / 2);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const t = useTranslations("secretSanta");
 
   return (
     <ExclusionsLayout>
@@ -42,11 +44,11 @@ function AdminExclusions({ secretSanta }: { secretSanta: SecretSanta }) {
       <ModalForm
         trigger={
           <Button ref={triggerRef}>
-            <SquaresExcludeIcon /> Nova exclusió
+            <SquaresExcludeIcon /> {t("exclusionCreateAction")}
           </Button>
         }
-        title="Nova exclusió"
-        description={`Per crear una exclusió, selecciona ${maxExclusions > 2 ? `entre 2 i ${Math.floor(secretSanta.participants.length / 2)}` : "2"} participants. Aquests no podran ser assignats entre ells.`}
+        title={t("exclusionCreateTitle")}
+        description={t("exclusionCreateDescription", { count: maxExclusions })}
       >
         <CreateExclusionForm
           secretSanta={secretSanta}
@@ -58,16 +60,16 @@ function AdminExclusions({ secretSanta }: { secretSanta: SecretSanta }) {
 }
 
 function ExclusionsLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("secretSanta");
+
   return (
     <>
       <Separator />
 
       <div className="space-y-2">
-        <h3 className="font-semibold text-lg">Exclusions</h3>
+        <h3 className="font-semibold text-lg">{t("exclusionsTitle")}</h3>
         <p className="text-muted-foreground text-sm">
-          {
-            "Les exclusions són parelles de participants que no poden ser assignats entre ells."
-          }
+          {t("exclusionsDescription")}
         </p>
       </div>
 
