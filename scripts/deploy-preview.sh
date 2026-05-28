@@ -17,6 +17,9 @@
 : "${CI_MERGE_REQUEST_IID:?missing}"
 : "${CI_COMMIT_SHA:?missing}"
 : "${CI_REPOSITORY_URL:?missing}"
+: "${SSH_USERNAME:?missing}"
+: "${SSH_PASSWORD:?missing}"
+: "${SSH_IP:?missing}"
 
 sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=no <<EOF
   set -e
