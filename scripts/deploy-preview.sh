@@ -20,10 +20,11 @@
 : "${SSH_USERNAME:?missing}"
 : "${SSH_PASSWORD:?missing}"
 : "${SSH_IP:?missing}"
+: "${SSH_PROJECT_DIRECTORY:?missing}"
 
 sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=no <<EOF
   set -e
-  source ~/.bashrc
+  . $SSH_PROJECT_DIRECTORY/deploy.env
 
   IID="$CI_MERGE_REQUEST_IID"
   SHA="$CI_COMMIT_SHA"

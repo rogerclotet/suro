@@ -61,7 +61,7 @@ The deploy host must have:
 - Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
 - Postgres reachable from inside containers on `$PREVIEW_DOCKER_NETWORK`; a CI user with `CREATEDB` privilege.
 - `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.
-- `~/.bashrc` on the deploy user exports: `PREVIEW_HOST_DIR`, `PREVIEW_DOMAIN`, `PREVIEW_PG_ADMIN_URL`, `PREVIEW_DB_URL_TEMPLATE` (must contain `{db}`), `PREVIEW_ENV_FILE`, `PREVIEW_DOCKER_NETWORK`, `PROD_DOMAIN` — plus the existing `SSH_*`/`PORT`/`SSH_PROJECT_DIRECTORY` used by prod deploy.
+- `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH.
 
 ## Don't
 
