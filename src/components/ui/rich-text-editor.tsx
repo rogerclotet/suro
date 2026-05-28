@@ -28,12 +28,15 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+export type RichTextEditorVariant = "boxed" | "inline";
+
 interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
   className?: string;
   ariaLabel?: string;
+  variant?: RichTextEditorVariant;
 }
 
 export function RichTextEditor({
@@ -42,7 +45,9 @@ export function RichTextEditor({
   placeholder,
   className,
   ariaLabel,
+  variant = "boxed",
 }: RichTextEditorProps) {
+  const isInline = variant === "inline";
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -66,7 +71,7 @@ export function RichTextEditor({
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "rich-text px-3 py-2",
+        class: cn("rich-text", isInline ? "flex-1 py-3" : "px-3 py-2"),
         ...(ariaLabel ? { "aria-label": ariaLabel } : {}),
       },
     },
@@ -79,17 +84,29 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "rich-text-editor rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "rich-text-editor",
+        isInline
+          ? "flex min-h-0 flex-col bg-background"
+          : "rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         className,
       )}
     >
-      <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <EditorToolbar editor={editor} inline={isInline} />
+      <EditorContent
+        editor={editor}
+        className={cn(isInline && "flex min-h-0 flex-1 flex-col")}
+      />
     </div>
   );
 }
 
-function EditorToolbar({ editor }: { editor: Editor | null }) {
+function EditorToolbar({
+  editor,
+  inline,
+}: {
+  editor: Editor | null;
+  inline?: boolean;
+}) {
   const t = useTranslations("notes.editor");
 
   if (!editor) {
@@ -97,7 +114,12 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-input border-b p-1">
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-0.5 border-input border-b p-1",
+        inline && "sticky top-0 z-10 bg-background/95 backdrop-blur",
+      )}
+    >
       <ToolbarButton
         label={t("bold")}
         onClick={() => editor.chain().focus().toggleBold().run()}

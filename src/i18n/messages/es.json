@@ -520,6 +520,10 @@
     "notFound": "No se ha encontrado la nota.",
     "noteLabel": "Nota",
     "contentsPlaceholder": "Escribe algo...",
+    "titlePlaceholder": "Nota sin título",
+    "emptyPreview": "Nota vacía",
+    "saving": "Guardando…",
+    "saved": "Guardado",
     "editor": {
       "bold": "Negrita",
       "italic": "Cursiva",

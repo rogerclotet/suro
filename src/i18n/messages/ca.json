@@ -520,6 +520,10 @@
     "notFound": "No s'ha trobat la nota.",
     "noteLabel": "Nota",
     "contentsPlaceholder": "Escriu alguna cosa...",
+    "titlePlaceholder": "Nota sense títol",
+    "emptyPreview": "Nota buida",
+    "saving": "Desant…",
+    "saved": "Desat",
     "editor": {
       "bold": "Negreta",
       "italic": "Cursiva",

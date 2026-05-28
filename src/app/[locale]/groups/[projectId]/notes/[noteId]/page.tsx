@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { ClientOnly } from "@/components/client-only";
-import { RichTextContent } from "@/components/ui/rich-text-content";
 import ShareButton from "@/components/ui/share-button";
 import { checkAuth } from "@/lib/check-auth";
 import { getNote } from "@/server/notes";
 import EventBacklink from "../../calendar/_components/event/event-backlink";
+import NoteEditor from "./_components/note-editor";
 import SettingsMenu from "./_components/settings-menu";
 
 export default async function Page({
@@ -22,11 +22,10 @@ export default async function Page({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="font-semibold text-xl">{note.name}</h1>
-
-        <div className="flex items-center gap-2">
+    <NoteEditor
+      note={note}
+      actions={
+        <>
           <ClientOnly>
             <ShareButton
               title={note.name}
@@ -41,12 +40,9 @@ export default async function Page({
             />
           </ClientOnly>
           <SettingsMenu note={note} />
-        </div>
-      </div>
-
-      {note.event && <EventBacklink event={note.event} />}
-
-      <RichTextContent format={note.format} content={note.contents} />
-    </div>
+        </>
+      }
+      backlink={note.event && <EventBacklink event={note.event} />}
+    />
   );
 }
