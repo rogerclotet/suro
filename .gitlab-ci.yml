@@ -1,6 +1,17 @@
 stages:
   - check
+  - build
   - deploy
+
+workflow:
+  rules:
+    # Run for MRs (so preview jobs fire) and for the default branch (prod deploy).
+    # Skip branch pipelines that have an open MR — the MR pipeline supersedes them.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 check:
   stage: check
@@ -23,9 +34,52 @@ check:
     reports:
       junit: test-report.xml
 
+build_preview:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build
+        --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+        --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        -t $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID .
+    - docker push $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build
+        --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+        --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+        -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+
 deploy:
   stage: deploy
   image: alpine
+  needs: [build]
   before_script:
     - apk add openssh-client sshpass
   script:
@@ -33,3 +87,36 @@ deploy:
     - scripts/deploy.sh
   only:
     - main
+
+deploy_preview:
+  stage: deploy
+  image: alpine
+  needs: [build_preview]
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/deploy-preview.sh
+    - scripts/deploy-preview.sh
+  environment:
+    name: review/mr-$CI_MERGE_REQUEST_IID
+    url: https://mr-$CI_MERGE_REQUEST_IID.suro.clotet.dev
+    on_stop: stop_preview
+    auto_stop_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+stop_preview:
+  stage: deploy
+  image: alpine
+  before_script:
+    - apk add openssh-client sshpass
+  script:
+    - chmod +x scripts/teardown-preview.sh
+    - scripts/teardown-preview.sh
+  environment:
+    name: review/mr-$CI_MERGE_REQUEST_IID
+    action: stop
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true

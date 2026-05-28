@@ -12,7 +12,13 @@ import { Input } from "@/components/ui/input";
 import { getSafeRedirectTo } from "@/lib/auth-redirect";
 import { loginWithGoogle, loginWithResend } from "./actions";
 
-export default function Login({ session }: { session?: Session | null }) {
+export default function Login({
+  session,
+  previewEmail,
+}: {
+  session?: Session | null;
+  previewEmail?: string;
+}) {
   const t = useTranslations("auth");
   const [loggedInWithResend, setLoggedInWithResend] = useState(false);
   const searchParams = useSearchParams();
@@ -87,6 +93,25 @@ export default function Login({ session }: { session?: Session | null }) {
             {t("continueWithEmail")}
           </button>
         </form>
+
+        {/* Preview environment quick login */}
+        {previewEmail && (
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
+                preview
+              </span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <a
+              href="/api/preview-login"
+              className="flex w-full items-center justify-center rounded-xl border border-border border-dashed bg-muted/50 px-4 py-2.5 font-mono text-muted-foreground text-xs transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+            >
+              {previewEmail}
+            </a>
+          </div>
+        )}
 
         {/* Success state */}
         {loggedInWithResend && (

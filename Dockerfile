@@ -21,9 +21,19 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Allow callers (e.g. preview CI) to skip runtime env validation at build time.
+ARG SKIP_ENV_VALIDATION=0
+ENV SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time.
+ARG NEXT_PUBLIC_POSTHOG_KEY=""
+ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+ARG NEXT_PUBLIC_POSTHOG_HOST=""
+ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
 RUN \
-    if [ -f pnpm-lock.yaml ]; then pnpm db:migrate && pnpm run build; \
+    if [ -f pnpm-lock.yaml ]; then pnpm run build; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
@@ -48,6 +58,17 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Migrations run at container start (entrypoint) against the runtime DATABASE_URL,
+# so previews can target their per-MR database. drizzle-orm + postgres are
+# bundled in standalone's node_modules; copy them explicitly to guarantee the
+# migrator submodule is present.
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/migrate.mjs ./scripts/migrate.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed.mjs ./scripts/seed.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/entrypoint.sh ./scripts/entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/postgres ./node_modules/postgres
+
 USER nextjs
 
 EXPOSE 3000
@@ -57,4 +78,4 @@ ENV HOSTNAME="0.0.0.0"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-CMD ["node", "server.js"]
+ENTRYPOINT ["./scripts/entrypoint.sh"]
