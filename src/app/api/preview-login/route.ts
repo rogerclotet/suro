@@ -5,7 +5,7 @@ import { verificationTokens } from "@/server/db/schema";
 
 // One-click login for ephemeral preview environments.
 // Only active when PREVIEW_AUTH_EMAIL is set; always returns 404 in production.
-export async function GET(request: Request): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const email = process.env.PREVIEW_AUTH_EMAIL;
   if (!email) return new NextResponse("Not found", { status: 404 });
 
@@ -19,8 +19,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     .insert(verificationTokens)
     .values({ identifier: email, token, expires });
 
-  const { origin } = new URL(request.url);
-  const callbackUrl = new URL("/api/auth/callback/resend", origin);
+  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const callbackUrl = new URL("/api/auth/callback/resend", base);
   callbackUrl.searchParams.set("callbackUrl", "/");
   callbackUrl.searchParams.set("token", token);
   callbackUrl.searchParams.set("email", email);
