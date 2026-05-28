@@ -43,6 +43,10 @@ After edits, run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-
 - Schema changes: edit the relevant file under `src/server/db/schema/`, then run `pnpm db:generate` to produce a new migration in `drizzle/`. Don't hand-edit existing migrations.
 - All user-facing strings go through next-intl. New routes go under `app/[locale]/`.
 
+## Git
+
+Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr create --target-branch main` to open merge requests — `gh` won't work here.
+
 ## Don't
 
 - Don't commit `.env`. Update `.env.example` **and** `src/env.js` together when adding a var.
