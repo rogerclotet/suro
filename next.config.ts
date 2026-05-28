@@ -79,10 +79,10 @@ const nextConfig = {
 
 export default withPostHogConfig(withNextIntl(nextConfig), {
   personalApiKey: process.env.POSTHOG_API_KEY ?? "",
-  envId: process.env.POSTHOG_ENV_ID ?? "",
+  projectId: process.env.POSTHOG_PROJECT_ID ?? "",
   host: "https://eu.i.posthog.com",
   sourcemaps: {
-    enabled: !!process.env.POSTHOG_API_KEY,
+    enabled: !!process.env.POSTHOG_PROJECT_ID,
     deleteAfterUpload: true,
   },
 });

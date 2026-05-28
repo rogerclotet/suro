@@ -47,6 +47,23 @@ After edits, run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-
 
 Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr create --target-branch main` to open merge requests — `gh` won't work here.
 
+## Deploys
+
+- **Prod**: pushes to `main` run `scripts/deploy.sh`, which SSHes into the host, pulls, rebuilds the `familia` image, and restarts the container behind Traefik (`$PROD_DOMAIN`).
+- **MR previews**: every MR pipeline runs `scripts/deploy-preview.sh`, which boots `suro-mr-<iid>` against its own Postgres DB (`suro_mr_<iid>`) at `https://mr-<iid>.preview.suro.app`. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
+- Migrations run at container start via `scripts/entrypoint.sh` → `scripts/migrate.mjs`, against the runtime `DATABASE_URL` — so previews migrate into their own DB.
+
+### Host prerequisites (one-time)
+
+The deploy host must have:
+
+- **Pangolin/Traefik** already running (uses the `pangolin` Docker network, cert resolver `letsencrypt`). Routing uses Traefik's **file provider** — no Docker provider needed.
+  - One-time: change the file provider in `/srv/pangolin/config/traefik/traefik_config.yml` from `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir /srv/pangolin/config/traefik/routes && mv /srv/pangolin/config/traefik/dynamic_config.yml /srv/pangolin/config/traefik/routes/` and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
+- Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
+- Postgres image pullable (used as per-MR sidecar containers); no host Postgres required.
+- `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.
+- `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH.
+
 ## Don't
 
 - Don't commit `.env`. Update `.env.example` **and** `src/env.js` together when adding a var.
