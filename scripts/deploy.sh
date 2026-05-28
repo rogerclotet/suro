@@ -34,6 +34,7 @@
     docker rm familia 2>/dev/null || true
 
     docker run --name=familia --restart=unless-stopped -d \\
+      --env-file .env \\
       -p \$PORT:3000 \\
       --network "\$PREVIEW_DOCKER_NETWORK" \\
       --label "traefik.enable=true" \\
