@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import UserAvatar from "@/components/user-avatar";
+import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
 import ThemeSwitcher from "../theme-switcher";
 import { logOut } from "./actions";
@@ -22,6 +23,7 @@ export default function Profile() {
   const { isMobile, setOpenMobile } = useSidebar();
   const tNav = useTranslations("nav");
   const tAuth = useTranslations("auth");
+  const tChangelog = useTranslations("changelog");
 
   if (!session) {
     return null;
@@ -63,6 +65,18 @@ export default function Profile() {
         <NotificationSwitcher />
 
         <ThemeSwitcher />
+
+        <DropdownMenuSeparator />
+
+        <Link href="/changelog">
+          <DropdownMenuItem
+            className="cursor-pointer justify-between gap-2 text-muted-foreground text-xs"
+            onClick={() => setOpenMobile(false)}
+          >
+            <span>{tChangelog("versionLabel")}</span>
+            <span>v{CURRENT_VERSION}</span>
+          </DropdownMenuItem>
+        </Link>
 
         <DropdownMenuSeparator />
 
