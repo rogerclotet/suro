@@ -242,6 +242,17 @@
     "themeDark": "Fosc",
     "themeSystem": "Sistema"
   },
+  "changelog": {
+    "pageTitle": "Novetats",
+    "intro": "Els canvis i les millores més importants de Suro.",
+    "versionLabel": "Versió",
+    "updatedTitle": "Suro s'ha actualitzat a la v{version}",
+    "updatedDescription": "Mira què hi ha de nou.",
+    "viewChanges": "Veure els canvis",
+    "typeFeature": "Novetat",
+    "typeFix": "Correcció",
+    "typeImprovement": "Millora"
+  },
   "profile": {
     "header": "Perfil",
     "publicInfo": "Aquesta és la informació que es mostra a tots els teus grups i que es pot veure públicament.",

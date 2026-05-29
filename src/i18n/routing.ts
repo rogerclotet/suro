@@ -18,6 +18,11 @@ export const routing = defineRouting({
       es: "/perfil",
       en: "/profile",
     },
+    "/changelog": {
+      ca: "/canvis",
+      es: "/cambios",
+      en: "/changelog",
+    },
     "/notifications": {
       ca: "/notificacions",
       es: "/notificaciones",

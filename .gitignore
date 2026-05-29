@@ -6,6 +6,9 @@
 # testing
 /coverage
 
+# generated from CHANGELOG.md by scripts/generate-changelog.mjs
+/src/data/changelog.generated.ts
+
 # database
 /prisma/db.sqlite
 /prisma/db.sqlite-journal

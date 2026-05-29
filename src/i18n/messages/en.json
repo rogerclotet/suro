@@ -242,6 +242,17 @@
     "themeDark": "Dark",
     "themeSystem": "System"
   },
+  "changelog": {
+    "pageTitle": "What's new",
+    "intro": "The most important changes and improvements to Suro.",
+    "versionLabel": "Version",
+    "updatedTitle": "Suro was updated to v{version}",
+    "updatedDescription": "See what's new.",
+    "viewChanges": "View changes",
+    "typeFeature": "New",
+    "typeFix": "Fix",
+    "typeImprovement": "Improvement"
+  },
   "profile": {
     "header": "Profile",
     "publicInfo": "This is the information shown across all your groups and is publicly visible.",
