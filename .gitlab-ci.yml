@@ -52,7 +52,11 @@ build_preview:
         -t $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID .
     - docker push $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID
   rules:
+    # Preview is opt-in: trigger this job manually from the MR pipeline.
+    # It doesn't block the pipeline, and deploy_preview waits on it.
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
 
 build:
   stage: build
