@@ -205,16 +205,7 @@ export default async function Landing() {
             >
               {t("footerContact")}
             </a>
-            <PrivacyDialog
-              trigger={
-                <button
-                  type="button"
-                  className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {t("footerPrivacy")}
-                </button>
-              }
-            >
+            <PrivacyDialog label={t("footerPrivacy")}>
               <PrivacyContent />
             </PrivacyDialog>
           </nav>
