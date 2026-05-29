@@ -80,24 +80,25 @@ export default function ListPreview({
             )}
           </div>
 
-          {todoCount > 0 ? (
-            <div className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-secondary px-1.5 font-bold text-secondary-foreground text-xs">
-              {todoCount}
-            </div>
-          ) : completed && compact ? (
+          {completed && compact && (
             <CheckIcon size={18} className="shrink-0 text-primary" />
-          ) : null}
+          )}
         </div>
 
         {!compact && progress !== null && (
-          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
-            <div
-              className={cn(
-                "h-full rounded-full transition-all",
-                completed ? "bg-primary" : "bg-primary/50",
-              )}
-              style={{ width: `${progress * 100}%` }}
-            />
+          <div className="mt-2">
+            <div className="text-right font-medium text-muted-foreground text-xs tabular-nums">
+              {completedCount}/{totalCount}
+            </div>
+            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-foreground/25">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  completed ? "bg-primary" : "bg-primary/50",
+                )}
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
           </div>
         )}
       </div>
