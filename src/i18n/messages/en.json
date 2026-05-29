@@ -673,7 +673,8 @@
     "metadataInviteBody": "Open the link to join the group on Suro.",
     "accept": "Accept invitation",
     "acceptError": "Could not accept the invitation",
-    "acceptSuccess": "You joined the group"
+    "acceptSuccess": "You joined the group",
+    "loginPrompt": "Log in to join this group"
   },
   "errors": {
     "notFound": "Page not found.",
