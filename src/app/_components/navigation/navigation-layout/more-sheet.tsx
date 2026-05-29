@@ -11,6 +11,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import UserAvatar from "@/components/user-avatar";
+import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
 import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
@@ -29,6 +30,7 @@ export default function MoreSheet({
   const { totalUnread } = useNotifications();
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
+  const tChangelog = useTranslations("changelog");
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -119,6 +121,17 @@ export default function MoreSheet({
               <span>{tAuth("signOut")}</span>
             </button>
           </form>
+
+          <div className="my-1 border-border border-t" />
+
+          <Link
+            href="/changelog"
+            onClick={() => onOpenChange(false)}
+            className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-muted-foreground text-xs transition-colors hover:bg-accent"
+          >
+            <span>{tChangelog("versionLabel")}</span>
+            <span>v{CURRENT_VERSION}</span>
+          </Link>
         </nav>
       </DrawerContent>
     </Drawer>
