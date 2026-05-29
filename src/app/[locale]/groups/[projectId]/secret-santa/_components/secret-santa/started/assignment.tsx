@@ -24,7 +24,7 @@ export default function Assignment({
 
   return (
     <div className="columns-1 gap-4 space-y-4 lg:columns-2">
-      <div className="flex items-center justify-center py-12">
+      <div className="flex break-inside-avoid items-center justify-center py-12">
         <button
           type="button"
           onClick={handleFlip}
@@ -47,7 +47,7 @@ export default function Assignment({
       </div>
 
       {isFlipped && (
-        <div className="fade-in-0 [sm,md]:slide-in-from-top-5 lg:slide-in-from-left-5 animate-in space-y-4 duration-500">
+        <div className="fade-in-0 [sm,md]:slide-in-from-top-5 lg:slide-in-from-left-5 animate-in break-inside-avoid space-y-4 duration-500">
           <h4 className="font-semibold">{t("giftIdeas")}</h4>
           <AssignmentGiftIdeas
             giftIdeas={assignment.giftIdeas}

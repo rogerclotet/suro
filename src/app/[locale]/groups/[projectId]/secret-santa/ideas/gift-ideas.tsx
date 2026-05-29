@@ -86,7 +86,7 @@ export default function GiftIdeas({
           className="columns-1 gap-2 space-y-2 lg:columns-2 2xl:columns-3"
         >
           {giftIdeas.map((giftIdea, index) => (
-            <li key={giftIdea.id}>
+            <li key={giftIdea.id} className="break-inside-avoid">
               <GiftIdea
                 giftIdea={giftIdea}
                 onEdit={(data) => handleEdit(index, data)}
