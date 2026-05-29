@@ -662,7 +662,8 @@
     "metadataInviteBody": "Obre l'enllaç per unir-te al grup a Suro.",
     "accept": "Acceptar invitació",
     "acceptError": "No s'ha pogut acceptar la invitació",
-    "acceptSuccess": "Has entrat al grup"
+    "acceptSuccess": "Has entrat al grup",
+    "loginPrompt": "Inicia sessió per unir-te a aquest grup"
   },
   "errors": {
     "notFound": "No s'ha trobat la pàgina.",

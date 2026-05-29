@@ -15,14 +15,20 @@ import { loginWithGoogle, loginWithResend } from "./actions";
 export default function Login({
   session,
   previewEmail,
+  redirectTo: redirectToProp,
+  compact = false,
 }: {
   session?: Session | null;
   previewEmail?: string;
+  redirectTo?: string;
+  compact?: boolean;
 }) {
   const t = useTranslations("auth");
   const [loggedInWithResend, setLoggedInWithResend] = useState(false);
   const searchParams = useSearchParams();
-  const redirectTo = getSafeRedirectTo(searchParams.get("to"));
+  const redirectTo = getSafeRedirectTo(
+    redirectToProp ?? searchParams.get("to"),
+  );
 
   if (session) {
     return redirect(redirectTo);
@@ -33,10 +39,10 @@ export default function Login({
     setLoggedInWithResend(true);
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-xs space-y-6">
-        {/* Logo + heading */}
+  const inner = (
+    <div className="w-full max-w-xs space-y-6">
+      {!compact && (
+        /* Logo + heading */
         <div className="space-y-3 text-center">
           <div className="inline-flex items-center justify-center">
             <Image src="/logo.png" alt="Suro" width={64} height={64} />
@@ -50,82 +56,89 @@ export default function Login({
             </p>
           </div>
         </div>
+      )}
 
-        {/* Primary CTA: Google */}
-        <form action={loginWithGoogle}>
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
-            type="submit"
-            className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
-          >
-            <SiGoogle
-              className="h-4 w-4 shrink-0"
-              style={{ color: "#4285F4" }}
-            />
-            {t("continueWithGoogle")}
-          </button>
-        </form>
+      {/* Primary CTA: Google */}
+      <form action={loginWithGoogle}>
+        <input type="hidden" name="redirectTo" value={redirectTo} />
+        <button
+          type="submit"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+        >
+          <SiGoogle className="h-4 w-4 shrink-0" style={{ color: "#4285F4" }} />
+          {t("continueWithGoogle")}
+        </button>
+      </form>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-muted-foreground text-xs tracking-wide">
-            {t("or")}
-          </span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        {/* Secondary: Email magic link */}
-        <form action={handleResendSignIn} className="space-y-2.5">
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <Input
-            name="email"
-            type="email"
-            placeholder={t("emailPlaceholder")}
-            required
-            className="h-10 rounded-xl border-border bg-card text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
-          />
-          <button
-            type="submit"
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-muted-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
-          >
-            <Mail className="h-4 w-4 shrink-0" />
-            {t("continueWithEmail")}
-          </button>
-        </form>
-
-        {/* Preview environment quick login */}
-        {previewEmail && (
-          <div className="space-y-2.5 pt-1">
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-muted-foreground text-xs uppercase tracking-wide">
-                preview
-              </span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-            <a
-              href="/api/preview-login"
-              className="flex w-full items-center justify-center rounded-xl border border-border border-dashed bg-muted/50 px-4 py-2.5 font-mono text-muted-foreground text-xs transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
-            >
-              {previewEmail}
-            </a>
-          </div>
-        )}
-
-        {/* Success state */}
-        {loggedInWithResend && (
-          <Alert className="rounded-xl border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/50">
-            <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertTitle className="font-medium text-green-800 text-sm dark:text-green-300">
-              {t("emailSent")}
-            </AlertTitle>
-            <AlertDescription className="text-green-700 text-xs leading-relaxed dark:text-green-400">
-              {t("emailSentDescription")}
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-muted-foreground text-xs tracking-wide">
+          {t("or")}
+        </span>
+        <div className="h-px flex-1 bg-border" />
       </div>
+
+      {/* Secondary: Email magic link */}
+      <form action={handleResendSignIn} className="space-y-2.5">
+        <input type="hidden" name="redirectTo" value={redirectTo} />
+        <Input
+          name="email"
+          type="email"
+          placeholder={t("emailPlaceholder")}
+          required
+          className="h-10 rounded-xl border-border bg-card text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
+        />
+        <button
+          type="submit"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-muted-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+        >
+          <Mail className="h-4 w-4 shrink-0" />
+          {t("continueWithEmail")}
+        </button>
+      </form>
+
+      {/* Preview environment quick login */}
+      {previewEmail && (
+        <div className="space-y-2.5 pt-1">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-muted-foreground text-xs uppercase tracking-wide">
+              preview
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <a
+            href="/api/preview-login"
+            className="flex w-full items-center justify-center rounded-xl border border-border border-dashed bg-muted/50 px-4 py-2.5 font-mono text-muted-foreground text-xs transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+          >
+            {previewEmail}
+          </a>
+        </div>
+      )}
+
+      {/* Success state */}
+      {loggedInWithResend && (
+        <Alert className="rounded-xl border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/50">
+          <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <AlertTitle className="font-medium text-green-800 text-sm dark:text-green-300">
+            {t("emailSent")}
+          </AlertTitle>
+          <AlertDescription className="text-green-700 text-xs leading-relaxed dark:text-green-400">
+            {t("emailSentDescription")}
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
+
+  if (compact) {
+    return inner;
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      {inner}
     </div>
   );
 }
