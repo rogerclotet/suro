@@ -43,6 +43,16 @@ After edits, run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-
 - Schema changes: edit the relevant file under `src/server/db/schema/`, then run `pnpm db:generate` to produce a new migration in `drizzle/`. Don't hand-edit existing migrations.
 - All user-facing strings go through next-intl. New routes go under `app/[locale]/`.
 
+## Changelog
+
+`CHANGELOG.md` (repo root) is the curated, user-facing changelog — **not** a full history. With every commit, update it **only if** the change is an important fix or a user-facing change (new feature, visible behavior change, notable bugfix). Skip it for refactors, internal/infra changes, dependency bumps, tests, or docs.
+
+When an entry is warranted:
+
+- Add a typed bullet in **all three** locales (`ca`, `es`, `en`) — the build fails if a type or locale is malformed. Format: `- [feature|fix|improvement] <text>`.
+- Append it under the topmost (unreleased) version block. Start a **new** `## [x.y.z] — YYYY-MM-DD` block (newest first) only when cutting a release, and keep `package.json` `version` in sync. The topmost version is shown in-app and drives the "app updated" toast, so a version bump is what notifies users.
+- No manual codegen needed — `src/data/changelog.generated.ts` is regenerated from `CHANGELOG.md` by the `pre*` hooks (`predev`/`prebuild`/`pretest`/`pretypecheck`). Run `pnpm changelog:generate` to preview.
+
 ## Git
 
 Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr create --target-branch main` to open merge requests — `gh` won't work here.
