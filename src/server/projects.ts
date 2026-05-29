@@ -127,3 +127,45 @@ export const getInvitedProject = cache(async (projectId: string) => {
     return null;
   }
 });
+
+export const getProjectByInvite = cache(
+  async (projectId: string, inviteToken: string) => {
+    try {
+      const result = await db.query.projects.findFirst({
+        columns: {
+          id: true,
+          name: true,
+          createdBy: true,
+          inviteToken: true,
+          image: true,
+          color: true,
+          features: true,
+        },
+        with: {
+          users: { columns: {}, with: { user: true } },
+          categories: true,
+          secretSantas: {
+            columns: { assignmentsDone: true, datetime: true },
+            orderBy: desc(secretSantas.datetime),
+            where: isNull(secretSantas.archivedAt),
+            limit: 1,
+          },
+        },
+        where: and(
+          eq(projects.id, projectId),
+          eq(projects.inviteToken, inviteToken),
+        ),
+      });
+
+      return result;
+    } catch (e) {
+      const session = await auth();
+      const posthog = getPostHogServer();
+      posthog.captureException(e, session?.user.id, {
+        action: "get_project_by_invite",
+        projectId,
+      });
+      return null;
+    }
+  },
+);
