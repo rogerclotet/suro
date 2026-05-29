@@ -11,7 +11,7 @@ import {
   notificationUnsupported,
   registerAndSubscribe,
 } from "@/app/push";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ResponsiveMenuItem } from "@/components/ui/responsive-menu";
 import { Switch } from "@/components/ui/switch";
 
 export default function NotificationToggle() {
@@ -60,7 +60,10 @@ export default function NotificationToggle() {
   }
 
   return (
-    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+    <ResponsiveMenuItem
+      onSelect={(e) => e.preventDefault()}
+      closeOnSelect={false}
+    >
       {enabled ? <Bell /> : <BellOff />}
       <span>Notificacions</span>
       <Switch
@@ -68,6 +71,6 @@ export default function NotificationToggle() {
         onCheckedChange={toggleSubscription}
         className="ml-auto"
       />
-    </DropdownMenuItem>
+    </ResponsiveMenuItem>
   );
 }

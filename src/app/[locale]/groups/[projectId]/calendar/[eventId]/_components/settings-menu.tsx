@@ -16,18 +16,17 @@ import {
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { useRef } from "react";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import type { Pot } from "@/app/_data/pot";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import {
   createLinkedList,
   createLinkedNote,
@@ -53,8 +52,6 @@ export default function SettingsMenu({
   canCreatePot: boolean;
 }) {
   const { data: session } = useSession();
-  const editDialogRef = useRef<HTMLButtonElement>(null);
-  const deleteDialogRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("calendar");
 
   async function handleCreateLinkedList() {
@@ -103,45 +100,44 @@ export default function SettingsMenu({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button variant="ghost" size="icon">
           <Settings />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent>
         <EditEventForm
           event={event}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
-              onClick={() => editDialogRef.current?.click()}
               className="cursor-pointer gap-2"
             >
               <Edit />
               {t("editTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
         {list === undefined ? (
           <>
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onClick={handleCreateLinkedList}
               className="cursor-pointer gap-2"
             >
               <ListPlus />
               {t("createListMenuItem")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
 
             <LinkListForm
               trigger={
-                <DropdownMenuItem
+                <ResponsiveMenuItem
                   onSelect={(e) => e.preventDefault()}
                   className="cursor-pointer gap-2"
                 >
                   <ListTodo />
                   {t("linkExistingListMenuItem")}
-                </DropdownMenuItem>
+                </ResponsiveMenuItem>
               }
               event={event}
             />
@@ -149,35 +145,35 @@ export default function SettingsMenu({
         ) : (
           <UnlinkEventListModal
             trigger={
-              <DropdownMenuItem
+              <ResponsiveMenuItem
                 onSelect={(e) => e.preventDefault()}
                 className="cursor-pointer gap-2"
               >
                 <ListX />
                 {t("unlinkListButton")}
-              </DropdownMenuItem>
+              </ResponsiveMenuItem>
             }
             event={event}
             list={list}
           />
         )}
 
-        <DropdownMenuItem
+        <ResponsiveMenuItem
           onClick={handleCreateLinkedNote}
           className="cursor-pointer gap-2"
         >
           <NotebookPen />
           {t("createNoteMenuItem")}
-        </DropdownMenuItem>
+        </ResponsiveMenuItem>
         <LinkNoteForm
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2"
             >
               <NotebookText />
               {t("linkExistingNoteMenuItem")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
           event={event}
         />
@@ -185,13 +181,13 @@ export default function SettingsMenu({
         {pot !== undefined ? (
           <UnlinkEventPotModal
             trigger={
-              <DropdownMenuItem
+              <ResponsiveMenuItem
                 onSelect={(e) => e.preventDefault()}
                 className="cursor-pointer gap-2"
               >
                 <Receipt />
                 {t("unlinkPotButton")}
-              </DropdownMenuItem>
+              </ResponsiveMenuItem>
             }
             event={event}
             pot={pot}
@@ -199,23 +195,23 @@ export default function SettingsMenu({
         ) : (
           canCreatePot && (
             <>
-              <DropdownMenuItem
+              <ResponsiveMenuItem
                 onClick={handleCreateLinkedPot}
                 className="cursor-pointer gap-2"
               >
                 <PiggyBank />
                 {t("createPotMenuItem")}
-              </DropdownMenuItem>
+              </ResponsiveMenuItem>
 
               <LinkPotForm
                 trigger={
-                  <DropdownMenuItem
+                  <ResponsiveMenuItem
                     onSelect={(e) => e.preventDefault()}
                     className="cursor-pointer gap-2"
                   >
                     <Wallet />
                     {t("linkExistingPotMenuItem")}
-                  </DropdownMenuItem>
+                  </ResponsiveMenuItem>
                 }
                 event={event}
               />
@@ -225,18 +221,17 @@ export default function SettingsMenu({
 
         <DeleteEventModal
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
-              onClick={() => deleteDialogRef.current?.click()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 />
               {t("deleteTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
           event={event}
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

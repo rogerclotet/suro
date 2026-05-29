@@ -4,11 +4,11 @@ import { Check, Languages } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 
@@ -31,8 +31,8 @@ export default function InfoLanguageSwitcher() {
   const activeLocale: SupportedLocale = isSupported(locale) ? locale : "en";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button
           variant="ghost"
           size="icon"
@@ -40,10 +40,10 @@ export default function InfoLanguageSwitcher() {
         >
           <Languages />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent align="end">
         {SUPPORTED.map((l) => (
-          <DropdownMenuItem
+          <ResponsiveMenuItem
             key={l}
             onClick={() => {
               router.replace(pathname as Parameters<typeof router.replace>[0], {
@@ -55,9 +55,9 @@ export default function InfoLanguageSwitcher() {
               className={l === activeLocale ? "opacity-100" : "opacity-0"}
             />
             {LOCALE_LABELS[l]}
-          </DropdownMenuItem>
+          </ResponsiveMenuItem>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

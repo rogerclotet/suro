@@ -30,16 +30,26 @@ function offlineToPreview(l: OfflineList): List {
   } as unknown as List;
 }
 
+// Dates read from the React Query cache come back as strings once the query
+// refetches from the JSON API (its queryFn does `response.json()`), even though
+// the List type claims Date. Coerce defensively so the sort never crashes.
+function toTime(value: Date | string | number | null | undefined): number {
+  if (!value) return 0;
+  const time =
+    value instanceof Date ? value.getTime() : new Date(value).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
 // Same sort as lists.tsx — most recently updated first (considers item updatedAt too)
 function compareLists(a: List, b: List) {
-  const updatedAtA = a.updatedAt?.getTime() ?? a.createdAt?.getTime() ?? 0;
+  const updatedAtA = toTime(a.updatedAt) || toTime(a.createdAt);
   const itemsUpdatedAtA = a.items.reduce(
-    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    (acc, item) => Math.max(acc, toTime(item.updatedAt)),
     0,
   );
-  const updatedAtB = b.updatedAt?.getTime() ?? b.createdAt?.getTime() ?? 0;
+  const updatedAtB = toTime(b.updatedAt) || toTime(b.createdAt);
   const itemsUpdatedAtB = b.items.reduce(
-    (acc, item) => Math.max(acc, item.updatedAt?.getTime() ?? 0),
+    (acc, item) => Math.max(acc, toTime(item.updatedAt)),
     0,
   );
   const diff =
