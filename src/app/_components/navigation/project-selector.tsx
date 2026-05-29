@@ -7,13 +7,13 @@ import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import ProjectAvatar from "@/components/project-avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuLabel,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -23,7 +23,7 @@ export default function ProjectSelector() {
   const { projects, project, selectProject } = useProjects();
   const router = useRouter();
   const pathname = usePathname();
-  const { state, isMobile, setOpenMobile } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const { data: session } = useSession();
   const tNav = useTranslations("nav");
   const tGroups = useTranslations("groups");
@@ -55,8 +55,8 @@ export default function ProjectSelector() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <SidebarMenuButton size="lg" tooltip={project.name}>
           <ProjectAvatar project={project} />
           <div className="flex flex-col">
@@ -69,19 +69,20 @@ export default function ProjectSelector() {
           </div>
           <ChevronsUpDownIcon className="ml-auto" />
         </SidebarMenuButton>
-      </DropdownMenuTrigger>
+      </ResponsiveMenuTrigger>
 
-      <DropdownMenuContent
-        side={isMobile ? "bottom" : "right"}
+      <ResponsiveMenuContent
+        side="right"
         align="start"
+        title={tNav("groups")}
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
       >
-        <DropdownMenuLabel>{tNav("groups")}</DropdownMenuLabel>
+        <ResponsiveMenuLabel>{tNav("groups")}</ResponsiveMenuLabel>
 
-        <DropdownMenuSeparator />
+        <ResponsiveMenuSeparator />
 
         {projects.map((p) => (
-          <DropdownMenuItem
+          <ResponsiveMenuItem
             key={p.id}
             onClick={() => handleProjectSelect(p)}
             disabled={project.id === p.id}
@@ -93,9 +94,9 @@ export default function ProjectSelector() {
           >
             <ProjectAvatar project={p} className="h-6 w-6 text-xs" />
             <span className="min-w-0 truncate">{p.name}</span>
-          </DropdownMenuItem>
+          </ResponsiveMenuItem>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

@@ -8,14 +8,14 @@ import { useRef } from "react";
 import { toast } from "sonner";
 import type { SecretSanta, SecretSantaData } from "@/app/_data/secret-santa";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import ModalAction from "@/components/ui/modal-action";
 import ModalForm from "@/components/ui/modal-form";
+import {
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import { archiveSecretSanta, updateSecretSanta } from "@/server/secret-santa";
 import SecretSantaForm from "../../form";
 
@@ -59,26 +59,26 @@ export default function SettingsMenu({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button variant="ghost" size="icon">
           <Settings />
         </Button>
-      </DropdownMenuTrigger>
+      </ResponsiveMenuTrigger>
 
-      <DropdownMenuContent>
+      <ResponsiveMenuContent>
         <ModalForm
           title={t("settingsEditTitle")}
           description={t("settingsEditDescription", { name: secretSanta.name })}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               ref={editDialogRef}
               className="cursor-pointer gap-2"
             >
               <Edit />
               {t("settingsEditTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         >
           <SecretSantaForm
@@ -96,17 +96,17 @@ export default function SettingsMenu({
           actionText={t("settingsArchiveAction")}
           onAction={handleArchive}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >
               <ArchiveIcon />
               {t("settingsArchiveAction")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }
 

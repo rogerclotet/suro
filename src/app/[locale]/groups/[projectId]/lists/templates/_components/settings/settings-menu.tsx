@@ -5,11 +5,11 @@ import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import DeleteTemplateModal from "./delete-template-modal";
 import EditTemplateForm from "./edit-template-form";
 import ExportTemplateModal from "./export-template-modal";
@@ -19,23 +19,23 @@ export default function SettingsMenu({ template }: { template: Template }) {
   const hasOtherProjects = projects.some((p) => p.id !== template.projectId);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button variant="ghost" size="icon">
           <Settings />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent>
         <EditTemplateForm
           template={template}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2"
             >
               <Edit />
               Editar plantilla
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
 
@@ -43,13 +43,13 @@ export default function SettingsMenu({ template }: { template: Template }) {
           <ExportTemplateModal
             template={template}
             trigger={
-              <DropdownMenuItem
+              <ResponsiveMenuItem
                 onSelect={(e) => e.preventDefault()}
                 className="cursor-pointer gap-2"
               >
                 <Copy />
                 Exportar a un altre grup
-              </DropdownMenuItem>
+              </ResponsiveMenuItem>
             }
           />
         )}
@@ -57,16 +57,16 @@ export default function SettingsMenu({ template }: { template: Template }) {
         <DeleteTemplateModal
           template={template}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 />
               Eliminar plantilla
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

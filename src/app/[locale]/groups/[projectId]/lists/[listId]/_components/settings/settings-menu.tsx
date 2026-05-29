@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 import type { List, Template } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import { toggleFavorite } from "./actions";
 import ClearCompletedModal from "./clear-completed-modal";
 import DeleteListModal from "./delete-list-modal";
@@ -28,16 +28,16 @@ export default function SettingsMenu({
   const tTemplates = useTranslations("templates");
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button variant="ghost" size="icon">
           <Settings />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent>
+        <ResponsiveMenuItem
           className="cursor-pointer gap-2"
-          onSelect={() => toggleFavorite(list)}
+          onClick={() => toggleFavorite(list)}
         >
           <Star
             size={16}
@@ -46,19 +46,19 @@ export default function SettingsMenu({
           {list.favorite
             ? tLists("removeFromFavorites")
             : tLists("addToFavorites")}
-        </DropdownMenuItem>
+        </ResponsiveMenuItem>
 
-        <DropdownMenuSeparator />
+        <ResponsiveMenuSeparator />
 
         <ClearCompletedModal
           list={list}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2"
             >
               <ListX /> {tLists("clearCompletedTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
 
@@ -66,41 +66,41 @@ export default function SettingsMenu({
           list={list}
           templates={templates}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2"
             >
               <Import /> {tTemplates("importTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
 
         <EditListForm
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2"
             >
               <Edit />
               {tLists("editTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
           list={list}
         />
 
         <DeleteListModal
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 />
               {tLists("deleteTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
           list={list}
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

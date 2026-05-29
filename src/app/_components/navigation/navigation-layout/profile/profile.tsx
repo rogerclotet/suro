@@ -4,12 +4,12 @@ import { ChevronsUpDownIcon, LogOut, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import UserAvatar from "@/components/user-avatar";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
@@ -20,7 +20,7 @@ import NotificationSwitcher from "./notification-toggle";
 
 export default function Profile() {
   const session = useSession();
-  const { isMobile, setOpenMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar();
   const tNav = useTranslations("nav");
   const tAuth = useTranslations("auth");
   const tChangelog = useTranslations("changelog");
@@ -30,8 +30,8 @@ export default function Profile() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <SidebarMenuButton
           size="lg"
           tooltip={session.data?.user.name ?? tNav("profile")}
@@ -46,39 +46,40 @@ export default function Profile() {
           </div>
           <ChevronsUpDownIcon className="ml-auto" />
         </SidebarMenuButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        side={isMobile ? "bottom" : "right"}
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent
+        side="right"
         align="end"
+        title={session.data?.user.name ?? tNav("profile")}
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
       >
         <Link href="/profile">
-          <DropdownMenuItem
+          <ResponsiveMenuItem
             className="cursor-pointer gap-2"
             onClick={() => setOpenMobile(false)}
           >
             <User />
             {tNav("profile")}
-          </DropdownMenuItem>
+          </ResponsiveMenuItem>
         </Link>
 
         <NotificationSwitcher />
 
         <ThemeSwitcher />
 
-        <DropdownMenuSeparator />
+        <ResponsiveMenuSeparator />
 
         <Link href="/changelog">
-          <DropdownMenuItem
+          <ResponsiveMenuItem
             className="cursor-pointer justify-between gap-2 text-muted-foreground text-xs"
             onClick={() => setOpenMobile(false)}
           >
             <span>{tChangelog("versionLabel")}</span>
             <span>v{CURRENT_VERSION}</span>
-          </DropdownMenuItem>
+          </ResponsiveMenuItem>
         </Link>
 
-        <DropdownMenuSeparator />
+        <ResponsiveMenuSeparator />
 
         <form action={logOut}>
           <button
@@ -86,12 +87,12 @@ export default function Profile() {
             className="w-full"
             onClick={() => setOpenMobile(false)}
           >
-            <DropdownMenuItem className="cursor-pointer gap-2">
+            <ResponsiveMenuItem className="cursor-pointer gap-2">
               <LogOut /> {tAuth("signOut")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           </button>
         </form>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }

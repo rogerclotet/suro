@@ -5,37 +5,37 @@ import { useTranslations } from "next-intl";
 import type { Note } from "@/app/_data/note";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuItem,
+  ResponsiveMenuTrigger,
+} from "@/components/ui/responsive-menu";
 import DeleteNoteModal from "./delete-note-modal";
 
 export default function SettingsMenu({ note }: { note: Note }) {
   const t = useTranslations("notes");
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger>
         <Button variant="ghost" size="icon">
           <Settings />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      </ResponsiveMenuTrigger>
+      <ResponsiveMenuContent>
         <DeleteNoteModal
           note={note}
           trigger={
-            <DropdownMenuItem
+            <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
               className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 />
               {t("deleteTitle")}
-            </DropdownMenuItem>
+            </ResponsiveMenuItem>
           }
         />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   );
 }
