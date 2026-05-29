@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [0.2.0] — 2026-05-30
+
+### ca
+
+- [improvement] Als mòbils, els menús ara s'obren com un full inferior amb opcions més grans i fàcils de tocar.
+- [fix] Corregit un error que podia aparèixer en obrir les llistes.
+
+### es
+
+- [improvement] En móviles, los menús ahora se abren como una hoja inferior con opciones más grandes y fáciles de tocar.
+- [fix] Corregido un error que podía aparecer al abrir las listas.
+
+### en
+
+- [improvement] On phones, menus now open as a bottom sheet with larger, easier-to-tap options.
+- [fix] Fixed an error that could appear when opening your lists.
+
 ## [0.1.0] — 2026-05-29
 
 ### ca
