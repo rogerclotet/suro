@@ -50,7 +50,7 @@ After edits, run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-
 When an entry is warranted:
 
 - Add a typed bullet in **all three** locales (`ca`, `es`, `en`) — the build fails if a type or locale is malformed. Format: `- [feature|fix|improvement] <text>`.
-- Append it under the topmost (unreleased) version block. Start a **new** `## [x.y.z] — YYYY-MM-DD` block (newest first) only when cutting a release, and keep `package.json` `version` in sync. The topmost version is shown in-app and drives the "app updated" toast, so a version bump is what notifies users.
+- **Never** append to an existing version block. Always start a **new** `## [x.y.z] — YYYY-MM-DD` block at the top (newest first) and bump `package.json` `version` to match. Use a **patch** bump for minimal changes or a lone fix; use a **minor** bump otherwise. The topmost version is shown in-app and drives the "app updated" toast, so the version bump is what notifies users.
 - No manual codegen needed — `src/data/changelog.generated.ts` is regenerated from `CHANGELOG.md` by the `pre*` hooks (`predev`/`prebuild`/`pretest`/`pretypecheck`). Run `pnpm changelog:generate` to preview.
 
 ## Git

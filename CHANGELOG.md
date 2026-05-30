@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [0.3.0] — 2026-05-31
+
+### ca
+
+- [feature] Ara pots enviar comentaris i suggeriments directament des de l'aplicació.
+- [improvement] Afegir elements a les llistes és més fàcil, amb un disseny més clar i un selector de categories.
+
+### es
+
+- [feature] Ahora puedes enviar comentarios y sugerencias directamente desde la aplicación.
+- [improvement] Añadir elementos a las listas es más fácil, con un diseño más claro y un selector de categorías.
+
+### en
+
+- [feature] You can now send feedback and suggestions directly from the app.
+- [improvement] Adding items to your lists is now easier, with a clearer layout and a category picker.
+
 ## [0.2.0] — 2026-05-30
 
 ### ca
