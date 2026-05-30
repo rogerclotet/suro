@@ -1,8 +1,14 @@
 "use client";
 
-import { BellIcon, LayoutGridIcon, LogOut } from "lucide-react";
+import {
+  BellIcon,
+  LayoutGridIcon,
+  LogOut,
+  MessageSquarePlusIcon,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useFeedback } from "@/app/_state/feedback-state";
 import { useNotifications } from "@/app/_state/notification-state";
 import {
   Drawer,
@@ -28,6 +34,7 @@ export default function MoreSheet({
 }) {
   const { data: session } = useSession();
   const { totalUnread } = useNotifications();
+  const { openFeedback } = useFeedback();
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
   const tChangelog = useTranslations("changelog");
@@ -94,6 +101,18 @@ export default function MoreSheet({
             <LayoutGridIcon />
             <span>{t("manageGroups")}</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => {
+              onOpenChange(false);
+              openFeedback();
+            }}
+            className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
+          >
+            <MessageSquarePlusIcon />
+            <span>{t("feedback")}</span>
+          </button>
 
           <div className="my-1 border-border border-t" />
 

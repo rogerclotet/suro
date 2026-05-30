@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { useAction } from "@/app/_state/action-state";
+import FeedbackDialog from "@/app/[locale]/_components/feedback/feedback-dialog";
 import { FAB } from "@/components/ui/fab";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { SyncIndicator } from "@/components/ui/sync-indicator";
@@ -70,6 +71,7 @@ export default function SidebarInsetContent({
       </div>
 
       <BottomNav />
+      <FeedbackDialog />
     </div>
   );
 }

@@ -237,10 +237,23 @@
     "manageGroups": "Gestionar grups",
     "groups": "Grups",
     "profile": "Perfil",
+    "feedback": "Suggeriments",
     "chooseTheme": "Triar tema",
     "themeLight": "Clar",
     "themeDark": "Fosc",
     "themeSystem": "Sistema"
+  },
+  "feedback": {
+    "title": "Envia suggeriments",
+    "description": "Has trobat un error o tens una idea? Fes-nos-ho saber.",
+    "typeLabel": "Tipus",
+    "typeBug": "Error",
+    "typeSuggestion": "Suggeriment",
+    "messageLabel": "Missatge",
+    "messagePlaceholder": "Descriu l'error o el teu suggeriment…",
+    "submit": "Envia",
+    "success": "Gràcies pels teus comentaris!",
+    "error": "Alguna cosa ha anat malament. Torna-ho a provar."
   },
   "changelog": {
     "pageTitle": "Novetats",
