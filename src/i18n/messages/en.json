@@ -237,10 +237,25 @@
     "manageGroups": "Manage groups",
     "groups": "Groups",
     "profile": "Profile",
+    "feedback": "Feedback",
     "chooseTheme": "Choose theme",
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System"
+  },
+  "feedback": {
+    "title": "Send feedback",
+    "description": "Found a bug or have an idea? Let us know.",
+    "typeLabel": "Type",
+    "typeBug": "Bug",
+    "typeSuggestion": "Suggestion",
+    "sectionLabel": "Section",
+    "sectionOther": "Other",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Describe the bug or your suggestion…",
+    "submit": "Send",
+    "success": "Thanks for your feedback!",
+    "error": "Something went wrong. Please try again."
   },
   "changelog": {
     "pageTitle": "What's new",

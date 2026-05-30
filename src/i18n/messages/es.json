@@ -237,10 +237,25 @@
     "manageGroups": "Gestionar grupos",
     "groups": "Grupos",
     "profile": "Perfil",
+    "feedback": "Comentarios",
     "chooseTheme": "Elegir tema",
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "themeSystem": "Sistema"
+  },
+  "feedback": {
+    "title": "Enviar comentarios",
+    "description": "¿Has encontrado un error o tienes una idea? Cuéntanoslo.",
+    "typeLabel": "Tipo",
+    "typeBug": "Error",
+    "typeSuggestion": "Sugerencia",
+    "sectionLabel": "Sección",
+    "sectionOther": "Otros",
+    "messageLabel": "Mensaje",
+    "messagePlaceholder": "Describe el error o tu sugerencia…",
+    "submit": "Enviar",
+    "success": "¡Gracias por tus comentarios!",
+    "error": "Algo ha ido mal. Inténtalo de nuevo."
   },
   "changelog": {
     "pageTitle": "Novedades",
