@@ -5,29 +5,16 @@ import { Check, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { useRef } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import NewCategoryModal from "../../../[listId]/_components/categories/new-category-modal";
+import CategoryPicker from "@/components/ui/category-picker";
+import { InputGroupInput } from "@/components/ui/input-group";
+import AddItemForm from "../../../_components/add-item/add-item-form";
+import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
 import { templateItemSchema } from "../../_components/create-template/data";
 import { createTemplateItem } from "./actions";
 
@@ -49,9 +36,8 @@ export default function NewTemplateItem({
   });
   const { project } = useProjects();
   const { data: session } = useSession();
-  const newTemplateItemModalRef = useRef<HTMLButtonElement>(null);
+  const { createAndSelect } = useCategoryCreation();
   const t = useTranslations("lists");
-  const tCommon = useTranslations("common");
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     if (data.name === "") {
@@ -66,6 +52,7 @@ export default function NewTemplateItem({
       await createTemplateItem(template, data);
       onCreate({ name: data.name, category: data.category ?? null });
       form.reset({ name: "", category: data.category ?? "" });
+      form.setFocus("name");
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -78,44 +65,41 @@ export default function NewTemplateItem({
     }
   }
 
-  function handleCategoryChange(value: string) {
-    if (value === "new") {
-      newTemplateItemModalRef.current?.click();
-      return;
-    }
-
-    if (value === "-") {
-      form.setValue("category", "");
-    } else {
-      form.setValue("category", value);
-    }
-  }
-
   return (
-    <li className="flex w-full items-center justify-between gap-4">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex grow items-start gap-2"
-        >
-          <FormField
+    <li className="w-full">
+      <AddItemForm
+        onSubmit={form.handleSubmit(onSubmit)}
+        nameInput={
+          <Controller
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="grow">
-                <FormControl>
-                  <Input
-                    placeholder={t("newItemPlaceholder")}
-                    disabled={form.formState.isSubmitting}
-                    className="h-10"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
+              <InputGroupInput
+                placeholder={t("newItemPlaceholder")}
+                disabled={form.formState.isSubmitting}
+                {...field}
+              />
             )}
           />
-
-          {form.formState.isDirty && (
+        }
+        categoryControl={
+          <Controller
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <CategoryPicker
+                variant="ghost"
+                categories={project?.categories ?? []}
+                value={field.value || null}
+                onChange={(categoryId) => field.onChange(categoryId ?? "")}
+                onCreate={createAndSelect}
+                disabled={form.formState.isSubmitting}
+              />
+            )}
+          />
+        }
+        submitButton={
+          form.formState.isDirty ? (
             <Button
               size="icon"
               variant="ghost"
@@ -127,50 +111,8 @@ export default function NewTemplateItem({
                 <Check />
               )}
             </Button>
-          )}
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <Select
-                  value={field.value ?? undefined}
-                  onValueChange={handleCategoryChange}
-                  disabled={form.formState.isSubmitting}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder={tCommon("noCategory")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="-">{tCommon("noCategory")}</SelectItem>
-                    {project?.categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-
-                    <SelectItem value="new">{t("newCategory")}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
-
-      <NewCategoryModal
-        trigger={
-          <button
-            ref={newTemplateItemModalRef}
-            type="button"
-            className="hidden"
-          />
+          ) : null
         }
-        onCreate={(categoryId) => form.setValue("category", categoryId)}
       />
     </li>
   );
