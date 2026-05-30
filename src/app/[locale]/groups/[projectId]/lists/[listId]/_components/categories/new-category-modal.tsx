@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm from "@/components/ui/modal-form";
+import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { createCategory } from "./actions";
 import { categorySchema } from "./data";
@@ -30,6 +30,24 @@ export default function NewCategoryModal({
   trigger: React.ReactNode;
   onCreate?: (categoryId: string) => void;
 }) {
+  const t = useTranslations("categories");
+
+  return (
+    <ModalForm
+      trigger={trigger}
+      title={t("newTitle")}
+      description={t("newDescription")}
+    >
+      <NewCategoryModalContent onCreate={onCreate} />
+    </ModalForm>
+  );
+}
+
+function NewCategoryModalContent({
+  onCreate,
+}: {
+  onCreate?: (categoryId: string) => void;
+}) {
   const { project, addCategory } = useProjects();
   const form = useForm({
     defaultValues: {
@@ -37,6 +55,7 @@ export default function NewCategoryModal({
     },
     resolver: valibotResolver(categorySchema),
   });
+  const { close } = useModalForm();
   const { data: session } = useSession();
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
@@ -54,12 +73,10 @@ export default function NewCategoryModal({
         projectId: project.id,
       });
 
-      // Add to queue to allow components to update categories
-      setTimeout(() => onCreate?.(categoryId), 0);
-
       form.reset();
-
       toast.success(t("createSuccess", { name: data.name }));
+      onCreate?.(categoryId);
+      close();
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -71,34 +88,28 @@ export default function NewCategoryModal({
   }
 
   return (
-    <ModalForm
-      trigger={trigger}
-      title={t("newTitle")}
-      description={t("newDescription")}
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{tCommon("name")}</FormLabel>
-                <FormControl>
-                  <Input autoFocus {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{tCommon("name")}</FormLabel>
+              <FormControl>
+                <Input autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <SubmitButton
-            icon={<PlusIcon />}
-            text={tCommon("create")}
-            formState={form.formState}
-          />
-        </form>
-      </Form>
-    </ModalForm>
+        <SubmitButton
+          icon={<PlusIcon />}
+          text={tCommon("create")}
+          formState={form.formState}
+        />
+      </form>
+    </Form>
   );
 }
