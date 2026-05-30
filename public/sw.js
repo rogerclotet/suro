@@ -354,17 +354,27 @@ self.addEventListener("push", (event) => {
   const payload = event.data.json();
   const { title, body, tag, icon, badge, image, timestamp, path } = payload;
 
-  event.waitUntil(
-    self.registration.showNotification(title ?? "Suro", {
-      body,
-      tag,
-      icon: icon ?? `${self.location.origin}/favicon.png`,
-      badge: badge ?? `${self.location.origin}/notification-badge.png`,
-      image,
-      timestamp,
-      data: { path },
-    }),
-  );
+  const options = {
+    body,
+    tag,
+    badge: badge ?? `${self.location.origin}/notification-badge.png`,
+    image,
+    timestamp,
+    data: { path },
+  };
+
+  // iOS renders the notification `icon` as a large thumbnail on the right,
+  // which just duplicates the home-screen app icon already shown on the left.
+  // Only attach an icon when it carries its own information (e.g. a project
+  // or event image), and never fall back to the app logo on iOS.
+  const isIOS = /iP(hone|ad|od)/.test(self.navigator?.userAgent ?? "");
+  if (icon) {
+    options.icon = icon;
+  } else if (!isIOS) {
+    options.icon = `${self.location.origin}/favicon.png`;
+  }
+
+  event.waitUntil(self.registration.showNotification(title ?? "Suro", options));
 });
 
 self.addEventListener("notificationclick", (event) => {
