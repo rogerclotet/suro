@@ -282,6 +282,8 @@
     "dateFormat": "Date format",
     "dateFormatPlaceholder": "Select a format",
     "dateFormatDescription": "This format is used to display dates in the calendar.",
+    "theme": "Theme",
+    "themeDescription": "Choose between a light, dark, or system-matched appearance.",
     "language": "Language",
     "languagePlaceholder": "Select a language",
     "languageDescription": "This language is used for the interface and notifications.",

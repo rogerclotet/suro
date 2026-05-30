@@ -282,6 +282,8 @@
     "dateFormat": "Format de data",
     "dateFormatPlaceholder": "Selecciona un format",
     "dateFormatDescription": "Aquest format es fa servir per mostrar dates al calendari.",
+    "theme": "Tema",
+    "themeDescription": "Tria entre una aparença clara, fosca o segons el sistema.",
     "language": "Idioma",
     "languagePlaceholder": "Selecciona un idioma",
     "languageDescription": "Aquest idioma s'utilitza per a la interfície i les notificacions.",
