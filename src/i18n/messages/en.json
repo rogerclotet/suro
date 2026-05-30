@@ -249,6 +249,8 @@
     "typeLabel": "Type",
     "typeBug": "Bug",
     "typeSuggestion": "Suggestion",
+    "sectionLabel": "Section",
+    "sectionOther": "Other",
     "messageLabel": "Message",
     "messagePlaceholder": "Describe the bug or your suggestion…",
     "submit": "Send",

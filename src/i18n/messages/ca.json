@@ -249,6 +249,8 @@
     "typeLabel": "Tipus",
     "typeBug": "Error",
     "typeSuggestion": "Suggeriment",
+    "sectionLabel": "Secció",
+    "sectionOther": "Altres",
     "messageLabel": "Missatge",
     "messagePlaceholder": "Descriu l'error o el teu suggeriment…",
     "submit": "Envia",
