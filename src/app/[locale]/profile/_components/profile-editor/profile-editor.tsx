@@ -40,6 +40,7 @@ import { routing } from "@/i18n/routing";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
 import NotificationSettings from "../notification-settings";
+import ThemeSettings from "../theme-settings";
 import { editProfile, removeProfileImage, resetProfileImage } from "./actions";
 import { profileSchema } from "./data";
 
@@ -275,6 +276,10 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
           />
         </form>
       </Form>
+
+      <div className="border-t pt-4">
+        <ThemeSettings />
+      </div>
 
       <div className="border-t pt-4">
         <NotificationSettings />

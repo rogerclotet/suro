@@ -11,16 +11,19 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [improvement] Als mòbils, els menús ara s'obren com un full inferior amb opcions més grans i fàcils de tocar.
+- [improvement] Ara pots triar el tema (clar, fosc o segons el sistema) des de la pàgina de perfil, també al mòbil.
 - [fix] Corregit un error que podia aparèixer en obrir les llistes.
 
 ### es
 
 - [improvement] En móviles, los menús ahora se abren como una hoja inferior con opciones más grandes y fáciles de tocar.
+- [improvement] Ahora puedes elegir el tema (claro, oscuro o según el sistema) desde la página de perfil, también en el móvil.
 - [fix] Corregido un error que podía aparecer al abrir las listas.
 
 ### en
 
 - [improvement] On phones, menus now open as a bottom sheet with larger, easier-to-tap options.
+- [improvement] You can now choose the theme (light, dark, or system) from the profile page, including on mobile.
 - [fix] Fixed an error that could appear when opening your lists.
 
 ## [0.1.0] — 2026-05-29
