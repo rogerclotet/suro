@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { isNetworkError } from "@/lib/is-network-error";
 import { ConflictResolver } from "./conflict-resolver";
 import { db, type EntityType, type SyncQueueItem } from "./db";
 
@@ -519,19 +520,6 @@ class NetworkError extends Error {
     super(message ?? "Network unavailable");
     this.name = "NetworkError";
   }
-}
-
-function isNetworkError(error: unknown): boolean {
-  if (error instanceof NetworkError) return true;
-  if ((error as { isNetworkError?: boolean })?.isNetworkError === true)
-    return true;
-  if (error instanceof Error) {
-    if (error.name === "NetworkError") return true;
-    // Catch "Failed to fetch" and similar network errors
-    if (error.message.toLowerCase().includes("fetch")) return true;
-    if (error.message.toLowerCase().includes("network")) return true;
-  }
-  return false;
 }
 
 export const syncManager = new SyncManagerClass();
