@@ -3,6 +3,7 @@
 import NextError from "next/error";
 import posthog from "posthog-js";
 import { useEffect } from "react";
+import { isNetworkError } from "@/lib/is-network-error";
 
 export default function GlobalError({
   error,
@@ -11,6 +12,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // Transient network failures are recoverable, not bugs — don't report them.
+    if (isNetworkError(error)) return;
     posthog.captureException(error);
   }, [error]);
 

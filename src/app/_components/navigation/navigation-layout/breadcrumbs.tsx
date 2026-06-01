@@ -147,9 +147,11 @@ function DesktopBreadcrumbs() {
 
   const allowedBreadcrumbs = useMemo(() => {
     const breadcrumbsFromMenuItems = menuItems.flatMap((item) =>
-      [item, ...(item.children ?? [])].map((item) =>
-        item.path.split("/").pop(),
-      ),
+      [item, ...(item.children ?? [])]
+        // Guard against a missing path: an undefined entry would crash the
+        // whole nav (and its error boundary) on `.split`, never an allowlist hit.
+        .map((entry) => entry.path?.split("/").pop())
+        .filter((segment): segment is string => Boolean(segment)),
     );
 
     return [...standaloneBreadcrumbs, ...breadcrumbsFromMenuItems];
