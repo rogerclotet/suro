@@ -13,6 +13,11 @@ export default {
   secret: env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/login",
+    // Route auth failures (including the "iss missing" CallbackRouteError that
+    // Google triggers when a user cancels account selection) back to the login
+    // screen instead of Auth.js's built-in "Server error" page. The login page
+    // surfaces a friendly, retryable message based on the `error` query param.
+    error: "/login",
   },
   callbacks: {
     async signIn({ profile }: { profile?: Profile }): Promise<boolean> {

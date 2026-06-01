@@ -20,6 +20,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  logger: {
+    // Auth.js handles errors like CallbackRouteError internally and only reports
+    // them through this logger — they never bubble up to Next's onRequestError,
+    // which is why these failures were invisible in PostHog. Forward them here.
+    error: (error) => {
+      console.error(`[auth][error] ${error.message}`);
+      if (process.env.NODE_ENV === "production") {
+        getPostHogServer().captureException(error, undefined, {
+          source: "next-auth",
+          errorName: error.name,
+        });
+      }
+    },
+  },
   events: {
     createUser: async ({ user }) => {
       if (!user.id) {

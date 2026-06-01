@@ -219,7 +219,13 @@
     "emailPlaceholder": "your@email.com",
     "emailSent": "Email sent",
     "emailSentDescription": "We've sent you an email with a link to sign in. Check your inbox.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "error": {
+      "title": "Couldn't sign you in",
+      "generic": "Something went wrong while signing you in. Please try again.",
+      "accessDenied": "Sign-in was cancelled or access was denied. Please try again.",
+      "verification": "This sign-in link is no longer valid. Request a new one."
+    }
   },
   "nav": {
     "lists": "Lists",

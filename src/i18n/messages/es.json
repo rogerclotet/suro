@@ -219,7 +219,13 @@
     "emailPlaceholder": "tu@correo.com",
     "emailSent": "Correo enviado",
     "emailSentDescription": "Te hemos enviado un email con un enlace para iniciar sesión. Revisa tu bandeja de entrada.",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "error": {
+      "title": "No se pudo iniciar sesión",
+      "generic": "Algo salió mal al iniciar sesión. Inténtalo de nuevo.",
+      "accessDenied": "Se canceló el inicio de sesión o se denegó el acceso. Inténtalo de nuevo.",
+      "verification": "Este enlace de inicio de sesión ya no es válido. Solicita uno nuevo."
+    }
   },
   "nav": {
     "lists": "Listas",
