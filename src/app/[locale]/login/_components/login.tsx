@@ -1,7 +1,7 @@
 "use client";
 
 import { SiGoogle } from "@icons-pack/react-simple-icons";
-import { Info, Mail } from "lucide-react";
+import { Info, Mail, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { redirect, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
@@ -11,6 +11,30 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { getSafeRedirectTo } from "@/lib/auth-redirect";
 import { loginWithGoogle, loginWithResend } from "./actions";
+
+type AuthTranslator = ReturnType<typeof useTranslations<"auth">>;
+
+/**
+ * Maps an Auth.js error code (passed as the `error` query param to the
+ * configured error page) to a friendly, retryable message. A cancelled Google
+ * sign-in surfaces as `Configuration`, so it falls through to the generic case.
+ */
+function getErrorMessage(
+  code: string | null,
+  t: AuthTranslator,
+): string | null {
+  if (!code) {
+    return null;
+  }
+  switch (code) {
+    case "AccessDenied":
+      return t("error.accessDenied");
+    case "Verification":
+      return t("error.verification");
+    default:
+      return t("error.generic");
+  }
+}
 
 export default function Login({
   session,
@@ -29,6 +53,7 @@ export default function Login({
   const redirectTo = getSafeRedirectTo(
     redirectToProp ?? searchParams.get("to"),
   );
+  const errorMessage = getErrorMessage(searchParams.get("error"), t);
 
   if (session) {
     return redirect(redirectTo);
@@ -41,6 +66,18 @@ export default function Login({
 
   const inner = (
     <div className="w-full max-w-xs space-y-6">
+      {errorMessage && (
+        <Alert className="rounded-xl border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/50">
+          <TriangleAlert className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <AlertTitle className="font-medium text-red-800 text-sm dark:text-red-300">
+            {t("error.title")}
+          </AlertTitle>
+          <AlertDescription className="text-red-700 text-xs leading-relaxed dark:text-red-400">
+            {errorMessage}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {!compact && (
         /* Logo + heading */
         <div className="space-y-3 text-center">
