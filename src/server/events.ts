@@ -31,7 +31,8 @@ export const getEvent = cache(async (projectId: string, eventId: string) => {
       result?.project.users.find((u) => u.userId === session.user.id) ===
       undefined
     ) {
-      throw new Error("Event not found");
+      // Missing or inaccessible event is an expected outcome, not an error.
+      return undefined;
     }
 
     return {
@@ -68,7 +69,8 @@ export const getEvents = cache(
       });
 
       if (!membership) {
-        throw new Error("Project not found");
+        // Missing or inaccessible project is an expected outcome, not an error.
+        return [];
       }
 
       const results = await db.query.events.findMany({
