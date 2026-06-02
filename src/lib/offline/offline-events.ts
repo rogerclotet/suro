@@ -8,6 +8,7 @@ import {
 } from "@/app/[locale]/groups/[projectId]/calendar/[eventId]/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
+import { toTimestamp } from "./to-timestamp";
 
 async function isActuallyOnline(): Promise<boolean> {
   if (!navigator.onLine) return false;
@@ -163,7 +164,7 @@ export async function updateEventOffline(
       endAt,
       allDay: data.allDay,
       projectId: project.id,
-      createdAt: event.createdAt?.getTime() ?? now,
+      createdAt: event.createdAt ? toTimestamp(event.createdAt) : now,
       createdBy: event.createdBy,
       updatedAt: now,
       updatedBy: null,
