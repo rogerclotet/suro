@@ -22,6 +22,11 @@ check:
   variables:
     SKIP_ENV_VALIDATION: "1"
     NEXT_TELEMETRY_DISABLED: "1"
+    # This is a throwaway validation build, not the deployed artifact — blank the
+    # PostHog credentials so it never uploads source maps (those come from the
+    # `build` job below). Protected CI variables would otherwise leak in on main.
+    POSTHOG_API_KEY: ""
+    POSTHOG_ENV_ID: ""
   script:
     - pnpm biome:check
     - pnpm typecheck
@@ -73,6 +78,8 @@ build:
         --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
         --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
         --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        --build-arg POSTHOG_API_KEY=$POSTHOG_API_KEY
+        --build-arg POSTHOG_ENV_ID=$POSTHOG_ENV_ID
         -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
         -t $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA

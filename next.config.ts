@@ -77,12 +77,22 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
 } satisfies NextConfig;
 
+// Source map upload runs at build time only. It needs a personal API key with
+// error-tracking write access plus the environment ID. Gate on both:
+// resolveConfig in @posthog/nextjs-config throws when sourcemaps are enabled
+// without credentials, so builds that lack them (local dev, MR previews) must
+// opt out rather than fail.
+const posthogSourcemapsEnabled =
+  !!process.env.POSTHOG_API_KEY && !!process.env.POSTHOG_ENV_ID;
+
 export default withPostHogConfig(withNextIntl(nextConfig), {
   personalApiKey: process.env.POSTHOG_API_KEY ?? "",
-  projectId: process.env.POSTHOG_PROJECT_ID ?? "",
-  host: "https://eu.i.posthog.com",
+  projectId: process.env.POSTHOG_ENV_ID ?? "",
+  // PostHog EU API host. This is the app host the CLI uploads to, distinct from
+  // the eu.i.posthog.com ingestion host the browser SDK posts events to.
+  host: "https://eu.posthog.com",
   sourcemaps: {
-    enabled: !!process.env.POSTHOG_PROJECT_ID,
+    enabled: posthogSourcemapsEnabled,
     deleteAfterUpload: true,
   },
 });

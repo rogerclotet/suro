@@ -31,6 +31,12 @@ ARG NEXT_PUBLIC_POSTHOG_HOST=""
 ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
 ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+# Build-time only: upload client source maps to PostHog so production stack
+# traces are readable. Unset for preview builds, which skip the upload.
+ARG POSTHOG_API_KEY=""
+ENV POSTHOG_API_KEY=$POSTHOG_API_KEY
+ARG POSTHOG_ENV_ID=""
+ENV POSTHOG_ENV_ID=$POSTHOG_ENV_ID
 
 RUN \
     if [ -f pnpm-lock.yaml ]; then pnpm run build; \
