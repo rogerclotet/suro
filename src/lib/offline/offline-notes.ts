@@ -8,6 +8,7 @@ import {
 } from "@/app/[locale]/groups/[projectId]/notes/[noteId]/actions";
 import { db } from "./db";
 import { syncManager } from "./sync-manager";
+import { toTimestamp } from "./to-timestamp";
 
 async function isActuallyOnline(): Promise<boolean> {
   if (!navigator.onLine) return false;
@@ -123,7 +124,7 @@ export async function updateNoteOffline(
       contents: data.contents,
       format: data.format,
       projectId: note.projectId,
-      createdAt: note.createdAt?.getTime() ?? now,
+      createdAt: note.createdAt ? toTimestamp(note.createdAt) : now,
       createdBy: note.createdBy,
       updatedAt: now,
       updatedBy: null,
