@@ -1,6 +1,8 @@
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 import { makeRedirectUri } from "expo-auth-session";
 import * as Linking from "expo-linking";
+import { Redirect } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import { View } from "react-native";
@@ -13,6 +15,7 @@ const redirectTo = makeRedirectUri();
 
 export default function Login() {
   const { signIn } = useAuthActions();
+  const { isAuthenticated } = useConvexAuth();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -60,6 +63,12 @@ export default function Login() {
         await signIn("google", { code: returnedCode });
       }
     });
+
+  // Once Convex Auth flips to authenticated (Google or OTP), leave the login
+  // screen automatically — otherwise it sits here until a manual reload.
+  if (isAuthenticated) {
+    return <Redirect href="/projects" />;
+  }
 
   return (
     <Screen>
