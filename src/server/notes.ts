@@ -29,7 +29,8 @@ export async function getNote(noteId: string) {
       result?.project.users.find((u) => u.userId === session.user.id) ===
       undefined
     ) {
-      throw new Error("Note not found");
+      // Missing or inaccessible note is an expected outcome, not an error.
+      return undefined;
     }
 
     return result;
@@ -60,7 +61,8 @@ export async function getEventNotes(projectId: string, eventId: string) {
     if (
       project?.users.find((u) => u.userId === session.user.id) === undefined
     ) {
-      throw new Error("Project not found");
+      // Missing or inaccessible project is an expected outcome, not an error.
+      return [];
     }
 
     return await db.query.notes.findMany({
@@ -98,7 +100,8 @@ export async function getNotes(projectId: string) {
     if (
       project?.users.find((u) => u.userId === session.user.id) === undefined
     ) {
-      throw new Error("Project not found");
+      // Missing or inaccessible project is an expected outcome, not an error.
+      return [];
     }
 
     return project.notes;

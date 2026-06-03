@@ -34,7 +34,8 @@ export const getList = cache(async (listId: string) => {
       result?.project.users.find((u) => u.userId === session.user.id) ===
       undefined
     ) {
-      throw new Error("List not found");
+      // Missing or inaccessible list is an expected outcome, not an error.
+      return undefined;
     }
 
     return result;
@@ -76,7 +77,8 @@ export const getEventList = cache(
         result?.project.users.find((u) => u.userId === session.user.id) ===
         undefined
       ) {
-        throw new Error("List not found");
+        // Missing or inaccessible list is an expected outcome, not an error.
+        return undefined;
       }
 
       return result;
@@ -126,7 +128,8 @@ export const getLists = cache(async (projectId: string) => {
     if (
       project?.users.find((u) => u.userId === session.user.id) === undefined
     ) {
-      throw new Error("Project not found");
+      // Missing or inaccessible project is an expected outcome, not an error.
+      return [];
     }
 
     return project.lists;
@@ -160,7 +163,8 @@ export const getTemplate = cache(async (templateId: string) => {
       result?.project.users.find((u) => u.userId === session.user.id) ===
       undefined
     ) {
-      throw new Error("Template not found");
+      // Missing or inaccessible template is an expected outcome, not an error.
+      return undefined;
     }
 
     return result as Template;
@@ -194,7 +198,8 @@ export const getTemplates = cache(async (projectId: string) => {
     if (
       project?.users.find((u) => u.userId === session.user.id) === undefined
     ) {
-      throw new Error("Project not found");
+      // Missing or inaccessible project is an expected outcome, not an error.
+      return [];
     }
 
     return project.templates.map((t) => ({
