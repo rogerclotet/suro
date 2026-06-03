@@ -3,11 +3,10 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, SectionList, View } from "react-native";
+import { Pressable, ScrollView, SectionList, View } from "react-native";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Txt } from "@/ui";
+import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
 type ListResult = FunctionReturnType<typeof api.lists.get>;
 type Item = ListResult["items"][number];
@@ -303,43 +302,6 @@ export default function ListDetail() {
         onClose={() => setSettingsOpen(false)}
       />
     </Screen>
-  );
-}
-
-function Sheet({
-  visible,
-  onClose,
-  children,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  const t = useTheme();
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
-        onPress={onClose}
-      />
-      <View
-        style={{
-          backgroundColor: t.bg,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          padding: 20,
-          paddingBottom: 36,
-          gap: 12,
-        }}
-      >
-        {children}
-      </View>
-    </Modal>
   );
 }
 

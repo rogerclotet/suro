@@ -1,11 +1,20 @@
 import { Tabs } from "expo-router";
-import { type ColorValue, Text } from "react-native";
+import {
+  Calendar,
+  FileText,
+  Gift,
+  HandCoins,
+  ListTodo,
+  type LucideIcon,
+} from "lucide-react-native";
+import type { ColorValue } from "react-native";
 import { FONT, useTheme } from "@/theme";
 
-const icon =
-  (glyph: string) =>
-  ({ color }: { color: ColorValue }) => (
-    <Text style={{ fontSize: 18, color }}>{glyph}</Text>
+// Monochrome lucide icons, matching the PWA's section iconography.
+const tabIcon =
+  (Icon: LucideIcon) =>
+  ({ color, size }: { color: ColorValue; size: number }) => (
+    <Icon color={color as string} size={size} />
   );
 
 export default function ProjectTabs() {
@@ -25,26 +34,30 @@ export default function ProjectTabs() {
     >
       <Tabs.Screen
         name="lists"
-        options={{ title: "Lists", tabBarIcon: icon("☑︎") }}
+        options={{ title: "Lists", tabBarIcon: tabIcon(ListTodo) }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
           title: "Calendar",
           headerShown: true,
-          tabBarIcon: icon("📅"),
+          tabBarIcon: tabIcon(Calendar),
         }}
       />
       <Tabs.Screen
         name="notes"
-        options={{ title: "Notes", headerShown: true, tabBarIcon: icon("📝") }}
+        options={{
+          title: "Notes",
+          headerShown: true,
+          tabBarIcon: tabIcon(FileText),
+        }}
       />
       <Tabs.Screen
         name="expenses"
         options={{
           title: "Expenses",
           headerShown: true,
-          tabBarIcon: icon("💶"),
+          tabBarIcon: tabIcon(HandCoins),
         }}
       />
       <Tabs.Screen
@@ -52,7 +65,7 @@ export default function ProjectTabs() {
         options={{
           title: "Secret Santa",
           headerShown: true,
-          tabBarIcon: icon("🎁"),
+          tabBarIcon: tabIcon(Gift),
         }}
       />
     </Tabs>

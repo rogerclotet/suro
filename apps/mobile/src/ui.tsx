@@ -1,6 +1,8 @@
+import { Plus } from "lucide-react-native";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +12,71 @@ import {
   View,
 } from "react-native";
 import { FONT, useTheme } from "./theme";
+
+export function Sheet({
+  visible,
+  onClose,
+  children,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  const t = useTheme();
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <Pressable
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
+        onPress={onClose}
+      />
+      <View
+        style={{
+          backgroundColor: t.bg,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          padding: 20,
+          paddingBottom: 36,
+          gap: 12,
+        }}
+      >
+        {children}
+      </View>
+    </Modal>
+  );
+}
+
+export function Fab({ onPress }: { onPress: () => void }) {
+  const t = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        position: "absolute",
+        right: 20,
+        bottom: 28,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: t.primary,
+        opacity: pressed ? 0.85 : 1,
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 4,
+      })}
+    >
+      <Plus color={t.onPrimary} size={28} />
+    </Pressable>
+  );
+}
 
 export function Screen({ children }: { children: ReactNode }) {
   const t = useTheme();

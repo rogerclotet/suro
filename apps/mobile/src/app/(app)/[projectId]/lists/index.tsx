@@ -4,9 +4,9 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, SectionList, View } from "react-native";
+import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Txt } from "@/ui";
+import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
 type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
 type ListWithItems = ListsResult[number];
@@ -19,11 +19,10 @@ export default function ListsOverview() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const pid = projectId as Id<"projects">;
   const lists = useQuery(api.lists.listByProject, { projectId: pid });
-  const createList = useMutation(api.lists.create);
   const toggleFavorite = useMutation(api.lists.toggleFavorite);
   const router = useRouter();
   const t = useTheme();
-  const [name, setName] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const sections = useMemo(() => {
     if (!lists) {
@@ -41,15 +40,6 @@ export default function ListsOverview() {
       },
     ].filter((section) => section.data.length > 0);
   }, [lists]);
-
-  async function addList() {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      return;
-    }
-    setName("");
-    await createList({ projectId: pid, name: trimmed });
-  }
 
   return (
     <Screen>
@@ -69,35 +59,24 @@ export default function ListsOverview() {
         <SectionList
           sections={sections}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View style={{ paddingBottom: 12, gap: 10 }}>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <View style={{ flex: 1 }}>
-                  <Field
-                    placeholder="New list…"
-                    value={name}
-                    onChangeText={setName}
-                    onSubmitEditing={addList}
-                    returnKeyType="done"
-                  />
-                </View>
-                <Button title="Add" onPress={addList} />
-              </View>
-              <View style={{ flexDirection: "row", gap: 20 }}>
-                <Pressable
-                  onPress={() => router.push(`/${pid}/lists/categories`)}
-                >
-                  <Txt style={{ color: t.primary }}>Categories</Txt>
-                </Pressable>
-                <Pressable
-                  onPress={() => router.push(`/${pid}/lists/templates`)}
-                >
-                  <Txt style={{ color: t.primary }}>Templates</Txt>
-                </Pressable>
-              </View>
+            <View style={{ flexDirection: "row", gap: 20, paddingBottom: 8 }}>
+              <Pressable
+                onPress={() => router.push(`/${pid}/lists/categories`)}
+              >
+                <Txt style={{ color: t.primary }}>Categories</Txt>
+              </Pressable>
+              <Pressable onPress={() => router.push(`/${pid}/lists/templates`)}>
+                <Txt style={{ color: t.primary }}>Templates</Txt>
+              </Pressable>
             </View>
+          }
+          ListEmptyComponent={
+            <Txt muted style={{ paddingVertical: 24, textAlign: "center" }}>
+              No lists yet. Tap + to create one.
+            </Txt>
           }
           renderSectionHeader={({ section }) => (
             <Txt
@@ -156,6 +135,109 @@ export default function ListsOverview() {
           }}
         />
       )}
+
+      <Fab onPress={() => setCreating(true)} />
+      <CreateListSheet
+        visible={creating}
+        projectId={pid}
+        onClose={() => setCreating(false)}
+      />
     </Screen>
+  );
+}
+
+function CreateListSheet({
+  visible,
+  projectId,
+  onClose,
+}: {
+  visible: boolean;
+  projectId: Id<"projects">;
+  onClose: () => void;
+}) {
+  const templates = useQuery(api.templates.listByProject, { projectId });
+  const createList = useMutation(api.lists.create);
+  const router = useRouter();
+  const t = useTheme();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  function toggleTemplate(id: Id<"listTemplates">) {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function create() {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const listId = await createList({
+        projectId,
+        name: trimmed,
+        description: description.trim() || undefined,
+        templateIds: selected.length > 0 ? selected : undefined,
+      });
+      setName("");
+      setDescription("");
+      setSelected([]);
+      onClose();
+      router.push(`/${projectId}/lists/${listId}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Sheet visible={visible} onClose={onClose}>
+      <Txt size={18} weight="700">
+        New list
+      </Txt>
+      <Field placeholder="Name" value={name} onChangeText={setName} autoFocus />
+      <Field
+        placeholder="Description (optional)"
+        value={description}
+        onChangeText={setDescription}
+      />
+      {templates && templates.length > 0 ? (
+        <>
+          <Txt muted size={13}>
+            Include templates
+          </Txt>
+          <ScrollView style={{ maxHeight: 200 }}>
+            {templates.map((template) => (
+              <View
+                key={template._id}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                  paddingVertical: 6,
+                }}
+              >
+                <Switch
+                  value={selected.includes(template._id)}
+                  onValueChange={() => toggleTemplate(template._id)}
+                  trackColor={{ true: t.primary, false: t.border }}
+                />
+                <Txt style={{ flex: 1 }}>
+                  {template.name} ({template.items.length})
+                </Txt>
+              </View>
+            ))}
+          </ScrollView>
+        </>
+      ) : null}
+      <Button
+        title={busy ? "Creating…" : "Create list"}
+        disabled={busy || name.trim().length === 0}
+        onPress={create}
+      />
+    </Sheet>
   );
 }
