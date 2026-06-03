@@ -3,10 +3,21 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Check, ChevronDown, CircleUser } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Card,
+  Fab,
+  Field,
+  HeaderButton,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
 type ListWithItems = ListsResult[number];
@@ -18,11 +29,13 @@ function isCompleted(list: ListWithItems) {
 export default function ListsOverview() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const pid = projectId as Id<"projects">;
+  const project = useQuery(api.projects.get, { projectId: pid });
   const lists = useQuery(api.lists.listByProject, { projectId: pid });
   const toggleFavorite = useMutation(api.lists.toggleFavorite);
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   const sections = useMemo(() => {
     if (!lists) {
@@ -47,9 +60,26 @@ export default function ListsOverview() {
         options={{
           title: "Lists",
           headerLeft: () => (
-            <Pressable onPress={() => router.navigate("/projects")} hitSlop={8}>
-              <Txt style={{ color: t.primary }}>Groups</Txt>
-            </Pressable>
+            <HeaderButton
+              onPress={() => setSwitching(true)}
+              accessibilityLabel="Switch group"
+            >
+              <Txt
+                numberOfLines={1}
+                style={{ color: t.primary, maxWidth: 160 }}
+              >
+                {project?.name ?? "Groups"}
+              </Txt>
+              <ChevronDown color={t.primary} size={16} />
+            </HeaderButton>
+          ),
+          headerRight: () => (
+            <HeaderButton
+              onPress={() => router.push("/profile")}
+              accessibilityLabel="Profile"
+            >
+              <CircleUser color={t.primary} size={22} />
+            </HeaderButton>
           ),
         }}
       />
@@ -136,15 +166,82 @@ export default function ListsOverview() {
         />
       )}
 
-      {/* Hide the FAB while the sheet is open so its shadow doesn't ride up
+      {/* Hide the FAB while a sheet is open so its shadow doesn't ride up
           with the slide-in drawer animation. */}
-      {!creating && <Fab onPress={() => setCreating(true)} />}
+      {!creating && !switching && <Fab onPress={() => setCreating(true)} />}
       <CreateListSheet
         visible={creating}
         projectId={pid}
         onClose={() => setCreating(false)}
       />
+      <GroupSwitcherSheet
+        visible={switching}
+        currentProjectId={pid}
+        onClose={() => setSwitching(false)}
+      />
     </Screen>
+  );
+}
+
+function GroupSwitcherSheet({
+  visible,
+  currentProjectId,
+  onClose,
+}: {
+  visible: boolean;
+  currentProjectId: Id<"projects">;
+  onClose: () => void;
+}) {
+  const groups = useQuery(api.projects.listMine);
+  const router = useRouter();
+  const t = useTheme();
+
+  function selectGroup(id: Id<"projects">) {
+    onClose();
+    if (id === currentProjectId) {
+      return;
+    }
+    // Replace (not push) so switching is lateral and the stack never grows.
+    router.replace(`/${id}/lists`);
+  }
+
+  function manageGroups() {
+    onClose();
+    router.push("/projects");
+  }
+
+  return (
+    <Sheet visible={visible} onClose={onClose}>
+      <Txt size={18} weight="700">
+        Switch group
+      </Txt>
+      {groups === undefined ? (
+        <Loading />
+      ) : (
+        <ScrollView
+          style={{ maxHeight: 320 }}
+          contentContainerStyle={{ gap: 8 }}
+        >
+          {groups.map((group) => {
+            const active = group._id === currentProjectId;
+            return (
+              <Card key={group._id} onPress={() => selectGroup(group._id)}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Txt
+                    weight={active ? "700" : "400"}
+                    style={{ flex: 1, color: active ? t.primary : t.text }}
+                  >
+                    {group.name}
+                  </Txt>
+                  {active && <Check color={t.primary} size={18} />}
+                </View>
+              </Card>
+            );
+          })}
+        </ScrollView>
+      )}
+      <Button title="Manage groups" variant="ghost" onPress={manageGroups} />
+    </Sheet>
   );
 }
 

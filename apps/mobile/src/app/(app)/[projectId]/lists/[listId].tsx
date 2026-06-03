@@ -6,7 +6,15 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, View } from "react-native";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Field,
+  HEADER_BUTTON_INSET,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type ListResult = FunctionReturnType<typeof api.lists.get>;
 type Item = ListResult["items"][number];
@@ -173,7 +181,13 @@ export default function ListDetail() {
         options={{
           title: list.name,
           headerRight: () => (
-            <View style={{ flexDirection: "row", gap: 14 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 14,
+                paddingRight: HEADER_BUTTON_INSET,
+              }}
+            >
               <Pressable
                 onPress={() => void toggleFavorite({ listId: lid })}
                 hitSlop={8}

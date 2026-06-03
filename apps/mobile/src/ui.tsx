@@ -213,6 +213,38 @@ export function Button({
   );
 }
 
+// Standard edge inset for header-bar actions. A custom headerLeft/headerRight
+// doesn't inherit the native header's inset, so each one applies it itself.
+export const HEADER_BUTTON_INSET = 16;
+
+/** A header-bar action (headerLeft/headerRight) with the standard edge inset. */
+export function HeaderButton({
+  onPress,
+  accessibilityLabel,
+  children,
+}: {
+  onPress: () => void;
+  accessibilityLabel?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: HEADER_BUTTON_INSET,
+      }}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
 export function Field({ style, ...props }: TextInputProps) {
   const t = useTheme();
   return (

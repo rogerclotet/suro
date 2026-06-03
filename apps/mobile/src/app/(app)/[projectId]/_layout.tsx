@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, useLocalSearchParams } from "expo-router";
 import {
   Calendar,
   FileText,
@@ -7,7 +7,9 @@ import {
   ListTodo,
   type LucideIcon,
 } from "lucide-react-native";
+import { useEffect } from "react";
 import type { ColorValue } from "react-native";
+import { setLastProjectId } from "@/lib/last-project";
 import { FONT, useTheme } from "@/theme";
 
 // Monochrome lucide icons, matching the PWA's section iconography.
@@ -19,6 +21,15 @@ const tabIcon =
 
 export default function ProjectTabs() {
   const t = useTheme();
+  const { projectId } = useLocalSearchParams<{ projectId: string }>();
+
+  // Remember this group so the next launch resumes here.
+  useEffect(() => {
+    if (projectId) {
+      void setLastProjectId(projectId);
+    }
+  }, [projectId]);
+
   return (
     <Tabs
       screenOptions={{

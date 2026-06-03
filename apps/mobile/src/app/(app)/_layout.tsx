@@ -19,6 +19,9 @@ export default function AppLayout() {
         headerStyle: { backgroundColor: t.bg },
         headerTitleStyle: { fontFamily: FONT, color: t.text },
         headerTintColor: t.primary,
+        // Pushed pages (Manage groups, Profile) show a bare chevron, not the
+        // stale "[projectId]" previous-route label.
+        headerBackButtonDisplayMode: "minimal",
         contentStyle: { backgroundColor: t.bg },
       }}
     >
