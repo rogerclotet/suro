@@ -136,7 +136,9 @@ export default function ListsOverview() {
         />
       )}
 
-      <Fab onPress={() => setCreating(true)} />
+      {/* Hide the FAB while the sheet is open so its shadow doesn't ride up
+          with the slide-in drawer animation. */}
+      {!creating && <Fab onPress={() => setCreating(true)} />}
       <CreateListSheet
         visible={creating}
         projectId={pid}
