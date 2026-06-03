@@ -46,7 +46,7 @@ export default function UploadButton({
           toast.error(t("shareError"));
         }}
         content={{
-          button({ ready }) {
+          button({ ready }: { ready: boolean }) {
             if (ready) {
               return (
                 <div className="flex items-center gap-2 text-nowrap font-medium text-sm">
@@ -60,7 +60,13 @@ export default function UploadButton({
               </div>
             );
           },
-          allowedContent({ ready, isUploading }) {
+          allowedContent({
+            ready,
+            isUploading,
+          }: {
+            ready: boolean;
+            isUploading: boolean;
+          }) {
             if (!ready) return tCommon("loadingEllipsis");
             if (isUploading) return t("uploading");
             return t("allowedContent");

@@ -14,8 +14,8 @@ import { notFound } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ThemeProvider } from "next-themes";
-import type { ReactNode } from "react";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
 import SidebarLayout from "@/app/_components/navigation/navigation-layout/sidebar-layout";
@@ -24,6 +24,12 @@ import ProjectsProvider from "@/app/_components/projects-provider/projects-provi
 import UserIdentifier from "@/app/_components/user-identifier";
 import { uploadFileRouter } from "@/app/api/uploadthing/core";
 import { routing } from "@/i18n/routing";
+
+// next-themes' ThemeProviderProps no longer carries `children` under React 19
+// types; re-add it without changing runtime behavior.
+const ThemeProvider = NextThemeProvider as ComponentType<
+  ComponentProps<typeof NextThemeProvider> & { children?: ReactNode }
+>;
 
 const VALIBOT_LANG: Record<string, string> = {
   ca: "ca",

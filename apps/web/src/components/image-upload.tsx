@@ -68,7 +68,13 @@ export default function ImageUpload({
             toast.error(t("imageUploadError"));
           }}
           content={{
-            button({ ready, isUploading }) {
+            button({
+              ready,
+              isUploading,
+            }: {
+              ready: boolean;
+              isUploading: boolean;
+            }) {
               if (isUploading) {
                 return (
                   <div className="flex items-center gap-2 text-nowrap text-sm">
