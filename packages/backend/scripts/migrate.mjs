@@ -63,6 +63,7 @@ const counts = {
   events: 0,
   lists: 0,
   items: 0,
+  files: 0,
 };
 
 try {
@@ -245,6 +246,52 @@ try {
       updatedAt: toMs(it.updatedAt) ?? toMs(it.createdAt) ?? Date.now(),
     });
     counts.items++;
+  }
+
+  // Files: copy each blob from Uploadthing into Convex storage, then upsert the
+  // row. Re-runs re-upload bytes (upsertFile drops the dup and keeps the
+  // existing blob). Files referencing a missing project/uploader are skipped.
+  for (const f of await sql`
+    SELECT id, name, url, type, size, "projectId", "eventId", "uploadedBy"
+    FROM "f_file"`) {
+    const projectId = projects.get(f.projectId);
+    const uploadedBy = users.get(f.uploadedBy);
+    if (!projectId || !uploadedBy) continue;
+
+    const download = await fetch(f.url);
+    if (!download.ok) {
+      console.warn(
+        `Skipping file ${f.id}: download failed (${download.status})`,
+      );
+      continue;
+    }
+    const blob = await download.blob();
+    const uploadUrl = await convex.mutation(api.migrations.generateUploadUrl, {
+      secret,
+    });
+    const upload = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": f.type },
+      body: blob,
+    });
+    if (!upload.ok) {
+      console.warn(`Skipping file ${f.id}: upload failed (${upload.status})`);
+      continue;
+    }
+    const { storageId } = await upload.json();
+
+    await convex.mutation(api.migrations.upsertFile, {
+      secret,
+      legacyId: f.id,
+      name: f.name,
+      storageId,
+      type: f.type,
+      size: f.size,
+      projectId,
+      eventId: f.eventId ? events.get(f.eventId) : undefined,
+      uploadedBy,
+    });
+    counts.files++;
   }
 
   console.log("Migration complete:", counts);

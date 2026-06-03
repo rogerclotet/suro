@@ -140,4 +140,21 @@ export default defineSchema({
   })
     .index("by_project", ["projectId"])
     .index("by_legacyId", ["legacyId"]),
+
+  // Uploaded files (images/PDFs), stored in Convex file storage. Project-scoped,
+  // optionally attached to an event (ON DELETE SET NULL — events.remove nulls
+  // eventId manually). `_creationTime` replaces the Drizzle `createdAt`.
+  files: defineTable({
+    name: v.string(),
+    storageId: v.id("_storage"),
+    type: v.string(),
+    size: v.number(),
+    projectId: v.id("projects"),
+    eventId: v.optional(v.id("events")),
+    uploadedBy: v.id("users"),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_event", ["eventId"])
+    .index("by_legacyId", ["legacyId"]),
 });

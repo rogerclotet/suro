@@ -226,3 +226,43 @@ export const upsertItem = mutation({
     return ctx.db.insert("listItems", data);
   },
 });
+
+/** Upload slot for copying file bytes from Uploadthing into Convex storage. */
+export const generateUploadUrl = mutation({
+  args: { secret: v.string() },
+  handler: async (ctx, { secret }): Promise<string> => {
+    assertSecret(secret);
+    return ctx.storage.generateUploadUrl();
+  },
+});
+
+export const upsertFile = mutation({
+  args: {
+    secret: v.string(),
+    legacyId: v.string(),
+    name: v.string(),
+    storageId: v.id("_storage"),
+    type: v.string(),
+    size: v.number(),
+    projectId: v.id("projects"),
+    eventId: v.optional(v.id("events")),
+    uploadedBy: v.id("users"),
+  },
+  handler: async (ctx, { secret, ...data }): Promise<Id<"files">> => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("files")
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .unique();
+    if (existing) {
+      // Re-run: drop the freshly-uploaded blob and keep the existing row's.
+      await ctx.storage.delete(data.storageId);
+      await ctx.db.patch(existing._id, {
+        ...data,
+        storageId: existing.storageId,
+      });
+      return existing._id;
+    }
+    return ctx.db.insert("files", data);
+  },
+});

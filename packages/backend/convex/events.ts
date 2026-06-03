@@ -121,13 +121,21 @@ export const remove = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event } = await requireEventAccess(ctx, eventId);
-    // Mirror lists.eventId's ON DELETE SET NULL: unlink any linked lists.
+    // Mirror ON DELETE SET NULL for the things that point at this event:
+    // unlink any linked lists and detach any attached files (they survive).
     const linkedLists = await ctx.db
       .query("lists")
       .withIndex("by_event", (q) => q.eq("eventId", event._id))
       .collect();
     for (const list of linkedLists) {
       await ctx.db.patch(list._id, { eventId: undefined });
+    }
+    const attachedFiles = await ctx.db
+      .query("files")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+    for (const file of attachedFiles) {
+      await ctx.db.patch(file._id, { eventId: undefined });
     }
     await ctx.db.delete(event._id);
     return null;

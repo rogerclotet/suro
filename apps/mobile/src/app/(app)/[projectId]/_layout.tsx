@@ -2,6 +2,7 @@ import { Tabs, useLocalSearchParams } from "expo-router";
 import {
   Calendar,
   FileText,
+  FolderOpen,
   Gift,
   HandCoins,
   ListTodo,
@@ -50,6 +51,14 @@ export default function ProjectTabs() {
       <Tabs.Screen
         name="calendar"
         options={{ title: "Calendar", tabBarIcon: tabIcon(Calendar) }}
+      />
+      <Tabs.Screen
+        name="files"
+        options={{
+          title: "Files",
+          headerShown: true,
+          tabBarIcon: tabIcon(FolderOpen),
+        }}
       />
       <Tabs.Screen
         name="notes"

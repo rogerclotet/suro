@@ -3,11 +3,13 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ListTodo, Share2 } from "lucide-react-native";
+import { Folders, ListTodo, Share2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
+import { FileList } from "@/components/file-list";
+import { UploadButton } from "@/components/upload-button";
 import { formatTimeRange, formatTimeRemaining } from "@/lib/event-dates";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
@@ -27,6 +29,7 @@ export default function EventDetail() {
   const router = useRouter();
 
   const event = useQuery(api.events.get, { eventId: eid });
+  const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
   const updateEvent = useMutation(api.events.update);
   const removeEvent = useMutation(api.events.remove);
   const createLinkedList = useMutation(api.events.createLinkedList);
@@ -147,6 +150,33 @@ export default function EventDetail() {
             />
           </View>
         ) : null}
+
+        <View style={{ gap: 8 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <Folders color={t.text} size={18} />
+              <Txt size={16} weight="700">
+                Files
+              </Txt>
+            </View>
+            <UploadButton projectId={pid} eventId={eid} />
+          </View>
+          {eventFiles && eventFiles.length > 0 ? (
+            <FileList files={eventFiles} />
+          ) : (
+            <Txt muted size={13}>
+              No files attached.
+            </Txt>
+          )}
+        </View>
       </ScrollView>
 
       <EventForm

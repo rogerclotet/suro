@@ -81,6 +81,22 @@ export async function requireEventAccess(ctx: QueryCtx, eventId: Id<"events">) {
 }
 
 /**
+ * Ports requireOwnedFile: only the uploader may rename/delete a file. The opaque
+ * "not found" (rather than "forbidden") matches the Next.js owner check.
+ */
+export async function requireFileOwner(ctx: QueryCtx, fileId: Id<"files">) {
+  const file = await ctx.db.get(fileId);
+  if (file === null) {
+    throw new Error("File not found");
+  }
+  const userId = await requireUserId(ctx);
+  if (file.uploadedBy !== userId) {
+    throw new Error("File not found");
+  }
+  return { file, userId };
+}
+
+/**
  * Ports getProjectCategoryId: a category id only "counts" if it belongs to the
  * project; otherwise it's silently dropped (never throws), so stale/foreign
  * category references degrade to "no category" instead of failing the write.
