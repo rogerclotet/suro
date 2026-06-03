@@ -1,13 +1,13 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # generated from CHANGELOG.md by scripts/generate-changelog.mjs
-/src/data/changelog.generated.ts
+apps/web/src/data/changelog.generated.ts
 
 # database
 /prisma/db.sqlite
@@ -15,8 +15,8 @@
 db.sqlite
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 next-env.d.ts
 
 # production

@@ -94,8 +94,8 @@ deploy:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/deploy.sh
-    - scripts/deploy.sh
+    - chmod +x apps/web/scripts/deploy.sh
+    - apps/web/scripts/deploy.sh
   only:
     - main
 
@@ -106,8 +106,8 @@ deploy_preview:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/deploy-preview.sh
-    - scripts/deploy-preview.sh
+    - chmod +x apps/web/scripts/deploy-preview.sh
+    - apps/web/scripts/deploy-preview.sh
   environment:
     name: review/mr-$CI_MERGE_REQUEST_IID
     url: https://mr-$CI_MERGE_REQUEST_IID.suro.clotet.dev
@@ -122,8 +122,8 @@ stop_preview:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/teardown-preview.sh
-    - scripts/teardown-preview.sh
+    - chmod +x apps/web/scripts/teardown-preview.sh
+    - apps/web/scripts/teardown-preview.sh
   environment:
     name: review/mr-$CI_MERGE_REQUEST_IID
     action: stop

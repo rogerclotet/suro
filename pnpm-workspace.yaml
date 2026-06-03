@@ -1,0 +1,18 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Moved here from the root package.json "pnpm" field — pnpm 10.26+ reads these
+# from the workspace manifest, not package.json.
+overrides:
+  "@types/react": 19.2.14
+  "@types/react-dom": 19.2.3
+
+onlyBuiltDependencies:
+  - "@napi-rs/canvas"
+  - "@posthog/cli"
+  - core-js
+  - esbuild
+  - msgpackr-extract
+  - sharp
+  - unrs-resolver

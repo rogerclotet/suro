@@ -1,3 +1,4 @@
+import path from "node:path";
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -32,6 +33,10 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  // pnpm monorepo: trace from the repo root so the standalone bundle includes
+  // workspace-hoisted deps. Without this, Next guesses the app dir and the
+  // standalone server is missing modules at runtime.
+  outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
   experimental: {
     // Restore pre-v15 Router Cache duration for dynamic routes.
     // Next.js 15+ defaults to 0 (every navigation refetches from server).
