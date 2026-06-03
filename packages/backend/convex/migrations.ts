@@ -145,6 +145,34 @@ export const upsertTemplate = mutation({
   },
 });
 
+export const upsertEvent = mutation({
+  args: {
+    secret: v.string(),
+    legacyId: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    startAt: v.number(),
+    endAt: v.number(),
+    allDay: v.boolean(),
+    projectId: v.id("projects"),
+    createdBy: v.id("users"),
+    updatedBy: v.optional(v.id("users")),
+    updatedAt: v.number(),
+  },
+  handler: async (ctx, { secret, ...data }): Promise<Id<"events">> => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, data);
+      return existing._id;
+    }
+    return ctx.db.insert("events", data);
+  },
+});
+
 export const upsertList = mutation({
   args: {
     secret: v.string(),
@@ -153,6 +181,7 @@ export const upsertList = mutation({
     description: v.optional(v.string()),
     projectId: v.id("projects"),
     favorite: v.boolean(),
+    eventId: v.optional(v.id("events")),
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),

@@ -4,7 +4,8 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, SectionList, View } from "react-native";
+import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
+import { CategoryPicker } from "@/components/category-picker";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -52,6 +53,7 @@ export default function ListDetail() {
   const categories = useQuery(api.categories.listByProject, { projectId: pid });
   const createItem = useMutation(api.listItems.create);
   const removeItem = useMutation(api.listItems.remove);
+  const createCategory = useMutation(api.categories.create);
   const toggleFavorite = useMutation(api.lists.toggleFavorite);
   const updateList = useMutation(api.lists.update);
   const removeList = useMutation(api.lists.remove);
@@ -78,6 +80,7 @@ export default function ListDetail() {
   );
 
   const [name, setName] = useState("");
+  const [addCategory, setAddCategory] = useState<Id<"categories"> | null>(null);
   const [editing, setEditing] = useState<Item | null>(null);
   const [editName, setEditName] = useState("");
   const [editDetails, setEditDetails] = useState("");
@@ -85,6 +88,7 @@ export default function ListDetail() {
     null,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [listDescription, setListDescription] = useState("");
 
@@ -93,13 +97,18 @@ export default function ListDetail() {
     [list],
   );
 
+  async function onCreateCategory(categoryName: string) {
+    return createCategory({ projectId: pid, name: categoryName });
+  }
+
   async function addItem() {
     const trimmed = name.trim();
     if (!trimmed) {
       return;
     }
     setName("");
-    await createItem({ listId: lid, name: trimmed });
+    // Keep the chosen category so adding several items to it stays quick.
+    await createItem({ listId: lid, name: trimmed, categoryId: addCategory });
   }
 
   function toggle(item: Item) {
@@ -213,17 +222,27 @@ export default function ListDetail() {
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View style={{ flexDirection: "row", gap: 8, paddingBottom: 12 }}>
-            <View style={{ flex: 1 }}>
-              <Field
-                placeholder="Add an item…"
-                value={name}
-                onChangeText={setName}
-                onSubmitEditing={addItem}
-                returnKeyType="done"
-              />
+          <View style={{ gap: 8, paddingBottom: 12 }}>
+            <Field
+              placeholder="Add an item…"
+              value={name}
+              onChangeText={setName}
+              onSubmitEditing={addItem}
+              returnKeyType="done"
+            />
+            <View
+              style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}
+            >
+              <View style={{ flex: 1 }}>
+                <CategoryPicker
+                  categories={categories ?? []}
+                  value={addCategory}
+                  onChange={setAddCategory}
+                  onCreate={onCreateCategory}
+                />
+              </View>
+              <Button title="Add" onPress={addItem} />
             </View>
-            <Button title="Add" onPress={addItem} />
           </View>
         }
         ListEmptyComponent={
@@ -296,6 +315,7 @@ export default function ListDetail() {
         onChangeName={setEditName}
         onChangeDetails={setEditDetails}
         onChangeCategory={setEditCategory}
+        onCreateCategory={onCreateCategory}
         onSave={saveEdit}
         onDelete={deleteEditingItem}
         onClose={() => setEditing(null)}
@@ -308,12 +328,23 @@ export default function ListDetail() {
         onChangeName={setListName}
         onChangeDescription={setListDescription}
         onSave={saveSettings}
+        onImportTemplates={() => {
+          setSettingsOpen(false);
+          setImportOpen(true);
+        }}
         onClearCompleted={async () => {
           setSettingsOpen(false);
           await clearCompleted({ listId: lid });
         }}
         onDelete={handleDeleteList}
         onClose={() => setSettingsOpen(false)}
+      />
+
+      <ImportTemplatesSheet
+        visible={importOpen}
+        projectId={pid}
+        listId={lid}
+        onClose={() => setImportOpen(false)}
       />
     </Screen>
   );
@@ -328,6 +359,7 @@ function EditItemSheet({
   onChangeName,
   onChangeDetails,
   onChangeCategory,
+  onCreateCategory,
   onSave,
   onDelete,
   onClose,
@@ -340,6 +372,7 @@ function EditItemSheet({
   onChangeName: (value: string) => void;
   onChangeDetails: (value: string) => void;
   onChangeCategory: (value: Id<"categories"> | null) => void;
+  onCreateCategory: (name: string) => Promise<Id<"categories">>;
   onSave: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -355,25 +388,12 @@ function EditItemSheet({
         value={details}
         onChangeText={onChangeDetails}
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
-      >
-        <CategoryChip
-          label="None"
-          active={categoryId === null}
-          onPress={() => onChangeCategory(null)}
-        />
-        {categories.map((category) => (
-          <CategoryChip
-            key={category._id}
-            label={category.name}
-            active={categoryId === category._id}
-            onPress={() => onChangeCategory(category._id)}
-          />
-        ))}
-      </ScrollView>
+      <CategoryPicker
+        categories={categories}
+        value={categoryId}
+        onChange={onChangeCategory}
+        onCreate={onCreateCategory}
+      />
       <Button title="Save" onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
         <Txt style={{ textAlign: "center", color: "#e64553" }}>Delete item</Txt>
@@ -389,6 +409,7 @@ function SettingsSheet({
   onChangeName,
   onChangeDescription,
   onSave,
+  onImportTemplates,
   onClearCompleted,
   onDelete,
   onClose,
@@ -399,6 +420,7 @@ function SettingsSheet({
   onChangeName: (value: string) => void;
   onChangeDescription: (value: string) => void;
   onSave: () => void;
+  onImportTemplates: () => void;
   onClearCompleted: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -416,6 +438,11 @@ function SettingsSheet({
       />
       <Button title="Save" onPress={onSave} />
       <Button
+        title="Import templates"
+        variant="ghost"
+        onPress={onImportTemplates}
+      />
+      <Button
         title="Clear completed items"
         variant="ghost"
         onPress={onClearCompleted}
@@ -427,31 +454,87 @@ function SettingsSheet({
   );
 }
 
-function CategoryChip({
-  label,
-  active,
-  onPress,
+function ImportTemplatesSheet({
+  visible,
+  projectId,
+  listId,
+  onClose,
 }: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
+  visible: boolean;
+  projectId: Id<"projects">;
+  listId: Id<"lists">;
+  onClose: () => void;
 }) {
+  const templates = useQuery(api.templates.listByProject, { projectId });
+  const importTemplates = useMutation(api.lists.importTemplates);
   const t = useTheme();
+  const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  function toggle(id: Id<"listTemplates">) {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function submit() {
+    if (selected.length === 0) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await importTemplates({ listId, templateIds: selected });
+      setSelected([]);
+      onClose();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: active ? t.primary : t.border,
-        backgroundColor: active ? t.primary : "transparent",
+    <Sheet
+      visible={visible}
+      onClose={() => {
+        setSelected([]);
+        onClose();
       }}
     >
-      <Txt size={14} style={{ color: active ? t.onPrimary : t.text }}>
-        {label}
+      <Txt size={18} weight="700">
+        Import templates
       </Txt>
-    </Pressable>
+      {templates && templates.length > 0 ? (
+        <ScrollView style={{ maxHeight: 260 }}>
+          {templates.map((template) => (
+            <View
+              key={template._id}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingVertical: 6,
+              }}
+            >
+              <Switch
+                value={selected.includes(template._id)}
+                onValueChange={() => toggle(template._id)}
+                trackColor={{ true: t.primary, false: t.border }}
+              />
+              <Txt style={{ flex: 1 }}>
+                {template.name} ({template.items.length})
+              </Txt>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <Txt muted style={{ paddingVertical: 8 }}>
+          No templates yet.
+        </Txt>
+      )}
+      <Button
+        title={busy ? "Importing…" : "Import selected"}
+        disabled={busy || selected.length === 0}
+        onPress={submit}
+      />
+    </Sheet>
   );
 }

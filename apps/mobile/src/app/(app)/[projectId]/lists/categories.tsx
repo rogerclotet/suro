@@ -3,14 +3,16 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { Alert, FlatList, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
 
 export default function Categories() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const pid = projectId as Id<"projects">;
-  const categories = useQuery(api.categories.listByProject, { projectId: pid });
+  const categories = useQuery(api.categories.listWithCounts, {
+    projectId: pid,
+  });
   const create = useMutation(api.categories.create);
   const update = useMutation(api.categories.update);
   const remove = useMutation(api.categories.remove);
@@ -38,6 +40,21 @@ export default function Categories() {
     await update({ categoryId, name: trimmed });
   }
 
+  function confirmDelete(categoryId: Id<"categories">, categoryName: string) {
+    Alert.alert(
+      "Delete category",
+      `Delete "${categoryName}"? This can't be undone, and its items will become uncategorized.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => void remove({ categoryId }),
+        },
+      ],
+    );
+  }
+
   return (
     <Screen>
       <Stack.Screen options={{ title: "Categories" }} />
@@ -48,6 +65,7 @@ export default function Categories() {
           data={categories}
           keyExtractor={(category) => category._id}
           contentContainerStyle={{ padding: 16 }}
+          keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <View style={{ flexDirection: "row", gap: 8, paddingBottom: 12 }}>
               <View style={{ flex: 1 }}>
@@ -107,9 +125,12 @@ export default function Categories() {
                   }}
                 >
                   <Txt size={16}>{item.name}</Txt>
+                  <Txt muted size={13}>
+                    {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
+                  </Txt>
                 </Pressable>
                 <Pressable
-                  onPress={() => void remove({ categoryId: item._id })}
+                  onPress={() => confirmDelete(item._id, item.name)}
                   hitSlop={8}
                   style={{ padding: 6 }}
                 >

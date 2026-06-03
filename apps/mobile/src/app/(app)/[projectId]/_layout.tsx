@@ -49,11 +49,7 @@ export default function ProjectTabs() {
       />
       <Tabs.Screen
         name="calendar"
-        options={{
-          title: "Calendar",
-          headerShown: true,
-          tabBarIcon: tabIcon(Calendar),
-        }}
+        options={{ title: "Calendar", tabBarIcon: tabIcon(Calendar) }}
       />
       <Tabs.Screen
         name="notes"

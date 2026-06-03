@@ -1,0 +1,265 @@
+import { v } from "convex/values";
+import type { Doc, Id } from "./_generated/dataModel";
+import { internalQuery, mutation, query } from "./_generated/server";
+import { loadListWithItems } from "./model/lists";
+import {
+  requireEventAccess,
+  requireListAccess,
+  requireProjectMember,
+} from "./model/permissions";
+
+/** Adds a UTC day to an all-day event's end so the half-open range still
+ * overlaps the final day — mirrors the Drizzle app's createEvent/editEvent. */
+const DAY_MS = 86_400_000;
+function normalizeEnd(endAt: number, allDay: boolean): number {
+  return allDay ? endAt + DAY_MS : endAt;
+}
+
+export const listByRange = query({
+  args: {
+    projectId: v.id("projects"),
+    from: v.number(),
+    to: v.number(),
+  },
+  handler: async (ctx, { projectId, from, to }) => {
+    await requireProjectMember(ctx, projectId);
+    // Bound the scan by startAt <= window end, then keep events whose end is at
+    // or after the window start (overlap test, like the Postgres query).
+    const candidates = await ctx.db
+      .query("events")
+      .withIndex("by_project_start", (q) =>
+        q.eq("projectId", projectId).lte("startAt", to),
+      )
+      .collect();
+    return candidates
+      .filter((event) => event.endAt >= from)
+      .sort((a, b) => a.startAt - b.startAt);
+  },
+});
+
+/** The event plus its linked list (with items), or null. */
+export const get = query({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    const linkedList = await ctx.db
+      .query("lists")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .first();
+    return {
+      ...event,
+      list: linkedList ? await loadListWithItems(ctx, linkedList) : null,
+    };
+  },
+});
+
+export const create = mutation({
+  args: {
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    startAt: v.number(),
+    endAt: v.number(),
+    allDay: v.boolean(),
+  },
+  handler: async (
+    ctx,
+    { projectId, name, description, startAt, endAt, allDay },
+  ) => {
+    const userId = await requireProjectMember(ctx, projectId);
+    const trimmed = name.trim();
+    if (trimmed === "") {
+      throw new Error("Event name is required");
+    }
+    return ctx.db.insert("events", {
+      name: trimmed,
+      description: (description ?? "").trim() || undefined,
+      startAt,
+      endAt: normalizeEnd(endAt, allDay),
+      allDay,
+      projectId,
+      createdBy: userId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const update = mutation({
+  args: {
+    eventId: v.id("events"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    startAt: v.number(),
+    endAt: v.number(),
+    allDay: v.boolean(),
+  },
+  handler: async (
+    ctx,
+    { eventId, name, description, startAt, endAt, allDay },
+  ) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    const trimmed = name.trim();
+    if (trimmed === "") {
+      throw new Error("Event name is required");
+    }
+    // Unlike the Drizzle editEvent (which never wrote allDay — a latent bug),
+    // we persist allDay so the stored flag and the times stay consistent.
+    await ctx.db.patch(event._id, {
+      name: trimmed,
+      description: (description ?? "").trim() || undefined,
+      startAt,
+      endAt: normalizeEnd(endAt, allDay),
+      allDay,
+      updatedBy: userId,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+export const remove = mutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    // Mirror lists.eventId's ON DELETE SET NULL: unlink any linked lists.
+    const linkedLists = await ctx.db
+      .query("lists")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+    for (const list of linkedLists) {
+      await ctx.db.patch(list._id, { eventId: undefined });
+    }
+    await ctx.db.delete(event._id);
+    return null;
+  },
+});
+
+/** Create a fresh list already linked to the event (ports createLinkedList). */
+export const createLinkedList = mutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    return ctx.db.insert("lists", {
+      name: event.name,
+      description: `List for ${event.name}`,
+      projectId: event.projectId,
+      favorite: false,
+      eventId: event._id,
+      createdBy: userId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Link an existing list (same project) to the event (ports linkEventList). */
+export const linkList = mutation({
+  args: { eventId: v.id("events"), listId: v.id("lists") },
+  handler: async (ctx, { eventId, listId }) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    const { list } = await requireListAccess(ctx, listId);
+    if (list.projectId !== event.projectId) {
+      throw new Error("List and event are not in the same project");
+    }
+    await ctx.db.patch(list._id, { eventId: event._id, updatedBy: userId });
+    return null;
+  },
+});
+
+export const unlinkList = mutation({
+  args: { eventId: v.id("events"), listId: v.id("lists") },
+  handler: async (ctx, { eventId, listId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    const { list } = await requireListAccess(ctx, listId);
+    if (list.eventId !== event._id) {
+      throw new Error("List is not linked to the event");
+    }
+    await ctx.db.patch(list._id, { eventId: undefined });
+    return null;
+  },
+});
+
+/**
+ * Return (lazily creating) the project's secret calendar-feed token. The token
+ * gates the public `.ics` HTTP endpoint — distinct from inviteToken. Idempotent.
+ */
+export const getOrCreateCalendarToken = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const project = await ctx.db.get(projectId);
+    if (project === null) {
+      throw new Error("Project not found");
+    }
+    if (project.calendarToken) {
+      return project.calendarToken;
+    }
+    const token = crypto.randomUUID().replace(/-/g, "");
+    await ctx.db.patch(projectId, { calendarToken: token });
+    return token;
+  },
+});
+
+/**
+ * Token-gated data for the `.ics` feed (internal — only the http.ts route calls
+ * this, with the secret token as the gate; no session auth). Returns null for a
+ * missing/mismatched token. Events, organizer-per-event, and member attendees
+ * mirror the PWA's getEventsToExport.
+ */
+export const exportData = internalQuery({
+  args: { projectId: v.id("projects"), token: v.string() },
+  handler: async (ctx, { projectId, token }) => {
+    if (token === "") {
+      return null;
+    }
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_calendarToken", (q) => q.eq("calendarToken", token))
+      .unique();
+    if (project === null || project._id !== projectId) {
+      return null;
+    }
+
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+
+    const userCache = new Map<Id<"users">, Doc<"users"> | null>();
+    async function loadUser(id: Id<"users">) {
+      if (!userCache.has(id)) {
+        userCache.set(id, await ctx.db.get(id));
+      }
+      return userCache.get(id) ?? null;
+    }
+
+    const organizers: {
+      eventId: Id<"events">;
+      name?: string;
+      email: string;
+    }[] = [];
+    for (const event of events) {
+      const creator = await loadUser(event.createdBy);
+      if (creator?.email) {
+        organizers.push({
+          eventId: event._id,
+          name: creator.name,
+          email: creator.email,
+        });
+      }
+    }
+
+    const members = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const attendees: { name?: string; email: string }[] = [];
+    for (const member of members) {
+      const user = await loadUser(member.userId);
+      if (user?.email) {
+        attendees.push({ name: user.name, email: user.email });
+      }
+    }
+
+    return { calendarName: project.name, events, organizers, attendees };
+  },
+});

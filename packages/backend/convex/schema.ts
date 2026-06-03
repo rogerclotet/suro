@@ -3,11 +3,10 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 /**
- * Convex schema for the Lists slice + its foundations (users, projects/groups,
- * membership). Translated from the Drizzle `f_*` tables. Document `_id`s replace
- * the cuid/uuid foreign keys, and the `f_projectToUser` composite-PK join
- * becomes the `projectMembers` table. `lists.eventId` is intentionally omitted
- * until the events slice lands (Convex makes adding an optional field trivial).
+ * Convex schema for the Lists + Calendar slices and their foundations (users,
+ * projects/groups, membership). Translated from the Drizzle `f_*` tables.
+ * Document `_id`s replace the cuid/uuid foreign keys, and the `f_projectToUser`
+ * composite-PK join becomes the `projectMembers` table.
  */
 export default defineSchema({
   // @convex-dev/auth tables (authSessions, authAccounts, ...). We redefine
@@ -44,10 +43,14 @@ export default defineSchema({
     image: v.optional(v.string()),
     color: v.string(),
     features: v.object({ secretSanta: v.boolean() }),
+    // Secret that gates the public .ics calendar feed (lazily generated).
+    // Distinct from inviteToken (which joins the group) — never conflate them.
+    calendarToken: v.optional(v.string()),
     legacyId: v.optional(v.string()),
   })
     .index("by_inviteToken", ["inviteToken"])
     .index("by_createdBy", ["createdBy"])
+    .index("by_calendarToken", ["calendarToken"])
     .index("by_legacyId", ["legacyId"]),
 
   // Many-to-many membership (replaces f_projectToUser).
@@ -67,11 +70,34 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     .index("by_legacyId", ["legacyId"]),
 
+  // Calendar events. `startAt`/`endAt` are epoch ms. All-day events store
+  // `endAt` as (last day + 1 day) — same convention as the Drizzle app — so the
+  // half-open range still overlaps the final day; UIs subtract a day to display.
+  events: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    startAt: v.number(),
+    endAt: v.number(),
+    allDay: v.boolean(),
+    projectId: v.id("projects"),
+    createdBy: v.id("users"),
+    updatedBy: v.optional(v.id("users")),
+    updatedAt: v.number(),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    // Range scan by start within a project (startAt <= window end).
+    .index("by_project_start", ["projectId", "startAt"])
+    .index("by_legacyId", ["legacyId"]),
+
   lists: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
     projectId: v.id("projects"),
     favorite: v.boolean(),
+    // Optional backlink to a calendar event (ON DELETE SET NULL in the Drizzle
+    // app — events.remove nulls this manually since Convex has no cascades).
+    eventId: v.optional(v.id("events")),
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
@@ -80,6 +106,7 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     // Pre-sorted overview (updatedAt desc) without an in-memory sort.
     .index("by_project_updatedAt", ["projectId", "updatedAt"])
+    .index("by_event", ["eventId"])
     .index("by_legacyId", ["legacyId"]),
 
   listItems: defineTable({

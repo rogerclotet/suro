@@ -71,6 +71,15 @@ export async function requireTemplateAccess(
   return { template, userId };
 }
 
+export async function requireEventAccess(ctx: QueryCtx, eventId: Id<"events">) {
+  const event = await ctx.db.get(eventId);
+  if (event === null) {
+    throw new Error("Event not found");
+  }
+  const userId = await requireProjectMember(ctx, event.projectId);
+  return { event, userId };
+}
+
 /**
  * Ports getProjectCategoryId: a category id only "counts" if it belongs to the
  * project; otherwise it's silently dropped (never throws), so stale/foreign

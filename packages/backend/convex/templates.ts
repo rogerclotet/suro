@@ -86,3 +86,28 @@ export const remove = mutation({
     return null;
   },
 });
+
+/**
+ * Copy a template into another project the user belongs to (ports exportTemplate).
+ * Item category ids are copied verbatim; since they belong to the source
+ * project, they won't resolve in the target and degrade to "no category" at
+ * instantiation — matching the PWA's lossy export.
+ */
+export const exportToProject = mutation({
+  args: {
+    templateId: v.id("listTemplates"),
+    targetProjectId: v.id("projects"),
+  },
+  handler: async (ctx, { templateId, targetProjectId }) => {
+    const { template, userId } = await requireTemplateAccess(ctx, templateId);
+    await requireProjectMember(ctx, targetProjectId);
+    return ctx.db.insert("listTemplates", {
+      name: template.name,
+      description: template.description,
+      items: template.items,
+      projectId: targetProjectId,
+      createdBy: userId,
+      updatedAt: Date.now(),
+    });
+  },
+});

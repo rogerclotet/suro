@@ -5,14 +5,42 @@ import {
   requireProjectMember,
 } from "./model/permissions";
 
+/** Project categories, sorted by name (mirrors the PWA's alphabetical order). */
 export const listByProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
     await requireProjectMember(ctx, projectId);
-    return ctx.db
+    const categories = await ctx.db
       .query("categories")
       .withIndex("by_project", (q) => q.eq("projectId", projectId))
       .collect();
+    return categories.sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
+/**
+ * Same as listByProject, but each category carries its `itemCount` — used by the
+ * management screen, which shows "N items" per category (ported from
+ * getCategories' `items: { id }[]` projection).
+ */
+export const listWithCounts = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const categories = await ctx.db
+      .query("categories")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const withCounts = await Promise.all(
+      categories.map(async (category) => {
+        const items = await ctx.db
+          .query("listItems")
+          .withIndex("by_category", (q) => q.eq("categoryId", category._id))
+          .collect();
+        return { ...category, itemCount: items.length };
+      }),
+    );
+    return withCounts.sort((a, b) => a.name.localeCompare(b.name));
   },
 });
 

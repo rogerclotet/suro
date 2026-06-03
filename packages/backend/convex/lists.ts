@@ -20,7 +20,10 @@ export const get = query({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
     const { list } = await requireListAccess(ctx, listId);
-    return loadListWithItems(ctx, list);
+    const withItems = await loadListWithItems(ctx, list);
+    // Surface the linked calendar event (if any) for the detail backlink.
+    const event = list.eventId ? await ctx.db.get(list.eventId) : null;
+    return { ...withItems, event };
   },
 });
 
@@ -62,6 +65,38 @@ export const create = mutation({
     }
 
     return listId;
+  },
+});
+
+/**
+ * Append the items of the selected templates to an existing list (ports
+ * importTemplates). Categories are re-resolved within the list's project, so
+ * cross-project ids degrade to "no category" — same as create()'s seeding.
+ */
+export const importTemplates = mutation({
+  args: {
+    listId: v.id("lists"),
+    templateIds: v.array(v.id("listTemplates")),
+  },
+  handler: async (ctx, { listId, templateIds }) => {
+    const { list, userId } = await requireListAccess(ctx, listId);
+    const items = await instantiateTemplateItems(
+      ctx,
+      list.projectId,
+      templateIds,
+    );
+    const now = Date.now();
+    for (const item of items) {
+      await ctx.db.insert("listItems", {
+        name: item.name,
+        completed: false,
+        listId: list._id,
+        categoryId: item.categoryId,
+        createdBy: userId,
+        updatedAt: now,
+      });
+    }
+    return null;
   },
 });
 

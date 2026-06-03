@@ -15,8 +15,8 @@
  *   node scripts/migrate.mjs
  *
  * Migrates in FK order and remaps every foreign key (including the category ids
- * embedded in template item JSON) from Postgres ids to Convex ids.
- * `lists.eventId` is skipped until the events slice migrates events.
+ * embedded in template item JSON and `lists.eventId`) from Postgres ids to
+ * Convex ids.
  *
  * Users are seeded by email with NO auth account — Convex Auth links to them on
  * first sign-in, so existing logins keep their groups. Verify with a real
@@ -60,6 +60,7 @@ const counts = {
   members: 0,
   categories: 0,
   templates: 0,
+  events: 0,
   lists: 0,
   items: 0,
 };
@@ -164,11 +165,46 @@ try {
     counts.templates++;
   }
 
+  // Events before lists, so lists.eventId can be remapped to a Convex id.
+  /** @type {Map<string, string>} */
+  const events = new Map();
+  for (const e of await sql`
+    SELECT id, name, description, "startAt", "endAt", "allDay", "projectId",
+           "createdBy", "updatedBy", "updatedAt", "createdAt"
+    FROM "f_event"`) {
+    const projectId = projects.get(e.projectId);
+    const createdBy = users.get(e.createdBy);
+    const startAt = toMs(e.startAt);
+    const endAt = toMs(e.endAt);
+    if (
+      !projectId ||
+      !createdBy ||
+      startAt === undefined ||
+      endAt === undefined
+    )
+      continue;
+    const id = await convex.mutation(api.migrations.upsertEvent, {
+      secret,
+      legacyId: e.id,
+      name: e.name,
+      description: e.description ?? undefined,
+      startAt,
+      endAt,
+      allDay: e.allDay ?? false,
+      projectId,
+      createdBy,
+      updatedBy: e.updatedBy ? users.get(e.updatedBy) : undefined,
+      updatedAt: toMs(e.updatedAt) ?? toMs(e.createdAt) ?? Date.now(),
+    });
+    events.set(e.id, id);
+    counts.events++;
+  }
+
   /** @type {Map<string, string>} */
   const lists = new Map();
   for (const l of await sql`
-    SELECT id, name, description, "projectId", "createdBy", "updatedBy",
-           "updatedAt", "createdAt", favorite
+    SELECT id, name, description, "projectId", "eventId", "createdBy",
+           "updatedBy", "updatedAt", "createdAt", favorite
     FROM "f_list"`) {
     const projectId = projects.get(l.projectId);
     const createdBy = users.get(l.createdBy);
@@ -180,6 +216,7 @@ try {
       description: l.description ?? "",
       projectId,
       favorite: l.favorite ?? false,
+      eventId: l.eventId ? events.get(l.eventId) : undefined,
       createdBy,
       updatedBy: l.updatedBy ? users.get(l.updatedBy) : undefined,
       updatedAt: toMs(l.updatedAt) ?? toMs(l.createdAt) ?? Date.now(),
