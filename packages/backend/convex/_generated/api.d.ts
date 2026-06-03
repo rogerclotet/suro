@@ -17,7 +17,9 @@ import type * as model_auth from "../model/auth.js";
 import type * as model_colors from "../model/colors.js";
 import type * as model_lists from "../model/lists.js";
 import type * as model_permissions from "../model/permissions.js";
+import type * as projects from "../projects.js";
 import type * as templates from "../templates.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -35,7 +37,9 @@ declare const fullApi: ApiFromModules<{
   "model/colors": typeof model_colors;
   "model/lists": typeof model_lists;
   "model/permissions": typeof model_permissions;
+  projects: typeof projects;
   templates: typeof templates;
+  users: typeof users;
 }>;
 
 /**
