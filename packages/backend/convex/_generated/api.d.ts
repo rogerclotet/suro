@@ -13,6 +13,7 @@ import type * as categories from "../categories.js";
 import type * as http from "../http.js";
 import type * as listItems from "../listItems.js";
 import type * as lists from "../lists.js";
+import type * as migrations from "../migrations.js";
 import type * as model_auth from "../model/auth.js";
 import type * as model_colors from "../model/colors.js";
 import type * as model_lists from "../model/lists.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   listItems: typeof listItems;
   lists: typeof lists;
+  migrations: typeof migrations;
   "model/auth": typeof model_auth;
   "model/colors": typeof model_colors;
   "model/lists": typeof model_lists;

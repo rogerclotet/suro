@@ -29,7 +29,12 @@ export default defineSchema({
     dateLocale: v.optional(v.string()),
     locale: v.optional(v.string()),
     onboardingCompleted: v.optional(v.boolean()),
-  }).index("email", ["email"]),
+    // Temporary: source Postgres id, for idempotent migration + FK remapping.
+    // Drop (field + by_legacyId indexes + convex/migrations.ts) after cutover.
+    legacyId: v.optional(v.string()),
+  })
+    .index("email", ["email"])
+    .index("by_legacyId", ["legacyId"]),
 
   projects: defineTable({
     name: v.string(),
@@ -39,9 +44,11 @@ export default defineSchema({
     image: v.optional(v.string()),
     color: v.string(),
     features: v.object({ secretSanta: v.boolean() }),
+    legacyId: v.optional(v.string()),
   })
     .index("by_inviteToken", ["inviteToken"])
-    .index("by_createdBy", ["createdBy"]),
+    .index("by_createdBy", ["createdBy"])
+    .index("by_legacyId", ["legacyId"]),
 
   // Many-to-many membership (replaces f_projectToUser).
   projectMembers: defineTable({
@@ -55,7 +62,10 @@ export default defineSchema({
   categories: defineTable({
     name: v.string(),
     projectId: v.id("projects"),
-  }).index("by_project", ["projectId"]),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_legacyId", ["legacyId"]),
 
   lists: defineTable({
     name: v.string(),
@@ -65,10 +75,12 @@ export default defineSchema({
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
+    legacyId: v.optional(v.string()),
   })
     .index("by_project", ["projectId"])
     // Pre-sorted overview (updatedAt desc) without an in-memory sort.
-    .index("by_project_updatedAt", ["projectId", "updatedAt"]),
+    .index("by_project_updatedAt", ["projectId", "updatedAt"])
+    .index("by_legacyId", ["legacyId"]),
 
   listItems: defineTable({
     name: v.string(),
@@ -79,9 +91,11 @@ export default defineSchema({
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
+    legacyId: v.optional(v.string()),
   })
     .index("by_list", ["listId"])
-    .index("by_category", ["categoryId"]),
+    .index("by_category", ["categoryId"])
+    .index("by_legacyId", ["legacyId"]),
 
   listTemplates: defineTable({
     name: v.string(),
@@ -95,5 +109,8 @@ export default defineSchema({
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
-  }).index("by_project", ["projectId"]),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_legacyId", ["legacyId"]),
 });
