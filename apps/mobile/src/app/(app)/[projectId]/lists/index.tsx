@@ -53,7 +53,16 @@ export default function ListsOverview() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: "Lists" }} />
+      <Stack.Screen
+        options={{
+          title: "Lists",
+          headerLeft: () => (
+            <Pressable onPress={() => router.navigate("/projects")} hitSlop={8}>
+              <Txt style={{ color: t.primary }}>Groups</Txt>
+            </Pressable>
+          ),
+        }}
+      />
       {lists === undefined ? (
         <Loading />
       ) : (
@@ -63,17 +72,31 @@ export default function ListsOverview() {
           contentContainerStyle={{ padding: 16 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View style={{ flexDirection: "row", gap: 8, paddingBottom: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Field
-                  placeholder="New list…"
-                  value={name}
-                  onChangeText={setName}
-                  onSubmitEditing={addList}
-                  returnKeyType="done"
-                />
+            <View style={{ paddingBottom: 12, gap: 10 }}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <Field
+                    placeholder="New list…"
+                    value={name}
+                    onChangeText={setName}
+                    onSubmitEditing={addList}
+                    returnKeyType="done"
+                  />
+                </View>
+                <Button title="Add" onPress={addList} />
               </View>
-              <Button title="Add" onPress={addList} />
+              <View style={{ flexDirection: "row", gap: 20 }}>
+                <Pressable
+                  onPress={() => router.push(`/${pid}/lists/categories`)}
+                >
+                  <Txt style={{ color: t.primary }}>Categories</Txt>
+                </Pressable>
+                <Pressable
+                  onPress={() => router.push(`/${pid}/lists/templates`)}
+                >
+                  <Txt style={{ color: t.primary }}>Templates</Txt>
+                </Pressable>
+              </View>
             </View>
           }
           renderSectionHeader={({ section }) => (

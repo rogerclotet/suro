@@ -21,6 +21,9 @@ export default function AppLayout() {
         headerTintColor: t.primary,
         contentStyle: { backgroundColor: t.bg },
       }}
-    />
+    >
+      {/* The project route is a Tabs navigator; it owns its own headers. */}
+      <Stack.Screen name="[projectId]" options={{ headerShown: false }} />
+    </Stack>
   );
 }

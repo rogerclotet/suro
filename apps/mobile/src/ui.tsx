@@ -151,6 +151,22 @@ export function Card({
   );
 }
 
+export function ComingSoon({ emoji, title }: { emoji: string; title: string }) {
+  return (
+    <Screen>
+      <Center>
+        <Text style={{ fontSize: 48 }}>{emoji}</Text>
+        <Txt size={20} weight="700" style={{ marginTop: 12 }}>
+          {title}
+        </Txt>
+        <Txt muted style={{ marginTop: 4 }}>
+          Coming soon
+        </Txt>
+      </Center>
+    </Screen>
+  );
+}
+
 const styles = StyleSheet.create({
   btn: { paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12 },
   field: {
