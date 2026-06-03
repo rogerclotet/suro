@@ -1,7 +1,10 @@
 import { Plus } from "lucide-react-native";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Dimensions,
+  Easing,
   Modal,
   Pressable,
   StyleSheet,
@@ -13,6 +16,8 @@ import {
 } from "react-native";
 import { FONT, useTheme } from "./theme";
 
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
 export function Sheet({
   visible,
   onClose,
@@ -23,29 +28,67 @@ export function Sheet({
   children: ReactNode;
 }) {
   const t = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setMounted(false);
+        }
+      });
+    }
+  }, [visible, anim]);
+
+  if (!mounted) {
+    return null;
+  }
+
+  // Backdrop fades opacity in place; only the panel translates up — so the
+  // dark overlay no longer rides up with the drawer.
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [SCREEN_HEIGHT, 0],
+  });
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
-        onPress={onClose}
-      />
-      <View
+    <Modal visible transparent animationType="none" onRequestClose={onClose}>
+      <Animated.View
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", opacity: anim }}
+      >
+        <Pressable style={{ flex: 1 }} onPress={onClose} />
+      </Animated.View>
+      <Animated.View
         style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
           backgroundColor: t.bg,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           padding: 20,
           paddingBottom: 36,
           gap: 12,
+          transform: [{ translateY }],
         }}
       >
         {children}
-      </View>
+      </Animated.View>
     </Modal>
   );
 }
