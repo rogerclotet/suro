@@ -5,6 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
+import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -28,7 +29,15 @@ export default function Templates() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: tr("title") }} />
+      <Stack.Screen
+        options={{
+          title: tr("title"),
+          ...headerCreateAction({
+            onPress: () => setCreating(true),
+            label: tr("newTemplate"),
+          }),
+        }}
+      />
       {templates === undefined ? (
         <Loading />
       ) : (

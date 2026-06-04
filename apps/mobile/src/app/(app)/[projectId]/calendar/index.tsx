@@ -103,7 +103,10 @@ export default function CalendarScreen() {
       <Stack.Screen
         options={{
           title: tCal("title"),
-          ...sectionHeaderBadges("calendar"),
+          ...sectionHeaderBadges("calendar", {
+            onPress: () => setCreating(true),
+            label: tCal("newEvent"),
+          }),
         }}
       />
 

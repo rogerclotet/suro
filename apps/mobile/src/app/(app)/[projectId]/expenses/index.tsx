@@ -23,7 +23,13 @@ export default function ExpensesOverview() {
   return (
     <Screen>
       <Stack.Screen
-        options={{ title: tExp("title"), ...sectionHeaderBadges("expenses") }}
+        options={{
+          title: tExp("title"),
+          ...sectionHeaderBadges("expenses", {
+            onPress: () => setCreating(true),
+            label: tExp("newPot"),
+          }),
+        }}
       />
       {pots === undefined ? (
         <Loading />

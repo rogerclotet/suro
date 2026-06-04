@@ -17,10 +17,27 @@ export default function Files() {
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
 
+  const onCreate = () =>
+    chooseAndUpload(
+      { pickImage, pickDocument },
+      {
+        title: tFiles("sharePrompt"),
+        photo: tFiles("photo"),
+        document: tFiles("document"),
+        cancel: tc("cancel"),
+      },
+    );
+
   return (
     <Screen>
       <Stack.Screen
-        options={{ title: tFiles("title"), ...sectionHeaderBadges("files") }}
+        options={{
+          title: tFiles("title"),
+          ...sectionHeaderBadges("files", {
+            onPress: onCreate,
+            label: tFiles("shareFiles"),
+          }),
+        }}
       />
       {files === undefined ? (
         <Loading />
@@ -40,19 +57,7 @@ export default function Files() {
           )}
         </ScrollView>
       )}
-      <Fab
-        onPress={() =>
-          chooseAndUpload(
-            { pickImage, pickDocument },
-            {
-              title: tFiles("sharePrompt"),
-              photo: tFiles("photo"),
-              document: tFiles("document"),
-              cancel: tc("cancel"),
-            },
-          )
-        }
-      />
+      <Fab onPress={onCreate} />
     </Screen>
   );
 }

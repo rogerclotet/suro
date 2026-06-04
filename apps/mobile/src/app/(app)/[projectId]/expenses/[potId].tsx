@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
+import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { formatMoney, parseMoney } from "@/lib/money";
@@ -43,7 +44,15 @@ export default function PotDetail() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: pot.name }} />
+      <Stack.Screen
+        options={{
+          title: pot.name,
+          ...headerCreateAction({
+            onPress: () => setAdding(true),
+            label: tExp("newSpending"),
+          }),
+        }}
+      />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 96 }}>
         {pot.settledAt ? (
           <Txt

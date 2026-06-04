@@ -27,7 +27,13 @@ export default function NotesOverview() {
   return (
     <Screen>
       <Stack.Screen
-        options={{ title: tNotes("title"), ...sectionHeaderBadges("notes") }}
+        options={{
+          title: tNotes("title"),
+          ...sectionHeaderBadges("notes", {
+            onPress: () => setCreating(true),
+            label: tNotes("newNote"),
+          }),
+        }}
       />
       {notes === undefined ? (
         <Loading />

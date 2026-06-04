@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { Check } from "lucide-react-native";
+import { Check, ChevronRight } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
@@ -27,9 +27,11 @@ export function GroupSwitcherSheet({
   onClose: () => void;
 }) {
   const groups = useQuery(api.projects.listMine);
+  const me = useQuery(api.users.me);
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
+  const tp = useTranslations("mobile.profile");
 
   function selectGroup(id: Id<"projects">) {
     onClose();
@@ -43,6 +45,11 @@ export function GroupSwitcherSheet({
   function manageGroups() {
     onClose();
     router.push("/projects");
+  }
+
+  function openProfile() {
+    onClose();
+    router.push("/profile");
   }
 
   return (
@@ -91,6 +98,28 @@ export function GroupSwitcherSheet({
         variant="ghost"
         onPress={manageGroups}
       />
+      {/* Account entry: replaces the old header profile badge — same Liquid
+          Glass-adjacent home for "you", tapping it opens the preferences page. */}
+      <Card onPress={openProfile}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Avatar
+            name={me?.name}
+            image={me?.customImage ?? me?.image}
+            color={me?.avatarColor}
+          />
+          <View style={{ flex: 1 }}>
+            <Txt weight="700" numberOfLines={1}>
+              {me?.name ?? tp("title")}
+            </Txt>
+            {me?.email ? (
+              <Txt muted size={13} numberOfLines={1}>
+                {me.email}
+              </Txt>
+            ) : null}
+          </View>
+          <ChevronRight color={t.muted} size={18} />
+        </View>
+      </Card>
     </Sheet>
   );
 }

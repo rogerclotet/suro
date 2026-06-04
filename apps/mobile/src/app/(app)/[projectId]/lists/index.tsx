@@ -59,7 +59,10 @@ export default function ListsOverview() {
       <Stack.Screen
         options={{
           title: tl("title"),
-          ...sectionHeaderBadges("lists"),
+          ...sectionHeaderBadges("lists", {
+            onPress: () => setCreating(true),
+            label: tl("newList"),
+          }),
         }}
       />
       {lists === undefined ? (

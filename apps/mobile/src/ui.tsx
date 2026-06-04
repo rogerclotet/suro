@@ -24,7 +24,6 @@ import {
   type TextProps,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -155,51 +154,39 @@ export function Sheet({
   );
 }
 
+// Material 3 floating action button — Android only. On iOS the create action
+// lives in the navigation bar instead (a Liquid Glass "+" header item, wired via
+// `sectionHeaderBadges` / `headerCreateAction`), so the FAB renders nothing
+// there; a floating button isn't part of the iOS design language.
 export function Fab({ onPress }: { onPress: () => void }) {
   const t = useTheme();
-  const insets = useSafeAreaInsets();
   const { anyOpen } = useContext(SheetCountContext);
-  // Hide while any drawer is open so the FAB's shadow doesn't bleed through the
-  // backdrop or ride up with the slide-in animation.
-  if (anyOpen) {
+  // Hide on iOS (header "+" instead), and while any drawer is open so the FAB's
+  // shadow doesn't bleed through the backdrop or ride up with the slide-in.
+  if (Platform.OS !== "android" || anyOpen) {
     return null;
   }
-
-  const isAndroid = Platform.OS === "android";
-  // The native tab bar sits below the FAB. On Android the screen content is
-  // already inset above the M3 navigation bar, so the M3 spec's 16dp margin
-  // clears it. On iOS the screen extends *behind* the translucent / Liquid
-  // Glass tab bar and the root safe-area inset reports only the home-indicator
-  // gap, so add a standard tab-bar height (~49pt) on top to clear it. Tune this
-  // single constant on-device if the iOS 26 glass bar's height differs.
-  const bottom = isAndroid ? 16 : insets.bottom + 49 + 16;
 
   return (
     <Pressable
       onPress={onPress}
       android_ripple={{ color: t.onPrimaryContainer, borderless: false }}
-      style={({ pressed }) => ({
+      style={{
         position: "absolute",
         right: 16,
-        bottom,
+        // Screen content is already inset above the M3 navigation bar, so the
+        // spec's 16dp margin clears it.
+        bottom: 16,
         width: 56,
         height: 56,
-        // M3 FABs are 16dp rounded squares; iOS keeps the familiar circle.
-        borderRadius: isAndroid ? 16 : 28,
+        borderRadius: 16, // M3 FABs are 16dp rounded squares.
         alignItems: "center",
         justifyContent: "center",
-        // M3 uses the primary-container tonal color; iOS the solid primary.
-        backgroundColor: isAndroid ? t.primaryContainer : t.primary,
-        // Ripple covers Android press feedback; opacity handles iOS.
-        opacity: !isAndroid && pressed ? 0.85 : 1,
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
+        backgroundColor: t.primaryContainer,
         elevation: 6,
-      })}
+      }}
     >
-      <Plus color={isAndroid ? t.onPrimaryContainer : t.onPrimary} size={24} />
+      <Plus color={t.onPrimaryContainer} size={24} />
     </Pressable>
   );
 }
