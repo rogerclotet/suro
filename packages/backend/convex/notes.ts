@@ -33,7 +33,15 @@ export const listByProject = query({
 export const get = query({
   args: { noteId: v.id("notes") },
   handler: async (ctx, { noteId }) => {
-    const { note } = await requireNoteAccess(ctx, noteId);
+    // Return null rather than throwing when the note is gone: the editor keeps
+    // this query subscribed while it navigates away after a delete, and a
+    // dangling subscription re-running against the deleted row would otherwise
+    // surface a "Note not found" server error on the client.
+    const note = await ctx.db.get(noteId);
+    if (note === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, note.projectId);
     return loadNote(ctx, note);
   },
 });
@@ -67,8 +75,12 @@ export const update = mutation({
     noteId: v.id("notes"),
     name: v.string(),
     contents: v.string(),
+    // The mobile editor now saves Tiptap HTML (matching the web app), so it
+    // sends `format: "html"`. Omitted by older/plain-text callers, which leaves
+    // the stored format untouched.
+    format: v.optional(v.string()),
   },
-  handler: async (ctx, { noteId, name, contents }) => {
+  handler: async (ctx, { noteId, name, contents, format }) => {
     const { note, userId } = await requireNoteAccess(ctx, noteId);
     const trimmed = name.trim();
     if (trimmed === "") {
@@ -77,6 +89,7 @@ export const update = mutation({
     await ctx.db.patch(note._id, {
       name: trimmed,
       contents,
+      ...(format === undefined ? {} : { format }),
       updatedBy: userId,
       updatedAt: Date.now(),
     });

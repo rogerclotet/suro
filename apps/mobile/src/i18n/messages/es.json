@@ -932,7 +932,24 @@
       "contentsPlaceholder": "Escribe algo…",
       "saved": "Guardado",
       "saving": "Guardando…",
-      "updatedAt": "Actualizada {time}"
+      "updatedAt": "Actualizada {time}",
+      "notFound": "Esta nota ya no existe.",
+      "editor": {
+        "bold": "Negrita",
+        "italic": "Cursiva",
+        "strike": "Tachado",
+        "heading2": "Encabezado 2",
+        "heading3": "Encabezado 3",
+        "bulletList": "Lista con viñetas",
+        "orderedList": "Lista numerada",
+        "blockquote": "Cita",
+        "link": "Enlace",
+        "linkPlaceholder": "https://ejemplo.com",
+        "linkApply": "Aplicar",
+        "unlink": "Quitar enlace",
+        "undo": "Deshacer",
+        "redo": "Rehacer"
+      }
     },
     "files": {
       "title": "Archivos",

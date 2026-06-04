@@ -932,7 +932,24 @@
       "contentsPlaceholder": "Escriu alguna cosa…",
       "saved": "Desat",
       "saving": "Desant…",
-      "updatedAt": "Actualitzada {time}"
+      "updatedAt": "Actualitzada {time}",
+      "notFound": "Aquesta nota ja no existeix.",
+      "editor": {
+        "bold": "Negreta",
+        "italic": "Cursiva",
+        "strike": "Ratllat",
+        "heading2": "Encapçalament 2",
+        "heading3": "Encapçalament 3",
+        "bulletList": "Llista amb pics",
+        "orderedList": "Llista numerada",
+        "blockquote": "Cita",
+        "link": "Enllaç",
+        "linkPlaceholder": "https://exemple.com",
+        "linkApply": "Aplicar",
+        "unlink": "Treure enllaç",
+        "undo": "Desfer",
+        "redo": "Refer"
+      }
     },
     "files": {
       "title": "Fitxers",

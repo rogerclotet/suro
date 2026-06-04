@@ -932,7 +932,24 @@
       "contentsPlaceholder": "Write something…",
       "saved": "Saved",
       "saving": "Saving…",
-      "updatedAt": "Updated {time}"
+      "updatedAt": "Updated {time}",
+      "notFound": "This note no longer exists.",
+      "editor": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "strike": "Strikethrough",
+        "heading2": "Heading 2",
+        "heading3": "Heading 3",
+        "bulletList": "Bullet list",
+        "orderedList": "Numbered list",
+        "blockquote": "Quote",
+        "link": "Link",
+        "linkPlaceholder": "https://example.com",
+        "linkApply": "Apply",
+        "unlink": "Remove link",
+        "undo": "Undo",
+        "redo": "Redo"
+      }
     },
     "files": {
       "title": "Files",
