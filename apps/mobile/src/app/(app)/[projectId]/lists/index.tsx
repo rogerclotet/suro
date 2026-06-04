@@ -272,6 +272,9 @@ function CreateListSheet({
         placeholder={tl("descriptionPlaceholder")}
         value={description}
         onChangeText={setDescription}
+        multiline
+        textAlignVertical="top"
+        style={{ minHeight: 88, paddingTop: 11 }}
       />
       {templates && templates.length > 0 ? (
         <>

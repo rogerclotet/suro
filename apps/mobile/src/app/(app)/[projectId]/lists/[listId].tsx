@@ -3,15 +3,33 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Ellipsis } from "lucide-react-native";
+import {
+  Check,
+  Download,
+  Ellipsis,
+  Eraser,
+  type LucideIcon,
+  Plus,
+  Star,
+  Trash2,
+} from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  SectionList,
+  Switch,
+  View,
+} from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
   Button,
+  Fab,
   Field,
   HEADER_BUTTON_INSET,
   Loading,
@@ -82,12 +100,18 @@ export default function ListDetail() {
     },
   );
 
-  const [name, setName] = useState("");
-  const [addCategory, setAddCategory] = useState<Id<"categories"> | null>(null);
-  const [editing, setEditing] = useState<Item | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDetails, setEditDetails] = useState("");
-  const [editCategory, setEditCategory] = useState<Id<"categories"> | null>(
+  // The create and edit flows share one drawer (`ItemSheet`) and one draft form;
+  // `mode` picks the title/action, and `editingItem` is the target when editing.
+  // The mode and target persist while the sheet slides out so its content
+  // doesn't flicker during the close animation.
+  const [itemSheetOpen, setItemSheetOpen] = useState(false);
+  const [itemSheetMode, setItemSheetMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [draftName, setDraftName] = useState("");
+  const [draftDetails, setDraftDetails] = useState("");
+  const [draftCategory, setDraftCategory] = useState<Id<"categories"> | null>(
     null,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -113,16 +137,6 @@ export default function ListDetail() {
     return createCategory({ projectId: pid, name: categoryName });
   }
 
-  async function addItem() {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      return;
-    }
-    setName("");
-    // Keep the chosen category so adding several items to it stays quick.
-    await createItem({ listId: lid, name: trimmed, categoryId: addCategory });
-  }
-
   function toggle(item: Item) {
     void updateItem({
       itemId: item._id,
@@ -133,34 +147,59 @@ export default function ListDetail() {
     });
   }
 
-  function openEdit(item: Item) {
-    setEditing(item);
-    setEditName(item.name);
-    setEditDetails(item.details ?? "");
-    setEditCategory(item.categoryId ?? null);
+  function openCreate() {
+    setItemSheetMode("create");
+    setEditingItem(null);
+    setDraftName("");
+    setDraftDetails("");
+    setDraftCategory(null);
+    setItemSheetOpen(true);
   }
 
-  async function saveEdit() {
-    if (!editing) {
+  function openEdit(item: Item) {
+    setItemSheetMode("edit");
+    setEditingItem(item);
+    setDraftName(item.name);
+    setDraftDetails(item.details ?? "");
+    setDraftCategory(item.categoryId ?? null);
+    setItemSheetOpen(true);
+  }
+
+  async function submitItem() {
+    const trimmed = draftName.trim();
+    if (itemSheetMode === "create") {
+      if (!trimmed) {
+        return;
+      }
+      setItemSheetOpen(false);
+      await createItem({
+        listId: lid,
+        name: trimmed,
+        details: draftDetails.trim() || undefined,
+        categoryId: draftCategory,
+      });
       return;
     }
-    const target = editing;
-    setEditing(null);
+    if (!editingItem) {
+      return;
+    }
+    const target = editingItem;
+    setItemSheetOpen(false);
     await updateItem({
       itemId: target._id,
-      name: editName.trim() || target.name,
-      details: editDetails,
+      name: trimmed || target.name,
+      details: draftDetails,
       completed: target.completed,
-      categoryId: editCategory,
+      categoryId: draftCategory,
     });
   }
 
-  async function deleteEditingItem() {
-    if (!editing) {
+  async function deleteCurrentItem() {
+    if (!editingItem) {
       return;
     }
-    const target = editing;
-    setEditing(null);
+    const target = editingItem;
+    setItemSheetOpen(false);
     await removeItem({ itemId: target._id });
   }
 
@@ -182,10 +221,27 @@ export default function ListDetail() {
     });
   }
 
-  async function handleDeleteList() {
-    setSettingsOpen(false);
-    await removeList({ listId: lid });
-    router.back();
+  function handleDeleteList() {
+    if (!list) {
+      return;
+    }
+    // Confirm before the irreversible delete; keep the settings sheet open
+    // behind the alert so cancelling lands back where the user was.
+    Alert.alert(
+      tl("deleteList"),
+      tl("deleteListMessage", { name: list.name }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: tc("delete"),
+          style: "destructive",
+          onPress: () => {
+            setSettingsOpen(false);
+            void removeList({ listId: lid }).then(() => router.back());
+          },
+        },
+      ],
+    );
   }
 
   function handleToggleFavorite() {
@@ -197,18 +253,57 @@ export default function ListDetail() {
       <Stack.Screen
         options={{
           title: headerTitle,
-          headerRight: list
-            ? () => (
-                <Pressable
-                  onPress={openSettings}
-                  hitSlop={8}
-                  accessibilityLabel={tl("listSettings")}
-                  style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
-                >
-                  <Ellipsis color={t.primary} size={22} />
-                </Pressable>
-              )
-            : undefined,
+          ...(list
+            ? {
+                // Android: only the settings overflow lives in the header (create
+                // is the Fab). iOS: the create "+" and settings both sit in the
+                // Liquid Glass bar via the multi-item API, which supersedes
+                // `headerRight` there.
+                headerRight: () => (
+                  <Pressable
+                    onPress={openSettings}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={tl("listSettings")}
+                    style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
+                  >
+                    <Ellipsis color={t.primary} size={22} />
+                  </Pressable>
+                ),
+                ...(Platform.OS === "ios"
+                  ? {
+                      unstable_headerRightItems: () => [
+                        {
+                          type: "custom" as const,
+                          element: (
+                            <Pressable
+                              onPress={openCreate}
+                              hitSlop={8}
+                              accessibilityRole="button"
+                              accessibilityLabel={tl("newItem")}
+                            >
+                              <Plus color={t.primary} size={22} />
+                            </Pressable>
+                          ),
+                        },
+                        {
+                          type: "custom" as const,
+                          element: (
+                            <Pressable
+                              onPress={openSettings}
+                              hitSlop={8}
+                              accessibilityRole="button"
+                              accessibilityLabel={tl("listSettings")}
+                            >
+                              <Ellipsis color={t.primary} size={22} />
+                            </Pressable>
+                          ),
+                        },
+                      ],
+                    }
+                  : {}),
+              }
+            : {}),
         }}
       />
 
@@ -223,37 +318,33 @@ export default function ListDetail() {
             stickySectionHeadersEnabled={false}
             keyboardShouldPersistTaps="handled"
             ListHeaderComponent={
-              <View style={{ gap: 8, paddingBottom: 12 }}>
-                {list.description ? (
-                  <Txt muted size={14} style={{ paddingBottom: 4 }}>
-                    {list.description}
-                  </Txt>
-                ) : null}
-                <Field
-                  placeholder={tl("addItemPlaceholder")}
-                  value={name}
-                  onChangeText={setName}
-                  onSubmitEditing={addItem}
-                  returnKeyType="done"
-                />
+              list.description ? (
+                // Set off the description as a quoted note — an accent rail and
+                // breathing room mark it as the list's blurb rather than chrome.
                 <View
                   style={{
                     flexDirection: "row",
-                    gap: 8,
-                    alignItems: "flex-start",
+                    gap: 10,
+                    paddingBottom: 12,
                   }}
                 >
-                  <View style={{ flex: 1 }}>
-                    <CategoryPicker
-                      categories={categories ?? []}
-                      value={addCategory}
-                      onChange={setAddCategory}
-                      onCreate={onCreateCategory}
-                    />
-                  </View>
-                  <Button title={tc("add")} onPress={addItem} />
+                  <View
+                    style={{
+                      width: 3,
+                      borderRadius: 999,
+                      backgroundColor: t.primary,
+                      opacity: 0.5,
+                    }}
+                  />
+                  <Txt
+                    muted
+                    size={14}
+                    style={{ flex: 1, lineHeight: 20, paddingVertical: 1 }}
+                  >
+                    {list.description}
+                  </Txt>
                 </View>
-              </View>
+              ) : null
             }
             ListEmptyComponent={
               <Txt muted style={{ padding: 16 }}>
@@ -288,7 +379,7 @@ export default function ListDetail() {
                   style={{
                     width: 26,
                     height: 26,
-                    borderRadius: 13,
+                    borderRadius: 8,
                     borderWidth: 2,
                     borderColor: item.completed ? t.primary : t.muted,
                     backgroundColor: item.completed ? t.primary : "transparent",
@@ -297,9 +388,7 @@ export default function ListDetail() {
                   }}
                 >
                   {item.completed ? (
-                    <Txt size={15} style={{ color: t.onPrimary }}>
-                      ✓
-                    </Txt>
+                    <Check color={t.onPrimary} size={16} strokeWidth={3} />
                   ) : null}
                 </Pressable>
                 <Pressable style={{ flex: 1 }} onPress={() => openEdit(item)}>
@@ -316,19 +405,22 @@ export default function ListDetail() {
             )}
           />
 
-          <EditItemSheet
-            visible={editing !== null}
-            name={editName}
-            details={editDetails}
-            categoryId={editCategory}
+          <Fab onPress={openCreate} />
+
+          <ItemSheet
+            visible={itemSheetOpen}
+            mode={itemSheetMode}
+            name={draftName}
+            details={draftDetails}
+            categoryId={draftCategory}
             categories={categories ?? []}
-            onChangeName={setEditName}
-            onChangeDetails={setEditDetails}
-            onChangeCategory={setEditCategory}
+            onChangeName={setDraftName}
+            onChangeDetails={setDraftDetails}
+            onChangeCategory={setDraftCategory}
             onCreateCategory={onCreateCategory}
-            onSave={saveEdit}
-            onDelete={deleteEditingItem}
-            onClose={() => setEditing(null)}
+            onSubmit={submitItem}
+            onDelete={deleteCurrentItem}
+            onClose={() => setItemSheetOpen(false)}
           />
 
           <SettingsSheet
@@ -370,8 +462,12 @@ export default function ListDetail() {
   );
 }
 
-function EditItemSheet({
+// Shared create/edit drawer for a list item. In "create" mode it autofocuses
+// the name and hides the destructive action; in "edit" mode it offers Save and
+// Delete. Same form either way, so the two flows stay visually identical.
+function ItemSheet({
   visible,
+  mode,
   name,
   details,
   categoryId,
@@ -380,11 +476,12 @@ function EditItemSheet({
   onChangeDetails,
   onChangeCategory,
   onCreateCategory,
-  onSave,
+  onSubmit,
   onDelete,
   onClose,
 }: {
   visible: boolean;
+  mode: "create" | "edit";
   name: string;
   details: string;
   categoryId: Id<"categories"> | null;
@@ -393,26 +490,33 @@ function EditItemSheet({
   onChangeDetails: (value: string) => void;
   onChangeCategory: (value: Id<"categories"> | null) => void;
   onCreateCategory: (name: string) => Promise<Id<"categories">>;
-  onSave: () => void;
+  onSubmit: () => void;
   onDelete: () => void;
   onClose: () => void;
 }) {
   const tl = useTranslations("mobile.lists");
   const tc = useTranslations("mobile.common");
+  const isCreate = mode === "create";
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        {tl("editItem")}
+        {isCreate ? tl("newItem") : tl("editItem")}
       </Txt>
       <Field
         placeholder={tl("namePlaceholder")}
         value={name}
         onChangeText={onChangeName}
+        autoFocus={isCreate}
+        returnKeyType={isCreate ? "done" : undefined}
+        onSubmitEditing={isCreate ? onSubmit : undefined}
       />
       <Field
         placeholder={tl("detailsPlaceholder")}
         value={details}
         onChangeText={onChangeDetails}
+        multiline
+        textAlignVertical="top"
+        style={{ minHeight: 88, paddingTop: 11 }}
       />
       <CategoryPicker
         categories={categories}
@@ -420,12 +524,14 @@ function EditItemSheet({
         onChange={onChangeCategory}
         onCreate={onCreateCategory}
       />
-      <Button title={tc("save")} onPress={onSave} />
-      <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>
-          {tl("deleteItem")}
-        </Txt>
-      </Pressable>
+      <Button title={isCreate ? tc("add") : tc("save")} onPress={onSubmit} />
+      {isCreate ? null : (
+        <Pressable onPress={onDelete} style={{ padding: 10 }}>
+          <Txt style={{ textAlign: "center", color: DESTRUCTIVE }}>
+            {tl("deleteItem")}
+          </Txt>
+        </Pressable>
+      )}
     </Sheet>
   );
 }
@@ -475,29 +581,78 @@ function SettingsSheet({
         placeholder={tl("descriptionPlaceholder")}
         value={description}
         onChangeText={onChangeDescription}
+        multiline
+        textAlignVertical="top"
+        style={{ minHeight: 88, paddingTop: 11 }}
       />
       <Button title={tc("save")} onPress={onSave} />
-      <Button
-        title={favorite ? tl("removeFromFavorites") : tl("addToFavorites")}
-        variant="ghost"
-        onPress={onToggleFavorite}
-      />
-      <Button
-        title={tl("importTemplates")}
-        variant="ghost"
-        onPress={onImportTemplates}
-      />
-      <Button
-        title={tl("clearCompleted")}
-        variant="ghost"
-        onPress={onClearCompleted}
-      />
-      <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>
-          {tl("deleteList")}
-        </Txt>
-      </Pressable>
+      {/* Secondary list actions as a compact icon toolbar. */}
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <IconAction
+          icon={Star}
+          active={favorite}
+          label={favorite ? tl("removeFromFavorites") : tl("addToFavorites")}
+          onPress={onToggleFavorite}
+        />
+        <IconAction
+          icon={Download}
+          label={tl("importTemplates")}
+          onPress={onImportTemplates}
+        />
+        <IconAction
+          icon={Eraser}
+          label={tl("clearCompleted")}
+          onPress={onClearCompleted}
+        />
+        <IconAction
+          icon={Trash2}
+          destructive
+          label={tl("deleteList")}
+          onPress={onDelete}
+        />
+      </View>
     </Sheet>
+  );
+}
+
+const DESTRUCTIVE = "#e64553";
+
+// Square icon button for a sheet's action toolbar — label drives accessibility
+// only; `active` fills the glyph (favorite), `destructive` tints it red.
+function IconAction({
+  icon: Icon,
+  label,
+  onPress,
+  active,
+  destructive,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onPress: () => void;
+  active?: boolean;
+  destructive?: boolean;
+}) {
+  const t = useTheme();
+  const color = destructive ? DESTRUCTIVE : active ? t.primary : t.text;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: destructive ? DESTRUCTIVE : t.border,
+        backgroundColor: t.inputBg,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Icon color={color} size={20} fill={active ? color : "none"} />
+    </Pressable>
   );
 }
 
