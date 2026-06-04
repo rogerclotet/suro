@@ -149,7 +149,12 @@ export default function EventDetail() {
             </View>
             <LinkedListCard
               list={linkedList}
-              onPress={() => router.push(`/${pid}/lists/${linkedList._id}`)}
+              onPress={() =>
+                router.push({
+                  pathname: `/${pid}/lists/${linkedList._id}`,
+                  params: { name: linkedList.name },
+                })
+              }
             />
           </View>
         ) : null}

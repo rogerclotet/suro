@@ -10,16 +10,7 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import {
-  Button,
-  Fab,
-  Field,
-  Loading,
-  ProgressBar,
-  Screen,
-  Sheet,
-  Txt,
-} from "@/ui";
+import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
 type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
 type ListWithItems = ListsResult[number];
@@ -71,11 +62,12 @@ export default function ListsOverview() {
         <SectionList
           sections={sections}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
             <View
               style={{
+                marginHorizontal: 16,
                 backgroundColor: t.card,
                 borderColor: t.border,
                 borderWidth: 1,
@@ -111,32 +103,47 @@ export default function ListsOverview() {
             <Txt
               muted
               size={12}
-              style={{ paddingTop: 16, paddingBottom: 4, letterSpacing: 1 }}
+              style={{
+                paddingTop: 16,
+                paddingBottom: 4,
+                paddingHorizontal: 16,
+                letterSpacing: 1,
+              }}
             >
               {section.title.toUpperCase()}
             </Txt>
           )}
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                height: 1,
+                marginHorizontal: 16,
+                backgroundColor: t.border,
+              }}
+            />
+          )}
           renderItem={({ item }) => {
             const total = item.items.length;
             const done = item.items.filter((i) => i.completed).length;
-            const complete = total > 0 && done === total;
             return (
               <Pressable
-                style={{ marginBottom: 8 }}
-                onPress={() => router.push(`/${pid}/lists/${item._id}`)}
+                onPress={() =>
+                  router.push({
+                    pathname: `/${pid}/lists/${item._id}`,
+                    params: { name: item.name },
+                  })
+                }
+                style={({ pressed }) => ({
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  backgroundColor: pressed ? t.border : "transparent",
+                })}
               >
-                <View
-                  style={{
-                    backgroundColor: t.card,
-                    borderColor: t.border,
-                    borderWidth: 1,
-                    borderRadius: 14,
-                    padding: 14,
-                  }}
-                >
-                  <Txt size={17} weight="700">
-                    {item.name}
-                  </Txt>
+                <View style={{ flex: 1 }}>
+                  <Txt size={16}>{item.name}</Txt>
                   {item.description ? (
                     <Txt
                       muted
@@ -147,24 +154,10 @@ export default function ListsOverview() {
                       {item.description}
                     </Txt>
                   ) : null}
-                  {total === 0 ? (
-                    <Txt muted size={13} style={{ marginTop: 2 }}>
-                      {tc("empty")}
-                    </Txt>
-                  ) : (
-                    <View style={{ marginTop: 8, gap: 6 }}>
-                      <Txt
-                        muted
-                        size={12}
-                        weight="700"
-                        style={{ textAlign: "right" }}
-                      >
-                        {done}/{total}
-                      </Txt>
-                      <ProgressBar value={done / total} complete={complete} />
-                    </View>
-                  )}
                 </View>
+                <Txt muted size={15}>
+                  {total === 0 ? tc("empty") : total - done}
+                </Txt>
               </Pressable>
             );
           }}
@@ -255,7 +248,10 @@ function CreateListSheet({
       setDescription("");
       setSelected([]);
       onClose();
-      router.push(`/${projectId}/lists/${listId}`);
+      router.push({
+        pathname: `/${projectId}/lists/${listId}`,
+        params: { name: trimmed },
+      });
     } finally {
       setBusy(false);
     }

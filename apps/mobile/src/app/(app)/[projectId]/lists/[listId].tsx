@@ -41,7 +41,10 @@ function groupByCategory(items: Item[], uncategorized: string) {
 }
 
 export default function ListDetail() {
-  const { listId } = useLocalSearchParams<{ listId: string }>();
+  const { listId, name: initialTitle } = useLocalSearchParams<{
+    listId: string;
+    name?: string;
+  }>();
   const pid = useProjectId();
   const lid = listId as Id<"lists">;
   const t = useTheme();
@@ -100,6 +103,11 @@ export default function ListDetail() {
     () => (list ? groupByCategory(list.items, uncategorized) : []),
     [list, uncategorized],
   );
+
+  // Render the header title from the loaded list, falling back to the name
+  // passed at navigation time so the title never flashes the "[listId]" route
+  // segment while the list query resolves.
+  const headerTitle = list?.name ?? initialTitle ?? "";
 
   async function onCreateCategory(categoryName: string) {
     return createCategory({ projectId: pid, name: categoryName });
@@ -184,176 +192,180 @@ export default function ListDetail() {
     void toggleFavorite({ listId: lid });
   }
 
-  if (list === undefined) {
-    return (
-      <Screen>
-        <Loading />
-      </Screen>
-    );
-  }
-
   return (
     <Screen>
       <Stack.Screen
         options={{
-          title: list.name,
-          headerRight: () => (
-            <Pressable
-              onPress={openSettings}
-              hitSlop={8}
-              accessibilityLabel={tl("listSettings")}
-              style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
-            >
-              <Ellipsis color={t.primary} size={22} />
-            </Pressable>
-          ),
+          title: headerTitle,
+          headerRight: list
+            ? () => (
+                <Pressable
+                  onPress={openSettings}
+                  hitSlop={8}
+                  accessibilityLabel={tl("listSettings")}
+                  style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
+                >
+                  <Ellipsis color={t.primary} size={22} />
+                </Pressable>
+              )
+            : undefined,
         }}
       />
 
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ padding: 16 }}
-        stickySectionHeadersEnabled={false}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={
-          <View style={{ gap: 8, paddingBottom: 12 }}>
-            {list.description ? (
-              <Txt muted size={14} style={{ paddingBottom: 4 }}>
-                {list.description}
-              </Txt>
-            ) : null}
-            <Field
-              placeholder={tl("addItemPlaceholder")}
-              value={name}
-              onChangeText={setName}
-              onSubmitEditing={addItem}
-              returnKeyType="done"
-            />
-            <View
-              style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}
-            >
-              <View style={{ flex: 1 }}>
-                <CategoryPicker
-                  categories={categories ?? []}
-                  value={addCategory}
-                  onChange={setAddCategory}
-                  onCreate={onCreateCategory}
+      {list === undefined ? (
+        <Loading />
+      ) : (
+        <>
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{ padding: 16 }}
+            stickySectionHeadersEnabled={false}
+            keyboardShouldPersistTaps="handled"
+            ListHeaderComponent={
+              <View style={{ gap: 8, paddingBottom: 12 }}>
+                {list.description ? (
+                  <Txt muted size={14} style={{ paddingBottom: 4 }}>
+                    {list.description}
+                  </Txt>
+                ) : null}
+                <Field
+                  placeholder={tl("addItemPlaceholder")}
+                  value={name}
+                  onChangeText={setName}
+                  onSubmitEditing={addItem}
+                  returnKeyType="done"
                 />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 8,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <CategoryPicker
+                      categories={categories ?? []}
+                      value={addCategory}
+                      onChange={setAddCategory}
+                      onCreate={onCreateCategory}
+                    />
+                  </View>
+                  <Button title={tc("add")} onPress={addItem} />
+                </View>
               </View>
-              <Button title={tc("add")} onPress={addItem} />
-            </View>
-          </View>
-        }
-        ListEmptyComponent={
-          <Txt muted style={{ padding: 16 }}>
-            {tl("noItems")}
-          </Txt>
-        }
-        renderSectionHeader={({ section }) =>
-          sections.length > 1 ? (
-            <Txt
-              muted
-              size={12}
-              style={{ paddingTop: 16, paddingBottom: 4, letterSpacing: 1 }}
-            >
-              {section.title.toUpperCase()}
-            </Txt>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              paddingVertical: 10,
-              borderBottomWidth: 1,
-              borderColor: t.border,
-            }}
-          >
-            <Pressable
-              onPress={() => toggle(item)}
-              hitSlop={8}
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 13,
-                borderWidth: 2,
-                borderColor: item.completed ? t.primary : t.muted,
-                backgroundColor: item.completed ? t.primary : "transparent",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {item.completed ? (
-                <Txt size={15} style={{ color: t.onPrimary }}>
-                  ✓
-                </Txt>
-              ) : null}
-            </Pressable>
-            <Pressable style={{ flex: 1 }} onPress={() => openEdit(item)}>
-              <Txt size={16} muted={item.completed} strike={item.completed}>
-                {item.name}
+            }
+            ListEmptyComponent={
+              <Txt muted style={{ padding: 16 }}>
+                {tl("noItems")}
               </Txt>
-              {item.details ? (
-                <Txt muted size={13}>
-                  {item.details}
+            }
+            renderSectionHeader={({ section }) =>
+              sections.length > 1 ? (
+                <Txt
+                  muted
+                  size={12}
+                  style={{ paddingTop: 16, paddingBottom: 4, letterSpacing: 1 }}
+                >
+                  {section.title.toUpperCase()}
                 </Txt>
-              ) : null}
-            </Pressable>
-          </View>
-        )}
-      />
+              ) : null
+            }
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  paddingVertical: 10,
+                  borderBottomWidth: 1,
+                  borderColor: t.border,
+                }}
+              >
+                <Pressable
+                  onPress={() => toggle(item)}
+                  hitSlop={8}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 13,
+                    borderWidth: 2,
+                    borderColor: item.completed ? t.primary : t.muted,
+                    backgroundColor: item.completed ? t.primary : "transparent",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {item.completed ? (
+                    <Txt size={15} style={{ color: t.onPrimary }}>
+                      ✓
+                    </Txt>
+                  ) : null}
+                </Pressable>
+                <Pressable style={{ flex: 1 }} onPress={() => openEdit(item)}>
+                  <Txt size={16} muted={item.completed} strike={item.completed}>
+                    {item.name}
+                  </Txt>
+                  {item.details ? (
+                    <Txt muted size={13}>
+                      {item.details}
+                    </Txt>
+                  ) : null}
+                </Pressable>
+              </View>
+            )}
+          />
 
-      <EditItemSheet
-        visible={editing !== null}
-        name={editName}
-        details={editDetails}
-        categoryId={editCategory}
-        categories={categories ?? []}
-        onChangeName={setEditName}
-        onChangeDetails={setEditDetails}
-        onChangeCategory={setEditCategory}
-        onCreateCategory={onCreateCategory}
-        onSave={saveEdit}
-        onDelete={deleteEditingItem}
-        onClose={() => setEditing(null)}
-      />
+          <EditItemSheet
+            visible={editing !== null}
+            name={editName}
+            details={editDetails}
+            categoryId={editCategory}
+            categories={categories ?? []}
+            onChangeName={setEditName}
+            onChangeDetails={setEditDetails}
+            onChangeCategory={setEditCategory}
+            onCreateCategory={onCreateCategory}
+            onSave={saveEdit}
+            onDelete={deleteEditingItem}
+            onClose={() => setEditing(null)}
+          />
 
-      <SettingsSheet
-        visible={settingsOpen}
-        name={listName}
-        description={listDescription}
-        favorite={list.favorite}
-        onChangeName={setListName}
-        onChangeDescription={setListDescription}
-        onToggleFavorite={handleToggleFavorite}
-        onSave={saveSettings}
-        onImportTemplates={() => {
-          setPendingImport(true);
-          setSettingsOpen(false);
-        }}
-        onClearCompleted={async () => {
-          setSettingsOpen(false);
-          await clearCompleted({ listId: lid });
-        }}
-        onDelete={handleDeleteList}
-        onClose={() => setSettingsOpen(false)}
-        onClosed={() => {
-          if (pendingImport) {
-            setPendingImport(false);
-            setImportOpen(true);
-          }
-        }}
-      />
+          <SettingsSheet
+            visible={settingsOpen}
+            name={listName}
+            description={listDescription}
+            favorite={list.favorite}
+            onChangeName={setListName}
+            onChangeDescription={setListDescription}
+            onToggleFavorite={handleToggleFavorite}
+            onSave={saveSettings}
+            onImportTemplates={() => {
+              setPendingImport(true);
+              setSettingsOpen(false);
+            }}
+            onClearCompleted={async () => {
+              setSettingsOpen(false);
+              await clearCompleted({ listId: lid });
+            }}
+            onDelete={handleDeleteList}
+            onClose={() => setSettingsOpen(false)}
+            onClosed={() => {
+              if (pendingImport) {
+                setPendingImport(false);
+                setImportOpen(true);
+              }
+            }}
+          />
 
-      <ImportTemplatesSheet
-        visible={importOpen}
-        projectId={pid}
-        listId={lid}
-        onClose={() => setImportOpen(false)}
-      />
+          <ImportTemplatesSheet
+            visible={importOpen}
+            projectId={pid}
+            listId={lid}
+            onClose={() => setImportOpen(false)}
+          />
+        </>
+      )}
     </Screen>
   );
 }
