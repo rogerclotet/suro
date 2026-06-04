@@ -59,16 +59,24 @@ export function SheetHost({ children }: { children: ReactNode }) {
 export function Sheet({
   visible,
   onClose,
+  onClosed,
   children,
 }: {
   visible: boolean;
   onClose: () => void;
+  // Fires once the sheet has fully slid out and unmounted. Use it to chain a
+  // second sheet open: presenting a new Modal while this one is still mounted
+  // is silently dropped on iOS, so the next sheet must wait for this.
+  onClosed?: () => void;
   children: ReactNode;
 }) {
   const t = useTheme();
   const { acquire, release } = useContext(SheetCountContext);
   const [mounted, setMounted] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
+  const shownRef = useRef(false);
+  const onClosedRef = useRef(onClosed);
+  onClosedRef.current = onClosed;
 
   // Register as open for as long as the parent wants us visible; release on the
   // way out so the FAB can reappear as we animate away.
@@ -82,6 +90,7 @@ export function Sheet({
 
   useEffect(() => {
     if (visible) {
+      shownRef.current = true;
       setMounted(true);
       Animated.timing(anim, {
         toValue: 1,
@@ -98,6 +107,10 @@ export function Sheet({
       }).start(({ finished }) => {
         if (finished) {
           setMounted(false);
+          if (shownRef.current) {
+            shownRef.current = false;
+            onClosedRef.current?.();
+          }
         }
       });
     }
@@ -210,6 +223,39 @@ export function Loading() {
     <Center>
       <ActivityIndicator color={t.primary} size="large" />
     </Center>
+  );
+}
+
+// Thin completion bar mirroring the web list preview: a muted track with a
+// primary fill that's dimmed until everything is done.
+export function ProgressBar({
+  value,
+  complete,
+}: {
+  value: number;
+  complete?: boolean;
+}) {
+  const t = useTheme();
+  const pct = Math.max(0, Math.min(1, value)) * 100;
+  return (
+    <View
+      style={{
+        height: 4,
+        borderRadius: 999,
+        backgroundColor: t.border,
+        overflow: "hidden",
+      }}
+    >
+      <View
+        style={{
+          height: "100%",
+          width: `${pct}%`,
+          borderRadius: 999,
+          backgroundColor: t.primary,
+          opacity: complete ? 1 : 0.5,
+        }}
+      />
+    </View>
   );
 }
 

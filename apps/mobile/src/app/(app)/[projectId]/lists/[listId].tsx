@@ -89,6 +89,9 @@ export default function ListDetail() {
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  // Opening the import sheet while the settings sheet is still animating out
+  // would stack two Modals; defer it until settings reports it has closed.
+  const [pendingImport, setPendingImport] = useState(false);
   const [listName, setListName] = useState("");
   const [listDescription, setListDescription] = useState("");
 
@@ -215,6 +218,11 @@ export default function ListDetail() {
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={{ gap: 8, paddingBottom: 12 }}>
+            {list.description ? (
+              <Txt muted size={14} style={{ paddingBottom: 4 }}>
+                {list.description}
+              </Txt>
+            ) : null}
             <Field
               placeholder={tl("addItemPlaceholder")}
               value={name}
@@ -323,8 +331,8 @@ export default function ListDetail() {
         onToggleFavorite={handleToggleFavorite}
         onSave={saveSettings}
         onImportTemplates={() => {
+          setPendingImport(true);
           setSettingsOpen(false);
-          setImportOpen(true);
         }}
         onClearCompleted={async () => {
           setSettingsOpen(false);
@@ -332,6 +340,12 @@ export default function ListDetail() {
         }}
         onDelete={handleDeleteList}
         onClose={() => setSettingsOpen(false)}
+        onClosed={() => {
+          if (pendingImport) {
+            setPendingImport(false);
+            setImportOpen(true);
+          }
+        }}
       />
 
       <ImportTemplatesSheet
@@ -417,6 +431,7 @@ function SettingsSheet({
   onClearCompleted,
   onDelete,
   onClose,
+  onClosed,
 }: {
   visible: boolean;
   name: string;
@@ -430,11 +445,12 @@ function SettingsSheet({
   onClearCompleted: () => void;
   onDelete: () => void;
   onClose: () => void;
+  onClosed: () => void;
 }) {
   const tl = useTranslations("mobile.lists");
   const tc = useTranslations("mobile.common");
   return (
-    <Sheet visible={visible} onClose={onClose}>
+    <Sheet visible={visible} onClose={onClose} onClosed={onClosed}>
       <Txt size={18} weight="700">
         {tl("listSettings")}
       </Txt>

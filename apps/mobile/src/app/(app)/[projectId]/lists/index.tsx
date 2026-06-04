@@ -10,7 +10,16 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  ProgressBar,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
 type ListWithItems = ListsResult[number];
@@ -105,7 +114,9 @@ export default function ListsOverview() {
             </Txt>
           )}
           renderItem={({ item }) => {
+            const total = item.items.length;
             const done = item.items.filter((i) => i.completed).length;
+            const complete = total > 0 && done === total;
             return (
               <Pressable
                 style={{ marginBottom: 8 }}
@@ -123,14 +134,33 @@ export default function ListsOverview() {
                   <Txt size={17} weight="700">
                     {item.name}
                   </Txt>
-                  <Txt muted size={13}>
-                    {item.items.length === 0
-                      ? tc("empty")
-                      : tc("itemsDone", {
-                          done,
-                          total: item.items.length,
-                        })}
-                  </Txt>
+                  {item.description ? (
+                    <Txt
+                      muted
+                      size={13}
+                      numberOfLines={1}
+                      style={{ marginTop: 2 }}
+                    >
+                      {item.description}
+                    </Txt>
+                  ) : null}
+                  {total === 0 ? (
+                    <Txt muted size={13} style={{ marginTop: 2 }}>
+                      {tc("empty")}
+                    </Txt>
+                  ) : (
+                    <View style={{ marginTop: 8, gap: 6 }}>
+                      <Txt
+                        muted
+                        size={12}
+                        weight="700"
+                        style={{ textAlign: "right" }}
+                      >
+                        {done}/{total}
+                      </Txt>
+                      <ProgressBar value={done / total} complete={complete} />
+                    </View>
+                  )}
                 </View>
               </Pressable>
             );
