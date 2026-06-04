@@ -3,7 +3,8 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { ChevronRight, LayoutTemplate, Tag } from "lucide-react-native";
+import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useProjectId } from "@/lib/project-id";
@@ -58,15 +59,32 @@ export default function ListsOverview() {
           contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View style={{ flexDirection: "row", gap: 20, paddingBottom: 8 }}>
-              <Pressable
+            <View
+              style={{
+                backgroundColor: t.card,
+                borderColor: t.border,
+                borderWidth: 1,
+                borderRadius: 14,
+                overflow: "hidden",
+              }}
+            >
+              <NavRow
+                icon={<LayoutTemplate color={t.primary} size={20} />}
+                label="Templates"
+                onPress={() => router.push(`/${pid}/lists/templates`)}
+              />
+              <View
+                style={{
+                  height: 1,
+                  marginLeft: 46,
+                  backgroundColor: t.border,
+                }}
+              />
+              <NavRow
+                icon={<Tag color={t.primary} size={20} />}
+                label="Categories"
                 onPress={() => router.push(`/${pid}/lists/categories`)}
-              >
-                <Txt style={{ color: t.primary }}>Categories</Txt>
-              </Pressable>
-              <Pressable onPress={() => router.push(`/${pid}/lists/templates`)}>
-                <Txt style={{ color: t.primary }}>Templates</Txt>
-              </Pressable>
+              />
             </View>
           }
           ListEmptyComponent={
@@ -121,6 +139,37 @@ export default function ListsOverview() {
         onClose={() => setCreating(false)}
       />
     </Screen>
+  );
+}
+
+function NavRow({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: ReactNode;
+  label: string;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        backgroundColor: pressed ? t.border : "transparent",
+      })}
+    >
+      <View style={{ width: 20, alignItems: "center" }}>{icon}</View>
+      <Txt size={16} style={{ flex: 1 }}>
+        {label}
+      </Txt>
+      <ChevronRight color={t.muted} size={18} />
+    </Pressable>
   );
 }
 
