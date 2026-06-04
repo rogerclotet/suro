@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Share, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
+import { sectionHeaderBadges } from "@/components/header-badges";
 import { MonthGrid } from "@/components/month-grid";
 import { formatTimeRange, isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { useProjectId } from "@/lib/project-id";
@@ -98,11 +99,7 @@ export default function CalendarScreen() {
       <Stack.Screen
         options={{
           title: "Calendar",
-          headerLeft: () => (
-            <Pressable onPress={() => router.navigate("/projects")} hitSlop={8}>
-              <Txt style={{ color: t.primary }}>Groups</Txt>
-            </Pressable>
-          ),
+          ...sectionHeaderBadges("calendar"),
         }}
       />
 
@@ -162,7 +159,7 @@ export default function CalendarScreen() {
         )}
       </ScrollView>
 
-      {!creating && <Fab onPress={() => setCreating(true)} />}
+      <Fab onPress={() => setCreating(true)} />
       <EventForm
         visible={creating}
         defaultDate={selectedDay}

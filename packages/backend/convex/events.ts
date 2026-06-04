@@ -137,6 +137,20 @@ export const remove = mutation({
     for (const file of attachedFiles) {
       await ctx.db.patch(file._id, { eventId: undefined });
     }
+    const linkedNotes = await ctx.db
+      .query("notes")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+    for (const note of linkedNotes) {
+      await ctx.db.patch(note._id, { eventId: undefined });
+    }
+    const linkedPots = await ctx.db
+      .query("pots")
+      .withIndex("by_event", (q) => q.eq("eventId", event._id))
+      .collect();
+    for (const pot of linkedPots) {
+      await ctx.db.patch(pot._id, { eventId: undefined });
+    }
     await ctx.db.delete(event._id);
     return null;
   },

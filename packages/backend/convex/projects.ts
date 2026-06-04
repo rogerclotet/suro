@@ -26,3 +26,26 @@ export const get = query({
     return ctx.db.get(projectId);
   },
 });
+
+/** Members of a project, as the avatar fields the UI needs. */
+export const members = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const memberships = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const users = await Promise.all(
+      memberships.map((m) => ctx.db.get(m.userId)),
+    );
+    return users
+      .filter((u) => u !== null)
+      .map((u) => ({
+        _id: u._id,
+        name: u.name ?? null,
+        image: u.customImage ?? u.image ?? null,
+        avatarColor: u.avatarColor ?? null,
+      }));
+  },
+});

@@ -157,4 +157,64 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     .index("by_event", ["eventId"])
     .index("by_legacyId", ["legacyId"]),
+
+  // Free-text notes. `format` mirrors the Drizzle column ("html" | "plain");
+  // the Expo client edits plain text. Optional event backlink (ON DELETE SET
+  // NULL — events.remove nulls eventId manually).
+  notes: defineTable({
+    name: v.string(),
+    contents: v.string(),
+    format: v.string(),
+    projectId: v.id("projects"),
+    eventId: v.optional(v.id("events")),
+    createdBy: v.id("users"),
+    updatedBy: v.optional(v.id("users")),
+    updatedAt: v.number(),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_updatedAt", ["projectId", "updatedAt"])
+    .index("by_event", ["eventId"])
+    .index("by_legacyId", ["legacyId"]),
+
+  // Expense "pots" (shared tabs). `settledAt` (epoch ms) marks a settled pot;
+  // undefined = active. Optional event backlink (ON DELETE SET NULL).
+  pots: defineTable({
+    name: v.string(),
+    projectId: v.id("projects"),
+    settledAt: v.optional(v.number()),
+    createdBy: v.id("users"),
+    eventId: v.optional(v.id("events")),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_event", ["eventId"])
+    .index("by_legacyId", ["legacyId"]),
+
+  // Pot membership (replaces the f_potToUser join), mirroring projectMembers.
+  potMembers: defineTable({
+    potId: v.id("pots"),
+    userId: v.id("users"),
+  })
+    .index("by_pot", ["potId"])
+    .index("by_user", ["userId"])
+    .index("by_pot_user", ["potId", "userId"]),
+
+  // Individual spendings within a pot. `amount` is in cents. `to` set = a direct
+  // payment from→to; `to` unset = an equal split among all pot members. `from`
+  // unset is unused by the Expo client but kept for migration fidelity.
+  spendings: defineTable({
+    amount: v.number(),
+    currency: v.string(),
+    description: v.optional(v.string()),
+    from: v.optional(v.id("users")),
+    to: v.optional(v.id("users")),
+    projectId: v.id("projects"),
+    potId: v.optional(v.id("pots")),
+    createdBy: v.id("users"),
+    legacyId: v.optional(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_pot", ["potId"])
+    .index("by_legacyId", ["legacyId"]),
 });

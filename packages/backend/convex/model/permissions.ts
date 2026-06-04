@@ -80,6 +80,24 @@ export async function requireEventAccess(ctx: QueryCtx, eventId: Id<"events">) {
   return { event, userId };
 }
 
+export async function requireNoteAccess(ctx: QueryCtx, noteId: Id<"notes">) {
+  const note = await ctx.db.get(noteId);
+  if (note === null) {
+    throw new Error("Note not found");
+  }
+  const userId = await requireProjectMember(ctx, note.projectId);
+  return { note, userId };
+}
+
+export async function requirePotAccess(ctx: QueryCtx, potId: Id<"pots">) {
+  const pot = await ctx.db.get(potId);
+  if (pot === null) {
+    throw new Error("Pot not found");
+  }
+  const userId = await requireProjectMember(ctx, pot.projectId);
+  return { pot, userId };
+}
+
 /**
  * Ports requireOwnedFile: only the uploader may rename/delete a file. The opaque
  * "not found" (rather than "forbidden") matches the Next.js owner check.

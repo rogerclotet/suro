@@ -1,7 +1,9 @@
 import { api } from "backend/convex/_generated/api";
 import { useQuery } from "convex/react";
+import { Stack } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { FileList } from "@/components/file-list";
+import { sectionHeaderBadges } from "@/components/header-badges";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useProjectId } from "@/lib/project-id";
 import { useUploadFile } from "@/lib/use-upload-file";
@@ -14,6 +16,9 @@ export default function Files() {
 
   return (
     <Screen>
+      <Stack.Screen
+        options={{ title: "Files", ...sectionHeaderBadges("files") }}
+      />
       {files === undefined ? (
         <Loading />
       ) : (

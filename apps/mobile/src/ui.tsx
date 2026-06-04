@@ -1,5 +1,14 @@
 import { Plus } from "lucide-react-native";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -18,6 +27,33 @@ import { FONT, useTheme } from "./theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
+// Tracks how many sheets are currently open so chrome like the FAB can step
+// aside while a drawer is on screen — otherwise the FAB's bright shadow bleeds
+// through the backdrop as it fades in.
+const SheetCountContext = createContext<{
+  anyOpen: boolean;
+  acquire: () => void;
+  release: () => void;
+}>({ anyOpen: false, acquire: () => {}, release: () => {} });
+
+export function SheetHost({ children }: { children: ReactNode }) {
+  const [openCount, setOpenCount] = useState(0);
+  const acquire = useCallback(() => setOpenCount((c) => c + 1), []);
+  const release = useCallback(
+    () => setOpenCount((c) => Math.max(0, c - 1)),
+    [],
+  );
+  const value = useMemo(
+    () => ({ anyOpen: openCount > 0, acquire, release }),
+    [openCount, acquire, release],
+  );
+  return (
+    <SheetCountContext.Provider value={value}>
+      {children}
+    </SheetCountContext.Provider>
+  );
+}
+
 export function Sheet({
   visible,
   onClose,
@@ -28,8 +64,19 @@ export function Sheet({
   children: ReactNode;
 }) {
   const t = useTheme();
+  const { acquire, release } = useContext(SheetCountContext);
   const [mounted, setMounted] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
+
+  // Register as open for as long as the parent wants us visible; release on the
+  // way out so the FAB can reappear as we animate away.
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    acquire();
+    return release;
+  }, [visible, acquire, release]);
 
   useEffect(() => {
     if (visible) {
@@ -95,6 +142,12 @@ export function Sheet({
 
 export function Fab({ onPress }: { onPress: () => void }) {
   const t = useTheme();
+  const { anyOpen } = useContext(SheetCountContext);
+  // Hide while any drawer is open so the FAB's shadow doesn't bleed through the
+  // backdrop or ride up with the slide-in animation.
+  if (anyOpen) {
+    return null;
+  }
   return (
     <Pressable
       onPress={onPress}
@@ -216,34 +269,6 @@ export function Button({
 // Standard edge inset for header-bar actions. A custom headerLeft/headerRight
 // doesn't inherit the native header's inset, so each one applies it itself.
 export const HEADER_BUTTON_INSET = 16;
-
-/** A header-bar action (headerLeft/headerRight) with the standard edge inset. */
-export function HeaderButton({
-  onPress,
-  accessibilityLabel,
-  children,
-}: {
-  onPress: () => void;
-  accessibilityLabel?: string;
-  children: ReactNode;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={8}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        paddingHorizontal: HEADER_BUTTON_INSET,
-      }}
-    >
-      {children}
-    </Pressable>
-  );
-}
 
 export function Field({ style, ...props }: TextInputProps) {
   const t = useTheme();
