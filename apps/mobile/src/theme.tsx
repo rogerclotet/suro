@@ -1,5 +1,11 @@
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as NavigationThemeProvider,
+} from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import {
   createContext,
   type ReactNode,
@@ -9,7 +15,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useColorScheme } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 
 /** The web app's typeface (loaded via expo-font in app/_layout.tsx). */
 export const FONT = "Convergence_400Regular";
@@ -101,16 +107,60 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         : "light"
       : preference;
 
+  // Paint the native root view to match the active scheme. Without this, the
+  // OS default (light) root view shows through for a frame while a tab's Stack
+  // lazily mounts on iOS — a white flash when switching sections. (Android
+  // already covers this via the tab navigator's backgroundColor.) Also keeps
+  // the root correct when the in-app preference diverges from the OS scheme.
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(palette[scheme].bg).catch(() => {});
+  }, [scheme]);
+
+  // Force native UIKit chrome (nav bar, header buttons, tab bar, system
+  // dialogs) onto the chosen appearance. `userInterfaceStyle: "automatic"`
+  // otherwise leaves them on the OS appearance, so a dark in-app theme over a
+  // light OS flashes the native bars white as react-native-screens rebuilds
+  // them on a section change. "unspecified" restores OS-following for "system".
+  useEffect(() => {
+    Appearance.setColorScheme(
+      preference === "system" ? "unspecified" : preference,
+    );
+  }, [preference]);
+
   const value = useMemo(
     () => ({ scheme, preference, setPreference }),
     [scheme, preference, setPreference],
   );
 
+  // React Navigation theme for the native stacks. The native header reads this
+  // theme's `dark` flag to set the iOS header's `experimental_userInterfaceStyle`
+  // — without a dark theme here it forces the header (and its Liquid Glass bar
+  // buttons) to light, so the glass capsules flash white on a section change.
+  // Colors are mapped to our palette so the navigator's defaults match.
+  const navigationTheme = useMemo(() => {
+    const base = scheme === "dark" ? DarkTheme : DefaultTheme;
+    const pal = palette[scheme];
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        primary: pal.primary,
+        background: pal.bg,
+        card: pal.bg,
+        text: pal.text,
+        border: pal.border,
+        notification: pal.primary,
+      },
+    };
+  }, [scheme]);
+
   return (
     <ThemeContext.Provider value={value}>
-      {/* Keep the OS status bar legible against the resolved scheme. */}
-      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
-      {children}
+      <NavigationThemeProvider value={navigationTheme}>
+        {/* Keep the OS status bar legible against the resolved scheme. */}
+        <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+        {children}
+      </NavigationThemeProvider>
     </ThemeContext.Provider>
   );
 }

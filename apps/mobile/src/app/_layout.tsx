@@ -1,3 +1,5 @@
+// Side-effect import: install Intl polyfills before any component renders.
+import "@/polyfills";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import {
   Convergence_400Regular,

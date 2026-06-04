@@ -770,7 +770,11 @@
       "name": "Nom",
       "someone": "Algú",
       "member": "Membre",
-      "memberCount": "{count, plural, =1 {# membre} other {# membres}}"
+      "memberCount": "{count, plural, =1 {# membre} other {# membres}}",
+      "timeAgoJustNow": "Ara mateix",
+      "timeAgoMinutes": "Fa {minutes, plural, =1 {# minut} other {# minuts}}",
+      "timeAgoHours": "Fa {hours, plural, =1 {# hora} other {# hores}}",
+      "timeAgoDays": "Fa {days, plural, =1 {# dia} other {# dies}}"
     },
     "auth": {
       "tagline": "Llistes, calendari i més, compartit amb la teva gent.",

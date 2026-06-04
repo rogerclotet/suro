@@ -30,6 +30,9 @@ importers:
       '@expo-google-fonts/convergence':
         specifier: ^0.4.1
         version: 0.4.1
+      '@formatjs/intl-pluralrules':
+        specifier: ^6.3.9
+        version: 6.3.9
       backend:
         specifier: workspace:*
         version: link:../../packages/backend
@@ -1914,8 +1917,14 @@ packages:
   '@fontsource/convergence@5.2.8':
     resolution: {integrity: sha512-H+scSdAntblH+rsSlYRFlTJcJPeSfbJ8okobtvktfjGL4zHl3OzjwQEhglawmVgLdbyeJJ0RiKQs7K9CTiBQuQ==}
 
+  '@formatjs/bigdecimal@0.2.5':
+    resolution: {integrity: sha512-2XTKNrZRaCUyXK2976wfutqxMBuPO/S/zbJnQdysLI2Zy5mWPVNVEkE6tsTcSVWSE7DgO88t8DtBy+uf3I8bxg==}
+
   '@formatjs/fast-memoize@3.1.3':
     resolution: {integrity: sha512-Ocd1vPuD68rW6BJDuAOtnnc1GPeVepY5kZXML1psGVFQ+1Q8CfkftT3Tnam+Mxx97Pz08jIEDCotl/GV+Naccg==}
+
+  '@formatjs/fast-memoize@3.1.5':
+    resolution: {integrity: sha512-KLi3fan6WnCHmigd9pmEEN8Hid0v4wiFBW576M/d07KMWYecf1CvyMI3n34vCmHT4AoVqG2n702kiHbXjzZX2A==}
 
   '@formatjs/icu-messageformat-parser@3.5.6':
     resolution: {integrity: sha512-04ZjRIeQCnR/h32wBP9/S7rkyy1hLAs2fXJcNwc7hseJd//K9TMBqK0ukb4dXqnALKQ9m5ruZeOD2qqEkK9ixg==}
@@ -1925,6 +1934,12 @@ packages:
 
   '@formatjs/intl-localematcher@0.8.5':
     resolution: {integrity: sha512-TEW/NR367c3PcQ2AXfkNig9jC740+qbkM0LgKl7UCE7Xtv7C5Uk1mvlu86MjQZBmscUai8HSWjcEETpwaVvJ6A==}
+
+  '@formatjs/intl-localematcher@0.8.9':
+    resolution: {integrity: sha512-GmB0F/gYh4Hdl4rLWjgDsgT+x4pB54fkJeRh8kAZ4XFzKeCK8dGs+SBJWXO42QZtOUni+IDWKNuCw6wiL4lTvw==}
+
+  '@formatjs/intl-pluralrules@6.3.9':
+    resolution: {integrity: sha512-0405uU1npNs5/N04tfIQ3pme96Xb51tEkCBTBKy8HMjAsssbhnK70gf8v3ogj1WqHf7WFRoFZu8clQTsvwBQNg==}
 
   '@formkit/auto-animate@0.9.0':
     resolution: {integrity: sha512-VhP4zEAacXS3dfTpJpJ88QdLqMTcabMg0jwpOSxZ/VzfQVfl3GkZSCZThhGC5uhq/TxPHPzW0dzr4H9Bb1OgKA==}
@@ -6801,10 +6816,6 @@ packages:
     resolution: {integrity: sha512-dAqSqE/RabpBKI8+h26GfLq6Vb3JVXs30XYQjdMjaj/c2tS8IYYMbIzP599KtRj7c57/wYApb3QjgRgXmrCukA==}
     engines: {node: '>=18'}
 
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -8817,7 +8828,11 @@ snapshots:
 
   '@fontsource/convergence@5.2.8': {}
 
+  '@formatjs/bigdecimal@0.2.5': {}
+
   '@formatjs/fast-memoize@3.1.3': {}
+
+  '@formatjs/fast-memoize@3.1.5': {}
 
   '@formatjs/icu-messageformat-parser@3.5.6':
     dependencies:
@@ -8828,6 +8843,15 @@ snapshots:
   '@formatjs/intl-localematcher@0.8.5':
     dependencies:
       '@formatjs/fast-memoize': 3.1.3
+
+  '@formatjs/intl-localematcher@0.8.9':
+    dependencies:
+      '@formatjs/fast-memoize': 3.1.5
+
+  '@formatjs/intl-pluralrules@6.3.9':
+    dependencies:
+      '@formatjs/bigdecimal': 0.2.5
+      '@formatjs/intl-localematcher': 0.8.9
 
   '@formkit/auto-animate@0.9.0': {}
 
@@ -14155,11 +14179,6 @@ snapshots:
 
   tinyexec@1.1.2: {}
 
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-
   tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
@@ -14392,7 +14411,7 @@ snapshots:
       std-env: 4.1.0
       tinybench: 2.9.0
       tinyexec: 1.1.2
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
       vite: 8.0.16(@types/node@25.6.0)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.4)
       why-is-node-running: 2.3.0

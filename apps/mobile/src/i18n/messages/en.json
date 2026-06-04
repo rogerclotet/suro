@@ -770,7 +770,11 @@
       "name": "Name",
       "someone": "Someone",
       "member": "Member",
-      "memberCount": "{count, plural, =1 {# member} other {# members}}"
+      "memberCount": "{count, plural, =1 {# member} other {# members}}",
+      "timeAgoJustNow": "Just now",
+      "timeAgoMinutes": "{minutes, plural, =1 {# minute} other {# minutes}} ago",
+      "timeAgoHours": "{hours, plural, =1 {# hour} other {# hours}} ago",
+      "timeAgoDays": "{days, plural, =1 {# day} other {# days}} ago"
     },
     "auth": {
       "tagline": "Lists, calendar and more, shared with your people.",

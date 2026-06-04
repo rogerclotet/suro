@@ -14,6 +14,7 @@
   "dependencies": {
     "@convex-dev/auth": "^0.0.93",
     "@expo-google-fonts/convergence": "^0.4.1",
+    "@formatjs/intl-pluralrules": "^6.3.9",
     "backend": "workspace:*",
     "convex": "^1.40.0",
     "expo": "~56.0.8",

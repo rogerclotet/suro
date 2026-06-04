@@ -1,9 +1,45 @@
-import { useFormatter, useLocale, useTranslations } from "@/i18n";
+import { useLocale, useTranslations } from "@/i18n";
 import {
   type EventTimes,
   formatTimeRange,
   timeRemainingParts,
 } from "@/lib/event-dates";
+
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * Coarse "time ago" buckets. We compute these ourselves instead of using
+ * `Intl.RelativeTimeFormat` because iOS Hermes ships no `RelativeTimeFormat`
+ * (only DateTime/Number/Collator), so calling it crashes with FORMATTING_ERROR;
+ * Android's Hermes proxies to system ICU and would work, but we keep both
+ * platforms on one code path. Older-than-a-week timestamps fall back to an
+ * absolute localized date.
+ */
+type TimeAgoParts =
+  | { kind: "justNow" }
+  | { kind: "minutes"; minutes: number }
+  | { kind: "hours"; hours: number }
+  | { kind: "days"; days: number }
+  | { kind: "date"; date: Date };
+
+function timeAgoParts(epochMs: number, now: number): TimeAgoParts {
+  const diff = now - epochMs;
+  if (diff < MINUTE_MS) {
+    return { kind: "justNow" };
+  }
+  if (diff < HOUR_MS) {
+    return { kind: "minutes", minutes: Math.floor(diff / MINUTE_MS) };
+  }
+  if (diff < DAY_MS) {
+    return { kind: "hours", hours: Math.floor(diff / HOUR_MS) };
+  }
+  if (diff < 7 * DAY_MS) {
+    return { kind: "days", days: Math.floor(diff / DAY_MS) };
+  }
+  return { kind: "date", date: new Date(epochMs) };
+}
 
 /** Localized event time-range formatter bound to the active UI locale. */
 export function useFormatEventRange(): (event: EventTimes) => string {
@@ -11,10 +47,33 @@ export function useFormatEventRange(): (event: EventTimes) => string {
   return (event) => formatTimeRange(event, locale);
 }
 
-/** Localized relative time ("2 days ago" / "fa 2 dies"), via Intl.RelativeTimeFormat. */
+/** Localized relative time ("2 days ago" / "fa 2 dies"), older items show a date. */
 export function useTimeAgo(): (epochMs: number) => string {
-  const format = useFormatter();
-  return (epochMs) => format.relativeTime(new Date(epochMs));
+  const t = useTranslations("mobile.common");
+  const locale = useLocale();
+  return (epochMs) => {
+    const parts = timeAgoParts(epochMs, Date.now());
+    switch (parts.kind) {
+      case "justNow":
+        return t("timeAgoJustNow");
+      case "minutes":
+        return t("timeAgoMinutes", { minutes: parts.minutes });
+      case "hours":
+        return t("timeAgoHours", { hours: parts.hours });
+      case "days":
+        return t("timeAgoDays", { days: parts.days });
+      case "date":
+        return parts.date.toLocaleDateString(locale, {
+          day: "numeric",
+          month: "short",
+          // Drop the year for same-year dates to keep the label short.
+          year:
+            parts.date.getFullYear() === new Date().getFullYear()
+              ? undefined
+              : "numeric",
+        });
+    }
+  };
 }
 
 /** Localized, pluralized countdown to an event's start, or null once started. */
