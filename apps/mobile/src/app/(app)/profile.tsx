@@ -2,6 +2,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Stack } from "expo-router";
 import {
@@ -179,16 +180,17 @@ function AvatarSection({ user }: { user: Doc<"users"> }) {
     setBusy(true);
     try {
       const postUrl = await generateUploadUrl();
-      const blob = await (await fetch(asset.uri)).blob();
-      const res = await fetch(postUrl, {
-        method: "POST",
+      // RN's fetch can't turn a file:// URI into a Blob ("Creating blobs from
+      // 'ArrayBuffer' ... are not supported"), so stream the bytes natively.
+      const res = await new File(asset.uri).upload(postUrl, {
+        httpMethod: "POST",
+        uploadType: UploadType.BINARY_CONTENT,
         headers: { "Content-Type": asset.mimeType ?? "image/jpeg" },
-        body: blob,
       });
-      if (!res.ok) {
+      if (res.status < 200 || res.status >= 300) {
         throw new Error(`Upload failed (${res.status})`);
       }
-      const { storageId } = (await res.json()) as { storageId: string };
+      const { storageId } = JSON.parse(res.body) as { storageId: string };
       await setAvatarImage({ storageId: storageId as Id<"_storage"> });
     } catch {
       Alert.alert(t("photoError"));

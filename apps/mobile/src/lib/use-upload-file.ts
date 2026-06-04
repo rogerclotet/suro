@@ -2,6 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import * as DocumentPicker from "expo-document-picker";
+import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Alert } from "react-native";
@@ -33,16 +34,17 @@ export function useUploadFile(
     setBusy(true);
     try {
       const postUrl = await generateUploadUrl({ projectId });
-      const blob = await (await fetch(asset.uri)).blob();
-      const res = await fetch(postUrl, {
-        method: "POST",
+      // RN's fetch can't turn a file:// URI into a Blob ("Creating blobs from
+      // 'ArrayBuffer' ... are not supported"), so stream the bytes natively.
+      const res = await new File(asset.uri).upload(postUrl, {
+        httpMethod: "POST",
+        uploadType: UploadType.BINARY_CONTENT,
         headers: { "Content-Type": asset.mimeType },
-        body: blob,
       });
-      if (!res.ok) {
+      if (res.status < 200 || res.status >= 300) {
         throw new Error(`Upload failed (${res.status})`);
       }
-      const { storageId } = (await res.json()) as { storageId: string };
+      const { storageId } = JSON.parse(res.body) as { storageId: string };
       await saveFile({
         projectId,
         eventId,
