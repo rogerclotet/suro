@@ -20,7 +20,6 @@ function isCompleted(list: ListWithItems) {
 export default function ListsOverview() {
   const pid = useProjectId();
   const lists = useQuery(api.lists.listByProject, { projectId: pid });
-  const toggleFavorite = useMutation(api.lists.toggleFavorite);
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
@@ -87,47 +86,29 @@ export default function ListsOverview() {
           renderItem={({ item }) => {
             const done = item.items.filter((i) => i.completed).length;
             return (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 8,
-                }}
+              <Pressable
+                style={{ marginBottom: 8 }}
+                onPress={() => router.push(`/${pid}/lists/${item._id}`)}
               >
-                <Pressable
-                  style={{ flex: 1 }}
-                  onPress={() => router.push(`/${pid}/lists/${item._id}`)}
+                <View
+                  style={{
+                    backgroundColor: t.card,
+                    borderColor: t.border,
+                    borderWidth: 1,
+                    borderRadius: 14,
+                    padding: 14,
+                  }}
                 >
-                  <View
-                    style={{
-                      backgroundColor: t.card,
-                      borderColor: t.border,
-                      borderWidth: 1,
-                      borderRadius: 14,
-                      padding: 14,
-                    }}
-                  >
-                    <Txt size={17} weight="700">
-                      {item.name}
-                    </Txt>
-                    <Txt muted size={13}>
-                      {item.items.length === 0
-                        ? "Empty"
-                        : `${done}/${item.items.length} done`}
-                    </Txt>
-                  </View>
-                </Pressable>
-                <Pressable
-                  onPress={() => void toggleFavorite({ listId: item._id })}
-                  hitSlop={10}
-                  style={{ padding: 6 }}
-                >
-                  <Txt size={22} style={{ color: t.primary }}>
-                    {item.favorite ? "★" : "☆"}
+                  <Txt size={17} weight="700">
+                    {item.name}
                   </Txt>
-                </Pressable>
-              </View>
+                  <Txt muted size={13}>
+                    {item.items.length === 0
+                      ? "Empty"
+                      : `${done}/${item.items.length} done`}
+                  </Txt>
+                </View>
+              </Pressable>
             );
           }}
         />

@@ -3,6 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ellipsis } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
@@ -174,6 +175,10 @@ export default function ListDetail() {
     router.back();
   }
 
+  function handleToggleFavorite() {
+    void toggleFavorite({ listId: lid });
+  }
+
   if (list === undefined) {
     return (
       <Screen>
@@ -188,27 +193,14 @@ export default function ListDetail() {
         options={{
           title: list.name,
           headerRight: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 14,
-                paddingRight: HEADER_BUTTON_INSET,
-              }}
+            <Pressable
+              onPress={openSettings}
+              hitSlop={8}
+              accessibilityLabel="List settings"
+              style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
             >
-              <Pressable
-                onPress={() => void toggleFavorite({ listId: lid })}
-                hitSlop={8}
-              >
-                <Txt size={20} style={{ color: t.primary }}>
-                  {list.favorite ? "★" : "☆"}
-                </Txt>
-              </Pressable>
-              <Pressable onPress={openSettings} hitSlop={8}>
-                <Txt size={20} style={{ color: t.primary }}>
-                  ⋯
-                </Txt>
-              </Pressable>
-            </View>
+              <Ellipsis color={t.primary} size={22} />
+            </Pressable>
           ),
         }}
       />
@@ -323,8 +315,10 @@ export default function ListDetail() {
         visible={settingsOpen}
         name={listName}
         description={listDescription}
+        favorite={list.favorite}
         onChangeName={setListName}
         onChangeDescription={setListDescription}
+        onToggleFavorite={handleToggleFavorite}
         onSave={saveSettings}
         onImportTemplates={() => {
           setSettingsOpen(false);
@@ -404,8 +398,10 @@ function SettingsSheet({
   visible,
   name,
   description,
+  favorite,
   onChangeName,
   onChangeDescription,
+  onToggleFavorite,
   onSave,
   onImportTemplates,
   onClearCompleted,
@@ -415,8 +411,10 @@ function SettingsSheet({
   visible: boolean;
   name: string;
   description: string;
+  favorite: boolean;
   onChangeName: (value: string) => void;
   onChangeDescription: (value: string) => void;
+  onToggleFavorite: () => void;
   onSave: () => void;
   onImportTemplates: () => void;
   onClearCompleted: () => void;
@@ -435,6 +433,11 @@ function SettingsSheet({
         onChangeText={onChangeDescription}
       />
       <Button title="Save" onPress={onSave} />
+      <Button
+        title={favorite ? "Remove from favorites" : "Add to favorites"}
+        variant="ghost"
+        onPress={onToggleFavorite}
+      />
       <Button
         title="Import templates"
         variant="ghost"
