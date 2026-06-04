@@ -12,6 +12,9 @@ const palette = {
     muted: "#6c6f85",
     primary: "#40862f",
     onPrimary: "#ffffff",
+    // Tonal pair for M3 surfaces (FAB container, tab indicator).
+    primaryContainer: "#c6e7bb",
+    onPrimaryContainer: "#0c3900",
     border: "#e4ddd0",
     inputBg: "#ffffff",
   },
@@ -22,6 +25,8 @@ const palette = {
     muted: "#9399b2",
     primary: "#a6e3a1",
     onPrimary: "#1e1e2e",
+    primaryContainer: "#33522c",
+    onPrimaryContainer: "#c2f0bd",
     border: "#3a3a4f",
     inputBg: "#28283b",
   },
