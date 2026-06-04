@@ -5,7 +5,14 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { CalendarArrowDown } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Share, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  View,
+} from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -93,9 +100,27 @@ export default function CalendarScreen() {
 
   async function exportCalendar() {
     const token = await getCalendarToken({ projectId: pid });
-    const url = `${convexSiteUrl()}/calendar.ics?projectId=${pid}&token=${token}`;
-    // Native share sheet lets the user copy or send the subscribable feed URL.
-    await Share.share({ message: url, url });
+    const httpsUrl = `${convexSiteUrl()}/calendar.ics?projectId=${pid}&token=${token}`;
+
+    // iOS handles webcal:// natively: Calendar opens and prompts to subscribe
+    // to the live feed.
+    if (Platform.OS === "ios") {
+      await Linking.openURL(httpsUrl.replace(/^https?:\/\//, "webcal://"));
+      return;
+    }
+
+    // Android calendar apps don't register webcal://. Google Calendar's
+    // ?cid=webcal://… link opens a confirm-subscription prompt for the live
+    // feed. The webcal URL must be encoded because the feed carries query
+    // params (projectId/token) that would otherwise break the outer URL.
+    const webcalUrl = httpsUrl.replace(/^https?:\/\//, "webcal://");
+    const subscribeUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
+    try {
+      await Linking.openURL(subscribeUrl);
+    } catch {
+      // No browser/handler available: fall back to sharing the link.
+      await Share.share({ message: httpsUrl });
+    }
   }
 
   return (
