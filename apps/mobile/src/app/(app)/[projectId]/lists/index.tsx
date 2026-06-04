@@ -7,6 +7,7 @@ import { ChevronRight, LayoutTemplate, Tag } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
@@ -23,6 +24,8 @@ export default function ListsOverview() {
   const lists = useQuery(api.lists.listByProject, { projectId: pid });
   const router = useRouter();
   const t = useTheme();
+  const tl = useTranslations("mobile.lists");
+  const tc = useTranslations("mobile.common");
   const [creating, setCreating] = useState(false);
 
   const sections = useMemo(() => {
@@ -30,23 +33,23 @@ export default function ListsOverview() {
       return [];
     }
     return [
-      { title: "Favorites", data: lists.filter((l) => l.favorite) },
+      { title: tl("sectionFavorites"), data: lists.filter((l) => l.favorite) },
       {
-        title: "Lists",
+        title: tl("sectionLists"),
         data: lists.filter((l) => !l.favorite && !isCompleted(l)),
       },
       {
-        title: "Completed",
+        title: tl("sectionCompleted"),
         data: lists.filter((l) => !l.favorite && isCompleted(l)),
       },
     ].filter((section) => section.data.length > 0);
-  }, [lists]);
+  }, [lists, tl]);
 
   return (
     <Screen>
       <Stack.Screen
         options={{
-          title: "Lists",
+          title: tl("title"),
           ...sectionHeaderBadges("lists"),
         }}
       />
@@ -70,7 +73,7 @@ export default function ListsOverview() {
             >
               <NavRow
                 icon={<LayoutTemplate color={t.primary} size={20} />}
-                label="Templates"
+                label={tl("templates")}
                 onPress={() => router.push(`/${pid}/lists/templates`)}
               />
               <View
@@ -82,14 +85,14 @@ export default function ListsOverview() {
               />
               <NavRow
                 icon={<Tag color={t.primary} size={20} />}
-                label="Categories"
+                label={tl("categories")}
                 onPress={() => router.push(`/${pid}/lists/categories`)}
               />
             </View>
           }
           ListEmptyComponent={
             <Txt muted style={{ paddingVertical: 24, textAlign: "center" }}>
-              No lists yet. Tap + to create one.
+              {tl("empty")}
             </Txt>
           }
           renderSectionHeader={({ section }) => (
@@ -122,8 +125,11 @@ export default function ListsOverview() {
                   </Txt>
                   <Txt muted size={13}>
                     {item.items.length === 0
-                      ? "Empty"
-                      : `${done}/${item.items.length} done`}
+                      ? tc("empty")
+                      : tc("itemsDone", {
+                          done,
+                          total: item.items.length,
+                        })}
                   </Txt>
                 </View>
               </Pressable>
@@ -186,6 +192,8 @@ function CreateListSheet({
   const createList = useMutation(api.lists.create);
   const router = useRouter();
   const t = useTheme();
+  const tl = useTranslations("mobile.lists");
+  const tc = useTranslations("mobile.common");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);
@@ -223,18 +231,23 @@ function CreateListSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        New list
+        {tl("newList")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={setName} autoFocus />
       <Field
-        placeholder="Description (optional)"
+        placeholder={tl("namePlaceholder")}
+        value={name}
+        onChangeText={setName}
+        autoFocus
+      />
+      <Field
+        placeholder={tl("descriptionPlaceholder")}
         value={description}
         onChangeText={setDescription}
       />
       {templates && templates.length > 0 ? (
         <>
           <Txt muted size={13}>
-            Include templates
+            {tl("includeTemplates")}
           </Txt>
           <ScrollView style={{ maxHeight: 200 }}>
             {templates.map((template) => (
@@ -261,7 +274,7 @@ function CreateListSheet({
         </>
       ) : null}
       <Button
-        title={busy ? "Creating…" : "Create list"}
+        title={busy ? tc("creating") : tl("createList")}
         disabled={busy || name.trim().length === 0}
         onPress={create}
       />

@@ -74,37 +74,45 @@ const TIME_OPTS: Intl.DateTimeFormatOptions = {
   minute: "2-digit",
 };
 
-/** Human time-range string, ported from time-range.tsx (uses device locale). */
-export function formatTimeRange(event: EventTimes): string {
+/**
+ * Human time-range string, ported from time-range.tsx. `locale` (a BCP-47 tag
+ * or undefined) selects the language; pass the active UI locale so dates render
+ * in it — `undefined` falls back to the device locale.
+ */
+export function formatTimeRange(event: EventTimes, locale?: string): string {
   const start = new Date(event.startAt);
   const end = new Date(event.endAt);
 
   if (event.allDay) {
     const displayEnd = allDayDisplayEnd(event.endAt);
     if (sameDay(displayEnd, start)) {
-      return start.toLocaleDateString(undefined, DATE_OPTS);
+      return start.toLocaleDateString(locale, DATE_OPTS);
     }
-    return `${start.toLocaleDateString(undefined, DATE_OPTS)} - ${displayEnd.toLocaleDateString(undefined, DATE_OPTS)}`;
+    return `${start.toLocaleDateString(locale, DATE_OPTS)} - ${displayEnd.toLocaleDateString(locale, DATE_OPTS)}`;
   }
 
   if (sameDay(start, end)) {
-    return `${start.toLocaleString(undefined, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleTimeString(undefined, TIME_OPTS)}`;
+    return `${start.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleTimeString(locale, TIME_OPTS)}`;
   }
-  return `${start.toLocaleString(undefined, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleString(undefined, { ...DATE_OPTS, ...TIME_OPTS })}`;
-}
-
-function plural(n: number, unit: string): string {
-  return `${n} ${unit}${n === 1 ? "" : "s"}`;
+  return `${start.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })}`;
 }
 
 /**
- * Countdown to the event start, ported from time-remaining.tsx. Returns null
- * once the event has started (or is < 1 minute away).
+ * Countdown to the event start as a localizable descriptor, ported from
+ * time-remaining.tsx. Returns null once the event has started (or is < 1 minute
+ * away). The UI maps the descriptor to a translated, pluralized string.
  */
-export function formatTimeRemaining(
+export type TimeRemaining =
+  | { kind: "days"; days: number }
+  | { kind: "daysHours"; days: number; hours: number }
+  | { kind: "hours"; hours: number }
+  | { kind: "oneHourMinutes"; minutes: number }
+  | { kind: "minutes"; minutes: number };
+
+export function timeRemainingParts(
   event: EventTimes,
   now: number,
-): string | null {
+): TimeRemaining | null {
   const remaining = event.startAt - now;
   if (remaining < 0) {
     return null;
@@ -114,19 +122,19 @@ export function formatTimeRemaining(
   const minutes = Math.floor((remaining % HOUR_MS) / MINUTE_MS);
 
   if (days > 2 || (days > 0 && hours === 0)) {
-    return `${plural(days, "day")} remaining`;
+    return { kind: "days", days };
   }
   if (days > 0) {
-    return `${plural(days, "day")} and ${plural(hours, "hour")} remaining`;
+    return { kind: "daysHours", days, hours };
   }
   if (hours > 1) {
-    return `${plural(hours, "hour")} remaining`;
+    return { kind: "hours", hours };
   }
   if (hours > 0) {
-    return `1 hour and ${plural(minutes, "minute")} remaining`;
+    return { kind: "oneHourMinutes", minutes };
   }
   if (minutes > 0) {
-    return `${plural(minutes, "minute")} remaining`;
+    return { kind: "minutes", minutes };
   }
   return null;
 }

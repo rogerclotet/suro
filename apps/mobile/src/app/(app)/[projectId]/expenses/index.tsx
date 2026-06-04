@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
@@ -16,17 +17,19 @@ export default function ExpensesOverview() {
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
+  const tExp = useTranslations("mobile.expenses");
+  const tc = useTranslations("mobile.common");
 
   return (
     <Screen>
       <Stack.Screen
-        options={{ title: "Expenses", ...sectionHeaderBadges("expenses") }}
+        options={{ title: tExp("title"), ...sectionHeaderBadges("expenses") }}
       />
       {pots === undefined ? (
         <Loading />
       ) : pots.length === 0 ? (
         <Txt muted style={{ padding: 24, textAlign: "center" }}>
-          No pots yet. Tap + to start a shared tab.
+          {tExp("empty")}
         </Txt>
       ) : (
         <ScrollView
@@ -61,7 +64,7 @@ export default function ExpensesOverview() {
                       paddingVertical: 2,
                     }}
                   >
-                    Settled
+                    {tExp("settled")}
                   </Txt>
                 ) : null}
               </View>
@@ -83,8 +86,7 @@ export default function ExpensesOverview() {
                   />
                 ))}
                 <Txt muted size={13} style={{ marginLeft: 4 }}>
-                  {pot.members.length}{" "}
-                  {pot.members.length === 1 ? "member" : "members"}
+                  {tc("memberCount", { count: pot.members.length })}
                 </Txt>
               </View>
             </Card>
@@ -115,6 +117,8 @@ function CreatePotSheet({
   const createPot = useMutation(api.expenses.createPot);
   const router = useRouter();
   const t = useTheme();
+  const tExp = useTranslations("mobile.expenses");
+  const tc = useTranslations("mobile.common");
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<Set<Id<"users">> | null>(null);
   const [busy, setBusy] = useState(false);
@@ -156,11 +160,16 @@ function CreatePotSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        New pot
+        {tExp("newPot")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={setName} autoFocus />
+      <Field
+        placeholder={tExp("namePlaceholder")}
+        value={name}
+        onChangeText={setName}
+        autoFocus
+      />
       <Txt muted size={13}>
-        Members ({chosen.size})
+        {tExp("members", { count: chosen.size })}
       </Txt>
       {members === undefined ? (
         <Loading />
@@ -192,7 +201,7 @@ function CreatePotSheet({
                   size={28}
                 />
                 <Txt style={{ flex: 1 }} numberOfLines={1}>
-                  {member.name ?? "Member"}
+                  {member.name ?? tc("member")}
                 </Txt>
                 {on ? (
                   <Txt weight="700" style={{ color: t.primary }}>
@@ -205,7 +214,7 @@ function CreatePotSheet({
         </ScrollView>
       )}
       <Button
-        title={busy ? "Creating…" : "Create pot"}
+        title={busy ? tc("creating") : tExp("createPot")}
         disabled={busy || name.trim().length === 0 || chosen.size < 2}
         onPress={submit}
       />

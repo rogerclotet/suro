@@ -5,6 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
@@ -17,6 +18,7 @@ export default function Templates() {
   const templates = useQuery(api.templates.listByProject, { projectId: pid });
   const router = useRouter();
   const t = useTheme();
+  const tr = useTranslations("mobile.templates");
 
   const [creating, setCreating] = useState(false);
   // Visibility is separate from the content so the sheet keeps showing the
@@ -26,7 +28,7 @@ export default function Templates() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: "Templates" }} />
+      <Stack.Screen options={{ title: tr("title") }} />
       {templates === undefined ? (
         <Loading />
       ) : (
@@ -36,7 +38,7 @@ export default function Templates() {
           contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
           ListEmptyComponent={
             <Txt muted style={{ padding: 8 }}>
-              No templates yet. Tap + to create one.
+              {tr("empty")}
             </Txt>
           }
           renderItem={({ item }) => (
@@ -71,7 +73,7 @@ export default function Templates() {
                     </Txt>
                   ) : null}
                   <Txt muted size={13}>
-                    {item.items.length} item{item.items.length === 1 ? "" : "s"}
+                    {tr("itemCount", { count: item.items.length })}
                   </Txt>
                 </View>
               </Pressable>
@@ -121,6 +123,8 @@ function CreateTemplateSheet({
 }) {
   const create = useMutation(api.templates.create);
   const router = useRouter();
+  const t = useTranslations("mobile.templates");
+  const tc = useTranslations("mobile.common");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
@@ -150,16 +154,21 @@ function CreateTemplateSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        New template
+        {t("newTemplate")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={setName} autoFocus />
       <Field
-        placeholder="Description (optional)"
+        placeholder={t("namePlaceholder")}
+        value={name}
+        onChangeText={setName}
+        autoFocus
+      />
+      <Field
+        placeholder={t("descriptionPlaceholder")}
         value={description}
         onChangeText={setDescription}
       />
       <Button
-        title={busy ? "Creating…" : "Create template"}
+        title={busy ? tc("creating") : t("createTemplate")}
         disabled={busy || name.trim().length === 0}
         onPress={submit}
       />
@@ -183,6 +192,8 @@ function TemplateActionsSheet({
   const exportToProject = useMutation(api.templates.exportToProject);
   const remove = useMutation(api.templates.remove);
   const router = useRouter();
+  const t = useTranslations("mobile.templates");
+  const tc = useTranslations("mobile.common");
   const [showExport, setShowExport] = useState(false);
 
   const otherProjects = (projects ?? []).filter((p) => p._id !== projectId);
@@ -206,12 +217,12 @@ function TemplateActionsSheet({
     }
     const target = template;
     Alert.alert(
-      "Delete template",
-      `Delete "${target.name}"? This can't be undone.`,
+      t("deleteTemplate"),
+      t("deleteMessage", { name: target.name }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: tc("cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: tc("delete"),
           style: "destructive",
           onPress: () => {
             onClose();
@@ -232,7 +243,10 @@ function TemplateActionsSheet({
     });
     setShowExport(false);
     onClose();
-    Alert.alert("Template exported", `Copied to "${target.name}".`);
+    Alert.alert(
+      t("exportedTitle"),
+      t("exportedMessage", { name: target.name }),
+    );
   }
 
   return (
@@ -249,11 +263,11 @@ function TemplateActionsSheet({
       {showExport ? (
         <>
           <Txt muted size={13}>
-            Export to another group
+            {t("exportToGroup")}
           </Txt>
           {otherProjects.length === 0 ? (
             <Txt muted style={{ paddingVertical: 8 }}>
-              You have no other groups.
+              {t("noOtherGroups")}
             </Txt>
           ) : (
             otherProjects.map((project) => (
@@ -266,7 +280,7 @@ function TemplateActionsSheet({
             ))
           )}
           <Button
-            title="Back"
+            title={tc("back")}
             variant="ghost"
             onPress={() => setShowExport(false)}
           />
@@ -274,17 +288,17 @@ function TemplateActionsSheet({
       ) : (
         <>
           <Button
-            title="Create list from template"
+            title={t("createListFromTemplate")}
             onPress={createListFromTemplate}
           />
           <Button
-            title="Export to another group"
+            title={t("exportToGroup")}
             variant="ghost"
             onPress={() => setShowExport(true)}
           />
           <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
             <Txt style={{ textAlign: "center", color: "#e64553" }}>
-              Delete template
+              {t("deleteTemplate")}
             </Txt>
           </Pressable>
         </>

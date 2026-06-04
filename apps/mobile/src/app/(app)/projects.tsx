@@ -2,15 +2,17 @@ import { api } from "backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { FlatList } from "react-native";
+import { useTranslations } from "@/i18n";
 import { Card, Loading, Screen, Txt } from "@/ui";
 
 export default function Projects() {
   const projects = useQuery(api.projects.listMine);
   const router = useRouter();
+  const t = useTranslations("mobile.groups");
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: "Groups" }} />
+      <Stack.Screen options={{ title: t("title") }} />
       {projects === undefined ? (
         <Loading />
       ) : (
@@ -20,7 +22,7 @@ export default function Projects() {
           contentContainerStyle={{ padding: 16, gap: 12 }}
           ListEmptyComponent={
             <Txt muted style={{ padding: 16 }}>
-              No groups yet.
+              {t("empty")}
             </Txt>
           }
           renderItem={({ item }) => (

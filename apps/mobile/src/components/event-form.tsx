@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, Pressable, ScrollView, Switch, View } from "react-native";
 import { MonthGrid } from "@/components/month-grid";
+import { useTranslations } from "@/i18n";
 import { allDayDisplayEnd, startOfDay, utcMidnight } from "@/lib/event-dates";
 import { useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
@@ -46,6 +47,7 @@ export function EventForm({
   onClose: () => void;
 }) {
   const t = useTheme();
+  const tForm = useTranslations("mobile.eventForm");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [allDay, setAllDay] = useState(true);
@@ -162,9 +164,13 @@ export function EventForm({
         <Txt size={18} weight="700">
           {title}
         </Txt>
-        <Field placeholder="Name" value={name} onChangeText={setName} />
         <Field
-          placeholder="Description (optional)"
+          placeholder={tForm("namePlaceholder")}
+          value={name}
+          onChangeText={setName}
+        />
+        <Field
+          placeholder={tForm("descriptionPlaceholder")}
           value={description}
           onChangeText={setDescription}
         />
@@ -176,7 +182,7 @@ export function EventForm({
             justifyContent: "space-between",
           }}
         >
-          <Txt size={15}>All day</Txt>
+          <Txt size={15}>{tForm("allDay")}</Txt>
           <Switch
             value={allDay}
             onValueChange={setAllDay}
@@ -186,8 +192,16 @@ export function EventForm({
 
         {!allDay ? (
           <View style={{ gap: 8 }}>
-            <TimeRow label="Starts" value={startTime} onChange={setStartTime} />
-            <TimeRow label="Ends" value={endTime} onChange={setEndTime} />
+            <TimeRow
+              label={tForm("starts")}
+              value={startTime}
+              onChange={setStartTime}
+            />
+            <TimeRow
+              label={tForm("ends")}
+              value={endTime}
+              onChange={setEndTime}
+            />
           </View>
         ) : null}
 
@@ -209,7 +223,7 @@ export function EventForm({
         </View>
 
         <Button
-          title={busy ? "Saving…" : "Save"}
+          title={busy ? tForm("saving") : tForm("save")}
           disabled={busy || name.trim().length === 0}
           onPress={submit}
         />

@@ -4,6 +4,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Calendar, File as FileIcon, FileText } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Image, Linking, Pressable, View } from "react-native";
+import { useTranslations } from "@/i18n";
 import { isImage, isPdf, readableSize } from "@/lib/files";
 import { useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
@@ -13,6 +14,8 @@ type ProjectFile = FunctionReturnType<typeof api.files.listByProject>[number];
 /** Self-contained file list: opens files, and offers owner-only rename/delete. */
 export function FileList({ files }: { files: ProjectFile[] }) {
   const t = useTheme();
+  const tFiles = useTranslations("mobile.files");
+  const tc = useTranslations("mobile.common");
   const me = useQuery(api.users.me);
   const rename = useMutation(api.files.rename);
   const remove = useMutation(api.files.remove);
@@ -45,14 +48,18 @@ export function FileList({ files }: { files: ProjectFile[] }) {
 
   function confirmDelete(file: ProjectFile) {
     setEditing(null);
-    Alert.alert("Delete file", `Delete "${file.name}"? This can't be undone.`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => void remove({ fileId: file._id }),
-      },
-    ]);
+    Alert.alert(
+      tFiles("deleteFile"),
+      tFiles("deleteMessage", { name: file.name }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: tc("delete"),
+          style: "destructive",
+          onPress: () => void remove({ fileId: file._id }),
+        },
+      ],
+    );
   }
 
   return (
@@ -129,16 +136,16 @@ export function FileList({ files }: { files: ProjectFile[] }) {
 
       <Sheet visible={editing !== null} onClose={() => setEditing(null)}>
         <Txt size={18} weight="700">
-          File options
+          {tFiles("fileOptions")}
         </Txt>
-        <Field placeholder="Name" value={draft} onChangeText={setDraft} />
-        <Button title="Rename" onPress={saveRename} />
+        <Field placeholder={tc("name")} value={draft} onChangeText={setDraft} />
+        <Button title={tFiles("rename")} onPress={saveRename} />
         <Pressable
           onPress={() => editing && confirmDelete(editing)}
           style={{ padding: 10 }}
         >
           <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            Delete file
+            {tFiles("deleteFile")}
           </Txt>
         </Pressable>
       </Sheet>

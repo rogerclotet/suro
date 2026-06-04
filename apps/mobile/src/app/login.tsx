@@ -6,6 +6,7 @@ import { Redirect } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import { View } from "react-native";
+import { useTranslations } from "@/i18n";
 import { Button, Field, Screen, Txt } from "@/ui";
 
 // Finishes any auth session that was pending when the app was backgrounded.
@@ -16,6 +17,7 @@ const redirectTo = makeRedirectUri();
 export default function Login() {
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  const t = useTranslations("mobile.auth");
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -28,7 +30,7 @@ export default function Login() {
     try {
       await fn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusy(false);
     }
@@ -77,13 +79,13 @@ export default function Login() {
           Suro
         </Txt>
         <Txt muted style={{ textAlign: "center" }}>
-          Lists, calendar and more, shared with your people.
+          {t("tagline")}
         </Txt>
 
         {step === "email" ? (
           <>
             <Field
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -92,7 +94,7 @@ export default function Login() {
               editable={!busy}
             />
             <Button
-              title={busy ? "Sending…" : "Email me a code"}
+              title={busy ? t("sending") : t("sendCode")}
               disabled={busy || email.length === 0}
               onPress={sendCode}
             />
@@ -100,10 +102,10 @@ export default function Login() {
         ) : (
           <>
             <Txt muted style={{ textAlign: "center" }}>
-              Enter the code we sent to {email}.
+              {t("codeSentTo", { email })}
             </Txt>
             <Field
-              placeholder="123456"
+              placeholder={t("codePlaceholder")}
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
@@ -111,12 +113,12 @@ export default function Login() {
               editable={!busy}
             />
             <Button
-              title={busy ? "Verifying…" : "Verify code"}
+              title={busy ? t("verifying") : t("verifyCode")}
               disabled={busy || code.length === 0}
               onPress={verifyCode}
             />
             <Button
-              title="Use a different email"
+              title={t("differentEmail")}
               variant="ghost"
               onPress={() => {
                 setStep("email");
@@ -128,10 +130,10 @@ export default function Login() {
         )}
 
         <Txt muted style={{ textAlign: "center" }}>
-          or
+          {t("or")}
         </Txt>
         <Button
-          title="Continue with Google"
+          title={t("continueWithGoogle")}
           variant="ghost"
           disabled={busy}
           onPress={signInWithGoogle}

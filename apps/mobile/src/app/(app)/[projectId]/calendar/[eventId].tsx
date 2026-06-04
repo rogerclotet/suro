@@ -10,7 +10,8 @@ import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { FileList } from "@/components/file-list";
 import { UploadButton } from "@/components/upload-button";
-import { formatTimeRange, formatTimeRemaining } from "@/lib/event-dates";
+import { useTranslations } from "@/i18n";
+import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
@@ -25,6 +26,10 @@ export default function EventDetail() {
   const eid = eventId as Id<"events">;
   const t = useTheme();
   const router = useRouter();
+  const tCal = useTranslations("mobile.calendar");
+  const tc = useTranslations("mobile.common");
+  const formatRange = useFormatEventRange();
+  const timeRemaining = useTimeRemaining();
 
   const event = useQuery(api.events.get, { eventId: eid });
   const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
@@ -54,10 +59,10 @@ export default function EventDetail() {
       return;
     }
     const name = event.name;
-    Alert.alert("Delete event", `Delete "${name}"? This can't be undone.`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(tCal("deleteEvent"), tCal("deleteMessage", { name }), [
+      { text: tc("cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: tc("delete"),
         style: "destructive",
         onPress: () => {
           setSettingsOpen(false);
@@ -93,7 +98,7 @@ export default function EventDetail() {
     );
   }
 
-  const remaining = formatTimeRemaining(event, now);
+  const remaining = timeRemaining(event, now);
   const linkedList = event.list;
 
   return (
@@ -126,7 +131,7 @@ export default function EventDetail() {
             </Txt>
           ) : null}
           <Txt muted size={14}>
-            {formatTimeRange(event)}
+            {formatRange(event)}
           </Txt>
         </View>
 
@@ -139,7 +144,7 @@ export default function EventDetail() {
             >
               <ListTodo color={t.text} size={18} />
               <Txt size={16} weight="700">
-                List
+                {tCal("list")}
               </Txt>
             </View>
             <LinkedListCard
@@ -162,7 +167,7 @@ export default function EventDetail() {
             >
               <Folders color={t.text} size={18} />
               <Txt size={16} weight="700">
-                Files
+                {tCal("files")}
               </Txt>
             </View>
             <UploadButton projectId={pid} eventId={eid} />
@@ -171,7 +176,7 @@ export default function EventDetail() {
             <FileList files={eventFiles} />
           ) : (
             <Txt muted size={13}>
-              No files attached.
+              {tCal("noFilesAttached")}
             </Txt>
           )}
         </View>
@@ -186,17 +191,17 @@ export default function EventDetail() {
           endAt: event.endAt,
           allDay: event.allDay,
         }}
-        title="Edit event"
+        title={tCal("editEvent")}
         onSubmit={handleEdit}
         onClose={() => setEditing(false)}
       />
 
       <Sheet visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <Txt size={18} weight="700">
-          Event options
+          {tCal("eventOptions")}
         </Txt>
         <Button
-          title="Edit event"
+          title={tCal("editEvent")}
           onPress={() => {
             setSettingsOpen(false);
             setEditing(true);
@@ -204,7 +209,7 @@ export default function EventDetail() {
         />
         {linkedList ? (
           <Button
-            title="Unlink list"
+            title={tCal("unlinkList")}
             variant="ghost"
             onPress={() => {
               setSettingsOpen(false);
@@ -213,9 +218,12 @@ export default function EventDetail() {
           />
         ) : (
           <>
-            <Button title="Create list" onPress={handleCreateLinkedList} />
             <Button
-              title="Link existing list"
+              title={tCal("createList")}
+              onPress={handleCreateLinkedList}
+            />
+            <Button
+              title={tCal("linkExistingList")}
               variant="ghost"
               onPress={() => {
                 setSettingsOpen(false);
@@ -226,7 +234,7 @@ export default function EventDetail() {
         )}
         <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
           <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            Delete event
+            {tCal("deleteEvent")}
           </Txt>
         </Pressable>
       </Sheet>
@@ -248,6 +256,7 @@ function LinkedListCard({
   list: ListWithItems;
   onPress: () => void;
 }) {
+  const tc = useTranslations("mobile.common");
   const done = list.items.filter((item) => item.completed).length;
   return (
     <Card onPress={onPress}>
@@ -256,8 +265,8 @@ function LinkedListCard({
       </Txt>
       <Txt muted size={13}>
         {list.items.length === 0
-          ? "Empty"
-          : `${done}/${list.items.length} done`}
+          ? tc("empty")
+          : tc("itemsDone", { done, total: list.items.length })}
       </Txt>
     </Card>
   );
@@ -274,6 +283,7 @@ function LinkListSheet({
   eventId: Id<"events">;
   onClose: () => void;
 }) {
+  const tCal = useTranslations("mobile.calendar");
   const lists = useQuery(api.lists.listByProject, { projectId });
   const linkList = useMutation(api.events.linkList);
   // Only lists not already linked to an event (mirrors the PWA filter).
@@ -287,11 +297,11 @@ function LinkListSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        Link a list
+        {tCal("linkAList")}
       </Txt>
       {available.length === 0 ? (
         <Txt muted style={{ paddingVertical: 8 }}>
-          No unlinked lists available.
+          {tCal("noUnlinkedLists")}
         </Txt>
       ) : (
         <ScrollView style={{ maxHeight: 320 }}>

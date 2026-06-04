@@ -5,8 +5,9 @@ import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { FlatList } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { useTranslations } from "@/i18n";
+import { useTimeAgo } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
-import { timeAgo } from "@/lib/time-ago";
 import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
 /** Plain-text preview, stripping tags from any migrated HTML notes. */
@@ -20,11 +21,13 @@ export default function NotesOverview() {
   const notes = useQuery(api.notes.listByProject, { projectId: pid });
   const router = useRouter();
   const [creating, setCreating] = useState(false);
+  const tNotes = useTranslations("mobile.notes");
+  const timeAgo = useTimeAgo();
 
   return (
     <Screen>
       <Stack.Screen
-        options={{ title: "Notes", ...sectionHeaderBadges("notes") }}
+        options={{ title: tNotes("title"), ...sectionHeaderBadges("notes") }}
       />
       {notes === undefined ? (
         <Loading />
@@ -35,7 +38,7 @@ export default function NotesOverview() {
           contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 96 }}
           ListEmptyComponent={
             <Txt muted style={{ paddingVertical: 24, textAlign: "center" }}>
-              No notes yet. Tap + to create one.
+              {tNotes("empty")}
             </Txt>
           }
           renderItem={({ item }) => {
@@ -86,6 +89,8 @@ function CreateNoteSheet({
   const router = useRouter();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const tNotes = useTranslations("mobile.notes");
+  const tc = useTranslations("mobile.common");
 
   async function submit() {
     const trimmed = name.trim();
@@ -106,16 +111,16 @@ function CreateNoteSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        New note
+        {tNotes("newNote")}
       </Txt>
       <Field
-        placeholder="Title"
+        placeholder={tNotes("titlePlaceholder")}
         value={name}
         onChangeText={setName}
         autoFocus
       />
       <Button
-        title={busy ? "Creating…" : "Create note"}
+        title={busy ? tc("creating") : tNotes("createNote")}
         disabled={busy || name.trim().length === 0}
         onPress={submit}
       />

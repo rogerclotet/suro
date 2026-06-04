@@ -8,7 +8,9 @@ import type { ComponentType, ReactNode } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { GestureHandlerRootView as RNGestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { I18nProvider } from "@/i18n";
 import { convex, secureStorage } from "@/lib/convex";
+import { ThemeProvider } from "@/theme";
 
 // GestureHandlerRootViewProps drops `children` under React 19 types; re-type it
 // to the props we actually use (runtime behavior is unchanged).
@@ -28,9 +30,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ConvexAuthProvider client={convex} storage={secureStorage}>
-          <Stack screenOptions={{ headerShown: false }} />
-        </ConvexAuthProvider>
+        <ThemeProvider>
+          <ConvexAuthProvider client={convex} storage={secureStorage}>
+            <I18nProvider>
+              <Stack screenOptions={{ headerShown: false }} />
+            </I18nProvider>
+          </ConvexAuthProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

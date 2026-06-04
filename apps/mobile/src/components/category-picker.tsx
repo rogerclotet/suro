@@ -2,6 +2,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { Check, ChevronDown, Plus, Tag } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
 
@@ -60,6 +61,7 @@ export function CategoryPicker({
   onCreate: (name: string) => Promise<Id<"categories">>;
 }) {
   const t = useTheme();
+  const tcat = useTranslations("mobile.categories");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
@@ -119,7 +121,7 @@ export function CategoryPicker({
       >
         <Tag color={t.muted} size={16} />
         <Txt style={{ flex: 1 }} muted={!selected} numberOfLines={1}>
-          {selected?.name ?? "No category"}
+          {selected?.name ?? tcat("noCategory")}
         </Txt>
         <ChevronDown color={t.muted} size={16} />
       </Pressable>
@@ -138,7 +140,7 @@ export function CategoryPicker({
           <Field
             value={query}
             onChangeText={setQuery}
-            placeholder="Search or create…"
+            placeholder={tcat("searchPlaceholder")}
             autoFocus
             editable={!creating}
             returnKeyType="done"
@@ -155,7 +157,7 @@ export function CategoryPicker({
           >
             {trimmedQuery !== "" && !hasCategoryRows ? (
               <Txt muted size={14} style={{ padding: 10 }}>
-                No categories found.
+                {tcat("noResults")}
               </Txt>
             ) : null}
             {rows.map((row) => {
@@ -166,9 +168,9 @@ export function CategoryPicker({
                 (row.type === "category" && row.category._id === value);
               const label =
                 row.type === "create"
-                  ? `Create "${row.name}"`
+                  ? tcat("createNamed", { name: row.name })
                   : row.type === "none"
-                    ? "No category"
+                    ? tcat("noCategory")
                     : row.category.name;
               return (
                 <Pressable

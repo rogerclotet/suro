@@ -22,6 +22,11 @@ export const CATPPUCCIN_COLORS = {
 
 export type CatppuccinColor = keyof typeof CATPPUCCIN_COLORS;
 
+/** Palette keys in display order (mirrors the web color picker). */
+export const CATPPUCCIN_COLOR_KEYS = Object.keys(
+  CATPPUCCIN_COLORS,
+) as CatppuccinColor[];
+
 /** Resolve a stored color name to its swatch, or undefined if unset/unknown. */
 export function catppuccinSwatch(
   color?: string | null,

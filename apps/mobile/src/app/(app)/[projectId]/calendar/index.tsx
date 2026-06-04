@@ -10,7 +10,9 @@ import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { MonthGrid } from "@/components/month-grid";
-import { formatTimeRange, isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { useTranslations } from "@/i18n";
+import { useFormatEventRange, useLongDate } from "@/lib/datetime";
+import { isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { useProjectId } from "@/lib/project-id";
 import { convexSiteUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
@@ -25,6 +27,8 @@ export default function CalendarScreen() {
   const pid = useProjectId();
   const router = useRouter();
   const t = useTheme();
+  const tCal = useTranslations("mobile.calendar");
+  const longDate = useLongDate();
 
   const [month, setMonth] = useState(() => {
     const now = new Date();
@@ -98,7 +102,7 @@ export default function CalendarScreen() {
     <Screen>
       <Stack.Screen
         options={{
-          title: "Calendar",
+          title: tCal("title"),
           ...sectionHeaderBadges("calendar"),
         }}
       />
@@ -128,23 +132,19 @@ export default function CalendarScreen() {
         >
           <CalendarArrowDown color={t.primary} size={18} />
           <Txt size={15} style={{ color: t.primary }}>
-            Export calendar
+            {tCal("exportCalendar")}
           </Txt>
         </Pressable>
 
         <Txt size={17} weight="700" style={{ marginTop: 20, marginBottom: 8 }}>
-          {selectedDay.toLocaleDateString(undefined, {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
+          {longDate(selectedDay)}
         </Txt>
 
         {events === undefined ? (
           <Loading />
         ) : selectedEvents.length === 0 ? (
           <Txt muted style={{ fontStyle: "italic", paddingVertical: 8 }}>
-            No events scheduled for this day.
+            {tCal("noEventsForDay")}
           </Txt>
         ) : (
           <View style={{ gap: 12 }}>
@@ -163,7 +163,7 @@ export default function CalendarScreen() {
       <EventForm
         visible={creating}
         defaultDate={selectedDay}
-        title="New event"
+        title={tCal("newEvent")}
         onSubmit={handleCreate}
         onClose={() => setCreating(false)}
       />
@@ -178,13 +178,14 @@ function EventCard({
   event: CalendarEvent;
   onPress: () => void;
 }) {
+  const formatRange = useFormatEventRange();
   return (
     <Card onPress={onPress}>
       <Txt size={16} weight="700">
         {event.name}
       </Txt>
       <Txt muted size={13} style={{ marginTop: 2 }}>
-        {formatTimeRange(event)}
+        {formatRange(event)}
       </Txt>
       {event.description ? (
         <Txt size={14} style={{ marginTop: 6 }} numberOfLines={2}>

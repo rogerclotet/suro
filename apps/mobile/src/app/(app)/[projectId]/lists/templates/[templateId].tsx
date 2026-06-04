@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
@@ -16,16 +17,18 @@ type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 /** A template item plus its position in the template's `items` array. */
 type IndexedItem = TemplateItem & { index: number };
 
-const UNCATEGORIZED = "Other";
-
 /** Group items by their category name, sorted like the PWA (category & item alpha). */
-function groupByCategory(items: TemplateItem[], categories: Category[]) {
+function groupByCategory(
+  items: TemplateItem[],
+  categories: Category[],
+  uncategorized: string,
+) {
   const nameById = new Map(categories.map((c) => [c._id, c.name]));
   const groups = new Map<string, IndexedItem[]>();
   items.forEach((item, index) => {
     const key =
       (item.category && nameById.get(item.category as Id<"categories">)) ??
-      UNCATEGORIZED;
+      uncategorized;
     const bucket = groups.get(key);
     if (bucket) {
       bucket.push({ ...item, index });
@@ -46,6 +49,8 @@ export default function TemplateEditor() {
   const pid = useProjectId();
   const tid = templateId as Id<"listTemplates">;
   const t = useTheme();
+  const tr = useTranslations("mobile.templates");
+  const tc = useTranslations("mobile.common");
   const router = useRouter();
 
   const template = useQuery(api.templates.get, { templateId: tid });
@@ -66,9 +71,13 @@ export default function TemplateEditor() {
   const [settingsName, setSettingsName] = useState("");
   const [settingsDescription, setSettingsDescription] = useState("");
 
+  const uncategorized = tr("uncategorized");
   const sections = useMemo(
-    () => (template ? groupByCategory(template.items, categories ?? []) : []),
-    [template, categories],
+    () =>
+      template
+        ? groupByCategory(template.items, categories ?? [], uncategorized)
+        : [],
+    [template, categories, uncategorized],
   );
 
   async function persist(
@@ -192,7 +201,7 @@ export default function TemplateEditor() {
               </Txt>
             ) : null}
             <Field
-              placeholder="Add an item…"
+              placeholder={tr("addItemPlaceholder")}
               value={newName}
               onChangeText={setNewName}
               onSubmitEditing={addItem}
@@ -209,13 +218,13 @@ export default function TemplateEditor() {
                   onCreate={onCreateCategory}
                 />
               </View>
-              <Button title="Add" onPress={addItem} />
+              <Button title={tc("add")} onPress={addItem} />
             </View>
           </View>
         }
         ListEmptyComponent={
           <Txt muted style={{ padding: 16 }}>
-            No items yet.
+            {tr("noItems")}
           </Txt>
         }
         renderSectionHeader={({ section }) =>
@@ -258,22 +267,22 @@ export default function TemplateEditor() {
 
       <Sheet visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <Txt size={18} weight="700">
-          Template settings
+          {tr("templateSettings")}
         </Txt>
         <Field
-          placeholder="Name"
+          placeholder={tr("namePlaceholder")}
           value={settingsName}
           onChangeText={setSettingsName}
         />
         <Field
-          placeholder="Description (optional)"
+          placeholder={tr("descriptionPlaceholder")}
           value={settingsDescription}
           onChangeText={setSettingsDescription}
         />
-        <Button title="Save" onPress={saveSettings} />
+        <Button title={tc("save")} onPress={saveSettings} />
         <Pressable onPress={deleteTemplate} style={{ padding: 10 }}>
           <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            Delete template
+            {tr("deleteTemplate")}
           </Txt>
         </Pressable>
       </Sheet>
@@ -304,21 +313,29 @@ function EditTemplateItemSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("mobile.templates");
+  const tc = useTranslations("mobile.common");
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        Edit item
+        {t("editItem")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={onChangeName} />
+      <Field
+        placeholder={t("namePlaceholder")}
+        value={name}
+        onChangeText={onChangeName}
+      />
       <CategoryPicker
         categories={categories}
         value={category}
         onChange={onChangeCategory}
         onCreate={onCreateCategory}
       />
-      <Button title="Save" onPress={onSave} />
+      <Button title={tc("save")} onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>Delete item</Txt>
+        <Txt style={{ textAlign: "center", color: "#e64553" }}>
+          {t("deleteItem")}
+        </Txt>
       </Pressable>
     </Sheet>
   );

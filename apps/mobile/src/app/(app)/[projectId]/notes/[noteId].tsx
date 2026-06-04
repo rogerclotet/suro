@@ -12,8 +12,9 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useTranslations } from "@/i18n";
+import { useTimeAgo } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
-import { timeAgo } from "@/lib/time-ago";
 import { FONT, useTheme } from "@/theme";
 import { HEADER_BUTTON_INSET, Loading, Screen, Txt } from "@/ui";
 
@@ -33,6 +34,9 @@ export default function NoteEditor() {
   const remove = useMutation(api.notes.remove);
   const router = useRouter();
   const t = useTheme();
+  const tNotes = useTranslations("mobile.notes");
+  const tc = useTranslations("mobile.common");
+  const timeAgo = useTimeAgo();
 
   const [name, setName] = useState("");
   const [contents, setContents] = useState("");
@@ -73,18 +77,22 @@ export default function NoteEditor() {
   }
 
   function confirmDelete() {
-    Alert.alert("Delete note", `Delete "${note?.name ?? "this note"}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => {
-          void remove({ noteId: id }).then(() =>
-            router.replace(`/${pid}/notes`),
-          );
+    Alert.alert(
+      tNotes("deleteTitle"),
+      tNotes("deleteMessage", { name: note?.name ?? tNotes("thisNote") }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: tc("delete"),
+          style: "destructive",
+          onPress: () => {
+            void remove({ noteId: id }).then(() =>
+              router.replace(`/${pid}/notes`),
+            );
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 
   if (note === undefined) {
@@ -104,7 +112,7 @@ export default function NoteEditor() {
             <Pressable
               onPress={confirmDelete}
               hitSlop={8}
-              accessibilityLabel="Delete note"
+              accessibilityLabel={tNotes("deleteTitle")}
               style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
             >
               <Trash2 color={t.primary} size={20} />
@@ -120,7 +128,7 @@ export default function NoteEditor() {
           <TextInput
             value={name}
             onChangeText={edit(setName)}
-            placeholder="Title"
+            placeholder={tNotes("titlePlaceholder")}
             placeholderTextColor={t.muted}
             style={{
               fontFamily: FONT,
@@ -132,14 +140,14 @@ export default function NoteEditor() {
           <Txt muted size={12}>
             {dirty
               ? saved
-                ? "Saved"
-                : "Saving…"
-              : `Updated ${timeAgo(note.updatedAt)}`}
+                ? tNotes("saved")
+                : tNotes("saving")
+              : tNotes("updatedAt", { time: timeAgo(note.updatedAt) })}
           </Txt>
           <TextInput
             value={contents}
             onChangeText={edit(setContents)}
-            placeholder="Write something…"
+            placeholder={tNotes("contentsPlaceholder")}
             placeholderTextColor={t.muted}
             multiline
             textAlignVertical="top"

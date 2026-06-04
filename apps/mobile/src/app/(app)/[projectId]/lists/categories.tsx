@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
@@ -17,6 +18,8 @@ export default function Categories() {
   const update = useMutation(api.categories.update);
   const remove = useMutation(api.categories.remove);
   const t = useTheme();
+  const tcat = useTranslations("mobile.categories");
+  const tc = useTranslations("mobile.common");
 
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<Id<"categories"> | null>(null);
@@ -42,12 +45,12 @@ export default function Categories() {
 
   function confirmDelete(categoryId: Id<"categories">, categoryName: string) {
     Alert.alert(
-      "Delete category",
-      `Delete "${categoryName}"? This can't be undone, and its items will become uncategorized.`,
+      tcat("deleteTitle"),
+      tcat("deleteMessage", { name: categoryName }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: tc("cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: tc("delete"),
           style: "destructive",
           onPress: () => void remove({ categoryId }),
         },
@@ -57,7 +60,7 @@ export default function Categories() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: "Categories" }} />
+      <Stack.Screen options={{ title: tcat("title") }} />
       {categories === undefined ? (
         <Loading />
       ) : (
@@ -70,19 +73,19 @@ export default function Categories() {
             <View style={{ flexDirection: "row", gap: 8, paddingBottom: 12 }}>
               <View style={{ flex: 1 }}>
                 <Field
-                  placeholder="New category…"
+                  placeholder={tcat("newPlaceholder")}
                   value={name}
                   onChangeText={setName}
                   onSubmitEditing={add}
                   returnKeyType="done"
                 />
               </View>
-              <Button title="Add" onPress={add} />
+              <Button title={tc("add")} onPress={add} />
             </View>
           }
           ListEmptyComponent={
             <Txt muted style={{ padding: 8 }}>
-              No categories yet.
+              {tcat("empty")}
             </Txt>
           }
           renderItem={({ item }) =>
@@ -104,7 +107,7 @@ export default function Categories() {
                     returnKeyType="done"
                   />
                 </View>
-                <Button title="Save" onPress={() => saveEdit(item._id)} />
+                <Button title={tc("save")} onPress={() => saveEdit(item._id)} />
               </View>
             ) : (
               <View
@@ -126,7 +129,7 @@ export default function Categories() {
                 >
                   <Txt size={16}>{item.name}</Txt>
                   <Txt muted size={13}>
-                    {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
+                    {tcat("itemCount", { count: item.itemCount })}
                   </Txt>
                 </Pressable>
                 <Pressable

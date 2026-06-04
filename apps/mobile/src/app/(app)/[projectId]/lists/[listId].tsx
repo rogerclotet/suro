@@ -7,6 +7,7 @@ import { Ellipsis } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -23,12 +24,10 @@ type ListResult = FunctionReturnType<typeof api.lists.get>;
 type Item = ListResult["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 
-const UNCATEGORIZED = "Other";
-
-function groupByCategory(items: Item[]) {
+function groupByCategory(items: Item[], uncategorized: string) {
   const groups = new Map<string, Item[]>();
   for (const item of items) {
-    const key = item.category?.name ?? UNCATEGORIZED;
+    const key = item.category?.name ?? uncategorized;
     const bucket = groups.get(key);
     if (bucket) {
       bucket.push(item);
@@ -46,6 +45,8 @@ export default function ListDetail() {
   const pid = useProjectId();
   const lid = listId as Id<"lists">;
   const t = useTheme();
+  const tl = useTranslations("mobile.lists");
+  const tc = useTranslations("mobile.common");
   const router = useRouter();
 
   const list = useQuery(api.lists.get, { listId: lid });
@@ -91,9 +92,10 @@ export default function ListDetail() {
   const [listName, setListName] = useState("");
   const [listDescription, setListDescription] = useState("");
 
+  const uncategorized = tl("uncategorized");
   const sections = useMemo(
-    () => (list ? groupByCategory(list.items) : []),
-    [list],
+    () => (list ? groupByCategory(list.items, uncategorized) : []),
+    [list, uncategorized],
   );
 
   async function onCreateCategory(categoryName: string) {
@@ -196,7 +198,7 @@ export default function ListDetail() {
             <Pressable
               onPress={openSettings}
               hitSlop={8}
-              accessibilityLabel="List settings"
+              accessibilityLabel={tl("listSettings")}
               style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
             >
               <Ellipsis color={t.primary} size={22} />
@@ -214,7 +216,7 @@ export default function ListDetail() {
         ListHeaderComponent={
           <View style={{ gap: 8, paddingBottom: 12 }}>
             <Field
-              placeholder="Add an item…"
+              placeholder={tl("addItemPlaceholder")}
               value={name}
               onChangeText={setName}
               onSubmitEditing={addItem}
@@ -231,13 +233,13 @@ export default function ListDetail() {
                   onCreate={onCreateCategory}
                 />
               </View>
-              <Button title="Add" onPress={addItem} />
+              <Button title={tc("add")} onPress={addItem} />
             </View>
           </View>
         }
         ListEmptyComponent={
           <Txt muted style={{ padding: 16 }}>
-            No items yet.
+            {tl("noItems")}
           </Txt>
         }
         renderSectionHeader={({ section }) =>
@@ -369,14 +371,20 @@ function EditItemSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const tl = useTranslations("mobile.lists");
+  const tc = useTranslations("mobile.common");
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        Edit item
+        {tl("editItem")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={onChangeName} />
       <Field
-        placeholder="Details (optional)"
+        placeholder={tl("namePlaceholder")}
+        value={name}
+        onChangeText={onChangeName}
+      />
+      <Field
+        placeholder={tl("detailsPlaceholder")}
         value={details}
         onChangeText={onChangeDetails}
       />
@@ -386,9 +394,11 @@ function EditItemSheet({
         onChange={onChangeCategory}
         onCreate={onCreateCategory}
       />
-      <Button title="Save" onPress={onSave} />
+      <Button title={tc("save")} onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>Delete item</Txt>
+        <Txt style={{ textAlign: "center", color: "#e64553" }}>
+          {tl("deleteItem")}
+        </Txt>
       </Pressable>
     </Sheet>
   );
@@ -421,35 +431,43 @@ function SettingsSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const tl = useTranslations("mobile.lists");
+  const tc = useTranslations("mobile.common");
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        List settings
+        {tl("listSettings")}
       </Txt>
-      <Field placeholder="Name" value={name} onChangeText={onChangeName} />
       <Field
-        placeholder="Description (optional)"
+        placeholder={tl("namePlaceholder")}
+        value={name}
+        onChangeText={onChangeName}
+      />
+      <Field
+        placeholder={tl("descriptionPlaceholder")}
         value={description}
         onChangeText={onChangeDescription}
       />
-      <Button title="Save" onPress={onSave} />
+      <Button title={tc("save")} onPress={onSave} />
       <Button
-        title={favorite ? "Remove from favorites" : "Add to favorites"}
+        title={favorite ? tl("removeFromFavorites") : tl("addToFavorites")}
         variant="ghost"
         onPress={onToggleFavorite}
       />
       <Button
-        title="Import templates"
+        title={tl("importTemplates")}
         variant="ghost"
         onPress={onImportTemplates}
       />
       <Button
-        title="Clear completed items"
+        title={tl("clearCompleted")}
         variant="ghost"
         onPress={onClearCompleted}
       />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>Delete list</Txt>
+        <Txt style={{ textAlign: "center", color: "#e64553" }}>
+          {tl("deleteList")}
+        </Txt>
       </Pressable>
     </Sheet>
   );
@@ -469,6 +487,7 @@ function ImportTemplatesSheet({
   const templates = useQuery(api.templates.listByProject, { projectId });
   const importTemplates = useMutation(api.lists.importTemplates);
   const t = useTheme();
+  const tl = useTranslations("mobile.lists");
   const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -501,7 +520,7 @@ function ImportTemplatesSheet({
       }}
     >
       <Txt size={18} weight="700">
-        Import templates
+        {tl("importTemplates")}
       </Txt>
       {templates && templates.length > 0 ? (
         <ScrollView style={{ maxHeight: 260 }}>
@@ -528,11 +547,11 @@ function ImportTemplatesSheet({
         </ScrollView>
       ) : (
         <Txt muted style={{ paddingVertical: 8 }}>
-          No templates yet.
+          {tl("noTemplates")}
         </Txt>
       )}
       <Button
-        title={busy ? "Importing…" : "Import selected"}
+        title={busy ? tl("importing") : tl("importSelected")}
         disabled={busy || selected.length === 0}
         onPress={submit}
       />

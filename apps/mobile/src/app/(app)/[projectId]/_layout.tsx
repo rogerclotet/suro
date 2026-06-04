@@ -8,6 +8,7 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import type { FC, PropsWithChildren } from "react";
 import { useEffect } from "react";
 import { Platform } from "react-native";
+import { useTranslations } from "@/i18n";
 import { setLastProjectId } from "@/lib/last-project";
 import { ProjectIdProvider } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
@@ -27,6 +28,7 @@ const { Icon, Label } = NativeTabs.Trigger;
 
 export default function ProjectTabs() {
   const t = useTheme();
+  const tNav = useTranslations("nav");
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
 
   // Remember this group so the next launch resumes here.
@@ -69,23 +71,23 @@ export default function ProjectTabs() {
           backgroundColor={Platform.OS === "android" ? t.card : undefined}
         >
           <Trigger name="lists">
-            <Label>Lists</Label>
+            <Label>{tNav("lists")}</Label>
             <Icon sf="checklist" md="checklist" />
           </Trigger>
           <Trigger name="calendar">
-            <Label>Calendar</Label>
+            <Label>{tNav("calendar")}</Label>
             <Icon sf="calendar" md="calendar_month" />
           </Trigger>
           <Trigger name="files">
-            <Label>Files</Label>
+            <Label>{tNav("files")}</Label>
             <Icon sf="folder" md="folder" />
           </Trigger>
           <Trigger name="notes">
-            <Label>Notes</Label>
+            <Label>{tNav("notes")}</Label>
             <Icon sf="note.text" md="description" />
           </Trigger>
           <Trigger name="expenses">
-            <Label>Expenses</Label>
+            <Label>{tNav("expenses")}</Label>
             <Icon sf="creditcard" md="payments" />
           </Trigger>
         </Tabs>

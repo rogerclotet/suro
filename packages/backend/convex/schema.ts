@@ -24,6 +24,10 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     // App fields (ported from f_user):
     customImage: v.optional(v.string()),
+    // Convex storage id backing `customImage` when the avatar was uploaded from
+    // a native client (lets us delete the old file on replace/remove). Absent
+    // for migrated avatars whose `customImage` is an external Uploadthing URL.
+    customImageStorageId: v.optional(v.id("_storage")),
     avatarColor: v.optional(v.string()),
     dateLocale: v.optional(v.string()),
     locale: v.optional(v.string()),

@@ -1,10 +1,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Pressable, View } from "react-native";
+import { useMonthLabel, useWeekdayShortLabels } from "@/lib/datetime";
 import { sameDay } from "@/lib/event-dates";
 import { useTheme } from "@/theme";
 import { Txt } from "@/ui";
-
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 /** The 42 cells (6 weeks) starting on the Monday on/before the 1st. */
 function monthCells(month: Date): Date[] {
@@ -46,15 +45,14 @@ export function MonthGrid({
   const t = useTheme();
   const cells = monthCells(month);
   const today = new Date();
+  const monthLabelOf = useMonthLabel();
+  const weekdays = useWeekdayShortLabels();
 
   function shiftMonth(delta: number) {
     onChangeMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1));
   }
 
-  const monthLabel = month.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
+  const monthLabel = monthLabelOf(month);
 
   return (
     <View>
@@ -86,7 +84,7 @@ export function MonthGrid({
       </View>
 
       <View style={{ flexDirection: "row" }}>
-        {WEEKDAYS.map((label) => (
+        {weekdays.map((label) => (
           <View key={label} style={{ flex: 1, alignItems: "center" }}>
             <Txt muted size={11} style={{ letterSpacing: 0.5 }}>
               {label.toUpperCase()}

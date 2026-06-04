@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { User } from "lucide-react-native";
 import { Pressable } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE } from "@/components/avatar";
+import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { HEADER_BUTTON_INSET } from "@/ui";
 
@@ -20,6 +21,7 @@ export function ProfileBadge({
   const user = useQuery(api.users.me);
   const router = useRouter();
   const t = useTheme();
+  const tNav = useTranslations("nav");
 
   if (variant === "glass") {
     return (
@@ -27,7 +29,7 @@ export function ProfileBadge({
         onPress={() => router.push("/profile")}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel="Profile"
+        accessibilityLabel={tNav("profile")}
       >
         <User color={t.primary} size={22} />
       </Pressable>
@@ -41,7 +43,7 @@ export function ProfileBadge({
       color={user?.avatarColor}
       size={HEADER_AVATAR_SIZE}
       onPress={() => router.push("/profile")}
-      accessibilityLabel="Profile"
+      accessibilityLabel={tNav("profile")}
       style={{ marginHorizontal: HEADER_BUTTON_INSET }}
     />
   );

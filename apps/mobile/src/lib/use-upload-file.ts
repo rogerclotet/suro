@@ -5,6 +5,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Alert } from "react-native";
+import { useTranslations } from "@/i18n";
 import { stripExtension } from "@/lib/files";
 
 type PickedAsset = {
@@ -25,6 +26,7 @@ export function useUploadFile(
 ) {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveFile = useMutation(api.files.saveFile);
+  const t = useTranslations("mobile.files");
   const [busy, setBusy] = useState(false);
 
   async function upload(asset: PickedAsset) {
@@ -51,8 +53,8 @@ export function useUploadFile(
       });
     } catch (error) {
       Alert.alert(
-        "Upload failed",
-        error instanceof Error ? error.message : "Please try again.",
+        t("uploadFailedTitle"),
+        error instanceof Error ? error.message : t("uploadFailedBody"),
       );
     } finally {
       setBusy(false);
@@ -62,7 +64,7 @@ export function useUploadFile(
   async function pickImage() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow photo access to share images.");
+      Alert.alert(t("permissionTitle"), t("permissionBody"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({

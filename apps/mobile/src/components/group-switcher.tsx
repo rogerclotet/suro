@@ -6,6 +6,7 @@ import { Check } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Card, HEADER_BUTTON_INSET, Loading, Sheet, Txt } from "@/ui";
@@ -28,6 +29,7 @@ export function GroupSwitcherSheet({
   const groups = useQuery(api.projects.listMine);
   const router = useRouter();
   const t = useTheme();
+  const tr = useTranslations("mobile.groups");
 
   function selectGroup(id: Id<"projects">) {
     onClose();
@@ -46,7 +48,7 @@ export function GroupSwitcherSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        Switch group
+        {tr("switchGroup")}
       </Txt>
       {groups === undefined ? (
         <Loading />
@@ -84,7 +86,11 @@ export function GroupSwitcherSheet({
           })}
         </ScrollView>
       )}
-      <Button title="Manage groups" variant="ghost" onPress={manageGroups} />
+      <Button
+        title={tr("manageGroups")}
+        variant="ghost"
+        onPress={manageGroups}
+      />
     </Sheet>
   );
 }
@@ -105,6 +111,7 @@ export function GroupBadge({
   const project = useQuery(api.projects.get, { projectId });
   const [switching, setSwitching] = useState(false);
   const t = useTheme();
+  const tr = useTranslations("mobile.groups");
 
   return (
     <>
@@ -113,7 +120,7 @@ export function GroupBadge({
           onPress={() => setSwitching(true)}
           hitSlop={8}
           accessibilityRole="button"
-          accessibilityLabel="Switch group"
+          accessibilityLabel={tr("switchGroup")}
         >
           <Txt weight="700" size={17} style={{ color: t.primary }}>
             {project?.name ? initials(project.name) : ""}
@@ -126,7 +133,7 @@ export function GroupBadge({
           color={project?.color}
           size={HEADER_AVATAR_SIZE}
           onPress={() => setSwitching(true)}
-          accessibilityLabel="Switch group"
+          accessibilityLabel={tr("switchGroup")}
           style={{ marginHorizontal: HEADER_BUTTON_INSET }}
         />
       )}

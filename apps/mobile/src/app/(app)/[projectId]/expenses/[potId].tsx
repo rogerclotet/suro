@@ -6,8 +6,9 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
+import { useTranslations } from "@/i18n";
+import { useTimeAgo } from "@/lib/datetime";
 import { formatMoney, parseMoney } from "@/lib/money";
-import { timeAgo } from "@/lib/time-ago";
 import { useTheme } from "@/theme";
 import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
@@ -26,6 +27,9 @@ export default function PotDetail() {
   const id = potId as Id<"pots">;
   const pot = useQuery(api.expenses.getPot, { potId: id });
   const t = useTheme();
+  const tExp = useTranslations("mobile.expenses");
+  const tc = useTranslations("mobile.common");
+  const timeAgo = useTimeAgo();
   const [adding, setAdding] = useState(false);
   const [settling, setSettling] = useState(false);
 
@@ -56,12 +60,12 @@ export default function PotDetail() {
               marginBottom: 12,
             }}
           >
-            Settled {timeAgo(pot.settledAt)}
+            {tExp("settledAgo", { time: timeAgo(pot.settledAt) })}
           </Txt>
         ) : null}
 
         <Txt muted size={12} style={{ letterSpacing: 1, marginBottom: 8 }}>
-          BALANCES
+          {tExp("balances")}
         </Txt>
         <View style={{ gap: 8 }}>
           {pot.balances.map((entry) => (
@@ -76,7 +80,7 @@ export default function PotDetail() {
                 size={28}
               />
               <Txt style={{ flex: 1 }} numberOfLines={1}>
-                {entry.user.name ?? "Member"}
+                {entry.user.name ?? tc("member")}
               </Txt>
               <Txt
                 weight="700"
@@ -90,10 +94,12 @@ export default function PotDetail() {
                 }}
               >
                 {entry.amount > 0
-                  ? `gets ${formatMoney(entry.amount)}`
+                  ? tExp("getsAmount", { amount: formatMoney(entry.amount) })
                   : entry.amount < 0
-                    ? `owes ${formatMoney(-entry.amount)}`
-                    : "settled"}
+                    ? tExp("owesAmount", {
+                        amount: formatMoney(-entry.amount),
+                      })
+                    : tExp("settledStatus")}
               </Txt>
             </View>
           ))}
@@ -101,7 +107,7 @@ export default function PotDetail() {
 
         {pot.settlements.length > 0 ? (
           <Button
-            title="Settle up"
+            title={tExp("settleUp")}
             variant="ghost"
             onPress={() => setSettling(true)}
           />
@@ -112,11 +118,11 @@ export default function PotDetail() {
           size={12}
           style={{ letterSpacing: 1, marginTop: 20, marginBottom: 8 }}
         >
-          SPENDINGS
+          {tExp("spendings")}
         </Txt>
         {pot.spendings.length === 0 ? (
           <Txt muted style={{ fontStyle: "italic", paddingVertical: 8 }}>
-            No spendings yet. Tap + to add one.
+            {tExp("noSpendings")}
           </Txt>
         ) : (
           <View style={{ gap: 10 }}>
@@ -133,10 +139,10 @@ export default function PotDetail() {
                   </Txt>
                 </View>
                 <Txt muted size={13} style={{ marginTop: 2 }}>
-                  {spending.fromName ?? "Someone"}
+                  {spending.fromName ?? tc("someone")}
                   {spending.to
-                    ? ` → ${spending.toName ?? "someone"}`
-                    : " · split among all"}
+                    ? ` → ${spending.toName ?? tc("someone")}`
+                    : ` · ${tExp("splitAmongAll")}`}
                 </Txt>
                 {spending.description ? (
                   <Txt size={14} style={{ marginTop: 6 }}>
@@ -176,6 +182,7 @@ function MemberChip({
   onPress: () => void;
 }) {
   const t = useTheme();
+  const tc = useTranslations("mobile.common");
   return (
     <Pressable
       onPress={onPress}
@@ -200,7 +207,7 @@ function MemberChip({
         />
       ) : null}
       <Txt size={14} style={{ color: selected ? t.primary : t.text }}>
-        {member ? (member.name ?? "Member") : label}
+        {member ? (member.name ?? tc("member")) : label}
       </Txt>
     </Pressable>
   );
@@ -218,6 +225,7 @@ function AddSpendingSheet({
   const me = useQuery(api.users.me);
   const createSpending = useMutation(api.expenses.createSpending);
   const members = useMemo(() => loadedMembers(pot.members), [pot.members]);
+  const tExp = useTranslations("mobile.expenses");
 
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -261,23 +269,23 @@ function AddSpendingSheet({
     <Sheet visible={visible} onClose={onClose}>
       <ScrollView contentContainerStyle={{ gap: 12 }}>
         <Txt size={18} weight="700">
-          New spending
+          {tExp("newSpending")}
         </Txt>
         <Field
-          placeholder="Amount"
+          placeholder={tExp("amountPlaceholder")}
           value={amount}
           onChangeText={setAmount}
           keyboardType="decimal-pad"
           autoFocus
         />
         <Field
-          placeholder="Description (optional)"
+          placeholder={tExp("descriptionPlaceholder")}
           value={description}
           onChangeText={setDescription}
         />
 
         <Txt muted size={13}>
-          Paid by
+          {tExp("paidBy")}
         </Txt>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {members.map((member) => (
@@ -291,11 +299,11 @@ function AddSpendingSheet({
         </View>
 
         <Txt muted size={13}>
-          For
+          {tExp("forLabel")}
         </Txt>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           <MemberChip
-            label="Everyone (split)"
+            label={tExp("everyoneSplit")}
             selected={to === null}
             onPress={() => setTo(null)}
           />
@@ -312,7 +320,7 @@ function AddSpendingSheet({
         </View>
 
         <Button
-          title={busy ? "Adding…" : "Add spending"}
+          title={busy ? tExp("adding") : tExp("addSpending")}
           disabled={busy || !valid}
           onPress={submit}
         />
@@ -332,6 +340,8 @@ function SettleSheet({
 }) {
   const settlePayments = useMutation(api.expenses.settlePayments);
   const t = useTheme();
+  const tExp = useTranslations("mobile.expenses");
+  const tc = useTranslations("mobile.common");
   // All proposals selected by default; users can deselect any.
   const [excluded, setExcluded] = useState<Set<number>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -368,10 +378,10 @@ function SettleSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        Settle up
+        {tExp("settleUp")}
       </Txt>
       {pot.settlements.length === 0 ? (
-        <Txt muted>Everyone is settled up.</Txt>
+        <Txt muted>{tExp("everyoneSettled")}</Txt>
       ) : (
         <>
           <ScrollView
@@ -396,8 +406,8 @@ function SettleSheet({
                   }}
                 >
                   <Txt style={{ flex: 1 }}>
-                    {payment.fromName ?? "Someone"} →{" "}
-                    {payment.toName ?? "someone"}
+                    {payment.fromName ?? tc("someone")} →{" "}
+                    {payment.toName ?? tc("someone")}
                   </Txt>
                   <Txt weight="700">{formatMoney(payment.amount)}</Txt>
                   <Txt weight="700" style={{ color: on ? t.primary : t.muted }}>
@@ -408,7 +418,11 @@ function SettleSheet({
             })}
           </ScrollView>
           <Button
-            title={busy ? "Settling…" : `Record ${selectedCount} payment(s)`}
+            title={
+              busy
+                ? tExp("settling")
+                : tExp("recordPayments", { count: selectedCount })
+            }
             disabled={busy || selectedCount === 0}
             onPress={submit}
           />
