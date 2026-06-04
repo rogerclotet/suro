@@ -29,23 +29,20 @@ const palette = {
     muted: "#6c6f85",
     primary: "#40862f",
     onPrimary: "#ffffff",
-    // Tonal pair for M3 surfaces (FAB container, tab indicator).
-    primaryContainer: "#c6e7bb",
-    onPrimaryContainer: "#0c3900",
     border: "#e4ddd0",
     inputBg: "#ffffff",
   },
+  // Mapped from the web app's warm-brown dark theme (globals.css `.dark`),
+  // converted from its oklch values to sRGB hex.
   dark: {
-    bg: "#1e1e2e",
-    card: "#28283b",
-    text: "#cdd6f4",
-    muted: "#9399b2",
-    primary: "#a6e3a1",
-    onPrimary: "#1e1e2e",
-    primaryContainer: "#33522c",
-    onPrimaryContainer: "#c2f0bd",
-    border: "#3a3a4f",
-    inputBg: "#28283b",
+    bg: "#211a16",
+    card: "#19120e",
+    text: "#ebe6de",
+    muted: "#a0968f",
+    primary: "#a7dc9a",
+    onPrimary: "#142310",
+    border: "#40362f",
+    inputBg: "#40362f",
   },
 };
 

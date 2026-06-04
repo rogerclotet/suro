@@ -72,7 +72,7 @@ export default function NotesOverview() {
           }}
         />
       )}
-      <Fab onPress={() => setCreating(true)} />
+      <Fab onPress={() => setCreating(true)} label={tNotes("newNote")} />
       <CreateNoteSheet
         visible={creating}
         projectId={pid}

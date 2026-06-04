@@ -104,7 +104,7 @@ export default function Templates() {
       )}
 
       {!creating && !actionsVisible && (
-        <Fab onPress={() => setCreating(true)} />
+        <Fab onPress={() => setCreating(true)} label={tr("newTemplate")} />
       )}
       <CreateTemplateSheet
         visible={creating}

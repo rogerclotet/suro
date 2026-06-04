@@ -99,7 +99,7 @@ export default function ExpensesOverview() {
           ))}
         </ScrollView>
       )}
-      <Fab onPress={() => setCreating(true)} />
+      <Fab onPress={() => setCreating(true)} label={tExp("newPot")} />
       <CreatePotSheet
         visible={creating}
         projectId={pid}

@@ -405,7 +405,7 @@ export default function ListDetail() {
             )}
           />
 
-          <Fab onPress={openCreate} />
+          <Fab onPress={openCreate} label={tl("newItem")} />
 
           <ItemSheet
             visible={itemSheetOpen}

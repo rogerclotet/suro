@@ -154,11 +154,19 @@ export function Sheet({
   );
 }
 
-// Material 3 floating action button — Android only. On iOS the create action
-// lives in the navigation bar instead (a Liquid Glass "+" header item, wired via
-// `sectionHeaderBadges` / `headerCreateAction`), so the FAB renders nothing
-// there; a floating button isn't part of the iOS design language.
-export function Fab({ onPress }: { onPress: () => void }) {
+// Material 3 extended floating action button — Android only. On iOS the create
+// action lives in the navigation bar instead (a Liquid Glass "+" header item,
+// wired via `sectionHeaderBadges` / `headerCreateAction`), so the FAB renders
+// nothing there; a floating button isn't part of the iOS design language.
+// Mirrors the web app's FAB: a bright `primary` green pill with the action
+// label beside the "+", rather than M3's tonal icon-only square.
+export function Fab({
+  onPress,
+  label,
+}: {
+  onPress: () => void;
+  label: string;
+}) {
   const t = useTheme();
   const { anyOpen } = useContext(SheetCountContext);
   // Hide on iOS (header "+" instead), and while any drawer is open so the FAB's
@@ -170,23 +178,27 @@ export function Fab({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      android_ripple={{ color: t.onPrimaryContainer, borderless: false }}
+      android_ripple={{ color: t.onPrimary, borderless: false }}
       style={{
         position: "absolute",
         right: 16,
         // Screen content is already inset above the M3 navigation bar, so the
         // spec's 16dp margin clears it.
         bottom: 16,
-        width: 56,
-        height: 56,
-        borderRadius: 16, // M3 FABs are 16dp rounded squares.
+        flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: t.primaryContainer,
+        gap: 8,
+        height: 56,
+        paddingHorizontal: 20, // M3 extended FAB padding.
+        borderRadius: 16,
+        backgroundColor: t.primary,
         elevation: 6,
       }}
     >
-      <Plus color={t.onPrimaryContainer} size={24} />
+      <Plus color={t.onPrimary} size={24} />
+      <Txt size={15} weight="700" style={{ color: t.onPrimary }}>
+        {label}
+      </Txt>
     </Pressable>
   );
 }

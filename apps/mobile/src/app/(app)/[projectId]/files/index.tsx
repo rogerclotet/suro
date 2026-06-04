@@ -57,7 +57,7 @@ export default function Files() {
           )}
         </ScrollView>
       )}
-      <Fab onPress={onCreate} />
+      <Fab onPress={onCreate} label={tFiles("shareFiles")} />
     </Screen>
   );
 }

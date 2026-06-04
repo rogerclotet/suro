@@ -164,7 +164,7 @@ export default function PotDetail() {
         )}
       </ScrollView>
 
-      <Fab onPress={() => setAdding(true)} />
+      <Fab onPress={() => setAdding(true)} label={tExp("newSpending")} />
       <AddSpendingSheet
         visible={adding}
         pot={pot}

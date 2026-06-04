@@ -162,7 +162,7 @@ export default function CalendarScreen() {
         )}
       </ScrollView>
 
-      <Fab onPress={() => setCreating(true)} />
+      <Fab onPress={() => setCreating(true)} label={tCal("newEvent")} />
       <EventForm
         visible={creating}
         defaultDate={selectedDay}

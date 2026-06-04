@@ -164,7 +164,7 @@ export default function ListsOverview() {
         />
       )}
 
-      <Fab onPress={() => setCreating(true)} />
+      <Fab onPress={() => setCreating(true)} label={tl("newList")} />
       <CreateListSheet
         visible={creating}
         projectId={pid}
