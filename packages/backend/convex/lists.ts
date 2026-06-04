@@ -19,7 +19,15 @@ export const listByProject = query({
 export const get = query({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
-    const { list } = await requireListAccess(ctx, listId);
+    // Return null rather than throwing when the list is gone: the detail
+    // screen keeps this query subscribed while it animates out after a delete,
+    // and a dangling subscription re-running against the deleted row would
+    // otherwise surface a "List not found" server error on the client.
+    const list = await ctx.db.get(listId);
+    if (list === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, list.projectId);
     const withItems = await loadListWithItems(ctx, list);
     // Surface the linked calendar event (if any) for the detail backlink.
     const event = list.eventId ? await ctx.db.get(list.eventId) : null;

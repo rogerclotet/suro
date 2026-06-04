@@ -44,6 +44,17 @@ function normalizeList(list: {
   };
 }
 
+// `lists.get` returns null for a missing list; tests that expect a present
+// list assert non-null here so the value is narrowed for the assertions below.
+async function getList(
+  actor: ReturnType<ReturnType<typeof setup>["withIdentity"]>,
+  listId: Id<"lists">,
+) {
+  const list = await actor.query(api.lists.get, { listId });
+  expect(list).not.toBeNull();
+  return list as NonNullable<typeof list>;
+}
+
 type Ids = {
   alice: Id<"users">;
   bob: Id<"users">;
@@ -148,9 +159,7 @@ describe("lists: create & read", () => {
       name: "  Camping  ",
       description: "",
     });
-    expect(
-      normalizeList(await alice.query(api.lists.get, { listId: id })),
-    ).toEqual({
+    expect(normalizeList(await getList(alice, id))).toEqual({
       name: "Camping",
       description: "",
       favorite: false,
@@ -180,9 +189,7 @@ describe("lists: create & read", () => {
       templateIds: [tpl],
     });
 
-    expect(
-      normalizeList(await alice.query(api.lists.get, { listId: id })),
-    ).toEqual({
+    expect(normalizeList(await getList(alice, id))).toEqual({
       name: "Trip",
       description: "",
       favorite: false,
@@ -211,7 +218,7 @@ describe("lists: create & read", () => {
     await insertItem(list, "Cherry");
     await insertItem(list, "Date", { completed: true });
 
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.items.map((i) => i.name)).toEqual([
       "Apple",
       "Cherry",
@@ -260,7 +267,7 @@ describe("list items", () => {
       categoryId: ids.foreign,
     });
 
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     const apples = result.items.find((i) => i.name === "Apples");
     const towels = result.items.find((i) => i.name === "Towels");
     expect(apples?.category?.name).toBe("Groceries");
@@ -278,7 +285,7 @@ describe("list items", () => {
       categoryId: ids.groceries,
     });
 
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     const updated = result.items.find((i) => i._id === item);
     expect(updated?.name).toBe("Big Tent");
     expect(updated?.details).toBe("2-person");
@@ -296,7 +303,7 @@ describe("list items", () => {
       completed: false,
       categoryId: ids.foreign,
     });
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.items[0]?.category).toBeNull();
   });
 
@@ -319,7 +326,7 @@ describe("list items", () => {
     await insertItem(list, "Keep");
     const remove = await insertItem(list, "Remove");
     await alice.mutation(api.listItems.remove, { itemId: remove });
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.items.map((i) => i.name)).toEqual(["Keep"]);
   });
 });
@@ -332,7 +339,7 @@ describe("list settings", () => {
       name: "New Name",
       description: "desc",
     });
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.name).toBe("New Name");
     expect(result.description).toBe("desc");
   });
@@ -340,13 +347,9 @@ describe("list settings", () => {
   it("toggles favorite back and forth", async () => {
     const list = await insertList("L", { favorite: false });
     await alice.mutation(api.lists.toggleFavorite, { listId: list });
-    expect((await alice.query(api.lists.get, { listId: list })).favorite).toBe(
-      true,
-    );
+    expect((await getList(alice, list)).favorite).toBe(true);
     await alice.mutation(api.lists.toggleFavorite, { listId: list });
-    expect((await alice.query(api.lists.get, { listId: list })).favorite).toBe(
-      false,
-    );
+    expect((await getList(alice, list)).favorite).toBe(false);
   });
 
   it("clears only completed items", async () => {
@@ -354,7 +357,7 @@ describe("list settings", () => {
     await insertItem(list, "Done", { completed: true });
     await insertItem(list, "Todo");
     await alice.mutation(api.lists.clearCompleted, { listId: list });
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.items.map((i) => i.name)).toEqual(["Todo"]);
   });
 
@@ -362,9 +365,11 @@ describe("list settings", () => {
     const list = await insertList("L");
     await insertItem(list, "X");
     await alice.mutation(api.lists.remove, { listId: list });
+    // A deleted list reads back as null (not an error) so a still-subscribed
+    // detail screen can navigate away cleanly instead of surfacing a server error.
     await expect(
       alice.query(api.lists.get, { listId: list }),
-    ).rejects.toThrow();
+    ).resolves.toBeNull();
     const remaining = await t.run((ctx) =>
       ctx.db
         .query("listItems")
@@ -381,7 +386,7 @@ describe("categories", () => {
     await insertItem(list, "Milk", { categoryId: ids.groceries });
     await alice.mutation(api.categories.remove, { categoryId: ids.groceries });
 
-    const result = await alice.query(api.lists.get, { listId: list });
+    const result = await getList(alice, list);
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.name).toBe("Milk");
     expect(result.items[0]?.category).toBeNull();

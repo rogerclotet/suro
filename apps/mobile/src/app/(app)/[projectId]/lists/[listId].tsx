@@ -13,7 +13,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -38,7 +38,7 @@ import {
   Txt,
 } from "@/ui";
 
-type ListResult = FunctionReturnType<typeof api.lists.get>;
+type ListResult = NonNullable<FunctionReturnType<typeof api.lists.get>>;
 type Item = ListResult["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 
@@ -71,6 +71,14 @@ export default function ListDetail() {
   const router = useRouter();
 
   const list = useQuery(api.lists.get, { listId: lid });
+
+  // `null` means the list no longer exists (deleted here or from another
+  // client); leave the now-empty detail screen instead of rendering stale chrome.
+  useEffect(() => {
+    if (list === null && router.canGoBack()) {
+      router.back();
+    }
+  }, [list, router]);
   const categories = useQuery(api.categories.listByProject, { projectId: pid });
   const createItem = useMutation(api.listItems.create);
   const removeItem = useMutation(api.listItems.remove);
@@ -307,7 +315,7 @@ export default function ListDetail() {
         }}
       />
 
-      {list === undefined ? (
+      {list == null ? (
         <Loading />
       ) : (
         <>

@@ -204,7 +204,7 @@ describe("events: linked lists", () => {
     expect(event.list?.name).toBe("Camping");
     // The list carries the event backlink.
     const list = await alice.query(api.lists.get, { listId });
-    expect(list.event?._id).toBe(eventId);
+    expect(list?.event?._id).toBe(eventId);
   });
 
   it("links and unlinks an existing list", async () => {
@@ -229,7 +229,7 @@ describe("events: linked lists", () => {
     await alice.mutation(api.events.unlinkList, { eventId, listId });
     expect((await alice.query(api.events.get, { eventId })).list).toBeNull();
     // The list itself survives the unlink.
-    expect((await alice.query(api.lists.get, { listId })).event).toBeNull();
+    expect((await alice.query(api.lists.get, { listId }))?.event).toBeNull();
   });
 
   it("nulls a linked list's backlink when the event is deleted", async () => {
@@ -246,7 +246,7 @@ describe("events: linked lists", () => {
     await alice.mutation(api.events.remove, { eventId });
 
     const list = await alice.query(api.lists.get, { listId });
-    expect(list.event).toBeNull();
+    expect(list?.event).toBeNull();
   });
 
   it("rejects linking a list from another project", async () => {

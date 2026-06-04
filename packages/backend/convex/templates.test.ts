@@ -267,8 +267,9 @@ describe("lists: import templates into an existing list", () => {
     });
 
     const result = await alice.query(api.lists.get, { listId: list });
+    expect(result).not.toBeNull();
     const byName = Object.fromEntries(
-      result.items.map((item) => [item.name, item.category?.name ?? null]),
+      result!.items.map((item) => [item.name, item.category?.name ?? null]),
     );
     expect(byName).toEqual({
       Existing: null,
