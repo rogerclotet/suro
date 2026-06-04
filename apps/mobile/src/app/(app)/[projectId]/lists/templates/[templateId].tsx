@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
@@ -41,11 +42,8 @@ function groupByCategory(items: TemplateItem[], categories: Category[]) {
 }
 
 export default function TemplateEditor() {
-  const { projectId, templateId } = useLocalSearchParams<{
-    projectId: string;
-    templateId: string;
-  }>();
-  const pid = projectId as Id<"projects">;
+  const { templateId } = useLocalSearchParams<{ templateId: string }>();
+  const pid = useProjectId();
   const tid = templateId as Id<"listTemplates">;
   const t = useTheme();
   const router = useRouter();

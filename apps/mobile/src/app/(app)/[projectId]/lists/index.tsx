@@ -2,10 +2,11 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Check, ChevronDown, CircleUser } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
+import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -27,8 +28,7 @@ function isCompleted(list: ListWithItems) {
 }
 
 export default function ListsOverview() {
-  const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const pid = projectId as Id<"projects">;
+  const pid = useProjectId();
   const project = useQuery(api.projects.get, { projectId: pid });
   const lists = useQuery(api.lists.listByProject, { projectId: pid });
   const toggleFavorite = useMutation(api.lists.toggleFavorite);

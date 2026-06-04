@@ -2,9 +2,10 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
+import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
@@ -12,8 +13,7 @@ type Template = FunctionReturnType<typeof api.templates.listByProject>[number];
 type Project = FunctionReturnType<typeof api.projects.listMine>[number];
 
 export default function Templates() {
-  const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const pid = projectId as Id<"projects">;
+  const pid = useProjectId();
   const templates = useQuery(api.templates.listByProject, { projectId: pid });
   const router = useRouter();
   const t = useTheme();

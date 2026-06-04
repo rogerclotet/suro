@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { CalendarArrowDown } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Share, View } from "react-native";
@@ -10,6 +10,7 @@ import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { MonthGrid } from "@/components/month-grid";
 import { formatTimeRange, isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { useProjectId } from "@/lib/project-id";
 import { convexSiteUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
 import { Card, Fab, Loading, Screen, Txt } from "@/ui";
@@ -20,8 +21,7 @@ type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 const EVENT_COLORS = ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"];
 
 export default function CalendarScreen() {
-  const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const pid = projectId as Id<"projects">;
+  const pid = useProjectId();
   const router = useRouter();
   const t = useTheme();
 

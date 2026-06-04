@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -40,11 +41,8 @@ function groupByCategory(items: Item[]) {
 }
 
 export default function ListDetail() {
-  const { projectId, listId } = useLocalSearchParams<{
-    projectId: string;
-    listId: string;
-  }>();
-  const pid = projectId as Id<"projects">;
+  const { listId } = useLocalSearchParams<{ listId: string }>();
+  const pid = useProjectId();
   const lid = listId as Id<"lists">;
   const t = useTheme();
   const router = useRouter();

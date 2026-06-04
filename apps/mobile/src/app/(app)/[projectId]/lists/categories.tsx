@@ -1,15 +1,15 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
+import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
 
 export default function Categories() {
-  const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const pid = projectId as Id<"projects">;
+  const pid = useProjectId();
   const categories = useQuery(api.categories.listWithCounts, {
     projectId: pid,
   });

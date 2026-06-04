@@ -11,6 +11,7 @@ import { EventForm } from "@/components/event-form";
 import { FileList } from "@/components/file-list";
 import { UploadButton } from "@/components/upload-button";
 import { formatTimeRange, formatTimeRemaining } from "@/lib/event-dates";
+import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
 import { Button, Card, Loading, Screen, Sheet, Txt } from "@/ui";
@@ -19,11 +20,8 @@ type EventResult = FunctionReturnType<typeof api.events.get>;
 type ListWithItems = NonNullable<EventResult["list"]>;
 
 export default function EventDetail() {
-  const { projectId, eventId } = useLocalSearchParams<{
-    projectId: string;
-    eventId: string;
-  }>();
-  const pid = projectId as Id<"projects">;
+  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const pid = useProjectId();
   const eid = eventId as Id<"events">;
   const t = useTheme();
   const router = useRouter();
