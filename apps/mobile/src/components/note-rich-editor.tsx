@@ -23,6 +23,7 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
+import { CONVERGENCE_400_DATA_URI } from "@/lib/convergence-font";
 import { isBlankHtml } from "@/lib/note-content";
 import { type Theme, useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
@@ -370,9 +371,16 @@ function LinkSheet({
 /** CSS injected into the editor's WebView so it matches the active app theme. */
 function editorCss(t: Theme): string {
   return `
+    @font-face {
+      font-family: "Convergence";
+      font-style: normal;
+      font-weight: 400;
+      src: url("${CONVERGENCE_400_DATA_URI}") format("truetype");
+    }
     .ProseMirror {
       background-color: ${t.bg};
       color: ${t.text};
+      font-family: "Convergence", -apple-system, system-ui, sans-serif;
       font-size: 16px;
       line-height: 1.5;
       caret-color: ${t.primary};
