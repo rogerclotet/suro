@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
+import { catppuccinSwatch } from "@/lib/catppuccin-colors";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Card, HEADER_BUTTON_INSET, Loading, Sheet, Txt } from "@/ui";
@@ -213,7 +214,11 @@ export function GroupBadge({
           accessibilityRole="button"
           accessibilityLabel={tr("switchGroup")}
         >
-          <Txt weight="700" size={17} style={{ color: t.primary }}>
+          <Txt
+            weight="700"
+            size={17}
+            style={{ color: catppuccinSwatch(project?.color)?.bg ?? t.primary }}
+          >
             {project?.name ? initials(project.name) : ""}
           </Txt>
         </Pressable>

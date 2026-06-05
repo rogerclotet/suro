@@ -29,8 +29,14 @@ export default function AppLayout() {
         contentStyle: { backgroundColor: t.bg },
       }}
     >
-      {/* The project route is a Tabs navigator; it owns its own headers. */}
-      <Stack.Screen name="[projectId]" options={{ headerShown: false }} />
+      {/* The project route is a Tabs navigator; it owns its own headers.
+          Switching groups `replace`s this route in place, so cross-fade rather
+          than the default forward slide — a slide reads as "pushed a sub-page"
+          (implying a back target), a fade reads as switching the active group. */}
+      <Stack.Screen
+        name="[projectId]"
+        options={{ headerShown: false, animation: "fade" }}
+      />
     </Stack>
   );
 }
