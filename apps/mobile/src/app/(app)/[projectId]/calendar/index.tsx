@@ -27,9 +27,6 @@ import { Card, Fab, Loading, Screen, Txt } from "@/ui";
 
 type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
-// Rotating dot colors, mirroring the PWA's 5 event colors.
-const EVENT_COLORS = ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"];
-
 export default function CalendarScreen() {
   const pid = useProjectId();
   const router = useRouter();
@@ -67,13 +64,15 @@ export default function CalendarScreen() {
   const createEvent = useMutation(api.events.create);
   const getCalendarToken = useMutation(api.events.getOrCreateCalendarToken);
 
+  // Each event gets a stable Catppuccin accent (theme-aware: Latte on light,
+  // Mocha on dark), reused for both its calendar dots and its list card.
   const colorById = useMemo(() => {
     const map = new Map<Id<"events">, string>();
     (events ?? []).forEach((event, index) => {
-      map.set(event._id, EVENT_COLORS[index % EVENT_COLORS.length] as string);
+      map.set(event._id, t.event[index % t.event.length] as string);
     });
     return map;
-  }, [events]);
+  }, [events, t.event]);
 
   function dotsForDay(day: Date): { key: string; color: string }[] {
     if (!events) {
@@ -84,7 +83,7 @@ export default function CalendarScreen() {
       .slice(0, 3)
       .map((event) => ({
         key: event._id,
-        color: colorById.get(event._id) ?? (EVENT_COLORS[0] as string),
+        color: colorById.get(event._id) ?? (t.event[0] as string),
       }));
   }
 
@@ -180,6 +179,7 @@ export default function CalendarScreen() {
               <EventCard
                 key={event._id}
                 event={event}
+                color={colorById.get(event._id) ?? (t.event[0] as string)}
                 onPress={() => router.push(`/${pid}/calendar/${event._id}`)}
               />
             ))}
@@ -201,17 +201,29 @@ export default function CalendarScreen() {
 
 function EventCard({
   event,
+  color,
   onPress,
 }: {
   event: CalendarEvent;
+  color: string;
   onPress: () => void;
 }) {
   const formatRange = useFormatEventRange();
   return (
     <Card onPress={onPress}>
-      <Txt size={16} weight="700">
-        {event.name}
-      </Txt>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: color,
+          }}
+        />
+        <Txt size={16} weight="700" style={{ flex: 1 }}>
+          {event.name}
+        </Txt>
+      </View>
       <Txt muted size={13} style={{ marginTop: 2 }}>
         {formatRange(event)}
       </Txt>

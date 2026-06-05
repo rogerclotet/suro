@@ -919,6 +919,8 @@
       "allDay": "Tot el dia",
       "starts": "Comença",
       "ends": "Acaba",
+      "daysCount": "{days, plural, =1 {# dia} other {# dies}}",
+      "pickHint": "Toca un dia per fixar la data destacada",
       "save": "Desar",
       "saving": "Desant…"
     },

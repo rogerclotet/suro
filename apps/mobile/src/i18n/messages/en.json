@@ -919,6 +919,8 @@
       "allDay": "All day",
       "starts": "Starts",
       "ends": "Ends",
+      "daysCount": "{days, plural, =1 {# day} other {# days}}",
+      "pickHint": "Tap a day to set the highlighted date",
       "save": "Save",
       "saving": "Saving…"
     },

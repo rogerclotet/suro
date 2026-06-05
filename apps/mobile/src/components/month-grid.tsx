@@ -22,6 +22,10 @@ function isBetween(day: Date, start: Date, end: Date): boolean {
   return d >= lo && d <= hi;
 }
 
+// Height of the connecting range bar; matches the day circle so the highlight
+// reads as one continuous pill flowing through the endpoint circles.
+const RANGE_BAR = 34;
+
 /**
  * Reusable Monday-first month grid. Drives the calendar view (with event dots)
  * and the event form's date-range picker (with start/end highlighting).
@@ -100,10 +104,17 @@ export function MonthGrid({
           const isStart = selectedStart ? sameDay(day, selectedStart) : false;
           const isEnd = selectedEnd ? sameDay(day, selectedEnd) : false;
           const isEndpoint = isStart || isEnd;
+          // A range only exists when both ends are set to *different* days; a
+          // lone selected day (or a same-day pick) just gets the endpoint circle.
+          const hasRange = Boolean(
+            selectedStart &&
+              selectedEnd &&
+              !sameDay(selectedStart, selectedEnd),
+          );
           const inRange =
-            selectedStart && selectedEnd
+            hasRange && selectedStart && selectedEnd
               ? isBetween(day, selectedStart, selectedEnd)
-              : isStart;
+              : false;
           const dots = dotsForDay?.(day) ?? [];
 
           return (
@@ -115,10 +126,29 @@ export function MonthGrid({
                 aspectRatio: 1,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor:
-                  inRange && !isEndpoint ? `${t.primary}22` : "transparent",
               }}
             >
+              {inRange ? (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    marginTop: -RANGE_BAR / 2,
+                    height: RANGE_BAR,
+                    // Endpoints fill from their own centre so the bar tucks
+                    // under the circle; middle days span the whole cell, so
+                    // neighbouring segments butt together into one bar.
+                    left: isStart ? "50%" : 0,
+                    right: isEnd ? "50%" : 0,
+                    backgroundColor: `${t.primary}22`,
+                    borderTopLeftRadius: isStart ? RANGE_BAR / 2 : 0,
+                    borderBottomLeftRadius: isStart ? RANGE_BAR / 2 : 0,
+                    borderTopRightRadius: isEnd ? RANGE_BAR / 2 : 0,
+                    borderBottomRightRadius: isEnd ? RANGE_BAR / 2 : 0,
+                  }}
+                />
+              ) : null}
               <View
                 style={{
                   width: 34,

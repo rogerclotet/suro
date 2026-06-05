@@ -105,6 +105,17 @@ export function useTimeRemaining(): (
   };
 }
 
+/** Medium localized date for compact rows ("Thu, 5 Jun"). */
+export function useMediumDate(): (date: Date) => string {
+  const locale = useLocale();
+  return (date) =>
+    date.toLocaleDateString(locale, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+}
+
 /** Long localized date for the calendar day header ("Monday, 5 June"). */
 export function useLongDate(): (date: Date) => string {
   const locale = useLocale();

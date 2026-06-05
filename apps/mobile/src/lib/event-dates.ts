@@ -42,6 +42,16 @@ export function allDayDisplayEnd(endAt: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
 }
 
+/**
+ * Number of calendar days an inclusive `from`…`to` span covers (1 for a single
+ * day). Compares date parts via UTC so it's exact across DST transitions.
+ */
+export function inclusiveDayCount(from: Date, to: Date): number {
+  const a = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+  const b = Date.UTC(to.getFullYear(), to.getMonth(), to.getDate());
+  return Math.round(Math.abs(b - a) / DAY_MS) + 1;
+}
+
 /** Whether the event covers `day` (date-only comparison), ported from the PWA. */
 export function isEventOnDay(event: EventTimes, day: Date): boolean {
   const endMs = event.allDay ? event.endAt - DAY_MS : event.endAt;

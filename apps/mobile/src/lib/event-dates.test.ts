@@ -4,6 +4,7 @@ import {
   DAY_MS,
   type EventTimes,
   formatTimeRange,
+  inclusiveDayCount,
   isEventOnDay,
   sameDay,
   startOfDay,
@@ -97,6 +98,43 @@ describe("allDayDisplayEnd", () => {
     expect(result.getFullYear()).toBe(2024);
     expect(result.getMonth()).toBe(0);
     expect(result.getDate()).toBe(15);
+  });
+});
+
+describe("inclusiveDayCount", () => {
+  it("counts a single day as one", () => {
+    expect(
+      inclusiveDayCount(new Date(2024, 0, 15), new Date(2024, 0, 15)),
+    ).toBe(1);
+  });
+
+  it("counts an inclusive multi-day span", () => {
+    // Jan 15–18 inclusive = 4 days.
+    expect(
+      inclusiveDayCount(new Date(2024, 0, 15), new Date(2024, 0, 18)),
+    ).toBe(4);
+  });
+
+  it("ignores time-of-day", () => {
+    expect(
+      inclusiveDayCount(
+        new Date(2024, 0, 15, 23, 59),
+        new Date(2024, 0, 16, 0, 1),
+      ),
+    ).toBe(2);
+  });
+
+  it("is order-independent", () => {
+    expect(
+      inclusiveDayCount(new Date(2024, 0, 18), new Date(2024, 0, 15)),
+    ).toBe(4);
+  });
+
+  it("spans a DST transition exactly", () => {
+    // US spring-forward 2024 was Mar 10; the count stays whole-day exact.
+    expect(inclusiveDayCount(new Date(2024, 2, 9), new Date(2024, 2, 11))).toBe(
+      3,
+    );
   });
 });
 

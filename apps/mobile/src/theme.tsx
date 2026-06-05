@@ -34,6 +34,9 @@ const palette = {
     onPrimary: "#ffffff",
     border: "#e4ddd0",
     inputBg: "#ffffff",
+    // Rotating per-event accents (Catppuccin Latte: blue, peach, green, mauve,
+    // teal) — saturated enough to read on the light surface.
+    event: ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"],
   },
   // Mapped from the web app's warm-brown dark theme (globals.css `.dark`),
   // converted from its oklch values to sRGB hex.
@@ -49,6 +52,9 @@ const palette = {
     onPrimary: "#142310",
     border: "#40362f",
     inputBg: "#40362f",
+    // The Catppuccin Mocha counterparts of the Latte accents above — softer
+    // pastels that sit better on the warm-brown dark surface.
+    event: ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"],
   },
 };
 

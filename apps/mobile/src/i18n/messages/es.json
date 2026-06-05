@@ -919,6 +919,8 @@
       "allDay": "Todo el día",
       "starts": "Empieza",
       "ends": "Termina",
+      "daysCount": "{days, plural, =1 {# día} other {# días}}",
+      "pickHint": "Toca un día para fijar la fecha resaltada",
       "save": "Guardar",
       "saving": "Guardando…"
     },
