@@ -25,6 +25,9 @@ const palette = {
   light: {
     bg: "#f6f2ea",
     card: "#ffffff",
+    // M3 `surfaceContainer`: a tonal step off `bg` so the Android nav bar reads
+    // as a slightly elevated surface rather than blending into the page.
+    navBar: "#efe8da",
     text: "#1e1e2e",
     muted: "#6c6f85",
     primary: "#40862f",
@@ -37,6 +40,9 @@ const palette = {
   dark: {
     bg: "#211a16",
     card: "#19120e",
+    // M3 `surfaceContainer`: in dark themes the elevated surface is *lighter*
+    // than `bg`, so the nav bar lifts off the page instead of merging with it.
+    navBar: "#2b231d",
     text: "#ebe6de",
     muted: "#a0968f",
     primary: "#a7dc9a",

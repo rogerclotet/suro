@@ -65,13 +65,14 @@ export default function ProjectTabs() {
           // (`bg-primary/20`), not M3's opaque tonal container — `33` ≈ 20% alpha.
           indicatorColor={`${t.primary}33`}
           rippleColor={`${t.primary}33`}
-          // Android: always show every tab's label, and match the web app's
-          // bottom nav by painting the surface with the page background instead
-          // of the default M3 grey (which clashes with the warm background).
+          // Android: always show every tab's label, and paint the surface with
+          // a warm M3 `surfaceContainer` tone (`t.navBar`) so the bar reads as a
+          // slightly elevated surface above the page background, per M3, while
+          // still avoiding the default M3 grey that clashes with our warm bg.
           // iOS is left untouched so the Liquid Glass shows through — setting a
           // backgroundColor there would replace the glass.
           labelVisibilityMode="labeled"
-          backgroundColor={Platform.OS === "android" ? t.bg : undefined}
+          backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
         >
           <Trigger name="lists">
             <Label>{tNav("lists")}</Label>
