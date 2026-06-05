@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Dimensions, Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { headerCreateAction } from "@/components/header-badges";
 import { useLocale, useTranslations } from "@/i18n";
@@ -18,6 +18,7 @@ type Member = Pot["members"][number];
 type LoadedMember = Member & { _id: Id<"users"> };
 type Spending = Pot["spendings"][number];
 
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 const OWES_COLOR = "#e64553";
 const BAR_WIDTH = 150;
 const HOUR_MS = 60 * 60_000;
@@ -396,7 +397,11 @@ function AddSpendingSheet({
 
   return (
     <Sheet visible={visible} onClose={onClose}>
-      <ScrollView contentContainerStyle={{ gap: 12 }}>
+      <ScrollView
+        style={{ maxHeight: SCREEN_HEIGHT * 0.72 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ gap: 12 }}
+      >
         <Txt size={18} weight="700">
           {tExp("newSpending")}
         </Txt>

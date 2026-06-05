@@ -14,6 +14,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Keyboard,
   Modal,
   Platform,
   Pressable,
@@ -24,6 +25,7 @@ import {
   type TextProps,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -70,12 +72,22 @@ export function Sheet({
   children: ReactNode;
 }) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   const { acquire, release } = useContext(SheetCountContext);
   const [mounted, setMounted] = useState(false);
-  const anim = useRef(new Animated.Value(0)).current;
+  const anim = useMemo(() => new Animated.Value(0), []);
+  // Lifts the panel above the keyboard. RN's Modal doesn't resize its own
+  // window for the keyboard on Android, so without this the keyboard covers any
+  // focused TextInput inside a drawer.
+  const liftAnim = useMemo(() => new Animated.Value(0), []);
+  // The panel's measured height, used to clamp the lift so a tall form's top
+  // (where its text inputs live) is never pushed off the top of the screen.
+  const panelHeight = useRef(0);
   const shownRef = useRef(false);
   const onClosedRef = useRef(onClosed);
-  onClosedRef.current = onClosed;
+  useEffect(() => {
+    onClosedRef.current = onClosed;
+  });
 
   // Register as open for as long as the parent wants us visible; release on the
   // way out so the FAB can reappear as we animate away.
@@ -115,16 +127,48 @@ export function Sheet({
     }
   }, [visible, anim]);
 
+  // iOS reports the keyboard before it animates in (smoother); Android only
+  // fires the "did" events. Animate the panel up to keep the focused input
+  // visible, but clamp the rise so a tall panel's top stays on screen.
+  useEffect(() => {
+    const showEvt =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvt =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const animateTo = (value: number, duration: number) =>
+      Animated.timing(liftAnim, {
+        toValue: value,
+        duration: duration > 0 ? duration : 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    const onShow = Keyboard.addListener(showEvt, (e) => {
+      // Never lift so far that the panel's top crosses the safe-area inset.
+      const headroom = Math.max(
+        0,
+        SCREEN_HEIGHT - panelHeight.current - insets.top,
+      );
+      animateTo(Math.min(e.endCoordinates.height, headroom), e.duration);
+    });
+    const onHide = Keyboard.addListener(hideEvt, (e) => animateTo(0, e.duration));
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, [liftAnim, insets.top]);
+
   if (!mounted) {
     return null;
   }
 
   // Backdrop fades opacity in place; only the panel translates up — so the
-  // dark overlay no longer rides up with the drawer.
+  // dark overlay no longer rides up with the drawer. A second translate lifts
+  // the panel above the keyboard when it's open.
   const translateY = anim.interpolate({
     inputRange: [0, 1],
     outputRange: [SCREEN_HEIGHT, 0],
   });
+  const keyboardLift = Animated.multiply(liftAnim, -1);
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
@@ -134,6 +178,9 @@ export function Sheet({
         <Pressable style={{ flex: 1 }} onPress={onClose} />
       </Animated.View>
       <Animated.View
+        onLayout={(e) => {
+          panelHeight.current = e.nativeEvent.layout.height;
+        }}
         style={{
           position: "absolute",
           left: 0,
@@ -145,7 +192,7 @@ export function Sheet({
           padding: 20,
           paddingBottom: 36,
           gap: 12,
-          transform: [{ translateY }],
+          transform: [{ translateY }, { translateY: keyboardLift }],
         }}
       >
         {children}
