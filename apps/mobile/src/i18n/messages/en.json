@@ -971,6 +971,7 @@
     },
     "expenses": {
       "title": "Expenses",
+      "infoDescription": "This section is designed for groups with more than one user, and lets you share expenses and calculate group payments.",
       "empty": "No pots yet. Tap + to start a shared tab.",
       "settled": "Settled",
       "settledAgo": "Settled {time}",

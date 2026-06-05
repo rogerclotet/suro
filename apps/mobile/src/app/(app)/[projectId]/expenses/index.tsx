@@ -14,25 +14,36 @@ import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 export default function ExpensesOverview() {
   const pid = useProjectId();
   const pots = useQuery(api.expenses.listPots, { projectId: pid });
+  const members = useQuery(api.projects.members, { projectId: pid });
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");
 
+  // Expenses are a group feature: a pot needs at least two members to split
+  // between. For a solo group, show an explainer instead — mirrors the PWA.
+  const soloGroup = members !== undefined && members.length === 1;
+
   return (
     <Screen>
       <Stack.Screen
         options={{
           title: tExp("title"),
-          ...sectionHeaderBadges("expenses", {
-            onPress: () => setCreating(true),
-            label: tExp("newPot"),
-          }),
+          ...sectionHeaderBadges(
+            "expenses",
+            soloGroup
+              ? undefined
+              : { onPress: () => setCreating(true), label: tExp("newPot") },
+          ),
         }}
       />
-      {pots === undefined ? (
+      {pots === undefined || members === undefined ? (
         <Loading />
+      ) : soloGroup ? (
+        <Txt muted style={{ padding: 24, textAlign: "center" }}>
+          {tExp("infoDescription")}
+        </Txt>
       ) : pots.length === 0 ? (
         <Txt muted style={{ padding: 24, textAlign: "center" }}>
           {tExp("empty")}
@@ -99,12 +110,16 @@ export default function ExpensesOverview() {
           ))}
         </ScrollView>
       )}
-      <Fab onPress={() => setCreating(true)} label={tExp("newPot")} />
-      <CreatePotSheet
-        visible={creating}
-        projectId={pid}
-        onClose={() => setCreating(false)}
-      />
+      {soloGroup ? null : (
+        <>
+          <Fab onPress={() => setCreating(true)} label={tExp("newPot")} />
+          <CreatePotSheet
+            visible={creating}
+            projectId={pid}
+            onClose={() => setCreating(false)}
+          />
+        </>
+      )}
     </Screen>
   );
 }

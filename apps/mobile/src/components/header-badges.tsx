@@ -30,14 +30,23 @@ function HeaderCreateButton({ onPress, label }: CreateAction) {
  * for screens without the section badges (e.g. nested detail screens). Android
  * is left untouched — the `Fab` is the create affordance there.
  */
-export function headerCreateAction(create: CreateAction) {
+export function headerCreateAction(create?: CreateAction) {
   if (Platform.OS !== "ios") {
     return {};
   }
+  // Always emit the right-items key, even with no action: navigation options
+  // are merged across renders, so omitting it would leave a stale "+" behind
+  // when a screen drops its create action (e.g. expenses in a solo group).
   return {
-    unstable_headerRightItems: () => [
-      { type: "custom" as const, element: <HeaderCreateButton {...create} /> },
-    ],
+    unstable_headerRightItems: () =>
+      create
+        ? [
+            {
+              type: "custom" as const,
+              element: <HeaderCreateButton {...create} />,
+            },
+          ]
+        : [],
   };
 }
 
@@ -60,6 +69,6 @@ export function sectionHeaderBadges(section: string, create?: CreateAction) {
         element: <GroupBadge section={section} variant="glass" />,
       },
     ],
-    ...(create ? headerCreateAction(create) : {}),
+    ...headerCreateAction(create),
   };
 }

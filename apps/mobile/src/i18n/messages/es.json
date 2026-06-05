@@ -971,6 +971,7 @@
     },
     "expenses": {
       "title": "Gastos",
+      "infoDescription": "Esta sección está diseñada para grupos con más de un usuario y permite compartir gastos y calcular los pagos que se hacen en grupo.",
       "empty": "Todavía no hay botes. Toca + para empezar una cuenta compartida.",
       "settled": "Saldado",
       "settledAgo": "Saldado {time}",
