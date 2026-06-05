@@ -7,20 +7,155 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { headerCreateAction } from "@/components/header-badges";
-import { useTranslations } from "@/i18n";
+import { useLocale, useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { useTheme } from "@/theme";
-import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
 type Pot = NonNullable<FunctionReturnType<typeof api.expenses.getPot>>;
 type Member = Pot["members"][number];
 type LoadedMember = Member & { _id: Id<"users"> };
+type Spending = Pot["spendings"][number];
 
 const OWES_COLOR = "#e64553";
+const BAR_WIDTH = 150;
+const HOUR_MS = 60 * 60_000;
+const WEEK_MS = 7 * 24 * HOUR_MS;
 
 function loadedMembers(members: Member[]): LoadedMember[] {
   return members.filter((m): m is LoadedMember => m._id !== null);
+}
+
+/**
+ * Relative time pinned with an absolute timestamp for the hour/day range —
+ * mirrors the web app's spending line ("fa 4 dies (10:42 del 31 de maig…)").
+ * Reuses `useTimeAgo` for the relative part because iOS Hermes ships no
+ * `Intl.RelativeTimeFormat`.
+ */
+function useSpendingWhen(): (epochMs: number) => string {
+  const timeAgo = useTimeAgo();
+  const locale = useLocale();
+  const te = useTranslations("expenses");
+  return (epochMs) => {
+    const relative = timeAgo(epochMs);
+    const diff = Date.now() - epochMs;
+    // Minutes are unambiguous and week-plus already resolves to a date, so the
+    // absolute timestamp only adds value in between.
+    if (diff < HOUR_MS || diff >= WEEK_MS) {
+      return relative;
+    }
+    const date = new Date(epochMs);
+    const time = date.toLocaleTimeString(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const isToday = date.toDateString() === new Date().toDateString();
+    const stamp = isToday
+      ? te("spendingTimestampToday", { time })
+      : te("spendingTimestampDate", {
+          time,
+          date: date.toLocaleDateString(locale, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        });
+    return `${relative} (${stamp})`;
+  };
+}
+
+/**
+ * A member's balance as a two-sided bar, like the web app: debtors fill red to
+ * the left of centre, creditors green to the right, each proportional to the
+ * largest absolute balance in the pot, with the signed amount in a pill.
+ */
+function BalanceBar({ amount, maxAbs }: { amount: number; maxAbs: number }) {
+  const t = useTheme();
+  const percent = maxAbs === 0 ? 0 : Math.abs(amount) / maxAbs;
+  const positive = Math.round(amount) >= 0;
+  const fill = `${percent * 50}%` as const;
+  return (
+    <View
+      style={{
+        width: BAR_WIDTH,
+        height: 34,
+        borderRadius: 10,
+        overflow: "hidden",
+        backgroundColor: t.inputBg,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {percent > 0 ? (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            width: fill,
+            backgroundColor: positive ? t.primary : OWES_COLOR,
+            ...(positive ? { left: "50%" } : { right: "50%" }),
+          }}
+        />
+      ) : null}
+      <View
+        style={{
+          backgroundColor: t.text,
+          borderRadius: 999,
+          paddingHorizontal: 8,
+          paddingVertical: 2,
+        }}
+      >
+        <Txt size={13} weight="700" style={{ color: t.bg }}>
+          {formatMoney(maxAbs === 0 ? 0 : amount)}
+        </Txt>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * One spending rendered as a sentence ("**Bob** paid **30€** for Dinner …"),
+ * mirroring the web app's bulleted transaction log.
+ */
+function SpendingLine({ spending }: { spending: Spending }) {
+  const tc = useTranslations("mobile.common");
+  const te = useTranslations("expenses");
+  const when = useSpendingWhen();
+  return (
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      <Txt muted style={{ lineHeight: 21 }}>
+        {"•"}
+      </Txt>
+      <Txt muted size={14} style={{ flex: 1, lineHeight: 21 }}>
+        <Txt size={14} weight="700">
+          {spending.fromName ?? tc("someone")}
+        </Txt>{" "}
+        {te("spendingPaid")}{" "}
+        <Txt size={14} weight="700">
+          {formatMoney(spending.amount, spending.currency)}
+        </Txt>
+        {spending.to ? (
+          <>
+            {" "}
+            {te("spendingTo")}{" "}
+            <Txt size={14} weight="700">
+              {spending.toName ?? tc("someone")}
+            </Txt>
+          </>
+        ) : null}
+        {spending.description ? (
+          <>
+            {" "}
+            {te("spendingFor")} <Txt size={14}>{spending.description}</Txt>
+          </>
+        ) : null}{" "}
+        {when(spending._creationTime)}
+      </Txt>
+    </View>
+  );
 }
 
 export default function PotDetail() {
@@ -41,6 +176,11 @@ export default function PotDetail() {
       </Screen>
     );
   }
+
+  const maxAbs = Math.max(
+    0,
+    ...pot.balances.map((entry) => Math.abs(entry.amount)),
+  );
 
   return (
     <Screen>
@@ -73,46 +213,48 @@ export default function PotDetail() {
           </Txt>
         ) : null}
 
-        <Txt muted size={12} style={{ letterSpacing: 1, marginBottom: 8 }}>
-          {tExp("balances")}
-        </Txt>
-        <View style={{ gap: 8 }}>
-          {pot.balances.map((entry) => (
-            <View
-              key={entry.user._id ?? entry.user.name}
-              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
-            >
-              <Avatar
-                name={entry.user.name}
-                image={entry.user.image}
-                color={entry.user.avatarColor}
-                size={28}
-              />
-              <Txt style={{ flex: 1 }} numberOfLines={1}>
-                {entry.user.name ?? tc("member")}
-              </Txt>
-              <Txt
-                weight="700"
-                style={{
-                  color:
-                    entry.amount > 0
-                      ? t.primary
-                      : entry.amount < 0
-                        ? OWES_COLOR
-                        : t.muted,
-                }}
-              >
-                {entry.amount > 0
-                  ? tExp("getsAmount", { amount: formatMoney(entry.amount) })
-                  : entry.amount < 0
-                    ? tExp("owesAmount", {
-                        amount: formatMoney(-entry.amount),
-                      })
-                    : tExp("settledStatus")}
-              </Txt>
-            </View>
-          ))}
+        {/* Two-sided balance bars: red left for debtors, green right for
+            creditors, each scaled to the pot's largest absolute balance. */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingBottom: 6,
+            borderBottomWidth: 1,
+            borderBottomColor: t.border,
+          }}
+        >
+          <Txt muted size={12} style={{ flex: 1, letterSpacing: 1 }}>
+            {tc("member")}
+          </Txt>
+          <Txt muted size={12} style={{ letterSpacing: 1 }}>
+            {tExp("balances")}
+          </Txt>
         </View>
+        {pot.balances.map((entry, index) => (
+          <View
+            key={entry.user._id ?? entry.user.name}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingVertical: 10,
+              borderBottomWidth: index < pot.balances.length - 1 ? 1 : 0,
+              borderBottomColor: t.border,
+            }}
+          >
+            <Avatar
+              name={entry.user.name}
+              image={entry.user.image}
+              color={entry.user.avatarColor}
+              size={28}
+            />
+            <Txt style={{ flex: 1 }} numberOfLines={1}>
+              {entry.user.name ?? tc("member")}
+            </Txt>
+            <BalanceBar amount={entry.amount} maxAbs={maxAbs} />
+          </View>
+        ))}
 
         {pot.settlements.length > 0 ? (
           <Button
@@ -136,29 +278,7 @@ export default function PotDetail() {
         ) : (
           <View style={{ gap: 10 }}>
             {pot.spendings.map((spending) => (
-              <Card key={spending._id}>
-                <View
-                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-                >
-                  <Txt size={16} weight="700" style={{ flex: 1 }}>
-                    {formatMoney(spending.amount, spending.currency)}
-                  </Txt>
-                  <Txt muted size={12}>
-                    {timeAgo(spending._creationTime)}
-                  </Txt>
-                </View>
-                <Txt muted size={13} style={{ marginTop: 2 }}>
-                  {spending.fromName ?? tc("someone")}
-                  {spending.to
-                    ? ` → ${spending.toName ?? tc("someone")}`
-                    : ` · ${tExp("splitAmongAll")}`}
-                </Txt>
-                {spending.description ? (
-                  <Txt size={14} style={{ marginTop: 6 }}>
-                    {spending.description}
-                  </Txt>
-                ) : null}
-              </Card>
+              <SpendingLine key={spending._id} spending={spending} />
             ))}
           </View>
         )}
