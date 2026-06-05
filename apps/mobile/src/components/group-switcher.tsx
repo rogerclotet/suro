@@ -2,18 +2,23 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { Check, ChevronRight } from "lucide-react-native";
+import { Check, ChevronRight, Plus, Settings2 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Card, HEADER_BUTTON_INSET, Loading, Sheet, Txt } from "@/ui";
+import { Card, HEADER_BUTTON_INSET, Loading, Sheet, Txt } from "@/ui";
+
+const ROW_AVATAR_SIZE = 38;
 
 /**
  * Bottom-sheet group switcher, shared across every section. Selecting a group
- * keeps the user on the same `section` within it.
+ * keeps the user on the same `section` within it; each row also exposes a manage
+ * button (invite, edit, leave all live on the per-group manage page now). The
+ * only standalone action is "Create group", sitting between the list and the
+ * account entry.
  */
 export function GroupSwitcherSheet({
   visible,
@@ -32,6 +37,7 @@ export function GroupSwitcherSheet({
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
   const tp = useTranslations("mobile.profile");
+  const ti = useTranslations("groups");
 
   function selectGroup(id: Id<"projects">) {
     onClose();
@@ -42,9 +48,14 @@ export function GroupSwitcherSheet({
     router.replace(`/${id}/${section}`);
   }
 
-  function manageGroups() {
+  function manageGroup(id: Id<"projects">) {
     onClose();
-    router.push("/projects");
+    router.push(`/group-settings?projectId=${id}`);
+  }
+
+  function createGroup() {
+    onClose();
+    router.push("/create-group");
   }
 
   function openProfile() {
@@ -60,44 +71,78 @@ export function GroupSwitcherSheet({
       {groups === undefined ? (
         <Loading />
       ) : (
-        <ScrollView
-          style={{ maxHeight: 320 }}
-          contentContainerStyle={{ gap: 8 }}
-        >
-          {groups.map((group) => {
+        <ScrollView style={{ maxHeight: 320 }}>
+          {groups.map((group, index) => {
             const active = group._id === currentProjectId;
             return (
-              <Card key={group._id} onPress={() => selectGroup(group._id)}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
+              <View
+                key={group._id}
+                style={[
+                  styles.row,
+                  index > 0 && { borderTopWidth: StyleSheet.hairlineWidth },
+                  { borderColor: t.border },
+                ]}
+              >
+                <Pressable
+                  onPress={() => selectGroup(group._id)}
+                  style={({ pressed }) => [
+                    styles.rowMain,
+                    { opacity: pressed ? 0.6 : 1 },
+                  ]}
                 >
                   <Avatar
                     name={group.name}
                     image={group.image}
                     color={group.color}
+                    size={ROW_AVATAR_SIZE}
                   />
                   <Txt
                     weight={active ? "700" : "400"}
+                    numberOfLines={1}
                     style={{ flex: 1, color: active ? t.primary : t.text }}
                   >
                     {group.name}
                   </Txt>
-                  {active && <Check color={t.primary} size={18} />}
-                </View>
-              </Card>
+                  {active ? <Check color={t.primary} size={18} /> : null}
+                </Pressable>
+                <Pressable
+                  onPress={() => manageGroup(group._id)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={tr("manageGroup")}
+                  style={({ pressed }) => [
+                    styles.manageButton,
+                    { opacity: pressed ? 0.5 : 1 },
+                  ]}
+                >
+                  <Settings2 color={t.muted} size={20} />
+                </Pressable>
+              </View>
             );
           })}
         </ScrollView>
       )}
-      <Button
-        title={tr("manageGroups")}
-        variant="ghost"
-        onPress={manageGroups}
-      />
+      {/* The only standalone action: create a new group. */}
+      <Pressable
+        onPress={createGroup}
+        style={({ pressed }) => [
+          styles.rowMain,
+          { opacity: pressed ? 0.6 : 1 },
+        ]}
+      >
+        <View
+          style={[
+            styles.createBadge,
+            { width: ROW_AVATAR_SIZE, height: ROW_AVATAR_SIZE },
+            { backgroundColor: t.primary },
+          ]}
+        >
+          <Plus color={t.onPrimary} size={20} />
+        </View>
+        <Txt weight="700" style={{ color: t.primary }}>
+          {ti("createTitle")}
+        </Txt>
+      </Pressable>
       {/* Account entry: replaces the old header profile badge — same Liquid
           Glass-adjacent home for "you", tapping it opens the preferences page. */}
       <Card onPress={openProfile}>
@@ -123,6 +168,23 @@ export function GroupSwitcherSheet({
     </Sheet>
   );
 }
+
+const styles = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center" },
+  rowMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+  },
+  manageButton: { padding: 8 },
+  createBadge: {
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 /**
  * Header-left group badge that opens the switcher drawer. The `filled` variant

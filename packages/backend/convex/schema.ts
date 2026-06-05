@@ -46,7 +46,6 @@ export default defineSchema({
     inviteTokenExpiresAt: v.optional(v.number()),
     image: v.optional(v.string()),
     color: v.string(),
-    features: v.object({ secretSanta: v.boolean() }),
     // Secret that gates the public .ics calendar feed (lazily generated).
     // Distinct from inviteToken (which joins the group) — never conflate them.
     calendarToken: v.optional(v.string()),
@@ -187,6 +186,9 @@ export default defineSchema({
     name: v.string(),
     projectId: v.id("projects"),
     settledAt: v.optional(v.number()),
+    // Source creation time (epoch ms), preserved from the Drizzle `createdAt`.
+    // Absent for natively-created pots — reads fall back to `_creationTime`.
+    createdAt: v.optional(v.number()),
     createdBy: v.id("users"),
     eventId: v.optional(v.id("events")),
     legacyId: v.optional(v.string()),
@@ -215,10 +217,25 @@ export default defineSchema({
     to: v.optional(v.id("users")),
     projectId: v.id("projects"),
     potId: v.optional(v.id("pots")),
+    // Source creation time (epoch ms), preserved from the Drizzle `createdAt`.
+    // Absent for natively-created spendings — reads fall back to `_creationTime`.
+    createdAt: v.optional(v.number()),
     createdBy: v.id("users"),
     legacyId: v.optional(v.string()),
   })
     .index("by_project", ["projectId"])
     .index("by_pot", ["potId"])
     .index("by_legacyId", ["legacyId"]),
+
+  // Expo push tokens — one row per device (replaces the PWA's web-push
+  // `pushSubscriptions`). Deduped by the token string; rows are pruned when Expo
+  // reports the device gone (DeviceNotRegistered), mirroring the web's 404/410
+  // pruning.
+  pushTokens: defineTable({
+    userId: v.id("users"),
+    token: v.string(),
+    platform: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_token", ["token"]),
 });

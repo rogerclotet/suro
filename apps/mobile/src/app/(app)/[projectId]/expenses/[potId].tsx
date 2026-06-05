@@ -152,7 +152,7 @@ function SpendingLine({ spending }: { spending: Spending }) {
             {te("spendingFor")} <Txt size={14}>{spending.description}</Txt>
           </>
         ) : null}{" "}
-        {when(spending._creationTime)}
+        {when(spending.createdAt ?? spending._creationTime)}
       </Txt>
     </View>
   );

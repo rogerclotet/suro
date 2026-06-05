@@ -28,6 +28,7 @@ import {
   CATPPUCCIN_COLOR_KEYS,
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
+import { unregisterPushToken } from "@/lib/push";
 import { type ThemePreference, useTheme, useThemePreference } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
 
@@ -52,6 +53,7 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
   const theme = useTheme();
   const { signOut } = useAuthActions();
   const updateProfile = useMutation(api.users.updateProfile);
+  const unregisterPush = useMutation(api.pushTokens.unregister);
 
   const [name, setName] = useState(user.name ?? "");
   const [savingName, setSavingName] = useState(false);
@@ -143,7 +145,14 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
       <Button
         title={t("signOut")}
         variant="ghost"
-        onPress={() => void signOut()}
+        onPress={() => {
+          // Drop this device's push token before the session goes away, so a
+          // signed-out phone stops receiving the group's notifications.
+          void (async () => {
+            await unregisterPushToken(unregisterPush);
+            await signOut();
+          })();
+        }}
       />
     </ScrollView>
   );

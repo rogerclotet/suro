@@ -69,7 +69,9 @@ export default function Login() {
   // Once Convex Auth flips to authenticated (Google or OTP), leave the login
   // screen automatically — otherwise it sits here until a manual reload.
   if (isAuthenticated) {
-    return <Redirect href="/projects" />;
+    // Hand off to the index router, which resumes the last group (or routes to
+    // group creation when the user has none).
+    return <Redirect href="/" />;
   }
 
   return (

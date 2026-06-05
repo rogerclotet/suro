@@ -24,8 +24,11 @@ import type * as model_expenses from "../model/expenses.js";
 import type * as model_ics from "../model/ics.js";
 import type * as model_lists from "../model/lists.js";
 import type * as model_permissions from "../model/permissions.js";
+import type * as model_pushI18n from "../model/pushI18n.js";
 import type * as notes from "../notes.js";
 import type * as projects from "../projects.js";
+import type * as push from "../push.js";
+import type * as pushTokens from "../pushTokens.js";
 import type * as templates from "../templates.js";
 import type * as users from "../users.js";
 
@@ -52,8 +55,11 @@ declare const fullApi: ApiFromModules<{
   "model/ics": typeof model_ics;
   "model/lists": typeof model_lists;
   "model/permissions": typeof model_permissions;
+  "model/pushI18n": typeof model_pushI18n;
   notes: typeof notes;
   projects: typeof projects;
+  push: typeof push;
+  pushTokens: typeof pushTokens;
   templates: typeof templates;
   users: typeof users;
 }>;

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { instantiateTemplateItems, loadListWithItems } from "./model/lists";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
@@ -71,6 +72,14 @@ export const create = mutation({
         });
       }
     }
+
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "list_created",
+      bodyParams: { name: trimmedName },
+      path: `/${projectId}/lists`,
+    });
 
     return listId;
   },

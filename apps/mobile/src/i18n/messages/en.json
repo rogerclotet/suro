@@ -331,6 +331,10 @@
     "groupImage": "Group image",
     "removeImage": "Remove image",
     "color": "Color",
+    "name": "Name",
+    "namePlaceholder": "Group name",
+    "save": "Save",
+    "saving": "Saving…",
     "leaveSuccess": "You have left the group {name}",
     "leaveError": "Could not leave the group, please try again later",
     "leaveConfirmTitle": "Leave group",
@@ -791,10 +795,8 @@
       "genericError": "Something went wrong"
     },
     "groups": {
-      "title": "Groups",
-      "empty": "No groups yet.",
       "switchGroup": "Switch group",
-      "manageGroups": "Manage groups"
+      "manageGroup": "Manage group"
     },
     "profile": {
       "title": "Profile",

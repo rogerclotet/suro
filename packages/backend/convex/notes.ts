@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
 import { requireNoteAccess, requireProjectMember } from "./model/permissions";
@@ -59,7 +60,7 @@ export const create = mutation({
     if (trimmed === "") {
       throw new Error("Note name is required");
     }
-    return ctx.db.insert("notes", {
+    const noteId = await ctx.db.insert("notes", {
       name: trimmed,
       contents: contents ?? "",
       format: format ?? "plain",
@@ -67,6 +68,14 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "note_created",
+      bodyParams: { name: trimmed },
+      path: `/${projectId}/notes`,
+    });
+    return noteId;
   },
 });
 

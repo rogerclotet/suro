@@ -331,6 +331,10 @@
     "groupImage": "Imagen del grupo",
     "removeImage": "Eliminar imagen",
     "color": "Color",
+    "name": "Nombre",
+    "namePlaceholder": "Nombre del grupo",
+    "save": "Guardar",
+    "saving": "Guardando…",
     "leaveSuccess": "Has salido del grupo {name}",
     "leaveError": "No se ha podido salir del grupo, vuelve a intentarlo más tarde",
     "leaveConfirmTitle": "Salir del grupo",
@@ -791,10 +795,8 @@
       "genericError": "Algo salió mal"
     },
     "groups": {
-      "title": "Grupos",
-      "empty": "Todavía no hay grupos.",
       "switchGroup": "Cambiar de grupo",
-      "manageGroups": "Gestionar grupos"
+      "manageGroup": "Gestionar grupo"
     },
     "profile": {
       "title": "Perfil",

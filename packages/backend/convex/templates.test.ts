@@ -35,7 +35,6 @@ async function seed(t: ReturnType<typeof setup>): Promise<Ids> {
       createdBy: alice,
       inviteToken: "token-family",
       color: "blue",
-      features: { secretSanta: false },
     });
     // A second project Alice also belongs to — a valid export target.
     const shared = await ctx.db.insert("projects", {
@@ -43,7 +42,6 @@ async function seed(t: ReturnType<typeof setup>): Promise<Ids> {
       createdBy: alice,
       inviteToken: "token-shared",
       color: "green",
-      features: { secretSanta: false },
     });
     // A project Alice is NOT a member of.
     const other = await ctx.db.insert("projects", {
@@ -51,7 +49,6 @@ async function seed(t: ReturnType<typeof setup>): Promise<Ids> {
       createdBy: bob,
       inviteToken: "token-other",
       color: "red",
-      features: { secretSanta: false },
     });
     await ctx.db.insert("projectMembers", { projectId: family, userId: alice });
     await ctx.db.insert("projectMembers", { projectId: shared, userId: alice });

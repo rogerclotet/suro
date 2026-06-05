@@ -41,7 +41,6 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         createdBy: userId,
         inviteToken: crypto.randomUUID(),
         color: getRandomColor(),
-        features: { secretSanta: false },
       });
       await ctx.db.insert("projectMembers", { projectId, userId });
       await ctx.db.patch(userId, { locale: "ca", onboardingCompleted: false });

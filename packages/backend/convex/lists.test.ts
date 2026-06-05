@@ -84,14 +84,12 @@ async function seed(t: ReturnType<typeof setup>): Promise<Ids> {
       createdBy: alice,
       inviteToken: "token-family",
       color: "blue",
-      features: { secretSanta: false },
     });
     const other = await ctx.db.insert("projects", {
       name: "Other",
       createdBy: bob,
       inviteToken: "token-other",
       color: "red",
-      features: { secretSanta: false },
     });
     await ctx.db.insert("projectMembers", { projectId: family, userId: alice });
     await ctx.db.insert("projectMembers", { projectId: other, userId: bob });

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { loadListWithItems } from "./model/lists";
@@ -71,7 +72,7 @@ export const create = mutation({
     if (trimmed === "") {
       throw new Error("Event name is required");
     }
-    return ctx.db.insert("events", {
+    const eventId = await ctx.db.insert("events", {
       name: trimmed,
       description: (description ?? "").trim() || undefined,
       startAt,
@@ -81,6 +82,14 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "event_created",
+      bodyParams: { name: trimmed },
+      path: `/${projectId}/calendar`,
+    });
+    return eventId;
   },
 });
 

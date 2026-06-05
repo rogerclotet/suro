@@ -331,6 +331,10 @@
     "groupImage": "Imatge del grup",
     "removeImage": "Eliminar imatge",
     "color": "Color",
+    "name": "Nom",
+    "namePlaceholder": "Nom del grup",
+    "save": "Desar",
+    "saving": "Desant…",
     "leaveSuccess": "Has sortit del grup {name}",
     "leaveError": "No s'ha pogut sortir del grup, torna-ho a provar més tard",
     "leaveConfirmTitle": "Sortir del grup",
@@ -791,10 +795,8 @@
       "genericError": "Alguna cosa ha anat malament"
     },
     "groups": {
-      "title": "Grups",
-      "empty": "Encara no hi ha grups.",
       "switchGroup": "Canviar de grup",
-      "manageGroups": "Gestionar grups"
+      "manageGroup": "Gestionar grup"
     },
     "profile": {
       "title": "Perfil",

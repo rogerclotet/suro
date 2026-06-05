@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
 import { calculateBalances, generateProposals } from "./model/expenses";
@@ -52,7 +53,11 @@ export const listPots = query({
       if (a.settledAt && b.settledAt) {
         return b.settledAt - a.settledAt;
       }
-      return b._creationTime - a._creationTime;
+      // `createdAt` is set only for migrated pots; native ones fall back to
+      // `_creationTime` (which equals their creation time).
+      return (
+        (b.createdAt ?? b._creationTime) - (a.createdAt ?? a._creationTime)
+      );
     });
   },
 });
@@ -73,11 +78,17 @@ export const getPot = query({
       memberDocs.filter((u) => u !== null).map((u) => [u._id, u.name ?? null]),
     );
 
-    const spendingDocs = await ctx.db
-      .query("spendings")
-      .withIndex("by_pot", (q) => q.eq("potId", potId))
-      .order("desc")
-      .collect();
+    // Newest first by effective creation time: migrated spendings carry the
+    // source `createdAt`; native ones fall back to `_creationTime`.
+    const spendingDocs = (
+      await ctx.db
+        .query("spendings")
+        .withIndex("by_pot", (q) => q.eq("potId", potId))
+        .collect()
+    ).sort(
+      (a, b) =>
+        (b.createdAt ?? b._creationTime) - (a.createdAt ?? a._creationTime),
+    );
     const spendings = spendingDocs.map((s) => ({
       ...s,
       fromName: s.from ? (nameById.get(s.from) ?? null) : null,
@@ -139,6 +150,13 @@ export const createPot = mutation({
     for (const memberId of unique) {
       await ctx.db.insert("potMembers", { potId, userId: memberId });
     }
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "pot_created",
+      bodyParams: { name: trimmed },
+      path: `/${projectId}/expenses`,
+    });
     return potId;
   },
 });
@@ -184,6 +202,18 @@ export const createSpending = mutation({
     if (pot.settledAt !== undefined) {
       await ctx.db.patch(pot._id, { settledAt: undefined });
     }
+    const cleanDescription = description?.trim();
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId: pot.projectId,
+      actorId: userId,
+      bodyKey: cleanDescription
+        ? "spending_created_with_description"
+        : "spending_created",
+      bodyParams: cleanDescription
+        ? { amount: (amount / 100).toFixed(2), description: cleanDescription }
+        : { amount: (amount / 100).toFixed(2) },
+      path: `/${pot.projectId}/expenses`,
+    });
     return spendingId;
   },
 });

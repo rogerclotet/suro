@@ -26,6 +26,11 @@ export const upsertUser = mutation({
     secret: v.string(),
     legacyId: v.string(),
     email: v.string(),
+    // Epoch ms the email was verified. REQUIRED for the by-email link to work:
+    // Convex Auth only matches an existing user whose `emailVerificationTime` is
+    // set (see uniqueUserWithVerifiedEmail), so omitting it would re-create every
+    // migrated user as a fresh account, orphaned from their groups.
+    emailVerificationTime: v.optional(v.number()),
     name: v.optional(v.string()),
     image: v.optional(v.string()),
     customImage: v.optional(v.string()),
@@ -36,17 +41,20 @@ export const upsertUser = mutation({
   },
   handler: async (ctx, { secret, ...data }): Promise<Id<"users">> => {
     assertSecret(secret);
+    // Convex Auth lowercases the email before matching on sign-in, so store the
+    // normalized form — otherwise a mixed-case address won't link to this row.
+    const normalized = { ...data, email: data.email.toLowerCase() };
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", normalized.legacyId))
       .unique();
     if (existing) {
-      await ctx.db.patch(existing._id, data);
+      await ctx.db.patch(existing._id, normalized);
       return existing._id;
     }
     // No auth account is created — Convex Auth links to this row by email on the
     // user's first sign-in, so existing logins keep their groups.
-    return ctx.db.insert("users", data);
+    return ctx.db.insert("users", normalized);
   },
 });
 
@@ -60,7 +68,6 @@ export const upsertProject = mutation({
     inviteTokenExpiresAt: v.optional(v.number()),
     image: v.optional(v.string()),
     color: v.string(),
-    features: v.object({ secretSanta: v.boolean() }),
   },
   handler: async (ctx, { secret, ...data }): Promise<Id<"projects">> => {
     assertSecret(secret);
@@ -264,5 +271,106 @@ export const upsertFile = mutation({
       return existing._id;
     }
     return ctx.db.insert("files", data);
+  },
+});
+
+export const upsertNote = mutation({
+  args: {
+    secret: v.string(),
+    legacyId: v.string(),
+    name: v.string(),
+    contents: v.string(),
+    format: v.string(),
+    projectId: v.id("projects"),
+    eventId: v.optional(v.id("events")),
+    createdBy: v.id("users"),
+    updatedBy: v.optional(v.id("users")),
+    updatedAt: v.number(),
+  },
+  handler: async (ctx, { secret, ...data }): Promise<Id<"notes">> => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("notes")
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, data);
+      return existing._id;
+    }
+    return ctx.db.insert("notes", data);
+  },
+});
+
+export const upsertPot = mutation({
+  args: {
+    secret: v.string(),
+    legacyId: v.string(),
+    name: v.string(),
+    projectId: v.id("projects"),
+    settledAt: v.optional(v.number()),
+    createdAt: v.number(),
+    createdBy: v.id("users"),
+    eventId: v.optional(v.id("events")),
+  },
+  handler: async (ctx, { secret, ...data }): Promise<Id<"pots">> => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("pots")
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, data);
+      return existing._id;
+    }
+    return ctx.db.insert("pots", data);
+  },
+});
+
+export const addPotMember = mutation({
+  args: {
+    secret: v.string(),
+    potId: v.id("pots"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { secret, potId, userId }) => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("potMembers")
+      .withIndex("by_pot_user", (q) =>
+        q.eq("potId", potId).eq("userId", userId),
+      )
+      .unique();
+    if (!existing) {
+      await ctx.db.insert("potMembers", { potId, userId });
+    }
+    return null;
+  },
+});
+
+export const upsertSpending = mutation({
+  args: {
+    secret: v.string(),
+    legacyId: v.string(),
+    amount: v.number(),
+    currency: v.string(),
+    description: v.optional(v.string()),
+    from: v.optional(v.id("users")),
+    to: v.optional(v.id("users")),
+    projectId: v.id("projects"),
+    potId: v.optional(v.id("pots")),
+    createdAt: v.number(),
+    createdBy: v.id("users"),
+  },
+  handler: async (ctx, { secret, ...data }): Promise<Id<"spendings">> => {
+    assertSecret(secret);
+    const existing = await ctx.db
+      .query("spendings")
+      .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, data);
+      return existing._id;
+    }
+    return ctx.db.insert("spendings", data);
   },
 });

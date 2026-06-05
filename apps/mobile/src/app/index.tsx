@@ -32,7 +32,15 @@ export default function Index() {
   if (storedProjectId === undefined || projects === undefined) {
     return <Loading />;
   }
+  // Resume the last group when it still exists; otherwise land in the first
+  // group the user belongs to, falling back to group creation only if they have
+  // none (the manage-groups list page is gone — the switcher owns that now).
   const resume =
     storedProjectId && projects.some((p) => p._id === storedProjectId);
-  return <Redirect href={resume ? `/${storedProjectId}/lists` : "/projects"} />;
+  const target = resume
+    ? `/${storedProjectId}/lists`
+    : projects[0]
+      ? `/${projects[0]._id}/lists`
+      : "/create-group";
+  return <Redirect href={target} />;
 }
