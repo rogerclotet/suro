@@ -3,7 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { ChevronRight, LayoutTemplate, Tag } from "lucide-react-native";
+import { LayoutTemplate, Tag } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -25,7 +25,6 @@ export default function ListsOverview() {
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
-  const tc = useTranslations("mobile.common");
   const [creating, setCreating] = useState(false);
 
   const sections = useMemo(() => {
@@ -66,29 +65,15 @@ export default function ListsOverview() {
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
             <View
-              style={{
-                marginHorizontal: 16,
-                backgroundColor: t.card,
-                borderColor: t.border,
-                borderWidth: 1,
-                borderRadius: 14,
-                overflow: "hidden",
-              }}
+              style={{ flexDirection: "row", gap: 12, marginHorizontal: 16 }}
             >
-              <NavRow
-                icon={<LayoutTemplate color={t.primary} size={20} />}
+              <NavTile
+                icon={<LayoutTemplate color={t.primary} size={22} />}
                 label={tl("templates")}
                 onPress={() => router.push(`/${pid}/lists/templates`)}
               />
-              <View
-                style={{
-                  height: 1,
-                  marginLeft: 46,
-                  backgroundColor: t.border,
-                }}
-              />
-              <NavRow
-                icon={<Tag color={t.primary} size={20} />}
+              <NavTile
+                icon={<Tag color={t.primary} size={22} />}
                 label={tl("categories")}
                 onPress={() => router.push(`/${pid}/lists/categories`)}
               />
@@ -117,7 +102,8 @@ export default function ListsOverview() {
             <View
               style={{
                 height: 1,
-                marginHorizontal: 16,
+                marginLeft: 48,
+                marginRight: 16,
                 backgroundColor: t.border,
               }}
             />
@@ -142,6 +128,17 @@ export default function ListsOverview() {
                   backgroundColor: pressed ? t.border : "transparent",
                 })}
               >
+                <View style={{ width: 20, alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 3,
+                      backgroundColor: t.marker,
+                      transform: [{ rotate: "45deg" }],
+                    }}
+                  />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Txt size={16}>{item.name}</Txt>
                   {item.description ? (
@@ -155,9 +152,11 @@ export default function ListsOverview() {
                     </Txt>
                   ) : null}
                 </View>
-                <Txt muted size={15}>
-                  {total === 0 ? tc("empty") : total - done}
-                </Txt>
+                {total > 0 ? (
+                  <Txt muted size={15}>
+                    {total - done}
+                  </Txt>
+                ) : null}
               </Pressable>
             );
           }}
@@ -174,7 +173,10 @@ export default function ListsOverview() {
   );
 }
 
-function NavRow({
+// A square-ish launcher tile for a list subsection (templates, categories).
+// Deliberately distinct from the full-width list cards below: side-by-side,
+// icon-forward, with the icon in a primary-tinted badge.
+function NavTile({
   icon,
   label,
   onPress,
@@ -188,19 +190,31 @@ function NavRow({
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 13,
-        backgroundColor: pressed ? t.border : "transparent",
+        flex: 1,
+        aspectRatio: 1.3,
+        borderColor: t.border,
+        borderWidth: 1,
+        borderRadius: 14,
+        padding: 14,
+        justifyContent: "space-between",
+        backgroundColor: pressed ? t.border : t.card,
       })}
     >
-      <View style={{ width: 20, alignItems: "center" }}>{icon}</View>
-      <Txt size={16} style={{ flex: 1 }}>
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: `${t.primary}1a`,
+        }}
+      >
+        {icon}
+      </View>
+      <Txt size={15} weight="700">
         {label}
       </Txt>
-      <ChevronRight color={t.muted} size={18} />
     </Pressable>
   );
 }
