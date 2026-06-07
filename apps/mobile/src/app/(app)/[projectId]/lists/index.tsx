@@ -3,7 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { LayoutTemplate, Tag } from "lucide-react-native";
+import { Check, LayoutTemplate, Tag } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -111,6 +111,7 @@ export default function ListsOverview() {
           renderItem={({ item }) => {
             const total = item.items.length;
             const done = item.items.filter((i) => i.completed).length;
+            const pending = total - done;
             return (
               <Pressable
                 onPress={() =>
@@ -152,11 +153,28 @@ export default function ListsOverview() {
                     </Txt>
                   ) : null}
                 </View>
-                {total > 0 ? (
-                  <Txt muted size={15}>
-                    {total - done}
-                  </Txt>
-                ) : null}
+                {total === 0 ? null : pending > 0 ? (
+                  // A count chip reads as "items left" — clearer than a bare
+                  // number floating at the row's edge.
+                  <View
+                    style={{
+                      minWidth: 26,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 13,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: t.border,
+                    }}
+                  >
+                    <Txt size={13} weight="700">
+                      {pending}
+                    </Txt>
+                  </View>
+                ) : (
+                  // All done: a check beats showing "0".
+                  <Check color={t.primary} size={18} />
+                )}
               </Pressable>
             );
           }}
