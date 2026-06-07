@@ -3,7 +3,15 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Folders, ListTodo, Share2 } from "lucide-react-native";
+import {
+  Folders,
+  Link2,
+  ListPlus,
+  ListTodo,
+  Share2,
+  Trash2,
+  Unlink,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
@@ -15,7 +23,16 @@ import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
-import { Button, Card, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Card,
+  IconAction,
+  IconActionBar,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type EventResult = FunctionReturnType<typeof api.events.get>;
 type ListWithItems = NonNullable<EventResult["list"]>;
@@ -212,36 +229,45 @@ export default function EventDetail() {
             setEditing(true);
           }}
         />
-        {linkedList ? (
-          <Button
-            title={tCal("unlinkList")}
-            variant="ghost"
-            onPress={() => {
-              setSettingsOpen(false);
-              void unlinkList({ eventId: eid, listId: linkedList._id });
-            }}
-          />
-        ) : (
-          <>
-            <Button
-              title={tCal("createList")}
-              onPress={handleCreateLinkedList}
-            />
-            <Button
-              title={tCal("linkExistingList")}
-              variant="ghost"
+        {/* Secondary event actions as a compact icon toolbar. */}
+        <IconActionBar>
+          {linkedList ? (
+            <IconAction
+              icon={Unlink}
+              caption={tCal("unlinkCaption")}
+              label={tCal("unlinkList")}
               onPress={() => {
                 setSettingsOpen(false);
-                setLinking(true);
+                void unlinkList({ eventId: eid, listId: linkedList._id });
               }}
             />
-          </>
-        )}
-        <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
-          <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            {tCal("deleteEvent")}
-          </Txt>
-        </Pressable>
+          ) : (
+            <>
+              <IconAction
+                icon={ListPlus}
+                caption={tCal("createListCaption")}
+                label={tCal("createList")}
+                onPress={handleCreateLinkedList}
+              />
+              <IconAction
+                icon={Link2}
+                caption={tCal("linkListCaption")}
+                label={tCal("linkExistingList")}
+                onPress={() => {
+                  setSettingsOpen(false);
+                  setLinking(true);
+                }}
+              />
+            </>
+          )}
+          <IconAction
+            icon={Trash2}
+            destructive
+            caption={tCal("deleteCaption")}
+            label={tCal("deleteEvent")}
+            onPress={confirmDelete}
+          />
+        </IconActionBar>
       </Sheet>
 
       <LinkListSheet

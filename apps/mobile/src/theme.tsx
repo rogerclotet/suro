@@ -37,6 +37,8 @@ const palette = {
     // A muted warm "cork" accent for neutral markers (the list bullet) — warm
     // enough to fit the palette, soft enough not to pull focus like `primary`.
     marker: "#c2a368",
+    // Catppuccin Latte "maroon" — destructive actions (delete, clear).
+    danger: "#e64553",
     // Rotating per-event accents (Catppuccin Latte: blue, peach, green, mauve,
     // teal) — saturated enough to read on the light surface.
     event: ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"],
@@ -57,6 +59,8 @@ const palette = {
     inputBg: "#40362f",
     // Lighter cork tan so the neutral marker stays legible on the dark surface.
     marker: "#c9b07f",
+    // Catppuccin Mocha "maroon" — the dark counterpart of the light danger.
+    danger: "#eba0ac",
     // The Catppuccin Mocha counterparts of the Latte accents above — softer
     // pastels that sit better on the warm-brown dark surface.
     event: ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"],

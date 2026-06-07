@@ -8,7 +8,6 @@ import {
   Ellipsis,
   LayoutTemplate,
   ListX,
-  type LucideIcon,
   Plus,
   Star,
   Trash2,
@@ -32,6 +31,8 @@ import {
   Fab,
   Field,
   HEADER_BUTTON_INSET,
+  IconAction,
+  IconActionBar,
   Loading,
   Screen,
   Sheet,
@@ -516,6 +517,7 @@ function ItemSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const tc = useTranslations("mobile.common");
   const isCreate = mode === "create";
@@ -549,7 +551,7 @@ function ItemSheet({
       <Button title={isCreate ? tc("add") : tc("save")} onPress={onSubmit} />
       {isCreate ? null : (
         <Pressable onPress={onDelete} style={{ padding: 10 }}>
-          <Txt style={{ textAlign: "center", color: DESTRUCTIVE }}>
+          <Txt style={{ textAlign: "center", color: t.danger }}>
             {tl("deleteItem")}
           </Txt>
         </Pressable>
@@ -609,7 +611,7 @@ function SettingsSheet({
       />
       <Button title={tc("save")} onPress={onSave} />
       {/* Secondary list actions as a compact icon toolbar. */}
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <IconActionBar>
         <IconAction
           icon={Star}
           active={favorite}
@@ -636,56 +638,8 @@ function SettingsSheet({
           label={tl("deleteList")}
           onPress={onDelete}
         />
-      </View>
+      </IconActionBar>
     </Sheet>
-  );
-}
-
-const DESTRUCTIVE = "#e64553";
-
-// Icon button for a sheet's action toolbar, with a caption underneath so the
-// glyph isn't the only cue. `label` drives accessibility; `active` fills the
-// glyph (favorite); `destructive` tints icon and caption red.
-function IconAction({
-  icon: Icon,
-  caption,
-  label,
-  onPress,
-  active,
-  destructive,
-}: {
-  icon: LucideIcon;
-  caption: string;
-  label: string;
-  onPress: () => void;
-  active?: boolean;
-  destructive?: boolean;
-}) {
-  const t = useTheme();
-  const color = destructive ? DESTRUCTIVE : active ? t.primary : t.text;
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => ({
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: destructive ? DESTRUCTIVE : t.border,
-        backgroundColor: t.inputBg,
-        opacity: pressed ? 0.7 : 1,
-      })}
-    >
-      <Icon color={color} size={20} fill={active ? color : "none"} />
-      <Txt size={11} numberOfLines={1} style={{ color, textAlign: "center" }}>
-        {caption}
-      </Txt>
-    </Pressable>
   );
 }
 

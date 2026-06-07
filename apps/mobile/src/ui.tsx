@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react-native";
+import { type LucideIcon, Plus } from "lucide-react-native";
 import {
   createContext,
   type ReactNode,
@@ -150,7 +150,9 @@ export function Sheet({
       );
       animateTo(Math.min(e.endCoordinates.height, headroom), e.duration);
     });
-    const onHide = Keyboard.addListener(hideEvt, (e) => animateTo(0, e.duration));
+    const onHide = Keyboard.addListener(hideEvt, (e) =>
+      animateTo(0, e.duration),
+    );
     return () => {
       onShow.remove();
       onHide.remove();
@@ -371,6 +373,58 @@ export function Button({
       >
         {title}
       </Text>
+    </Pressable>
+  );
+}
+
+// Equal-width row container for a sheet's secondary-action toolbar. Wrap a set
+// of `IconAction`s so they share spacing and stretch to a common height.
+export function IconActionBar({ children }: { children: ReactNode }) {
+  return <View style={{ flexDirection: "row", gap: 8 }}>{children}</View>;
+}
+
+// Square action button for an `IconActionBar`: an icon over a caption, so the
+// glyph isn't the only cue. `label` drives accessibility; `active` fills the
+// glyph (e.g. a favorite star); `destructive` tints icon, caption, and border.
+export function IconAction({
+  icon: Icon,
+  caption,
+  label,
+  onPress,
+  active,
+  destructive,
+}: {
+  icon: LucideIcon;
+  caption: string;
+  label: string;
+  onPress: () => void;
+  active?: boolean;
+  destructive?: boolean;
+}) {
+  const t = useTheme();
+  const color = destructive ? t.danger : active ? t.primary : t.text;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: destructive ? t.danger : t.border,
+        backgroundColor: t.inputBg,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Icon color={color} size={20} fill={active ? color : "none"} />
+      <Txt size={11} numberOfLines={1} style={{ color, textAlign: "center" }}>
+        {caption}
+      </Txt>
     </Pressable>
   );
 }
