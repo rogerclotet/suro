@@ -5,9 +5,9 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   Check,
-  Download,
   Ellipsis,
-  Eraser,
+  LayoutTemplate,
+  ListX,
   type LucideIcon,
   Plus,
   Star,
@@ -252,6 +252,23 @@ export default function ListDetail() {
     );
   }
 
+  function handleClearCompleted() {
+    // Removing completed items is irreversible; confirm first, keeping the
+    // settings sheet open behind the alert so cancelling lands back where the
+    // user was.
+    Alert.alert(tl("clearCompleted"), tl("clearCompletedMessage"), [
+      { text: tc("cancel"), style: "cancel" },
+      {
+        text: tl("clearCompletedAction"),
+        style: "destructive",
+        onPress: () => {
+          setSettingsOpen(false);
+          void clearCompleted({ listId: lid });
+        },
+      },
+    ]);
+  }
+
   function handleToggleFavorite() {
     void toggleFavorite({ listId: lid });
   }
@@ -444,10 +461,7 @@ export default function ListDetail() {
               setPendingImport(true);
               setSettingsOpen(false);
             }}
-            onClearCompleted={async () => {
-              setSettingsOpen(false);
-              await clearCompleted({ listId: lid });
-            }}
+            onClearCompleted={handleClearCompleted}
             onDelete={handleDeleteList}
             onClose={() => setSettingsOpen(false)}
             onClosed={() => {
@@ -599,22 +613,26 @@ function SettingsSheet({
         <IconAction
           icon={Star}
           active={favorite}
+          caption={tl("favoriteCaption")}
           label={favorite ? tl("removeFromFavorites") : tl("addToFavorites")}
           onPress={onToggleFavorite}
         />
         <IconAction
-          icon={Download}
+          icon={LayoutTemplate}
+          caption={tl("templatesCaption")}
           label={tl("importTemplates")}
           onPress={onImportTemplates}
         />
         <IconAction
-          icon={Eraser}
+          icon={ListX}
+          caption={tl("clearCaption")}
           label={tl("clearCompleted")}
           onPress={onClearCompleted}
         />
         <IconAction
           icon={Trash2}
           destructive
+          caption={tl("deleteCaption")}
           label={tl("deleteList")}
           onPress={onDelete}
         />
@@ -625,16 +643,19 @@ function SettingsSheet({
 
 const DESTRUCTIVE = "#e64553";
 
-// Square icon button for a sheet's action toolbar — label drives accessibility
-// only; `active` fills the glyph (favorite), `destructive` tints it red.
+// Icon button for a sheet's action toolbar, with a caption underneath so the
+// glyph isn't the only cue. `label` drives accessibility; `active` fills the
+// glyph (favorite); `destructive` tints icon and caption red.
 function IconAction({
   icon: Icon,
+  caption,
   label,
   onPress,
   active,
   destructive,
 }: {
   icon: LucideIcon;
+  caption: string;
   label: string;
   onPress: () => void;
   active?: boolean;
@@ -651,7 +672,8 @@ function IconAction({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 14,
+        gap: 6,
+        paddingVertical: 12,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: destructive ? DESTRUCTIVE : t.border,
@@ -660,6 +682,9 @@ function IconAction({
       })}
     >
       <Icon color={color} size={20} fill={active ? color : "none"} />
+      <Txt size={11} numberOfLines={1} style={{ color, textAlign: "center" }}>
+        {caption}
+      </Txt>
     </Pressable>
   );
 }
