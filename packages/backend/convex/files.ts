@@ -1,22 +1,32 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { mutation, type QueryCtx, query } from "./_generated/server";
+import {
+  internalMutation,
+  mutation,
+  type QueryCtx,
+  query,
+} from "./_generated/server";
 import {
   requireEventAccess,
   requireFileOwner,
   requireProjectMember,
 } from "./model/permissions";
 
-/** Attach a download URL, the uploader's name, and any event name to a row. */
+/** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
-  const [url, uploader, event] = await Promise.all([
+  const [url, thumbnailUrl, uploader, event] = await Promise.all([
     ctx.storage.getUrl(file.storageId),
+    file.thumbnailStorageId
+      ? ctx.storage.getUrl(file.thumbnailStorageId)
+      : Promise.resolve(null),
     ctx.db.get(file.uploadedBy),
     file.eventId ? ctx.db.get(file.eventId) : Promise.resolve(null),
   ]);
   return {
     ...file,
     url,
+    thumbnailUrl,
     uploaderName: uploader?.name ?? null,
     eventName: event?.name ?? null,
   };
@@ -56,7 +66,7 @@ export const saveFile = mutation({
     if (name === "") {
       throw new Error("File name is required");
     }
-    return ctx.db.insert("files", {
+    const fileId = await ctx.db.insert("files", {
       name,
       storageId: args.storageId,
       type: args.type,
@@ -65,6 +75,35 @@ export const saveFile = mutation({
       eventId: args.eventId,
       uploadedBy: userId,
     });
+    // Render a page-1 preview off the transaction (Node action, mupdf is WASM).
+    if (args.type === "application/pdf") {
+      await ctx.scheduler.runAfter(0, internal.pdfThumbnails.generate, {
+        fileId,
+        storageId: args.storageId,
+      });
+    }
+    return fileId;
+  },
+});
+
+/**
+ * Attach a rendered PDF thumbnail to its file. Called only by the
+ * `pdfThumbnails.generate` action; tolerates the file having been deleted (or
+ * re-thumbnailed) meanwhile by dropping the now-orphaned blob.
+ */
+export const attachThumbnail = internalMutation({
+  args: { fileId: v.id("files"), thumbnailStorageId: v.id("_storage") },
+  handler: async (ctx, { fileId, thumbnailStorageId }) => {
+    const file = await ctx.db.get(fileId);
+    if (file === null) {
+      await ctx.storage.delete(thumbnailStorageId);
+      return null;
+    }
+    if (file.thumbnailStorageId) {
+      await ctx.storage.delete(file.thumbnailStorageId);
+    }
+    await ctx.db.patch(fileId, { thumbnailStorageId });
+    return null;
   },
 });
 
@@ -114,6 +153,9 @@ export const remove = mutation({
   handler: async (ctx, { fileId }) => {
     const { file } = await requireFileOwner(ctx, fileId);
     await ctx.storage.delete(file.storageId);
+    if (file.thumbnailStorageId) {
+      await ctx.storage.delete(file.thumbnailStorageId);
+    }
     await ctx.db.delete(file._id);
     return null;
   },

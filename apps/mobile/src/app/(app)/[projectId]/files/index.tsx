@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import { ScrollView, View } from "react-native";
-import { FileList } from "@/components/file-list";
+import { FileGallery } from "@/components/file-gallery";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
@@ -13,7 +13,7 @@ import { Fab, Loading, Screen, Txt } from "@/ui";
 export default function Files() {
   const pid = useProjectId();
   const files = useQuery(api.files.listByProject, { projectId: pid });
-  const { pickImage, pickDocument, busy } = useUploadFile(pid);
+  const { pickImage, pickDocument, pending } = useUploadFile(pid);
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
 
@@ -43,17 +43,12 @@ export default function Files() {
         <Loading />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 96 }}>
-          {busy ? (
-            <Txt muted style={{ paddingBottom: 8 }}>
-              {tFiles("sharing")}
-            </Txt>
-          ) : null}
-          {files.length === 0 ? (
+          {files.length === 0 && !pending ? (
             <View style={{ paddingVertical: 24, alignItems: "center" }}>
               <Txt muted>{tFiles("empty")}</Txt>
             </View>
           ) : (
-            <FileList files={files} />
+            <FileGallery files={files} pending={pending} />
           )}
         </ScrollView>
       )}

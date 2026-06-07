@@ -155,6 +155,9 @@ export default defineSchema({
     projectId: v.id("projects"),
     eventId: v.optional(v.id("events")),
     uploadedBy: v.id("users"),
+    // Page-1 preview for PDFs, rendered async after upload (see pdfThumbnails).
+    // Absent until generated, and for non-PDF types — clients fall back to icons.
+    thumbnailStorageId: v.optional(v.id("_storage")),
     legacyId: v.optional(v.string()),
   })
     .index("by_project", ["projectId"])

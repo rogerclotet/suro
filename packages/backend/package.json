@@ -24,6 +24,7 @@
     "@auth/core": "0.37.0",
     "@convex-dev/auth": "^0.0.93",
     "convex": "^1.40.0",
+    "mupdf": "^1.27.0",
     "postgres": "^3.4.9"
   },
   "devDependencies": {

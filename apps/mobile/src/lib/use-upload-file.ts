@@ -7,13 +7,24 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useTranslations } from "@/i18n";
-import { stripExtension } from "@/lib/files";
+import { isImage, stripExtension } from "@/lib/files";
 
 type PickedAsset = {
   uri: string;
   name: string;
   mimeType: string;
   size: number;
+};
+
+/**
+ * The in-flight upload, surfaced so the gallery can show an optimistic tile —
+ * the picked image previews immediately (documents fall back to an icon) with a
+ * spinner over it until the row lands.
+ */
+export type PendingUpload = {
+  uri: string;
+  isImage: boolean;
+  type: string;
 };
 
 /**
@@ -28,10 +39,14 @@ export function useUploadFile(
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveFile = useMutation(api.files.saveFile);
   const t = useTranslations("mobile.files");
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<PendingUpload | null>(null);
 
   async function upload(asset: PickedAsset) {
-    setBusy(true);
+    setPending({
+      uri: asset.uri,
+      isImage: isImage(asset.mimeType),
+      type: asset.mimeType,
+    });
     try {
       const postUrl = await generateUploadUrl({ projectId });
       // RN's fetch can't turn a file:// URI into a Blob ("Creating blobs from
@@ -59,7 +74,7 @@ export function useUploadFile(
         error instanceof Error ? error.message : t("uploadFailedBody"),
       );
     } finally {
-      setBusy(false);
+      setPending(null);
     }
   }
 
@@ -101,5 +116,5 @@ export function useUploadFile(
     });
   }
 
-  return { pickImage, pickDocument, busy };
+  return { pickImage, pickDocument, busy: pending !== null, pending };
 }

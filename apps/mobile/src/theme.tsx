@@ -39,6 +39,8 @@ const palette = {
     marker: "#c2a368",
     // Catppuccin Latte "maroon" — destructive actions (delete, clear).
     danger: "#e64553",
+    // The conventional PDF red, for the PDF file-type icon and badge.
+    pdf: "#e2574c",
     // Rotating per-event accents (Catppuccin Latte: blue, peach, green, mauve,
     // teal) — saturated enough to read on the light surface.
     event: ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"],
@@ -61,6 +63,8 @@ const palette = {
     marker: "#c9b07f",
     // Catppuccin Mocha "maroon" — the dark counterpart of the light danger.
     danger: "#eba0ac",
+    // A lighter PDF red so the icon and badge stay legible on the dark surface.
+    pdf: "#f0857b",
     // The Catppuccin Mocha counterparts of the Latte accents above — softer
     // pastels that sit better on the warm-brown dark surface.
     event: ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"],

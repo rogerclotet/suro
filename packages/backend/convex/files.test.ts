@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test";
 import { beforeEach, describe, expect, it } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -171,6 +171,55 @@ describe("files: event attachment", () => {
         eventId: foreignEvent,
       }),
     ).rejects.toThrow();
+  });
+});
+
+describe("files: PDF thumbnails", () => {
+  it("exposes a thumbnailUrl once a thumbnail is attached", async () => {
+    const fileId = await saveFamilyFile("Doc");
+    expect(
+      (await alice.query(api.files.listByProject, { projectId: ids.family }))[0]
+        ?.thumbnailUrl,
+    ).toBeNull();
+
+    const thumbId = await storeBlob("png-bytes");
+    await t.mutation(internal.files.attachThumbnail, {
+      fileId,
+      thumbnailStorageId: thumbId,
+    });
+
+    const files = await alice.query(api.files.listByProject, {
+      projectId: ids.family,
+    });
+    expect(files[0]?.thumbnailUrl).toBeTruthy();
+  });
+
+  it("drops the orphan blob when its file is already gone", async () => {
+    const fileId = await saveFamilyFile("Vanishing");
+    await alice.mutation(api.files.remove, { fileId });
+
+    const thumbId = await storeBlob("png-bytes");
+    await t.mutation(internal.files.attachThumbnail, {
+      fileId,
+      thumbnailStorageId: thumbId,
+    });
+
+    const stillThere = await t.run((ctx) => ctx.storage.getUrl(thumbId));
+    expect(stillThere).toBeNull();
+  });
+
+  it("deletes the thumbnail blob when the file is removed", async () => {
+    const fileId = await saveFamilyFile("WithThumb");
+    const thumbId = await storeBlob("png-bytes");
+    await t.mutation(internal.files.attachThumbnail, {
+      fileId,
+      thumbnailStorageId: thumbId,
+    });
+
+    await alice.mutation(api.files.remove, { fileId });
+
+    const stillThere = await t.run((ctx) => ctx.storage.getUrl(thumbId));
+    expect(stillThere).toBeNull();
   });
 });
 

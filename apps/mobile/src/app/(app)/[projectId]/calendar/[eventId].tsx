@@ -16,12 +16,13 @@ import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
-import { FileList } from "@/components/file-list";
+import { FileGallery } from "@/components/file-gallery";
 import { UploadButton } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
+import { useUploadFile } from "@/lib/use-upload-file";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -50,6 +51,7 @@ export default function EventDetail() {
 
   const event = useQuery(api.events.get, { eventId: eid });
   const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
+  const { pickImage, pickDocument, busy, pending } = useUploadFile(pid, eid);
   const updateEvent = useMutation(api.events.update);
   const removeEvent = useMutation(api.events.remove);
   const createLinkedList = useMutation(api.events.createLinkedList);
@@ -192,10 +194,14 @@ export default function EventDetail() {
                 {tCal("files")}
               </Txt>
             </View>
-            <UploadButton projectId={pid} eventId={eid} />
+            <UploadButton picker={{ pickImage, pickDocument }} busy={busy} />
           </View>
-          {eventFiles && eventFiles.length > 0 ? (
-            <FileList files={eventFiles} />
+          {(eventFiles && eventFiles.length > 0) || pending ? (
+            <FileGallery
+              files={eventFiles ?? []}
+              pending={pending}
+              showEventBadge={false}
+            />
           ) : (
             <Txt muted size={13}>
               {tCal("noFilesAttached")}
