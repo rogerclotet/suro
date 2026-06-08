@@ -1,16 +1,17 @@
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import * as Linking from "expo-linking";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
-import { useTranslations } from "@/i18n";
+import { useLocale, useTranslations } from "@/i18n";
 import {
   CATPPUCCIN_COLOR_KEYS,
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
+import { localizeGroupPath } from "@/lib/group-paths";
+import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
 
@@ -53,15 +54,26 @@ function ManageGroup({
 }) {
   const t = useTranslations("groups");
   const tc = useTranslations("mobile.common");
+  const locale = useLocale();
   const router = useRouter();
   const leave = useMutation(api.projects.leave);
 
   async function shareInvite() {
-    // Deep link into the join screen; resolves to suro://invitation/… in a build.
-    const url = Linking.createURL(
-      `invitation/${project._id}/${project.inviteToken}`,
+    // Share a localized https URL: anyone without the app lands on the web
+    // invitation page in their language, and the app opens it directly via
+    // Universal Links / App Links when installed (app/+native-intent maps it
+    // back to the in-app invitation screen).
+    const link = webUrl(
+      localizeGroupPath(
+        `/groups/${project._id}/invitation/${project.inviteToken}`,
+        locale,
+      ),
     );
-    await Share.share({ message: `${t("inviteDescription")}\n${url}` });
+    await Share.share({
+      title: t("inviteTitle"),
+      message: `${t("inviteDescription")}\n${link}`,
+      url: link,
+    });
   }
 
   async function leaveGroup() {

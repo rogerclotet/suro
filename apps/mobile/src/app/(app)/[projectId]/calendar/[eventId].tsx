@@ -18,8 +18,9 @@ import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { FileGallery } from "@/components/file-gallery";
 import { UploadButton } from "@/components/upload-button";
-import { useTranslations } from "@/i18n";
+import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
+import { localizeGroupPath } from "@/lib/group-paths";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useUploadFile } from "@/lib/use-upload-file";
@@ -46,6 +47,7 @@ export default function EventDetail() {
   const router = useRouter();
   const tCal = useTranslations("mobile.calendar");
   const tc = useTranslations("mobile.common");
+  const locale = useLocale();
   const formatRange = useFormatEventRange();
   const timeRemaining = useTimeRemaining();
 
@@ -94,14 +96,17 @@ export default function EventDetail() {
   async function handleCreateLinkedList() {
     setSettingsOpen(false);
     const listId = await createLinkedList({ eventId: eid });
-    router.push(`/${pid}/lists/${listId}`);
+    // Open within the calendar stack so Back returns to this event.
+    router.push(`/${pid}/calendar/list/${listId}`);
   }
 
   async function shareEvent() {
     if (!event) {
       return;
     }
-    const link = webUrl(`/groups/${pid}/calendar/${eid}`);
+    const link = webUrl(
+      localizeGroupPath(`/groups/${pid}/calendar/${eid}`, locale),
+    );
     // message carries the link for Android; url gives iOS its rich preview.
     const message = event.description
       ? `${event.name}\n\n${event.description}\n\n${link}`
@@ -169,8 +174,9 @@ export default function EventDetail() {
             <LinkedListCard
               list={linkedList}
               onPress={() =>
+                // Open within the calendar stack so Back returns to this event.
                 router.push({
-                  pathname: `/${pid}/lists/${linkedList._id}`,
+                  pathname: `/${pid}/calendar/list/${linkedList._id}`,
                   params: { name: linkedList.name },
                 })
               }

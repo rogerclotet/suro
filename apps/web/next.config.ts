@@ -64,6 +64,12 @@ const nextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        // The AASA file has no extension, so Next serves it as octet-stream by
+        // default; force application/json so the OS accepts it.
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
     ];
   },
   async rewrites() {

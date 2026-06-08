@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["REPLACE_WITH_APPLE_TEAM_ID.app.suro.mobile"],
+        "components": [
+          { "/": "/groups/*", "comment": "Group content shared from the app (canonical, unprefixed)" },
+          { "/": "/en/groups/*", "comment": "Group content shared from the web (en)" },
+          { "/": "/ca/grups/*", "comment": "Group content shared from the web (ca)" },
+          { "/": "/es/grupos/*", "comment": "Group content shared from the web (es)" }
+        ]
+      }
+    ]
+  }
+}
