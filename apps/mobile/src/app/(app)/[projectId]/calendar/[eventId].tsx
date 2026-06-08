@@ -28,6 +28,7 @@ import { useTheme } from "@/theme";
 import {
   Button,
   Card,
+  HEADER_BUTTON_INSET,
   IconAction,
   IconActionBar,
   Loading,
@@ -132,7 +133,12 @@ export default function EventDetail() {
           title: event.name,
           headerRight: () => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 16,
+                paddingHorizontal: HEADER_BUTTON_INSET,
+              }}
             >
               <Pressable onPress={shareEvent} hitSlop={8}>
                 <Share2 color={t.primary} size={20} />
