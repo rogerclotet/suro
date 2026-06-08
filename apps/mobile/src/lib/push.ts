@@ -24,7 +24,18 @@ function notifications(): typeof Notifications {
   return require("expo-notifications") as typeof Notifications;
 }
 
-if (PUSH_AVAILABLE) {
+// Configure the foreground handler exactly once, lazily. This must NOT run at
+// module-load time: importing expo-notifications fires its native init side
+// effects, and on a standalone Android build (no Expo Go to short-circuit it)
+// that runs at app launch — before any screen mounts — taking the whole app
+// down if anything in that path throws. Deferring it behind the hook's effect
+// keeps the cost off the launch path and out of the import graph's hot section.
+let handlerConfigured = false;
+function configureForegroundHandler(): void {
+  if (handlerConfigured || !PUSH_AVAILABLE) {
+    return;
+  }
+  handlerConfigured = true;
   // Show the banner even when the app is foregrounded (server pushes are about
   // other members' activity, so they're worth surfacing in-app too).
   notifications().setNotificationHandler({
@@ -36,6 +47,11 @@ if (PUSH_AVAILABLE) {
     }),
   });
 }
+
+// getDeviceToken already swallows its own errors; the response-listener effect
+// wraps these calls in try/catch. Keeping that boundary at the call sites (not
+// here) means a failed configure still flips `handlerConfigured`, so we don't
+// retry a known-broken native module on every mount.
 
 /** The EAS project id, required by getExpoPushTokenAsync. Absent until `eas init`. */
 function easProjectId(): string | undefined {
@@ -120,20 +136,30 @@ export function usePushNotifications(): void {
     if (!PUSH_AVAILABLE) {
       return;
     }
-    const N = notifications();
     function open(response: Notifications.NotificationResponse) {
       const path = response.notification.request.content.data?.path;
       if (typeof path === "string") {
         router.push(path);
       }
     }
-    const subscription = N.addNotificationResponseReceivedListener(open);
-    // Cold start: the tap that launched the app isn't delivered to the listener.
-    void N.getLastNotificationResponseAsync().then((response) => {
-      if (response) {
-        open(response);
-      }
-    });
-    return () => subscription.remove();
+    // Any of these can throw if expo-notifications' native side fails to init on
+    // a misconfigured build; never let that propagate and crash the app — push
+    // is a best-effort enhancement, not load-bearing.
+    try {
+      configureForegroundHandler();
+      const N = notifications();
+      const subscription = N.addNotificationResponseReceivedListener(open);
+      // Cold start: the tap that launched the app isn't delivered to the listener.
+      void N.getLastNotificationResponseAsync()
+        .then((response) => {
+          if (response) {
+            open(response);
+          }
+        })
+        .catch(() => {});
+      return () => subscription.remove();
+    } catch {
+      return;
+    }
   }, [router]);
 }
