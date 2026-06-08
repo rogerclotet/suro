@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "pnpm install && { git -C \"$CONDUCTOR_ROOT_PATH\" fetch --prune origin && git -C \"$CONDUCTOR_ROOT_PATH\" pull --ff-only || true; }",
+    "run": "pnpm --filter web dev --port \"$CONDUCTOR_PORT\""
+  },
+  "runScriptMode": "concurrent"
+}
