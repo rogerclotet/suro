@@ -6,6 +6,8 @@ import { loadListWithItems } from "./model/lists";
 import {
   requireEventAccess,
   requireListAccess,
+  requireNoteAccess,
+  requirePotAccess,
   requireProjectMember,
 } from "./model/permissions";
 
@@ -38,18 +40,39 @@ export const listByRange = query({
   },
 });
 
-/** The event plus its linked list (with items), or null. */
+/** The event plus its linked list, note, and expense pot — each or null. */
 export const get = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event } = await requireEventAccess(ctx, eventId);
-    const linkedList = await ctx.db
-      .query("lists")
-      .withIndex("by_event", (q) => q.eq("eventId", event._id))
-      .first();
+    const [linkedList, linkedNote, linkedPot] = await Promise.all([
+      ctx.db
+        .query("lists")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .first(),
+      ctx.db
+        .query("notes")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .first(),
+      ctx.db
+        .query("pots")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .first(),
+    ]);
+    // The pot card only needs a member count, not the full balances payload.
+    let pot = null;
+    if (linkedPot) {
+      const members = await ctx.db
+        .query("potMembers")
+        .withIndex("by_pot", (q) => q.eq("potId", linkedPot._id))
+        .collect();
+      pot = { ...linkedPot, memberCount: members.length };
+    }
     return {
       ...event,
       list: linkedList ? await loadListWithItems(ctx, linkedList) : null,
+      note: linkedNote,
+      pot,
     };
   },
 });
@@ -205,6 +228,104 @@ export const unlinkList = mutation({
       throw new Error("List is not linked to the event");
     }
     await ctx.db.patch(list._id, { eventId: undefined });
+    return null;
+  },
+});
+
+/** Create a blank note already linked to the event (mirrors createLinkedList). */
+export const createLinkedNote = mutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    return ctx.db.insert("notes", {
+      name: event.name,
+      contents: "",
+      format: "html",
+      projectId: event.projectId,
+      eventId: event._id,
+      createdBy: userId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const linkNote = mutation({
+  args: { eventId: v.id("events"), noteId: v.id("notes") },
+  handler: async (ctx, { eventId, noteId }) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    const { note } = await requireNoteAccess(ctx, noteId);
+    if (note.projectId !== event.projectId) {
+      throw new Error("Note and event are not in the same project");
+    }
+    await ctx.db.patch(note._id, { eventId: event._id, updatedBy: userId });
+    return null;
+  },
+});
+
+export const unlinkNote = mutation({
+  args: { eventId: v.id("events"), noteId: v.id("notes") },
+  handler: async (ctx, { eventId, noteId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    const { note } = await requireNoteAccess(ctx, noteId);
+    if (note.eventId !== event._id) {
+      throw new Error("Note is not linked to the event");
+    }
+    await ctx.db.patch(note._id, { eventId: undefined });
+    return null;
+  },
+});
+
+/**
+ * Create an expense pot already linked to the event, seeded with every project
+ * member (a pot needs at least two — expenses are inherently a group feature).
+ */
+export const createLinkedPot = mutation({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, { eventId }) => {
+    const { event, userId } = await requireEventAccess(ctx, eventId);
+    const members = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", event.projectId))
+      .collect();
+    const memberIds = [...new Set(members.map((m) => m.userId))];
+    if (memberIds.length < 2) {
+      throw new Error("A pot needs at least two members");
+    }
+    const potId = await ctx.db.insert("pots", {
+      name: event.name,
+      projectId: event.projectId,
+      eventId: event._id,
+      createdBy: userId,
+    });
+    for (const memberId of memberIds) {
+      await ctx.db.insert("potMembers", { potId, userId: memberId });
+    }
+    return potId;
+  },
+});
+
+export const linkPot = mutation({
+  args: { eventId: v.id("events"), potId: v.id("pots") },
+  handler: async (ctx, { eventId, potId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    const { pot } = await requirePotAccess(ctx, potId);
+    if (pot.projectId !== event.projectId) {
+      throw new Error("Pot and event are not in the same project");
+    }
+    await ctx.db.patch(pot._id, { eventId: event._id });
+    return null;
+  },
+});
+
+export const unlinkPot = mutation({
+  args: { eventId: v.id("events"), potId: v.id("pots") },
+  handler: async (ctx, { eventId, potId }) => {
+    const { event } = await requireEventAccess(ctx, eventId);
+    const { pot } = await requirePotAccess(ctx, potId);
+    if (pot.eventId !== event._id) {
+      throw new Error("Pot is not linked to the event");
+    }
+    await ctx.db.patch(pot._id, { eventId: undefined });
     return null;
   },
 });

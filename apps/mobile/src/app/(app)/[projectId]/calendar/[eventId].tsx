@@ -1,26 +1,38 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Folders,
-  Link2,
+  CirclePlus,
+  FilePlus,
+  FileText,
   ListPlus,
   ListTodo,
+  type LucideIcon,
+  Paperclip,
   Share2,
   Trash2,
   Unlink,
+  Upload,
+  Wallet,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Share, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { FileGallery } from "@/components/file-gallery";
-import { UploadButton } from "@/components/upload-button";
+import { chooseAndUpload } from "@/components/upload-button";
 import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { localizeGroupPath } from "@/lib/group-paths";
+import { notePreview } from "@/lib/note-content";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useUploadFile } from "@/lib/use-upload-file";
@@ -29,16 +41,21 @@ import {
   Button,
   Card,
   HEADER_BUTTON_INSET,
-  IconAction,
-  IconActionBar,
   Loading,
   Screen,
   Sheet,
   Txt,
 } from "@/ui";
 
-type EventResult = FunctionReturnType<typeof api.events.get>;
-type ListWithItems = NonNullable<EventResult["list"]>;
+type LinkKind = "list" | "note" | "pot";
+type LinkCandidate = { kind: LinkKind; id: string; name: string };
+
+/** The leading icon for each linkable kind — shared by cards and the picker. */
+const KIND_ICON: Record<LinkKind, LucideIcon> = {
+  list: ListTodo,
+  note: FileText,
+  pot: Wallet,
+};
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -47,6 +64,7 @@ export default function EventDetail() {
   const t = useTheme();
   const router = useRouter();
   const tCal = useTranslations("mobile.calendar");
+  const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
   const locale = useLocale();
   const formatRange = useFormatEventRange();
@@ -54,15 +72,34 @@ export default function EventDetail() {
 
   const event = useQuery(api.events.get, { eventId: eid });
   const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
-  const { pickImage, pickDocument, busy, pending } = useUploadFile(pid, eid);
+  const { pickImage, pickDocument, pending } = useUploadFile(pid, eid);
   const updateEvent = useMutation(api.events.update);
   const removeEvent = useMutation(api.events.remove);
   const createLinkedList = useMutation(api.events.createLinkedList);
   const unlinkList = useMutation(api.events.unlinkList);
+  const createLinkedNote = useMutation(api.events.createLinkedNote);
+  const unlinkNote = useMutation(api.events.unlinkNote);
+  const createLinkedPot = useMutation(api.events.createLinkedPot);
+  const unlinkPot = useMutation(api.events.unlinkPot);
+  const linkList = useMutation(api.events.linkList);
+  const linkNote = useMutation(api.events.linkNote);
+  const linkPot = useMutation(api.events.linkPot);
+
+  // Existing records the event could still link — only the kinds it lacks.
+  const candidates = useLinkCandidates(pid, {
+    list: Boolean(event?.list),
+    note: Boolean(event?.note),
+    pot: Boolean(event?.pot),
+  });
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [linking, setLinking] = useState(false);
+  // Presenting a second sheet while the options sheet is still animating out is
+  // dropped on iOS, so defer it until the options sheet has fully closed.
+  const [pendingSheet, setPendingSheet] = useState<null | "edit" | "link">(
+    null,
+  );
 
   // Live countdown: refresh "now" each minute.
   const [now, setNow] = useState(() => Date.now());
@@ -94,11 +131,58 @@ export default function EventDetail() {
     ]);
   }
 
+  // Unlinking only detaches the record from the event; it isn't deleted, so the
+  // confirm reassures rather than warns.
+  function confirmUnlink(label: string, name: string, run: () => void) {
+    Alert.alert(label, tCal("unlinkMessage", { name }), [
+      { text: tc("cancel"), style: "cancel" },
+      { text: tCal("unlink"), onPress: run },
+    ]);
+  }
+
+  function chooseFile() {
+    chooseAndUpload(
+      { pickImage, pickDocument },
+      {
+        title: tFiles("sharePrompt"),
+        photo: tFiles("photo"),
+        document: tFiles("document"),
+        cancel: tc("cancel"),
+      },
+    );
+  }
+
+  // Each "create" links a fresh record to the event and opens it within the
+  // calendar stack so Back returns here rather than that section's own tab.
   async function handleCreateLinkedList() {
-    setSettingsOpen(false);
     const listId = await createLinkedList({ eventId: eid });
-    // Open within the calendar stack so Back returns to this event.
     router.push(`/${pid}/calendar/list/${listId}`);
+  }
+
+  async function handleCreateLinkedNote() {
+    const noteId = await createLinkedNote({ eventId: eid });
+    router.push(`/${pid}/calendar/note/${noteId}`);
+  }
+
+  async function handleCreateLinkedPot() {
+    try {
+      const potId = await createLinkedPot({ eventId: eid });
+      router.push(`/${pid}/calendar/expense/${potId}`);
+    } catch {
+      // The only failure mode is a solo project — expenses need a group.
+      Alert.alert(tCal("expenseNeedsMembers"));
+    }
+  }
+
+  function linkExisting(candidate: LinkCandidate) {
+    setLinking(false);
+    if (candidate.kind === "list") {
+      void linkList({ eventId: eid, listId: candidate.id as Id<"lists"> });
+    } else if (candidate.kind === "note") {
+      void linkNote({ eventId: eid, noteId: candidate.id as Id<"notes"> });
+    } else {
+      void linkPot({ eventId: eid, potId: candidate.id as Id<"pots"> });
+    }
   }
 
   async function shareEvent() {
@@ -125,6 +209,20 @@ export default function EventDetail() {
 
   const remaining = timeRemaining(event, now);
   const linkedList = event.list;
+  const linkedNote = event.note;
+  const linkedPot = event.pot;
+  // Pending uploads keep the gallery visible so the in-flight tile shows.
+  const hasFiles = (eventFiles && eventFiles.length > 0) || pending;
+  const hasExtras = Boolean(linkedList || linkedNote || linkedPot || hasFiles);
+
+  function runPendingSheet() {
+    if (pendingSheet === "edit") {
+      setEditing(true);
+    } else if (pendingSheet === "link") {
+      setLinking(true);
+    }
+    setPendingSheet(null);
+  }
 
   return (
     <Screen>
@@ -156,70 +254,113 @@ export default function EventDetail() {
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
         <View>
           {remaining ? (
-            <Txt size={14} style={{ color: t.primary, marginBottom: 2 }}>
+            <Txt size={16} style={{ color: t.primary, marginBottom: 3 }}>
               {remaining}
             </Txt>
           ) : null}
-          <Txt muted size={14}>
+          <Txt muted size={16}>
             {formatRange(event)}
           </Txt>
         </View>
 
-        {event.description ? <Txt size={15}>{event.description}</Txt> : null}
+        {event.description ? <Txt size={18}>{event.description}</Txt> : null}
 
-        {linkedList ? (
-          <View style={{ gap: 8 }}>
+        {hasExtras ? (
+          <>
+            {/* Divider sets the event off from the extras attached to it. */}
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <ListTodo color={t.text} size={18} />
-              <Txt size={16} weight="700">
-                {tCal("list")}
-              </Txt>
-            </View>
-            <LinkedListCard
-              list={linkedList}
-              onPress={() =>
-                // Open within the calendar stack so Back returns to this event.
-                router.push({
-                  pathname: `/${pid}/calendar/list/${linkedList._id}`,
-                  params: { name: linkedList.name },
-                })
-              }
+              style={{
+                height: StyleSheet.hairlineWidth,
+                backgroundColor: t.border,
+                marginVertical: 4,
+              }}
             />
-          </View>
+            {linkedList ? (
+              <LinkedCard
+                icon={ListTodo}
+                name={linkedList.name}
+                subtitle={
+                  linkedList.items.length === 0
+                    ? tc("empty")
+                    : tc("itemsDone", {
+                        done: linkedList.items.filter((i) => i.completed)
+                          .length,
+                        total: linkedList.items.length,
+                      })
+                }
+                unlinkLabel={tCal("unlinkList")}
+                onPress={() =>
+                  router.push({
+                    pathname: `/${pid}/calendar/list/${linkedList._id}`,
+                    params: { name: linkedList.name },
+                  })
+                }
+                onUnlink={() =>
+                  confirmUnlink(
+                    tCal("unlinkList"),
+                    linkedList.name,
+                    () =>
+                      void unlinkList({ eventId: eid, listId: linkedList._id }),
+                  )
+                }
+              />
+            ) : null}
+            {linkedNote ? (
+              <LinkedCard
+                icon={FileText}
+                name={linkedNote.name}
+                subtitle={
+                  notePreview(linkedNote.contents, linkedNote.format) ||
+                  tc("empty")
+                }
+                unlinkLabel={tCal("unlinkNote")}
+                onPress={() =>
+                  router.push({
+                    pathname: `/${pid}/calendar/note/${linkedNote._id}`,
+                    params: { name: linkedNote.name },
+                  })
+                }
+                onUnlink={() =>
+                  confirmUnlink(
+                    tCal("unlinkNote"),
+                    linkedNote.name,
+                    () =>
+                      void unlinkNote({ eventId: eid, noteId: linkedNote._id }),
+                  )
+                }
+              />
+            ) : null}
+            {linkedPot ? (
+              <LinkedCard
+                icon={Wallet}
+                name={linkedPot.name}
+                subtitle={tc("memberCount", { count: linkedPot.memberCount })}
+                unlinkLabel={tCal("unlinkExpense")}
+                onPress={() =>
+                  router.push({
+                    pathname: `/${pid}/calendar/expense/${linkedPot._id}`,
+                    params: { name: linkedPot.name },
+                  })
+                }
+                onUnlink={() =>
+                  confirmUnlink(
+                    tCal("unlinkExpense"),
+                    linkedPot.name,
+                    () =>
+                      void unlinkPot({ eventId: eid, potId: linkedPot._id }),
+                  )
+                }
+              />
+            ) : null}
+            {hasFiles ? (
+              <FileGallery
+                files={eventFiles ?? []}
+                pending={pending}
+                showEventBadge={false}
+              />
+            ) : null}
+          </>
         ) : null}
-
-        <View style={{ gap: 8 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <Folders color={t.text} size={18} />
-              <Txt size={16} weight="700">
-                {tCal("files")}
-              </Txt>
-            </View>
-            <UploadButton picker={{ pickImage, pickDocument }} busy={busy} />
-          </View>
-          {(eventFiles && eventFiles.length > 0) || pending ? (
-            <FileGallery
-              files={eventFiles ?? []}
-              pending={pending}
-              showEventBadge={false}
-            />
-          ) : (
-            <Txt muted size={13}>
-              {tCal("noFilesAttached")}
-            </Txt>
-          )}
-        </View>
       </ScrollView>
 
       <EventForm
@@ -236,132 +377,285 @@ export default function EventDetail() {
         onClose={() => setEditing(false)}
       />
 
-      <Sheet visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
+      <Sheet
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onClosed={runPendingSheet}
+      >
         <Txt size={18} weight="700">
           {tCal("eventOptions")}
         </Txt>
         <Button
           title={tCal("editEvent")}
           onPress={() => {
+            setPendingSheet("edit");
             setSettingsOpen(false);
-            setEditing(true);
           }}
         />
-        {/* Secondary event actions as a compact icon toolbar. */}
-        <IconActionBar>
-          {linkedList ? (
-            <IconAction
-              icon={Unlink}
-              caption={tCal("unlinkCaption")}
-              label={tCal("unlinkList")}
-              onPress={() => {
-                setSettingsOpen(false);
-                void unlinkList({ eventId: eid, listId: linkedList._id });
-              }}
-            />
-          ) : (
-            <>
-              <IconAction
-                icon={ListPlus}
-                caption={tCal("createListCaption")}
-                label={tCal("createList")}
-                onPress={handleCreateLinkedList}
-              />
-              <IconAction
-                icon={Link2}
-                caption={tCal("linkListCaption")}
-                label={tCal("linkExistingList")}
-                onPress={() => {
-                  setSettingsOpen(false);
-                  setLinking(true);
-                }}
-              />
-            </>
-          )}
-          <IconAction
-            icon={Trash2}
-            destructive
-            caption={tCal("deleteCaption")}
-            label={tCal("deleteEvent")}
-            onPress={confirmDelete}
+        {/* Add-to-event actions: create a new record of a kind not yet linked,
+            attach an existing one, or upload a file. */}
+        {!linkedList ? (
+          <SheetAction
+            icon={ListPlus}
+            label={tCal("createList")}
+            onPress={() => {
+              setSettingsOpen(false);
+              void handleCreateLinkedList();
+            }}
           />
-        </IconActionBar>
+        ) : null}
+        {!linkedNote ? (
+          <SheetAction
+            icon={FilePlus}
+            label={tCal("createNote")}
+            onPress={() => {
+              setSettingsOpen(false);
+              void handleCreateLinkedNote();
+            }}
+          />
+        ) : null}
+        {!linkedPot ? (
+          <SheetAction
+            icon={CirclePlus}
+            label={tCal("createExpense")}
+            onPress={() => {
+              setSettingsOpen(false);
+              void handleCreateLinkedPot();
+            }}
+          />
+        ) : null}
+        {candidates.length > 0 ? (
+          <SheetAction
+            icon={Paperclip}
+            label={tCal("addExisting")}
+            onPress={() => {
+              setPendingSheet("link");
+              setSettingsOpen(false);
+            }}
+          />
+        ) : null}
+        <SheetAction
+          icon={Upload}
+          label={tFiles("uploadFile")}
+          onPress={() => {
+            setSettingsOpen(false);
+            chooseFile();
+          }}
+        />
+        <SheetAction
+          icon={Trash2}
+          destructive
+          label={tCal("deleteEvent")}
+          onPress={confirmDelete}
+        />
       </Sheet>
 
-      <LinkListSheet
+      <LinkExistingSheet
         visible={linking}
-        projectId={pid}
-        eventId={eid}
+        title={tCal("addExisting")}
+        emptyLabel={tCal("noneToAdd")}
+        typeLabel={(kind) =>
+          kind === "list"
+            ? tCal("list")
+            : kind === "note"
+              ? tCal("note")
+              : tCal("expense")
+        }
+        candidates={candidates}
+        onPick={linkExisting}
         onClose={() => setLinking(false)}
       />
     </Screen>
   );
 }
 
-function LinkedListCard({
-  list,
+/**
+ * The unlinked records the event could still attach, across the kinds it
+ * doesn't already have. Queries for an already-linked kind are skipped.
+ */
+function useLinkCandidates(
+  projectId: Id<"projects">,
+  linked: { list: boolean; note: boolean; pot: boolean },
+): LinkCandidate[] {
+  const lists = useQuery(
+    api.lists.listByProject,
+    linked.list ? "skip" : { projectId },
+  );
+  const notes = useQuery(
+    api.notes.listByProject,
+    linked.note ? "skip" : { projectId },
+  );
+  const pots = useQuery(
+    api.expenses.listPots,
+    linked.pot ? "skip" : { projectId },
+  );
+  return useMemo(() => {
+    const out: LinkCandidate[] = [];
+    if (!linked.list) {
+      for (const list of lists ?? []) {
+        if (!list.eventId) {
+          out.push({ kind: "list", id: list._id, name: list.name });
+        }
+      }
+    }
+    if (!linked.note) {
+      for (const note of notes ?? []) {
+        if (!note.eventId) {
+          out.push({ kind: "note", id: note._id, name: note.name });
+        }
+      }
+    }
+    if (!linked.pot) {
+      for (const pot of pots ?? []) {
+        if (!pot.eventId) {
+          out.push({ kind: "pot", id: pot._id, name: pot.name });
+        }
+      }
+    }
+    return out;
+  }, [lists, notes, pots, linked.list, linked.note, linked.pot]);
+}
+
+/** A left-aligned icon + label row for the event-options sheet. */
+function SheetAction({
+  icon: Icon,
+  label,
   onPress,
+  destructive,
 }: {
-  list: ListWithItems;
+  icon: LucideIcon;
+  label: string;
   onPress: () => void;
+  destructive?: boolean;
 }) {
-  const tc = useTranslations("mobile.common");
-  const done = list.items.filter((item) => item.completed).length;
+  const t = useTheme();
+  const color = destructive ? t.danger : t.text;
   return (
-    <Card onPress={onPress}>
-      <Txt size={16} weight="700">
-        {list.name}
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 10,
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <Icon color={color} size={20} />
+      <Txt size={16} style={{ color }}>
+        {label}
       </Txt>
-      <Txt muted size={13}>
-        {list.items.length === 0
-          ? tc("empty")
-          : tc("itemsDone", { done, total: list.items.length })}
-      </Txt>
+    </Pressable>
+  );
+}
+
+/** A linked record: kind icon, tap the body to open it, trailing icon to unlink. */
+function LinkedCard({
+  icon: Icon,
+  name,
+  subtitle,
+  onPress,
+  onUnlink,
+  unlinkLabel,
+}: {
+  icon: LucideIcon;
+  name: string;
+  subtitle: string;
+  onPress: () => void;
+  onUnlink: () => void;
+  unlinkLabel: string;
+}) {
+  const t = useTheme();
+  return (
+    <Card>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <Icon color={t.text} size={20} />
+        <Pressable
+          onPress={onPress}
+          style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.7 : 1 })}
+        >
+          <Txt size={16} weight="700">
+            {name}
+          </Txt>
+          <Txt muted size={13} numberOfLines={2}>
+            {subtitle}
+          </Txt>
+        </Pressable>
+        <Pressable
+          onPress={onUnlink}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={unlinkLabel}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+        >
+          <Unlink color={t.muted} size={18} />
+        </Pressable>
+      </View>
     </Card>
   );
 }
 
-function LinkListSheet({
+/**
+ * Unified "add existing" picker: one list of every unlinked record across the
+ * kinds the event doesn't already have, each row tagged with its kind.
+ */
+function LinkExistingSheet({
   visible,
-  projectId,
-  eventId,
+  title,
+  emptyLabel,
+  typeLabel,
+  candidates,
+  onPick,
   onClose,
 }: {
   visible: boolean;
-  projectId: Id<"projects">;
-  eventId: Id<"events">;
+  title: string;
+  emptyLabel: string;
+  typeLabel: (kind: LinkKind) => string;
+  candidates: LinkCandidate[];
+  onPick: (candidate: LinkCandidate) => void;
   onClose: () => void;
 }) {
-  const tCal = useTranslations("mobile.calendar");
-  const lists = useQuery(api.lists.listByProject, { projectId });
-  const linkList = useMutation(api.events.linkList);
-  // Only lists not already linked to an event (mirrors the PWA filter).
-  const available = (lists ?? []).filter((list) => !list.eventId);
-
-  async function link(listId: Id<"lists">) {
-    onClose();
-    await linkList({ eventId, listId });
-  }
-
+  const t = useTheme();
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        {tCal("linkAList")}
+        {title}
       </Txt>
-      {available.length === 0 ? (
+      {candidates.length === 0 ? (
         <Txt muted style={{ paddingVertical: 8 }}>
-          {tCal("noUnlinkedLists")}
+          {emptyLabel}
         </Txt>
       ) : (
         <ScrollView style={{ maxHeight: 320 }}>
-          {available.map((list) => (
-            <Button
-              key={list._id}
-              title={list.name}
-              variant="ghost"
-              onPress={() => void link(list._id)}
-            />
-          ))}
+          {candidates.map((candidate, index) => {
+            const Icon = KIND_ICON[candidate.kind];
+            return (
+              <Pressable
+                key={`${candidate.kind}:${candidate.id}`}
+                onPress={() => onPick(candidate)}
+                style={({ pressed }) => ({
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  paddingVertical: 14,
+                  borderTopWidth: index === 0 ? 0 : StyleSheet.hairlineWidth,
+                  borderTopColor: t.border,
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <Icon color={t.muted} size={18} />
+                <Txt size={16} style={{ flex: 1 }} numberOfLines={1}>
+                  {candidate.name}
+                </Txt>
+                <Txt muted size={12}>
+                  {typeLabel(candidate.kind)}
+                </Txt>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       )}
     </Sheet>
