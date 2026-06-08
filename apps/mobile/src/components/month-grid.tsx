@@ -22,9 +22,12 @@ function isBetween(day: Date, start: Date, end: Date): boolean {
   return d >= lo && d <= hi;
 }
 
-// Height of the connecting range bar; matches the day circle so the highlight
-// reads as one continuous pill flowing through the endpoint circles.
+// Height of the connecting range bar; matches the day tile so the highlight
+// reads as one continuous band flowing through the endpoint squares.
 const RANGE_BAR = 34;
+// Corner radius of the selected-day tile (and the range bar's outer ends), so
+// selected days read as rounded squares rather than circles.
+const DAY_RADIUS = 10;
 
 /**
  * Reusable Monday-first month grid. Drives the calendar view (with event dots)
@@ -43,8 +46,14 @@ export function MonthGrid({
   onSelectDay: (day: Date) => void;
   selectedStart?: Date | null;
   selectedEnd?: Date | null;
-  /** Up to a few event markers per day; `key` must be stable (e.g. event id). */
-  dotsForDay?: (day: Date) => { key: string; color: string }[];
+  /**
+   * Up to a few event markers per day; `key` must be stable (e.g. event id).
+   * `onPrimary` is the dot color to use when the day carries the green
+   * `primary` fill (the selected day); falls back to `color` when omitted.
+   */
+  dotsForDay?: (
+    day: Date,
+  ) => { key: string; color: string; onPrimary?: string }[];
 }) {
   const t = useTheme();
   const cells = monthCells(month);
@@ -105,7 +114,7 @@ export function MonthGrid({
           const isEnd = selectedEnd ? sameDay(day, selectedEnd) : false;
           const isEndpoint = isStart || isEnd;
           // A range only exists when both ends are set to *different* days; a
-          // lone selected day (or a same-day pick) just gets the endpoint circle.
+          // lone selected day (or a same-day pick) just gets the endpoint square.
           const hasRange = Boolean(
             selectedStart &&
               selectedEnd &&
@@ -137,15 +146,15 @@ export function MonthGrid({
                     marginTop: -RANGE_BAR / 2,
                     height: RANGE_BAR,
                     // Endpoints fill from their own centre so the bar tucks
-                    // under the circle; middle days span the whole cell, so
+                    // under the tile; middle days span the whole cell, so
                     // neighbouring segments butt together into one bar.
                     left: isStart ? "50%" : 0,
                     right: isEnd ? "50%" : 0,
                     backgroundColor: `${t.primary}22`,
-                    borderTopLeftRadius: isStart ? RANGE_BAR / 2 : 0,
-                    borderBottomLeftRadius: isStart ? RANGE_BAR / 2 : 0,
-                    borderTopRightRadius: isEnd ? RANGE_BAR / 2 : 0,
-                    borderBottomRightRadius: isEnd ? RANGE_BAR / 2 : 0,
+                    borderTopLeftRadius: isStart ? DAY_RADIUS : 0,
+                    borderBottomLeftRadius: isStart ? DAY_RADIUS : 0,
+                    borderTopRightRadius: isEnd ? DAY_RADIUS : 0,
+                    borderBottomRightRadius: isEnd ? DAY_RADIUS : 0,
                   }}
                 />
               ) : null}
@@ -153,7 +162,7 @@ export function MonthGrid({
                 style={{
                   width: 34,
                   height: 34,
-                  borderRadius: 17,
+                  borderRadius: DAY_RADIUS,
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: isEndpoint
@@ -192,7 +201,11 @@ export function MonthGrid({
                       width: 5,
                       height: 5,
                       borderRadius: 2.5,
-                      backgroundColor: dot.color,
+                      // On the selected day's green fill, use the on-primary
+                      // variant so the dot contrasts with the green.
+                      backgroundColor: isEndpoint
+                        ? (dot.onPrimary ?? dot.color)
+                        : dot.color,
                     }}
                   />
                 ))}

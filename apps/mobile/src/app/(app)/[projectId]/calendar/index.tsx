@@ -67,24 +67,34 @@ export default function CalendarScreen() {
   // Each event gets a stable Catppuccin accent (theme-aware: Latte on light,
   // Mocha on dark), reused for both its calendar dots and its list card.
   const colorById = useMemo(() => {
-    const map = new Map<Id<"events">, string>();
+    const map = new Map<Id<"events">, { color: string; onPrimary: string }>();
     (events ?? []).forEach((event, index) => {
-      map.set(event._id, t.event[index % t.event.length] as string);
+      const i = index % t.event.length;
+      map.set(event._id, {
+        color: t.event[i] as string,
+        onPrimary: t.eventOnPrimary[i] as string,
+      });
     });
     return map;
-  }, [events, t.event]);
+  }, [events, t.event, t.eventOnPrimary]);
 
-  function dotsForDay(day: Date): { key: string; color: string }[] {
+  function dotsForDay(
+    day: Date,
+  ): { key: string; color: string; onPrimary: string }[] {
     if (!events) {
       return [];
     }
     return events
       .filter((event) => isEventOnDay(event, day))
       .slice(0, 3)
-      .map((event) => ({
-        key: event._id,
-        color: colorById.get(event._id) ?? (t.event[0] as string),
-      }));
+      .map((event) => {
+        const accent = colorById.get(event._id);
+        return {
+          key: event._id,
+          color: accent?.color ?? (t.event[0] as string),
+          onPrimary: accent?.onPrimary ?? (t.eventOnPrimary[0] as string),
+        };
+      });
   }
 
   const selectedEvents = useMemo(
@@ -179,7 +189,9 @@ export default function CalendarScreen() {
               <EventCard
                 key={event._id}
                 event={event}
-                color={colorById.get(event._id) ?? (t.event[0] as string)}
+                color={
+                  colorById.get(event._id)?.color ?? (t.event[0] as string)
+                }
                 onPress={() => router.push(`/${pid}/calendar/${event._id}`)}
               />
             ))}

@@ -20,6 +20,14 @@ import { Appearance, useColorScheme } from "react-native";
 /** The web app's typeface (loaded via expo-font in app/_layout.tsx). */
 export const FONT = "Convergence_400Regular";
 
+// Per-event accent dots cycle through one of these two sets. The Latte set
+// (saturated) reads on a light surface; the Mocha set (pastel) reads on a dark
+// one. Each theme uses one for normal dots and the other (`eventOnPrimary`) for
+// dots sitting on the selected day's green fill — whose brightness is the
+// opposite of the page — so dots always contrast with whatever is behind them.
+const LATTE_EVENT = ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"];
+const MOCHA_EVENT = ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"];
+
 // Loosely mapped from the web app's Catppuccin palette (green primary, warm bg).
 const palette = {
   light: {
@@ -30,7 +38,8 @@ const palette = {
     navBar: "#efe8da",
     text: "#1e1e2e",
     muted: "#6c6f85",
-    primary: "#40862f",
+    // Catppuccin Latte "green".
+    primary: "#40a02b",
     onPrimary: "#ffffff",
     border: "#e4ddd0",
     inputBg: "#ffffff",
@@ -41,9 +50,10 @@ const palette = {
     danger: "#e64553",
     // The conventional PDF red, for the PDF file-type icon and badge.
     pdf: "#e2574c",
-    // Rotating per-event accents (Catppuccin Latte: blue, peach, green, mauve,
-    // teal) — saturated enough to read on the light surface.
-    event: ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"],
+    // Saturated Latte accents for normal (light-surface) dots; the Mocha
+    // pastels read better on the selected day's green fill.
+    event: LATTE_EVENT,
+    eventOnPrimary: MOCHA_EVENT,
   },
   // Mapped from the web app's warm-brown dark theme (globals.css `.dark`),
   // converted from its oklch values to sRGB hex.
@@ -65,9 +75,10 @@ const palette = {
     danger: "#eba0ac",
     // A lighter PDF red so the icon and badge stay legible on the dark surface.
     pdf: "#f0857b",
-    // The Catppuccin Mocha counterparts of the Latte accents above — softer
-    // pastels that sit better on the warm-brown dark surface.
-    event: ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"],
+    // Mocha pastels for normal (dark-surface) dots; the dark theme's `primary`
+    // is a light mint green, so its on-primary dots use the Latte accents.
+    event: MOCHA_EVENT,
+    eventOnPrimary: LATTE_EVENT,
   },
 };
 
