@@ -333,10 +333,21 @@ try {
 
     const download = await fetch(f.url);
     if (!download.ok) {
-      skip("files", f.id, `download failed (${download.status})`);
+      skip("files", f.id, `download failed (${download.status}) from ${f.url}`);
       continue;
     }
     const blob = await download.blob();
+    // A deleted/expired Uploadthing object can still answer 200 with an empty or
+    // HTML body; Convex storage rejects a 0-byte upload with 400. Catch it here
+    // so the skip reason names the real cause instead of a bare upload error.
+    if (blob.size === 0) {
+      skip(
+        "files",
+        f.id,
+        `empty download from ${f.url} (object gone from Uploadthing?)`,
+      );
+      continue;
+    }
     const uploadUrl = await convex.mutation(api.migrations.generateUploadUrl, {
       secret,
     });
@@ -346,7 +357,12 @@ try {
       body: blob,
     });
     if (!upload.ok) {
-      skip("files", f.id, `upload failed (${upload.status})`);
+      const serverMessage = await upload.text().catch(() => "");
+      skip(
+        "files",
+        f.id,
+        `upload failed (${upload.status}; declared type=${f.type}, downloaded type=${blob.type || "none"}, bytes=${blob.size}) — ${serverMessage.slice(0, 300)}`,
+      );
       continue;
     }
     const { storageId } = await upload.json();
