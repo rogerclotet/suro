@@ -1,6 +1,8 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import { useMutation } from "convex/react";
 import { Info, SaveIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -40,7 +42,7 @@ import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
 import { useSession } from "@/lib/session";
 import ThemeSettings from "../theme-settings";
-import { editProfile, removeProfileImage, resetProfileImage } from "./actions";
+import { editProfile } from "./actions";
 import { profileSchema } from "./data";
 
 interface ProfileUser {
@@ -86,6 +88,8 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
     resolver: valibotResolver(profileSchema),
   });
   const { data: session } = useSession();
+  const removeAvatarImage = useMutation(api.users.removeAvatarImage);
+  const resetProviderImage = useMutation(api.users.resetProviderImage);
   const [imageCleared, setImageCleared] = useState(false);
 
   const watchedColor = form.watch("avatarColor");
@@ -100,14 +104,18 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
       imageActions.push({
         label: t("resetGoogleImage"),
         icon: Undo2,
-        onAction: resetProfileImage,
+        onAction: async () => {
+          await resetProviderImage({});
+        },
       });
     }
     if (user.customImage || user.image) {
       imageActions.push({
         label: t("removeImage"),
         icon: Trash2,
-        onAction: removeProfileImage,
+        onAction: async () => {
+          await removeAvatarImage({});
+        },
       });
     }
   }
@@ -172,7 +180,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
           <div className="space-y-2">
             <Label>{t("avatar")}</Label>
             <ImageUpload
-              endpoint="profileImageUploader"
+              target={{ kind: "avatar" }}
               actions={imageActions}
               uploadedActions={[
                 ...(user.image
@@ -180,14 +188,18 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
                       {
                         label: t("resetGoogleImage"),
                         icon: Undo2,
-                        onAction: resetProfileImage,
+                        onAction: async () => {
+                          await resetProviderImage({});
+                        },
                       } satisfies ImageAction,
                     ]
                   : []),
                 {
                   label: t("removeImage"),
                   icon: Trash2,
-                  onAction: removeProfileImage,
+                  onAction: async () => {
+                    await removeAvatarImage({});
+                  },
                 },
               ]}
               onUploadComplete={() => setImageCleared(false)}

@@ -264,3 +264,76 @@ export const leave = mutation({
     return null;
   },
 });
+
+/**
+ * Short-lived URL the client POSTs new group-image bytes to (Convex storage).
+ * Creator-only — mirrors the Uploadthing groupImageUploader gate.
+ */
+export const generateImageUploadUrl = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const userId = await requireUserId(ctx);
+    const project = await ctx.db.get(projectId);
+    if (project === null) {
+      throw new Error("Project not found");
+    }
+    if (project.createdBy !== userId) {
+      throw new Error("Only the creator can edit this group");
+    }
+    return ctx.storage.generateUploadUrl();
+  },
+});
+
+/**
+ * Persist a freshly uploaded group image: store its serving URL in `image` and
+ * the storage id for later cleanup. Deletes the previous upload, if any.
+ * Creator-only. Mirrors users.setAvatarImage.
+ */
+export const setImage = mutation({
+  args: { projectId: v.id("projects"), storageId: v.id("_storage") },
+  handler: async (ctx, { projectId, storageId }) => {
+    const userId = await requireUserId(ctx);
+    const project = await ctx.db.get(projectId);
+    if (project === null) {
+      throw new Error("Project not found");
+    }
+    if (project.createdBy !== userId) {
+      throw new Error("Only the creator can edit this group");
+    }
+    const url = await ctx.storage.getUrl(storageId);
+    if (url === null) {
+      throw new Error("Uploaded image not found");
+    }
+    if (project.imageStorageId) {
+      await ctx.storage.delete(project.imageStorageId);
+    }
+    await ctx.db.patch(projectId, { image: url, imageStorageId: storageId });
+    return null;
+  },
+});
+
+/**
+ * Remove the group image (and its stored blob, if uploaded via Convex).
+ * Creator-only. Mirrors users.removeAvatarImage.
+ */
+export const removeImage = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const userId = await requireUserId(ctx);
+    const project = await ctx.db.get(projectId);
+    if (project === null) {
+      throw new Error("Project not found");
+    }
+    if (project.createdBy !== userId) {
+      throw new Error("Only the creator can edit this group");
+    }
+    if (project.imageStorageId) {
+      await ctx.storage.delete(project.imageStorageId);
+    }
+    await ctx.db.patch(projectId, {
+      image: undefined,
+      imageStorageId: undefined,
+    });
+    return null;
+  },
+});

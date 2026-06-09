@@ -1,12 +1,10 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import { useMutation } from "convex/react";
 import { UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import {
-  removeProfileImage,
-  resetProfileImage,
-} from "@/app/[locale]/profile/_components/profile-editor/actions";
 import ColorPicker from "@/components/color-picker";
 import ImageUpload, {
   type ImageAction,
@@ -43,6 +41,8 @@ export default function OnboardingProfileStep({
   const t = useTranslations("onboarding");
   const tProfile = useTranslations("profile");
   const tCommon = useTranslations("common");
+  const removeAvatarImage = useMutation(api.users.removeAvatarImage);
+  const resetProviderImage = useMutation(api.users.resetProviderImage);
   const [imageCleared, setImageCleared] = useState(false);
 
   const avatarUser = imageCleared
@@ -55,14 +55,18 @@ export default function OnboardingProfileStep({
       imageActions.push({
         label: tProfile("resetGoogleImage"),
         icon: Undo2,
-        onAction: resetProfileImage,
+        onAction: async () => {
+          await resetProviderImage({});
+        },
       });
     }
     if (user.customImage || user.image) {
       imageActions.push({
         label: tProfile("removeImage"),
         icon: Trash2,
-        onAction: removeProfileImage,
+        onAction: async () => {
+          await removeAvatarImage({});
+        },
       });
     }
   }
@@ -90,7 +94,7 @@ export default function OnboardingProfileStep({
         <div className="space-y-2">
           <Label>{tProfile("avatar")}</Label>
           <ImageUpload
-            endpoint="profileImageUploader"
+            target={{ kind: "avatar" }}
             actions={imageActions}
             uploadedActions={[
               ...(user.image
@@ -98,14 +102,18 @@ export default function OnboardingProfileStep({
                     {
                       label: tProfile("resetGoogleImage"),
                       icon: Undo2,
-                      onAction: resetProfileImage,
+                      onAction: async () => {
+                        await resetProviderImage({});
+                      },
                     } satisfies ImageAction,
                   ]
                 : []),
               {
                 label: tProfile("removeImage"),
                 icon: Trash2,
-                onAction: removeProfileImage,
+                onAction: async () => {
+                  await removeAvatarImage({});
+                },
               },
             ]}
             onUploadComplete={() => setImageCleared(false)}

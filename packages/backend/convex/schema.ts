@@ -45,6 +45,10 @@ export default defineSchema({
     inviteToken: v.string(),
     inviteTokenExpiresAt: v.optional(v.number()),
     image: v.optional(v.string()),
+    // Convex storage id backing `image` when the group image was uploaded from
+    // a native/web client; absent for migrated images whose `image` is an
+    // external Uploadthing URL. Mirrors users.customImageStorageId.
+    imageStorageId: v.optional(v.id("_storage")),
     color: v.string(),
     // Secret that gates the public .ics calendar feed (lazily generated).
     // Distinct from inviteToken (which joins the group) — never conflate them.

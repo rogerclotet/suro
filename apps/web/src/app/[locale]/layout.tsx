@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import { UpdateToast } from "@/components/update-toast";
 import "@/styles/globals.css";
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import "@fontsource/convergence/index.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import type { Metadata, Viewport } from "next";
@@ -13,12 +12,10 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 import type { ComponentProps, ComponentType, ReactNode } from "react";
-import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
 import SidebarLayout from "@/app/_components/navigation/navigation-layout/sidebar-layout";
 import ProjectsProvider from "@/app/_components/projects-provider/projects-provider";
 import UserIdentifier from "@/app/_components/user-identifier";
-import { uploadFileRouter } from "@/app/api/uploadthing/core";
 import { routing } from "@/i18n/routing";
 import ConvexClientProvider from "@/providers/convex-client-provider";
 
@@ -116,15 +113,6 @@ export default async function LocaleLayout({
       <html lang={locale} suppressHydrationWarning>
         <body>
           <ServiceWorkerRegister />
-          <NextSSRPlugin
-            /**
-             * The `extractRouterConfig` will extract **only** the route configs
-             * from the router to prevent additional information from being
-             * leaked to the client. The data passed to the client is the same
-             * as if you were to fetch `/api/uploadthing` directly.
-             */
-            routerConfig={extractRouterConfig(uploadFileRouter)}
-          />
           <NextIntlClientProvider>
             <ConvexClientProvider>
               <UserIdentifier />

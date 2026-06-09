@@ -30,7 +30,6 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { useSession } from "@/lib/session";
-import { removeProjectImage } from "./actions";
 
 const editProjectSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
@@ -81,6 +80,7 @@ function EditProjectFormContent({
   const tCommon = useTranslations("common");
   const { close } = useModalForm();
   const updateProject = useMutation(api.projects.update);
+  const removeImage = useMutation(api.projects.removeImage);
   const watchedColor = form.watch("color");
   const [imageCleared, setImageCleared] = useState(false);
 
@@ -120,15 +120,16 @@ function EditProjectFormContent({
         <div className="space-y-2">
           <Label>{t("groupImage")}</Label>
           <ImageUpload
-            endpoint="groupImageUploader"
-            headers={{ "x-project-id": project.id }}
+            target={{ kind: "group", projectId: project.id }}
             actions={
               !imageCleared && project.image
                 ? [
                     {
                       label: t("removeImage"),
                       onAction: async () => {
-                        await removeProjectImage(project.id);
+                        await removeImage({
+                          projectId: project.id as Id<"projects">,
+                        });
                       },
                     },
                   ]
@@ -139,7 +140,9 @@ function EditProjectFormContent({
                 label: t("removeImage"),
                 variant: "destructive" as const,
                 onAction: async () => {
-                  await removeProjectImage(project.id);
+                  await removeImage({
+                    projectId: project.id as Id<"projects">,
+                  });
                 },
               },
             ]}
