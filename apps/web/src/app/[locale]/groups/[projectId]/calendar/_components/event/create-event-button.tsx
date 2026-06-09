@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -14,7 +17,6 @@ import Action from "@/components/action";
 import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { createEventOffline } from "@/lib/offline/offline-events";
 import { useSession } from "@/lib/session";
 import { eventSchema } from "./data";
 import EventFormFields from "./event-form-fields";
@@ -25,7 +27,7 @@ export default function CreateEventButton({
   onCreate,
 }: {
   defaultDate: Date;
-  onCreate: (from: Date | undefined, to: Date | undefined) => void;
+  onCreate?: (from: Date | undefined, to: Date | undefined) => void;
 }) {
   const { data: session } = useSession();
   const t = useTranslations("calendar");
@@ -86,7 +88,7 @@ function CreateEventFormContent({
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
   project: Project | null;
-  onCreate: (from: Date | undefined, to: Date | undefined) => void;
+  onCreate?: (from: Date | undefined, to: Date | undefined) => void;
   sessionId?: string;
   handleDatesChange: Parameters<typeof EventFormFields>[0]["handleDatesChange"];
   handleStartTimeChange: Parameters<
@@ -103,6 +105,7 @@ function CreateEventFormContent({
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");
   const tLists = useTranslations("lists");
+  const createEvent = useMutation(api.events.create);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof eventSchema>) => {
@@ -135,17 +138,16 @@ function CreateEventFormContent({
       }
 
       try {
-        await createEventOffline(
-          {
-            name: dataToCreate.name,
-            description: dataToCreate.description,
-            dates: { from, to },
-            allDay: dataToCreate.allDay,
-          },
-          project,
-        );
+        await createEvent({
+          projectId: project.id as Id<"projects">,
+          name: dataToCreate.name,
+          description: dataToCreate.description,
+          startAt: from.getTime(),
+          endAt: to.getTime(),
+          allDay: dataToCreate.allDay,
+        });
         toast.success(t("createSuccess", { name: data.name }));
-        onCreate(data.dates.from, data.dates.to);
+        onCreate?.(data.dates.from, data.dates.to);
         form.reset();
         close();
       } catch (e) {
@@ -157,7 +159,7 @@ function CreateEventFormContent({
         toast.error(t("createError"));
       }
     },
-    [project, onCreate, form, sessionId, close, t, tLists],
+    [project, onCreate, form, sessionId, close, t, tLists, createEvent],
   );
 
   const handleFormSubmit = useCallback(

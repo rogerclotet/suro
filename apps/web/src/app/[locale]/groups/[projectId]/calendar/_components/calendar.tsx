@@ -1,19 +1,15 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  type ComponentProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type ComponentProps, useMemo, useState } from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
-import type { CalendarEvent as CalendarEventType } from "@/app/_data/event";
+import type { CalendarEvent } from "@/app/_data/event";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,72 +22,13 @@ import {
   getDateFnsLocaleForUi,
   parseDateOnly,
 } from "@/lib/date-locale";
-import {
-  cacheEventsToIDB,
-  loadMonthEventsFromIDB,
-} from "@/lib/offline/calendar-cache";
-import { db } from "@/lib/offline/db";
+import { useEventsInRange } from "@/lib/queries/use-events";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
-import getMonthString from "./event/get-month-string";
 import { getMonthEnd } from "./event/month-range";
-import { eventsQueryOptions } from "./event/query";
 
 const EVENT_COLORS = 5;
-
-// Local alias for the exported CalendarEvent type
-type CalendarEvent = CalendarEventType;
-
-function useOfflineEvents(
-  monthStart: Date,
-  projectId: string | undefined,
-): CalendarEvent[] {
-  const [offlineEvents, setOfflineEvents] = useState<CalendarEvent[]>([]);
-
-  const load = useCallback(() => {
-    if (!projectId) return;
-    const monthEnd = getMonthEnd(monthStart);
-    db.events
-      .where("projectId")
-      .equals(projectId)
-      .filter(
-        (e) =>
-          e._syncStatus === "pending" &&
-          !e._deleted &&
-          e.startAt < monthEnd.getTime() &&
-          e.endAt > monthStart.getTime(),
-      )
-      .toArray()
-      .then((items) => {
-        setOfflineEvents(
-          items.map((e) => ({
-            id: e.id,
-            name: e.name,
-            description: e.description,
-            startAt: new Date(e.startAt),
-            endAt: new Date(e.endAt),
-            allDay: e.allDay,
-            projectId: e.projectId,
-            createdAt: new Date(e.createdAt),
-            createdBy: e.createdBy,
-            updatedAt: new Date(e.updatedAt),
-            updatedBy: e.updatedBy,
-            files: [],
-          })),
-        );
-      })
-      .catch(() => {});
-  }, [monthStart, projectId]);
-
-  useEffect(() => {
-    load();
-    window.addEventListener("sync-completed", load);
-    return () => window.removeEventListener("sync-completed", load);
-  }, [load]);
-
-  return offlineEvents;
-}
 
 function Events({
   isLoading,
@@ -110,7 +47,7 @@ function Events({
     );
   }
 
-  if (currentEvents && currentEvents.length === 0) {
+  if (currentEvents.length === 0) {
     return <p className="italic opacity-60">{t("noEventsForDay")}</p>;
   }
 
@@ -151,45 +88,10 @@ export default function Calendar({
   const [date, setDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(monthStart);
   const { project } = useProjects();
-  const { data: serverEvents, isLoading } = useQuery(
-    eventsQueryOptions(currentMonth, project?.id),
-  );
-  const offlineEvents = useOfflineEvents(currentMonth, project?.id);
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
-  // IndexedDB fallback: load cached events for the current month so month
-  // switching feels instant even while TQ fetches from the server.
   const monthEnd = useMemo(() => getMonthEnd(currentMonth), [currentMonth]);
-  const [idbEvents, setIdbEvents] = useState<CalendarEvent[]>([]);
-  useEffect(() => {
-    if (!project?.id) return;
-    loadMonthEventsFromIDB(currentMonth, monthEnd, project.id)
-      .then(setIdbEvents)
-      .catch(() => {});
-  }, [currentMonth, monthEnd, project?.id]);
-
-  // Write server events to IndexedDB after each successful fetch so future
-  // renders can use them as an instant fallback.
-  useEffect(() => {
-    if (serverEvents && serverEvents.length > 0) {
-      cacheEventsToIDB(serverEvents).catch(() => {});
-    }
-  }, [serverEvents]);
-
-  // Merge: prefer server data; fall back to IDB while TQ is loading; always
-  // layer pending offline events on top, deduped by ID.
-  const events = useMemo<CalendarEvent[] | undefined>(() => {
-    const base =
-      serverEvents ??
-      (isLoading && idbEvents.length > 0 ? idbEvents : undefined);
-    if (!base && offlineEvents.length === 0) return undefined;
-    const baseIds = new Set(base?.map((e) => e.id) ?? []);
-    return [
-      ...(base ?? []),
-      ...offlineEvents.filter((e) => !baseIds.has(e.id)),
-    ];
-  }, [serverEvents, isLoading, idbEvents, offlineEvents]);
+  const events = useEventsInRange(project?.id, currentMonth, monthEnd);
+  const router = useRouter();
+  const getCalendarToken = useMutation(api.events.getOrCreateCalendarToken);
 
   const currentEvents = useMemo(
     () => events?.filter((event) => isCurrentDayEvent(event, date)),
@@ -242,8 +144,6 @@ export default function Calendar({
                   key={event.id}
                   className={cn(
                     "z-10 h-2 w-2 rounded-full border border-muted/60",
-                    // Explictly defining colors to avoid concatenating arbitrary values
-                    // https://v2.tailwindcss.com/docs/just-in-time-mode#arbitrary-value-support
                     color === 2
                       ? "bg-event-2"
                       : color === 3
@@ -263,26 +163,6 @@ export default function Calendar({
     );
   }
 
-  async function handleEventCreated(
-    from: Date | undefined,
-    to: Date | undefined,
-  ) {
-    const fromMonth = from ? getMonthString(from) : undefined;
-    const toMonth = to ? getMonthString(to) : undefined;
-
-    if (fromMonth) {
-      await queryClient.invalidateQueries({
-        queryKey: ["events", fromMonth],
-      });
-    }
-
-    if (toMonth && fromMonth !== toMonth) {
-      await queryClient.invalidateQueries({
-        queryKey: ["events", toMonth],
-      });
-    }
-  }
-
   function handleDaySelect(date: Date | undefined) {
     if (date) {
       setDate(date);
@@ -296,7 +176,18 @@ export default function Calendar({
   }
 
   async function copyCalendarExportURL() {
-    const url = `${window.location.origin}/api/${project?.id}/calendar.ics`;
+    if (!project?.id) {
+      return;
+    }
+    const token = await getCalendarToken({
+      projectId: project.id as Id<"projects">,
+    });
+    // The .ics feed is served by the Convex HTTP actions domain (.convex.site).
+    const siteUrl = (process.env.NEXT_PUBLIC_CONVEX_URL ?? "").replace(
+      ".convex.cloud",
+      ".convex.site",
+    );
+    const url = `${siteUrl}/calendar.ics?projectId=${project.id}&token=${token}`;
     await navigator.clipboard.writeText(url);
     toast.info(tCommon("copiedToClipboard"));
   }
@@ -339,14 +230,11 @@ export default function Calendar({
                 date,
               )}
 
-              <CreateEventButton
-                defaultDate={date}
-                onCreate={handleEventCreated}
-              />
+              <CreateEventButton defaultDate={date} />
             </h2>
 
             <Events
-              isLoading={isLoading && !events}
+              isLoading={events === undefined}
               currentEvents={currentEvents}
             />
           </div>
