@@ -7,6 +7,7 @@ import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
 import { Link } from "@/i18n/navigation";
 import { useEvent } from "@/lib/queries/use-events";
+import { useEventFiles } from "@/lib/queries/use-files";
 import { textToHtml } from "@/lib/utils";
 import Files from "../../../files/_components/files";
 import UploadButton from "../../../files/_components/upload-button";
@@ -26,6 +27,7 @@ export default function EventDetail({
   const tCal = useTranslations("calendar");
   const { project } = useProjects();
   const data = useEvent(eventId);
+  const files = useEventFiles(eventId);
 
   if (data === undefined) {
     return null;
@@ -126,7 +128,7 @@ export default function EventDetail({
             <UploadButton projectId={projectId} eventId={eventId} />
           </h2>
 
-          {event.files.length > 0 && <Files files={event.files} />}
+          {files && files.length > 0 && <Files files={files} />}
         </div>
 
         {note !== null && (

@@ -12,3 +12,11 @@ export function useProjectFiles(projectId: string): File[] | undefined {
   });
   return data?.map(adaptFile);
 }
+
+/** Reactive files attached to a single event, newest first (Convex). */
+export function useEventFiles(eventId: string): File[] | undefined {
+  const data = useQuery(api.files.listByEvent, {
+    eventId: eventId as Id<"events">,
+  });
+  return data?.map(adaptFile);
+}
