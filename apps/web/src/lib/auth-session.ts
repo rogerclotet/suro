@@ -21,13 +21,13 @@ export type Session = { user: SessionUser };
 
 /**
  * Build a NextAuth-shaped session from a Convex `users.me` doc. `id` is the
- * legacy Postgres id when present so any not-yet-migrated Drizzle code still
- * resolves; Convex functions identify the caller themselves and never read it.
+ * Convex user id so client-side ownership checks (`createdBy === session.user.id`)
+ * match Convex-sourced data. Convex functions identify the caller themselves.
  */
 export function toSession(me: Doc<"users">): Session {
   return {
     user: {
-      id: me.legacyId ?? me._id,
+      id: me._id,
       name: me.name ?? null,
       email: me.email ?? null,
       image: me.customImage ?? me.image ?? null,

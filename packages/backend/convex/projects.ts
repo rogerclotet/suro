@@ -28,6 +28,51 @@ export const get = query({
   },
 });
 
+/**
+ * Projects the current user belongs to, each with its categories and members
+ * embedded. Powers the PWA's project store (which needs member avatars and
+ * categories for every group up-front); native uses the lean `listMine`.
+ */
+export const listMineDetailed = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const memberships = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    const projects = await Promise.all(
+      memberships.map((m) => ctx.db.get(m.projectId)),
+    );
+    return Promise.all(
+      projects
+        .filter((p) => p !== null)
+        .map(async (project) => {
+          const categories = await ctx.db
+            .query("categories")
+            .withIndex("by_project", (q) => q.eq("projectId", project._id))
+            .collect();
+          categories.sort((a, b) => a.name.localeCompare(b.name));
+          const memberRows = await ctx.db
+            .query("projectMembers")
+            .withIndex("by_project", (q) => q.eq("projectId", project._id))
+            .collect();
+          const members = (
+            await Promise.all(memberRows.map((m) => ctx.db.get(m.userId)))
+          )
+            .filter((u) => u !== null)
+            .map((u) => ({
+              _id: u._id,
+              name: u.name ?? null,
+              image: u.customImage ?? u.image ?? null,
+              avatarColor: u.avatarColor ?? null,
+            }));
+          return { ...project, categories, members };
+        }),
+    );
+  },
+});
+
 /** Members of a project, as the avatar fields the UI needs. */
 export const members = query({
   args: { projectId: v.id("projects") },
