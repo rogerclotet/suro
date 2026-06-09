@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
@@ -7,7 +10,6 @@ import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { useSession } from "@/lib/session";
-import { clearCompletedItems } from "./actions";
 
 export default function ClearCompletedModal({
   list,
@@ -18,10 +20,11 @@ export default function ClearCompletedModal({
 }) {
   const { data: session } = useSession();
   const t = useTranslations("lists");
+  const clearCompleted = useMutation(api.lists.clearCompleted);
 
   async function handleClear() {
     try {
-      await clearCompletedItems(list);
+      await clearCompleted({ listId: list.id as Id<"lists"> });
       toast.success(t("clearCompletedSuccess"));
     } catch (e) {
       posthog.captureException(e, {

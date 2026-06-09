@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -22,7 +25,6 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { listSchema } from "../../../_components/create-list/data";
-import { updateList } from "./actions";
 
 export default function EditListForm({
   list,
@@ -41,10 +43,15 @@ export default function EditListForm({
   const { data: session } = useSession();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
+  const updateList = useMutation(api.lists.update);
 
   async function onSubmit(data: v.InferInput<typeof listSchema>) {
     try {
-      await updateList(list, data);
+      await updateList({
+        listId: list.id as Id<"lists">,
+        name: data.name,
+        description: data.description,
+      });
       toast.success(t("editSuccess", { name: data.name }));
     } catch (e) {
       posthog.captureException(e, {

@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -20,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
-import { createCategory } from "./actions";
 import { categorySchema } from "./data";
 
 export default function NewCategoryModal({
@@ -59,6 +61,7 @@ function NewCategoryModalContent({
   const { data: session } = useSession();
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
+  const createCategory = useMutation(api.categories.create);
 
   async function onSubmit(data: v.InferInput<typeof categorySchema>) {
     try {
@@ -66,7 +69,10 @@ function NewCategoryModalContent({
         throw new Error("No project selected");
       }
 
-      const categoryId = await createCategory(project, data);
+      const categoryId = await createCategory({
+        projectId: project.id as Id<"projects">,
+        name: data.name,
+      });
       addCategory({
         id: categoryId,
         name: data.name,

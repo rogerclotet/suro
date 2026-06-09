@@ -12,15 +12,15 @@ import EditCategoryButton from "./edit-category-button";
 export default function Category({
   category,
 }: {
-  category: CategoryType & { items: { id: string }[] };
+  category: CategoryType & { itemCount: number };
 }) {
   return (
     <Item variant="card">
       <ItemContent>
         <ItemTitle>{category.name}</ItemTitle>
         <ItemDescription>
-          {category.items.length}{" "}
-          {category.items.length === 1 ? "element" : "elements"}
+          {category.itemCount}{" "}
+          {category.itemCount === 1 ? "element" : "elements"}
         </ItemDescription>
       </ItemContent>
 

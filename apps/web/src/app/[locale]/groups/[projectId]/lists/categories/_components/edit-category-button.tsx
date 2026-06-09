@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Edit, SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -22,7 +25,6 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { categorySchema } from "../../[listId]/_components/categories/data";
-import { editCategory } from "./actions";
 
 export default function EditCategoryButton({
   category,
@@ -38,11 +40,15 @@ export default function EditCategoryButton({
   const { data: session } = useSession();
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
+  const editCategory = useMutation(api.categories.update);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof categorySchema>) => {
       try {
-        await editCategory(category, data);
+        await editCategory({
+          categoryId: category.id as Id<"categories">,
+          name: data.name,
+        });
         toast.success(t("editSuccess"));
         form.reset({ name: data.name });
       } catch (e) {
@@ -55,7 +61,7 @@ export default function EditCategoryButton({
         toast.error(t("editError"));
       }
     },
-    [category, form, session?.user.id, t],
+    [category, form, session?.user.id, t, editCategory],
   );
 
   const handleFormSubmit = useCallback(

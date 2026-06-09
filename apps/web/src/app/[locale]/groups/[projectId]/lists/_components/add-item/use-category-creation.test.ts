@@ -3,11 +3,16 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useProjects } from "@/app/_state/project-state";
-import { createCategory } from "../../[listId]/_components/categories/actions";
 import { useCategoryCreation } from "./use-category-creation";
 
-vi.mock("../../[listId]/_components/categories/actions", () => ({
-  createCategory: vi.fn(),
+// The hook creates categories via a Convex mutation (useMutation(api.categories.create)).
+const createCategoryMock = vi.hoisted(() => vi.fn());
+
+vi.mock("convex/react", () => ({
+  useMutation: () => createCategoryMock,
+}));
+vi.mock("backend/convex/_generated/api", () => ({
+  api: { categories: { create: "categories.create" } },
 }));
 vi.mock("@/app/_state/project-state", () => ({
   useProjects: vi.fn(),
@@ -28,7 +33,6 @@ vi.mock("posthog-js", () => ({
   default: { captureException: vi.fn() },
 }));
 
-const createCategoryMock = vi.mocked(createCategory);
 const useProjectsMock = vi.mocked(useProjects);
 const addCategory = vi.fn();
 
@@ -48,6 +52,10 @@ describe("useCategoryCreation", () => {
     const id = await result.current.createAndSelect("Dairy");
 
     expect(id).toBe("new-id");
+    expect(createCategoryMock).toHaveBeenCalledWith({
+      projectId: "p1",
+      name: "Dairy",
+    });
     expect(addCategory).toHaveBeenCalledWith({
       id: "new-id",
       name: "Dairy",

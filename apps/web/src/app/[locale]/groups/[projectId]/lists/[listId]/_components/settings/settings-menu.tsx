@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Edit, Import, ListX, Settings, Star, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { List, Template } from "@/app/_data/list";
@@ -11,7 +14,6 @@ import {
   ResponsiveMenuSeparator,
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
-import { toggleFavorite } from "./actions";
 import ClearCompletedModal from "./clear-completed-modal";
 import DeleteListModal from "./delete-list-modal";
 import EditListForm from "./edit-list-form";
@@ -26,6 +28,7 @@ export default function SettingsMenu({
 }) {
   const tLists = useTranslations("lists");
   const tTemplates = useTranslations("templates");
+  const toggleFavorite = useMutation(api.lists.toggleFavorite);
 
   return (
     <ResponsiveMenu>
@@ -37,7 +40,7 @@ export default function SettingsMenu({
       <ResponsiveMenuContent>
         <ResponsiveMenuItem
           className="cursor-pointer gap-2"
-          onClick={() => toggleFavorite(list)}
+          onClick={() => toggleFavorite({ listId: list.id as Id<"lists"> })}
         >
           <Star
             size={16}

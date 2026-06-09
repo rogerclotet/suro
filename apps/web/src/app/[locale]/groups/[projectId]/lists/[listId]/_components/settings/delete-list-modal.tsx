@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
@@ -8,7 +11,6 @@ import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import { deleteList } from "./actions";
 
 export default function DeleteListModal({
   list,
@@ -21,10 +23,11 @@ export default function DeleteListModal({
   const { data: session } = useSession();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
+  const deleteList = useMutation(api.lists.remove);
 
   async function handleDelete() {
     try {
-      await deleteList(list);
+      await deleteList({ listId: list.id as Id<"lists"> });
       router.push({
         pathname: "/groups/[projectId]/lists",
         params: { projectId: list.projectId },

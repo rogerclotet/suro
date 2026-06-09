@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -8,7 +11,6 @@ import type { Category } from "@/app/_data/category";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
 import { useSession } from "@/lib/session";
-import { deleteCategory } from "./actions";
 
 export default function DeleteCategoryButton({
   category,
@@ -18,10 +20,11 @@ export default function DeleteCategoryButton({
   const { data: session } = useSession();
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
+  const deleteCategory = useMutation(api.categories.remove);
 
   async function handleDelete() {
     try {
-      await deleteCategory(category);
+      await deleteCategory({ categoryId: category.id as Id<"categories"> });
       toast.success(t("deleteSuccess"));
     } catch (e) {
       posthog.captureException(e, {

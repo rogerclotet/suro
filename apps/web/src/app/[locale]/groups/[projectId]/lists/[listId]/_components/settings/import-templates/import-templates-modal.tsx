@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Fragment, useEffect, useState } from "react";
@@ -12,7 +15,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ModalForm from "@/components/ui/modal-form";
 import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "@/lib/session";
-import { importTemplates } from "./actions";
 import TemplatePreview from "./template-preview";
 
 export default function ImportTemplatesModal({
@@ -33,6 +35,7 @@ export default function ImportTemplatesModal({
   const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
+  const importTemplates = useMutation(api.lists.importTemplates);
 
   useEffect(() => {
     if (!project) {
@@ -69,11 +72,13 @@ export default function ImportTemplatesModal({
     setSubmitting(true);
 
     try {
-      await importTemplates(
-        project,
-        list.id,
-        Object.values(itemsByCategory).flat(),
-      );
+      const templateIds = templates
+        .filter((_t, idx) => selected[idx])
+        .map((tpl) => tpl.id as Id<"listTemplates">);
+      await importTemplates({
+        listId: list.id as Id<"lists">,
+        templateIds,
+      });
       setSelected([]);
     } catch (e) {
       posthog.captureException(e, {
