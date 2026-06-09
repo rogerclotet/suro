@@ -10,9 +10,9 @@ const cspReportOnly = [
   // next/script + dev hot reload need 'unsafe-inline'/'unsafe-eval'; tighten later via nonces
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com",
+  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com https://*.convex.cloud",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh",
+  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -55,6 +55,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "*.ufs.sh",
+      },
+      {
+        // Convex file storage serves avatars/group images/files from
+        // <deployment>.convex.cloud and its regional variant
+        // (<deployment>.<region>.convex.cloud); ** covers both, across the
+        // dev and prod deployments.
+        protocol: "https",
+        hostname: "**.convex.cloud",
       },
     ],
   },
