@@ -6,13 +6,7 @@ import { useNote } from "@/lib/queries/use-notes";
 import NoteEditor from "./note-editor";
 import SettingsMenu from "./settings-menu";
 
-export default function NoteDetail({
-  projectId,
-  noteId,
-}: {
-  projectId: string;
-  noteId: string;
-}) {
+export default function NoteDetail({ noteId }: { noteId: string }) {
   const note = useNote(noteId);
 
   if (note === undefined || note === null) {

@@ -8,7 +8,7 @@ export default async function Page({
 }) {
   await checkAuth();
 
-  const { projectId, noteId } = await params;
+  const { noteId } = await params;
 
-  return <NoteDetail projectId={projectId} noteId={noteId} />;
+  return <NoteDetail noteId={noteId} />;
 }
