@@ -31,7 +31,7 @@ export async function deleteTemplate(template: Template) {
     properties: {
       projectId: serverTemplate.projectId,
       templateId: serverTemplate.id,
-      usersCount: serverTemplate.project.users.length,
+      usersCount: 0,
       itemsCount: serverTemplate.items.length,
       withCategoryCount: serverTemplate.items.filter(
         (item) => item.category !== null,
@@ -112,7 +112,7 @@ export async function updateTemplate(
     properties: {
       projectId: serverTemplate.projectId,
       templateId: serverTemplate.id,
-      usersCount: serverTemplate.project.users.length,
+      usersCount: 0,
       itemsCount: serverTemplate.items.length,
       withCategoryCount: serverTemplate.items.filter(
         (item) => item.category !== null,

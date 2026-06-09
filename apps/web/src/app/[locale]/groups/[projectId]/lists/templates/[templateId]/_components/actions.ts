@@ -36,7 +36,7 @@ export async function createTemplateItem(
     properties: {
       projectId: serverTemplate.projectId,
       templateId: serverTemplate.id,
-      usersCount: serverTemplate.project.users.length,
+      usersCount: 0,
       hasCategory: !!data.category,
     },
   });
@@ -68,7 +68,7 @@ export async function updateTemplateItems(
     properties: {
       projectId: serverTemplate.projectId,
       templateId: serverTemplate.id,
-      usersCount: serverTemplate.project.users.length,
+      usersCount: 0,
       itemsCount: items.length,
       withCategoryCount: items.filter((item) => item.category !== null).length,
     },

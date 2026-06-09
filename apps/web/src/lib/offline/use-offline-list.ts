@@ -364,12 +364,8 @@ function createListFromOffline(offlineList: OfflineList): List {
     createdAt: new Date(offlineList.createdAt),
     createdBy: offlineList.createdBy,
     updatedAt: offlineList.updatedAt ? new Date(offlineList.updatedAt) : null,
-    updatedBy: offlineList.updatedBy,
+    updatedBy: offlineList.updatedBy ?? null,
     items: [],
-    project: {
-      id: offlineList.projectId,
-      users: [],
-    } as unknown as List["project"],
     event: null,
   };
 }

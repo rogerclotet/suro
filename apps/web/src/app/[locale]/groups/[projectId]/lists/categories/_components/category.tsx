@@ -9,7 +9,11 @@ import {
 import DeleteCategoryButton from "./delete-category-button";
 import EditCategoryButton from "./edit-category-button";
 
-export default function Category({ category }: { category: CategoryType }) {
+export default function Category({
+  category,
+}: {
+  category: CategoryType & { items: { id: string }[] };
+}) {
   return (
     <Item variant="card">
       <ItemContent>
