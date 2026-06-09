@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -27,7 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
-import { createSpendingOffline } from "@/lib/offline/offline-spendings";
 import { useSession } from "@/lib/session";
 import { spendingSchema } from "./data";
 
@@ -84,14 +86,16 @@ function CreateSpendingFormContent({
   const { close } = useModalForm();
   const t = useTranslations("expenses");
   const tCommon = useTranslations("common");
+  const createSpending = useMutation(api.expenses.createSpending);
 
   async function onSubmit(data: v.InferInput<typeof spendingSchema>) {
     try {
-      await createSpendingOffline(pot, {
-        amount: Number(data.amount),
-        description: data.description,
-        from: data.from,
-        to: data.to,
+      await createSpending({
+        potId: pot.id as Id<"pots">,
+        amount: Math.round(Number(data.amount) * 100),
+        description: data.description || undefined,
+        from: data.from as Id<"users">,
+        to: data.to ? (data.to as Id<"users">) : undefined,
       });
       form.reset();
       toast.success(t("createSpendingSuccess"));

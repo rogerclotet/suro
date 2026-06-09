@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Check, Handshake } from "lucide-react";
 import posthog from "posthog-js";
 import { useMemo, useState } from "react";
@@ -10,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { useSession } from "@/lib/session";
 import SettleProposal from "./_components/settle-proposal";
-import { settlePayments } from "./actions";
 import type { SettlingPayment } from "./data";
 import { generateProposals } from "./generate-proposals";
 
@@ -89,10 +91,18 @@ function SettleButtonContent({
   sessionId?: string;
 }) {
   const { close } = useModalForm();
+  const settlePayments = useMutation(api.expenses.settlePayments);
 
   async function handleSubmit() {
     try {
-      await settlePayments(potId, selected);
+      await settlePayments({
+        potId: potId as Id<"pots">,
+        payments: selected.map((p) => ({
+          from: p.from as Id<"users">,
+          to: p.to as Id<"users">,
+          amount: p.amount,
+        })),
+      });
       close();
       toast.success("Deutes saldats correctament");
     } catch (e) {

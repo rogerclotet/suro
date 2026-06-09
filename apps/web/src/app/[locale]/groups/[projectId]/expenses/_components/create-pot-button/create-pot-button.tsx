@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -23,7 +26,6 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
-import { createPotOffline } from "@/lib/offline/offline-spendings";
 import { useSession } from "@/lib/session";
 import { potSchema } from "./data";
 
@@ -71,12 +73,14 @@ function CreatePotFormContent({
   const router = useRouter();
   const t = useTranslations("expenses");
   const tCommon = useTranslations("common");
+  const createPot = useMutation(api.expenses.createPot);
 
   async function onSubmit(data: v.InferInput<typeof potSchema>) {
     try {
-      const potId = await createPotOffline(project.id, {
+      const potId = await createPot({
+        projectId: project.id as Id<"projects">,
         name: data.name,
-        memberIds: data.memberIds,
+        memberIds: data.memberIds as Id<"users">[],
       });
       form.reset();
       toast.success(t("createPotSuccess"));
