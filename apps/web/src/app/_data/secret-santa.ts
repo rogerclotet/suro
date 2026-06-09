@@ -1,5 +1,4 @@
 import * as v from "valibot";
-import type { getCurrentSecretSanta } from "@/server/secret-santa";
 
 export const exclusionSchema = v.object({
   exclusions: v.pipe(
@@ -73,7 +72,3 @@ export const giftIdeaSchema = v.object({
 export const giftIdeasSchema = v.array(giftIdeaSchema);
 
 export type GiftIdeaData = v.InferOutput<typeof giftIdeaSchema>;
-
-export type SecretSanta = NonNullable<
-  Awaited<ReturnType<typeof getCurrentSecretSanta>>
->;
