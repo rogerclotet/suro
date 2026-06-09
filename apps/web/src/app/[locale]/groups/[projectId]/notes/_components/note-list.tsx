@@ -1,15 +1,25 @@
+"use client";
+
 import { InfoIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { checkAuth } from "@/lib/check-auth";
-import { getNotes } from "@/server/notes";
-import NotePreview from "./note-preview";
+import { useProjectNotes } from "@/lib/queries/use-notes";
+import NotePreview, { NotePreviewSkeleton } from "./note-preview";
 
-export default async function NoteList({ projectId }: { projectId: string }) {
-  await checkAuth();
+export default function NoteList({ projectId }: { projectId: string }) {
+  const t = useTranslations("notes");
+  const notes = useProjectNotes(projectId);
 
-  const notes = await getNotes(projectId);
-  const t = await getTranslations("notes");
+  if (notes === undefined) {
+    return (
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        {Array.from({ length: 3 }, (_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+          <NotePreviewSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
 
   if (notes.length === 0) {
     return (

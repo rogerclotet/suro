@@ -1,14 +1,16 @@
+"use client";
+
 import { CalendarFold } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { useLocale, useTranslations } from "next-intl";
 import type { Note } from "@/app/_data/note";
 import { htmlToPreview } from "@/components/ui/rich-text-content";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import { formatRelative } from "@/lib/format-relative";
 
-export default async function NotePreview({ note }: { note: Note }) {
-  const locale = await getLocale();
-  const t = await getTranslations("notes");
+export default function NotePreview({ note }: { note: Note }) {
+  const locale = useLocale();
+  const t = useTranslations("notes");
   const preview = htmlToPreview(note.format, note.contents);
   const updatedAt = note.updatedAt ?? note.createdAt;
   const updatedLabel = updatedAt ? formatRelative(updatedAt, locale) : null;

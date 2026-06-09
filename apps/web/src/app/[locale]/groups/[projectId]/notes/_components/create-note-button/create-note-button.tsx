@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -23,7 +26,6 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
-import { createNoteOffline } from "@/lib/offline/offline-notes";
 import { useSession } from "@/lib/session";
 import { noteSchema } from "./schema";
 
@@ -78,6 +80,7 @@ function CreateNoteFormContent({
   const t = useTranslations("notes");
   const tCommon = useTranslations("common");
   const tLists = useTranslations("lists");
+  const createNote = useMutation(api.notes.create);
 
   async function onSubmit(data: v.InferInput<typeof noteSchema>) {
     if (!project) {
@@ -86,7 +89,8 @@ function CreateNoteFormContent({
     }
 
     try {
-      const noteId = await createNoteOffline(project, {
+      const noteId = await createNote({
+        projectId: project.id as Id<"projects">,
         name: data.name,
         contents: data.contents,
         format: data.format ?? "html",

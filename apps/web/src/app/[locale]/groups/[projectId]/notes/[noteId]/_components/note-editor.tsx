@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import {
@@ -13,7 +16,6 @@ import { toast } from "sonner";
 import type { Note } from "@/app/_data/note";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import { formatRelative } from "@/lib/format-relative";
-import { updateNoteOffline } from "@/lib/offline/offline-notes";
 import { useSession } from "@/lib/session";
 
 type SaveState = "idle" | "saving" | "saved";
@@ -33,6 +35,7 @@ export default function NoteEditor({
   const { data: session } = useSession();
   const t = useTranslations("notes");
   const locale = useLocale();
+  const updateNote = useMutation(api.notes.update);
 
   const [name, setName] = useState(note.name);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -69,7 +72,8 @@ export default function NoteEditor({
 
     setSaveState("saving");
     try {
-      await updateNoteOffline(noteRef.current, {
+      await updateNote({
+        noteId: noteRef.current.id as Id<"notes">,
         name: trimmedName,
         contents,
         format: "html",
@@ -92,7 +96,7 @@ export default function NoteEditor({
       toast.error(tRef.current("editError"));
       setSaveState("idle");
     }
-  }, []);
+  }, [updateNote]);
 
   const scheduleSave = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
