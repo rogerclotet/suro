@@ -1,14 +1,14 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
 import {
   Form,
   FormControl,
@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
-import { createProject } from "./actions";
 import { projectSchema } from "./data";
 
 export default function CreateProjectForm({
@@ -30,14 +29,12 @@ export default function CreateProjectForm({
   trigger: React.ReactNode;
 }) {
   const t = useTranslations("groups");
-  const { selectProject } = useProjects();
   const form = useForm({
     defaultValues: {
       name: "",
     },
     resolver: valibotResolver(projectSchema),
   });
-  const { data: session } = useSession();
 
   return (
     <ModalForm
@@ -45,41 +42,34 @@ export default function CreateProjectForm({
       title={t("createTitle")}
       description={t("createDescription")}
     >
-      <CreateProjectFormContent
-        form={form}
-        selectProject={selectProject}
-        sessionId={session?.user.id}
-      />
+      <CreateProjectFormContent form={form} />
     </ModalForm>
   );
 }
 
 function CreateProjectFormContent({
   form,
-  selectProject,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof projectSchema>>>;
-  selectProject: (project: Project) => void;
-  sessionId?: string;
 }) {
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
   const { close } = useModalForm();
+  const { data: session } = useSession();
+  const createProject = useMutation(api.projects.create);
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
     try {
-      const project = await createProject(data);
-      if (!project) {
-        throw new Error("Error creating project");
-      }
-      selectProject(project);
+      const projectId = await createProject({ name: data.name });
+      // The projects store updates reactively; persist the selection so its
+      // effect makes the new group current once it arrives.
+      localStorage.setItem("selectedProjectId", projectId);
       toast.success(t("createSuccess", { name: form.getValues().name }));
       form.reset();
       close();
     } catch (e) {
       posthog.captureException(e, {
-        distinctId: sessionId,
+        distinctId: session?.user.id,
         action: "create_project",
       });
       toast.error(t("createError"));

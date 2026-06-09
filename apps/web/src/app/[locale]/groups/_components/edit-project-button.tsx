@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Edit, SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -27,7 +30,7 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { useSession } from "@/lib/session";
-import { editProject, removeProjectImage } from "./actions";
+import { removeProjectImage } from "./actions";
 
 const editProjectSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
@@ -77,13 +80,18 @@ function EditProjectFormContent({
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
   const { close } = useModalForm();
+  const updateProject = useMutation(api.projects.update);
   const watchedColor = form.watch("color");
   const [imageCleared, setImageCleared] = useState(false);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof editProjectSchema>) => {
       try {
-        await editProject(project, data);
+        await updateProject({
+          projectId: project.id as Id<"projects">,
+          name: data.name,
+          color: data.color,
+        });
         toast.success(t("editSuccess", { name: data.name }));
         close();
       } catch (e) {
@@ -95,7 +103,7 @@ function EditProjectFormContent({
         toast.error(t("editError"));
       }
     },
-    [project, sessionId, close, t],
+    [project, sessionId, close, t, updateProject],
   );
 
   const handleFormSubmit = useCallback(
