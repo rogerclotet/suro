@@ -1,7 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { useQuery } from "@tanstack/react-query";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -10,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
@@ -22,9 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
+import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { useSession } from "@/lib/session";
 import { linkEventListSchema } from "../../_components/event/data";
-import { linkEventList } from "../actions";
 
 export default function LinkListForm({
   event,
@@ -42,36 +43,17 @@ export default function LinkListForm({
     resolver: valibotResolver(linkEventListSchema),
   });
   const { project } = useProjects();
-  const { data: lists } = useQuery({
-    queryKey: ["lists", project?.id],
-    queryFn: async () => {
-      if (!project) {
-        return [];
-      }
-      const res = await fetch(`/api/${project.id}/lists`);
-      if (!res.ok) {
-        throw new Error(t("linkListLoadError"));
-      }
-      const lists = (await res.json()) as (List & {
-        createdAt: string;
-        updatedAt: string;
-      })[];
-      return lists.map<List>((list) => {
-        return {
-          ...list,
-          createdAt: new Date(list.createdAt),
-          updatedAt: new Date(list.updatedAt),
-        };
-      });
-    },
-    select: (data) => data?.filter((list) => list.eventId === null),
-    staleTime: 60 * 1000,
-  });
+  const allLists = useProjectLists(project?.id);
+  const lists = allLists?.filter((list) => list.eventId === null);
+  const linkList = useMutation(api.events.linkList);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof linkEventListSchema>) => {
       try {
-        await linkEventList(event, data.listId);
+        await linkList({
+          eventId: event.id as Id<"events">,
+          listId: data.listId as Id<"lists">,
+        });
         toast.success(t("linkListSuccess"));
       } catch (e) {
         posthog.captureException(e, {
@@ -83,7 +65,7 @@ export default function LinkListForm({
         toast.error(t("linkListError"));
       }
     },
-    [event, session?.user.id, t],
+    [event, session?.user.id, t, linkList],
   );
 
   const handleFormSubmit = useCallback(

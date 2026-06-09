@@ -11,10 +11,13 @@ import {
 } from "@/app/_data/list";
 
 /** Reactive lists for a project (Convex). `undefined` while loading. */
-export function useProjectLists(projectId: string): List[] | undefined {
-  const data = useQuery(api.lists.listByProject, {
-    projectId: projectId as Id<"projects">,
-  });
+export function useProjectLists(
+  projectId: string | undefined,
+): List[] | undefined {
+  const data = useQuery(
+    api.lists.listByProject,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
   return data?.map((l) => adaptList(l));
 }
 

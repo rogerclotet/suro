@@ -2,6 +2,9 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -26,7 +29,6 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
-import { updateEventOffline } from "@/lib/offline/offline-events";
 import { useSession } from "@/lib/session";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
@@ -179,6 +181,7 @@ function EditEventFormContent({
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");
   const tLists = useTranslations("lists");
+  const updateEvent = useMutation(api.events.update);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof eventSchema>) => {
@@ -211,16 +214,14 @@ function EditEventFormContent({
       }
 
       try {
-        await updateEventOffline(
-          event,
-          {
-            name: dataToEdit.name,
-            description: dataToEdit.description,
-            dates: { from, to },
-            allDay: dataToEdit.allDay,
-          },
-          project,
-        );
+        await updateEvent({
+          eventId: event.id as Id<"events">,
+          name: dataToEdit.name,
+          description: dataToEdit.description,
+          startAt: from.getTime(),
+          endAt: to.getTime(),
+          allDay: dataToEdit.allDay,
+        });
         toast.success(t("editSuccess"));
         form.reset({
           name: data.name,
@@ -239,7 +240,7 @@ function EditEventFormContent({
         toast.error(t("editError"));
       }
     },
-    [project, event, form, sessionId, close, t, tLists],
+    [project, event, form, sessionId, close, t, tLists, updateEvent],
   );
 
   const handleFormSubmit = useCallback(

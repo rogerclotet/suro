@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import {
   Edit,
   ListPlus,
@@ -18,7 +21,6 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
-import type { Pot } from "@/app/_data/pot";
 import { Button } from "@/components/ui/button";
 import {
   ResponsiveMenu,
@@ -27,11 +29,6 @@ import {
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
 import { useSession } from "@/lib/session";
-import {
-  createLinkedList,
-  createLinkedNote,
-  createLinkedPot,
-} from "../actions";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";
 import LinkListForm from "./link-list-form";
@@ -47,16 +44,19 @@ export default function SettingsMenu({
   canCreatePot,
 }: {
   event: Event;
-  list: List | undefined;
-  pot: Pot | undefined;
+  list: List | null;
+  pot: { id: string } | null;
   canCreatePot: boolean;
 }) {
   const { data: session } = useSession();
   const t = useTranslations("calendar");
+  const createLinkedList = useMutation(api.events.createLinkedList);
+  const createLinkedNote = useMutation(api.events.createLinkedNote);
+  const createLinkedPot = useMutation(api.events.createLinkedPot);
 
   async function handleCreateLinkedList() {
     try {
-      await createLinkedList(event);
+      await createLinkedList({ eventId: event.id as Id<"events"> });
       toast.success(t("createListSuccess"));
     } catch (e) {
       posthog.captureException(e, {
@@ -71,7 +71,7 @@ export default function SettingsMenu({
 
   async function handleCreateLinkedNote() {
     try {
-      await createLinkedNote(event);
+      await createLinkedNote({ eventId: event.id as Id<"events"> });
       toast.success(t("createNoteSuccess"));
     } catch (e) {
       posthog.captureException(e, {
@@ -86,7 +86,7 @@ export default function SettingsMenu({
 
   async function handleCreateLinkedPot() {
     try {
-      await createLinkedPot(event);
+      await createLinkedPot({ eventId: event.id as Id<"events"> });
       toast.success(t("createPotSuccess"));
     } catch (e) {
       posthog.captureException(e, {
@@ -119,7 +119,7 @@ export default function SettingsMenu({
             </ResponsiveMenuItem>
           }
         />
-        {list === undefined ? (
+        {list === null ? (
           <>
             <ResponsiveMenuItem
               onClick={handleCreateLinkedList}
@@ -178,7 +178,7 @@ export default function SettingsMenu({
           event={event}
         />
 
-        {pot !== undefined ? (
+        {pot !== null ? (
           <UnlinkEventPotModal
             trigger={
               <ResponsiveMenuItem

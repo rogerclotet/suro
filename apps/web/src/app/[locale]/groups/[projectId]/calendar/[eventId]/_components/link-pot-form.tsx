@@ -1,7 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { useQuery } from "@tanstack/react-query";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -10,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import type { Pot } from "@/app/_data/pot";
 import { useProjects } from "@/app/_state/project-state";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
@@ -24,7 +25,6 @@ import {
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { linkEventPotSchema } from "../../_components/event/data";
-import { linkEventPot } from "../actions";
 
 export default function LinkPotForm({
   event,
@@ -42,37 +42,22 @@ export default function LinkPotForm({
     resolver: valibotResolver(linkEventPotSchema),
   });
   const { project } = useProjects();
-  const { data: pots } = useQuery({
-    queryKey: ["pots", project?.id],
-    queryFn: async () => {
-      if (!project) {
-        return [];
-      }
-      const res = await fetch(`/api/${project.id}/pots`);
-      if (!res.ok) {
-        throw new Error(t("linkPotLoadError"));
-      }
-      const pots = (await res.json()) as (Pot & {
-        createdAt: string;
-        settledAt: string | null;
-      })[];
-      return pots.map<Pot>((pot) => {
-        return {
-          ...pot,
-          createdAt: new Date(pot.createdAt),
-          settledAt: pot.settledAt ? new Date(pot.settledAt) : null,
-        };
-      });
-    },
-    select: (data) =>
-      data?.filter((pot) => pot.eventId === null && pot.settledAt === null),
-    staleTime: 60 * 1000,
-  });
+  const potsData = useQuery(
+    api.expenses.listPots,
+    project ? { projectId: project.id as Id<"projects"> } : "skip",
+  );
+  const pots = potsData?.filter(
+    (pot) => pot.eventId === undefined && pot.settledAt === undefined,
+  );
+  const linkPot = useMutation(api.events.linkPot);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof linkEventPotSchema>) => {
       try {
-        await linkEventPot(event, data.potId);
+        await linkPot({
+          eventId: event.id as Id<"events">,
+          potId: data.potId as Id<"pots">,
+        });
         toast.success(t("linkPotSuccess"));
       } catch (e) {
         posthog.captureException(e, {
@@ -84,7 +69,7 @@ export default function LinkPotForm({
         toast.error(t("linkPotError"));
       }
     },
-    [event, session?.user.id, t],
+    [event, session?.user.id, t, linkPot],
   );
 
   const handleFormSubmit = useCallback(
@@ -123,7 +108,7 @@ export default function LinkPotForm({
                     </FormControl>
                     <SelectContent>
                       {pots?.map((pot) => (
-                        <SelectItem key={pot.id} value={pot.id}>
+                        <SelectItem key={pot._id} value={pot._id}>
                           {pot.name}
                         </SelectItem>
                       ))}

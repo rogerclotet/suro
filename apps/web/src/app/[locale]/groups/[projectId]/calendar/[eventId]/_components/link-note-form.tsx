@@ -1,7 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { useQuery } from "@tanstack/react-query";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -10,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import type { Note } from "@/app/_data/note";
 import { useProjects } from "@/app/_state/project-state";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
@@ -24,7 +25,6 @@ import {
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { linkEventNoteSchema } from "../../_components/event/data";
-import { linkEventNote } from "../actions";
 
 export default function LinkNoteForm({
   event,
@@ -42,36 +42,20 @@ export default function LinkNoteForm({
     resolver: valibotResolver(linkEventNoteSchema),
   });
   const { project } = useProjects();
-  const { data: notes } = useQuery({
-    queryKey: ["notes", project?.id],
-    queryFn: async () => {
-      if (!project) {
-        return [];
-      }
-      const res = await fetch(`/api/${project.id}/notes`);
-      if (!res.ok) {
-        throw new Error(t("linkNoteLoadError"));
-      }
-      const notes = (await res.json()) as (Note & {
-        createdAt: string;
-        updatedAt: string;
-      })[];
-      return notes.map<Note>((note) => {
-        return {
-          ...note,
-          createdAt: note.createdAt ? new Date(note.createdAt) : null,
-          updatedAt: note.updatedAt ? new Date(note.updatedAt) : null,
-        };
-      });
-    },
-    select: (data) => data?.filter((note) => note.eventId === null),
-    staleTime: 60 * 1000,
-  });
+  const notesData = useQuery(
+    api.notes.listByProject,
+    project ? { projectId: project.id as Id<"projects"> } : "skip",
+  );
+  const notes = notesData?.filter((note) => note.eventId === undefined);
+  const linkNote = useMutation(api.events.linkNote);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof linkEventNoteSchema>) => {
       try {
-        await linkEventNote(event, data.noteId);
+        await linkNote({
+          eventId: event.id as Id<"events">,
+          noteId: data.noteId as Id<"notes">,
+        });
         toast.success(t("linkNoteSuccess"));
       } catch (e) {
         posthog.captureException(e, {
@@ -83,7 +67,7 @@ export default function LinkNoteForm({
         toast.error(t("linkNoteError"));
       }
     },
-    [event, session?.user.id, t],
+    [event, session?.user.id, t, linkNote],
   );
 
   const handleFormSubmit = useCallback(
@@ -122,7 +106,7 @@ export default function LinkNoteForm({
                     </FormControl>
                     <SelectContent>
                       {notes?.map((note) => (
-                        <SelectItem key={note.id} value={note.id}>
+                        <SelectItem key={note._id} value={note._id}>
                           {note.name}
                         </SelectItem>
                       ))}

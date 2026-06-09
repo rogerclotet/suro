@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -7,7 +10,6 @@ import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { useSession } from "@/lib/session";
-import { unlinkEventList } from "../actions";
 
 export default function UnlinkEventListModal({
   event,
@@ -15,19 +17,23 @@ export default function UnlinkEventListModal({
   trigger,
 }: {
   event: Event;
-  list: List | undefined;
+  list: List | null;
   trigger: React.ReactNode;
 }) {
   const { data: session } = useSession();
   const t = useTranslations("calendar");
+  const unlinkList = useMutation(api.events.unlinkList);
 
   async function handleUnlink() {
-    if (list === undefined) {
+    if (list === null) {
       return;
     }
 
     try {
-      await unlinkEventList(event, list);
+      await unlinkList({
+        eventId: event.id as Id<"events">,
+        listId: list.id as Id<"lists">,
+      });
       toast.success(t("unlinkListSuccess"));
     } catch (e) {
       posthog.captureException(e, {
@@ -40,7 +46,7 @@ export default function UnlinkEventListModal({
     }
   }
 
-  if (list === undefined) {
+  if (list === null) {
     return null;
   }
 
