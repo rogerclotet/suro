@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { ThemeColorMeta } from "@/components/theme-color-meta";
-import { ConflictModal } from "@/components/ui/conflict-modal";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import { UpdateToast } from "@/components/update-toast";
@@ -149,7 +148,6 @@ export default async function LocaleLayout({
                         {children}
                         <Toaster position="bottom-center" />
                         <UpdateToast />
-                        <ConflictModal />
                       </ProjectsProvider>
                     </TooltipProvider>
                   </SidebarLayout>
