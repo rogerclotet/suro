@@ -1,23 +1,28 @@
+"use client";
+
 import { InfoIcon } from "lucide-react";
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { List } from "@/app/_data/list";
-import { auth } from "@/auth";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { getLists } from "@/server/lists";
+import { useProjectLists } from "@/lib/queries/use-project-lists";
 import CollapsibleCompletedSection from "./collapsible-completed-section";
 import CreateListButton from "./create-list/create-list-button";
-import ListPreview from "./list-preview";
-import ListsTQPrimer from "./lists-tq-primer";
+import ListPreview, { ListPreviewSkeleton } from "./list-preview";
 
-export default async function Lists({ projectId }: { projectId: string }) {
-  const session = await auth();
-  if (!session) {
-    redirect("/");
+export default function Lists({ projectId }: { projectId: string }) {
+  const t = useTranslations("lists");
+  const lists = useProjectLists(projectId);
+
+  if (lists === undefined) {
+    return (
+      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 4 }, (_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+          <ListPreviewSkeleton key={i} />
+        ))}
+      </div>
+    );
   }
-
-  const t = await getTranslations("lists");
-  const lists = await getLists(projectId);
 
   if (lists.length === 0) {
     return (
@@ -83,7 +88,6 @@ export default async function Lists({ projectId }: { projectId: string }) {
       </div>
 
       <CreateListButton projectId={projectId} />
-      <ListsTQPrimer projectId={projectId} lists={lists} />
     </>
   );
 }

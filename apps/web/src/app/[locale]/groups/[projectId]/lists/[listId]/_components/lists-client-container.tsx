@@ -1,18 +1,16 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { CalendarFold } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import type { List, Template } from "@/app/_data/list";
 import { ClientOnly } from "@/components/client-only";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ShareButton from "@/components/ui/share-button";
 import { getPathname, Link } from "@/i18n/navigation";
 import {
-  projectListsQueryKey,
   useProjectLists,
+  useProjectTemplates,
 } from "@/lib/queries/use-project-lists";
 import { textToHtml } from "@/lib/utils";
 import TimeRange from "../../../calendar/_components/event/time-range";
@@ -23,35 +21,18 @@ import SettingsMenu from "./settings/settings-menu";
 export default function ListsClientContainer({
   initialListId,
   projectId,
-  templates,
-  initialLists,
 }: {
   initialListId: string;
   projectId: string;
-  templates: Template[];
-  initialLists: List[];
 }) {
   const [currentListId, setCurrentListId] = useState(initialListId);
   const locale = useLocale();
   const tLists = useTranslations("lists");
   const tErrors = useTranslations("errors");
-  const queryClient = useQueryClient();
 
-  // Lists live in TanStack Query — cached in memory across navigation,
-  // background-refreshed after staleTime (2 min). initialLists seeds the
-  // cache on first load so there's no extra network fetch.
-  const { data: lists = initialLists } = useProjectLists(
-    projectId,
-    initialLists,
-  );
-
-  // When the server passes fresh initialLists (e.g. after router.refresh() following
-  // a mutation), push the update into TQ so the cache stays current.
-  useEffect(() => {
-    queryClient.setQueryData(projectListsQueryKey(projectId), initialLists);
-  }, [queryClient, projectId, initialLists]);
-
-  const currentList = lists.find((l) => l.id === currentListId) ?? null;
+  // Lists + templates come reactively from Convex.
+  const lists = useProjectLists(projectId);
+  const templates = useProjectTemplates(projectId) ?? [];
 
   function handleListChange(newListId: string) {
     setCurrentListId(newListId);
@@ -68,13 +49,14 @@ export default function ListsClientContainer({
   // Sync currentListId with browser back/forward
   useEffect(() => {
     function handlePopState(event: PopStateEvent) {
+      const available = lists ?? [];
       const listId: string | undefined = event.state?.listId;
-      if (listId && lists.some((l) => l.id === listId)) {
+      if (listId && available.some((l) => l.id === listId)) {
         setCurrentListId(listId);
       } else {
         const segments = window.location.pathname.split("/").filter(Boolean);
         const urlListId = segments.at(-1);
-        if (urlListId && lists.some((l) => l.id === urlListId)) {
+        if (urlListId && available.some((l) => l.id === urlListId)) {
           setCurrentListId(urlListId);
         }
       }
@@ -83,6 +65,12 @@ export default function ListsClientContainer({
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [lists]);
+
+  if (lists === undefined) {
+    return null;
+  }
+
+  const currentList = lists.find((l) => l.id === currentListId) ?? null;
 
   if (!currentList) {
     return (

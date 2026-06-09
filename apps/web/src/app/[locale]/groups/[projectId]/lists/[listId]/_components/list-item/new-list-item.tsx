@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -13,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
-import { createListItemOffline } from "@/lib/offline/offline-actions";
 import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
@@ -31,6 +33,7 @@ export default function NewListItem({ list }: { list: List }) {
   const { project } = useProjects();
   const { data: session } = useSession();
   const { createAndSelect } = useCategoryCreation();
+  const createItem = useMutation(api.listItems.create);
   const t = useTranslations("lists");
 
   async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
@@ -52,10 +55,13 @@ export default function NewListItem({ list }: { list: List }) {
     }
 
     try {
-      const categoryName = project?.categories.find(
-        (c) => c.id === data.categoryId,
-      )?.name;
-      await createListItemOffline(list, data, categoryName);
+      await createItem({
+        listId: list.id as Id<"lists">,
+        name: data.name,
+        categoryId: data.categoryId
+          ? (data.categoryId as Id<"categories">)
+          : null,
+      });
       form.reset({
         name: "",
         completed: false,

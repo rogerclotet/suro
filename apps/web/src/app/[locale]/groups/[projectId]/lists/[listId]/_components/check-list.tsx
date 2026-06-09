@@ -11,21 +11,20 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
-import {
-  deleteListItemOffline,
-  updateListItemOffline,
-} from "@/lib/offline/offline-actions";
-import { useOfflineList } from "@/lib/offline/use-offline-list";
 import CategoryItems from "./category-items";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const { project } = useProjects();
+  const list = props.list;
 
   const [dragging, setDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
@@ -33,38 +32,10 @@ export default function CheckList(props: { list: List }) {
   const keyboardSensor = useSensor(KeyboardSensor);
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
-  // Use offline-first data
-  const { list: offlineList } = useOfflineList(props.list, props.list.id);
+  const updateItem = useMutation(api.listItems.update);
+  const removeItem = useMutation(api.listItems.remove);
 
-  // Reset local optimistic state when switching to a different list
-  const listId = props.list.id;
-  // biome-ignore lint/correctness/useExhaustiveDependencies: listId is a trigger, not used inside the effect
-  useEffect(() => {
-    setOptimisticUpdates(new Map());
-  }, [listId]);
-
-  // Track optimistic updates: itemId -> updated item data
-  const [optimisticUpdates, setOptimisticUpdates] = useState<
-    Map<string, Partial<ListItem>>
-  >(new Map());
-
-  // Use offline list as base, with optimistic overlay
-  const baseList = offlineList ?? props.list;
-
-  const list = useMemo(() => {
-    if (optimisticUpdates.size === 0) {
-      return baseList;
-    }
-    return {
-      ...baseList,
-      items: baseList.items.map((item) => {
-        const update = optimisticUpdates.get(item.id);
-        return update ? { ...item, ...update } : item;
-      }),
-    };
-  }, [baseList, optimisticUpdates]);
-
-  // Keep refs to latest values so stable callbacks can always read current state
+  // Keep refs to latest values so stable callbacks can always read current state.
   const listRef = useRef(list);
   const projectRef = useRef(project);
   // eslint-disable-next-line react-hooks/refs
@@ -88,42 +59,28 @@ export default function CheckList(props: { list: List }) {
       if (name === "") {
         return;
       }
-
-      const category = projectRef.current?.categories.find(
-        (c) => c.id === categoryId,
-      );
-
-      setOptimisticUpdates((prev) => {
-        const next = new Map(prev);
-        next.set(item.id, { name, details, completed, categoryId, category });
-        return next;
-      });
-
       try {
-        await updateListItemOffline(
-          listRef.current,
-          item.id,
+        await updateItem({
+          itemId: item.id as Id<"listItems">,
           name,
           details,
           completed,
-          categoryId,
-          category?.name,
-        );
-      } catch (e) {
-        setOptimisticUpdates((prev) => {
-          const next = new Map(prev);
-          next.delete(item.id);
-          return next;
+          categoryId: categoryId ? (categoryId as Id<"categories">) : null,
         });
+      } catch (e) {
+        toast.error("No s'ha pogut actualitzar l'element");
         throw e;
       }
     },
-    [],
+    [updateItem],
   );
 
-  const handleDelete = useCallback(async (item: List["items"][number]) => {
-    await deleteListItemOffline(listRef.current, item.id);
-  }, []);
+  const handleDelete = useCallback(
+    async (item: List["items"][number]) => {
+      await removeItem({ itemId: item.id as Id<"listItems"> });
+    },
+    [removeItem],
+  );
 
   function handleDragStart(_event: DragStartEvent) {
     setDragging(true);
@@ -153,7 +110,7 @@ export default function CheckList(props: { list: List }) {
       projectRef.current?.categories.find((c) => c.name === categoryName) ??
       null;
 
-    if (category === item.category) {
+    if ((category?.id ?? null) === (item.categoryId ?? null)) {
       return;
     }
 
@@ -166,33 +123,12 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    // Apply optimistic update for category change
-    setOptimisticUpdates((prev) => {
-      const next = new Map(prev);
-      const currentUpdate = next.get(itemId) ?? {};
-      next.set(itemId, {
-        ...currentUpdate,
-        category,
-        categoryId: category?.id ?? null,
-      });
-      return next;
-    });
-
-    await updateListItemOffline(
-      currentList,
-      itemId,
-      item.name,
-      item.details ?? "",
-      item.completed ?? false,
-      category?.id ?? null,
-      category?.name,
-    );
-
-    // Clear optimistic update after successful API call
-    setOptimisticUpdates((prev) => {
-      const next = new Map(prev);
-      next.delete(itemId);
-      return next;
+    await updateItem({
+      itemId: item.id as Id<"listItems">,
+      name: item.name,
+      details: item.details ?? "",
+      completed: item.completed ?? false,
+      categoryId: category?.id ? (category.id as Id<"categories">) : null,
     });
   }
 
@@ -258,7 +194,6 @@ function groupItemsByCategory(items: List["items"], project: Project | null) {
     }
   }
 
-  // Also include any categories found in items (for offline support)
   for (const item of items) {
     if (item.category?.name) {
       categoryNames.add(item.category.name);

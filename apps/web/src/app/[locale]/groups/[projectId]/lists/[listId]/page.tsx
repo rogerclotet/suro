@@ -1,5 +1,4 @@
 import { checkAuth } from "@/lib/check-auth";
-import { getLists, getTemplates } from "@/server/lists";
 import ListsClientContainer from "./_components/lists-client-container";
 
 export default async function ListPage({
@@ -11,17 +10,5 @@ export default async function ListPage({
 
   const { projectId, listId } = await params;
 
-  const [lists, templates] = await Promise.all([
-    getLists(projectId),
-    getTemplates(projectId),
-  ]);
-
-  return (
-    <ListsClientContainer
-      initialLists={lists}
-      initialListId={listId}
-      projectId={projectId}
-      templates={templates}
-    />
-  );
+  return <ListsClientContainer initialListId={listId} projectId={projectId} />;
 }

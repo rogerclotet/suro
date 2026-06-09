@@ -1,7 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { useQuery } from "@tanstack/react-query";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -9,7 +11,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import { useProjects } from "@/app/_state/project-state";
-import { getTemplates } from "@/app/api/[projectId]/templates/api";
 import Action from "@/components/action";
 import {
   Form,
@@ -25,8 +26,8 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "@/i18n/navigation";
+import { useProjectTemplates } from "@/lib/queries/use-project-lists";
 import { useSession } from "@/lib/session";
-import { createList } from "./actions";
 import { listSchema } from "./data";
 
 export default function CreateListButton({ projectId }: { projectId: string }) {
@@ -41,11 +42,8 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   });
   const router = useRouter();
   const { project } = useProjects();
-  const { data: templates } = useQuery({
-    queryKey: ["templates", projectId],
-    queryFn: () => getTemplates(projectId),
-    staleTime: 60 * 1000,
-  });
+  const templates = useProjectTemplates(projectId);
+  const createList = useMutation(api.lists.create);
   const { data: session } = useSession();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
@@ -57,7 +55,14 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
     }
 
     try {
-      const listId = await createList(project, data);
+      const listId = await createList({
+        projectId: project.id as Id<"projects">,
+        name: data.name,
+        description: data.description,
+        templateIds: (data.templates ?? []).map(
+          (id) => id as Id<"listTemplates">,
+        ),
+      });
       toast.success(t("createSuccess", { name: form.getValues().name }));
       router.push({
         pathname: "/groups/[projectId]/lists/[listId]",
