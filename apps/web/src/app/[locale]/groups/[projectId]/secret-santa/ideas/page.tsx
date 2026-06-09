@@ -1,61 +1,24 @@
+import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
-import { getPathname } from "@/i18n/navigation";
-import { getUserProject } from "@/server/projects";
-import { getCurrentSecretSanta } from "@/server/secret-santa";
-import GiftIdeas from "./gift-ideas";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export default async function IdeasPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
-  const t = await getTranslations("secretSanta");
-
+// Secret Santa is disabled until it is ported to Convex. The nav entry is
+// hidden (project.features.secretSanta is false); this stub covers deep links.
+export default async function GiftIdeasPage() {
   const session = await auth();
   if (!session) {
     redirect("/");
   }
 
-  const project = await getUserProject(projectId);
-  if (!project) {
-    redirect("/");
-  }
-  if (!project.features.secretSanta) {
-    redirect(`/groups/${projectId}/lists`);
-  }
-
-  const locale = await getLocale();
-  const secretSantaPath = getPathname({
-    href: {
-      pathname: "/groups/[projectId]/secret-santa",
-      params: { projectId },
-    },
-    locale,
-  });
-
-  const secretSanta = await getCurrentSecretSanta(projectId);
-  if (!secretSanta) {
-    redirect(secretSantaPath);
-  }
-
-  const participant = secretSanta?.participants.find(
-    (p) => p.userId === session?.user.id,
-  );
-  if (!participant) {
-    redirect(secretSantaPath);
-  }
+  const t = await getTranslations("secretSanta");
 
   return (
-    <div className="space-y-4">
-      <h2 className="font-semibold text-2xl">{t("ideasTitle")}</h2>
-
-      <GiftIdeas
-        giftIdeas={participant?.giftIdeas}
-        secretSantaId={secretSanta?.id}
-      />
-    </div>
+    <Alert className="mx-auto max-w-lg">
+      <InfoIcon className="h-4 w-4" />
+      <AlertTitle>{t("comingSoonTitle")}</AlertTitle>
+      <AlertDescription>{t("comingSoon")}</AlertDescription>
+    </Alert>
   );
 }

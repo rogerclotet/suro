@@ -627,6 +627,8 @@
     "spendingFor": "por"
   },
   "secretSanta": {
+    "comingSoonTitle": "Próximamente",
+    "comingSoon": "El amigo invisible se está reconstruyendo y volverá pronto.",
     "description": "El amigo invisible consiste en hacer un sorteo en el que a cada persona se le asigna otro participante de forma aleatoria, y esta le preparará un regalo, de manera que no se sabe quién se lo ha hecho a quién.",
     "infoDescription": "Esta sección está pensada para grupos de 2 o más personas, y permite hacer un amigo invisible entre ellos.",
     "emptyTitle": "Aún no se ha hecho ningún amigo invisible en este grupo.",

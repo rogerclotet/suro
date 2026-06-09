@@ -3,70 +3,22 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getUserProject } from "@/server/projects";
-import { getCurrentSecretSanta } from "@/server/secret-santa";
-import CreateButton from "./_components/secret-santa/setup/create-button";
-import SecretSantaSetup from "./_components/secret-santa/setup/setup";
-import SecretSantaStarted from "./_components/secret-santa/started/started";
 
-export default async function AmicInvisiblePage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
+// Secret Santa is disabled until it is ported to Convex. The nav entry is
+// hidden (project.features.secretSanta is false); this stub covers deep links.
+export default async function SecretSantaPage() {
   const session = await auth();
   if (!session) {
     redirect("/");
   }
 
-  const { projectId } = await params;
-  const project = await getUserProject(projectId);
-  if (!project) {
-    redirect("/");
-  }
-
-  if (!project.features.secretSanta) {
-    redirect(`/groups/${projectId}/lists`);
-  }
-
   const t = await getTranslations("secretSanta");
-  const tCommon = await getTranslations("common");
 
-  if (project.users.length < 2) {
-    return (
-      <Alert className="mx-auto max-w-lg">
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>{tCommon("info")}</AlertTitle>
-        <AlertDescription className="mt-2 space-y-2">
-          <p>{t("infoDescription")}</p>
-          <p>{t("description")}</p>
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  const isAdmin = project.createdBy === session.user.id;
-
-  const secretSanta = await getCurrentSecretSanta(projectId);
-  if (!secretSanta) {
-    return (
-      <>
-        <Alert className="mx-auto max-w-lg">
-          <InfoIcon className="h-4 w-4" />
-          <AlertTitle>{t("emptyTitle")}</AlertTitle>
-          <AlertDescription>
-            {isAdmin ? t("emptyAdminMessage") : t("emptyNonAdminMessage")}
-          </AlertDescription>
-        </Alert>
-
-        {isAdmin && <CreateButton />}
-      </>
-    );
-  }
-
-  if (secretSanta.assignmentsDone) {
-    return <SecretSantaStarted secretSanta={secretSanta} />;
-  }
-
-  return <SecretSantaSetup secretSanta={secretSanta} />;
+  return (
+    <Alert className="mx-auto max-w-lg">
+      <InfoIcon className="h-4 w-4" />
+      <AlertTitle>{t("comingSoonTitle")}</AlertTitle>
+      <AlertDescription>{t("comingSoon")}</AlertDescription>
+    </Alert>
+  );
 }

@@ -627,6 +627,8 @@
     "spendingFor": "per"
   },
   "secretSanta": {
+    "comingSoonTitle": "Aviat disponible",
+    "comingSoon": "L'amic invisible s'està reconstruint i tornarà aviat.",
     "description": "L'amic invisible consisteix en fer un sorteig on a cada persona se li assigna un altre participant de forma aleatòria, i aquest li prepararà un regal, de manera que no se sap qui li ha fet a qui.",
     "infoDescription": "Aquesta secció està pensada per grups de 2 o més persones, i permet fer un amic invisible entre ells.",
     "emptyTitle": "Encara no s'ha fet cap amic invisible en aquest grup.",

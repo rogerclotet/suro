@@ -627,6 +627,8 @@
     "spendingFor": "for"
   },
   "secretSanta": {
+    "comingSoonTitle": "Coming soon",
+    "comingSoon": "Secret Santa is being rebuilt and will be back soon.",
     "description": "Secret Santa is a draw where each person is randomly assigned another participant, and they prepare a gift for them, so nobody knows who got whom.",
     "infoDescription": "This section is intended for groups of 2 or more people, and lets them organize a Secret Santa.",
     "emptyTitle": "No Secret Santa has been organized in this group yet.",
