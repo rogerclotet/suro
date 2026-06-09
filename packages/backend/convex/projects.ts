@@ -337,3 +337,123 @@ export const removeImage = mutation({
     return null;
   },
 });
+
+/**
+ * Delete a group and all its data. Creator-only, and only once they are the
+ * sole remaining member (mirrors the PWA's deleteProject — a shared group must
+ * be emptied first). Convex has no FK ON DELETE CASCADE, so every project-scoped
+ * table is cleared manually, including child rows (listItems, potMembers) and
+ * stored file/image blobs.
+ */
+export const remove = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const userId = await requireUserId(ctx);
+    const project = await ctx.db.get(projectId);
+    if (project === null) {
+      throw new Error("Project not found");
+    }
+    if (project.createdBy !== userId) {
+      throw new Error("Only the creator can delete this group");
+    }
+    const members = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    if (members.length > 1) {
+      throw new Error("Cannot delete a group with other members");
+    }
+
+    // Lists + their items.
+    const lists = await ctx.db
+      .query("lists")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const list of lists) {
+      const items = await ctx.db
+        .query("listItems")
+        .withIndex("by_list", (q) => q.eq("listId", list._id))
+        .collect();
+      for (const item of items) {
+        await ctx.db.delete(item._id);
+      }
+      await ctx.db.delete(list._id);
+    }
+
+    // Pots + their members.
+    const pots = await ctx.db
+      .query("pots")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const pot of pots) {
+      const potMembers = await ctx.db
+        .query("potMembers")
+        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+        .collect();
+      for (const member of potMembers) {
+        await ctx.db.delete(member._id);
+      }
+      await ctx.db.delete(pot._id);
+    }
+
+    // Files (+ their stored blobs and thumbnails).
+    const files = await ctx.db
+      .query("files")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const file of files) {
+      await ctx.storage.delete(file.storageId);
+      if (file.thumbnailStorageId) {
+        await ctx.storage.delete(file.thumbnailStorageId);
+      }
+      await ctx.db.delete(file._id);
+    }
+
+    // Flat project-scoped tables.
+    const spendings = await ctx.db
+      .query("spendings")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const spending of spendings) {
+      await ctx.db.delete(spending._id);
+    }
+    const categories = await ctx.db
+      .query("categories")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const category of categories) {
+      await ctx.db.delete(category._id);
+    }
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const event of events) {
+      await ctx.db.delete(event._id);
+    }
+    const templates = await ctx.db
+      .query("listTemplates")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const template of templates) {
+      await ctx.db.delete(template._id);
+    }
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const note of notes) {
+      await ctx.db.delete(note._id);
+    }
+
+    // Memberships, the group image blob, then the project itself.
+    for (const member of members) {
+      await ctx.db.delete(member._id);
+    }
+    if (project.imageStorageId) {
+      await ctx.storage.delete(project.imageStorageId);
+    }
+    await ctx.db.delete(projectId);
+    return null;
+  },
+});

@@ -10,7 +10,6 @@ import {
   LayoutTemplateIcon,
   LightbulbIcon,
   ListTodo,
-  SettingsIcon,
   TagsIcon,
 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -104,11 +103,6 @@ const itemParts: MenuItemPart[] = [
       },
     ],
   },
-  {
-    nameKey: "settings",
-    pathPart: "settings",
-    icon: <SettingsIcon />,
-  },
 ];
 
 function isItemAvailable(item: MenuItemPart, project: Project) {
@@ -138,7 +132,7 @@ export function resolveSectionForProject(
 }
 
 export function useMenuItems(): MenuItem[] {
-  const { project: selectedProject, isAdmin } = useProjects();
+  const { project: selectedProject } = useProjects();
   const params = useParams<{ projectId?: string }>();
   const t = useTranslations("nav");
 
@@ -150,13 +144,11 @@ export function useMenuItems(): MenuItem[] {
       switch (item.pathPart) {
         case "secret-santa":
           return selectedProject?.features.secretSanta ?? false;
-        case "settings":
-          return Boolean(selectedProject) && isAdmin;
         default:
           return true;
       }
     });
-  }, [selectedProject, isAdmin]);
+  }, [selectedProject]);
 
   const activeItemParts = useMemo(() => {
     return enabledFeatureItemParts

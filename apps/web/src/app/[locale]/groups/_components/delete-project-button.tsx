@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -8,7 +11,6 @@ import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
 import { useSession } from "@/lib/session";
-import { deleteProject } from "./actions";
 
 export default function DeleteProjectButton({
   projectId,
@@ -19,6 +21,7 @@ export default function DeleteProjectButton({
   const { data: session } = useSession();
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
+  const removeProject = useMutation(api.projects.remove);
 
   const projectToDelete = projects.find((project) => project.id === projectId);
   if (!projectToDelete) {
@@ -31,7 +34,7 @@ export default function DeleteProjectButton({
     }
 
     try {
-      await deleteProject(projectToDelete);
+      await removeProject({ projectId: projectId as Id<"projects"> });
       const firstNonDeletedProject = projects.find(
         (project) => project.id !== projectId,
       );
