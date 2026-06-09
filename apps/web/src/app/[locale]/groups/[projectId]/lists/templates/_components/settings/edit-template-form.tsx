@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -23,7 +26,6 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { templateSchema } from "../create-template/data";
-import { updateTemplate } from "./actions";
 
 export default function EditTemplateForm({
   template,
@@ -44,10 +46,16 @@ export default function EditTemplateForm({
   const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
+  const updateTemplate = useMutation(api.templates.update);
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
-      await updateTemplate(template, data);
+      await updateTemplate({
+        templateId: template.id as Id<"listTemplates">,
+        name: data.name,
+        description: data.description,
+        items: data.items,
+      });
       toast.success(t("editSuccess", { name: data.name }));
     } catch (e) {
       posthog.captureException(e, {

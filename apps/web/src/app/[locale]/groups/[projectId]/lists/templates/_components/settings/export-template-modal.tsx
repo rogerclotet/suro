@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -18,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSession } from "@/lib/session";
-import { exportTemplate } from "./actions";
 
 function ExportTemplateForm({ template }: { template: Template }) {
   const { projects } = useProjects();
@@ -28,6 +30,7 @@ function ExportTemplateForm({ template }: { template: Template }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
+  const exportTemplate = useMutation(api.templates.exportToProject);
 
   const otherProjects = projects.filter((p) => p.id !== template.projectId);
 
@@ -37,7 +40,10 @@ function ExportTemplateForm({ template }: { template: Template }) {
 
     setIsSubmitting(true);
     try {
-      await exportTemplate(template, targetProjectId);
+      await exportTemplate({
+        templateId: template.id as Id<"listTemplates">,
+        targetProjectId: targetProjectId as Id<"projects">,
+      });
       const targetProject = projects.find((p) => p.id === targetProjectId);
       toast.success(
         t("exportSuccess", {

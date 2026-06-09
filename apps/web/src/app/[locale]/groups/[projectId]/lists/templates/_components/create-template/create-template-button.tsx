@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -21,7 +24,6 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import { createTemplate } from "./actions";
 import { templateSchema } from "./data";
 
 export default function CreateTemplateButton({
@@ -41,10 +43,16 @@ export default function CreateTemplateButton({
   const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
+  const createTemplate = useMutation(api.templates.create);
 
   async function onSubmit(data: v.InferInput<typeof templateSchema>) {
     try {
-      const templateId = await createTemplate(projectId, data);
+      const templateId = await createTemplate({
+        projectId: projectId as Id<"projects">,
+        name: data.name,
+        description: data.description,
+        items: data.items,
+      });
       toast.success(t("createSuccess", { name: form.getValues().name }));
       router.push({
         pathname: "/groups/[projectId]/lists/templates/[templateId]",

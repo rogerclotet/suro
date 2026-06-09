@@ -16,7 +16,6 @@ import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
 import { templateItemSchema } from "../../_components/create-template/data";
-import { createTemplateItem } from "./actions";
 
 type Item = Template["items"][number];
 
@@ -25,7 +24,7 @@ export default function NewTemplateItem({
   onCreate,
 }: {
   template: Template;
-  onCreate: (item: Item) => void;
+  onCreate: (item: Item) => Promise<void>;
 }) {
   const form = useForm({
     defaultValues: {
@@ -49,8 +48,7 @@ export default function NewTemplateItem({
     }
 
     try {
-      await createTemplateItem(template, data);
-      onCreate({ name: data.name, category: data.category ?? null });
+      await onCreate({ name: data.name, category: data.category ?? null });
       form.reset({ name: "", category: data.category ?? "" });
       form.setFocus("name");
     } catch (e) {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
-import { updateTemplateItems } from "./actions";
 import NewTemplateItem from "./new-template-item";
 import TemplateItem from "./template-item";
 
@@ -15,6 +17,20 @@ export default function TemplateItems({ template }: { template: Template }) {
   const [items, setItems] = useState<Template["items"]>(template.items);
   const [animationParent] = useAutoAnimate();
   const { project } = useProjects();
+  const updateTemplate = useMutation(api.templates.update);
+
+  // Persist the full items array (Convex stores template items inline).
+  const persist = useCallback(
+    async (newItems: Template["items"]) => {
+      await updateTemplate({
+        templateId: template.id as Id<"listTemplates">,
+        name: template.name,
+        description: template.description ?? undefined,
+        items: newItems,
+      });
+    },
+    [updateTemplate, template.id, template.name, template.description],
+  );
 
   const sorted = useCallback((items: ItemWithIndex[]) => {
     return [...items].sort((a, b) => a.name.localeCompare(b.name));
@@ -61,7 +77,7 @@ export default function TemplateItems({ template }: { template: Template }) {
     newName: string,
     newCategory: string | null,
   ) {
-    const newItems = [...template.items];
+    const newItems = [...items];
 
     if (newName === "") {
       newItems.splice(index, 1);
@@ -70,15 +86,13 @@ export default function TemplateItems({ template }: { template: Template }) {
     }
 
     setItems(newItems);
-
-    await updateTemplateItems(
-      template,
-      newItems.map((item) => ({ name: item.name, category: item.category })),
-    );
+    await persist(newItems);
   }
 
-  function handleItemAdded(item: Item) {
-    setItems([...items, item]);
+  async function handleItemAdded(item: Item) {
+    const newItems = [...items, item];
+    setItems(newItems);
+    await persist(newItems);
   }
 
   return (
