@@ -1,11 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useProjects } from "@/app/_state/project-state";
+import { useSession } from "@/lib/session";
 import { createCategory } from "../../[listId]/_components/categories/actions";
 
 /**

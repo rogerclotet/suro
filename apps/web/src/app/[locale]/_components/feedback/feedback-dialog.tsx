@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
 import { SendIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -49,6 +48,7 @@ import {
   FEEDBACK_SURVEY_ID,
   FEEDBACK_TYPE_LABELS,
 } from "@/lib/feedback-survey";
+import { useSession } from "@/lib/session";
 import { type FeedbackInput, feedbackSchema } from "./feedback-schema";
 
 // Rendered once in the authenticated chrome (sidebar-inset-content) and driven by the

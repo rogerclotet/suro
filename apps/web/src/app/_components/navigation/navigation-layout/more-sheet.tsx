@@ -1,12 +1,12 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 import {
   BellIcon,
   LayoutGridIcon,
   LogOut,
   MessageSquarePlusIcon,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/app/_state/feedback-state";
 import { useNotifications } from "@/app/_state/notification-state";
@@ -19,9 +19,9 @@ import {
 import UserAvatar from "@/components/user-avatar";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
-import { logOut } from "./profile/actions";
 
 export default function MoreSheet({
   open,
@@ -33,6 +33,7 @@ export default function MoreSheet({
   overflowItems: MenuItem[];
 }) {
   const { data: session } = useSession();
+  const { signOut } = useAuthActions();
   const { totalUnread } = useNotifications();
   const { openFeedback } = useFeedback();
   const t = useTranslations("nav");
@@ -130,16 +131,17 @@ export default function MoreSheet({
             </div>
           </Link>
 
-          <form action={logOut}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-destructive transition-colors hover:bg-accent [&_svg]:size-5"
-              onClick={() => onOpenChange(false)}
-            >
-              <LogOut />
-              <span>{tAuth("signOut")}</span>
-            </button>
-          </form>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-destructive transition-colors hover:bg-accent [&_svg]:size-5"
+            onClick={() => {
+              onOpenChange(false);
+              void signOut();
+            }}
+          >
+            <LogOut />
+            <span>{tAuth("signOut")}</span>
+          </button>
 
           <div className="my-1 border-border border-t" />
 

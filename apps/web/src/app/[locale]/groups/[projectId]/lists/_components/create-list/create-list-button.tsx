@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -26,6 +25,7 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { createList } from "./actions";
 import { listSchema } from "./data";
 

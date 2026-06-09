@@ -12,15 +12,22 @@ import { ResendOTP } from "./ResendOTP";
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Google, ResendOTP],
   callbacks: {
-    // Allow finishing an OAuth flow back into the native app (suro:// deep link)
-    // or the web origin. Without this, Convex Auth rejects the app's redirectTo.
+    // Allow finishing an OAuth flow back into the native app (suro:// / exp://
+    // deep link) on top of Convex Auth's default web handling. The default only
+    // accepts relative paths and SITE_URL-prefixed absolutes; overriding it
+    // means we must re-implement that web branch too, or the web client's
+    // relative `redirectTo` (e.g. "/") gets rejected.
     async redirect({ redirectTo }) {
-      const siteUrl = process.env.SITE_URL ?? "";
-      if (
-        redirectTo.startsWith("suro://") ||
-        redirectTo.startsWith("exp://") ||
-        (siteUrl !== "" && redirectTo.startsWith(siteUrl))
-      ) {
+      if (redirectTo.startsWith("suro://") || redirectTo.startsWith("exp://")) {
+        return redirectTo;
+      }
+      const siteUrl = (process.env.SITE_URL ?? "").replace(/\/$/, "");
+      // Relative paths from the web app — resolve against SITE_URL.
+      if (redirectTo.startsWith("/") || redirectTo.startsWith("?")) {
+        return `${siteUrl}${redirectTo}`;
+      }
+      // Absolute URLs already under the web origin.
+      if (siteUrl !== "" && redirectTo.startsWith(siteUrl)) {
         return redirectTo;
       }
       throw new Error(`Invalid redirectTo: ${redirectTo}`);

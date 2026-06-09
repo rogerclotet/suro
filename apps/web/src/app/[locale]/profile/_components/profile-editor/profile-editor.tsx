@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Info, SaveIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -39,6 +38,7 @@ import { useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
+import { useSession } from "@/lib/session";
 import NotificationSettings from "../notification-settings";
 import ThemeSettings from "../theme-settings";
 import { editProfile, removeProfileImage, resetProfileImage } from "./actions";

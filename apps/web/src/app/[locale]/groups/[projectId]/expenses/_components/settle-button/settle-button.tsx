@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Handshake } from "lucide-react";
-import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import type { Spending } from "@/app/_data/spending";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import { useSession } from "@/lib/session";
 import SettleProposal from "./_components/settle-proposal";
 import { settlePayments } from "./actions";
 import type { SettlingPayment } from "./data";

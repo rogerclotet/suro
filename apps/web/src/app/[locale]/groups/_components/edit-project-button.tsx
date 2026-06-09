@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Edit, SaveIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback, useState } from "react";
@@ -27,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
+import { useSession } from "@/lib/session";
 import { editProject, removeProjectImage } from "./actions";
 
 const editProjectSchema = v.object({

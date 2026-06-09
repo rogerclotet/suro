@@ -3,7 +3,6 @@
 import { CalendarFold } from "lucide-react";
 import Image from "next/image";
 import NextLink from "next/link";
-import { useSession } from "next-auth/react";
 import type { File } from "@/app/_data/file";
 import {
   Tooltip,
@@ -11,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { Link } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { readableSize } from "../../readable-size";
 import DeleteFileButton from "../delete-file/delete-file-button";
 import EditFileButton from "../edit-file/edit-file-button";

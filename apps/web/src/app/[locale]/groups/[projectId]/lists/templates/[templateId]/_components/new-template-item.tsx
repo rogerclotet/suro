@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
@@ -13,6 +12,7 @@ import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
+import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
 import { templateItemSchema } from "../../_components/create-template/data";

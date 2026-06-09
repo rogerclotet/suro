@@ -1,12 +1,12 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { clearCompletedItems } from "./actions";
 
 export default function ClearCompletedModal({

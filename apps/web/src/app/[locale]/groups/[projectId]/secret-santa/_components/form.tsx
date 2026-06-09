@@ -1,7 +1,6 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -27,6 +26,7 @@ import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import UserAvatar from "@/components/user-avatar";
+import { useSession } from "@/lib/session";
 
 const DEFAULT_MIN_PRICE = 0;
 const DEFAULT_MAX_PRICE = 30;

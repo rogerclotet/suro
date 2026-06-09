@@ -12,7 +12,7 @@ vi.mock("../../[listId]/_components/categories/actions", () => ({
 vi.mock("@/app/_state/project-state", () => ({
   useProjects: vi.fn(),
 }));
-vi.mock("next-auth/react", () => ({
+vi.mock("@/lib/session", () => ({
   useSession: () => ({ data: { user: { id: "user1" } } }),
 }));
 vi.mock("next-intl", () => ({

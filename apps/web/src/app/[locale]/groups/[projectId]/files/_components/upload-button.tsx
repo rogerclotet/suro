@@ -4,13 +4,13 @@
 
 import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { Project } from "@/app/_data/project";
 import { UploadButton as UploadthingButton } from "@/components/uploadthing";
+import { useSession } from "@/lib/session";
 
 export default function UploadButton({
   projectId,

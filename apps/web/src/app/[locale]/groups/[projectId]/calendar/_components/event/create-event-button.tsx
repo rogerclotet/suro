@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback, useEffect } from "react";
@@ -16,6 +15,7 @@ import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { createEventOffline } from "@/lib/offline/offline-events";
+import { useSession } from "@/lib/session";
 import { eventSchema } from "./data";
 import EventFormFields from "./event-form-fields";
 import { useEventDates } from "./use-event-dates";

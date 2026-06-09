@@ -13,7 +13,6 @@ import {
   Trash2,
   Wallet,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -27,6 +26,7 @@ import {
   ResponsiveMenuItem,
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
+import { useSession } from "@/lib/session";
 import {
   createLinkedList,
   createLinkedNote,

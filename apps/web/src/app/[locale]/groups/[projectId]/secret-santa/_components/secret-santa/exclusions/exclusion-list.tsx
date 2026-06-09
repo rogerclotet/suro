@@ -1,5 +1,4 @@
 import { Trash2Icon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { posthog } from "posthog-js";
 import { useState } from "react";
@@ -7,6 +6,7 @@ import { toast } from "sonner";
 import type { ExclusionData, SecretSanta } from "@/app/_data/secret-santa";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { deleteExclusion } from "@/server/secret-santa";
 import Participant from "../setup/participant";

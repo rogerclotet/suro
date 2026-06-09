@@ -1,9 +1,9 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import LoadingPage from "@/components/ui/loading-page";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import type { Project } from "../_data/project";
 import { useProjects } from "../_state/project-state";
 import OnboardingWalkthrough from "./onboarding/onboarding-walkthrough";

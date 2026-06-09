@@ -1,7 +1,6 @@
 "use client";
 
 import { Copy } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
@@ -18,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "@/lib/session";
 import { exportTemplate } from "./actions";
 
 function ExportTemplateForm({ template }: { template: Template }) {

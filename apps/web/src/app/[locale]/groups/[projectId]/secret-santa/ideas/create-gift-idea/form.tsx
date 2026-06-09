@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Link2Icon, PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
@@ -25,6 +24,7 @@ import {
 import { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "@/lib/session";
 
 export default function GiftIdeaForm({
   giftIdea,

@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { SaveIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type ChangeEvent, type FormEvent, useCallback } from "react";
@@ -28,6 +27,7 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { updateEventOffline } from "@/lib/offline/offline-events";
+import { useSession } from "@/lib/session";
 import { eventSchema } from "../../_components/event/data";
 import { getTimeString } from "../../get-time-string";
 

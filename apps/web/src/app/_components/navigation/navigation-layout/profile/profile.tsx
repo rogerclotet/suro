@@ -1,7 +1,7 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 import { ChevronsUpDownIcon, LogOut, User } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import {
   ResponsiveMenu,
@@ -14,12 +14,13 @@ import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import UserAvatar from "@/components/user-avatar";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import ThemeSwitcher from "../theme-switcher";
-import { logOut } from "./actions";
 import NotificationSwitcher from "./notification-toggle";
 
 export default function Profile() {
   const session = useSession();
+  const { signOut } = useAuthActions();
   const { setOpenMobile } = useSidebar();
   const tNav = useTranslations("nav");
   const tAuth = useTranslations("auth");
@@ -81,17 +82,18 @@ export default function Profile() {
 
         <ResponsiveMenuSeparator />
 
-        <form action={logOut}>
-          <button
-            type="submit"
-            className="w-full"
-            onClick={() => setOpenMobile(false)}
-          >
-            <ResponsiveMenuItem className="cursor-pointer gap-2">
-              <LogOut /> {tAuth("signOut")}
-            </ResponsiveMenuItem>
-          </button>
-        </form>
+        <button
+          type="button"
+          className="w-full"
+          onClick={() => {
+            setOpenMobile(false);
+            void signOut();
+          }}
+        >
+          <ResponsiveMenuItem className="cursor-pointer gap-2">
+            <LogOut /> {tAuth("signOut")}
+          </ResponsiveMenuItem>
+        </button>
       </ResponsiveMenuContent>
     </ResponsiveMenu>
   );

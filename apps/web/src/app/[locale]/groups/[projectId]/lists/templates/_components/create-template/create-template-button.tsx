@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -21,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { createTemplate } from "./actions";
 import { templateSchema } from "./data";
 

@@ -1,11 +1,11 @@
 "use client";
 
 import type {} from "@redux-devtools/extension"; // required for devtools typing
-import { useSession } from "next-auth/react";
 import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
+import { useSession } from "@/lib/session";
 import type { Project } from "../_data/project";
 
 interface ProjectState {

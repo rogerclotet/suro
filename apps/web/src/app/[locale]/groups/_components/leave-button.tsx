@@ -1,7 +1,6 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { leaveProject } from "./actions";
 
 export default function LeaveButton({ project }: { project: Project }) {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Fragment, useEffect, useState } from "react";
@@ -12,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ModalForm from "@/components/ui/modal-form";
 import { Spinner } from "@/components/ui/spinner";
+import { useSession } from "@/lib/session";
 import { importTemplates } from "./actions";
 import TemplatePreview from "./template-preview";
 

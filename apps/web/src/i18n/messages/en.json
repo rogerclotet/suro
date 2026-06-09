@@ -228,7 +228,11 @@
       "generic": "Something went wrong while signing you in. Please try again.",
       "accessDenied": "Sign-in was cancelled or access was denied. Please try again.",
       "verification": "This sign-in link is no longer valid. Request a new one."
-    }
+    },
+    "codeSentDescription": "We have sent a 6-digit code to your email. Enter it below to sign in.",
+    "codePlaceholder": "6-digit code",
+    "verifyCode": "Verify",
+    "codeError": "Invalid or expired code. Please try again."
   },
   "nav": {
     "lists": "Lists",

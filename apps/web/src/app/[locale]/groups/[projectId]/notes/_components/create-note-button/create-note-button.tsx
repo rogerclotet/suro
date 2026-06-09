@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -25,6 +24,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
 import { createNoteOffline } from "@/lib/offline/offline-notes";
+import { useSession } from "@/lib/session";
 import { noteSchema } from "./schema";
 
 export default function CreateNoteButton({ projectId }: { projectId: string }) {

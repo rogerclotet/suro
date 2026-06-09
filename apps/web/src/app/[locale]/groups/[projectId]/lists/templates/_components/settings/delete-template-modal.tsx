@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import type { ReactNode } from "react";
@@ -9,6 +8,7 @@ import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { deleteTemplate } from "./actions";
 
 export default function DeleteTemplateModal({

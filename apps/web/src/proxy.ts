@@ -1,4 +1,5 @@
-import { type NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 
@@ -44,7 +45,9 @@ function sanitizeForwardedHeaders(request: NextRequest): NextRequest {
   return new NextRequest(request, { headers });
 }
 
-export function proxy(request: NextRequest, _event: NextFetchEvent) {
+// i18n routing, the PWA manifest rewrite, and the x-pathname header that
+// server components read via `headers()`.
+function handleIntl(request: NextRequest): NextResponse {
   const sanitized = sanitizeForwardedHeaders(request);
 
   // Skip i18n routing for API routes and static assets — let them through.
@@ -103,6 +106,19 @@ export function proxy(request: NextRequest, _event: NextFetchEvent) {
   );
   return response;
 }
+
+/**
+ * Next.js proxy (formerly `middleware`). Convex Auth wraps the i18n proxy so a
+ * single entry point both refreshes the auth token cookie (read by the server
+ * provider and `convexAuthNextjsToken()`) and proxies `/api/auth` actions to
+ * Convex, while next-intl handles locale routing. Route protection stays
+ * in-page via `checkAuth()`.
+ *
+ * The matcher skips Next internals, the PostHog `/ingest` rewrite, and any path
+ * with a file extension (static assets, `sw.js`, `manifest.webmanifest`), while
+ * still covering page routes and `/api/auth`.
+ */
+export default convexAuthNextjsMiddleware((request) => handleIntl(request));
 
 export const config = {
   matcher: ["/((?!_next|_vercel|ingest|.*\\..*).*)"],

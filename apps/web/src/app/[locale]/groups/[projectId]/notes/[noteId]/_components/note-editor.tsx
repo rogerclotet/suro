@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import {
@@ -15,6 +14,7 @@ import type { Note } from "@/app/_data/note";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import { formatRelative } from "@/lib/format-relative";
 import { updateNoteOffline } from "@/lib/offline/offline-notes";
+import { useSession } from "@/lib/session";
 
 type SaveState = "idle" | "saving" | "saved";
 

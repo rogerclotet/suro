@@ -9,9 +9,9 @@ import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import "@fontsource/convergence/index.css";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { SessionProvider } from "next-auth/react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
@@ -24,6 +24,7 @@ import ProjectsProvider from "@/app/_components/projects-provider/projects-provi
 import UserIdentifier from "@/app/_components/user-identifier";
 import { uploadFileRouter } from "@/app/api/uploadthing/core";
 import { routing } from "@/i18n/routing";
+import ConvexClientProvider from "@/providers/convex-client-provider";
 
 // next-themes' ThemeProviderProps no longer carries `children` under React 19
 // types; re-add it without changing runtime behavior.
@@ -117,41 +118,47 @@ export default async function LocaleLayout({
   const session = await auth();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body>
-        <ServiceWorkerRegister />
-        <NextSSRPlugin
-          /**
-           * The `extractRouterConfig` will extract **only** the route configs
-           * from the router to prevent additional information from being
-           * leaked to the client. The data passed to the client is the same
-           * as if you were to fetch `/api/uploadthing` directly.
-           */
-          routerConfig={extractRouterConfig(uploadFileRouter)}
-        />
-        <NextIntlClientProvider>
-          <SessionProvider session={session}>
-            <UserIdentifier />
+    <ConvexAuthNextjsServerProvider>
+      <html lang={locale} suppressHydrationWarning>
+        <body>
+          <ServiceWorkerRegister />
+          <NextSSRPlugin
+            /**
+             * The `extractRouterConfig` will extract **only** the route configs
+             * from the router to prevent additional information from being
+             * leaked to the client. The data passed to the client is the same
+             * as if you were to fetch `/api/uploadthing` directly.
+             */
+            routerConfig={extractRouterConfig(uploadFileRouter)}
+          />
+          <NextIntlClientProvider>
+            <ConvexClientProvider>
+              <UserIdentifier />
 
-            <ReactQueryProvider>
-              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                <ThemeColorMeta />
-                <SidebarLayout>
-                  <TooltipProvider>
-                    <ProjectsProvider>
-                      {session && <NotificationProvider />}
-                      {children}
-                      <Toaster position="bottom-center" />
-                      <UpdateToast />
-                      <ConflictModal />
-                    </ProjectsProvider>
-                  </TooltipProvider>
-                </SidebarLayout>
-              </ThemeProvider>
-            </ReactQueryProvider>
-          </SessionProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+              <ReactQueryProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="dark"
+                  enableSystem
+                >
+                  <ThemeColorMeta />
+                  <SidebarLayout>
+                    <TooltipProvider>
+                      <ProjectsProvider>
+                        {session && <NotificationProvider />}
+                        {children}
+                        <Toaster position="bottom-center" />
+                        <UpdateToast />
+                        <ConflictModal />
+                      </ProjectsProvider>
+                    </TooltipProvider>
+                  </SidebarLayout>
+                </ThemeProvider>
+              </ReactQueryProvider>
+            </ConvexClientProvider>
+          </NextIntlClientProvider>
+        </body>
+      </html>
+    </ConvexAuthNextjsServerProvider>
   );
 }

@@ -228,7 +228,11 @@
       "generic": "Alguna cosa ha anat malament en iniciar la sessió. Torna-ho a provar.",
       "accessDenied": "S'ha cancel·lat l'inici de sessió o s'ha denegat l'accés. Torna-ho a provar.",
       "verification": "Aquest enllaç d'inici de sessió ja no és vàlid. Sol·licita'n un de nou."
-    }
+    },
+    "codeSentDescription": "T hem enviat un codi de 6 xifres al correu. Introdueix-lo per iniciar sessio.",
+    "codePlaceholder": "Codi de 6 xifres",
+    "verifyCode": "Verifica",
+    "codeError": "El codi no es valid o ha caducat. Torna-ho a provar."
   },
   "nav": {
     "lists": "Llistes",

@@ -1,13 +1,13 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Category } from "@/app/_data/category";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { deleteCategory } from "./actions";
 
 export default function DeleteCategoryButton({

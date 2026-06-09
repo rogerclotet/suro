@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { PlusIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
 import { createSpendingOffline } from "@/lib/offline/offline-spendings";
+import { useSession } from "@/lib/session";
 import { spendingSchema } from "./data";
 
 type Member = {

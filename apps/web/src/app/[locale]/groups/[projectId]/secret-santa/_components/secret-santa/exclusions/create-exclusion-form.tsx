@@ -1,6 +1,5 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { SquaresExcludeIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import type * as v from "valibot";
 import { exclusionSchema, type SecretSanta } from "@/app/_data/secret-santa";
 import { Field, FieldContent, FieldError } from "@/components/ui/field";
 import SubmitButton from "@/components/ui/submit-button";
+import { useSession } from "@/lib/session";
 import { createExclusion } from "@/server/secret-santa";
 import Participant from "../setup/participant";
 

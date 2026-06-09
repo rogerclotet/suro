@@ -2,12 +2,12 @@
 
 import { Camera, Loader2, type LucideIcon, Trash2, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 import { UploadButton } from "@/components/uploadthing";
+import { useSession } from "@/lib/session";
 import { Button } from "./ui/button";
 
 export interface ImageAction {

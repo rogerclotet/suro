@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2, Tag } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FocusEvent, useRef } from "react";
@@ -26,6 +25,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { useSession } from "@/lib/session";
 import NewCategoryModal from "../../../[listId]/_components/categories/new-category-modal";
 import { templateItemSchema } from "../../_components/create-template/data";
 

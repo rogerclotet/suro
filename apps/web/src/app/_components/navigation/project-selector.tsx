@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronsUpDownIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
@@ -17,6 +16,7 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { resolveSectionForProject } from "./use-menu-items";
 
 export default function ProjectSelector() {

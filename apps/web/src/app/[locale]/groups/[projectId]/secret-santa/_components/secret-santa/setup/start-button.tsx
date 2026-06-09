@@ -1,7 +1,6 @@
 "use client";
 
 import { PlayIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import type { SecretSanta } from "@/app/_data/secret-santa";
 import { useProjects } from "@/app/_state/project-state";
 import Action from "@/components/action";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { startSecretSanta } from "@/server/secret-santa";
 
 export default function StartButton({

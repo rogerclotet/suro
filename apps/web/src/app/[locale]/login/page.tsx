@@ -1,8 +1,7 @@
-import { auth } from "@/auth";
 import Login from "./_components/login";
 
-export default async function LoginPage() {
-  const session = await auth();
-  const previewEmail = process.env.PREVIEW_AUTH_EMAIL || undefined;
-  return <Login session={session} previewEmail={previewEmail} />;
+export default function LoginPage() {
+  // Already-signed-in users are redirected client-side by <Login> once Convex
+  // reports an authenticated session.
+  return <Login />;
 }

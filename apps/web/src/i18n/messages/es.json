@@ -228,7 +228,11 @@
       "generic": "Algo salió mal al iniciar sesión. Inténtalo de nuevo.",
       "accessDenied": "Se canceló el inicio de sesión o se denegó el acceso. Inténtalo de nuevo.",
       "verification": "Este enlace de inicio de sesión ya no es válido. Solicita uno nuevo."
-    }
+    },
+    "codeSentDescription": "Te hemos enviado un codigo de 6 digitos al correo. Introducelo para iniciar sesion.",
+    "codePlaceholder": "Codigo de 6 digitos",
+    "verifyCode": "Verificar",
+    "codeError": "El codigo no es valido o ha caducado. Intentalo de nuevo."
   },
   "nav": {
     "lists": "Listas",

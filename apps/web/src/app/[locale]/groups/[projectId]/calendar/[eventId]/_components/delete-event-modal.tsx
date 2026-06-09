@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import type { Event } from "@/app/_data/event";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
 import { deleteEventOffline } from "@/lib/offline/offline-events";
+import { useSession } from "@/lib/session";
 
 export default function DeleteEventModal({
   event,

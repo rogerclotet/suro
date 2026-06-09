@@ -1,7 +1,6 @@
 "use client";
 
 import { GiftIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useSession } from "@/lib/session";
 import { updateProjectFeatures } from "@/server/projects/settings";
 
 export default function FeaturesForm({ project }: { project: Project }) {

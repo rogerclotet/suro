@@ -2,7 +2,6 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { SaveIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { listItemSchema } from "./data";
 

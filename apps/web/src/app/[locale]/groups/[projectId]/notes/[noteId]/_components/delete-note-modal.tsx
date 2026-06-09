@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import type { Note } from "@/app/_data/note";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
 import { deleteNoteOffline } from "@/lib/offline/offline-notes";
+import { useSession } from "@/lib/session";
 
 export default function DeleteNoteModal({
   note,

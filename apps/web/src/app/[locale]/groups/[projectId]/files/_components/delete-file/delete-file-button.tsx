@@ -1,12 +1,12 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { File } from "@/app/_data/file";
 import ModalAction from "@/components/ui/modal-action";
+import { useSession } from "@/lib/session";
 import { deleteFile } from "./actions";
 
 export default function DeleteFileButton({ file }: { file: File }) {
