@@ -1,6 +1,8 @@
 "use client";
 
 import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
+import { api } from "backend/convex/_generated/api";
+import { useMutation } from "convex/react";
 import {
   Calendar,
   FileTextIcon,
@@ -32,7 +34,6 @@ import {
 } from "@/components/ui/drawer";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { cn } from "@/lib/utils";
-import { completeOnboarding } from "./actions";
 import OnboardingProfileStep from "./onboarding-profile-step";
 import OnboardingStep from "./onboarding-step";
 
@@ -64,6 +65,7 @@ function ClientOnboardingWalkthrough({
 }: OnboardingWalkthroughProps) {
   const t = useTranslations("onboarding");
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
+  const completeOnboarding = useMutation(api.users.completeOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
   const [profileName, setProfileName] = useState(user.name ?? "");
   const [profileColor, setProfileColor] = useState<CatppuccinColor | null>(
@@ -103,24 +105,24 @@ function ClientOnboardingWalkthrough({
               name: profileName || undefined,
               avatarColor: profileColor,
             }
-          : undefined,
+          : {},
       );
       onComplete();
     } catch {
       setIsSubmitting(false);
     }
-  }, [profileName, profileColor, onComplete]);
+  }, [profileName, profileColor, onComplete, completeOnboarding]);
 
   const handleSkip = useCallback(async () => {
     posthog.capture("onboarding_skipped", { atStep: currentStep });
     setIsSubmitting(true);
     try {
-      await completeOnboarding();
+      await completeOnboarding({});
       onComplete();
     } catch {
       setIsSubmitting(false);
     }
-  }, [currentStep, onComplete]);
+  }, [currentStep, onComplete, completeOnboarding]);
 
   const isLastStep = currentStep === TOTAL_STEPS - 1;
   const isFirstStep = currentStep === 0;

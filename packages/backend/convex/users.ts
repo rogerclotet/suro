@@ -28,6 +28,7 @@ export const updateProfile = mutation({
   args: {
     name: v.optional(v.string()),
     avatarColor: v.optional(v.union(v.string(), v.null())),
+    dateLocale: v.optional(v.string()),
     locale: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -35,6 +36,7 @@ export const updateProfile = mutation({
     const patch: {
       name?: string;
       avatarColor?: string | undefined;
+      dateLocale?: string;
       locale?: string;
     } = {};
 
@@ -54,11 +56,50 @@ export const updateProfile = mutation({
           : undefined;
     }
 
+    if (args.dateLocale !== undefined) {
+      patch.dateLocale = args.dateLocale;
+    }
+
     if (args.locale !== undefined) {
       if (!SUPPORTED_LOCALES.has(args.locale)) {
         throw new Error("Unsupported locale");
       }
       patch.locale = args.locale;
+    }
+
+    await ctx.db.patch(userId, patch);
+    return null;
+  },
+});
+
+/**
+ * Mark the walkthrough complete, optionally persisting the name/color set on
+ * the final step. Ported from the web completeOnboarding action; the Personal
+ * project is provisioned at sign-up (auth.afterUserCreatedOrUpdated), so this
+ * only flips the flag (+ optional profile fields).
+ */
+export const completeOnboarding = mutation({
+  args: {
+    name: v.optional(v.string()),
+    avatarColor: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const patch: {
+      onboardingCompleted: boolean;
+      name?: string;
+      avatarColor?: string | undefined;
+    } = { onboardingCompleted: true };
+
+    if (args.name !== undefined && args.name.trim() !== "") {
+      patch.name = args.name.trim();
+    }
+
+    if (args.avatarColor !== undefined) {
+      patch.avatarColor =
+        args.avatarColor && CATPPUCCIN_COLORS.has(args.avatarColor)
+          ? args.avatarColor
+          : undefined;
     }
 
     await ctx.db.patch(userId, patch);

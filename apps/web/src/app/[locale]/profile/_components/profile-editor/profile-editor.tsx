@@ -42,7 +42,6 @@ import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
 import { useSession } from "@/lib/session";
 import ThemeSettings from "../theme-settings";
-import { editProfile } from "./actions";
 import { profileSchema } from "./data";
 
 interface ProfileUser {
@@ -90,6 +89,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
   const { data: session } = useSession();
   const removeAvatarImage = useMutation(api.users.removeAvatarImage);
   const resetProviderImage = useMutation(api.users.resetProviderImage);
+  const updateProfile = useMutation(api.users.updateProfile);
   const [imageCleared, setImageCleared] = useState(false);
 
   const watchedColor = form.watch("avatarColor");
@@ -122,7 +122,15 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
 
   async function onSubmit(data: v.InferInput<typeof profileSchema>) {
     try {
-      await editProfile(data);
+      await updateProfile({
+        name: data.name,
+        avatarColor: data.avatarColor,
+        dateLocale: data.dateLocale,
+        locale: data.locale,
+      });
+      // The locale preference now lives in the Convex user doc; next-intl's
+      // middleware refreshes the NEXT_LOCALE cookie from the URL on the
+      // router.replace below, so no manual cookie write is needed.
       form.reset({
         name: data.name,
         avatarColor: data.avatarColor,
