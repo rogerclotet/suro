@@ -1,6 +1,9 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useMutation } from "convex/react";
 import { Edit, SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -21,7 +24,6 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
-import { editFile } from "./actions";
 import { editFileSchema } from "./schema";
 
 export default function EditFileButton({ file }: { file: File }) {
@@ -68,25 +70,26 @@ function EditFileFormContent({
   const { close } = useModalForm();
   const t = useTranslations("files");
   const tCommon = useTranslations("common");
+  const renameFile = useMutation(api.files.rename);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof editFileSchema>) => {
       try {
-        await editFile(file, data);
+        await renameFile({ fileId: file.id as Id<"files">, name: data.name });
         toast.success(t("editSuccess"));
         close();
       } catch (e) {
         posthog.captureException(e, {
           distinctId: sessionId,
           action: "edit_file",
-          projectId: file.project.id,
+          projectId: file.projectId,
           eventId: file.eventId,
           fileId: file.id,
         });
         toast.error(t("editError"));
       }
     },
-    [file, sessionId, close, t],
+    [file, sessionId, close, t, renameFile],
   );
 
   const handleFormSubmit = useCallback(
