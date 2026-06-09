@@ -1,7 +1,9 @@
+"use client";
+
 import { Edit, Trash2 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
-import { auth } from "@/auth";
+import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,23 +19,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
 import { Link } from "@/i18n/navigation";
-import { getProjects } from "@/server/projects";
+import { useSession } from "@/lib/session";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
 import EditProjectButton from "./edit-project-button";
 import InviteButton from "./invite-button";
 import LeaveButton from "./leave-button";
 
-export default async function ProjectsTable() {
-  const session = await auth();
-  const projects = await getProjects();
-  const t = await getTranslations("groups");
-  const tCommon = await getTranslations("common");
+export default function ProjectsTable() {
+  const { projects } = useProjects();
+  const { data: session } = useSession();
+  const t = useTranslations("groups");
+  const tCommon = useTranslations("common");
   const ownProjects = projects.filter(
     (p) => p.createdBy === session?.user.id,
   ).length;
 
-  async function DeleteButton({ project }: { project: Project }) {
+  function deleteButton(project: Project) {
     if (project.createdBy !== session?.user.id) {
       return (
         <Tooltip>
@@ -103,7 +105,7 @@ export default async function ProjectsTable() {
     return <DeleteProjectButton projectId={project.id} />;
   }
 
-  async function EditButton({ project }: { project: Project }) {
+  function editButton(project: Project) {
     if (project.createdBy !== session?.user.id) {
       return (
         <Tooltip>
@@ -161,8 +163,8 @@ export default async function ProjectsTable() {
               <div className="flex flex-row items-center justify-end gap-1">
                 <InviteButton project={project} />
                 <LeaveButton project={project} />
-                <EditButton project={project} />
-                <DeleteButton project={project} />
+                {editButton(project)}
+                {deleteButton(project)}
               </div>
             </TableCell>
           </TableRow>

@@ -1,3 +1,6 @@
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { fetchQuery } from "convex/nextjs";
 import { AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -14,8 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getAuthToken } from "@/lib/convex/server";
 import { pathnameHeader } from "@/proxy";
-import { getProjectByInvite } from "@/server/projects";
 import AcceptInviteButton from "./_components/accept-invite-button/accept-invite-button";
 
 export default async function InvitePage({
@@ -28,9 +31,19 @@ export default async function InvitePage({
   const session = await auth();
   const t = await getTranslations("invitation");
 
-  const project = await getProjectByInvite(projectId, inviteToken);
+  // The invite preview is auth-gated on the Convex side, so it's only fetched
+  // for signed-in users; signed-out visitors get a login prompt and see the
+  // full invite (group name + members + accept) once authenticated.
+  const token = await getAuthToken();
+  const invite = token
+    ? await fetchQuery(
+        api.projects.getByInvite,
+        { projectId: projectId as Id<"projects">, inviteToken },
+        { token },
+      ).catch(() => null)
+    : null;
 
-  if (!project) {
+  if (token && !invite) {
     return (
       <Alert variant="destructive" className="mx-auto mt-20 max-w-lg">
         <AlertCircle className="h-4 w-4" />
@@ -39,13 +52,22 @@ export default async function InvitePage({
     );
   }
 
-  if (
-    session?.user &&
-    project.users.some((u) => u.user.id === session.user.id)
-  ) {
+  if (session?.user && invite?.members.some((m) => m._id === session.user.id)) {
     // Already joined
-    return <Redirect project={project} />;
+    return <Redirect projectId={projectId} />;
   }
+
+  const users = invite
+    ? invite.members.map((m) => ({
+        user: {
+          id: m._id,
+          name: m.name,
+          image: m.image,
+          customImage: m.image,
+          avatarColor: m.avatarColor,
+        },
+      }))
+    : [];
 
   const redirectTo = (await headers()).get(pathnameHeader) ?? undefined;
 
@@ -54,15 +76,23 @@ export default async function InvitePage({
       <Card>
         <CardHeader>
           <CardTitle>
-            {t("groupTitle")}{" "}
-            <span className="font-bold text-secondary">{project.name}</span>
+            {invite ? (
+              <>
+                {t("groupTitle")}{" "}
+                <span className="font-bold text-secondary">{invite.name}</span>
+              </>
+            ) : (
+              t("metadataInviteTitle")
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-row items-center gap-4">
-            {t("participants")} <UsersList users={project.users} />
-          </div>
-        </CardContent>
+        {invite && (
+          <CardContent>
+            <div className="flex flex-row items-center gap-4">
+              {t("participants")} <UsersList users={users} />
+            </div>
+          </CardContent>
+        )}
         <CardFooter className="flex-col items-stretch gap-4">
           {session ? (
             <div className="flex justify-center">

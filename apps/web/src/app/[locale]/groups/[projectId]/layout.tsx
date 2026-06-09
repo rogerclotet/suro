@@ -1,6 +1,9 @@
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { getInvitedProject } from "@/server/projects";
+import { getAuthToken } from "@/lib/convex/server";
 import CurrentProjectUpdater from "./_components/current-project-updater";
 
 type Props = {
@@ -26,7 +29,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { projectId } = await params;
 
-  const project = await getInvitedProject(projectId);
+  const token = await getAuthToken();
+  if (!token) {
+    return {};
+  }
+
+  // Membership-gated; a non-member or missing project just yields no metadata.
+  const project = await fetchQuery(
+    api.projects.get,
+    { projectId: projectId as Id<"projects"> },
+    { token },
+  ).catch(() => null);
 
   if (!project) {
     return {};

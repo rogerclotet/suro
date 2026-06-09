@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import LoadingPage from "@/components/ui/loading-page";
 import { useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import type { Project } from "../_data/project";
 import { useProjects } from "../_state/project-state";
 import OnboardingWalkthrough from "./onboarding/onboarding-walkthrough";
 
-export default function Redirect({ project }: { project?: Project }) {
+export default function Redirect({ projectId }: { projectId?: string }) {
   const { projects, project: selectedProject, selectProject } = useProjects();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -21,25 +20,33 @@ export default function Redirect({ project }: { project?: Project }) {
     session?.user.onboardingCompleted === false;
 
   useEffect(() => {
-    if (project) {
-      selectProject(project);
+    if (projectId) {
+      const target = projects.find((p) => p.id === projectId);
+      if (target) {
+        selectProject(target);
+      }
     } else if (!selectedProject && projects && projects.length > 0) {
       selectProject(undefined);
     }
-  }, [project, projects, selectedProject, selectProject]);
+  }, [projectId, projects, selectedProject, selectProject]);
 
-  const projectId = project?.id ?? selectedProject?.id;
+  const targetProjectId = projectId ?? selectedProject?.id;
 
   useEffect(() => {
-    if (sessionReady && !needsOnboarding && projectId && projects.length > 0) {
+    if (
+      sessionReady &&
+      !needsOnboarding &&
+      targetProjectId &&
+      projects.length > 0
+    ) {
       router.push({
         pathname: "/groups/[projectId]/lists",
-        params: { projectId },
+        params: { projectId: targetProjectId },
       });
     }
-  }, [sessionReady, needsOnboarding, projectId, projects.length, router]);
+  }, [sessionReady, needsOnboarding, targetProjectId, projects.length, router]);
 
-  if (needsOnboarding && projectId && session?.user) {
+  if (needsOnboarding && targetProjectId && session?.user) {
     return (
       <OnboardingWalkthrough
         user={session.user}
