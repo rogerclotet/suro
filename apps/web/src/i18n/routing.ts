@@ -23,11 +23,6 @@ export const routing = defineRouting({
       es: "/cambios",
       en: "/changelog",
     },
-    "/notifications": {
-      ca: "/notificacions",
-      es: "/notificaciones",
-      en: "/notifications",
-    },
     "/groups": {
       ca: "/grups",
       es: "/grupos",

@@ -19,7 +19,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import GroupSwitcherSheet from "../group-switcher-sheet";
 import { useMenuItems } from "../use-menu-items";
 
-const standaloneBreadcrumbs = ["groups", "profile", "notifications"];
+const standaloneBreadcrumbs = ["groups", "profile"];
 
 type BreadcrumbHref = Parameters<typeof Link>[0]["href"];
 type HrefFactory = (projectId: string) => BreadcrumbHref;
@@ -61,14 +61,12 @@ const breadcrumbHrefMap: Record<string, HrefFactory> = {
 
 const standalonePages: Record<string, string> = {
   "/profile": "profile",
-  "/notifications": "notifications",
   "/groups": "groups",
 };
 
 const breadcrumbToTranslationKey: Record<string, string> = {
   groups: "groups",
   profile: "profile",
-  notifications: "notifications",
   lists: "lists",
   templates: "templates",
   categories: "categories",

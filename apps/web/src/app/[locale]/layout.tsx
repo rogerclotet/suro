@@ -1,10 +1,8 @@
-import { auth } from "@/auth";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { ThemeColorMeta } from "@/components/theme-color-meta";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
 import { UpdateToast } from "@/components/update-toast";
-import ReactQueryProvider from "@/providers/react-query-provider";
 import "@/styles/globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import "@fontsource/convergence/index.css";
@@ -18,7 +16,6 @@ import type { ComponentProps, ComponentType, ReactNode } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import * as v from "valibot";
 import SidebarLayout from "@/app/_components/navigation/navigation-layout/sidebar-layout";
-import NotificationProvider from "@/app/_components/notifications/notification-provider";
 import ProjectsProvider from "@/app/_components/projects-provider/projects-provider";
 import UserIdentifier from "@/app/_components/user-identifier";
 import { uploadFileRouter } from "@/app/api/uploadthing/core";
@@ -114,8 +111,6 @@ export default async function LocaleLayout({
 
   v.setGlobalConfig({ lang: VALIBOT_LANG[locale] ?? "en" });
 
-  const session = await auth();
-
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang={locale} suppressHydrationWarning>
@@ -134,25 +129,18 @@ export default async function LocaleLayout({
             <ConvexClientProvider>
               <UserIdentifier />
 
-              <ReactQueryProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="dark"
-                  enableSystem
-                >
-                  <ThemeColorMeta />
-                  <SidebarLayout>
-                    <TooltipProvider>
-                      <ProjectsProvider>
-                        {session && <NotificationProvider />}
-                        {children}
-                        <Toaster position="bottom-center" />
-                        <UpdateToast />
-                      </ProjectsProvider>
-                    </TooltipProvider>
-                  </SidebarLayout>
-                </ThemeProvider>
-              </ReactQueryProvider>
+              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                <ThemeColorMeta />
+                <SidebarLayout>
+                  <TooltipProvider>
+                    <ProjectsProvider>
+                      {children}
+                      <Toaster position="bottom-center" />
+                      <UpdateToast />
+                    </ProjectsProvider>
+                  </TooltipProvider>
+                </SidebarLayout>
+              </ThemeProvider>
             </ConvexClientProvider>
           </NextIntlClientProvider>
         </body>

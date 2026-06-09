@@ -1,15 +1,9 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  BellIcon,
-  LayoutGridIcon,
-  LogOut,
-  MessageSquarePlusIcon,
-} from "lucide-react";
+import { LayoutGridIcon, LogOut, MessageSquarePlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/app/_state/feedback-state";
-import { useNotifications } from "@/app/_state/notification-state";
 import {
   Drawer,
   DrawerContent,
@@ -20,7 +14,6 @@ import UserAvatar from "@/components/user-avatar";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import NotificationDot from "../../notifications/notification-dot";
 import type { MenuItem } from "../use-menu-items";
 
 export default function MoreSheet({
@@ -34,7 +27,6 @@ export default function MoreSheet({
 }) {
   const { data: session } = useSession();
   const { signOut } = useAuthActions();
-  const { totalUnread } = useNotifications();
   const { openFeedback } = useFeedback();
   const t = useTranslations("nav");
   const tAuth = useTranslations("auth");
@@ -76,23 +68,6 @@ export default function MoreSheet({
           )}
 
           <div className="my-1 border-border border-t" />
-
-          <Link
-            href="/notifications"
-            onClick={() => onOpenChange(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent [&_svg]:size-5"
-          >
-            <span className="relative">
-              <BellIcon />
-              <NotificationDot count={totalUnread} />
-            </span>
-            <span>{t("notifications")}</span>
-            {totalUnread > 0 && (
-              <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
-                {totalUnread}
-              </span>
-            )}
-          </Link>
 
           <Link
             href="/groups"

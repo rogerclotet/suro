@@ -16,7 +16,6 @@ import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
 import ThemeSwitcher from "../theme-switcher";
-import NotificationSwitcher from "./notification-toggle";
 
 export default function Profile() {
   const session = useSession();
@@ -63,8 +62,6 @@ export default function Profile() {
             {tNav("profile")}
           </ResponsiveMenuItem>
         </Link>
-
-        <NotificationSwitcher />
 
         <ThemeSwitcher />
 

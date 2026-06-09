@@ -1,10 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useNotifications } from "@/app/_state/notification-state";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import NotificationDot from "../../notifications/notification-dot";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
 import MoreSheet from "./more-sheet";
 
@@ -12,7 +10,6 @@ export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const bottomNavItems = useBottomNavItems();
   const [moreOpen, setMoreOpen] = useState(false);
-  const { hasUnreadInSections, totalUnread } = useNotifications();
 
   const activeItem = useMemo(() => {
     const activeItems = bottomNavItems.filter(
@@ -43,11 +40,6 @@ export default function BottomNav({ className }: { className?: string }) {
           const isActive = !isMore && activeItem?.path === item.path;
 
           if (isMore) {
-            const overflowSections =
-              (item as BottomNavItem).overflow?.map((o) => o.section) ?? [];
-            const hasOverflowUnread =
-              hasUnreadInSections(overflowSections) || totalUnread > 0;
-
             return (
               <button
                 key="more"
@@ -57,7 +49,6 @@ export default function BottomNav({ className }: { className?: string }) {
               >
                 <div className="relative rounded-full px-4 py-1.5 [&_svg]:size-5">
                   {item.icon}
-                  <NotificationDot count={hasOverflowUnread ? 1 : 0} />
                 </div>
                 <span className="text-xs">{item.name}</span>
               </button>

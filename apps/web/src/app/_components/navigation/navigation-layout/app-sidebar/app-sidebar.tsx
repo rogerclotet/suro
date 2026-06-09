@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  BellIcon,
-  LayoutGridIcon,
-  MessageSquarePlusIcon,
-  PlusIcon,
-} from "lucide-react";
+import { LayoutGridIcon, MessageSquarePlusIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/app/_state/feedback-state";
-import { useNotifications } from "@/app/_state/notification-state";
 import CreateProjectForm from "@/app/[locale]/groups/_components/create-project/create-project-form";
 import {
   Sidebar,
@@ -38,7 +32,6 @@ import NavApps from "./nav-apps";
 
 export default function AppSidebar() {
   const { setOpenMobile } = useSidebar();
-  const { totalUnread } = useNotifications();
   const { openFeedback } = useFeedback();
   const tNav = useTranslations("nav");
   const tGroups = useTranslations("groups");
@@ -99,19 +92,6 @@ export default function AppSidebar() {
             <SidebarMenuButton onClick={openFeedback}>
               <MessageSquarePlusIcon />
               {tNav("feedback")}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/notifications" onClick={() => setOpenMobile(false)}>
-                <BellIcon />
-                {tNav("notifications")}
-                {totalUnread > 0 && (
-                  <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
-                    {totalUnread}
-                  </span>
-                )}
-              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
