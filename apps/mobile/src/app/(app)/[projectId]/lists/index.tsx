@@ -6,6 +6,7 @@ import { Stack, useRouter } from "expo-router";
 import { Check, ChevronRight, LayoutTemplate } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
@@ -95,8 +96,7 @@ export default function ListsOverview() {
             <View
               style={{
                 height: 1,
-                marginLeft: 48,
-                marginRight: 16,
+                marginHorizontal: 16,
                 backgroundColor: t.border,
               }}
             />
@@ -122,17 +122,6 @@ export default function ListsOverview() {
                   backgroundColor: pressed ? t.border : "transparent",
                 })}
               >
-                <View style={{ width: 20, alignItems: "center" }}>
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 3,
-                      backgroundColor: t.marker,
-                      transform: [{ rotate: "45deg" }],
-                    }}
-                  />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Txt size={16}>{item.name}</Txt>
                   {item.description ? (
@@ -146,28 +135,7 @@ export default function ListsOverview() {
                     </Txt>
                   ) : null}
                 </View>
-                {total === 0 ? null : pending > 0 ? (
-                  // A count chip reads as "items left" — clearer than a bare
-                  // number floating at the row's edge.
-                  <View
-                    style={{
-                      minWidth: 26,
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: 13,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: t.border,
-                    }}
-                  >
-                    <Txt size={13} weight="700">
-                      {pending}
-                    </Txt>
-                  </View>
-                ) : (
-                  // All done: a check beats showing "0".
-                  <Check color={t.primary} size={18} />
-                )}
+                <ProgressRing done={done} pending={pending} total={total} />
               </Pressable>
             );
           }}
@@ -181,6 +149,92 @@ export default function ListsOverview() {
         onClose={() => setCreating(false)}
       />
     </Screen>
+  );
+}
+
+// Per-row completion ring (Reminders/Things-style): an empty track for an
+// empty list, a primary arc that fills as items complete, and a solid disc
+// with a check when everything is done. One ring per row is what marks each
+// row as a checklist of its own — the screen reads as a list of lists. The
+// pending count sits inside the ring so an arc-less ring still reads as a
+// progress gauge rather than an unchecked checkbox.
+function ProgressRing({
+  done,
+  pending,
+  total,
+}: {
+  done: number;
+  pending: number;
+  total: number;
+}) {
+  const t = useTheme();
+  const size = 30;
+  const stroke = 3;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const complete = total > 0 && done === total;
+
+  if (complete) {
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: t.primary,
+        }}
+      >
+        <Check color={t.onPrimary} size={16} strokeWidth={3} />
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Svg width={size} height={size} style={{ position: "absolute" }}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={t.border}
+          strokeWidth={stroke}
+          fill="none"
+        />
+        {done > 0 ? (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={t.primary}
+            strokeWidth={stroke}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${circumference}`}
+            strokeDashoffset={circumference * (1 - done / total)}
+            // Start the arc at 12 o'clock instead of SVG's default 3 o'clock.
+            rotation={-90}
+            originX={size / 2}
+            originY={size / 2}
+          />
+        ) : null}
+      </Svg>
+      {pending > 0 ? (
+        // Two digits is all the ring fits; beyond that the gauge matters more
+        // than the exact number.
+        <Txt muted size={12} weight="700">
+          {pending > 99 ? "99" : pending}
+        </Txt>
+      ) : null}
+    </View>
   );
 }
 
