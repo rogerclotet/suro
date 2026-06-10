@@ -26,37 +26,35 @@ app. The Convex **deployment** needs these env vars set (`npx convex env set …
 the `JWT_PRIVATE_KEY` + `JWKS` pair (generate with `npx @convex-dev/auth`).
 Native Google OAuth additionally needs the redirect wired to the `suro://` scheme.
 
-## Builds (CI)
+## Builds (local)
 
-Pushes to `main` that touch `apps/mobile/`, `packages/backend/`, the lockfile,
-or the CI config trigger three jobs (`.gitlab-ci.yml`):
+Client builds run locally — runner build times made CI builds impractical. All
+three scripts are EAS **local** builds signed with the EAS-managed credentials;
+log in once with `eas login` (eas-cli is a devDependency, so the scripts
+resolve it from the workspace).
 
-| Job | Profile (`eas.json`) | Where | Artifact |
-| --- | --- | --- | --- |
-| `build_mobile_android_preview` | `preview` (dev Convex) | runner, `eas build --local` | `suro-preview.apk` (sideload-able) |
-| `build_mobile_android_release` | `production` | runner, `eas build --local` | `suro-release.aab` (store-ready) |
-| `build_mobile_ios_release` | `production` | EAS cloud | `suro-release.ipa` (store-ready) — **commented out** pending Apple credentials |
+| Script (`pnpm --filter mobile …`) | Profile (`eas.json`) | Output |
+| --- | --- | --- |
+| `build:android:preview` | `preview` (dev Convex) | `build/suro-preview.apk` (sideload-able) |
+| `build:android:release` | `production` | `build/suro-release.aab` (store-ready) |
+| `build:ios:release` | `production` | `build/suro-release.ipa` (store-ready) |
 
-Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from the
-`production` profile's `env` in `eas.json` — the EAS local-build sandbox does
-not inherit CI job env, so public build env belongs there, not in CI variables.
-Release versioning is remote (`appVersionSource: "remote"` + `autoIncrement`),
-so version codes bump on EAS servers per build. No `eas submit` step yet.
+Prerequisites:
 
-One-time setup before the first green run:
+- **Android**: JDK 17 + the Android SDK (`ANDROID_HOME`). The keystore lives
+  on EAS (created via `eas credentials -p android`); the build fetches it.
+- **iOS**: Xcode, fastlane and CocoaPods, plus an Apple Developer Program
+  membership with distribution credentials on EAS (`eas credentials -p ios`
+  for `app.suro.mobile`) — **still pending**, so `build:ios:release` fails at
+  credential fetch until that exists.
 
-1. Create an access token on expo.dev and set it as the `EXPO_TOKEN` GitLab
-   CI/CD variable (protected + masked). CI fetches signing credentials with it
-   but can never create them (`--non-interactive`).
-2. Android keystore: `cd apps/mobile && eas credentials -p android` →
-   `production` → generate a new EAS-managed keystore.
-3. iOS: requires an Apple Developer Program membership. Run
-   `eas credentials -p ios` and create the distribution certificate + App Store
-   provisioning profile for `app.suro.mobile`, then uncomment
-   `build_mobile_ios_release` in `.gitlab-ci.yml`.
+Notes:
 
-To force the mobile jobs without a mobile change, start a pipeline on `main`
-from the GitLab UI ("Run pipeline") — they appear there as manual jobs.
+- EAS archives the project **via git**, so uncommitted changes are not part of
+  the build — commit first.
+- Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from
+  the `production` profile's `env` in `eas.json` and auto-increment the remote
+  version (`appVersionSource: "remote"`). No `eas submit` step yet.
 
 ## Notes
 
