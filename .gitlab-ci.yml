@@ -146,3 +146,91 @@ stop_preview:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
       allow_failure: true
+
+# ---------------------------------------------------------------------------
+# Mobile builds (Expo / EAS). main only, and only when mobile paths change.
+# Android builds locally on the shared runner (eas build --local); iOS builds
+# on EAS cloud (no macOS runners on gitlab.com free tier). Signing uses
+# EAS-managed credentials, authenticated via EXPO_TOKEN.
+# ---------------------------------------------------------------------------
+
+.mobile_changes: &mobile_changes
+  - apps/mobile/**/*
+  - packages/backend/**/*
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - .gitlab-ci.yml
+
+# changes: only diffs real pushes; for web/api/schedule sources it always
+# matches, so gate on push and leave a manual escape hatch for UI-run pipelines.
+.mobile_rules: &mobile_rules
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"
+    changes: *mobile_changes
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "web"
+    when: manual
+    allow_failure: true
+
+.mobile_android_local:
+  stage: build
+  image: reactnativecommunity/react-native-android:v20.1 # pinned; latest moves
+  dependencies: [] # skip check's node_modules artifact
+  timeout: 2h # first uncached Gradle build can exceed 1h
+  variables:
+    GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3072m -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+  before_script:
+    - n $(cat .node-version) # image ships Node 22; repo pins 25
+    - npm install -g pnpm@latest-10 eas-cli
+    - pnpm install --frozen-lockfile --filter mobile...
+  rules: *mobile_rules
+
+# Debug/internal Android build: release-mode APK on the dev Convex deployment
+# (`preview` profile) — installable standalone from the job artifact.
+build_mobile_android_preview:
+  extends: .mobile_android_local
+  script:
+    - cd apps/mobile
+    - eas build --platform android --profile preview --local --non-interactive
+        --output "$CI_PROJECT_DIR/suro-preview.apk"
+  artifacts:
+    name: "suro-android-preview-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - suro-preview.apk
+    expire_in: 30 days
+
+# Store-ready Android release: signed .aab (EAS-managed keystore), prod env,
+# remote versionCode auto-incremented by eas-cli before the local build.
+build_mobile_android_release:
+  extends: .mobile_android_local
+  script:
+    - cd apps/mobile
+    - eas build --platform android --profile production --local --non-interactive
+        --output "$CI_PROJECT_DIR/suro-release.aab"
+  artifacts:
+    name: "suro-android-release-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - suro-release.aab
+    expire_in: 30 days
+
+# Store-ready iOS release on EAS cloud; waits for the build and downloads the
+# signed .ipa. Waiting burns runner minutes through the EAS queue.
+build_mobile_ios_release:
+  stage: build
+  image: node:25.1-slim
+  dependencies: []
+  timeout: 2h
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git curl jq ca-certificates
+    - npm install -g pnpm@latest-10 eas-cli
+    # eas-cli evaluates the app config locally, so deps must be installed.
+    - pnpm install --frozen-lockfile --filter mobile...
+  script:
+    - cd apps/mobile
+    - eas build --platform ios --profile production --non-interactive --json > "$CI_PROJECT_DIR/eas-ios-build.json"
+    - 'curl -fL -H "Authorization: Bearer $EXPO_TOKEN" -o "$CI_PROJECT_DIR/suro-release.ipa" "$(jq -r ".[0].artifacts.buildUrl" "$CI_PROJECT_DIR/eas-ios-build.json")"'
+  artifacts:
+    name: "suro-ios-release-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - suro-release.ipa
+      - eas-ios-build.json
+    expire_in: 30 days
+  rules: *mobile_rules
