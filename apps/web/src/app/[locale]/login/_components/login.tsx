@@ -108,7 +108,14 @@ export default function Login({
           {/* Primary CTA: Google */}
           <button
             type="button"
-            onClick={() => void signIn("google", { redirectTo })}
+            onClick={() =>
+              // Pass an absolute URL on this origin so the OAuth round-trip
+              // returns here (prod, a preview, or localhost) — the shared dev
+              // backend can't infer the origin from a relative path.
+              void signIn("google", {
+                redirectTo: `${window.location.origin}${redirectTo}`,
+              })
+            }
             className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
           >
             <SiGoogle
