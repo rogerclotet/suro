@@ -4,7 +4,6 @@ import { type MutationCtx, mutation, query } from "./_generated/server";
 import {
   ensureCategorySuggestions,
   normalizeCategoryName,
-  resolveLegacyCategoryValue,
 } from "./model/categories";
 import {
   requireProjectMember,
@@ -19,25 +18,17 @@ const templateItem = v.object({
 
 /**
  * Normalize item category names and record them as autocomplete suggestions
- * for the project — shared by create/update/exportToProject. Legacy category
- * ids (stale clients, pre-rework templates) are mapped to names first so they
- * never land in the suggestion store.
+ * for the project — shared by create/update/exportToProject.
  */
 async function prepareTemplateItems(
   ctx: MutationCtx,
   projectId: Id<"projects">,
   items: { name: string; category: string | null }[],
 ): Promise<{ name: string; category: string | null }[]> {
-  const normalized = await Promise.all(
-    items.map(async (item) => {
-      const name = normalizeCategoryName(item.category);
-      const category =
-        name === undefined
-          ? null
-          : ((await resolveLegacyCategoryValue(ctx, projectId, name)) ?? null);
-      return { name: item.name, category };
-    }),
-  );
+  const normalized = items.map((item) => ({
+    name: item.name,
+    category: normalizeCategoryName(item.category) ?? null,
+  }));
   await ensureCategorySuggestions(
     ctx,
     projectId,
@@ -126,8 +117,7 @@ export const remove = mutation({
 /**
  * Copy a template into another project the user belongs to (ports exportTemplate).
  * Item category names copy losslessly and are recorded as suggestions in the
- * target project. (Templates saved before the rework still hold category ids;
- * those degrade to "no category" at instantiation — see instantiateTemplateItems.)
+ * target project.
  */
 export const exportToProject = mutation({
   args: {

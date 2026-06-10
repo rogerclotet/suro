@@ -215,36 +215,6 @@ describe("lists: create & read", () => {
     expect(suggestions.map((c) => c.name)).toEqual(["Beach", "Groceries"]);
   });
 
-  // Transitional (drop with listItems.categoryId): templates saved before the
-  // rework carry category *ids* — same-project ids resolve to their name,
-  // foreign ones degrade to "no category".
-  it("seeds items from pre-rework templates holding category ids", async () => {
-    const tpl = await t.run((ctx) =>
-      ctx.db.insert("listTemplates", {
-        name: "Legacy",
-        items: [
-          { name: "Milk", category: ids.groceries },
-          { name: "Sunscreen", category: ids.foreign }, // another project
-        ],
-        projectId: ids.family,
-        createdBy: ids.alice,
-        updatedAt: Date.now(),
-      }),
-    );
-
-    const id = await alice.mutation(api.lists.create, {
-      projectId: ids.family,
-      name: "Trip",
-      description: "",
-      templateIds: [tpl],
-    });
-
-    expect(normalizeList(await getList(alice, id)).items).toEqual([
-      { name: "Milk", details: null, completed: false, category: "Groceries" },
-      { name: "Sunscreen", details: null, completed: false, category: null },
-    ]);
-  });
-
   it("sorts items uncompleted-first then by name", async () => {
     const list = await insertList("Sort");
     await insertItem(list, "Banana", { completed: true });
@@ -339,30 +309,6 @@ describe("list items", () => {
     });
     const result = await getList(alice, list);
     expect(result.items[0]?.category).toBeUndefined();
-  });
-
-  // Transitional (drop with listItems.categoryId): pre-rework clients send the
-  // category as an id — same-project ids resolve to their name, foreign ones
-  // degrade to "no category".
-  it("accepts legacy categoryId args from pre-rework clients", async () => {
-    const list = await insertList("L");
-    await alice.mutation(api.listItems.create, {
-      listId: list,
-      name: "Apples",
-      categoryId: ids.groceries,
-    });
-    await alice.mutation(api.listItems.create, {
-      listId: list,
-      name: "Towels",
-      categoryId: ids.foreign,
-    });
-
-    const result = await getList(alice, list);
-    const apples = result.items.find((i) => i.name === "Apples");
-    const towels = result.items.find((i) => i.name === "Towels");
-    expect(apples?.category).toBe("Groceries");
-    expect(apples?.categoryId).toBeUndefined();
-    expect(towels?.category).toBeUndefined();
   });
 
   it("rejects updating an item that doesn't exist", async () => {

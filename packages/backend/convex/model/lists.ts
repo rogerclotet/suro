@@ -1,9 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
-import {
-  normalizeCategoryName,
-  resolveLegacyCategoryValue,
-} from "./categories";
+import { normalizeCategoryName } from "./categories";
 
 export type ListWithItems = Doc<"lists"> & { items: Doc<"listItems">[] };
 
@@ -45,12 +42,10 @@ export async function instantiateTemplateItems(
       continue;
     }
     for (const item of template.items) {
-      const name = normalizeCategoryName(item.category);
-      const category =
-        name === undefined
-          ? undefined
-          : await resolveLegacyCategoryValue(ctx, projectId, name);
-      result.push({ name: item.name, category });
+      result.push({
+        name: item.name,
+        category: normalizeCategoryName(item.category),
+      });
     }
   }
   return result;

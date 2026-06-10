@@ -1,5 +1,5 @@
 import type { Id } from "../_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "../_generated/server";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * Category names live on the items themselves (list/template "sections"); the
@@ -56,24 +56,4 @@ export async function ensureCategorySuggestions(
   for (const name of unique) {
     await ensureCategorySuggestion(ctx, projectId, name);
   }
-}
-
-/**
- * Transitional (drop with listItems.categoryId): template items and stale
- * clients from before the rework carry category *ids* where names now live.
- * Map an id to its name when it still belongs to the project; foreign/dangling
- * ids degrade to "no category", mirroring the old resolveProjectCategoryId.
- * Strings that aren't category ids pass through untouched.
- */
-export async function resolveLegacyCategoryValue(
-  ctx: QueryCtx,
-  projectId: Id<"projects">,
-  category: string,
-): Promise<string | undefined> {
-  const normalizedId = ctx.db.normalizeId("categories", category);
-  if (normalizedId === null) {
-    return category;
-  }
-  const doc = await ctx.db.get(normalizedId);
-  return doc && doc.projectId === projectId ? doc.name : undefined;
 }

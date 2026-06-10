@@ -11,7 +11,6 @@
 import type * as ResendOTP from "../ResendOTP.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
-import type * as categoryNamesBackfill from "../categoryNamesBackfill.js";
 import type * as events from "../events.js";
 import type * as expenses from "../expenses.js";
 import type * as files from "../files.js";
@@ -46,7 +45,6 @@ declare const fullApi: ApiFromModules<{
   ResendOTP: typeof ResendOTP;
   auth: typeof auth;
   categories: typeof categories;
-  categoryNamesBackfill: typeof categoryNamesBackfill;
   events: typeof events;
   expenses: typeof expenses;
   files: typeof files;

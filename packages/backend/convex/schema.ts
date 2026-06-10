@@ -130,17 +130,12 @@ export default defineSchema({
     // The item's category (list section) as a plain name string — sections are
     // derived by grouping items on it, so they're scoped to the list.
     category: v.optional(v.string()),
-    // Transitional: pre-rework FK into `categories`. Cleared by
-    // categoryNamesBackfill; drop the field + by_category index once every doc
-    // has it unset.
-    categoryId: v.optional(v.id("categories")),
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
     legacyId: v.optional(v.string()),
   })
     .index("by_list", ["listId"])
-    .index("by_category", ["categoryId"])
     .index("by_legacyId", ["legacyId"]),
 
   listTemplates: defineTable({
