@@ -8,6 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build:android:preview": "mkdir -p build && eas build --platform android --profile preview --local --output build/suro-preview.apk",
+    "build:android:release": "mkdir -p build && eas build --platform android --profile production --local --output build/suro-release.aab",
+    "build:ios:release": "mkdir -p build && eas build --platform ios --profile production --local --output build/suro-release.ipa",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "vitest run",
@@ -57,6 +60,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@types/react": "~19.2.2",
+    "eas-cli": "^20.1.0",
     "eslint": "^9.39.4",
     "eslint-config-expo": "~56.0.4",
     "typescript": "~6.0.3",

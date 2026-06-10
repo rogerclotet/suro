@@ -43,6 +43,7 @@ example
 /android
 
 # local build artifacts (EAS / local builds)
+/build
 *.apk
 *.aab
 *.ipa
