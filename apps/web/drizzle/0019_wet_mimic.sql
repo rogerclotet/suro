@@ -1,1 +1,0 @@
-ALTER TABLE "f_event" ADD COLUMN "allDay" boolean DEFAULT false;

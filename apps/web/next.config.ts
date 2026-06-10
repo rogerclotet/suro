@@ -45,7 +45,6 @@ const nextConfig = {
       dynamic: 30,
     },
   },
-  serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "sharp"],
   images: {
     remotePatterns: [
       {

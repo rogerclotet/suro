@@ -1,1 +1,0 @@
-ALTER TABLE "f_list" ADD COLUMN "favorite" boolean DEFAULT false NOT NULL;

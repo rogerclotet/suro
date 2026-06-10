@@ -1,1 +1,0 @@
-ALTER TABLE "f_project" ALTER COLUMN "color" DROP DEFAULT;

@@ -1,1 +1,0 @@
-ALTER TABLE "f_event" ALTER COLUMN "allDay" SET NOT NULL;
