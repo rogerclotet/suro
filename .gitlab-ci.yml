@@ -213,24 +213,30 @@ build_mobile_android_release:
 
 # Store-ready iOS release on EAS cloud; waits for the build and downloads the
 # signed .ipa. Waiting burns runner minutes through the EAS queue.
-build_mobile_ios_release:
-  stage: build
-  image: node:25.1-slim
-  dependencies: []
-  timeout: 2h
-  before_script:
-    - apt-get update && apt-get install -y --no-install-recommends git curl jq ca-certificates
-    - npm install -g pnpm@latest-10 eas-cli
-    # eas-cli evaluates the app config locally, so deps must be installed.
-    - pnpm install --frozen-lockfile --filter mobile...
-  script:
-    - cd apps/mobile
-    - eas build --platform ios --profile production --non-interactive --json > "$CI_PROJECT_DIR/eas-ios-build.json"
-    - 'curl -fL -H "Authorization: Bearer $EXPO_TOKEN" -o "$CI_PROJECT_DIR/suro-release.ipa" "$(jq -r ".[0].artifacts.buildUrl" "$CI_PROJECT_DIR/eas-ios-build.json")"'
-  artifacts:
-    name: "suro-ios-release-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - suro-release.ipa
-      - eas-ios-build.json
-    expire_in: 30 days
-  rules: *mobile_rules
+#
+# DISABLED until an Apple Developer Program membership exists and the iOS
+# distribution credentials are created on EAS (`eas credentials -p ios` for
+# app.suro.mobile) — without them the job fails at credential fetch.
+# Uncomment to re-enable.
+#
+# build_mobile_ios_release:
+#   stage: build
+#   image: node:25.1-slim
+#   dependencies: []
+#   timeout: 2h
+#   before_script:
+#     - apt-get update && apt-get install -y --no-install-recommends git curl jq ca-certificates
+#     - npm install -g pnpm@latest-10 eas-cli
+#     # eas-cli evaluates the app config locally, so deps must be installed.
+#     - pnpm install --frozen-lockfile --filter mobile...
+#   script:
+#     - cd apps/mobile
+#     - eas build --platform ios --profile production --non-interactive --json > "$CI_PROJECT_DIR/eas-ios-build.json"
+#     - 'curl -fL -H "Authorization: Bearer $EXPO_TOKEN" -o "$CI_PROJECT_DIR/suro-release.ipa" "$(jq -r ".[0].artifacts.buildUrl" "$CI_PROJECT_DIR/eas-ios-build.json")"'
+#   artifacts:
+#     name: "suro-ios-release-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - suro-release.ipa
+#       - eas-ios-build.json
+#     expire_in: 30 days
+#   rules: *mobile_rules

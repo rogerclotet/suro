@@ -35,7 +35,7 @@ or the CI config trigger three jobs (`.gitlab-ci.yml`):
 | --- | --- | --- | --- |
 | `build_mobile_android_preview` | `preview` (dev Convex) | runner, `eas build --local` | `suro-preview.apk` (sideload-able) |
 | `build_mobile_android_release` | `production` | runner, `eas build --local` | `suro-release.aab` (store-ready) |
-| `build_mobile_ios_release` | `production` | EAS cloud | `suro-release.ipa` (store-ready) |
+| `build_mobile_ios_release` | `production` | EAS cloud | `suro-release.ipa` (store-ready) — **commented out** pending Apple credentials |
 
 Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from the
 `production` profile's `env` in `eas.json` — the EAS local-build sandbox does
@@ -52,7 +52,8 @@ One-time setup before the first green run:
    `production` → generate a new EAS-managed keystore.
 3. iOS: requires an Apple Developer Program membership. Run
    `eas credentials -p ios` and create the distribution certificate + App Store
-   provisioning profile for `app.suro.mobile`.
+   provisioning profile for `app.suro.mobile`, then uncomment
+   `build_mobile_ios_release` in `.gitlab-ci.yml`.
 
 To force the mobile jobs without a mobile change, start a pipeline on `main`
 from the GitLab UI ("Run pipeline") — they appear there as manual jobs.
