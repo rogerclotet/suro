@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Check, Loader2, Tag } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FocusEvent, useRef } from "react";
@@ -11,6 +11,7 @@ import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
+import CategoryPicker from "@/components/ui/category-picker";
 import {
   Form,
   FormControl,
@@ -19,14 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { useSession } from "@/lib/session";
-import NewCategoryModal from "../../../[listId]/_components/categories/new-category-modal";
 import { templateItemSchema } from "../../_components/create-template/data";
 
 export default function TemplateItem({
@@ -48,9 +42,7 @@ export default function TemplateItem({
   const { project } = useProjects();
   const formRef = useRef<HTMLFormElement>(null);
   const { data: session } = useSession();
-  const newTemplateItemModalRef = useRef<HTMLButtonElement>(null);
   const t = useTranslations("lists");
-  const tCommon = useTranslations("common");
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     try {
@@ -73,24 +65,6 @@ export default function TemplateItem({
     if (form.formState.isDirty) {
       formRef.current?.requestSubmit();
     }
-  }
-
-  async function handleCategoryChange(
-    value: string,
-    onChange: (value: string) => void,
-  ) {
-    if (value === "new") {
-      newTemplateItemModalRef.current?.click();
-      return;
-    }
-
-    if (value === "-") {
-      onChange("");
-    } else {
-      onChange(value);
-    }
-
-    formRef.current?.requestSubmit();
   }
 
   return (
@@ -137,30 +111,20 @@ export default function TemplateItem({
           <FormField
             control={form.control}
             name="category"
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { onChange: onFieldChange, value } }) => (
               <FormItem>
                 <FormControl>
-                  <Select
-                    value={value ?? ""}
-                    onValueChange={(v) => handleCategoryChange(v, onChange)}
+                  <CategoryPicker
+                    variant="ghost"
+                    categories={project?.categories ?? []}
+                    value={value ?? null}
+                    onChange={(category) => {
+                      onFieldChange(category);
+                      formRef.current?.requestSubmit();
+                    }}
                     disabled={form.formState.isSubmitting}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <Tag />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="-">{tCommon("noCategory")}</SelectItem>
-                      {project?.categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-
-                      <SelectItem value="new">{t("newCategory")}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    className="w-auto"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -168,17 +132,6 @@ export default function TemplateItem({
           />
         </form>
       </Form>
-
-      <NewCategoryModal
-        trigger={
-          <button
-            ref={newTemplateItemModalRef}
-            type="button"
-            className="hidden"
-          />
-        }
-        onCreate={(categoryId) => form.setValue("category", categoryId)}
-      />
     </li>
   );
 }

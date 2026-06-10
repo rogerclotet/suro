@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import * as v from "valibot";
 import type { List, ListItem } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import CategoryPicker from "@/components/ui/category-picker";
 import {
   Field,
   FieldContent,
@@ -18,13 +19,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/session";
@@ -38,7 +32,7 @@ export default function EditListItemForm(props: {
     name: string,
     details: string,
     completed: boolean,
-    categoryId: string | null,
+    category: string | null,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
   trigger: React.ReactNode;
@@ -57,7 +51,7 @@ function EditListItemFormContent(props: {
     name: string,
     details: string,
     completed: boolean,
-    categoryId: string | null,
+    category: string | null,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
@@ -70,7 +64,7 @@ function EditListItemFormContent(props: {
       name: item.name,
       details: item.details ?? "",
       completed: item.completed ?? false,
-      categoryId: item.categoryId,
+      category: item.category,
     },
     resolver: valibotResolver(listItemSchema),
   });
@@ -92,7 +86,7 @@ function EditListItemFormContent(props: {
         if (
           form.formState.dirtyFields.name &&
           listItems.filter(
-            (i) => i.categoryId === data.categoryId && i.name === data.name,
+            (i) => i.category === data.category && i.name === data.name,
           ).length > 0
         ) {
           toast.error(t("itemAlreadyExists"));
@@ -103,14 +97,14 @@ function EditListItemFormContent(props: {
           parsed.name,
           parsed.details ?? "",
           parsed.completed,
-          parsed.categoryId === "" ? null : (parsed.categoryId ?? null),
+          parsed.category,
         );
 
         form.reset({
           name: parsed.name,
           details: parsed.details ?? "",
           completed: parsed.completed,
-          categoryId: parsed.categoryId,
+          category: parsed.category,
         });
         toast.success(t("itemUpdated"));
         close();
@@ -193,37 +187,21 @@ function EditListItemFormContent(props: {
 
       <Controller
         control={form.control}
-        name="categoryId"
-        render={({ field, fieldState }) => {
-          const id = `${listId}-${itemId}-${field.name}`;
-          return (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={id}>{t("categoryLabel")}</FieldLabel>
-              <FieldContent>
-                <Select
-                  {...field}
-                  value={field.value ?? undefined}
-                  onValueChange={(value) => {
-                    field.onChange(value === "-" ? null : value);
-                  }}
-                >
-                  <SelectTrigger id={id}>
-                    <SelectValue placeholder={tCommon("noCategory")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="-">{tCommon("noCategory")}</SelectItem>
-                    {project.categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldContent>
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          );
-        }}
+        name="category"
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel>{t("categoryLabel")}</FieldLabel>
+            <FieldContent>
+              <CategoryPicker
+                categories={project.categories}
+                value={field.value}
+                onChange={field.onChange}
+                disabled={form.formState.isSubmitting}
+              />
+            </FieldContent>
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
       />
 
       <SubmitButton

@@ -18,17 +18,10 @@ type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 type IndexedItem = TemplateItem & { index: number };
 
 /** Group items by their category name, sorted like the PWA (category & item alpha). */
-function groupByCategory(
-  items: TemplateItem[],
-  categories: Category[],
-  uncategorized: string,
-) {
-  const nameById = new Map(categories.map((c) => [c._id, c.name]));
+function groupByCategory(items: TemplateItem[], uncategorized: string) {
   const groups = new Map<string, IndexedItem[]>();
   items.forEach((item, index) => {
-    const key =
-      (item.category && nameById.get(item.category as Id<"categories">)) ??
-      uncategorized;
+    const key = item.category ?? uncategorized;
     const bucket = groups.get(key);
     if (bucket) {
       bucket.push({ ...item, index });
@@ -57,27 +50,21 @@ export default function TemplateEditor() {
   const categories = useQuery(api.categories.listByProject, { projectId: pid });
   const update = useMutation(api.templates.update);
   const remove = useMutation(api.templates.remove);
-  const createCategory = useMutation(api.categories.create);
 
   const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<Id<"categories"> | null>(null);
+  const [newCategory, setNewCategory] = useState<string | null>(null);
   // Edit state is lifted to the parent (persists through the sheet's slide-out).
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [editCategory, setEditCategory] = useState<Id<"categories"> | null>(
-    null,
-  );
+  const [editCategory, setEditCategory] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsDescription, setSettingsDescription] = useState("");
 
   const uncategorized = tr("uncategorized");
   const sections = useMemo(
-    () =>
-      template
-        ? groupByCategory(template.items, categories ?? [], uncategorized)
-        : [],
-    [template, categories, uncategorized],
+    () => (template ? groupByCategory(template.items, uncategorized) : []),
+    [template, uncategorized],
   );
 
   async function persist(
@@ -96,10 +83,6 @@ export default function TemplateEditor() {
     });
   }
 
-  async function onCreateCategory(name: string) {
-    return createCategory({ projectId: pid, name });
-  }
-
   async function addItem() {
     const trimmed = newName.trim();
     if (!trimmed || !template) {
@@ -113,7 +96,7 @@ export default function TemplateEditor() {
   function openEdit(item: IndexedItem) {
     setEditingIndex(item.index);
     setEditName(item.name);
-    setEditCategory((item.category as Id<"categories"> | null) ?? null);
+    setEditCategory(item.category);
   }
 
   async function saveEdit() {
@@ -215,7 +198,6 @@ export default function TemplateEditor() {
                   categories={categories ?? []}
                   value={newCategory}
                   onChange={setNewCategory}
-                  onCreate={onCreateCategory}
                 />
               </View>
               <Button title={tc("add")} onPress={addItem} />
@@ -259,7 +241,6 @@ export default function TemplateEditor() {
         categories={categories ?? []}
         onChangeName={setEditName}
         onChangeCategory={setEditCategory}
-        onCreateCategory={onCreateCategory}
         onSave={saveEdit}
         onDelete={deleteEditingItem}
         onClose={() => setEditingIndex(null)}
@@ -297,18 +278,16 @@ function EditTemplateItemSheet({
   categories,
   onChangeName,
   onChangeCategory,
-  onCreateCategory,
   onSave,
   onDelete,
   onClose,
 }: {
   visible: boolean;
   name: string;
-  category: Id<"categories"> | null;
+  category: string | null;
   categories: Category[];
   onChangeName: (value: string) => void;
-  onChangeCategory: (value: Id<"categories"> | null) => void;
-  onCreateCategory: (name: string) => Promise<Id<"categories">>;
+  onChangeCategory: (value: string | null) => void;
   onSave: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -329,7 +308,6 @@ function EditTemplateItemSheet({
         categories={categories}
         value={category}
         onChange={onChangeCategory}
-        onCreate={onCreateCategory}
       />
       <Button title={tc("save")} onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>

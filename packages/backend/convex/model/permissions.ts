@@ -47,18 +47,6 @@ export async function requireItemAccess(
   return { item, list, userId };
 }
 
-export async function requireCategoryAccess(
-  ctx: QueryCtx,
-  categoryId: Id<"categories">,
-) {
-  const category = await ctx.db.get(categoryId);
-  if (category === null) {
-    throw new Error("Category not found");
-  }
-  const userId = await requireProjectMember(ctx, category.projectId);
-  return { category, userId };
-}
-
 export async function requireTemplateAccess(
   ctx: QueryCtx,
   templateId: Id<"listTemplates">,
@@ -115,9 +103,10 @@ export async function requireFileOwner(ctx: QueryCtx, fileId: Id<"files">) {
 }
 
 /**
- * Ports getProjectCategoryId: a category id only "counts" if it belongs to the
- * project; otherwise it's silently dropped (never throws), so stale/foreign
- * category references degrade to "no category" instead of failing the write.
+ * Transitional (drop with listItems.categoryId): a category id only "counts"
+ * if it belongs to the project; otherwise it's silently dropped (never
+ * throws), so stale/foreign category references degrade to "no category"
+ * instead of failing the write.
  */
 export async function resolveProjectCategoryId(
   ctx: QueryCtx,

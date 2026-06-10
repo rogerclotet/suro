@@ -14,17 +14,16 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
 import CategoryItems from "./category-items";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
-  const { project } = useProjects();
   const list = props.list;
+  const t = useTranslations("lists");
 
   const [dragging, setDragging] = useState(false);
   const mouseSensor = useSensor(MouseSensor);
@@ -35,17 +34,14 @@ export default function CheckList(props: { list: List }) {
   const updateItem = useMutation(api.listItems.update);
   const removeItem = useMutation(api.listItems.remove);
 
-  // Keep refs to latest values so stable callbacks can always read current state.
+  // Keep a ref to the latest list so stable callbacks can read current state.
   const listRef = useRef(list);
-  const projectRef = useRef(project);
   // eslint-disable-next-line react-hooks/refs
   listRef.current = list;
-  // eslint-disable-next-line react-hooks/refs
-  projectRef.current = project;
 
   const itemsByCategory = useMemo(
-    () => groupItemsByCategory(list.items, project),
-    [list.items, project],
+    () => groupItemsByCategory(list.items),
+    [list.items],
   );
 
   const handleChange = useCallback(
@@ -54,7 +50,7 @@ export default function CheckList(props: { list: List }) {
       name: string,
       details: string,
       completed: boolean,
-      categoryId: string | null,
+      category: string | null,
     ) => {
       if (name === "") {
         return;
@@ -65,14 +61,14 @@ export default function CheckList(props: { list: List }) {
           name,
           details,
           completed,
-          categoryId: categoryId ? (categoryId as Id<"categories">) : null,
+          category,
         });
       } catch (e) {
-        toast.error("No s'ha pogut actualitzar l'element");
+        toast.error(t("itemUpdateError"));
         throw e;
       }
     },
-    [updateItem],
+    [updateItem, t],
   );
 
   const handleDelete = useCallback(
@@ -106,20 +102,17 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    const category =
-      projectRef.current?.categories.find((c) => c.name === categoryName) ??
-      null;
-
-    if ((category?.id ?? null) === (item.categoryId ?? null)) {
+    const category = categoryName === "" ? null : categoryName;
+    if (category === item.category) {
       return;
     }
 
     if (
       currentList.items.find(
-        (i) => i.categoryId === (category?.id ?? null) && i.name === item.name,
+        (i) => i.category === category && i.name === item.name,
       )
     ) {
-      toast.error("L'element ja existeix a aquesta categoria");
+      toast.error(t("itemAlreadyExistsInCategory"));
       return;
     }
 
@@ -128,7 +121,7 @@ export default function CheckList(props: { list: List }) {
       name: item.name,
       details: item.details ?? "",
       completed: item.completed ?? false,
-      categoryId: category?.id ? (category.id as Id<"categories">) : null,
+      category,
     });
   }
 
@@ -184,33 +177,22 @@ function compareItems(a: ListItem, b: ListItem) {
   return nameCompare !== 0 ? nameCompare : a.id.localeCompare(b.id);
 }
 
-function groupItemsByCategory(items: List["items"], project: Project | null) {
-  // Build categories from project if available, otherwise extract from items
-  const categoryNames = new Set<string>([""]);
-
-  if (project) {
-    for (const category of project.categories) {
-      categoryNames.add(category.name);
-    }
-  }
+/**
+ * Group the list's items into sections by category name. Sections exist only
+ * while items use them; the empty-name bucket ("no category") is always
+ * present so it stays a drop target while dragging.
+ */
+function groupItemsByCategory(items: List["items"]) {
+  const categories = new Map<string, List["items"]>([["", []]]);
 
   for (const item of items) {
-    if (item.category?.name) {
-      categoryNames.add(item.category.name);
+    const category = item.category ?? "";
+    const bucket = categories.get(category);
+    if (bucket) {
+      bucket.push(item);
+    } else {
+      categories.set(category, [item]);
     }
-  }
-
-  const categories = new Map<string, List["items"]>();
-  for (const name of categoryNames) {
-    categories.set(name, []);
-  }
-
-  for (const item of items) {
-    const category = item.category?.name ?? "";
-    if (!categories.has(category)) {
-      categories.set(category, []);
-    }
-    categories.get(category)?.push(item);
   }
 
   const result = [];

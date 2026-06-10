@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { ensureCategorySuggestions } from "./model/categories";
 import { instantiateTemplateItems, loadListWithItems } from "./model/lists";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
 
@@ -61,12 +62,17 @@ export const create = mutation({
 
     if (templateIds && templateIds.length > 0) {
       const items = await instantiateTemplateItems(ctx, projectId, templateIds);
+      await ensureCategorySuggestions(
+        ctx,
+        projectId,
+        items.map((item) => item.category),
+      );
       for (const item of items) {
         await ctx.db.insert("listItems", {
           name: item.name,
           completed: false,
           listId,
-          categoryId: item.categoryId,
+          category: item.category,
           createdBy: userId,
           updatedAt: now,
         });
@@ -87,8 +93,8 @@ export const create = mutation({
 
 /**
  * Append the items of the selected templates to an existing list (ports
- * importTemplates). Categories are re-resolved within the list's project, so
- * cross-project ids degrade to "no category" — same as create()'s seeding.
+ * importTemplates). Item category names are copied as-is and recorded as
+ * suggestions in the list's project — same as create()'s seeding.
  */
 export const importTemplates = mutation({
   args: {
@@ -102,13 +108,18 @@ export const importTemplates = mutation({
       list.projectId,
       templateIds,
     );
+    await ensureCategorySuggestions(
+      ctx,
+      list.projectId,
+      items.map((item) => item.category),
+    );
     const now = Date.now();
     for (const item of items) {
       await ctx.db.insert("listItems", {
         name: item.name,
         completed: false,
         listId: list._id,
-        categoryId: item.categoryId,
+        category: item.category,
         createdBy: userId,
         updatedAt: now,
       });

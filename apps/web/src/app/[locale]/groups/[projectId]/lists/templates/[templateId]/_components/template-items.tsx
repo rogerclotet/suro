@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import type { Template } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import NewTemplateItem from "./new-template-item";
 import TemplateItem from "./template-item";
 
@@ -16,7 +15,6 @@ type ItemWithIndex = Item & { index: number };
 export default function TemplateItems({ template }: { template: Template }) {
   const [items, setItems] = useState<Template["items"]>(template.items);
   const [animationParent] = useAutoAnimate();
-  const { project } = useProjects();
   const updateTemplate = useMutation(api.templates.update);
 
   // Persist the full items array (Convex stores template items inline).
@@ -44,8 +42,7 @@ export default function TemplateItems({ template }: { template: Template }) {
         const item = items[i];
         if (!item) continue;
 
-        const category =
-          project?.categories.find((c) => c.id === item.category)?.name ?? "";
+        const category = item.category ?? "";
         if (!categories.has(category)) {
           categories.set(category, []);
         }
@@ -62,15 +59,13 @@ export default function TemplateItems({ template }: { template: Template }) {
 
       return result;
     },
-    [project, sorted],
+    [sorted],
   );
 
-  const itemsByCategory = useMemo(() => {
-    if (!project) {
-      return [];
-    }
-    return groupItemsByCategory(items);
-  }, [items, groupItemsByCategory, project]);
+  const itemsByCategory = useMemo(
+    () => groupItemsByCategory(items),
+    [items, groupItemsByCategory],
+  );
 
   async function handleItemChanged(
     index: number,

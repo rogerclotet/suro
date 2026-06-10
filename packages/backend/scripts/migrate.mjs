@@ -14,11 +14,13 @@
  *   MIGRATION_SECRET="<same string>" \
  *   node scripts/migrate.mjs
  *
- * Migrates in FK order and remaps every foreign key (including the category ids
- * embedded in template item JSON and `lists.eventId`) from Postgres ids to
- * Convex ids. Covers every user-owned table: users, projects + members,
- * categories, templates, events, lists + items, files, notes, and the expenses
- * triplet (pots + pot members + spendings).
+ * Migrates in FK order and remaps every foreign key (e.g. `lists.eventId`)
+ * from Postgres ids to Convex ids. Item/template categories are flattened to
+ * plain name strings (Convex stores the category as a per-item label; the
+ * `categories` table is only the autocomplete suggestion store). Covers every
+ * user-owned table: users, projects + members, categories, templates, events,
+ * lists + items, files, notes, and the expenses triplet (pots + pot members +
+ * spendings).
  *
  * Users are seeded by email with NO auth account — Convex Auth links to them on
  * first sign-in, so existing logins keep their groups. Each user's
@@ -181,21 +183,22 @@ try {
     counts.members++;
   }
 
+  // Postgres category id → name, for flattening item/template category refs.
   /** @type {Map<string, string>} */
-  const categories = new Map();
+  const categoryNames = new Map();
   for (const c of await sql`SELECT id, name, "projectId" FROM "f_category"`) {
     const projectId = projects.get(c.projectId);
     if (!projectId) {
       skip("categories", c.id, "missing project");
       continue;
     }
-    const id = await convex.mutation(api.migrations.upsertCategory, {
+    await convex.mutation(api.migrations.upsertCategory, {
       secret,
       legacyId: c.id,
       name: c.name,
       projectId,
     });
-    categories.set(c.id, id);
+    categoryNames.set(c.id, c.name);
     counts.categories++;
   }
 
@@ -214,11 +217,11 @@ try {
       legacyId: tpl.id,
       name: tpl.name,
       description: tpl.description ?? undefined,
-      // Remap each embedded category id (Postgres → Convex); drop if gone.
+      // Flatten each embedded category id to its name; drop if gone.
       items: rawItems.map((item) => ({
         name: item.name,
         category: item.category
-          ? (categories.get(item.category) ?? null)
+          ? (categoryNames.get(item.category) ?? null)
           : null,
       })),
       projectId,
@@ -310,7 +313,7 @@ try {
       details: it.details ?? undefined,
       completed: it.completed ?? false,
       listId,
-      categoryId: it.categoryId ? categories.get(it.categoryId) : undefined,
+      category: it.categoryId ? categoryNames.get(it.categoryId) : undefined,
       createdBy,
       updatedBy: it.updatedBy ? users.get(it.updatedBy) : undefined,
       updatedAt: toMs(it.updatedAt) ?? toMs(it.createdAt) ?? Date.now(),

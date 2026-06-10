@@ -83,12 +83,36 @@ describe("templates: CRUD", () => {
       projectId: ids.family,
       name: "  Camping  ",
       description: "  weekend kit  ",
-      items: [{ name: "Tent", category: ids.groceries }],
+      items: [{ name: "Tent", category: " Gear " }],
     });
     const template = await alice.query(api.templates.get, { templateId: id });
     expect(template.name).toBe("Camping");
     expect(template.description).toBe("weekend kit");
-    expect(template.items).toEqual([{ name: "Tent", category: ids.groceries }]);
+    // Item category names are trimmed and recorded as suggestions.
+    expect(template.items).toEqual([{ name: "Tent", category: "Gear" }]);
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.family,
+    });
+    expect(suggestions.map((c) => c.name)).toContain("Gear");
+  });
+
+  // Transitional (drop with listItems.categoryId): pre-rework clients send
+  // category *ids* in template items — same-project ids resolve to their name
+  // at save time, foreign ones degrade to "no category".
+  it("resolves legacy category ids in items at save time", async () => {
+    const id = await alice.mutation(api.templates.create, {
+      projectId: ids.family,
+      name: "Legacy",
+      items: [
+        { name: "Milk", category: ids.groceries },
+        { name: "Sunscreen", category: ids.foreign }, // another project
+      ],
+    });
+    const template = await alice.query(api.templates.get, { templateId: id });
+    expect(template.items).toEqual([
+      { name: "Milk", category: "Groceries" },
+      { name: "Sunscreen", category: null },
+    ]);
   });
 
   it("drops a blank description to undefined", async () => {
@@ -123,7 +147,7 @@ describe("templates: CRUD", () => {
       name: "New",
       description: "desc",
       items: [
-        { name: "Milk", category: ids.groceries },
+        { name: "Milk", category: "Groceries" },
         { name: "Eggs", category: null },
       ],
     });
@@ -190,7 +214,7 @@ describe("templates: export", () => {
       name: "Starter",
       description: "kit",
       items: [
-        { name: "Milk", category: ids.groceries },
+        { name: "Milk", category: "Groceries" },
         { name: "Eggs", category: null },
       ],
     });
@@ -204,11 +228,16 @@ describe("templates: export", () => {
     expect(copy.projectId).toBe(ids.shared);
     expect(copy.name).toBe("Starter");
     expect(copy.description).toBe("kit");
-    // Category ids are copied verbatim (lossy across projects).
+    // Category names copy losslessly across projects…
     expect(copy.items).toEqual([
-      { name: "Milk", category: ids.groceries },
+      { name: "Milk", category: "Groceries" },
       { name: "Eggs", category: null },
     ]);
+    // …and are recorded as suggestions in the target project.
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.shared,
+    });
+    expect(suggestions.map((c) => c.name)).toEqual(["Groceries"]);
 
     // The source template is untouched.
     const original = await alice.query(api.templates.listByProject, {
@@ -233,7 +262,7 @@ describe("templates: export", () => {
 });
 
 describe("lists: import templates into an existing list", () => {
-  it("appends template items, resolving categories and dropping cross-project ones", async () => {
+  it("appends template items, copying category names", async () => {
     const list = await t.run((ctx) =>
       ctx.db.insert("lists", {
         name: "Trip",
@@ -252,9 +281,9 @@ describe("lists: import templates into an existing list", () => {
       projectId: ids.family,
       name: "Pack",
       items: [
-        { name: "Milk", category: ids.groceries },
+        { name: "Milk", category: "Groceries" },
         { name: "Eggs", category: null },
-        { name: "Sunscreen", category: ids.foreign }, // another project
+        { name: "Sunscreen", category: "Beach" },
       ],
     });
 
@@ -266,13 +295,13 @@ describe("lists: import templates into an existing list", () => {
     const result = await alice.query(api.lists.get, { listId: list });
     expect(result).not.toBeNull();
     const byName = Object.fromEntries(
-      result!.items.map((item) => [item.name, item.category?.name ?? null]),
+      result!.items.map((item) => [item.name, item.category ?? null]),
     );
     expect(byName).toEqual({
       Existing: null,
       Milk: "Groceries",
       Eggs: null,
-      Sunscreen: null, // cross-project category dropped
+      Sunscreen: "Beach",
     });
   });
 
@@ -301,46 +330,22 @@ describe("lists: import templates into an existing list", () => {
   });
 });
 
-describe("categories: counts", () => {
-  it("returns categories sorted by name with item counts", async () => {
-    const list = await t.run((ctx) =>
-      ctx.db.insert("lists", {
-        name: "L",
-        description: "",
-        projectId: ids.family,
-        favorite: false,
-        createdBy: ids.alice,
-        updatedAt: Date.now(),
-      }),
-    );
+describe("categories: deprecated create", () => {
+  // Transitional (drop with listItems.categoryId): pre-rework pickers create
+  // categories explicitly; now it's just a suggestion upsert deduped by name.
+  it("dedupes by exact name and returns the existing suggestion's id", async () => {
     const drinks = await alice.mutation(api.categories.create, {
+      projectId: ids.family,
+      name: " Drinks ",
+    });
+    const again = await alice.mutation(api.categories.create, {
       projectId: ids.family,
       name: "Drinks",
     });
-    await alice.mutation(api.listItems.create, {
-      listId: list,
-      name: "Milk",
-      categoryId: ids.groceries,
-    });
-    await alice.mutation(api.listItems.create, {
-      listId: list,
-      name: "Bread",
-      categoryId: ids.groceries,
-    });
-    await alice.mutation(api.listItems.create, {
-      listId: list,
-      name: "Cola",
-      categoryId: drinks,
-    });
-
-    const result = await alice.query(api.categories.listWithCounts, {
+    expect(again).toBe(drinks);
+    const suggestions = await alice.query(api.categories.listByProject, {
       projectId: ids.family,
     });
-    expect(
-      result.map((category) => [category.name, category.itemCount]),
-    ).toEqual([
-      ["Drinks", 1],
-      ["Groceries", 2],
-    ]);
+    expect(suggestions.map((c) => c.name)).toEqual(["Drinks", "Groceries"]);
   });
 });
