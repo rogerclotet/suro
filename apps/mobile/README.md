@@ -26,6 +26,38 @@ app. The Convex **deployment** needs these env vars set (`npx convex env set …
 the `JWT_PRIVATE_KEY` + `JWKS` pair (generate with `npx @convex-dev/auth`).
 Native Google OAuth additionally needs the redirect wired to the `suro://` scheme.
 
+## Builds (CI)
+
+Pushes to `main` that touch `apps/mobile/`, `packages/backend/`, the lockfile,
+or the CI config trigger three jobs (`.gitlab-ci.yml`):
+
+| Job | Profile (`eas.json`) | Where | Artifact |
+| --- | --- | --- | --- |
+| `build_mobile_android_preview` | `preview` (dev Convex) | runner, `eas build --local` | `suro-preview.apk` (sideload-able) |
+| `build_mobile_android_release` | `production` | runner, `eas build --local` | `suro-release.aab` (store-ready) |
+| `build_mobile_ios_release` | `production` | EAS cloud | `suro-release.ipa` (store-ready) — **commented out** pending Apple credentials |
+
+Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from the
+`production` profile's `env` in `eas.json` — the EAS local-build sandbox does
+not inherit CI job env, so public build env belongs there, not in CI variables.
+Release versioning is remote (`appVersionSource: "remote"` + `autoIncrement`),
+so version codes bump on EAS servers per build. No `eas submit` step yet.
+
+One-time setup before the first green run:
+
+1. Create an access token on expo.dev and set it as the `EXPO_TOKEN` GitLab
+   CI/CD variable (protected + masked). CI fetches signing credentials with it
+   but can never create them (`--non-interactive`).
+2. Android keystore: `cd apps/mobile && eas credentials -p android` →
+   `production` → generate a new EAS-managed keystore.
+3. iOS: requires an Apple Developer Program membership. Run
+   `eas credentials -p ios` and create the distribution certificate + App Store
+   provisioning profile for `app.suro.mobile`, then uncomment
+   `build_mobile_ios_release` in `.gitlab-ci.yml`.
+
+To force the mobile jobs without a mobile change, start a pipeline on `main`
+from the GitLab UI ("Run pipeline") — they appear there as manual jobs.
+
 ## Notes
 
 - **Styling**: built with React Native core + a small theme (`src/theme.ts`,

@@ -15,7 +15,11 @@
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://happy-otter-123.convex.cloud",
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+      }
     }
   },
   "submit": {
