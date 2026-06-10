@@ -29,12 +29,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG SKIP_ENV_VALIDATION=0
 ENV SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION
 # NEXT_PUBLIC_* vars are inlined into the client bundle at build time.
+ARG NEXT_PUBLIC_CONVEX_URL=""
+ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ARG NEXT_PUBLIC_POSTHOG_KEY=""
 ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
 ARG NEXT_PUBLIC_POSTHOG_HOST=""
 ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
-ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 # Build-time only: upload client source maps to PostHog so production stack
 # traces are readable. Unset for preview builds, which skip the upload.
 ARG POSTHOG_API_KEY=""
@@ -43,14 +43,6 @@ ARG POSTHOG_ENV_ID=""
 ENV POSTHOG_ENV_ID=$POSTHOG_ENV_ID
 
 RUN pnpm --filter web build
-
-# migrate.mjs runs at container start and imports drizzle-orm/postgres at
-# runtime. Those are bundled into the Next server (not left in node_modules),
-# and pnpm's node_modules entries are symlinks into the store that a plain
-# Docker COPY won't dereference. Stage real (dereferenced) copies for the runner.
-RUN mkdir -p /runtime-deps \
-    && cp -RL apps/web/node_modules/drizzle-orm /runtime-deps/drizzle-orm \
-    && cp -RL apps/web/node_modules/postgres /runtime-deps/postgres
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -73,17 +65,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 RUN mkdir -p apps/web/.next
 RUN chown nextjs:nodejs apps/web/.next
 
-# Migrations run at container start (entrypoint) against the runtime DATABASE_URL,
-# so previews can target their per-MR database. migrate.mjs is a standalone
-# script (not part of the Next build graph), so its drizzle-orm + postgres deps
-# are not traced into standalone — copy them and the scripts explicitly.
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/drizzle ./apps/web/drizzle
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/scripts/migrate.mjs ./apps/web/scripts/migrate.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/scripts/seed.mjs ./apps/web/scripts/seed.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/scripts/entrypoint.sh ./apps/web/scripts/entrypoint.sh
-COPY --from=builder --chown=nextjs:nodejs /runtime-deps/drizzle-orm ./node_modules/drizzle-orm
-COPY --from=builder --chown=nextjs:nodejs /runtime-deps/postgres ./node_modules/postgres
-
 USER nextjs
 
 EXPOSE 3000
@@ -91,10 +72,11 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# server.js + the migrate/entrypoint scripts live under apps/web in the
-# standalone output; run from there.
+# server.js lives under apps/web in the standalone output; run from there.
 WORKDIR /app/apps/web
 
-# server.js is created by next build from the standalone output
+# server.js is created by next build from the standalone output. Data, auth,
+# and storage all run on Convex now, so there's no migrate/seed step — the
+# container just serves the app.
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-ENTRYPOINT ["./scripts/entrypoint.sh"]
+ENTRYPOINT ["node", "server.js"]

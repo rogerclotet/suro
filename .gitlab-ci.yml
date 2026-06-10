@@ -39,31 +39,6 @@ check:
     reports:
       junit: test-report.xml
 
-# Lists parity-oracle integration tests: server actions + queries run against a
-# real Postgres service. Uses a dedicated TEST_DATABASE_URL (never DATABASE_URL)
-# so it can't touch a dev DB. allow_failure until validated on a real pipeline —
-# then drop allow_failure to make it a hard gate.
-integration:
-  stage: check
-  image: node:25.1-slim
-  services:
-    - name: postgres:17-alpine
-      alias: postgres
-  variables:
-    POSTGRES_DB: suro_test
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_HOST_AUTH_METHOD: trust
-    TEST_DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/suro_test"
-    SKIP_ENV_VALIDATION: "1"
-    NEXT_TELEMETRY_DISABLED: "1"
-  before_script:
-    - npm install -g pnpm@latest-10
-    - pnpm install
-  script:
-    - pnpm test:integration
-  allow_failure: true
-
 build_preview:
   stage: build
   image: docker:27
@@ -74,11 +49,12 @@ build_preview:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
+    # Previews share the dev Convex deployment (NEXT_PUBLIC_CONVEX_URL_PREVIEW).
     - docker build
         --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL_PREVIEW
         --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
         --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
         -t $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID .
     - docker push $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID
   rules:
@@ -100,9 +76,9 @@ build:
   script:
     - docker build
         --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
         --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
         --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
         --build-arg POSTHOG_API_KEY=$POSTHOG_API_KEY
         --build-arg POSTHOG_ENV_ID=$POSTHOG_ENV_ID
         -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -112,10 +88,24 @@ build:
   only:
     - main
 
+# Deploy the Convex backend (schema + functions) to the production deployment
+# that CONVEX_DEPLOY_KEY belongs to. Runs before the web deploy (see needs:)
+# so the new frontend always lands on an up-to-date backend.
+convex_deploy:
+  stage: build
+  image: node:25.1-slim
+  before_script:
+    - npm install -g pnpm@latest-10
+    - pnpm install --frozen-lockfile --filter backend...
+  script:
+    - cd packages/backend && npx convex deploy
+  only:
+    - main
+
 deploy:
   stage: deploy
   image: alpine
-  needs: [build]
+  needs: [build, convex_deploy]
   before_script:
     - apk add openssh-client sshpass
   script:

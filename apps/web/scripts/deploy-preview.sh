@@ -1,11 +1,12 @@
 #!/bin/sh -e
 
 # Boot or update an ephemeral preview environment for a GitLab merge request.
+# Previews share the dev Convex deployment (baked into the image at build time
+# via NEXT_PUBLIC_CONVEX_URL_PREVIEW), so there's no per-MR database.
 #
 # Required env (from GitLab CI):
 #   CI_MERGE_REQUEST_IID
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
-#   NEXT_PUBLIC_POSTHOG_KEY, NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_VAPID_PUBLIC_KEY
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
 # Required env on the remote (deploy.env):
@@ -20,9 +21,6 @@
 : "${CI_REGISTRY_USER:?missing}"
 : "${CI_REGISTRY_PASSWORD:?missing}"
 : "${CI_REGISTRY_IMAGE:?missing}"
-: "${NEXT_PUBLIC_POSTHOG_KEY:?missing}"
-: "${NEXT_PUBLIC_POSTHOG_HOST:?missing}"
-: "${NEXT_PUBLIC_VAPID_PUBLIC_KEY:?missing}"
 : "${SSH_USERNAME:?missing}"
 : "${SSH_PASSWORD:?missing}"
 : "${SSH_IP:?missing}"
@@ -36,8 +34,6 @@ sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=
   IMAGE="$CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID"
 
   CONTAINER="suro-mr-\${IID}"
-  DB_CONTAINER="suro-mr-\${IID}-db"
-  DB_VOLUME="suro-mr-\${IID}-db"
   HOST="mr-\${IID}.\${PREVIEW_DOMAIN}"
   WORKDIR="\${PREVIEW_WORKDIR}/mr-\${IID}"
 
@@ -55,50 +51,15 @@ services:
       - traefik
     env_file:
       - __ENV_FILE__
-    environment:
-      DATABASE_URL: "postgresql://postgres:preview@db:5432/suro"
-      NEXTAUTH_URL: "https://__HOST__"
-      NEXT_PUBLIC_POSTHOG_KEY: "$NEXT_PUBLIC_POSTHOG_KEY"
-      NEXT_PUBLIC_POSTHOG_HOST: "$NEXT_PUBLIC_POSTHOG_HOST"
-      NEXT_PUBLIC_VAPID_PUBLIC_KEY: "$NEXT_PUBLIC_VAPID_PUBLIC_KEY"
-      SEED_DB: "true"
-      PREVIEW_AUTH_EMAIL: "$PREVIEW_AUTH_EMAIL"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres:17-alpine
-    container_name: __DB_CONTAINER__
-    restart: unless-stopped
-    networks:
-      - traefik
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: suro
-      POSTGRES_PASSWORD: preview
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 networks:
   traefik:
     external: true
     name: __NETWORK__
-
-volumes:
-  db_data:
-    name: __DB_VOLUME__
 COMPOSEEOF
 
   sed -e "s|__IMAGE__|\${IMAGE}|g" \\
       -e "s|__CONTAINER__|\${CONTAINER}|g" \\
-      -e "s|__DB_CONTAINER__|\${DB_CONTAINER}|g" \\
-      -e "s|__DB_VOLUME__|\${DB_VOLUME}|g" \\
-      -e "s|__HOST__|\${HOST}|g" \\
       -e "s|__NETWORK__|\${PREVIEW_DOCKER_NETWORK}|g" \\
       -e "s|__ENV_FILE__|\${PREVIEW_ENV_FILE}|g" \\
     "\${TMPL}" > "\${WORKDIR}/compose.yml"
@@ -108,11 +69,9 @@ COMPOSEEOF
   docker compose -f "\${WORKDIR}/compose.yml" pull
   docker logout "$CI_REGISTRY"
 
-  # Stop any containers from a previous non-compose deploy before handing off to compose.
+  # Stop any container from a previous deploy before handing off to compose.
   docker stop "\${CONTAINER}" 2>/dev/null || true
   docker rm "\${CONTAINER}" 2>/dev/null || true
-  docker stop "\${DB_CONTAINER}" 2>/dev/null || true
-  docker rm "\${DB_CONTAINER}" 2>/dev/null || true
 
   docker compose -f "\${WORKDIR}/compose.yml" up -d --remove-orphans
 

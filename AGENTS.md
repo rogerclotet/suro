@@ -59,9 +59,13 @@ Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr c
 
 ## Deploys
 
-- **Prod**: pushes to `main` run `scripts/deploy.sh`, which SSHes into the host, pulls, rebuilds the `familia` image, and restarts the container behind Traefik (`$PROD_DOMAIN`).
-- **MR previews**: every MR pipeline runs `scripts/deploy-preview.sh`, which boots `suro-mr-<iid>` against its own Postgres DB (`suro_mr_<iid>`) at `https://mr-<iid>.preview.suro.app`. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
-- Migrations run at container start via `scripts/entrypoint.sh` → `scripts/migrate.mjs`, against the runtime `DATABASE_URL` — so previews migrate into their own DB.
+Data, auth, and storage all run on **Convex** — the web container is now just the Next server (`node server.js`), with no migrate/seed step at start.
+
+- **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Resend/JWT/`SITE_URL`, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set`, not in CI.
+- **Prod web**: `scripts/deploy.sh` SSHes into the host, pulls the image built by CI, and restarts the `familia` container behind Traefik (`$PROD_DOMAIN`). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time.
+- **MR previews**: `scripts/deploy-preview.sh` boots `suro-mr-<iid>` at `https://mr-<iid>.<PREVIEW_DOMAIN>`, built against `NEXT_PUBLIC_CONVEX_URL_PREVIEW` so **all previews share the dev Convex deployment** — no per-MR database. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
+
+CI variables to set: `CONVEX_DEPLOY_KEY` (prod deploy key), `NEXT_PUBLIC_CONVEX_URL` (prod), `NEXT_PUBLIC_CONVEX_URL_PREVIEW` (dev), plus the existing PostHog + registry/SSH vars.
 
 ### Host prerequisites (one-time)
 
@@ -70,9 +74,7 @@ The deploy host must have:
 - **Pangolin/Traefik** already running (uses the `pangolin` Docker network, cert resolver `letsencrypt`). Routing uses Traefik's **file provider** — no Docker provider needed.
   - One-time: change the file provider in `/srv/pangolin/config/traefik/traefik_config.yml` from `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir /srv/pangolin/config/traefik/routes && mv /srv/pangolin/config/traefik/dynamic_config.yml /srv/pangolin/config/traefik/routes/` and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
 - Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
-- Postgres image pullable (used as per-MR sidecar containers); no host Postgres required.
-- `/etc/suro/preview.env` with shared preview env (Resend, Uploadthing dev keys, VAPID, `AUTH_SECRET`, etc.). Google OAuth is **not** wired for previews — wildcard redirect URIs aren't allowed; use Resend magic-link sign-in.
-- `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH.
+- `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH. (No Postgres or per-MR database needed anymore; the web container talks only to Convex.)
 
 ## Don't
 
