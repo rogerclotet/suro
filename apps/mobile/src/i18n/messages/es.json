@@ -828,7 +828,6 @@
     "lists": {
       "title": "Listas",
       "templates": "Plantillas",
-      "categories": "Categorías",
       "empty": "Todavía no hay listas. Toca + para crear una.",
       "sectionFavorites": "Favoritas",
       "sectionLists": "Listas",
@@ -860,19 +859,18 @@
       "importSelected": "Importar seleccionadas",
       "importing": "Importando…",
       "noTemplates": "Todavía no hay plantillas.",
-      "uncategorized": "Otros"
+      "uncategorized": "Otros",
+      "itemAlreadyExistsInCategory": "El elemento ya existe en esta categoría",
+      "dropNoCategory": "Sin categoría",
+      "dropNewCategory": "Nueva categoría…",
+      "newCategoryTitle": "Nueva categoría",
+      "newCategoryPlaceholder": "Nombre de la categoría"
     },
     "categories": {
-      "title": "Categorías",
-      "newPlaceholder": "Nueva categoría…",
-      "empty": "Todavía no hay categorías.",
       "searchPlaceholder": "Busca o crea…",
       "noResults": "No se encontró ninguna categoría.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sin categoría",
-      "deleteTitle": "Eliminar categoría",
-      "deleteMessage": "¿Eliminar \"{name}\"? No se puede deshacer y sus elementos quedarán sin categoría.",
-      "itemCount": "{count, plural, =1 {# elemento} other {# elementos}}"
+      "noCategory": "Sin categoría"
     },
     "templates": {
       "title": "Plantillas",

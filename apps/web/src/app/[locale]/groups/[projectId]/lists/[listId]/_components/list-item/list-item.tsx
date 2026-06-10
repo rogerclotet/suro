@@ -14,7 +14,7 @@ export default function ListItem(props: {
     name: string,
     details: string,
     completed: boolean,
-    categoryId: string | null,
+    category: string | null,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
@@ -34,7 +34,7 @@ export default function ListItem(props: {
       props.item.name,
       props.item.details ?? "",
       checked,
-      props.item.categoryId,
+      props.item.category,
     );
   }
 

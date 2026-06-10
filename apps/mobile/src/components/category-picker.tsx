@@ -1,11 +1,12 @@
 import type { Id } from "backend/convex/_generated/dataModel";
 import { Check, ChevronDown, Plus, Tag } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
 
+/** Autocomplete suggestion row (`_id` is only used as a stable list key). */
 export type PickerCategory = { _id: Id<"categories">; name: string };
 
 type Row =
@@ -47,26 +48,23 @@ export function buildCategoryRows(
 /**
  * Inline-expandable category selector. Renders a trigger that toggles an in-flow
  * panel (search + options), so it composes inside a Sheet or a screen without
- * stacking modals. Supports inline category creation via `onCreate`.
+ * stacking modals. Values are plain category names; the "create" row just
+ * selects the typed text (the suggestion is recorded server-side on save).
  */
 export function CategoryPicker({
   categories,
   value,
   onChange,
-  onCreate,
 }: {
   categories: PickerCategory[];
-  value: Id<"categories"> | null;
-  onChange: (categoryId: Id<"categories"> | null) => void;
-  onCreate: (name: string) => Promise<Id<"categories">>;
+  value: string | null;
+  onChange: (category: string | null) => void;
 }) {
   const t = useTheme();
   const tcat = useTranslations("mobile.categories");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [creating, setCreating] = useState(false);
 
-  const selected = categories.find((c) => c._id === value) ?? null;
   const rows = useMemo(
     () => buildCategoryRows(categories, query),
     [categories, query],
@@ -79,28 +77,15 @@ export function CategoryPicker({
     setQuery("");
   }
 
-  async function select(row: Row) {
-    if (row.type === "none") {
-      onChange(null);
-      close();
-      return;
-    }
-    if (row.type === "category") {
-      onChange(row.category._id);
-      close();
-      return;
-    }
-    if (creating) {
-      return;
-    }
-    setCreating(true);
-    try {
-      const id = await onCreate(row.name);
-      onChange(id);
-      close();
-    } finally {
-      setCreating(false);
-    }
+  function select(row: Row) {
+    onChange(
+      row.type === "none"
+        ? null
+        : row.type === "category"
+          ? row.category.name
+          : row.name,
+    );
+    close();
   }
 
   return (
@@ -120,8 +105,8 @@ export function CategoryPicker({
         }}
       >
         <Tag color={t.muted} size={16} />
-        <Txt style={{ flex: 1 }} muted={!selected} numberOfLines={1}>
-          {selected?.name ?? tcat("noCategory")}
+        <Txt style={{ flex: 1 }} muted={value === null} numberOfLines={1}>
+          {value ?? tcat("noCategory")}
         </Txt>
         <ChevronDown color={t.muted} size={16} />
       </Pressable>
@@ -142,12 +127,11 @@ export function CategoryPicker({
             onChangeText={setQuery}
             placeholder={tcat("searchPlaceholder")}
             autoFocus
-            editable={!creating}
             returnKeyType="done"
             onSubmitEditing={() => {
               const first = rows[0];
               if (first) {
-                void select(first);
+                select(first);
               }
             }}
           />
@@ -165,7 +149,7 @@ export function CategoryPicker({
                 row.type === "category" ? `cat-${row.category._id}` : row.type;
               const isSelected =
                 (row.type === "none" && value === null) ||
-                (row.type === "category" && row.category._id === value);
+                (row.type === "category" && row.category.name === value);
               const label =
                 row.type === "create"
                   ? tcat("createNamed", { name: row.name })
@@ -175,8 +159,7 @@ export function CategoryPicker({
               return (
                 <Pressable
                   key={key}
-                  onPress={() => void select(row)}
-                  disabled={creating}
+                  onPress={() => select(row)}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -184,15 +167,10 @@ export function CategoryPicker({
                     paddingHorizontal: 10,
                     paddingVertical: 12,
                     borderRadius: 8,
-                    opacity: creating && row.type !== "create" ? 0.5 : 1,
                   }}
                 >
                   {row.type === "create" ? (
-                    creating ? (
-                      <ActivityIndicator size="small" color={t.primary} />
-                    ) : (
-                      <Plus color={t.primary} size={16} />
-                    )
+                    <Plus color={t.primary} size={16} />
                   ) : (
                     <Check
                       color={t.primary}

@@ -15,30 +15,17 @@ interface ProjectState {
   setProjects: (projects: Project[]) => void;
   selectProject: (project: Project | undefined) => void;
   selectProjectId: (projectId: string) => void;
-  addCategory: (category: Project["categories"][number]) => void;
 }
 
 const useProjectsStore = create<ProjectState>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       projects: [],
       project: null,
       projectId: null,
       setProjects: (projects) => set({ projects }),
       selectProject: (project) => set({ project }),
       selectProjectId: (projectId) => set({ projectId: projectId }),
-      addCategory: (category) => {
-        const p = get().project;
-        if (!p) {
-          return;
-        }
-        set({
-          project: {
-            ...p,
-            categories: [...p.categories, category],
-          },
-        });
-      },
     }),
     { name: "ProjectsStore" },
   ),
@@ -52,7 +39,6 @@ export function useProjects() {
     selectProject: selectProjectInStore,
     projectId,
     selectProjectId,
-    addCategory,
   } = useProjectsStore(
     useShallow((state) => ({
       setProjects: state.setProjects,
@@ -61,7 +47,6 @@ export function useProjects() {
       selectProject: state.selectProject,
       projectId: state.projectId,
       selectProjectId: state.selectProjectId,
-      addCategory: state.addCategory,
     })),
   );
 
@@ -123,7 +108,6 @@ export function useProjects() {
     projects,
     project,
     selectProject,
-    addCategory,
     isAdmin,
   };
 }

@@ -1,9 +1,6 @@
 import type { api } from "backend/convex/_generated/api";
 import type { Doc } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
-import type { Category } from "./category";
-
-export type { Category };
 
 /**
  * List / item / template shapes consumed across the app. Backed by Convex via
@@ -16,8 +13,8 @@ export type ListItem = {
   name: string;
   details: string | null;
   completed: boolean | null;
-  categoryId: string | null;
-  category: Category | null;
+  /** Category (list section) name, or null for "no category". */
+  category: string | null;
   createdBy: string;
   updatedBy: string | null;
   updatedAt: Date | null;
@@ -64,10 +61,6 @@ type ConvexListWithItems = FunctionReturnType<
 >[number];
 type ConvexItem = ConvexListWithItems["items"][number];
 
-function adaptCategory(c: Doc<"categories">): Category {
-  return { id: c._id, name: c.name, projectId: c.projectId };
-}
-
 function adaptItem(i: ConvexItem): ListItem {
   return {
     id: i._id,
@@ -75,8 +68,7 @@ function adaptItem(i: ConvexItem): ListItem {
     name: i.name,
     details: i.details ?? null,
     completed: i.completed,
-    categoryId: i.categoryId ?? null,
-    category: i.category ? adaptCategory(i.category) : null,
+    category: i.category ?? null,
     createdBy: i.createdBy,
     updatedBy: i.updatedBy ?? null,
     updatedAt: i.updatedAt ? new Date(i.updatedAt) : null,

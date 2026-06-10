@@ -18,7 +18,6 @@ import { InputGroupInput } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
-import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
 import { listItemSchema } from "./data";
 
 export default function NewListItem({ list }: { list: List }) {
@@ -26,13 +25,12 @@ export default function NewListItem({ list }: { list: List }) {
     defaultValues: {
       name: "",
       completed: false,
-      categoryId: "",
+      category: null,
     },
     resolver: valibotResolver(listItemSchema),
   });
   const { project } = useProjects();
   const { data: session } = useSession();
-  const { createAndSelect } = useCategoryCreation();
   const createItem = useMutation(api.listItems.create);
   const t = useTranslations("lists");
 
@@ -41,13 +39,9 @@ export default function NewListItem({ list }: { list: List }) {
       return;
     }
 
-    if (data.categoryId === "") {
-      data.categoryId = null;
-    }
-
     if (
       list.items.find(
-        (i) => i.categoryId === data.categoryId && i.name === data.name,
+        (i) => i.category === data.category && i.name === data.name,
       )
     ) {
       toast.error(t("itemAlreadyExists"));
@@ -58,15 +52,10 @@ export default function NewListItem({ list }: { list: List }) {
       await createItem({
         listId: list.id as Id<"lists">,
         name: data.name,
-        categoryId: data.categoryId
-          ? (data.categoryId as Id<"categories">)
-          : null,
+        category: data.category,
       });
-      form.reset({
-        name: "",
-        completed: false,
-        categoryId: data.categoryId ?? "",
-      });
+      // Keep the category selected for fast same-section entry.
+      form.reset({ name: "", completed: false, category: data.category });
       form.setFocus("name");
     } catch (e) {
       console.error("[new-list-item] createListItemOffline failed:", e);
@@ -100,14 +89,13 @@ export default function NewListItem({ list }: { list: List }) {
       categoryControl={
         <Controller
           control={form.control}
-          name="categoryId"
+          name="category"
           render={({ field }) => (
             <CategoryPicker
               variant="ghost"
               categories={project?.categories ?? []}
-              value={field.value || null}
-              onChange={(categoryId) => field.onChange(categoryId ?? "")}
-              onCreate={createAndSelect}
+              value={field.value}
+              onChange={field.onChange}
               disabled={form.formState.isSubmitting}
             />
           )}

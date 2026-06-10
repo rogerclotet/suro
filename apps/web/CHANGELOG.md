@@ -6,6 +6,43 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.1.0] — 2026-06-10
+
+### ca
+
+- [improvement] Les categories ara són seccions pròpies de cada llista: escriu qualsevol nom en afegir un element i la secció es crea sola, amb suggeriments del grup per autocompletar.
+
+### es
+
+- [improvement] Las categorías ahora son secciones propias de cada lista: escribe cualquier nombre al añadir un elemento y la sección se crea sola, con sugerencias del grupo para autocompletar.
+
+### en
+
+- [improvement] Categories are now sections of each list: type any name when adding an item and the section is created on the fly, with group suggestions for autocomplete.
+
+## [1.0.0] — 2026-06-10
+
+### ca
+
+- [feature] Suro 1.0! Hem reconstruït l'aplicació de dalt a baix sobre una base nova, més ràpida i més fiable. És el canvi més gran des que Suro existeix, tot i que gairebé tot es veu igual: la diferència és tot el que ara és possible.
+- [feature] Tot se sincronitza a l'instant: quan algú del grup marca un element, puja una foto o canvia un pla, la resta ho veu immediatament, sense refrescar.
+- [feature] Aquesta nova base prepara el terreny per a les aplicacions natives de Suro per a iPhone i Android, que arribaran ben aviat.
+- [improvement] L'amic invisible i les notificacions queden en pausa temporalment mentre els traslladem a la nova base. Tornaran aviat.
+
+### es
+
+- [feature] ¡Suro 1.0! Hemos reconstruido la aplicación de arriba abajo sobre una base nueva, más rápida y más fiable. Es el cambio más grande desde que existe Suro, aunque casi todo se ve igual: la diferencia está en todo lo que ahora es posible.
+- [feature] Todo se sincroniza al instante: cuando alguien del grupo marca un elemento, sube una foto o cambia un plan, el resto lo ve inmediatamente, sin refrescar.
+- [feature] Esta nueva base prepara el terreno para las aplicaciones nativas de Suro para iPhone y Android, que llegarán muy pronto.
+- [improvement] El amigo invisible y las notificaciones quedan en pausa temporalmente mientras los trasladamos a la nueva base. Volverán pronto.
+
+### en
+
+- [feature] Suro 1.0! The app has been rebuilt from the ground up on a new, faster and more reliable foundation. It's the biggest change since Suro began, even though almost everything looks the same: the difference is everything that's now possible.
+- [feature] Everything syncs instantly: when someone in your group checks off an item, uploads a photo or changes a plan, everyone else sees it right away, no refresh needed.
+- [feature] This new foundation paves the way for native Suro apps for iPhone and Android, coming very soon.
+- [improvement] Secret Santa and notifications are temporarily paused while we move them to the new foundation. They'll be back soon.
+
 ## [0.3.0] — 2026-05-31
 
 ### ca

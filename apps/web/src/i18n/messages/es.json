@@ -237,7 +237,6 @@
   "nav": {
     "lists": "Listas",
     "templates": "Plantillas",
-    "categories": "Categorías",
     "calendar": "Calendario",
     "files": "Archivos",
     "notes": "Notas",
@@ -396,32 +395,14 @@
     "editItemLabel": "Editar",
     "detailsLabel": "Detalles",
     "categoryLabel": "Categoría",
-    "newCategory": "+ Nueva categoría",
     "templateItemsCount": "{count} elementos",
     "addToFavorites": "Añadir a favoritas",
     "removeFromFavorites": "Quitar de favoritas"
   },
   "categories": {
-    "empty": "Aún no hay categorías",
-    "description": "Las categorías son útiles para organizar las listas. Puedes clasificar los elementos de una lista de manera que queden agrupados y sean más fáciles de encontrar.",
-    "newTitle": "Nueva categoría",
-    "newDescription": "Crea y selecciona una categoría nueva",
     "searchPlaceholder": "Buscar categorías",
     "createNamed": "Crear \"{name}\"",
-    "noResults": "No se ha encontrado ninguna categoría",
-    "createSuccess": "Categoría {name} creada",
-    "createError": "No se ha podido crear la categoría, vuelve a intentarlo más tarde",
-    "deleteError": "No se ha podido eliminar la categoría, vuelve a intentarlo más tarde",
-    "deleteSuccess": "La categoría se ha eliminado correctamente",
-    "deleteAriaLabel": "Eliminar categoría",
-    "deleteTitle": "Eliminar categoría",
-    "deleteDescription": "¿Seguro que quieres eliminar la categoría {name}? Esta acción no se puede deshacer, y los elementos de esta categoría pasarán a estar sin categoría.",
-    "editError": "No se ha podido editar la categoría. Vuelve a intentarlo más tarde",
-    "editSuccess": "Categoría editada correctamente",
-    "editTitle": "Editar categoría",
-    "editDescription": "Editar el nombre de la categoría",
-    "editAriaLabel": "Editar categoría",
-    "createTitle": "Crear categoría"
+    "noResults": "No se ha encontrado ninguna categoría"
   },
   "templates": {
     "empty": "Aún no hay plantillas",

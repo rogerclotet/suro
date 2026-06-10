@@ -1,21 +1,21 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
-import { resolveProjectCategoryId } from "./permissions";
+import {
+  normalizeCategoryName,
+  resolveLegacyCategoryValue,
+} from "./categories";
 
-export type ItemWithCategory = Doc<"listItems"> & {
-  category: Doc<"categories"> | null;
-};
-export type ListWithItems = Doc<"lists"> & { items: ItemWithCategory[] };
+export type ListWithItems = Doc<"lists"> & { items: Doc<"listItems">[] };
 
 /** Matches the Postgres order: completed asc, name asc, id asc. */
-function compareItems(a: ItemWithCategory, b: ItemWithCategory) {
+function compareItems(a: Doc<"listItems">, b: Doc<"listItems">) {
   if (a.completed && !b.completed) return 1;
   if (!a.completed && b.completed) return -1;
   const byName = a.name.localeCompare(b.name);
   return byName !== 0 ? byName : a._id.localeCompare(b._id);
 }
 
-/** Join a list with its items (+ each item's category) and sort them. */
+/** Join a list with its items and sort them. */
 export async function loadListWithItems(
   ctx: QueryCtx,
   list: Doc<"lists">,
@@ -24,41 +24,33 @@ export async function loadListWithItems(
     .query("listItems")
     .withIndex("by_list", (q) => q.eq("listId", list._id))
     .collect();
-  const withCategory: ItemWithCategory[] = await Promise.all(
-    items.map(async (item) => ({
-      ...item,
-      category: item.categoryId ? await ctx.db.get(item.categoryId) : null,
-    })),
-  );
-  withCategory.sort(compareItems);
-  return { ...list, items: withCategory };
+  items.sort(compareItems);
+  return { ...list, items };
 }
 
 /**
  * Flatten the items of the given templates (filtered to this project) into
- * insert-ready rows, re-resolving each item's stored category id within the
- * project. Mirrors createList's template seeding.
+ * insert-ready rows carrying category names. Mirrors createList's template
+ * seeding.
  */
 export async function instantiateTemplateItems(
   ctx: QueryCtx,
   projectId: Id<"projects">,
   templateIds: Id<"listTemplates">[],
-): Promise<{ name: string; categoryId: Id<"categories"> | undefined }[]> {
-  const result: { name: string; categoryId: Id<"categories"> | undefined }[] =
-    [];
+): Promise<{ name: string; category: string | undefined }[]> {
+  const result: { name: string; category: string | undefined }[] = [];
   for (const templateId of templateIds) {
     const template = await ctx.db.get(templateId);
     if (template === null || template.projectId !== projectId) {
       continue;
     }
     for (const item of template.items) {
-      const normalized = item.category
-        ? ctx.db.normalizeId("categories", item.category)
-        : null;
-      const categoryId = normalized
-        ? await resolveProjectCategoryId(ctx, projectId, normalized)
-        : undefined;
-      result.push({ name: item.name, categoryId });
+      const name = normalizeCategoryName(item.category);
+      const category =
+        name === undefined
+          ? undefined
+          : await resolveLegacyCategoryValue(ctx, projectId, name);
+      result.push({ name: item.name, category });
     }
   }
   return result;

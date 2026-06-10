@@ -19,7 +19,6 @@ const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   groups: { ca: "grups", es: "grupos" },
   lists: { ca: "llistes", es: "listas" },
   templates: { ca: "plantilles", es: "plantillas" },
-  categories: { es: "categorias" },
   calendar: { ca: "calendari", es: "calendario" },
   files: { ca: "fitxers", es: "archivos" },
   notes: { es: "notas" },

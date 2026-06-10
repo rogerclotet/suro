@@ -3,7 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { Check, LayoutTemplate, Tag } from "lucide-react-native";
+import { Check, ChevronRight, LayoutTemplate } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -64,18 +64,11 @@ export default function ListsOverview() {
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View
-              style={{ flexDirection: "row", gap: 12, marginHorizontal: 16 }}
-            >
-              <NavTile
-                icon={<LayoutTemplate color={t.primary} size={22} />}
+            <View style={{ marginHorizontal: 16 }}>
+              <NavButton
+                icon={<LayoutTemplate color={t.primary} size={18} />}
                 label={tl("templates")}
                 onPress={() => router.push(`/${pid}/lists/templates`)}
-              />
-              <NavTile
-                icon={<Tag color={t.primary} size={22} />}
-                label={tl("categories")}
-                onPress={() => router.push(`/${pid}/lists/categories`)}
               />
             </View>
           }
@@ -191,10 +184,10 @@ export default function ListsOverview() {
   );
 }
 
-// A square-ish launcher tile for a list subsection (templates, categories).
-// Deliberately distinct from the full-width list cards below: side-by-side,
-// icon-forward, with the icon in a primary-tinted badge.
-function NavTile({
+// A compact launcher row for a list subsection (templates). Deliberately
+// distinct from the list rows below: bordered card, primary-tinted icon badge,
+// and a trailing chevron that marks it as navigation rather than a list.
+function NavButton({
   icon,
   label,
   onPress,
@@ -207,22 +200,24 @@ function NavTile({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       style={({ pressed }) => ({
-        flex: 1,
-        aspectRatio: 1.3,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
         borderColor: t.border,
         borderWidth: 1,
         borderRadius: 14,
-        padding: 14,
-        justifyContent: "space-between",
+        paddingVertical: 10,
+        paddingHorizontal: 12,
         backgroundColor: pressed ? t.border : t.card,
       })}
     >
       <View
         style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
+          width: 32,
+          height: 32,
+          borderRadius: 10,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: `${t.primary}1a`,
@@ -230,9 +225,10 @@ function NavTile({
       >
         {icon}
       </View>
-      <Txt size={15} weight="700">
+      <Txt size={15} weight="700" style={{ flex: 1 }}>
         {label}
       </Txt>
+      <ChevronRight color={t.muted} size={18} />
     </Pressable>
   );
 }

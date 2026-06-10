@@ -33,10 +33,6 @@ const breadcrumbHrefMap: Record<string, HrefFactory> = {
     pathname: "/groups/[projectId]/lists/templates",
     params: { projectId },
   }),
-  "lists/categories": (projectId) => ({
-    pathname: "/groups/[projectId]/lists/categories",
-    params: { projectId },
-  }),
   calendar: (projectId) => ({
     pathname: "/groups/[projectId]/calendar",
     params: { projectId },
@@ -69,7 +65,6 @@ const breadcrumbToTranslationKey: Record<string, string> = {
   profile: "profile",
   lists: "lists",
   templates: "templates",
-  categories: "categories",
   calendar: "calendar",
   files: "files",
   notes: "notes",

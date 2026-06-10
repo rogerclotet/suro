@@ -10,7 +10,6 @@ import {
   LayoutTemplateIcon,
   LightbulbIcon,
   ListTodo,
-  TagsIcon,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -59,11 +58,6 @@ const itemParts: MenuItemPart[] = [
         nameKey: "templates",
         pathPart: "templates",
         icon: <LayoutTemplateIcon />,
-      },
-      {
-        nameKey: "categories",
-        pathPart: "categories",
-        icon: <TagsIcon />,
       },
     ],
   },
