@@ -1,1 +1,0 @@
-ALTER TABLE "f_secretSantaParticipant" ADD CONSTRAINT "unique_user_secret_santa" UNIQUE("userId","secretSantaId");

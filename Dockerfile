@@ -3,14 +3,19 @@ FROM node:25.1 AS base
 # Install pnpm
 RUN npm install -g pnpm@latest-10
 
-# Install dependencies only when needed
+# Install dependencies only when needed.
+# Build context is the monorepo root. Copy the workspace manifests first so the
+# install layer caches independently of source changes.
 FROM base AS deps
 WORKDIR /app
-
-# Install dependencies
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/package.json
+# The web app depends on `backend` (workspace:*) and imports its generated
+# Convex client, so its manifest must be present for `--filter web...` to
+# install the backend package and its `convex` dependency.
+COPY packages/backend/package.json ./packages/backend/package.json
 RUN \
-    if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
+    if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile --filter web...; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
@@ -18,6 +23,10 @@ RUN \
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+# `backend/convex/_generated/api` resolves `convex/server` from here; without
+# the workspace's node_modules (the `convex` symlink) the build can't find it.
+COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -25,12 +34,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG SKIP_ENV_VALIDATION=0
 ENV SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION
 # NEXT_PUBLIC_* vars are inlined into the client bundle at build time.
+ARG NEXT_PUBLIC_CONVEX_URL=""
+ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ARG NEXT_PUBLIC_POSTHOG_KEY=""
 ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
 ARG NEXT_PUBLIC_POSTHOG_HOST=""
 ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
-ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 # Build-time only: upload client source maps to PostHog so production stack
 # traces are readable. Unset for preview builds, which skip the upload.
 ARG POSTHOG_API_KEY=""
@@ -38,10 +47,7 @@ ENV POSTHOG_API_KEY=$POSTHOG_API_KEY
 ARG POSTHOG_ENV_ID=""
 ENV POSTHOG_ENV_ID=$POSTHOG_ENV_ID
 
-RUN \
-    if [ -f pnpm-lock.yaml ]; then pnpm run build; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
+RUN pnpm --filter web build
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -53,27 +59,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# next.config sets outputFileTracingRoot to the monorepo root, so the standalone
+# bundle preserves the workspace structure: apps/web/server.js plus a top-level
+# node_modules. Lay it down at /app, then add static + public under apps/web.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 # Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Migrations run at container start (entrypoint) against the runtime DATABASE_URL,
-# so previews can target their per-MR database. drizzle-orm + postgres are
-# bundled in standalone's node_modules; copy them explicitly to guarantee the
-# migrator submodule is present.
-COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/migrate.mjs ./scripts/migrate.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed.mjs ./scripts/seed.mjs
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/entrypoint.sh ./scripts/entrypoint.sh
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/postgres ./node_modules/postgres
+RUN mkdir -p apps/web/.next
+RUN chown nextjs:nodejs apps/web/.next
 
 USER nextjs
 
@@ -82,6 +77,11 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# server.js is created by next build from the standalone output
+# server.js lives under apps/web in the standalone output; run from there.
+WORKDIR /app/apps/web
+
+# server.js is created by next build from the standalone output. Data, auth,
+# and storage all run on Convex now, so there's no migrate/seed step — the
+# container just serves the app.
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-ENTRYPOINT ["./scripts/entrypoint.sh"]
+ENTRYPOINT ["node", "server.js"]

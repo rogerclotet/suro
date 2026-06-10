@@ -1,1 +1,0 @@
-ALTER TABLE "f_notification" ADD COLUMN "bodyParams" jsonb;

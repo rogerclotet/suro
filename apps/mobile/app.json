@@ -1,0 +1,90 @@
+{
+  "expo": {
+    "name": "Suro",
+    "slug": "suro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "suro",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.suro.mobile",
+      "associatedDomains": ["applinks:suro.clotet.dev"]
+    },
+    "android": {
+      "package": "app.suro.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#17100c",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.RECORD_AUDIO"],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "category": ["BROWSABLE", "DEFAULT"],
+          "data": [
+            {
+              "scheme": "https",
+              "host": "suro.clotet.dev",
+              "pathPrefix": "/groups"
+            },
+            {
+              "scheme": "https",
+              "host": "suro.clotet.dev",
+              "pathPrefix": "/en/groups"
+            },
+            {
+              "scheme": "https",
+              "host": "suro.clotet.dev",
+              "pathPrefix": "/ca/grups"
+            },
+            {
+              "scheme": "https",
+              "host": "suro.clotet.dev",
+              "pathPrefix": "/es/grupos"
+            }
+          ]
+        }
+      ]
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Suro to access your photos so you can share them with your group."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#17100c",
+          "android": {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 76
+          }
+        }
+      ],
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aeba1153-b503-4a11-bec7-a55b432868c8"
+      }
+    }
+  }
+}

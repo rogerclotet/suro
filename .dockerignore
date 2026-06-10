@@ -1,10 +1,12 @@
 Dockerfile
 .dockerignore
-node_modules
+**/node_modules
 npm-debug.log
 README.md
-.next
-!.next/static
-!.next/standalone
+**/.next
+**/.expo
+**/.turbo
 .git
 previews
+# The web image doesn't need the Expo app or its heavy native projects.
+apps/mobile

@@ -49,11 +49,12 @@ build_preview:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
+    # Previews share the dev Convex deployment (NEXT_PUBLIC_CONVEX_URL_PREVIEW).
     - docker build
         --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL_PREVIEW
         --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
         --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
         -t $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID .
     - docker push $CI_REGISTRY_IMAGE:mr-$CI_MERGE_REQUEST_IID
   rules:
@@ -75,9 +76,9 @@ build:
   script:
     - docker build
         --build-arg SKIP_ENV_VALIDATION=1
+        --build-arg NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
         --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
         --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-        --build-arg NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
         --build-arg POSTHOG_API_KEY=$POSTHOG_API_KEY
         --build-arg POSTHOG_ENV_ID=$POSTHOG_ENV_ID
         -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -87,15 +88,29 @@ build:
   only:
     - main
 
+# Deploy the Convex backend (schema + functions) to the production deployment
+# that CONVEX_DEPLOY_KEY belongs to. Runs before the web deploy (see needs:)
+# so the new frontend always lands on an up-to-date backend.
+convex_deploy:
+  stage: build
+  image: node:25.1-slim
+  before_script:
+    - npm install -g pnpm@latest-10
+    - pnpm install --frozen-lockfile --filter backend...
+  script:
+    - cd packages/backend && npx convex deploy
+  only:
+    - main
+
 deploy:
   stage: deploy
   image: alpine
-  needs: [build]
+  needs: [build, convex_deploy]
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/deploy.sh
-    - scripts/deploy.sh
+    - chmod +x apps/web/scripts/deploy.sh
+    - apps/web/scripts/deploy.sh
   only:
     - main
 
@@ -106,8 +121,8 @@ deploy_preview:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/deploy-preview.sh
-    - scripts/deploy-preview.sh
+    - chmod +x apps/web/scripts/deploy-preview.sh
+    - apps/web/scripts/deploy-preview.sh
   environment:
     name: review/mr-$CI_MERGE_REQUEST_IID
     url: https://mr-$CI_MERGE_REQUEST_IID.suro.clotet.dev
@@ -122,8 +137,8 @@ stop_preview:
   before_script:
     - apk add openssh-client sshpass
   script:
-    - chmod +x scripts/teardown-preview.sh
-    - scripts/teardown-preview.sh
+    - chmod +x apps/web/scripts/teardown-preview.sh
+    - apps/web/scripts/teardown-preview.sh
   environment:
     name: review/mr-$CI_MERGE_REQUEST_IID
     action: stop

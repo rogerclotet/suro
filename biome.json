@@ -9,10 +9,13 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!node_modules",
-      "!.next",
-      "!dist",
-      "!build",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/dist",
+      "!**/build",
+      "!**/.expo",
+      "!**/_generated",
+      "!apps/web/src/data/changelog.generated.ts",
       "!design_handoff_ui_revamp"
     ]
   },
