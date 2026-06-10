@@ -10,9 +10,16 @@ overrides:
 
 onlyBuiltDependencies:
   - "@napi-rs/canvas"
-  - "@posthog/cli"
   - core-js
   - esbuild
   - msgpackr-extract
   - sharp
   - unrs-resolver
+
+# @posthog/cli's postinstall downloads a prebuilt binary from GitHub releases,
+# which hangs/ECONNRESETs in the CI Docker build. Skip the postinstall — the
+# CLI fetches the binary lazily on first invocation (the prod source-map
+# upload). Preview builds never invoke it (sourcemaps are gated on
+# POSTHOG_API_KEY + POSTHOG_ENV_ID), so they no longer need the download.
+ignoredBuiltDependencies:
+  - "@posthog/cli"
