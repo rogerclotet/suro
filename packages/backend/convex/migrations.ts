@@ -231,8 +231,7 @@ export const upsertItem = mutation({
       .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
       .unique();
     if (existing) {
-      // Also clear the transitional FK on rows migrated before the rework.
-      await ctx.db.patch(existing._id, { ...data, categoryId: undefined });
+      await ctx.db.patch(existing._id, data);
       return existing._id;
     }
     return ctx.db.insert("listItems", data);

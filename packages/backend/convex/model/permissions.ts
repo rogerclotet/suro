@@ -101,23 +101,3 @@ export async function requireFileOwner(ctx: QueryCtx, fileId: Id<"files">) {
   }
   return { file, userId };
 }
-
-/**
- * Transitional (drop with listItems.categoryId): a category id only "counts"
- * if it belongs to the project; otherwise it's silently dropped (never
- * throws), so stale/foreign category references degrade to "no category"
- * instead of failing the write.
- */
-export async function resolveProjectCategoryId(
-  ctx: QueryCtx,
-  projectId: Id<"projects">,
-  categoryId: Id<"categories"> | null | undefined,
-) {
-  if (!categoryId) {
-    return undefined;
-  }
-  const category = await ctx.db.get(categoryId);
-  return category && category.projectId === projectId
-    ? category._id
-    : undefined;
-}

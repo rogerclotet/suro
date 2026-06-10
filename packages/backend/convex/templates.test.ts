@@ -96,25 +96,6 @@ describe("templates: CRUD", () => {
     expect(suggestions.map((c) => c.name)).toContain("Gear");
   });
 
-  // Transitional (drop with listItems.categoryId): pre-rework clients send
-  // category *ids* in template items — same-project ids resolve to their name
-  // at save time, foreign ones degrade to "no category".
-  it("resolves legacy category ids in items at save time", async () => {
-    const id = await alice.mutation(api.templates.create, {
-      projectId: ids.family,
-      name: "Legacy",
-      items: [
-        { name: "Milk", category: ids.groceries },
-        { name: "Sunscreen", category: ids.foreign }, // another project
-      ],
-    });
-    const template = await alice.query(api.templates.get, { templateId: id });
-    expect(template.items).toEqual([
-      { name: "Milk", category: "Groceries" },
-      { name: "Sunscreen", category: null },
-    ]);
-  });
-
   it("drops a blank description to undefined", async () => {
     const id = await alice.mutation(api.templates.create, {
       projectId: ids.family,
@@ -327,25 +308,5 @@ describe("lists: import templates into an existing list", () => {
         templateIds: [tpl],
       }),
     ).rejects.toThrow();
-  });
-});
-
-describe("categories: deprecated create", () => {
-  // Transitional (drop with listItems.categoryId): pre-rework pickers create
-  // categories explicitly; now it's just a suggestion upsert deduped by name.
-  it("dedupes by exact name and returns the existing suggestion's id", async () => {
-    const drinks = await alice.mutation(api.categories.create, {
-      projectId: ids.family,
-      name: " Drinks ",
-    });
-    const again = await alice.mutation(api.categories.create, {
-      projectId: ids.family,
-      name: "Drinks",
-    });
-    expect(again).toBe(drinks);
-    const suggestions = await alice.query(api.categories.listByProject, {
-      projectId: ids.family,
-    });
-    expect(suggestions.map((c) => c.name)).toEqual(["Drinks", "Groceries"]);
   });
 });
