@@ -41,8 +41,10 @@ export default function ListItem(props: {
   return (
     <li
       className={cn(
-        "z-0 flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted",
-        isDragging && "z-50",
+        "flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted",
+        // `relative` makes the z-index effective: a static li ignores it and
+        // paints in DOM order, hiding the dragged row behind later categories.
+        isDragging && "relative z-50",
       )}
       onKeyDown={(e) => {
         const tag = (e.target as HTMLElement).tagName;

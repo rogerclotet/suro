@@ -25,7 +25,8 @@ export default function UserAvatar({ user, className }: UserAvatarProps) {
       {imageSrc && <AvatarImage src={imageSrc} alt={user.name ?? ""} />}
       <AvatarFallback
         delayMs={0}
-        className="bg-secondary text-secondary-foreground"
+        // No Catppuccin color picked → primary fill, like mobile's Avatar.
+        className="bg-primary text-primary-foreground"
         style={
           catppuccin
             ? { backgroundColor: catppuccin.bg, color: catppuccin.fg }

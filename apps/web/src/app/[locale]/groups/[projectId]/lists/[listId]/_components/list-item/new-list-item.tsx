@@ -15,7 +15,6 @@ import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
-import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { listItemSchema } from "./data";
@@ -34,7 +33,7 @@ export default function NewListItem({ list }: { list: List }) {
   const createItem = useMutation(api.listItems.create);
   const t = useTranslations("lists");
 
-  async function onSubmit(data: v.InferInput<typeof listItemSchema>) {
+  function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
       return;
     }
@@ -48,16 +47,18 @@ export default function NewListItem({ list }: { list: List }) {
       return;
     }
 
-    try {
-      await createItem({
-        listId: list.id as Id<"lists">,
-        name: data.name,
-        category: data.category,
-      });
-      // Keep the category selected for fast same-section entry.
-      form.reset({ name: "", completed: false, category: data.category });
-      form.setFocus("name");
-    } catch (e) {
+    // Clear synchronously and let the mutation race in the background:
+    // awaiting it would disable the input mid-flight, which blurs it and
+    // closes the mobile keyboard between consecutive adds. The category stays
+    // selected for fast same-section entry.
+    form.reset({ name: "", completed: false, category: data.category });
+    form.setFocus("name");
+
+    createItem({
+      listId: list.id as Id<"lists">,
+      name: data.name,
+      category: data.category,
+    }).catch((e: unknown) => {
       console.error("[new-list-item] createListItemOffline failed:", e);
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -65,9 +66,12 @@ export default function NewListItem({ list }: { list: List }) {
         projectId: list.projectId,
         listId: list.id,
       });
+      // Restore the lost name for a retry, unless a new one is mid-typing.
+      if (form.getValues("name") === "") {
+        form.setValue("name", data.name, { shouldDirty: true });
+      }
       toast.error(t("itemCreateError"));
-      return;
-    }
+    });
   }
 
   return (
@@ -78,11 +82,7 @@ export default function NewListItem({ list }: { list: List }) {
           control={form.control}
           name="name"
           render={({ field }) => (
-            <InputGroupInput
-              placeholder={t("newItemPlaceholder")}
-              disabled={form.formState.isSubmitting}
-              {...field}
-            />
+            <InputGroupInput placeholder={t("newItemPlaceholder")} {...field} />
           )}
         />
       }
@@ -96,7 +96,6 @@ export default function NewListItem({ list }: { list: List }) {
               categories={project?.categories ?? []}
               value={field.value}
               onChange={field.onChange}
-              disabled={form.formState.isSubmitting}
             />
           )}
         />
@@ -106,9 +105,11 @@ export default function NewListItem({ list }: { list: List }) {
           <Button
             size="icon"
             variant="ghost"
-            disabled={form.formState.isSubmitting}
+            // Keep focus (and the mobile keyboard) in the name input when
+            // confirming with a tap instead of the keyboard's return key.
+            onPointerDown={(e) => e.preventDefault()}
           >
-            {form.formState.isSubmitting ? <Spinner /> : <Check />}
+            <Check />
           </Button>
         ) : null
       }

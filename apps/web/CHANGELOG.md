@@ -6,6 +6,51 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.3.1] — 2026-06-11
+
+### ca
+
+- [fix] En desar els canvis d'una llista o importar plantilles, la finestra d'edició ja es tanca correctament en lloc de quedar-se oberta.
+
+### es
+
+- [fix] Al guardar los cambios de una lista o importar plantillas, la ventana de edición ya se cierra correctamente en lugar de quedarse abierta.
+
+### en
+
+- [fix] Saving changes to a list or importing templates now closes the edit window properly instead of leaving it open.
+
+## [1.3.0] — 2026-06-11
+
+### ca
+
+- [improvement] La pàgina de llistes ara es veu com a les aplicacions natives: seccions de preferides, llistes i completades, amb un anell de progrés per llista i les completades paginades.
+- [fix] En afegir elements a una llista, el teclat ja no es tanca després de cada element: pots afegir-ne uns quants seguits.
+
+### es
+
+- [improvement] La página de listas ahora se ve como en las aplicaciones nativas: secciones de favoritas, listas y completadas, con un anillo de progreso por lista y las completadas paginadas.
+- [fix] Al añadir elementos a una lista, el teclado ya no se cierra después de cada elemento: puedes añadir varios seguidos.
+
+### en
+
+- [improvement] The lists page now looks like the native apps: favorites, lists and completed sections, with a progress ring per list and paginated completed lists.
+- [fix] When adding items to a list, the keyboard no longer closes after each item: you can add several in a row.
+
+## [1.2.0] — 2026-06-11
+
+### ca
+
+- [improvement] Hem refrescat els colors de la web perquè coincideixin amb les aplicacions natives: verd salvia més calmat, fons càlids i accents nous per als esdeveniments del calendari, també en mode fosc.
+
+### es
+
+- [improvement] Hemos refrescado los colores de la web para que coincidan con las aplicaciones nativas: verde salvia más calmado, fondos cálidos y nuevos acentos para los eventos del calendario, también en modo oscuro.
+
+### en
+
+- [improvement] The web app's colors have been refreshed to match the native apps: a calmer sage green, warm backgrounds and new accent colors for calendar events, in dark mode too.
+
 ## [1.1.0] — 2026-06-10
 
 ### ca

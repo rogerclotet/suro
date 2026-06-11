@@ -52,6 +52,16 @@ export function useResponsiveMenu() {
   return context;
 }
 
+/**
+ * Like `useResponsiveMenu`, but safe outside a menu (returns null). For
+ * modals nested in a menu (whose items preventDefault so the modal can stay
+ * mounted) that want to collapse the underlying menu after a successful
+ * action instead of dropping the user back onto it.
+ */
+export function useOptionalResponsiveMenu() {
+  return useContext(ResponsiveMenuContext);
+}
+
 // Large, finger-friendly row used for every item in the mobile drawer.
 const MOBILE_ITEM_CLASSES =
   "flex w-full cursor-pointer select-none items-center gap-3 rounded-md px-4 py-3 text-base outline-hidden transition-colors active:bg-accent [&_svg:not([class*='size-'])]:size-5 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:shrink-0";

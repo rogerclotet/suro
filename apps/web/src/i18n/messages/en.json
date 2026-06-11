@@ -361,8 +361,9 @@
   "lists": {
     "empty": "No lists yet",
     "favorites": "Favorites",
-    "others": "Others",
+    "sectionLists": "Lists",
     "completed": "Completed",
+    "showMoreCompleted": "Show more",
     "items": "items",
     "createTitle": "Create list",
     "createDescription": "Create a new list",

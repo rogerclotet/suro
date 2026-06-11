@@ -361,8 +361,9 @@
   "lists": {
     "empty": "Encara no hi ha llistes",
     "favorites": "Preferides",
-    "others": "Altres",
+    "sectionLists": "Llistes",
     "completed": "Completades",
+    "showMoreCompleted": "Mostra'n més",
     "items": "elements",
     "createTitle": "Crear llista",
     "createDescription": "Crear una llista nova",

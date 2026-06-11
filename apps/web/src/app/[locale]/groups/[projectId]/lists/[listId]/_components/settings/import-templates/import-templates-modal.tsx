@@ -11,7 +11,8 @@ import type { List, Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import ModalForm from "@/components/ui/modal-form";
+import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import { useOptionalResponsiveMenu } from "@/components/ui/responsive-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "@/lib/session";
 import TemplatePreview from "./template-preview";
@@ -25,6 +26,27 @@ export default function ImportTemplatesModal({
   templates: Template[];
   trigger: React.ReactNode;
 }) {
+  const t = useTranslations("templates");
+
+  return (
+    <ModalForm
+      trigger={trigger}
+      title={t("importTitle")}
+      description={t("importDescription")}
+    >
+      {/* Split out so the form can reach the modal context's close(). */}
+      <ImportTemplatesContent list={list} templates={templates} />
+    </ModalForm>
+  );
+}
+
+function ImportTemplatesContent({
+  list,
+  templates,
+}: {
+  list: List;
+  templates: Template[];
+}) {
   const [selected, setSelected] = useState<boolean[]>([]);
   const [itemsByCategory, setItemsByCategory] = useState<
     Record<string, Template["items"]>
@@ -32,6 +54,8 @@ export default function ImportTemplatesModal({
   const [submitting, setSubmitting] = useState(false);
   const { project } = useProjects();
   const { data: session } = useSession();
+  const { close } = useModalForm();
+  const menu = useOptionalResponsiveMenu();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
   const importTemplates = useMutation(api.lists.importTemplates);
@@ -73,6 +97,11 @@ export default function ImportTemplatesModal({
         templateIds,
       });
       setSelected([]);
+      // Close the modal AND the settings menu beneath it (kept open by the
+      // trigger item's preventDefault), so importing doesn't drop the user
+      // back onto the menu sheet.
+      close();
+      menu?.setOpen(false);
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -94,11 +123,7 @@ export default function ImportTemplatesModal({
   }
 
   return (
-    <ModalForm
-      trigger={trigger}
-      title={t("importTitle")}
-      description={t("importDescription")}
-    >
+    <>
       <ul className="space-y-2">
         {templates.map((template, idx) => (
           <li key={template.id}>
@@ -152,6 +177,6 @@ export default function ImportTemplatesModal({
         {submitting && <Spinner />}
         {t("importButton")}
       </Button>
-    </ModalForm>
+    </>
   );
 }

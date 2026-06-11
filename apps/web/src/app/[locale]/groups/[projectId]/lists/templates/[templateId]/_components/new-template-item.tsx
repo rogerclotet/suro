@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
@@ -36,26 +36,33 @@ export default function NewTemplateItem({
   const { data: session } = useSession();
   const t = useTranslations("lists");
 
-  async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
+  function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
     if (data.name === "") {
       return;
     }
 
-    try {
-      await onCreate({ name: data.name, category: data.category ?? null });
-      // Keep the category selected for fast same-section entry.
-      form.reset({ name: "", category: data.category ?? null });
-      form.setFocus("name");
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_template_item",
-        projectId: template.projectId,
-        templateId: template.id,
-      });
-      toast.error(t("itemCreateError"));
-      return;
-    }
+    // Clear synchronously and let the creation race in the background:
+    // awaiting it would disable the input mid-flight, which blurs it and
+    // closes the mobile keyboard between consecutive adds. The category stays
+    // selected for fast same-section entry.
+    form.reset({ name: "", category: data.category ?? null });
+    form.setFocus("name");
+
+    onCreate({ name: data.name, category: data.category ?? null }).catch(
+      (e: unknown) => {
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "create_template_item",
+          projectId: template.projectId,
+          templateId: template.id,
+        });
+        // Restore the lost name for a retry, unless a new one is mid-typing.
+        if (form.getValues("name") === "") {
+          form.setValue("name", data.name, { shouldDirty: true });
+        }
+        toast.error(t("itemCreateError"));
+      },
+    );
   }
 
   return (
@@ -69,7 +76,6 @@ export default function NewTemplateItem({
             render={({ field }) => (
               <InputGroupInput
                 placeholder={t("newItemPlaceholder")}
-                disabled={form.formState.isSubmitting}
                 {...field}
               />
             )}
@@ -85,7 +91,6 @@ export default function NewTemplateItem({
                 categories={project?.categories ?? []}
                 value={field.value ?? null}
                 onChange={field.onChange}
-                disabled={form.formState.isSubmitting}
               />
             )}
           />
@@ -95,13 +100,11 @@ export default function NewTemplateItem({
             <Button
               size="icon"
               variant="ghost"
-              disabled={form.formState.isSubmitting}
+              // Keep focus (and the mobile keyboard) in the name input when
+              // confirming with a tap instead of the keyboard's return key.
+              onPointerDown={(e) => e.preventDefault()}
             >
-              {form.formState.isSubmitting ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Check />
-              )}
+              <Check />
             </Button>
           ) : null
         }

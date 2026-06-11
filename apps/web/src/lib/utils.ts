@@ -12,7 +12,8 @@ export function textToHtml(text: string) {
 
   text = text.replaceAll(
     linkExp,
-    '<a href="$1" target="_blank" class="text-secondary">$1</a>',
+    // Links render in `primary`, matching the mobile rich-text editor.
+    '<a href="$1" target="_blank" class="text-primary">$1</a>',
   );
   text = text.replaceAll("\n", "<br/>");
 
