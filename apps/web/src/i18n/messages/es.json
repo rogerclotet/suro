@@ -388,6 +388,7 @@
     "includeTemplates": "Incluir plantillas",
     "includeTemplatesDescription": "Se incluirán los elementos de las plantillas seleccionadas en la nueva lista",
     "newItemPlaceholder": "Nuevo elemento",
+    "addItem": "Añadir elemento",
     "itemAlreadyExists": "Ya existe un elemento con este nombre",
     "itemAlreadyExistsInCategory": "El elemento ya existe en esta categoría",
     "itemUpdated": "Elemento actualizado",

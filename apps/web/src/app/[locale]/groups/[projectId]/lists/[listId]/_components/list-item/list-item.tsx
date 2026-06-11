@@ -83,6 +83,11 @@ export default function ListItem(props: {
             )}
           >
             {props.item.name}
+            {props.item.details ? (
+              <span className="block text-muted-foreground text-xs">
+                {props.item.details}
+              </span>
+            ) : null}
           </button>
         }
       />

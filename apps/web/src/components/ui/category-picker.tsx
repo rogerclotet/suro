@@ -28,6 +28,8 @@ export type CategoryPickerProps = {
   /** Selected category name, or null for "no category". */
   value: string | null;
   onChange: (category: string | null) => void;
+  /** Observes the popover/drawer; lets hosts ignore blurs while it's open. */
+  onOpenChange?: (open: boolean) => void;
   disabled?: boolean;
   variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
@@ -91,6 +93,7 @@ function CategoryPickerView({
   categories,
   value,
   onChange,
+  onOpenChange,
   disabled,
   variant = "outline",
   className,
@@ -117,6 +120,7 @@ function CategoryPickerView({
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
+    onOpenChange?.(next);
     if (!next) {
       reset();
     }

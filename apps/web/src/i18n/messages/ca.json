@@ -388,6 +388,7 @@
     "includeTemplates": "Incloure plantilles",
     "includeTemplatesDescription": "S'inclouran els elements de les plantilles seleccionades a la nova llista",
     "newItemPlaceholder": "Nou element",
+    "addItem": "Afegeix un element",
     "itemAlreadyExists": "Ja existeix un element amb aquest nom",
     "itemAlreadyExistsInCategory": "L'element ja existeix a aquesta categoria",
     "itemUpdated": "Element actualitzat",

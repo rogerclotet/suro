@@ -5,6 +5,7 @@ import { type AnimationController, autoAnimate } from "@formkit/auto-animate";
 import { type CSSProperties, memo, useCallback, useRef } from "react";
 import type { List } from "@/app/_data/list";
 import { cn } from "@/lib/utils";
+import InlineAddItem from "./list-item/inline-add-item";
 import ListItem from "./list-item/list-item";
 
 // useAutoAnimate fires the callback ref twice in React Strict Mode (dev), creating
@@ -35,6 +36,10 @@ export default memo(function CategoryItems(props: {
     category: string | null,
   ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
+  addActive: boolean;
+  onAddActivate: (category: string | null) => void;
+  onAddDeactivate: (category: string | null) => void;
+  onAddSubmitted: (category: string | null) => void;
 }) {
   const animationParent = useStableAutoAnimate();
   const { isOver, setNodeRef } = useDroppable({
@@ -78,6 +83,19 @@ export default memo(function CategoryItems(props: {
           <div className="mb-2 h-10 rounded-md border-2 border-border border-dashed" />
         )}
       </ul>
+
+      {/* Items created here go straight to this category; the no-category
+          bucket's entry point is the bottom row owned by CheckList. */}
+      {props.category !== "" && (
+        <InlineAddItem
+          list={props.list}
+          category={props.category}
+          active={props.addActive}
+          onActivate={() => props.onAddActivate(props.category)}
+          onDeactivate={() => props.onAddDeactivate(props.category)}
+          onSubmitted={props.onAddSubmitted}
+        />
+      )}
     </div>
   );
 });

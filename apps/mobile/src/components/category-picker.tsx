@@ -55,10 +55,13 @@ export function CategoryPicker({
   categories,
   value,
   onChange,
+  onOpenChange,
 }: {
   categories: PickerCategory[];
   value: string | null;
   onChange: (category: string | null) => void;
+  /** Observes the expandable panel; lets hosts ignore blurs while it's open. */
+  onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTheme();
   const tcat = useTranslations("mobile.categories");
@@ -72,8 +75,15 @@ export function CategoryPicker({
   const trimmedQuery = query.trim();
   const hasCategoryRows = rows.some((row) => row.type === "category");
 
+  function toggleOpen() {
+    const next = !open;
+    setOpen(next);
+    onOpenChange?.(next);
+  }
+
   function close() {
     setOpen(false);
+    onOpenChange?.(false);
     setQuery("");
   }
 
@@ -91,7 +101,7 @@ export function CategoryPicker({
   return (
     <View style={{ gap: 8 }}>
       <Pressable
-        onPress={() => setOpen((o) => !o)}
+        onPress={toggleOpen}
         style={{
           flexDirection: "row",
           alignItems: "center",

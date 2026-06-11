@@ -19,13 +19,19 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import CategoryItems from "./category-items";
-import NewListItem from "./list-item/new-list-item";
+import InlineAddItem from "./list-item/inline-add-item";
 
 export default function CheckList(props: { list: List }) {
   const list = props.list;
   const t = useTranslations("lists");
 
   const [dragging, setDragging] = useState(false);
+  // Which inline add row is expanded: undefined = none, null = the bottom
+  // no-category row, a string = that category's row. Set after each add so
+  // focus follows the item into the category it went to.
+  const [activeAdd, setActiveAdd] = useState<string | null | undefined>(
+    undefined,
+  );
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const keyboardSensor = useSensor(KeyboardSensor);
@@ -77,6 +83,20 @@ export default function CheckList(props: { list: List }) {
     },
     [removeItem],
   );
+
+  const handleAddActivate = useCallback((category: string | null) => {
+    setActiveAdd(category);
+  }, []);
+
+  // Functional update keyed to the caller's own category so a stale blur from
+  // a collapsing row never clears another row's activation (focus-follow).
+  const handleAddDeactivate = useCallback((category: string | null) => {
+    setActiveAdd((prev) => (prev === category ? undefined : prev));
+  }, []);
+
+  const handleAddSubmitted = useCallback((category: string | null) => {
+    setActiveAdd(category);
+  }, []);
 
   function handleDragStart(_event: DragStartEvent) {
     setDragging(true);
@@ -136,8 +156,8 @@ export default function CheckList(props: { list: List }) {
       onDragEnd={handleDragEnd}
       sensors={sensors}
     >
-      <div className="mx-auto max-w-lg">
-        {totalCount > 0 && (
+      {totalCount > 0 && (
+        <div className="mx-auto max-w-lg">
           <div className="mb-3 flex items-center gap-2.5">
             <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
               <div
@@ -149,9 +169,8 @@ export default function CheckList(props: { list: List }) {
               {doneCount}/{totalCount}
             </span>
           </div>
-        )}
-        <NewListItem list={list} />
-      </div>
+        </div>
+      )}
 
       <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
         {itemsByCategory.map(({ category, items }) => (
@@ -163,8 +182,24 @@ export default function CheckList(props: { list: List }) {
             isDragging={dragging}
             handleChange={handleChange}
             handleDelete={handleDelete}
+            addActive={activeAdd === category}
+            onAddActivate={handleAddActivate}
+            onAddDeactivate={handleAddDeactivate}
+            onAddSubmitted={handleAddSubmitted}
           />
         ))}
+        {/* The always-visible no-category entry point; the only row with a
+            category quick-selector. Sits under the uncategorized section,
+            which sorts last. */}
+        <InlineAddItem
+          list={list}
+          category={null}
+          active={activeAdd === null}
+          withCategoryPicker
+          onActivate={() => handleAddActivate(null)}
+          onDeactivate={() => handleAddDeactivate(null)}
+          onSubmitted={handleAddSubmitted}
+        />
       </div>
     </DndContext>
   );
@@ -201,11 +236,12 @@ function groupItemsByCategory(items: List["items"]) {
     result.push({ category, items: categoryItems });
   }
 
+  // The no-category bucket always sorts last so its items sit right above the
+  // bottom inline add row (the no-category entry point).
   result.sort((a, b) => {
-    if (a.items.length !== 0 && b.items.length !== 0) {
-      return a.category.localeCompare(b.category);
-    }
-    return b.items.length - a.items.length;
+    if (a.category === "") return 1;
+    if (b.category === "") return -1;
+    return a.category.localeCompare(b.category);
   });
 
   return result;

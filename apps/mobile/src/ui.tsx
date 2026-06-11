@@ -2,6 +2,7 @@ import { type LucideIcon, Plus } from "lucide-react-native";
 import {
   createContext,
   type ReactNode,
+  type Ref,
   useCallback,
   useContext,
   useEffect,
@@ -544,7 +545,12 @@ export function Section({
 // doesn't inherit the native header's inset, so each one applies it itself.
 export const HEADER_BUTTON_INSET = 16;
 
-export function Field({ style, ...props }: TextInputProps) {
+// RN's TextInputProps predates React 19's ref-as-prop, so accept it explicitly
+// for hosts that need to refocus the input imperatively.
+export function Field({
+  style,
+  ...props
+}: TextInputProps & { ref?: Ref<TextInput> }) {
   const t = useTheme();
   return (
     <TextInput

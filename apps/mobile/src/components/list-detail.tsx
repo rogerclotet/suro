@@ -19,7 +19,6 @@ import {
   Alert,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  Platform,
   Pressable,
   ScrollView,
   Switch,
@@ -40,13 +39,13 @@ import {
   Droppable,
 } from "react-native-reanimated-dnd";
 import { CategoryPicker } from "@/components/category-picker";
+import { InlineAddItemRow } from "@/components/inline-add-item";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
   Button,
-  Fab,
   Field,
   HEADER_BUTTON_INSET,
   IconAction,
@@ -55,7 +54,6 @@ import {
   Screen,
   Sheet,
   Txt,
-  useFabScroll,
 } from "@/ui";
 
 type ListResult = NonNullable<FunctionReturnType<typeof api.lists.get>>;
@@ -65,6 +63,13 @@ type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 type DragData = { id: Id<"listItems"> };
 
 type Section = { title: string; category: string | null; data: Item[] };
+
+// Module-level counter for optimistic item ids (Hermes has no crypto.randomUUID).
+let optimisticItemCounter = 0;
+function nextOptimisticItemId(): Id<"listItems"> {
+  optimisticItemCounter += 1;
+  return `optimistic-item-${optimisticItemCounter}` as Id<"listItems">;
+}
 
 function groupByCategory(items: Item[], uncategorized: string): Section[] {
   const groups = new Map<string, Section>();
@@ -78,7 +83,13 @@ function groupByCategory(items: Item[], uncategorized: string): Section[] {
       groups.set(title, { title, category, data: [item] });
     }
   }
-  return [...groups.values()].sort((a, b) => a.title.localeCompare(b.title));
+  // The uncategorized bucket always sorts last so its items sit right above
+  // the bottom inline add row (the no-category entry point).
+  return [...groups.values()].sort((a, b) => {
+    if (a.category === null) return 1;
+    if (b.category === null) return -1;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 /**
@@ -119,7 +130,40 @@ export function ListDetailScreen({
     }
   }, [list, router]);
   const categories = useQuery(api.categories.listByProject, { projectId: pid });
-  const createItem = useMutation(api.listItems.create);
+  // Optimistic so the new row (and a brand-new category section) mounts in the
+  // same commit as the focus-follow state change — the inline input can grab
+  // focus without waiting a server round-trip or bouncing the keyboard.
+  const createItem = useMutation(api.listItems.create).withOptimisticUpdate(
+    (store, args) => {
+      const current = store.getQuery(api.lists.get, { listId: lid });
+      if (!current) {
+        return;
+      }
+      store.setQuery(
+        api.lists.get,
+        { listId: lid },
+        {
+          ...current,
+          items: [
+            ...current.items,
+            {
+              // Placeholder identity; Convex swaps in the server row on
+              // completion. `createdBy` isn't rendered, so the list's creator
+              // stands in for the current user.
+              _id: nextOptimisticItemId(),
+              _creationTime: Date.now(),
+              name: args.name,
+              completed: false,
+              listId: lid,
+              category: args.category ?? undefined,
+              createdBy: current.createdBy,
+              updatedAt: Date.now(),
+            },
+          ],
+        },
+      );
+    },
+  );
   const removeItem = useMutation(api.listItems.remove);
   const toggleFavorite = useMutation(api.lists.toggleFavorite);
   const updateList = useMutation(api.lists.update);
@@ -154,15 +198,16 @@ export function ListDetailScreen({
     },
   );
 
-  // The create and edit flows share one drawer (`ItemSheet`) and one draft form;
-  // `mode` picks the title/action, and `editingItem` is the target when editing.
-  // The mode and target persist while the sheet slides out so its content
-  // doesn't flicker during the close animation.
-  const fab = useFabScroll();
+  // Editing happens in a drawer (`ItemSheet`); the target and drafts persist
+  // while the sheet slides out so its content doesn't flicker during the close
+  // animation. Creation is inline: `activeAddCategory` tracks which section's
+  // add row is expanded (undefined = none, null = the bottom no-category row,
+  // a string = that category's row) and is set after each add so focus follows
+  // the item into the category it went to.
+  const [activeAddCategory, setActiveAddCategory] = useState<
+    string | null | undefined
+  >(undefined);
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
-  const [itemSheetMode, setItemSheetMode] = useState<"create" | "edit">(
-    "create",
-  );
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [draftName, setDraftName] = useState("");
   const [draftDetails, setDraftDetails] = useState("");
@@ -282,7 +327,6 @@ export function ListDetailScreen({
   }
 
   function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    fab.onScroll?.(e);
     const now = Date.now();
     if (now - lastPositionUpdate.current > 100) {
       lastPositionUpdate.current = now;
@@ -290,17 +334,37 @@ export function ListDetailScreen({
     }
   }
 
-  function openCreate() {
-    setItemSheetMode("create");
-    setEditingItem(null);
-    setDraftName("");
-    setDraftDetails("");
-    setDraftCategory(null);
-    setItemSheetOpen(true);
+  /**
+   * Create an item from an inline add row. Returns false (keeping the row's
+   * text) when the name already exists in the target category. The mutation
+   * is fire-and-forget: the optimistic insert re-sections instantly, and
+   * awaiting would blur the input and close the keyboard between consecutive
+   * adds.
+   */
+  function handleInlineAdd(name: string, category: string | null): boolean {
+    if (!list) {
+      return false;
+    }
+    const duplicate = list.items.some(
+      (item) => (item.category ?? null) === category && item.name === name,
+    );
+    if (duplicate) {
+      Alert.alert(tl("itemAlreadyExists"));
+      return false;
+    }
+    void createItem({ listId: lid, name, category });
+    // Focus follows the item: the used category's row becomes (or stays) the
+    // active one, ready for the next entry.
+    setActiveAddCategory(category);
+    return true;
+  }
+
+  /** Collapse an inline add row, unless focus already moved to another one. */
+  function deactivateAddRow(category: string | null) {
+    setActiveAddCategory((prev) => (prev === category ? undefined : prev));
   }
 
   function openEdit(item: Item) {
-    setItemSheetMode("edit");
     setEditingItem(item);
     setDraftName(item.name);
     setDraftDetails(item.details ?? "");
@@ -309,20 +373,6 @@ export function ListDetailScreen({
   }
 
   async function submitItem() {
-    const trimmed = draftName.trim();
-    if (itemSheetMode === "create") {
-      if (!trimmed) {
-        return;
-      }
-      setItemSheetOpen(false);
-      await createItem({
-        listId: lid,
-        name: trimmed,
-        details: draftDetails.trim() || undefined,
-        category: draftCategory,
-      });
-      return;
-    }
     if (!editingItem) {
       return;
     }
@@ -330,7 +380,7 @@ export function ListDetailScreen({
     setItemSheetOpen(false);
     await updateItem({
       itemId: target._id,
-      name: trimmed || target.name,
+      name: draftName.trim() || target.name,
       details: draftDetails,
       completed: target.completed,
       category: draftCategory,
@@ -415,10 +465,8 @@ export function ListDetailScreen({
           title: headerTitle,
           ...(list
             ? {
-                // Android: only the settings overflow lives in the header (create
-                // is the Fab). iOS: the create "+" and settings both sit in the
-                // Liquid Glass bar via the multi-item API, which supersedes
-                // `headerRight` there.
+                // Creation is inline (the per-section add rows), so the header
+                // only carries the settings overflow on both platforms.
                 headerRight: () => (
                   <Pressable
                     onPress={openSettings}
@@ -430,38 +478,6 @@ export function ListDetailScreen({
                     <Ellipsis color={t.primary} size={22} />
                   </Pressable>
                 ),
-                ...(Platform.OS === "ios"
-                  ? {
-                      unstable_headerRightItems: () => [
-                        {
-                          type: "custom" as const,
-                          element: (
-                            <Pressable
-                              onPress={openCreate}
-                              hitSlop={8}
-                              accessibilityRole="button"
-                              accessibilityLabel={tl("newItem")}
-                            >
-                              <Plus color={t.primary} size={22} />
-                            </Pressable>
-                          ),
-                        },
-                        {
-                          type: "custom" as const,
-                          element: (
-                            <Pressable
-                              onPress={openSettings}
-                              hitSlop={8}
-                              accessibilityRole="button"
-                              accessibilityLabel={tl("listSettings")}
-                            >
-                              <Ellipsis color={t.primary} size={22} />
-                            </Pressable>
-                          ),
-                        },
-                      ],
-                    }
-                  : {}),
               }
             : {}),
         }}
@@ -484,8 +500,12 @@ export function ListDetailScreen({
           }}
         >
           <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
             keyboardShouldPersistTaps="handled"
+            // iOS: inset the content so the focused inline input (especially
+            // the bottom add row) scrolls above the keyboard. Android relies
+            // on the window's adjustResize.
+            automaticallyAdjustKeyboardInsets
             onScroll={handleScroll}
             scrollEventThrottle={100}
             onScrollEndDrag={refreshDropPositions}
@@ -580,9 +600,33 @@ export function ListDetailScreen({
                       onEdit={openEdit}
                     />
                   ))}
+                  {/* Items created here go straight to this category; the
+                      no-category entry point is the bottom row below. */}
+                  {section.category !== null ? (
+                    <InlineAddItemRow
+                      active={activeAddCategory === section.category}
+                      onActivate={() => setActiveAddCategory(section.category)}
+                      onDeactivate={() => deactivateAddRow(section.category)}
+                      onSubmit={(name) =>
+                        handleInlineAdd(name, section.category)
+                      }
+                    />
+                  ) : null}
                 </Droppable>
               </Animated.View>
             ))}
+
+            {/* The always-visible no-category entry point; the only row with a
+                category quick-selector. The uncategorized section sorts last,
+                so this row sits right beneath its items. */}
+            <InlineAddItemRow
+              active={activeAddCategory === null}
+              withCategoryPicker
+              categories={categories ?? []}
+              onActivate={() => setActiveAddCategory(null)}
+              onDeactivate={() => deactivateAddRow(null)}
+              onSubmit={handleInlineAdd}
+            />
 
             {/* Ghost drop sections: placeholder targets that fade in below the
                 real sections while a drag is active. Kept mounted (their slots
@@ -613,15 +657,8 @@ export function ListDetailScreen({
             ) : null}
           </ScrollView>
 
-          <Fab
-            onPress={openCreate}
-            label={tl("newItem")}
-            extended={fab.extended}
-          />
-
           <ItemSheet
             visible={itemSheetOpen}
-            mode={itemSheetMode}
             name={draftName}
             details={draftDetails}
             category={draftCategory}
@@ -875,12 +912,10 @@ function NewCategorySheet({
   );
 }
 
-// Shared create/edit drawer for a list item. In "create" mode it autofocuses
-// the name and hides the destructive action; in "edit" mode it offers Save and
-// Delete. Same form either way, so the two flows stay visually identical.
+// Edit drawer for a list item. Creation is inline (the per-section add rows);
+// this remains the surface for renaming, details, re-categorizing and delete.
 function ItemSheet({
   visible,
-  mode,
   name,
   details,
   category,
@@ -893,7 +928,6 @@ function ItemSheet({
   onClose,
 }: {
   visible: boolean;
-  mode: "create" | "edit";
   name: string;
   details: string;
   category: string | null;
@@ -908,19 +942,15 @@ function ItemSheet({
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const tc = useTranslations("mobile.common");
-  const isCreate = mode === "create";
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
-        {isCreate ? tl("newItem") : tl("editItem")}
+        {tl("editItem")}
       </Txt>
       <Field
         placeholder={tl("namePlaceholder")}
         value={name}
         onChangeText={onChangeName}
-        autoFocus={isCreate}
-        returnKeyType={isCreate ? "done" : undefined}
-        onSubmitEditing={isCreate ? onSubmit : undefined}
       />
       <Field
         placeholder={tl("detailsPlaceholder")}
@@ -935,14 +965,12 @@ function ItemSheet({
         value={category}
         onChange={onChangeCategory}
       />
-      <Button title={isCreate ? tc("add") : tc("save")} onPress={onSubmit} />
-      {isCreate ? null : (
-        <Pressable onPress={onDelete} style={{ padding: 10 }}>
-          <Txt style={{ textAlign: "center", color: t.danger }}>
-            {tl("deleteItem")}
-          </Txt>
-        </Pressable>
-      )}
+      <Button title={tc("save")} onPress={onSubmit} />
+      <Pressable onPress={onDelete} style={{ padding: 10 }}>
+        <Txt style={{ textAlign: "center", color: t.danger }}>
+          {tl("deleteItem")}
+        </Txt>
+      </Pressable>
     </Sheet>
   );
 }

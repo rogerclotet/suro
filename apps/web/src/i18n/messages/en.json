@@ -388,6 +388,7 @@
     "includeTemplates": "Include templates",
     "includeTemplatesDescription": "Items from the selected templates will be included in the new list",
     "newItemPlaceholder": "New item",
+    "addItem": "Add item",
     "itemAlreadyExists": "An item with this name already exists",
     "itemAlreadyExistsInCategory": "The item already exists in this category",
     "itemUpdated": "Item updated",
