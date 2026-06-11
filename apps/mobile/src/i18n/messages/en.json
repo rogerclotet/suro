@@ -812,6 +812,14 @@
       "removePhoto": "Remove photo",
       "backgroundColor": "Background color",
       "backgroundColorHint": "The background color is shown when there is no profile picture",
+      "signOut": "Sign out",
+      "photoPermissionTitle": "Permission needed",
+      "photoPermissionBody": "Allow photo access to set a picture.",
+      "photoError": "Couldn't update photo",
+      "saveError": "Couldn't save"
+    },
+    "preferences": {
+      "title": "Preferences",
       "theme": "Theme",
       "themeDescription": "Choose between a light, dark, or system-matched appearance.",
       "themeLight": "Light",
@@ -819,10 +827,6 @@
       "themeSystem": "System",
       "language": "Language",
       "languageDescription": "This language is used for the interface and notifications.",
-      "signOut": "Sign out",
-      "photoPermissionTitle": "Permission needed",
-      "photoPermissionBody": "Allow photo access to set a picture.",
-      "photoError": "Couldn't update photo",
       "saveError": "Couldn't save"
     },
     "lists": {

@@ -812,6 +812,14 @@
       "removePhoto": "Eliminar la foto",
       "backgroundColor": "Color de fondo",
       "backgroundColorHint": "El color de fondo se muestra cuando no hay imagen de perfil",
+      "signOut": "Cerrar sesión",
+      "photoPermissionTitle": "Permiso necesario",
+      "photoPermissionBody": "Permite el acceso a las fotos para poner una imagen.",
+      "photoError": "No se pudo actualizar la foto",
+      "saveError": "No se pudo guardar"
+    },
+    "preferences": {
+      "title": "Preferencias",
       "theme": "Tema",
       "themeDescription": "Elige entre una apariencia clara, oscura o según el sistema.",
       "themeLight": "Claro",
@@ -819,10 +827,6 @@
       "themeSystem": "Sistema",
       "language": "Idioma",
       "languageDescription": "Este idioma se utiliza para la interfaz y las notificaciones.",
-      "signOut": "Cerrar sesión",
-      "photoPermissionTitle": "Permiso necesario",
-      "photoPermissionBody": "Permite el acceso a las fotos para poner una imagen.",
-      "photoError": "No se pudo actualizar la foto",
       "saveError": "No se pudo guardar"
     },
     "lists": {

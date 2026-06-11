@@ -469,6 +469,77 @@ export function IconAction({
   );
 }
 
+export type SegmentedOption = {
+  key: string;
+  label: string;
+  icon?: LucideIcon;
+  active: boolean;
+  onPress: () => void;
+};
+
+// Equal-width segmented control for mutually exclusive choices (e.g. the theme
+// and language pickers in preferences).
+export function Segmented({ options }: { options: SegmentedOption[] }) {
+  const t = useTheme();
+  return (
+    <View style={[styles.segmented, { borderColor: t.border }]}>
+      {options.map((option, index) => {
+        const Icon = option.icon;
+        return (
+          <Pressable
+            key={option.key}
+            onPress={option.onPress}
+            style={[
+              styles.segment,
+              {
+                backgroundColor: option.active ? t.primary : "transparent",
+                borderLeftWidth: index === 0 ? 0 : 1,
+                borderLeftColor: t.border,
+              },
+            ]}
+          >
+            {Icon ? (
+              <Icon color={option.active ? t.onPrimary : t.text} size={16} />
+            ) : null}
+            <Txt
+              size={14}
+              weight={option.active ? "700" : "400"}
+              style={{ color: option.active ? t.onPrimary : t.text }}
+            >
+              {option.label}
+            </Txt>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// Labelled form block: bold label above the control, optional italic hint below.
+export function Section({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Txt size={16} weight="700">
+        {label}
+      </Txt>
+      {children}
+      {hint ? (
+        <Txt muted size={13} style={{ fontStyle: "italic" }}>
+          {hint}
+        </Txt>
+      ) : null}
+    </View>
+  );
+}
+
 // Standard edge inset for header-bar actions. A custom headerLeft/headerRight
 // doesn't inherit the native header's inset, so each one applies it itself.
 export const HEADER_BUTTON_INSET = 16;
@@ -531,4 +602,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   card: { borderWidth: 1, borderRadius: 14, padding: 16 },
+  segmented: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  segment: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 11,
+  },
 });
