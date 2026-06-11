@@ -41,6 +41,7 @@ import {
 } from "react-native-reanimated-dnd";
 import { CategoryPicker } from "@/components/category-picker";
 import { useTranslations } from "@/i18n";
+import { useTimeAgo } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -105,6 +106,7 @@ export function ListDetailScreen({
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const tc = useTranslations("mobile.common");
+  const timeAgo = useTimeAgo();
   const router = useRouter();
 
   const list = useQuery(api.lists.get, { listId: lid });
@@ -491,33 +493,25 @@ export function ListDetailScreen({
             onContentSizeChange={refreshDropPositions}
             onLayout={refreshDropPositions}
           >
-            {list.description ? (
-              // Set off the description as a quoted note — an accent rail and
-              // breathing room mark it as the list's blurb rather than chrome.
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 10,
-                  paddingBottom: 12,
-                }}
-              >
-                <View
-                  style={{
-                    width: 3,
-                    borderRadius: 999,
-                    backgroundColor: t.primary,
-                    opacity: 0.5,
-                  }}
-                />
-                <Txt
-                  muted
-                  size={14}
-                  style={{ flex: 1, lineHeight: 20, paddingVertical: 1 }}
-                >
+            {/* The list's blurb and provenance. The "updated" stamp only
+                appears once the list has been edited after creation
+                (updatedAt starts below _creationTime). */}
+            <View style={{ gap: 10, paddingBottom: 12 }}>
+              {list.description ? (
+                <Txt muted size={14} style={{ lineHeight: 20 }}>
                   {list.description}
                 </Txt>
-              </View>
-            ) : null}
+              ) : null}
+              <Txt muted size={11}>
+                {tl("createdMeta", {
+                  name: list.createdByName ?? tc("someone"),
+                  date: timeAgo(list._creationTime),
+                })}
+                {list.updatedAt > list._creationTime
+                  ? ` · ${tl("updatedMeta", { date: timeAgo(list.updatedAt) })}`
+                  : ""}
+              </Txt>
+            </View>
 
             {list.items.length === 0 ? (
               <Txt muted style={{ padding: 16 }}>

@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ShareButton from "@/components/ui/share-button";
 import { getPathname, Link } from "@/i18n/navigation";
+import { formatRelative } from "@/lib/format-relative";
 import {
   useProjectLists,
   useProjectTemplates,
@@ -28,6 +29,7 @@ export default function ListsClientContainer({
   const [currentListId, setCurrentListId] = useState(initialListId);
   const locale = useLocale();
   const tLists = useTranslations("lists");
+  const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
 
   // Lists + templates come reactively from Convex.
@@ -145,14 +147,33 @@ export default function ListsClientContainer({
         </div>
       )}
 
-      {currentList.description && (
-        <p
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
-          dangerouslySetInnerHTML={{
-            __html: textToHtml(currentList.description),
-          }}
-        />
-      )}
+      {/* The list's blurb and provenance. The "updated" stamp only appears
+          once the list has been edited after creation. */}
+      <div className="space-y-2.5">
+        {currentList.description && (
+          <p
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: This is safe because the description is sanitized
+            dangerouslySetInnerHTML={{
+              __html: textToHtml(currentList.description),
+            }}
+          />
+        )}
+        <p className="text-muted-foreground text-xs">
+          {tLists("createdMeta", {
+            name: currentList.createdByName ?? tCommon("someone"),
+            date: currentList.createdAt
+              ? formatRelative(currentList.createdAt, locale)
+              : "",
+          })}
+          {currentList.createdAt &&
+          currentList.updatedAt &&
+          currentList.updatedAt > currentList.createdAt
+            ? ` · ${tLists("updatedMeta", {
+                date: formatRelative(currentList.updatedAt, locale),
+              })}`
+            : null}
+        </p>
+      </div>
 
       <CheckList list={currentList} />
     </div>

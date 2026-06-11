@@ -775,10 +775,10 @@
       "someone": "Alguien",
       "member": "Miembro",
       "memberCount": "{count, plural, =1 {# miembro} other {# miembros}}",
-      "timeAgoJustNow": "Ahora mismo",
-      "timeAgoMinutes": "Hace {minutes, plural, =1 {# minuto} other {# minutos}}",
-      "timeAgoHours": "Hace {hours, plural, =1 {# hora} other {# horas}}",
-      "timeAgoDays": "Hace {days, plural, =1 {# día} other {# días}}"
+      "timeAgoJustNow": "ahora mismo",
+      "timeAgoMinutes": "hace {minutes, plural, =1 {# minuto} other {# minutos}}",
+      "timeAgoHours": "hace {hours, plural, =1 {# hora} other {# horas}}",
+      "timeAgoDays": "hace {days, plural, =1 {# día} other {# días}}"
     },
     "auth": {
       "tagline": "Listas, calendario y más, compartido con tu gente.",
@@ -845,6 +845,8 @@
       "newItem": "Nuevo elemento",
       "addItemPlaceholder": "Añade un elemento…",
       "noItems": "Todavía no hay elementos.",
+      "createdMeta": "Creada por {name} {date}",
+      "updatedMeta": "Actualizada {date}",
       "editItem": "Editar elemento",
       "detailsPlaceholder": "Detalles (opcional)",
       "deleteItem": "Eliminar elemento",

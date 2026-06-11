@@ -37,6 +37,8 @@ export type List = {
   favorite: boolean;
   eventId: string | null;
   createdBy: string;
+  /** Creator display name (resolved server-side), or null if the account is gone. */
+  createdByName: string | null;
   updatedBy: string | null;
   updatedAt: Date | null;
   createdAt: Date | null;
@@ -99,6 +101,7 @@ export function adaptList(
     favorite: l.favorite,
     eventId: l.eventId ?? null,
     createdBy: l.createdBy,
+    createdByName: l.createdByName,
     updatedBy: l.updatedBy ?? null,
     updatedAt: l.updatedAt ? new Date(l.updatedAt) : null,
     createdAt: new Date(l._creationTime),
