@@ -832,6 +832,7 @@
       "sectionFavorites": "Favorites",
       "sectionLists": "Lists",
       "sectionCompleted": "Completed",
+      "showMoreCompleted": "Show more",
       "newList": "New list",
       "namePlaceholder": "Name",
       "descriptionPlaceholder": "Description (optional)",

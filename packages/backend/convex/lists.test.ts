@@ -136,7 +136,7 @@ function insertList(
 function insertItem(
   listId: Id<"lists">,
   name: string,
-  opts: { completed?: boolean; category?: string } = {},
+  opts: { completed?: boolean; category?: string; updatedAt?: number } = {},
 ) {
   return t.run((ctx) =>
     ctx.db.insert("listItems", {
@@ -145,7 +145,7 @@ function insertItem(
       listId,
       category: opts.category,
       createdBy: ids.alice,
-      updatedAt: Date.now(),
+      updatedAt: opts.updatedAt ?? Date.now(),
     }),
   );
 }
@@ -268,6 +268,66 @@ describe("lists: create & read", () => {
       projectId: ids.family,
     });
     expect(lists.map((l) => l.name)).toEqual(["Newer", "Older"]);
+  });
+});
+
+describe("lists: overview", () => {
+  function overview(completedLimit: number) {
+    return alice.query(api.lists.overviewByProject, {
+      projectId: ids.family,
+      completedLimit,
+    });
+  }
+
+  it("keeps favorites and unfinished lists active; empty lists too", async () => {
+    const fav = await insertList("Fav done", { favorite: true });
+    await insertItem(fav, "A", { completed: true });
+    const open = await insertList("In progress");
+    await insertItem(open, "B", { completed: false });
+    await insertList("Empty");
+    const done = await insertList("Done");
+    await insertItem(done, "C", { completed: true });
+
+    const result = await overview(5);
+    expect(result.active.map((l) => l.name).sort()).toEqual([
+      "Empty",
+      "Fav done",
+      "In progress",
+    ]);
+    expect(result.completed.map((l) => l.name)).toEqual(["Done"]);
+    expect(result.hasMoreCompleted).toBe(false);
+  });
+
+  it("orders completed by last item check desc and pages by the limit", async () => {
+    for (const [name, checkedAt] of [
+      ["First", Date.parse("2024-01-01")],
+      ["Third", Date.parse("2024-03-01")],
+      ["Second", Date.parse("2024-02-01")],
+    ] as const) {
+      const list = await insertList(name, { updatedAt: 0 });
+      await insertItem(list, "Item", { completed: true, updatedAt: checkedAt });
+    }
+
+    const page = await overview(2);
+    expect(page.completed.map((l) => l.name)).toEqual(["Third", "Second"]);
+    expect(page.hasMoreCompleted).toBe(true);
+
+    const all = await overview(3);
+    expect(all.completed.map((l) => l.name)).toEqual([
+      "Third",
+      "Second",
+      "First",
+    ]);
+    expect(all.hasMoreCompleted).toBe(false);
+  });
+
+  it("rejects non-members", async () => {
+    await expect(
+      bob.query(api.lists.overviewByProject, {
+        projectId: ids.family,
+        completedLimit: 5,
+      }),
+    ).rejects.toThrow();
   });
 });
 

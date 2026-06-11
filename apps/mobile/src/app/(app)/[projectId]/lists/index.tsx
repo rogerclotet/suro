@@ -1,10 +1,14 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { Check, ChevronRight, LayoutTemplate } from "lucide-react-native";
-import { type ReactNode, useMemo, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  LayoutTemplate,
+} from "lucide-react-native";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -13,37 +17,52 @@ import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
-type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
-type ListWithItems = ListsResult[number];
+const COMPLETED_PAGE_SIZE = 5;
 
-function isCompleted(list: ListWithItems) {
-  return list.items.length > 0 && list.items.every((item) => item.completed);
+// Holds the last loaded result while the query re-runs with new args (Convex
+// returns undefined during the swap), so "show more" grows the completed
+// section in place instead of flashing the screen back to the spinner.
+function useStable<T>(value: T | undefined): T | undefined {
+  const last = useRef<T | undefined>(undefined);
+  if (value !== undefined) {
+    last.current = value;
+  }
+  return last.current;
 }
 
 export default function ListsOverview() {
   const pid = useProjectId();
-  const lists = useQuery(api.lists.listByProject, { projectId: pid });
+  const [completedLimit, setCompletedLimit] = useState(COMPLETED_PAGE_SIZE);
+  const overview = useStable(
+    useQuery(api.lists.overviewByProject, { projectId: pid, completedLimit }),
+  );
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const [creating, setCreating] = useState(false);
 
   const sections = useMemo(() => {
-    if (!lists) {
+    if (!overview) {
       return [];
     }
     return [
-      { title: tl("sectionFavorites"), data: lists.filter((l) => l.favorite) },
       {
-        title: tl("sectionLists"),
-        data: lists.filter((l) => !l.favorite && !isCompleted(l)),
+        key: "favorites",
+        title: tl("sectionFavorites"),
+        data: overview.active.filter((l) => l.favorite),
       },
       {
+        key: "lists",
+        title: tl("sectionLists"),
+        data: overview.active.filter((l) => !l.favorite),
+      },
+      {
+        key: "completed",
         title: tl("sectionCompleted"),
-        data: lists.filter((l) => !l.favorite && isCompleted(l)),
+        data: overview.completed,
       },
     ].filter((section) => section.data.length > 0);
-  }, [lists, tl]);
+  }, [overview, tl]);
 
   return (
     <Screen>
@@ -56,7 +75,7 @@ export default function ListsOverview() {
           }),
         }}
       />
-      {lists === undefined ? (
+      {overview === undefined ? (
         <Loading />
       ) : (
         <SectionList
@@ -101,10 +120,34 @@ export default function ListsOverview() {
               }}
             />
           )}
+          renderSectionFooter={({ section }) =>
+            section.key === "completed" && overview.hasMoreCompleted ? (
+              <Pressable
+                onPress={() =>
+                  setCompletedLimit((limit) => limit + COMPLETED_PAGE_SIZE)
+                }
+                accessibilityRole="button"
+                style={({ pressed }) => ({
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  paddingVertical: 12,
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <ChevronDown color={t.muted} size={16} />
+                <Txt muted size={13} weight="700">
+                  {tl("showMoreCompleted")}
+                </Txt>
+              </Pressable>
+            ) : null
+          }
           renderItem={({ item }) => {
             const total = item.items.length;
             const done = item.items.filter((i) => i.completed).length;
             const pending = total - done;
+            const completed = total > 0 && pending === 0;
             return (
               <Pressable
                 onPress={() =>
@@ -123,7 +166,10 @@ export default function ListsOverview() {
                 })}
               >
                 <View style={{ flex: 1 }}>
-                  <Txt size={16}>{item.name}</Txt>
+                  {/* Done lists recede: muted name, faded marker. */}
+                  <Txt size={16} muted={completed}>
+                    {item.name}
+                  </Txt>
                   {item.description ? (
                     <Txt
                       muted
@@ -184,6 +230,9 @@ function ProgressRing({
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: t.primary,
+          // Same half-strength primary as ProgressBar's not-done fill: a done
+          // list is settled, so its marker recedes with the muted row text.
+          opacity: 0.5,
         }}
       >
         <Check color={t.onPrimary} size={16} strokeWidth={3} />
