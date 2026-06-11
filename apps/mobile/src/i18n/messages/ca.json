@@ -812,6 +812,14 @@
       "removePhoto": "Eliminar la foto",
       "backgroundColor": "Color de fons",
       "backgroundColorHint": "El color de fons es mostra quan no hi ha imatge de perfil",
+      "signOut": "Tancar sessió",
+      "photoPermissionTitle": "Cal permís",
+      "photoPermissionBody": "Permet l'accés a les fotos per posar una imatge.",
+      "photoError": "No s'ha pogut actualitzar la foto",
+      "saveError": "No s'ha pogut desar"
+    },
+    "preferences": {
+      "title": "Preferències",
       "theme": "Tema",
       "themeDescription": "Tria entre una aparença clara, fosca o segons el sistema.",
       "themeLight": "Clar",
@@ -819,10 +827,6 @@
       "themeSystem": "Sistema",
       "language": "Idioma",
       "languageDescription": "Aquest idioma s'utilitza per a la interfície i les notificacions.",
-      "signOut": "Tancar sessió",
-      "photoPermissionTitle": "Cal permís",
-      "photoPermissionBody": "Permet l'accés a les fotos per posar una imatge.",
-      "photoError": "No s'ha pogut actualitzar la foto",
       "saveError": "No s'ha pogut desar"
     },
     "lists": {

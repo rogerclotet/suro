@@ -2,7 +2,14 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { Check, ChevronRight, Plus, Settings2 } from "lucide-react-native";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Settings,
+  Settings2,
+} from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
@@ -38,6 +45,7 @@ export function GroupSwitcherSheet({
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
   const tp = useTranslations("mobile.profile");
+  const tpref = useTranslations("mobile.preferences");
   const ti = useTranslations("groups");
 
   function selectGroup(id: Id<"projects">) {
@@ -64,114 +72,159 @@ export function GroupSwitcherSheet({
     router.push("/profile");
   }
 
+  function openPreferences() {
+    onClose();
+    router.push("/preferences");
+  }
+
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
         {tr("switchGroup")}
       </Txt>
-      {groups === undefined ? (
-        <Loading />
-      ) : (
-        <ScrollView style={{ maxHeight: 320 }}>
-          {groups.map((group, index) => {
-            const active = group._id === currentProjectId;
-            return (
-              <View
-                key={group._id}
-                style={[
-                  styles.row,
-                  index > 0 && { borderTopWidth: StyleSheet.hairlineWidth },
-                  { borderColor: t.border },
-                ]}
-              >
-                <Pressable
-                  onPress={() => selectGroup(group._id)}
-                  style={({ pressed }) => [
-                    styles.rowMain,
-                    { opacity: pressed ? 0.6 : 1 },
-                  ]}
-                >
-                  <Avatar
-                    name={group.name}
-                    image={group.image}
-                    color={group.color}
-                    size={ROW_AVATAR_SIZE}
-                  />
-                  <Txt
-                    weight={active ? "700" : "400"}
-                    numberOfLines={1}
-                    style={{ flex: 1, color: active ? t.primary : t.text }}
-                  >
-                    {group.name}
-                  </Txt>
-                  {active ? <Check color={t.primary} size={18} /> : null}
-                </Pressable>
-                <Pressable
-                  onPress={() => manageGroup(group._id)}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={tr("manageGroup")}
-                  style={({ pressed }) => [
-                    styles.manageButton,
-                    { opacity: pressed ? 0.5 : 1 },
-                  ]}
-                >
-                  <Settings2 color={t.muted} size={20} />
-                </Pressable>
-              </View>
-            );
-          })}
-        </ScrollView>
-      )}
-      {/* The only standalone action: create a new group. */}
-      <Pressable
-        onPress={createGroup}
-        style={({ pressed }) => [
-          styles.rowMain,
-          { opacity: pressed ? 0.6 : 1 },
+      {/* One inset-grouped card for the whole list: every row — including
+          "Create group" — shares the same anatomy (38px leading visual + label)
+          so the create action reads as the list's final row, not a stray
+          button. It sits below the ScrollView so it stays reachable however
+          many groups there are. */}
+      <View
+        style={[
+          styles.listCard,
+          { backgroundColor: t.card, borderColor: t.border },
         ]}
       >
-        <View
-          style={[
-            styles.createBadge,
-            { width: ROW_AVATAR_SIZE, height: ROW_AVATAR_SIZE },
-            { backgroundColor: t.primary },
+        {groups === undefined ? (
+          <View style={{ paddingVertical: 24 }}>
+            <Loading />
+          </View>
+        ) : (
+          <ScrollView style={{ maxHeight: 300 }}>
+            {groups.map((group, index) => {
+              const active = group._id === currentProjectId;
+              return (
+                <View
+                  key={group._id}
+                  style={[
+                    styles.row,
+                    index > 0 && { borderTopWidth: StyleSheet.hairlineWidth },
+                    { borderColor: t.border },
+                  ]}
+                >
+                  <Pressable
+                    onPress={() => selectGroup(group._id)}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [
+                      styles.rowMain,
+                      { opacity: pressed ? 0.6 : 1 },
+                    ]}
+                  >
+                    <Avatar
+                      name={group.name}
+                      image={group.image}
+                      color={group.color}
+                      size={ROW_AVATAR_SIZE}
+                    />
+                    <Txt
+                      weight={active ? "700" : "400"}
+                      numberOfLines={1}
+                      style={{ flex: 1, color: active ? t.primary : t.text }}
+                    >
+                      {group.name}
+                    </Txt>
+                    {active ? <Check color={t.primary} size={18} /> : null}
+                  </Pressable>
+                  <Pressable
+                    onPress={() => manageGroup(group._id)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={tr("manageGroup")}
+                    style={({ pressed }) => [
+                      styles.manageButton,
+                      { opacity: pressed ? 0.5 : 1 },
+                    ]}
+                  >
+                    <Settings2 color={t.muted} size={20} />
+                  </Pressable>
+                </View>
+              );
+            })}
+          </ScrollView>
+        )}
+        <Pressable
+          onPress={createGroup}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.row,
+            styles.createRow,
+            {
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderColor: t.border,
+              opacity: pressed ? 0.6 : 1,
+            },
           ]}
         >
-          <Plus color={t.onPrimary} size={20} />
-        </View>
-        <Txt weight="700" style={{ color: t.primary }}>
-          {ti("createTitle")}
-        </Txt>
-      </Pressable>
-      {/* Account entry: replaces the old header profile badge — same Liquid
-          Glass-adjacent home for "you", tapping it opens the preferences page. */}
-      <Card onPress={openProfile}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Avatar
-            name={me?.name}
-            image={me?.customImage ?? me?.image}
-            color={me?.avatarColor}
-          />
-          <View style={{ flex: 1 }}>
-            <Txt weight="700" numberOfLines={1}>
-              {me?.name ?? tp("title")}
-            </Txt>
-            {me?.email ? (
-              <Txt muted size={13} numberOfLines={1}>
-                {me.email}
-              </Txt>
-            ) : null}
+          {/* Dashed outline instead of a filled badge: same footprint as the
+              group avatars, but clearly "add a new one of these". */}
+          <View style={[styles.createBadge, { borderColor: t.primary }]}>
+            <Plus color={t.primary} size={20} />
           </View>
-          <ChevronRight color={t.muted} size={18} />
+          <Txt style={{ color: t.primary }}>{ti("createTitle")}</Txt>
+        </Pressable>
+      </View>
+      {/* Account entries: the profile card (who you are) and its square
+          preferences sibling (how the app behaves), styled as one family. */}
+      <View style={{ flexDirection: "row", gap: 12, alignItems: "stretch" }}>
+        <View style={{ flex: 1 }}>
+          <Card onPress={openProfile}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <Avatar
+                name={me?.name}
+                image={me?.customImage ?? me?.image}
+                color={me?.avatarColor}
+              />
+              <View style={{ flex: 1 }}>
+                <Txt weight="700" numberOfLines={1}>
+                  {me?.name ?? tp("title")}
+                </Txt>
+                {me?.email ? (
+                  <Txt muted size={13} numberOfLines={1}>
+                    {me.email}
+                  </Txt>
+                ) : null}
+              </View>
+              <ChevronRight color={t.muted} size={18} />
+            </View>
+          </Card>
         </View>
-      </Card>
+        <Pressable
+          onPress={openPreferences}
+          accessibilityRole="button"
+          accessibilityLabel={tpref("title")}
+          style={({ pressed }) => [
+            styles.prefsButton,
+            {
+              backgroundColor: t.card,
+              borderColor: t.border,
+              opacity: pressed ? 0.9 : 1,
+            },
+          ]}
+        >
+          <Settings color={t.muted} size={22} />
+        </Pressable>
+      </View>
     </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center" },
+  listCard: { borderWidth: 1, borderRadius: 14, overflow: "hidden" },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
   rowMain: {
     flex: 1,
     flexDirection: "row",
@@ -180,11 +233,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   manageButton: { padding: 8 },
+  createRow: { gap: 12, paddingVertical: 10 },
   createBadge: {
+    width: ROW_AVATAR_SIZE,
+    height: ROW_AVATAR_SIZE,
     borderRadius: 11,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
   },
+  // Mirrors `Card` (border, radius, bg) so the gear square and the profile
+  // card read as siblings; stretches to the card's height and stays square.
+  prefsButton: {
+    aspectRatio: 1,
+    borderWidth: 1,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeRow: { flexDirection: "row", alignItems: "center", gap: 3 },
 });
 
 /**
@@ -205,6 +273,10 @@ export function GroupBadge({
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
 
+  // A chevron-down beside the badge signals "this opens a switcher" — the
+  // bare avatar/initials read as a static label, not a button.
+  const glassTint = catppuccinSwatch(project?.color)?.bg ?? t.primary;
+
   return (
     <>
       {variant === "glass" ? (
@@ -213,25 +285,36 @@ export function GroupBadge({
           hitSlop={8}
           accessibilityRole="button"
           accessibilityLabel={tr("switchGroup")}
+          style={styles.badgeRow}
         >
-          <Txt
-            weight="700"
-            size={17}
-            style={{ color: catppuccinSwatch(project?.color)?.bg ?? t.primary }}
-          >
+          <Txt weight="700" size={17} style={{ color: glassTint }}>
             {project?.name ? initials(project.name) : ""}
           </Txt>
+          {/* Same tint as the initials so the capsule reads as one control. */}
+          <ChevronDown color={glassTint} size={14} strokeWidth={2.5} />
         </Pressable>
       ) : (
-        <Avatar
-          name={project?.name}
-          image={project?.image}
-          color={project?.color}
-          size={HEADER_AVATAR_SIZE}
+        <Pressable
           onPress={() => setSwitching(true)}
+          hitSlop={8}
+          accessibilityRole="button"
           accessibilityLabel={tr("switchGroup")}
-          style={{ marginHorizontal: HEADER_BUTTON_INSET }}
-        />
+          style={({ pressed }) => [
+            styles.badgeRow,
+            {
+              marginHorizontal: HEADER_BUTTON_INSET,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <Avatar
+            name={project?.name}
+            image={project?.image}
+            color={project?.color}
+            size={HEADER_AVATAR_SIZE}
+          />
+          <ChevronDown color={t.muted} size={14} />
+        </Pressable>
       )}
       <GroupSwitcherSheet
         visible={switching}
