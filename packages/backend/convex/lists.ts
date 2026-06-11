@@ -2,7 +2,11 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { ensureCategorySuggestions } from "./model/categories";
-import { instantiateTemplateItems, loadListWithItems } from "./model/lists";
+import {
+  instantiateTemplateItems,
+  type ListWithItems,
+  loadListWithItems,
+} from "./model/lists";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
 
 export const listByProject = query({
@@ -15,6 +19,46 @@ export const listByProject = query({
       .order("desc")
       .collect();
     return Promise.all(lists.map((list) => loadListWithItems(ctx, list)));
+  },
+});
+
+function isCompleted(list: ListWithItems) {
+  return list.items.length > 0 && list.items.every((item) => item.completed);
+}
+
+/**
+ * The mobile lists overview: every favorite and unfinished list, plus a page
+ * of the most recently completed ones. Completed-ness is derived from items,
+ * so the query still reads the whole project's lists — `completedLimit` trims
+ * the payload, not the scan; fine at a group's scale. "Show more" re-runs the
+ * query with a larger limit.
+ */
+export const overviewByProject = query({
+  args: { projectId: v.id("projects"), completedLimit: v.number() },
+  handler: async (ctx, { projectId, completedLimit }) => {
+    await requireProjectMember(ctx, projectId);
+    const lists = await ctx.db
+      .query("lists")
+      .withIndex("by_project_updatedAt", (q) => q.eq("projectId", projectId))
+      .order("desc")
+      .collect();
+    const withItems = await Promise.all(
+      lists.map((list) => loadListWithItems(ctx, list)),
+    );
+    // Completed favorites stay pinned in the overview's Favorites section.
+    const active = withItems.filter((l) => l.favorite || !isCompleted(l));
+    const completed = withItems.filter((l) => !l.favorite && isCompleted(l));
+    // "Most recently completed" is when the last item was checked: completing
+    // an item bumps only the item's updatedAt, not the list document's.
+    const completedAt = (list: ListWithItems) =>
+      Math.max(list.updatedAt, ...list.items.map((item) => item.updatedAt));
+    completed.sort((a, b) => completedAt(b) - completedAt(a));
+    const limit = Math.max(0, Math.floor(completedLimit));
+    return {
+      active,
+      completed: completed.slice(0, limit),
+      hasMoreCompleted: completed.length > limit,
+    };
   },
 });
 
