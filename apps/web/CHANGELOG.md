@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.4.0] — 2026-06-11
+
+### ca
+
+- [improvement] Les pàgines d'esdeveniment ara mostren botons discrets per afegir una llista, una nota, un grup de despeses o un fitxer a l'esdeveniment, o enllaçar-ne un d'existent, sense obrir el menú d'opcions.
+
+### es
+
+- [improvement] Las páginas de evento ahora muestran botones discretos para añadir una lista, una nota, un grupo de gastos o un archivo al evento, o enlazar uno existente, sin abrir el menú de opciones.
+
+### en
+
+- [improvement] Event pages now show small suggestion buttons to add a list, a note, an expense group or a file to the event, or link an existing one, without opening the options menu.
+
 ## [1.3.1] — 2026-06-11
 
 ### ca

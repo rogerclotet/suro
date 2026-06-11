@@ -1,8 +1,5 @@
 "use client";
 
-import { api } from "backend/convex/_generated/api";
-import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
 import {
   Edit,
   ListPlus,
@@ -17,8 +14,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
-import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
 import { Button } from "@/components/ui/button";
@@ -28,7 +23,6 @@ import {
   ResponsiveMenuItem,
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
-import { useSession } from "@/lib/session";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";
 import LinkListForm from "./link-list-form";
@@ -36,6 +30,7 @@ import LinkNoteForm from "./link-note-form";
 import LinkPotForm from "./link-pot-form";
 import UnlinkEventListModal from "./unlink-event-list-modal";
 import UnlinkEventPotModal from "./unlink-event-pot-modal";
+import { useCreateLinked } from "./use-create-linked";
 
 export default function SettingsMenu({
   event,
@@ -48,56 +43,12 @@ export default function SettingsMenu({
   pot: { id: string } | null;
   canCreatePot: boolean;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
-  const createLinkedList = useMutation(api.events.createLinkedList);
-  const createLinkedNote = useMutation(api.events.createLinkedNote);
-  const createLinkedPot = useMutation(api.events.createLinkedPot);
-
-  async function handleCreateLinkedList() {
-    try {
-      await createLinkedList({ eventId: event.id as Id<"events"> });
-      toast.success(t("createListSuccess"));
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_list",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error(t("createListError"));
-    }
-  }
-
-  async function handleCreateLinkedNote() {
-    try {
-      await createLinkedNote({ eventId: event.id as Id<"events"> });
-      toast.success(t("createNoteSuccess"));
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_note",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error(t("createNoteError"));
-    }
-  }
-
-  async function handleCreateLinkedPot() {
-    try {
-      await createLinkedPot({ eventId: event.id as Id<"events"> });
-      toast.success(t("createPotSuccess"));
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_pot",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error(t("createPotError"));
-    }
-  }
+  const {
+    handleCreateLinkedList,
+    handleCreateLinkedNote,
+    handleCreateLinkedPot,
+  } = useCreateLinked(event);
 
   return (
     <ResponsiveMenu>

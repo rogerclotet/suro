@@ -215,6 +215,15 @@ export default function EventDetail() {
   // Pending uploads keep the gallery visible so the in-flight tile shows.
   const hasFiles = (eventFiles && eventFiles.length > 0) || pending;
   const hasExtras = Boolean(linkedList || linkedNote || linkedPot || hasFiles);
+  // Quiet prompts for whatever the event still lacks, so the menu's add
+  // actions are discoverable without opening it. Skipped entirely when full,
+  // so the ScrollView gap doesn't show phantom spacing.
+  const showAddChips =
+    !linkedList ||
+    !linkedNote ||
+    !linkedPot ||
+    !hasFiles ||
+    candidates.length > 0;
 
   // Auto-created linked records inherit the event's name (events.createLinked*);
   // repeating it right under the headline is noise, so show the kind instead.
@@ -372,6 +381,46 @@ export default function EventDetail() {
             ) : null}
           </>
         ) : null}
+
+        {showAddChips ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {!linkedList ? (
+              <AddChip
+                icon={ListPlus}
+                label={tCal("createList")}
+                onPress={() => void handleCreateLinkedList()}
+              />
+            ) : null}
+            {!linkedNote ? (
+              <AddChip
+                icon={FilePlus}
+                label={tCal("createNote")}
+                onPress={() => void handleCreateLinkedNote()}
+              />
+            ) : null}
+            {!linkedPot ? (
+              <AddChip
+                icon={CirclePlus}
+                label={tCal("createExpense")}
+                onPress={() => void handleCreateLinkedPot()}
+              />
+            ) : null}
+            {!hasFiles ? (
+              <AddChip
+                icon={Upload}
+                label={tFiles("uploadFile")}
+                onPress={chooseFile}
+              />
+            ) : null}
+            {candidates.length > 0 ? (
+              <AddChip
+                icon={Paperclip}
+                label={tCal("addExisting")}
+                onPress={() => setLinking(true)}
+              />
+            ) : null}
+          </View>
+        ) : null}
       </ScrollView>
 
       <EventForm
@@ -525,6 +574,46 @@ function useLinkCandidates(
     }
     return out;
   }, [lists, notes, pots, linked.list, linked.note, linked.pot]);
+}
+
+/**
+ * A muted dashed pill prompting an add-to-event action — quiet enough to fill
+ * the empty space without competing with the event's own content.
+ */
+function AddChip({
+  icon: Icon,
+  label,
+  onPress,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderStyle: "dashed",
+        borderColor: t.border,
+        borderRadius: 999,
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <Icon color={t.muted} size={14} />
+      <Txt muted size={13}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
 }
 
 /** A left-aligned icon + label row for the event-options sheet. */

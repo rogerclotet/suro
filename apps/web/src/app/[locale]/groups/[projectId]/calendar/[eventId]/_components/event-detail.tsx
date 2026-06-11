@@ -13,6 +13,7 @@ import Files from "../../../files/_components/files";
 import UploadButton from "../../../files/_components/upload-button";
 import CheckList from "../../../lists/[listId]/_components/check-list";
 import TimeRange from "../../_components/event/time-range";
+import AddToEventChips from "./add-to-event-chips";
 import SettingsMenu from "./settings-menu";
 import TimeRemaining from "./time-remaining";
 
@@ -149,6 +150,14 @@ export default function EventDetail({
           </div>
         )}
       </div>
+
+      <AddToEventChips
+        event={event}
+        list={list}
+        note={note}
+        pot={pot}
+        canCreatePot={canCreatePot}
+      />
     </div>
   );
 }
