@@ -11,7 +11,16 @@ import { useLocale, useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { formatMoney, parseMoney } from "@/lib/money";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
 type Pot = NonNullable<FunctionReturnType<typeof api.expenses.getPot>>;
 type Member = Pot["members"][number];
@@ -168,6 +177,7 @@ export default function PotDetail() {
   const tc = useTranslations("mobile.common");
   const timeAgo = useTimeAgo();
   const [adding, setAdding] = useState(false);
+  const fab = useFabScroll();
   const [settling, setSettling] = useState(false);
 
   if (pot === undefined) {
@@ -194,7 +204,11 @@ export default function PotDetail() {
           }),
         }}
       />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 96 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
+      >
         {pot.settledAt ? (
           <Txt
             size={13}
@@ -285,7 +299,11 @@ export default function PotDetail() {
         )}
       </ScrollView>
 
-      <Fab onPress={() => setAdding(true)} label={tExp("newSpending")} />
+      <Fab
+        onPress={() => setAdding(true)}
+        label={tExp("newSpending")}
+        extended={fab.extended}
+      />
       <AddSpendingSheet
         visible={adding}
         pot={pot}

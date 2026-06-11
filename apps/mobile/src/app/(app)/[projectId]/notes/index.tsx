@@ -11,7 +11,16 @@ import { useTimeAgo } from "@/lib/datetime";
 import { notePreview } from "@/lib/note-content";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
 type Note = FunctionReturnType<typeof api.notes.listByProject>[number];
 
@@ -62,6 +71,7 @@ export default function NotesOverview() {
   const pid = useProjectId();
   const notes = useQuery(api.notes.listByProject, { projectId: pid });
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
   const tNotes = useTranslations("mobile.notes");
 
   const columns = useMemo(() => {
@@ -99,6 +109,8 @@ export default function NotesOverview() {
         <ScrollView
           contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
           showsVerticalScrollIndicator={false}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
         >
           <View style={{ flexDirection: "row", gap: GAP }}>
             {columns.map((column, index) => (
@@ -115,7 +127,11 @@ export default function NotesOverview() {
           </View>
         </ScrollView>
       )}
-      <Fab onPress={() => setCreating(true)} label={tNotes("newNote")} />
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tNotes("newNote")}
+        extended={fab.extended}
+      />
       <CreateNoteSheet
         visible={creating}
         projectId={pid}

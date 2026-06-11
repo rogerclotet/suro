@@ -11,7 +11,16 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
 type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
 type ListWithItems = ListsResult[number];
@@ -27,6 +36,7 @@ export default function ListsOverview() {
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
 
   const sections = useMemo(() => {
     if (!lists) {
@@ -61,6 +71,8 @@ export default function ListsOverview() {
       ) : (
         <SectionList
           sections={sections}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
@@ -142,7 +154,11 @@ export default function ListsOverview() {
         />
       )}
 
-      <Fab onPress={() => setCreating(true)} label={tl("newList")} />
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tl("newList")}
+        extended={fab.extended}
+      />
       <CreateListSheet
         visible={creating}
         projectId={pid}
