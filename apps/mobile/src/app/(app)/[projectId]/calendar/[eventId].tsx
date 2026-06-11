@@ -202,6 +202,7 @@ export default function EventDetail() {
   if (event === undefined) {
     return (
       <Screen>
+        <Stack.Screen options={{ title: "" }} />
         <Loading />
       </Screen>
     );
@@ -214,6 +215,11 @@ export default function EventDetail() {
   // Pending uploads keep the gallery visible so the in-flight tile shows.
   const hasFiles = (eventFiles && eventFiles.length > 0) || pending;
   const hasExtras = Boolean(linkedList || linkedNote || linkedPot || hasFiles);
+
+  // Auto-created linked records inherit the event's name (events.createLinked*);
+  // repeating it right under the headline is noise, so show the kind instead.
+  const kindOrName = (name: string, kindLabel: string) =>
+    name === event.name ? kindLabel : name;
 
   function runPendingSheet() {
     if (pendingSheet === "edit") {
@@ -228,7 +234,9 @@ export default function EventDetail() {
     <Screen>
       <Stack.Screen
         options={{
-          title: event.name,
+          // The event name is the page's headline below (as in Apple/Google
+          // Calendar); a header title would truncate long names.
+          title: "",
           headerRight: () => (
             <View
               style={{
@@ -252,15 +260,18 @@ export default function EventDetail() {
       />
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-        <View>
-          {remaining ? (
-            <Txt size={16} style={{ color: t.primary, marginBottom: 3 }}>
-              {remaining}
-            </Txt>
-          ) : null}
+        <View style={{ gap: 4 }}>
+          <Txt size={26} weight="700">
+            {event.name}
+          </Txt>
           <Txt muted size={16}>
             {formatRange(event)}
           </Txt>
+          {remaining ? (
+            <Txt size={15} style={{ color: t.primary }}>
+              {remaining}
+            </Txt>
+          ) : null}
         </View>
 
         {event.description ? <Txt size={18}>{event.description}</Txt> : null}
@@ -278,7 +289,7 @@ export default function EventDetail() {
             {linkedList ? (
               <LinkedCard
                 icon={ListTodo}
-                name={linkedList.name}
+                name={kindOrName(linkedList.name, tCal("list"))}
                 subtitle={
                   linkedList.items.length === 0
                     ? tc("empty")
@@ -308,7 +319,7 @@ export default function EventDetail() {
             {linkedNote ? (
               <LinkedCard
                 icon={FileText}
-                name={linkedNote.name}
+                name={kindOrName(linkedNote.name, tCal("note"))}
                 subtitle={
                   notePreview(linkedNote.contents, linkedNote.format) ||
                   tc("empty")
@@ -333,7 +344,7 @@ export default function EventDetail() {
             {linkedPot ? (
               <LinkedCard
                 icon={Wallet}
-                name={linkedPot.name}
+                name={kindOrName(linkedPot.name, tCal("expense"))}
                 subtitle={tc("memberCount", { count: linkedPot.memberCount })}
                 unlinkLabel={tCal("unlinkExpense")}
                 onPress={() =>

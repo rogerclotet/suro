@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:android:preview": "mkdir -p build && eas build --platform android --profile preview --local --output build/suro-preview.apk",
+    "build:android:prod-apk": "mkdir -p build && eas build --platform android --profile production-apk --local --output build/suro-prod.apk",
     "build:android:release": "mkdir -p build && eas build --platform android --profile production --local --output build/suro-release.aab",
     "build:ios:release": "mkdir -p build && eas build --platform ios --profile production --local --output build/suro-release.ipa",
     "typecheck": "tsc --noEmit",

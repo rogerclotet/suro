@@ -14,10 +14,17 @@
         "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud"
       }
     },
+    "production-apk": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+      }
+    },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_CONVEX_URL": "https://happy-otter-123.convex.cloud",
+        "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
         "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
       }
     }
