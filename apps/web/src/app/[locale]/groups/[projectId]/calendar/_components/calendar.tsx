@@ -28,7 +28,24 @@ import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import { getMonthEnd } from "./event/month-range";
 
-const EVENT_COLORS = 5;
+// Per-event accent dots cycle through the palette's five accents, mirroring
+// the mobile calendar (apps/mobile, calendar/index.tsx). On the selected
+// day's primary fill the on-primary set — the opposite brightness — keeps
+// the dots legible against the green.
+const EVENT_DOT_CLASSES = [
+  "bg-event-1",
+  "bg-event-2",
+  "bg-event-3",
+  "bg-event-4",
+  "bg-event-5",
+] as const;
+const EVENT_DOT_ON_PRIMARY_CLASSES = [
+  "bg-event-on-primary-1",
+  "bg-event-on-primary-2",
+  "bg-event-on-primary-3",
+  "bg-event-on-primary-4",
+  "bg-event-on-primary-5",
+] as const;
 
 function Events({
   isLoading,
@@ -100,13 +117,12 @@ export default function Calendar({
 
   const eventColors = useMemo(() => {
     if (!events) {
-      return new Map();
+      return new Map<string, number>();
     }
 
-    const colors = new Map();
+    const colors = new Map<string, number>();
     [...events].forEach((event, index) => {
-      const color = index % EVENT_COLORS;
-      colors.set(event.id, color);
+      colors.set(event.id, index % EVENT_DOT_CLASSES.length);
     });
     return colors;
   }, [events]);
@@ -136,23 +152,19 @@ export default function Calendar({
         />
 
         {dayEvents && dayEvents.length > 0 && (
-          <div className="pointer-events-none absolute top-[3px] right-[3px] flex flex-row-reverse gap-px">
+          /* Bottom-centered 5px dots, like the mobile month grid. */
+          <div className="pointer-events-none absolute bottom-[3px] left-1/2 flex -translate-x-1/2 gap-0.5">
             {dayEvents.map((event) => {
-              const color = eventColors.get(event.id);
+              const color = eventColors.get(event.id) ?? 0;
+              const dotClasses = modifiers.selected
+                ? EVENT_DOT_ON_PRIMARY_CLASSES
+                : EVENT_DOT_CLASSES;
               return (
                 <div
                   key={event.id}
                   className={cn(
-                    "z-10 h-2 w-2 rounded-full border border-muted/60",
-                    color === 2
-                      ? "bg-event-2"
-                      : color === 3
-                        ? "bg-event-3"
-                        : color === 4
-                          ? "bg-event-4"
-                          : color === 5
-                            ? "bg-event-5"
-                            : "bg-event-1",
+                    "z-10 h-[5px] w-[5px] rounded-full",
+                    dotClasses[color],
                   )}
                 />
               );

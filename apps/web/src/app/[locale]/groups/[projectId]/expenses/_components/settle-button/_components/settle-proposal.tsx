@@ -19,7 +19,8 @@ export default function SettleProposal({
   members: Member[];
   onChange: (selected: boolean) => void;
 }) {
-  const [checked, setChecked] = useState(false);
+  // Proposals start selected, like the mobile settle sheet.
+  const [checked, setChecked] = useState(true);
   const checkboxId = `settle-${payment.from}-${payment.to}-${payment.amount}`;
 
   return (
@@ -32,7 +33,7 @@ export default function SettleProposal({
       >
         <Checkbox
           id={checkboxId}
-          defaultChecked={false}
+          checked={checked}
           onCheckedChange={(checked) => {
             if (checked === "indeterminate") {
               return;

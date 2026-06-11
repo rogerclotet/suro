@@ -9,6 +9,7 @@ import { useSession } from "@/lib/session";
 import { readableSize } from "../../readable-size";
 import DeleteFileButton from "../delete-file/delete-file-button";
 import EditFileButton from "../edit-file/edit-file-button";
+import { FileTypeTile, PdfBadge } from "../file-type-tile";
 
 export default function FileCard({ file }: { file: File }) {
   const session = useSession();
@@ -101,27 +102,10 @@ function FilePreviewContent({ file }: { file: File }) {
           height={350}
           className="h-full w-full object-cover object-top"
         />
-        <Image
-          src="/pdf.svg"
-          alt=""
-          aria-hidden
-          width={32}
-          height={32}
-          className="absolute right-2 bottom-2 drop-shadow-md"
-        />
+        <PdfBadge />
       </div>
     );
   }
 
-  return (
-    <div className="flex h-full w-full items-center justify-center p-6">
-      <Image
-        src="/pdf.svg"
-        alt={file.name}
-        width={350}
-        height={350}
-        className="h-full w-full object-contain"
-      />
-    </div>
-  );
+  return <FileTypeTile type={file.type} />;
 }

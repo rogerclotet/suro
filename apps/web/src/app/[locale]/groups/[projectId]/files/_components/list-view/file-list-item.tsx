@@ -14,6 +14,7 @@ import { useSession } from "@/lib/session";
 import { readableSize } from "../../readable-size";
 import DeleteFileButton from "../delete-file/delete-file-button";
 import EditFileButton from "../edit-file/edit-file-button";
+import { FileTypeTile } from "../file-type-tile";
 
 export default function FileListItem({ file }: { file: File }) {
   const session = useSession();
@@ -33,13 +34,9 @@ export default function FileListItem({ file }: { file: File }) {
               className="aspect-square rounded object-cover object-top"
             />
           ) : (
-            <Image
-              src="/pdf.svg"
-              alt={file.name}
-              width={42}
-              height={42}
-              className="aspect-square"
-            />
+            <div className="h-[42px] w-[42px]">
+              <FileTypeTile type={file.type} />
+            </div>
           )}
         </div>
       </NextLink>

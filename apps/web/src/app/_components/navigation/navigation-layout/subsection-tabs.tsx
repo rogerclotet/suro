@@ -22,7 +22,8 @@ export default function SubsectionTabs() {
 
   return (
     <div className="bg-background/80 px-3 py-2 backdrop-blur-md md:hidden">
-      <div className="flex gap-0.5 rounded-[15px] bg-muted p-[3px]">
+      {/* 12px outer radius, matching mobile's segmented control. */}
+      <div className="flex gap-0.5 rounded-lg bg-muted p-[3px]">
         {subsectionItems.map((item) => {
           const isActive = activeItem?.path === item.path;
 
@@ -39,7 +40,7 @@ export default function SubsectionTabs() {
               key={item.path}
               href={item.href as never}
               className={cn(
-                "flex-1 rounded-[12px] px-3 py-[7px] text-center text-sm transition-all",
+                "flex-1 rounded-[9px] px-3 py-[7px] text-center text-sm transition-all",
                 isActive
                   ? "bg-accent font-medium text-foreground"
                   : "text-muted-foreground",

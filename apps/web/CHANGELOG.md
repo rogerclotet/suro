@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.2.0] — 2026-06-11
+
+### ca
+
+- [improvement] Hem refrescat els colors de la web perquè coincideixin amb les aplicacions natives: verd salvia més calmat, fons càlids i accents nous per als esdeveniments del calendari, també en mode fosc.
+
+### es
+
+- [improvement] Hemos refrescado los colores de la web para que coincidan con las aplicaciones nativas: verde salvia más calmado, fondos cálidos y nuevos acentos para los eventos del calendario, también en modo oscuro.
+
+### en
+
+- [improvement] The web app's colors have been refreshed to match the native apps: a calmer sage green, warm backgrounds and new accent colors for calendar events, in dark mode too.
+
 ## [1.1.0] — 2026-06-10
 
 ### ca

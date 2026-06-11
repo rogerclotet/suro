@@ -27,7 +27,10 @@ export default function PotDetailView({
         <div className="flex items-center gap-2">
           <h1 className="font-semibold text-xl">{pot.name}</h1>
           {pot.settledAt && (
-            <Badge variant="secondary">{t("potSettled")}</Badge>
+            // Muted bordered chip, like mobile's settled marker.
+            <Badge variant="outline" className="text-muted-foreground">
+              {t("potSettled")}
+            </Badge>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">

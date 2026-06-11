@@ -148,7 +148,9 @@ function Calendar({
           defaultClassNames.range_end,
         ),
         today: cn(
-          "rounded-md [&_button]:bg-secondary [&_button]:text-secondary-foreground [&_button]:hover:bg-secondary/70 [&_button]:hover:text-secondary-foreground [&_button]:dark:hover:bg-secondary/70 [&_button]:dark:hover:text-secondary-foreground",
+          // Subtle border-tint fill + bold number, mirroring the mobile
+          // month grid's today treatment.
+          "rounded-md [&_button]:bg-border [&_button]:font-bold [&_button]:text-foreground [&_button]:hover:bg-border/70 [&_button]:hover:text-foreground [&_button]:dark:hover:bg-border/70 [&_button]:dark:hover:text-foreground",
           classNames?.today,
           defaultClassNames.today,
         ),

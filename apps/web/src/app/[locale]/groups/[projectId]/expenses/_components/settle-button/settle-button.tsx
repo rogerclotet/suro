@@ -27,7 +27,9 @@ export default function SettleButton({
   members: Member[];
   potId: string;
 }) {
-  const [selected, setSelected] = useState<SettlingPayment[]>([]);
+  // Every proposal starts selected (matching the mobile settle sheet); only
+  // the opt-outs are tracked, so the default stays "settle everything".
+  const [excluded, setExcluded] = useState<ReadonlySet<number>>(new Set());
   const { data: session } = useSession();
 
   const pending = useMemo(
@@ -35,17 +37,21 @@ export default function SettleButton({
     [spendings, members],
   );
 
-  function handleProposalChange(index: number, selected: boolean) {
-    const payment = pending?.[index];
-    if (payment === undefined) {
-      return;
-    }
+  const selected = useMemo(
+    () => (pending ?? []).filter((_, index) => !excluded.has(index)),
+    [pending, excluded],
+  );
 
-    if (selected) {
-      setSelected((prev) => [...prev, payment]);
-    } else {
-      setSelected((prev) => prev.filter((p) => p !== payment));
-    }
+  function handleProposalChange(index: number, isSelected: boolean) {
+    setExcluded((prev) => {
+      const next = new Set(prev);
+      if (isSelected) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   }
 
   return (
