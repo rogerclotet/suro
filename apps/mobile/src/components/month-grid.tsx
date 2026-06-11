@@ -30,9 +30,12 @@ function isBetween(day: Date, start: Date, end: Date): boolean {
   return d >= lo && d <= hi;
 }
 
+// Day tile size — large enough to hold the number with the event dots row
+// tucked inside its bottom edge.
+const DAY_TILE = 38;
 // Height of the connecting range bar; matches the day tile so the highlight
 // reads as one continuous band flowing through the endpoint squares.
-const RANGE_BAR = 34;
+const RANGE_BAR = DAY_TILE;
 // Corner radius of the selected-day tile (and the range bar's outer ends), so
 // selected days read as rounded squares rather than circles.
 const DAY_RADIUS = 10;
@@ -184,8 +187,8 @@ export function MonthGrid({
                   // fill remounts it instead, applying the radius at creation.
                   key={isEndpoint ? "selected" : isToday ? "today" : "plain"}
                   style={{
-                    width: 34,
-                    height: 34,
+                    width: DAY_TILE,
+                    height: DAY_TILE,
                     borderRadius: DAY_RADIUS,
                     alignItems: "center",
                     justifyContent: "center",
@@ -209,30 +212,33 @@ export function MonthGrid({
                   >
                     {day.getDate()}
                   </Txt>
-                </View>
-                <View
-                  style={{
-                    position: "absolute",
-                    bottom: 3,
-                    flexDirection: "row",
-                    gap: 2,
-                  }}
-                >
-                  {dots.slice(0, 3).map((dot) => (
-                    <View
-                      key={dot.key}
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: 2.5,
-                        // On the selected day's green fill, use the on-primary
-                        // variant so the dot contrasts with the green.
-                        backgroundColor: isEndpoint
-                          ? (dot.onPrimary ?? dot.color)
-                          : dot.color,
-                      }}
-                    />
-                  ))}
+                  {/* Dots live inside the tile, right under the number, so on
+                      a selected day they sit on the green fill (where the
+                      opposite-scheme on-primary accents keep them legible). */}
+                  <View
+                    style={{
+                      position: "absolute",
+                      bottom: 4,
+                      flexDirection: "row",
+                      gap: 2,
+                    }}
+                  >
+                    {dots.slice(0, 3).map((dot) => (
+                      <View
+                        key={dot.key}
+                        style={{
+                          width: 5,
+                          height: 5,
+                          borderRadius: 2.5,
+                          // On the selected day's green fill, use the on-primary
+                          // variant so the dot contrasts with the green.
+                          backgroundColor: isEndpoint
+                            ? (dot.onPrimary ?? dot.color)
+                            : dot.color,
+                        }}
+                      />
+                    ))}
+                  </View>
                 </View>
               </Pressable>
             );
