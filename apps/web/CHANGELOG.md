@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.3.0] — 2026-06-11
+
+### ca
+
+- [improvement] La pàgina de llistes ara es veu com a les aplicacions natives: seccions de preferides, llistes i completades, amb un anell de progrés per llista i les completades paginades.
+- [fix] En afegir elements a una llista, el teclat ja no es tanca després de cada element: pots afegir-ne uns quants seguits.
+
+### es
+
+- [improvement] La página de listas ahora se ve como en las aplicaciones nativas: secciones de favoritas, listas y completadas, con un anillo de progreso por lista y las completadas paginadas.
+- [fix] Al añadir elementos a una lista, el teclado ya no se cierra después de cada elemento: puedes añadir varios seguidos.
+
+### en
+
+- [improvement] The lists page now looks like the native apps: favorites, lists and completed sections, with a progress ring per list and paginated completed lists.
+- [fix] When adding items to a list, the keyboard no longer closes after each item: you can add several in a row.
+
 ## [1.2.0] — 2026-06-11
 
 ### ca

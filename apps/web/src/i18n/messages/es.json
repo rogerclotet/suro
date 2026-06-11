@@ -361,8 +361,9 @@
   "lists": {
     "empty": "Aún no hay listas",
     "favorites": "Favoritas",
-    "others": "Otras",
+    "sectionLists": "Listas",
     "completed": "Completadas",
+    "showMoreCompleted": "Mostrar más",
     "items": "elementos",
     "createTitle": "Crear lista",
     "createDescription": "Crear una lista nueva",

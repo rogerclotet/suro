@@ -1,21 +1,26 @@
 "use client";
 
-import { InfoIcon } from "lucide-react";
+import { ChevronDown, InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import type { List } from "@/app/_data/list";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { useProjectLists } from "@/lib/queries/use-project-lists";
-import CollapsibleCompletedSection from "./collapsible-completed-section";
 import CreateListButton from "./create-list/create-list-button";
 import ListPreview, { ListPreviewSkeleton } from "./list-preview";
+
+// Mirrors the mobile overview's completed pagination: the section starts with
+// a page of rows and grows in place behind "show more".
+const COMPLETED_PAGE_SIZE = 5;
 
 export default function Lists({ projectId }: { projectId: string }) {
   const t = useTranslations("lists");
   const lists = useProjectLists(projectId);
+  const [completedLimit, setCompletedLimit] = useState(COMPLETED_PAGE_SIZE);
 
   if (lists === undefined) {
     return (
-      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mx-auto w-full max-w-lg divide-y divide-border">
         {Array.from({ length: 4 }, (_, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
           <ListPreviewSkeleton key={i} />
@@ -53,38 +58,49 @@ export default function Lists({ projectId }: { projectId: string }) {
   regularLists.sort(compareLists);
   completedLists.sort(compareLists);
 
+  const hasMoreCompleted = completedLists.length > completedLimit;
+
+  // Same sectioning as the mobile overview: favorites / lists / completed,
+  // each rendered only while it has rows.
+  const sections = [
+    { key: "favorites", title: t("favorites"), lists: favoriteLists },
+    { key: "lists", title: t("sectionLists"), lists: regularLists },
+    {
+      key: "completed",
+      title: t("completed"),
+      lists: completedLists.slice(0, completedLimit),
+    },
+  ].filter((section) => section.lists.length > 0);
+
   return (
     <>
-      <div className="space-y-6">
-        {favoriteLists.length > 0 && (
-          <div className="space-y-2">
-            <h2 className="px-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              {t("favorites")}
+      <div className="mx-auto w-full max-w-lg">
+        {sections.map((section) => (
+          <section key={section.key}>
+            <h2 className="px-4 pt-4 pb-1 text-muted-foreground text-xs uppercase tracking-wider">
+              {section.title}
             </h2>
-            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
-              {favoriteLists.map((list) => (
+            <div className="divide-y divide-border">
+              {section.lists.map((list) => (
                 <ListPreview key={list.id} list={list} />
               ))}
             </div>
-          </div>
-        )}
-
-        {regularLists.length > 0 && (
-          <div className="space-y-2">
-            {favoriteLists.length > 0 && (
-              <h2 className="px-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-                {t("others")}
-              </h2>
+            {section.key === "completed" && hasMoreCompleted && (
+              <button
+                type="button"
+                onClick={() =>
+                  setCompletedLimit((limit) => limit + COMPLETED_PAGE_SIZE)
+                }
+                className="flex w-full items-center justify-center gap-1.5 py-3 text-muted-foreground transition-opacity hover:opacity-70"
+              >
+                <ChevronDown size={16} />
+                <span className="font-bold text-[13px]">
+                  {t("showMoreCompleted")}
+                </span>
+              </button>
             )}
-            <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
-              {regularLists.map((list) => (
-                <ListPreview key={list.id} list={list} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <CollapsibleCompletedSection lists={completedLists} />
+          </section>
+        ))}
       </div>
 
       <CreateListButton projectId={projectId} />
