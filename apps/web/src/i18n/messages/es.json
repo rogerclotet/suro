@@ -377,6 +377,8 @@
     "deleteSuccess": "Lista {name} eliminada",
     "deleteError": "No se ha podido eliminar la lista, vuelve a intentarlo más tarde",
     "notFound": "No se ha encontrado la lista.",
+    "createdMeta": "Creada por {name} {date}",
+    "updatedMeta": "Actualizada {date}",
     "clearCompletedTitle": "Borrar completados",
     "clearCompletedDescription": "¿Seguro que quieres borrar los elementos completados? Esta acción no se puede deshacer.",
     "clearCompletedSuccess": "Elementos completados borrados",

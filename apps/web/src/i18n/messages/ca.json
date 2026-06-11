@@ -377,6 +377,8 @@
     "deleteSuccess": "Llista {name} eliminada",
     "deleteError": "No s'ha pogut eliminar la llista, torna-ho a provar més tard",
     "notFound": "No s'ha trobat la llista.",
+    "createdMeta": "Creada per {name} {date}",
+    "updatedMeta": "Actualitzada {date}",
     "clearCompletedTitle": "Esborrar completats",
     "clearCompletedDescription": "Segur que vols esborrar els elements completats? Aquesta acció no es pot desfer.",
     "clearCompletedSuccess": "Elements completats esborrats",

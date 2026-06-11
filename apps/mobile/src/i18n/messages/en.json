@@ -775,7 +775,7 @@
       "someone": "Someone",
       "member": "Member",
       "memberCount": "{count, plural, =1 {# member} other {# members}}",
-      "timeAgoJustNow": "Just now",
+      "timeAgoJustNow": "just now",
       "timeAgoMinutes": "{minutes, plural, =1 {# minute} other {# minutes}} ago",
       "timeAgoHours": "{hours, plural, =1 {# hour} other {# hours}} ago",
       "timeAgoDays": "{days, plural, =1 {# day} other {# days}} ago"
@@ -845,6 +845,8 @@
       "newItem": "New item",
       "addItemPlaceholder": "Add an item…",
       "noItems": "No items yet.",
+      "createdMeta": "Created by {name} {date}",
+      "updatedMeta": "Updated {date}",
       "editItem": "Edit item",
       "detailsPlaceholder": "Details (optional)",
       "deleteItem": "Delete item",

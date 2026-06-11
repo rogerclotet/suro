@@ -775,10 +775,10 @@
       "someone": "Algú",
       "member": "Membre",
       "memberCount": "{count, plural, =1 {# membre} other {# membres}}",
-      "timeAgoJustNow": "Ara mateix",
-      "timeAgoMinutes": "Fa {minutes, plural, =1 {# minut} other {# minuts}}",
-      "timeAgoHours": "Fa {hours, plural, =1 {# hora} other {# hores}}",
-      "timeAgoDays": "Fa {days, plural, =1 {# dia} other {# dies}}"
+      "timeAgoJustNow": "ara mateix",
+      "timeAgoMinutes": "fa {minutes, plural, =1 {# minut} other {# minuts}}",
+      "timeAgoHours": "fa {hours, plural, =1 {# hora} other {# hores}}",
+      "timeAgoDays": "fa {days, plural, =1 {# dia} other {# dies}}"
     },
     "auth": {
       "tagline": "Llistes, calendari i més, compartit amb la teva gent.",
@@ -845,6 +845,8 @@
       "newItem": "Nou element",
       "addItemPlaceholder": "Afegeix un element…",
       "noItems": "Encara no hi ha elements.",
+      "createdMeta": "Creada per {name} {date}",
+      "updatedMeta": "Actualitzada {date}",
       "editItem": "Editar element",
       "detailsPlaceholder": "Detalls (opcional)",
       "deleteItem": "Eliminar element",

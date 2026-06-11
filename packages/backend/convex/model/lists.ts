@@ -2,7 +2,11 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { normalizeCategoryName } from "./categories";
 
-export type ListWithItems = Doc<"lists"> & { items: Doc<"listItems">[] };
+export type ListWithItems = Doc<"lists"> & {
+  items: Doc<"listItems">[];
+  /** Creator display name for the detail meta line; null if the account is gone. */
+  createdByName: string | null;
+};
 
 /** Matches the Postgres order: completed asc, name asc, id asc. */
 function compareItems(a: Doc<"listItems">, b: Doc<"listItems">) {
@@ -22,7 +26,8 @@ export async function loadListWithItems(
     .withIndex("by_list", (q) => q.eq("listId", list._id))
     .collect();
   items.sort(compareItems);
-  return { ...list, items };
+  const creator = await ctx.db.get(list.createdBy);
+  return { ...list, items, createdByName: creator?.name ?? null };
 }
 
 /**
