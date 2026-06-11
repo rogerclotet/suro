@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.3.1] — 2026-06-11
+
+### ca
+
+- [fix] En desar els canvis d'una llista o importar plantilles, la finestra d'edició ja es tanca correctament en lloc de quedar-se oberta.
+
+### es
+
+- [fix] Al guardar los cambios de una lista o importar plantillas, la ventana de edición ya se cierra correctamente en lugar de quedarse abierta.
+
+### en
+
+- [fix] Saving changes to a list or importing templates now closes the edit window properly instead of leaving it open.
+
 ## [1.3.0] — 2026-06-11
 
 ### ca

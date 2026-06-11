@@ -21,7 +21,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ModalForm from "@/components/ui/modal-form";
+import ModalForm, { useModalForm } from "@/components/ui/modal-form";
+import { useOptionalResponsiveMenu } from "@/components/ui/responsive-menu";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { listSchema } from "../../../_components/create-list/data";
@@ -33,6 +34,21 @@ export default function EditListForm({
   list: List;
   trigger: ReactNode;
 }) {
+  const t = useTranslations("lists");
+
+  return (
+    <ModalForm
+      trigger={trigger}
+      title={t("editTitle")}
+      description={t("editDescription")}
+    >
+      {/* Split out so the form can reach the modal context's close(). */}
+      <EditListFormContent list={list} />
+    </ModalForm>
+  );
+}
+
+function EditListFormContent({ list }: { list: List }) {
   const form = useForm({
     defaultValues: {
       name: list.name,
@@ -41,6 +57,8 @@ export default function EditListForm({
     resolver: valibotResolver(listSchema),
   });
   const { data: session } = useSession();
+  const { close } = useModalForm();
+  const menu = useOptionalResponsiveMenu();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
   const updateList = useMutation(api.lists.update);
@@ -53,6 +71,11 @@ export default function EditListForm({
         description: data.description,
       });
       toast.success(t("editSuccess", { name: data.name }));
+      // Close the modal AND the settings menu beneath it (kept open by the
+      // trigger item's preventDefault), so saving doesn't drop the user back
+      // onto the menu sheet.
+      close();
+      menu?.setOpen(false);
     } catch (e) {
       posthog.captureException(e, {
         distinctId: session?.user.id,
@@ -65,48 +88,42 @@ export default function EditListForm({
   }
 
   return (
-    <ModalForm
-      trigger={trigger}
-      title={t("editTitle")}
-      description={t("editDescription")}
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{tCommon("name")}</FormLabel>
-                <FormControl>
-                  <Input autoFocus {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{tCommon("name")}</FormLabel>
+              <FormControl>
+                <Input autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{tCommon("description")}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{tCommon("description")}</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <SubmitButton
-            icon={<SaveIcon />}
-            text={tCommon("save")}
-            formState={form.formState}
-          />
-        </form>
-      </Form>
-    </ModalForm>
+        <SubmitButton
+          icon={<SaveIcon />}
+          text={tCommon("save")}
+          formState={form.formState}
+        />
+      </form>
+    </Form>
   );
 }
