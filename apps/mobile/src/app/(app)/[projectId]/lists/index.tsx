@@ -222,20 +222,18 @@ function ProgressRing({
 
   if (complete) {
     return (
+      // Same footprint as the ring so the trailing column stays aligned.
       <View
         style={{
           width: size,
           height: size,
-          borderRadius: size / 2,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: t.primary,
-          // Same half-strength primary as ProgressBar's not-done fill: a done
-          // list is settled, so its marker recedes with the muted row text.
-          opacity: 0.5,
         }}
       >
-        <Check color={t.onPrimary} size={16} strokeWidth={3} />
+        {/* A bare muted check, faded so its 3px stroke carries the same
+            visual weight as the row's muted text: settled, not highlighted. */}
+        <Check color={t.muted} size={20} strokeWidth={3} opacity={0.6} />
       </View>
     );
   }
