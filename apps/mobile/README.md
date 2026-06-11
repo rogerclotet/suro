@@ -26,6 +26,36 @@ app. The Convex **deployment** needs these env vars set (`npx convex env set …
 the `JWT_PRIVATE_KEY` + `JWKS` pair (generate with `npx @convex-dev/auth`).
 Native Google OAuth additionally needs the redirect wired to the `suro://` scheme.
 
+## Builds (local)
+
+Client builds run locally — runner build times made CI builds impractical. All
+three scripts are EAS **local** builds signed with the EAS-managed credentials;
+log in once with `eas login` (eas-cli is a devDependency, so the scripts
+resolve it from the workspace).
+
+| Script (`pnpm --filter mobile …`) | Profile (`eas.json`) | Output |
+| --- | --- | --- |
+| `build:android:preview` | `preview` (dev Convex) | `build/suro-preview.apk` (sideload-able) |
+| `build:android:release` | `production` | `build/suro-release.aab` (store-ready) |
+| `build:ios:release` | `production` | `build/suro-release.ipa` (store-ready) |
+
+Prerequisites:
+
+- **Android**: JDK 17 + the Android SDK (`ANDROID_HOME`). The keystore lives
+  on EAS (created via `eas credentials -p android`); the build fetches it.
+- **iOS**: Xcode, fastlane and CocoaPods, plus an Apple Developer Program
+  membership with distribution credentials on EAS (`eas credentials -p ios`
+  for `app.suro.mobile`) — **still pending**, so `build:ios:release` fails at
+  credential fetch until that exists.
+
+Notes:
+
+- EAS archives the project **via git**, so uncommitted changes are not part of
+  the build — commit first.
+- Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from
+  the `production` profile's `env` in `eas.json` and auto-increment the remote
+  version (`appVersionSource: "remote"`). No `eas submit` step yet.
+
 ## Notes
 
 - **Styling**: built with React Native core + a small theme (`src/theme.ts`,

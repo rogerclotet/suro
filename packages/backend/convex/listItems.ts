@@ -1,31 +1,28 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import {
-  requireItemAccess,
-  requireListAccess,
-  resolveProjectCategoryId,
-} from "./model/permissions";
+import { ensureCategorySuggestion } from "./model/categories";
+import { requireItemAccess, requireListAccess } from "./model/permissions";
 
 export const create = mutation({
   args: {
     listId: v.id("lists"),
     name: v.string(),
     details: v.optional(v.string()),
-    categoryId: v.optional(v.union(v.id("categories"), v.null())),
+    category: v.optional(v.union(v.string(), v.null())),
   },
-  handler: async (ctx, { listId, name, details, categoryId }) => {
+  handler: async (ctx, { listId, name, details, category }) => {
     const { list, userId } = await requireListAccess(ctx, listId);
-    const resolved = await resolveProjectCategoryId(
+    const categoryName = await ensureCategorySuggestion(
       ctx,
       list.projectId,
-      categoryId ?? undefined,
+      category,
     );
     return ctx.db.insert("listItems", {
       name,
       details: details?.trim() || undefined,
       completed: false,
       listId: list._id,
-      categoryId: resolved,
+      category: categoryName,
       createdBy: userId,
       updatedAt: Date.now(),
     });
@@ -38,20 +35,20 @@ export const update = mutation({
     name: v.string(),
     details: v.optional(v.string()),
     completed: v.boolean(),
-    categoryId: v.optional(v.union(v.id("categories"), v.null())),
+    category: v.optional(v.union(v.string(), v.null())),
   },
-  handler: async (ctx, { itemId, name, details, completed, categoryId }) => {
+  handler: async (ctx, { itemId, name, details, completed, category }) => {
     const { item, list, userId } = await requireItemAccess(ctx, itemId);
-    const resolved = await resolveProjectCategoryId(
+    const categoryName = await ensureCategorySuggestion(
       ctx,
       list.projectId,
-      categoryId ?? undefined,
+      category,
     );
     await ctx.db.patch(item._id, {
       name,
       details: details?.trim() || undefined,
       completed,
-      categoryId: resolved,
+      category: categoryName,
       updatedBy: userId,
       updatedAt: Date.now(),
     });

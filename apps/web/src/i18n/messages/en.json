@@ -237,7 +237,6 @@
   "nav": {
     "lists": "Lists",
     "templates": "Templates",
-    "categories": "Categories",
     "calendar": "Calendar",
     "files": "Files",
     "notes": "Notes",
@@ -396,32 +395,14 @@
     "editItemLabel": "Edit",
     "detailsLabel": "Details",
     "categoryLabel": "Category",
-    "newCategory": "+ New category",
     "templateItemsCount": "{count} items",
     "addToFavorites": "Add to favorites",
     "removeFromFavorites": "Remove from favorites"
   },
   "categories": {
-    "empty": "No categories yet",
-    "description": "Categories help you organize lists. You can classify the items in a list so they are grouped together and easier to find.",
-    "newTitle": "New category",
-    "newDescription": "Create and select a new category",
     "searchPlaceholder": "Search categories",
     "createNamed": "Create \"{name}\"",
-    "noResults": "No categories found",
-    "createSuccess": "Category {name} created",
-    "createError": "Could not create the category, please try again later",
-    "deleteError": "Could not delete the category, please try again later",
-    "deleteSuccess": "Category deleted successfully",
-    "deleteAriaLabel": "Delete category",
-    "deleteTitle": "Delete category",
-    "deleteDescription": "Are you sure you want to delete the category {name}? This action cannot be undone, and items in this category will be uncategorized.",
-    "editError": "Could not edit the category. Please try again later",
-    "editSuccess": "Category edited successfully",
-    "editTitle": "Edit category",
-    "editDescription": "Edit the category name",
-    "editAriaLabel": "Edit category",
-    "createTitle": "Create category"
+    "noResults": "No categories found"
   },
   "templates": {
     "empty": "No templates yet",

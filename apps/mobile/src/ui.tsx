@@ -16,6 +16,8 @@ import {
   Easing,
   Keyboard,
   Modal,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Platform,
   Pressable,
   StyleSheet,
@@ -25,6 +27,7 @@ import {
   type TextProps,
   View,
 } from "react-native";
+import { AnimatedFAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
 
@@ -203,18 +206,60 @@ export function Sheet({
   );
 }
 
-// Material 3 extended floating action button — Android only. On iOS the create
-// action lives in the navigation bar instead (a Liquid Glass "+" header item,
-// wired via `sectionHeaderBadges` / `headerCreateAction`), so the FAB renders
+// Ignore sub-threshold scroll deltas so momentum jitter and overscroll bounce
+// don't make the FAB flicker between its extended and collapsed forms.
+const FAB_SCROLL_THRESHOLD = 8;
+
+/**
+ * Drives the M3 extended-FAB collapse from a screen's scroll position: attach
+ * `onScroll` to the screen's ScrollView/FlatList and pass `extended` to `Fab`.
+ * Extended at the top; collapses to the icon-only FAB on scroll down and
+ * re-extends on scroll up (the Material You behavior, per Gmail et al.).
+ */
+export function useFabScroll(): {
+  extended: boolean;
+  onScroll: ((e: NativeSyntheticEvent<NativeScrollEvent>) => void) | undefined;
+} {
+  const [extended, setExtended] = useState(true);
+  const lastOffset = useRef(0);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offset = e.nativeEvent.contentOffset.y;
+    const delta = offset - lastOffset.current;
+    lastOffset.current = offset;
+    if (offset <= 0) {
+      setExtended(true);
+      return;
+    }
+    if (Math.abs(delta) < FAB_SCROLL_THRESHOLD) {
+      return;
+    }
+    setExtended(delta < 0);
+  }, []);
+
+  // The FAB only exists on Android (iOS creates from the header), so skip the
+  // scroll subscription entirely elsewhere.
+  if (Platform.OS !== "android") {
+    return { extended: true, onScroll: undefined };
+  }
+  return { extended, onScroll };
+}
+
+// Material 3 floating action button — Android only. On iOS the create action
+// lives in the navigation bar instead (a Liquid Glass "+" header item, wired
+// via `sectionHeaderBadges` / `headerCreateAction`), so the FAB renders
 // nothing there; a floating button isn't part of the iOS design language.
-// Mirrors the web app's FAB: a bright `primary` green pill with the action
-// label beside the "+", rather than M3's tonal icon-only square.
+// Paper's AnimatedFAB implements the M3 extended↔collapsed morph; wire
+// `extended` from `useFabScroll` so it collapses to the icon as the list
+// scrolls. Colors and typeface come from our palette, not Paper's theme.
 export function Fab({
   onPress,
   label,
+  extended = true,
 }: {
   onPress: () => void;
   label: string;
+  extended?: boolean;
 }) {
   const t = useTheme();
   const { anyOpen } = useContext(SheetCountContext);
@@ -225,30 +270,25 @@ export function Fab({
   }
 
   return (
-    <Pressable
+    <AnimatedFAB
+      icon={({ size, color }) => <Plus color={color} size={size} />}
+      label={label}
+      extended={extended}
       onPress={onPress}
-      android_ripple={{ color: t.onPrimary, borderless: false }}
+      color={t.onPrimary}
+      animateFrom="right"
+      // Paper reads the label font from its own theme; override just that slot
+      // so the FAB matches the app typeface without a global PaperProvider.
+      theme={{ fonts: { labelLarge: { fontFamily: FONT, fontWeight: "700" } } }}
       style={{
         position: "absolute",
         right: 16,
         // Screen content is already inset above the M3 navigation bar, so the
         // spec's 16dp margin clears it.
         bottom: 16,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        height: 56,
-        paddingHorizontal: 20, // M3 extended FAB padding.
-        borderRadius: 16,
         backgroundColor: t.primary,
-        elevation: 6,
       }}
-    >
-      <Plus color={t.onPrimary} size={24} />
-      <Txt size={15} weight="700" style={{ color: t.onPrimary }}>
-        {label}
-      </Txt>
-    </Pressable>
+    />
   );
 }
 

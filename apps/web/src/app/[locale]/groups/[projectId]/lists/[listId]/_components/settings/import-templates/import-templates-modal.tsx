@@ -8,7 +8,6 @@ import posthog from "posthog-js";
 import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
-import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -38,16 +37,10 @@ export default function ImportTemplatesModal({
   const importTemplates = useMutation(api.lists.importTemplates);
 
   useEffect(() => {
-    if (!project) {
-      return;
-    }
-
     const itemsByCategory: Record<string, Template["items"]> = {};
     for (const template of templates.filter((_t, idx) => selected[idx])) {
       for (const item of template.items) {
-        const category = item.category
-          ? getCategoryName(item.category, project, tCommon("noCategory"))
-          : "";
+        const category = item.category ?? "";
         if (!itemsByCategory[category]) {
           itemsByCategory[category] = [];
         }
@@ -56,7 +49,7 @@ export default function ImportTemplatesModal({
       }
     }
     setItemsByCategory(itemsByCategory);
-  }, [selected, templates, project, tCommon]);
+  }, [selected, templates]);
 
   function handleSelect(idx: number) {
     const newSelected = [...selected];
@@ -160,19 +153,5 @@ export default function ImportTemplatesModal({
         {t("importButton")}
       </Button>
     </ModalForm>
-  );
-}
-
-function getCategoryName(
-  categoryId: string,
-  project: Project,
-  noCategoryLabel: string,
-) {
-  if (categoryId === "") {
-    return noCategoryLabel;
-  }
-
-  return (
-    project.categories.find((c) => c.id === categoryId)?.name ?? noCategoryLabel
   );
 }

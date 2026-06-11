@@ -832,11 +832,11 @@
     "lists": {
       "title": "Lists",
       "templates": "Templates",
-      "categories": "Categories",
       "empty": "No lists yet. Tap + to create one.",
       "sectionFavorites": "Favorites",
       "sectionLists": "Lists",
       "sectionCompleted": "Completed",
+      "showMoreCompleted": "Show more",
       "newList": "New list",
       "namePlaceholder": "Name",
       "descriptionPlaceholder": "Description (optional)",
@@ -864,19 +864,18 @@
       "importSelected": "Import selected",
       "importing": "Importing…",
       "noTemplates": "No templates yet.",
-      "uncategorized": "Other"
+      "uncategorized": "Other",
+      "itemAlreadyExistsInCategory": "The item already exists in this category",
+      "dropNoCategory": "No category",
+      "dropNewCategory": "New category…",
+      "newCategoryTitle": "New category",
+      "newCategoryPlaceholder": "Category name"
     },
     "categories": {
-      "title": "Categories",
-      "newPlaceholder": "New category…",
-      "empty": "No categories yet.",
       "searchPlaceholder": "Search or create…",
       "noResults": "No categories found.",
       "createNamed": "Create \"{name}\"",
-      "noCategory": "No category",
-      "deleteTitle": "Delete category",
-      "deleteMessage": "Delete \"{name}\"? This can't be undone, and its items will become uncategorized.",
-      "itemCount": "{count, plural, =1 {# item} other {# items}}"
+      "noCategory": "No category"
     },
     "templates": {
       "title": "Templates",

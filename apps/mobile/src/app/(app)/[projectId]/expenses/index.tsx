@@ -9,7 +9,17 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Card, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Card,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
 export default function ExpensesOverview() {
   const pid = useProjectId();
@@ -18,6 +28,7 @@ export default function ExpensesOverview() {
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");
 
@@ -51,6 +62,8 @@ export default function ExpensesOverview() {
       ) : (
         <ScrollView
           contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 96 }}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
         >
           {pots.map((pot) => (
             <Card
@@ -112,7 +125,11 @@ export default function ExpensesOverview() {
       )}
       {soloGroup ? null : (
         <>
-          <Fab onPress={() => setCreating(true)} label={tExp("newPot")} />
+          <Fab
+            onPress={() => setCreating(true)}
+            label={tExp("newPot")}
+            extended={fab.extended}
+          />
           <CreatePotSheet
             visible={creating}
             projectId={pid}

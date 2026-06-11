@@ -38,8 +38,10 @@ const palette = {
     navBar: "#efe8da",
     text: "#1e1e2e",
     muted: "#6c6f85",
-    // Catppuccin Latte "green".
-    primary: "#40a02b",
+    // Catppuccin Latte "green", strongly desaturated and darkened
+    // (hsl 109/58%/40% → 109/28%/36%): a muted sage that reads calmer on the
+    // warm bg and clears WCAG AA contrast with the white `onPrimary`.
+    primary: "#4c7642",
     onPrimary: "#ffffff",
     border: "#e4ddd0",
     inputBg: "#ffffff",

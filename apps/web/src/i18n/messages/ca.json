@@ -237,7 +237,6 @@
   "nav": {
     "lists": "Llistes",
     "templates": "Plantilles",
-    "categories": "Categories",
     "calendar": "Calendari",
     "files": "Fitxers",
     "notes": "Notes",
@@ -396,32 +395,14 @@
     "editItemLabel": "Editar",
     "detailsLabel": "Detalls",
     "categoryLabel": "Categoria",
-    "newCategory": "+ Nova categoria",
     "templateItemsCount": "{count} elements",
     "addToFavorites": "Afegir a preferides",
     "removeFromFavorites": "Treure de preferides"
   },
   "categories": {
-    "empty": "Encara no hi ha categories",
-    "description": "Les categories són útils per organitzar les llistes. Pots classificar els elements d'una llista de manera que quedin agrupats i siguin més fàcils de trobar.",
-    "newTitle": "Nova categoria",
-    "newDescription": "Crea i selecciona una categoria nova",
     "searchPlaceholder": "Cerca categories",
     "createNamed": "Crea \"{name}\"",
-    "noResults": "No s'ha trobat cap categoria",
-    "createSuccess": "Categoria {name} creada",
-    "createError": "No s'ha pogut crear la categoria, torna-ho a provar més tard",
-    "deleteError": "No s'ha pogut eliminar la categoria, torna-ho a provar més tard",
-    "deleteSuccess": "La categoria s'ha eliminat correctament",
-    "deleteAriaLabel": "Eliminar categoria",
-    "deleteTitle": "Eliminar categoria",
-    "deleteDescription": "Segur que vols eliminar la categoria {name}? Aquesta acció no es pot desfer, i els elements d'aquesta categoria passaran a estar sense categoria.",
-    "editError": "No s'ha pogut editar la categoria. Torna-ho a provar més tard",
-    "editSuccess": "Categoria editada correctament",
-    "editTitle": "Editar categoria",
-    "editDescription": "Editar el nom de la categoria",
-    "editAriaLabel": "Editar categoria",
-    "createTitle": "Crear categoria"
+    "noResults": "No s'ha trobat cap categoria"
   },
   "templates": {
     "empty": "Encara no hi ha plantilles",

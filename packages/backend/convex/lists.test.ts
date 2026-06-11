@@ -6,8 +6,8 @@ import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 
-// Mirror of apps/web/test/integration/normalize.ts so the SAME normalized
-// shapes can be asserted against both backends, proving parity.
+// Normalized shapes for whole-list assertions, independent of Convex
+// bookkeeping fields (_id, timestamps, …).
 type NormalizedItem = {
   name: string;
   details: string | null;
@@ -28,7 +28,7 @@ function normalizeList(list: {
     name: string;
     details?: string | null;
     completed: boolean;
-    category: { name: string } | null;
+    category?: string | null;
   }[];
 }): NormalizedList {
   return {
@@ -39,7 +39,7 @@ function normalizeList(list: {
       name: item.name,
       details: item.details ?? null,
       completed: item.completed,
-      category: item.category?.name ?? null,
+      category: item.category ?? null,
     })),
   };
 }
@@ -136,16 +136,16 @@ function insertList(
 function insertItem(
   listId: Id<"lists">,
   name: string,
-  opts: { completed?: boolean; categoryId?: Id<"categories"> } = {},
+  opts: { completed?: boolean; category?: string; updatedAt?: number } = {},
 ) {
   return t.run((ctx) =>
     ctx.db.insert("listItems", {
       name,
       completed: opts.completed ?? false,
       listId,
-      categoryId: opts.categoryId,
+      category: opts.category,
       createdBy: ids.alice,
-      updatedAt: Date.now(),
+      updatedAt: opts.updatedAt ?? Date.now(),
     }),
   );
 }
@@ -165,14 +165,14 @@ describe("lists: create & read", () => {
     });
   });
 
-  it("seeds items from templates, resolving category ids within the project and nulling cross-project ones", async () => {
+  it("seeds items from templates, copying category names verbatim", async () => {
     const tpl = await t.run((ctx) =>
       ctx.db.insert("listTemplates", {
         name: "Starter",
         items: [
-          { name: "Milk", category: ids.groceries },
+          { name: "Milk", category: "Groceries" },
           { name: "Eggs", category: null },
-          { name: "Sunscreen", category: ids.foreign }, // another project
+          { name: "Sunscreen", category: "Beach" }, // brand-new section name
         ],
         projectId: ids.family,
         createdBy: ids.alice,
@@ -203,10 +203,16 @@ describe("lists: create & read", () => {
           name: "Sunscreen",
           details: null,
           completed: false,
-          category: null, // cross-project category dropped
+          category: "Beach",
         },
       ],
     });
+
+    // Seeding also records the names as suggestions for the project.
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.family,
+    });
+    expect(suggestions.map((c) => c.name)).toEqual(["Beach", "Groceries"]);
   });
 
   it("sorts items uncompleted-first then by name", async () => {
@@ -235,6 +241,66 @@ describe("lists: create & read", () => {
   });
 });
 
+describe("lists: overview", () => {
+  function overview(completedLimit: number) {
+    return alice.query(api.lists.overviewByProject, {
+      projectId: ids.family,
+      completedLimit,
+    });
+  }
+
+  it("keeps favorites and unfinished lists active; empty lists too", async () => {
+    const fav = await insertList("Fav done", { favorite: true });
+    await insertItem(fav, "A", { completed: true });
+    const open = await insertList("In progress");
+    await insertItem(open, "B", { completed: false });
+    await insertList("Empty");
+    const done = await insertList("Done");
+    await insertItem(done, "C", { completed: true });
+
+    const result = await overview(5);
+    expect(result.active.map((l) => l.name).sort()).toEqual([
+      "Empty",
+      "Fav done",
+      "In progress",
+    ]);
+    expect(result.completed.map((l) => l.name)).toEqual(["Done"]);
+    expect(result.hasMoreCompleted).toBe(false);
+  });
+
+  it("orders completed by last item check desc and pages by the limit", async () => {
+    for (const [name, checkedAt] of [
+      ["First", Date.parse("2024-01-01")],
+      ["Third", Date.parse("2024-03-01")],
+      ["Second", Date.parse("2024-02-01")],
+    ] as const) {
+      const list = await insertList(name, { updatedAt: 0 });
+      await insertItem(list, "Item", { completed: true, updatedAt: checkedAt });
+    }
+
+    const page = await overview(2);
+    expect(page.completed.map((l) => l.name)).toEqual(["Third", "Second"]);
+    expect(page.hasMoreCompleted).toBe(true);
+
+    const all = await overview(3);
+    expect(all.completed.map((l) => l.name)).toEqual([
+      "Third",
+      "Second",
+      "First",
+    ]);
+    expect(all.hasMoreCompleted).toBe(false);
+  });
+
+  it("rejects non-members", async () => {
+    await expect(
+      bob.query(api.lists.overviewByProject, {
+        projectId: ids.family,
+        completedLimit: 5,
+      }),
+    ).rejects.toThrow();
+  });
+});
+
 describe("lists: authorization", () => {
   // Divergence from the Next.js app: it swallowed errors and returned
   // undefined/[] for non-members. Convex surfaces authorization as errors. The
@@ -252,27 +318,27 @@ describe("lists: authorization", () => {
 });
 
 describe("list items", () => {
-  it("creates an item with a project category, ignoring a cross-project one", async () => {
+  it("creates items carrying their category name, trimming it", async () => {
     const list = await insertList("L");
     await alice.mutation(api.listItems.create, {
       listId: list,
       name: "Apples",
-      categoryId: ids.groceries,
+      category: " Groceries ",
     });
     await alice.mutation(api.listItems.create, {
       listId: list,
       name: "Towels",
-      categoryId: ids.foreign,
+      category: null,
     });
 
     const result = await getList(alice, list);
     const apples = result.items.find((i) => i.name === "Apples");
     const towels = result.items.find((i) => i.name === "Towels");
-    expect(apples?.category?.name).toBe("Groceries");
-    expect(towels?.category).toBeNull();
+    expect(apples?.category).toBe("Groceries");
+    expect(towels?.category).toBeUndefined();
   });
 
-  it("updates name/details/completed and resolves the category within the project", async () => {
+  it("updates name/details/completed/category", async () => {
     const list = await insertList("L");
     const item = await insertItem(list, "Tent");
     await alice.mutation(api.listItems.update, {
@@ -280,7 +346,7 @@ describe("list items", () => {
       name: "Big Tent",
       details: "2-person",
       completed: true,
-      categoryId: ids.groceries,
+      category: "Camping",
     });
 
     const result = await getList(alice, list);
@@ -288,21 +354,21 @@ describe("list items", () => {
     expect(updated?.name).toBe("Big Tent");
     expect(updated?.details).toBe("2-person");
     expect(updated?.completed).toBe(true);
-    expect(updated?.category?.name).toBe("Groceries");
+    expect(updated?.category).toBe("Camping");
   });
 
-  it("nulls a cross-project category on update", async () => {
+  it("clears the category when given null or a blank name", async () => {
     const list = await insertList("L");
-    const item = await insertItem(list, "Tent", { categoryId: ids.groceries });
+    const item = await insertItem(list, "Tent", { category: "Camping" });
     await alice.mutation(api.listItems.update, {
       itemId: item,
       name: "Tent",
       details: "",
       completed: false,
-      categoryId: ids.foreign,
+      category: "   ",
     });
     const result = await getList(alice, list);
-    expect(result.items[0]?.category).toBeNull();
+    expect(result.items[0]?.category).toBeUndefined();
   });
 
   it("rejects updating an item that doesn't exist", async () => {
@@ -314,7 +380,7 @@ describe("list items", () => {
         itemId: ghost,
         name: "x",
         completed: false,
-        categoryId: null,
+        category: null,
       }),
     ).rejects.toThrow("List item not found");
   });
@@ -378,15 +444,52 @@ describe("list settings", () => {
   });
 });
 
-describe("categories", () => {
-  it("orphans items when their category is deleted (items survive, category cleared)", async () => {
+describe("category suggestions", () => {
+  it("records a fresh name as a suggestion when an item uses it", async () => {
     const list = await insertList("L");
-    await insertItem(list, "Milk", { categoryId: ids.groceries });
-    await alice.mutation(api.categories.remove, { categoryId: ids.groceries });
+    await alice.mutation(api.listItems.create, {
+      listId: list,
+      name: "Milk",
+      category: "Dairy",
+    });
 
-    const result = await getList(alice, list);
-    expect(result.items).toHaveLength(1);
-    expect(result.items[0]?.name).toBe("Milk");
-    expect(result.items[0]?.category).toBeNull();
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.family,
+    });
+    // "Groceries" comes from the seed; "Dairy" was just auto-upserted.
+    expect(suggestions.map((c) => c.name)).toEqual(["Dairy", "Groceries"]);
+  });
+
+  it("doesn't duplicate a suggestion when the same name is reused", async () => {
+    const list = await insertList("L");
+    await alice.mutation(api.listItems.create, {
+      listId: list,
+      name: "Milk",
+      category: "Groceries",
+    });
+    await alice.mutation(api.listItems.create, {
+      listId: list,
+      name: "Eggs",
+      category: "Groceries",
+    });
+
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.family,
+    });
+    expect(suggestions.map((c) => c.name)).toEqual(["Groceries"]);
+  });
+
+  it("records no suggestion for blank category names", async () => {
+    const list = await insertList("L");
+    await alice.mutation(api.listItems.create, {
+      listId: list,
+      name: "Milk",
+      category: "   ",
+    });
+
+    const suggestions = await alice.query(api.categories.listByProject, {
+      projectId: ids.family,
+    });
+    expect(suggestions.map((c) => c.name)).toEqual(["Groceries"]);
   });
 });

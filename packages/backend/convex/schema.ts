@@ -69,12 +69,18 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     .index("by_project_user", ["projectId", "userId"]),
 
+  // Per-project autocomplete suggestion store for category names. Items carry
+  // their category as a plain name string (see listItems.category); this table
+  // only feeds the pickers, auto-upserted (exact-name dedupe) whenever a name
+  // is used on an item or template.
   categories: defineTable({
     name: v.string(),
     projectId: v.id("projects"),
     legacyId: v.optional(v.string()),
   })
     .index("by_project", ["projectId"])
+    // Exact-name lookup for dedupe on auto-upsert.
+    .index("by_project_name", ["projectId", "name"])
     .index("by_legacyId", ["legacyId"]),
 
   // Calendar events. `startAt`/`endAt` are epoch ms. All-day events store
@@ -121,21 +127,22 @@ export default defineSchema({
     details: v.optional(v.string()),
     completed: v.boolean(),
     listId: v.id("lists"),
-    categoryId: v.optional(v.id("categories")),
+    // The item's category (list section) as a plain name string — sections are
+    // derived by grouping items on it, so they're scoped to the list.
+    category: v.optional(v.string()),
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
     legacyId: v.optional(v.string()),
   })
     .index("by_list", ["listId"])
-    .index("by_category", ["categoryId"])
     .index("by_legacyId", ["legacyId"]),
 
   listTemplates: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
-    // `category` holds a category id string (validated against the project at
-    // instantiation, mirroring getProjectCategoryId), or null.
+    // `category` holds the category name (the list-section label copied onto
+    // items at instantiation), or null.
     items: v.array(
       v.object({ name: v.string(), category: v.union(v.string(), v.null()) }),
     ),

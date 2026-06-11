@@ -1,14 +1,41 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { type MutationCtx, mutation, query } from "./_generated/server";
+import {
+  ensureCategorySuggestions,
+  normalizeCategoryName,
+} from "./model/categories";
 import {
   requireProjectMember,
   requireTemplateAccess,
 } from "./model/permissions";
 
+// `category` is the section name shown in the template, or null.
 const templateItem = v.object({
   name: v.string(),
   category: v.union(v.string(), v.null()),
 });
+
+/**
+ * Normalize item category names and record them as autocomplete suggestions
+ * for the project — shared by create/update/exportToProject.
+ */
+async function prepareTemplateItems(
+  ctx: MutationCtx,
+  projectId: Id<"projects">,
+  items: { name: string; category: string | null }[],
+): Promise<{ name: string; category: string | null }[]> {
+  const normalized = items.map((item) => ({
+    name: item.name,
+    category: normalizeCategoryName(item.category) ?? null,
+  }));
+  await ensureCategorySuggestions(
+    ctx,
+    projectId,
+    normalized.map((item) => item.category),
+  );
+  return normalized;
+}
 
 export const listByProject = query({
   args: { projectId: v.id("projects") },
@@ -46,7 +73,7 @@ export const create = mutation({
     return ctx.db.insert("listTemplates", {
       name: trimmed,
       description: (description ?? "").trim() || undefined,
-      items,
+      items: await prepareTemplateItems(ctx, projectId, items),
       projectId,
       createdBy: userId,
       updatedAt: Date.now(),
@@ -70,7 +97,7 @@ export const update = mutation({
     await ctx.db.patch(template._id, {
       name: trimmed,
       description: (description ?? "").trim() || undefined,
-      items,
+      items: await prepareTemplateItems(ctx, template.projectId, items),
       updatedBy: userId,
       updatedAt: Date.now(),
     });
@@ -89,9 +116,8 @@ export const remove = mutation({
 
 /**
  * Copy a template into another project the user belongs to (ports exportTemplate).
- * Item category ids are copied verbatim; since they belong to the source
- * project, they won't resolve in the target and degrade to "no category" at
- * instantiation — matching the PWA's lossy export.
+ * Item category names copy losslessly and are recorded as suggestions in the
+ * target project.
  */
 export const exportToProject = mutation({
   args: {
@@ -104,7 +130,7 @@ export const exportToProject = mutation({
     return ctx.db.insert("listTemplates", {
       name: template.name,
       description: template.description,
-      items: template.items,
+      items: await prepareTemplateItems(ctx, targetProjectId, template.items),
       projectId: targetProjectId,
       createdBy: userId,
       updatedAt: Date.now(),

@@ -31,7 +31,7 @@ export default memo(function CategoryItems(props: {
     name: string,
     details: string,
     completed: boolean,
-    categoryId: string | null,
+    category: string | null,
   ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
 }) {
@@ -61,8 +61,8 @@ export default memo(function CategoryItems(props: {
               key={item.id}
               list={props.list}
               item={item}
-              onChange={(name, details, completed, categoryId) =>
-                props.handleChange(item, name, details, completed, categoryId)
+              onChange={(name, details, completed, category) =>
+                props.handleChange(item, name, details, completed, category)
               }
               onDelete={() => props.handleDelete(item)}
             />

@@ -33,6 +33,7 @@ Run from the repo root; most are workspace-filtered.
 | Convex codegen (regen `api`/`dataModel`) | `pnpm --filter backend codegen` |
 | Convex deploy | `pnpm --filter backend exec convex deploy` |
 | Tests (all workspaces / one) | `pnpm test` / `pnpm --filter web test` |
+| Mobile builds (local, EAS) | `pnpm --filter mobile build:android:release` / `build:android:preview` / `build:ios:release` |
 | Lint + format check / fix | `pnpm biome:check` / `pnpm biome:fix` |
 | Typecheck (all workspaces) | `pnpm typecheck` |
 
@@ -73,6 +74,7 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 When an entry is warranted:
 
 - Add a typed bullet in **all three** locales (`ca`, `es`, `en`) — the build fails if a type or locale is malformed. Format: `- [feature|fix|improvement] <text>`.
+- No em dashes (`—`) in entry text; use commas, colons, or separate sentences instead. (The `## [x.y.z] — date` heading separator is fine.)
 - **Never** append to an existing version block. Always start a **new** `## [x.y.z] — YYYY-MM-DD` block at the top (newest first) and bump `package.json` `version` to match. Use a **patch** bump for minimal changes or a lone fix; use a **minor** bump otherwise. The topmost version is shown in-app and drives the "app updated" toast, so the version bump is what notifies users.
 - No manual codegen needed — `src/data/changelog.generated.ts` is regenerated from `CHANGELOG.md` by the `pre*` hooks (`predev`/`prebuild`/`pretest`/`pretypecheck`). Run `pnpm changelog:generate` to preview.
 
@@ -87,6 +89,7 @@ Data, auth, and storage all run on **Convex** — the web container is just the 
 - **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Resend/JWT/`SITE_URL`, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI.
 - **Prod web**: `scripts/deploy.sh` SSHes into the host, pulls the image built by CI, and restarts the `familia` container behind Traefik (`$PROD_DOMAIN`). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time.
 - **MR previews**: `scripts/deploy-preview.sh` boots `suro-mr-<iid>` at `https://mr-<iid>.<PREVIEW_DOMAIN>`, built against `NEXT_PUBLIC_CONVEX_URL_PREVIEW` so **all previews share the dev Convex deployment** — no per-MR database. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
+- **Mobile builds**: deliberately **not in CI** (runner build times were prohibitive). Build locally via the `build:*` scripts in `apps/mobile` — `pnpm --filter mobile build:android:preview` (dev-Convex `.apk`), `build:android:release` (store-ready `.aab`), `build:ios:release` (store-ready `.ipa`, pending Apple Developer credentials). Signing uses EAS-managed credentials (`eas login` once); public build env (`EXPO_PUBLIC_*`) is baked per profile in `apps/mobile/eas.json`. No `eas submit` step yet. See `apps/mobile/README.md` for prerequisites.
 
 CI variables to set: `CONVEX_DEPLOY_KEY` (prod deploy key), `NEXT_PUBLIC_CONVEX_URL` (prod), `NEXT_PUBLIC_CONVEX_URL_PREVIEW` (dev), plus the existing PostHog + registry/SSH vars.
 

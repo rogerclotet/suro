@@ -131,6 +131,8 @@ export const upsertTemplate = mutation({
     legacyId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
+    // `category` is the category name (the migration script maps the Postgres
+    // category id to its name), or null.
     items: v.array(
       v.object({ name: v.string(), category: v.union(v.string(), v.null()) }),
     ),
@@ -215,7 +217,9 @@ export const upsertItem = mutation({
     details: v.optional(v.string()),
     completed: v.boolean(),
     listId: v.id("lists"),
-    categoryId: v.optional(v.id("categories")),
+    // Category name (the migration script maps the Postgres category id to
+    // its name); absent = no category.
+    category: v.optional(v.string()),
     createdBy: v.id("users"),
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),

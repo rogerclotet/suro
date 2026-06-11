@@ -1,48 +1,78 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
-import { Check, LayoutTemplate, Tag } from "lucide-react-native";
-import { type ReactNode, useMemo, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  LayoutTemplate,
+} from "lucide-react-native";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
-type ListsResult = FunctionReturnType<typeof api.lists.listByProject>;
-type ListWithItems = ListsResult[number];
+const COMPLETED_PAGE_SIZE = 5;
 
-function isCompleted(list: ListWithItems) {
-  return list.items.length > 0 && list.items.every((item) => item.completed);
+// Holds the last loaded result while the query re-runs with new args (Convex
+// returns undefined during the swap), so "show more" grows the completed
+// section in place instead of flashing the screen back to the spinner.
+function useStable<T>(value: T | undefined): T | undefined {
+  const last = useRef<T | undefined>(undefined);
+  if (value !== undefined) {
+    last.current = value;
+  }
+  return last.current;
 }
 
 export default function ListsOverview() {
   const pid = useProjectId();
-  const lists = useQuery(api.lists.listByProject, { projectId: pid });
+  const [completedLimit, setCompletedLimit] = useState(COMPLETED_PAGE_SIZE);
+  const overview = useStable(
+    useQuery(api.lists.overviewByProject, { projectId: pid, completedLimit }),
+  );
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
 
   const sections = useMemo(() => {
-    if (!lists) {
+    if (!overview) {
       return [];
     }
     return [
-      { title: tl("sectionFavorites"), data: lists.filter((l) => l.favorite) },
       {
-        title: tl("sectionLists"),
-        data: lists.filter((l) => !l.favorite && !isCompleted(l)),
+        key: "favorites",
+        title: tl("sectionFavorites"),
+        data: overview.active.filter((l) => l.favorite),
       },
       {
+        key: "lists",
+        title: tl("sectionLists"),
+        data: overview.active.filter((l) => !l.favorite),
+      },
+      {
+        key: "completed",
         title: tl("sectionCompleted"),
-        data: lists.filter((l) => !l.favorite && isCompleted(l)),
+        data: overview.completed,
       },
     ].filter((section) => section.data.length > 0);
-  }, [lists, tl]);
+  }, [overview, tl]);
 
   return (
     <Screen>
@@ -55,27 +85,22 @@ export default function ListsOverview() {
           }),
         }}
       />
-      {lists === undefined ? (
+      {overview === undefined ? (
         <Loading />
       ) : (
         <SectionList
           sections={sections}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View
-              style={{ flexDirection: "row", gap: 12, marginHorizontal: 16 }}
-            >
-              <NavTile
-                icon={<LayoutTemplate color={t.primary} size={22} />}
+            <View style={{ marginHorizontal: 16 }}>
+              <NavButton
+                icon={<LayoutTemplate color={t.primary} size={18} />}
                 label={tl("templates")}
                 onPress={() => router.push(`/${pid}/lists/templates`)}
-              />
-              <NavTile
-                icon={<Tag color={t.primary} size={22} />}
-                label={tl("categories")}
-                onPress={() => router.push(`/${pid}/lists/categories`)}
               />
             </View>
           }
@@ -102,16 +127,39 @@ export default function ListsOverview() {
             <View
               style={{
                 height: 1,
-                marginLeft: 48,
-                marginRight: 16,
+                marginHorizontal: 16,
                 backgroundColor: t.border,
               }}
             />
           )}
+          renderSectionFooter={({ section }) =>
+            section.key === "completed" && overview.hasMoreCompleted ? (
+              <Pressable
+                onPress={() =>
+                  setCompletedLimit((limit) => limit + COMPLETED_PAGE_SIZE)
+                }
+                accessibilityRole="button"
+                style={({ pressed }) => ({
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  paddingVertical: 12,
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <ChevronDown color={t.muted} size={16} />
+                <Txt muted size={13} weight="700">
+                  {tl("showMoreCompleted")}
+                </Txt>
+              </Pressable>
+            ) : null
+          }
           renderItem={({ item }) => {
             const total = item.items.length;
             const done = item.items.filter((i) => i.completed).length;
             const pending = total - done;
+            const completed = total > 0 && pending === 0;
             return (
               <Pressable
                 onPress={() =>
@@ -129,19 +177,11 @@ export default function ListsOverview() {
                   backgroundColor: pressed ? t.border : "transparent",
                 })}
               >
-                <View style={{ width: 20, alignItems: "center" }}>
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 3,
-                      backgroundColor: t.marker,
-                      transform: [{ rotate: "45deg" }],
-                    }}
-                  />
-                </View>
                 <View style={{ flex: 1 }}>
-                  <Txt size={16}>{item.name}</Txt>
+                  {/* Done lists recede: muted name, faded marker. */}
+                  <Txt size={16} muted={completed}>
+                    {item.name}
+                  </Txt>
                   {item.description ? (
                     <Txt
                       muted
@@ -153,35 +193,18 @@ export default function ListsOverview() {
                     </Txt>
                   ) : null}
                 </View>
-                {total === 0 ? null : pending > 0 ? (
-                  // A count chip reads as "items left" — clearer than a bare
-                  // number floating at the row's edge.
-                  <View
-                    style={{
-                      minWidth: 26,
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
-                      borderRadius: 13,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: t.border,
-                    }}
-                  >
-                    <Txt size={13} weight="700">
-                      {pending}
-                    </Txt>
-                  </View>
-                ) : (
-                  // All done: a check beats showing "0".
-                  <Check color={t.primary} size={18} />
-                )}
+                <ProgressRing done={done} pending={pending} total={total} />
               </Pressable>
             );
           }}
         />
       )}
 
-      <Fab onPress={() => setCreating(true)} label={tl("newList")} />
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tl("newList")}
+        extended={fab.extended}
+      />
       <CreateListSheet
         visible={creating}
         projectId={pid}
@@ -191,10 +214,97 @@ export default function ListsOverview() {
   );
 }
 
-// A square-ish launcher tile for a list subsection (templates, categories).
-// Deliberately distinct from the full-width list cards below: side-by-side,
-// icon-forward, with the icon in a primary-tinted badge.
-function NavTile({
+// Per-row completion ring (Reminders/Things-style): an empty track for an
+// empty list, a primary arc that fills as items complete, and a solid disc
+// with a check when everything is done. One ring per row is what marks each
+// row as a checklist of its own — the screen reads as a list of lists. The
+// pending count sits inside the ring so an arc-less ring still reads as a
+// progress gauge rather than an unchecked checkbox.
+function ProgressRing({
+  done,
+  pending,
+  total,
+}: {
+  done: number;
+  pending: number;
+  total: number;
+}) {
+  const t = useTheme();
+  const size = 30;
+  const stroke = 3;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const complete = total > 0 && done === total;
+
+  if (complete) {
+    return (
+      // Same footprint as the ring so the trailing column stays aligned.
+      <View
+        style={{
+          width: size,
+          height: size,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* A bare muted check, faded so its 3px stroke carries the same
+            visual weight as the row's muted text: settled, not highlighted. */}
+        <Check color={t.muted} size={20} strokeWidth={3} opacity={0.6} />
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Svg width={size} height={size} style={{ position: "absolute" }}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={t.border}
+          strokeWidth={stroke}
+          fill="none"
+        />
+        {done > 0 ? (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={t.primary}
+            strokeWidth={stroke}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${circumference}`}
+            strokeDashoffset={circumference * (1 - done / total)}
+            // Start the arc at 12 o'clock instead of SVG's default 3 o'clock.
+            rotation={-90}
+            originX={size / 2}
+            originY={size / 2}
+          />
+        ) : null}
+      </Svg>
+      {pending > 0 ? (
+        // Two digits is all the ring fits; beyond that the gauge matters more
+        // than the exact number.
+        <Txt muted size={12} weight="700">
+          {pending > 99 ? "99" : pending}
+        </Txt>
+      ) : null}
+    </View>
+  );
+}
+
+// A compact launcher row for a list subsection (templates). Deliberately
+// distinct from the list rows below: bordered card, primary-tinted icon badge,
+// and a trailing chevron that marks it as navigation rather than a list.
+function NavButton({
   icon,
   label,
   onPress,
@@ -207,22 +317,24 @@ function NavTile({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       style={({ pressed }) => ({
-        flex: 1,
-        aspectRatio: 1.3,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
         borderColor: t.border,
         borderWidth: 1,
         borderRadius: 14,
-        padding: 14,
-        justifyContent: "space-between",
+        paddingVertical: 10,
+        paddingHorizontal: 12,
         backgroundColor: pressed ? t.border : t.card,
       })}
     >
       <View
         style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
+          width: 32,
+          height: 32,
+          borderRadius: 10,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: `${t.primary}1a`,
@@ -230,9 +342,10 @@ function NavTile({
       >
         {icon}
       </View>
-      <Txt size={15} weight="700">
+      <Txt size={15} weight="700" style={{ flex: 1 }}>
         {label}
       </Txt>
+      <ChevronRight color={t.muted} size={18} />
     </Pressable>
   );
 }

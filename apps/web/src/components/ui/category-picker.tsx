@@ -18,18 +18,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 type Category = { id: string; name: string };
 
 export type CategoryPickerProps = {
+  /** Autocomplete suggestions (the project's known category names). */
   categories: Category[];
-  /** Selected category id, or null for "no category". */
+  /** Selected category name, or null for "no category". */
   value: string | null;
-  onChange: (categoryId: string | null) => void;
-  /** Creates a category and resolves with its id. */
-  onCreate: (name: string) => Promise<string>;
+  onChange: (category: string | null) => void;
   disabled?: boolean;
   variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
@@ -93,7 +91,6 @@ function CategoryPickerView({
   categories,
   value,
   onChange,
-  onCreate,
   disabled,
   variant = "outline",
   className,
@@ -104,9 +101,7 @@ function CategoryPickerView({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
-  const [isCreating, setIsCreating] = useState(false);
 
-  const selected = categories.find((c) => c.id === value) ?? null;
   const trimmedQuery = query.trim();
 
   const rows = useMemo(
@@ -128,33 +123,16 @@ function CategoryPickerView({
   }
 
   function select(row: Row) {
-    if (row.type === "none") {
-      onChange(null);
-      handleOpenChange(false);
-      return;
-    }
-    if (row.type === "category") {
-      onChange(row.category.id);
-      handleOpenChange(false);
-      return;
-    }
-    void create(row.name);
-  }
-
-  async function create(name: string) {
-    if (isCreating) {
-      return;
-    }
-    setIsCreating(true);
-    try {
-      const categoryId = await onCreate(name);
-      onChange(categoryId);
-      handleOpenChange(false);
-    } catch {
-      // The error toast is surfaced by onCreate; keep the picker open to retry.
-    } finally {
-      setIsCreating(false);
-    }
+    // The "create" row is just the typed name — selecting it sets the value;
+    // the suggestion is recorded server-side when the item is saved.
+    onChange(
+      row.type === "none"
+        ? null
+        : row.type === "category"
+          ? row.category.name
+          : row.name,
+    );
+    handleOpenChange(false);
   }
 
   function handleSearchKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -177,7 +155,7 @@ function CategoryPickerView({
     }
   }
 
-  const triggerLabel = selected?.name ?? tCommon("noCategory");
+  const triggerLabel = value ?? tCommon("noCategory");
 
   const trigger = (
     <Button
@@ -189,7 +167,7 @@ function CategoryPickerView({
       disabled={disabled}
       className={cn(
         "h-10 justify-between gap-2 font-normal sm:h-9",
-        !selected && "text-muted-foreground",
+        value === null && "text-muted-foreground",
         className,
       )}
     >
@@ -212,7 +190,6 @@ function CategoryPickerView({
       placeholder={t("searchPlaceholder")}
       aria-label={t("searchPlaceholder")}
       autoFocus
-      disabled={isCreating}
     />
   );
 
@@ -230,8 +207,6 @@ function CategoryPickerView({
           mode={mode}
           highlighted={index === highlight}
           isSelected={isRowSelected(row, value)}
-          isCreating={isCreating && row.type === "create"}
-          disabled={isCreating}
           createLabel={t("createNamed", {
             name: row.type === "create" ? row.name : "",
           })}
@@ -283,8 +258,6 @@ function OptionRow({
   mode,
   highlighted,
   isSelected,
-  isCreating,
-  disabled,
   createLabel,
   noCategoryLabel,
   onSelect,
@@ -294,8 +267,6 @@ function OptionRow({
   mode: "desktop" | "mobile";
   highlighted: boolean;
   isSelected: boolean;
-  isCreating: boolean;
-  disabled: boolean;
   createLabel: string;
   noCategoryLabel: string;
   onSelect: () => void;
@@ -313,22 +284,17 @@ function OptionRow({
       type="button"
       role="option"
       aria-selected={isSelected}
-      disabled={disabled}
       onClick={onSelect}
       onMouseMove={onHover}
       className={cn(
-        "flex w-full cursor-pointer select-none items-center gap-2 rounded-md text-left outline-none disabled:cursor-not-allowed disabled:opacity-50",
+        "flex w-full cursor-pointer select-none items-center gap-2 rounded-md text-left outline-none",
         mode === "mobile" ? "px-4 py-3 text-base" : "px-2 py-1.5 text-sm",
         highlighted && "bg-accent text-accent-foreground",
         row.type === "create" && "text-primary",
       )}
     >
       {row.type === "create" ? (
-        isCreating ? (
-          <Spinner className="size-4 shrink-0" />
-        ) : (
-          <Plus className="size-4 shrink-0" />
-        )
+        <Plus className="size-4 shrink-0" />
       ) : (
         <Check
           className={cn(
@@ -347,7 +313,7 @@ function isRowSelected(row: Row, value: string | null): boolean {
     return value === null;
   }
   if (row.type === "category") {
-    return row.category.id === value;
+    return row.category.name === value;
   }
   return false;
 }

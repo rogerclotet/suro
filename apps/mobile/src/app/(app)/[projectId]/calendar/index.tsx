@@ -16,7 +16,7 @@ import { useFormatEventRange, useLongDate } from "@/lib/datetime";
 import { isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Card, Fab, Loading, Screen, Txt } from "@/ui";
+import { Card, Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
@@ -33,6 +33,7 @@ export default function CalendarScreen() {
   });
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
   const [exporting, setExporting] = useState(false);
 
   const monthStart = new Date(
@@ -122,7 +123,11 @@ export default function CalendarScreen() {
         }}
       />
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 96 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
+      >
         <MonthGrid
           month={month}
           onChangeMonth={setMonth}
@@ -157,7 +162,11 @@ export default function CalendarScreen() {
         )}
       </ScrollView>
 
-      <Fab onPress={() => setCreating(true)} label={tCal("newEvent")} />
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tCal("newEvent")}
+        extended={fab.extended}
+      />
       <EventForm
         visible={creating}
         defaultDate={selectedDay}

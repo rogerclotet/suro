@@ -8,7 +8,7 @@ import { chooseAndUpload } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useUploadFile } from "@/lib/use-upload-file";
-import { Fab, Loading, Screen, Txt } from "@/ui";
+import { Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 export default function Files() {
   const pid = useProjectId();
@@ -16,6 +16,7 @@ export default function Files() {
   const { pickImage, pickDocument, pending } = useUploadFile(pid);
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
+  const fab = useFabScroll();
 
   const onCreate = () =>
     chooseAndUpload(
@@ -42,7 +43,11 @@ export default function Files() {
       {files === undefined ? (
         <Loading />
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 96 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
+        >
           {files.length === 0 && !pending ? (
             <View style={{ paddingVertical: 24, alignItems: "center" }}>
               <Txt muted>{tFiles("empty")}</Txt>
@@ -52,7 +57,11 @@ export default function Files() {
           )}
         </ScrollView>
       )}
-      <Fab onPress={onCreate} label={tFiles("shareFiles")} />
+      <Fab
+        onPress={onCreate}
+        label={tFiles("shareFiles")}
+        extended={fab.extended}
+      />
     </Screen>
   );
 }

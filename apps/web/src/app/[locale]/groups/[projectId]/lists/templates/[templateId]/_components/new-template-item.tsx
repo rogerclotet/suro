@@ -14,7 +14,6 @@ import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
 import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
-import { useCategoryCreation } from "../../../_components/add-item/use-category-creation";
 import { templateItemSchema } from "../../_components/create-template/data";
 
 type Item = Template["items"][number];
@@ -29,13 +28,12 @@ export default function NewTemplateItem({
   const form = useForm({
     defaultValues: {
       name: "",
-      category: "",
+      category: null,
     },
     resolver: valibotResolver(templateItemSchema),
   });
   const { project } = useProjects();
   const { data: session } = useSession();
-  const { createAndSelect } = useCategoryCreation();
   const t = useTranslations("lists");
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
@@ -43,13 +41,10 @@ export default function NewTemplateItem({
       return;
     }
 
-    if (data.category === "") {
-      data.category = null;
-    }
-
     try {
       await onCreate({ name: data.name, category: data.category ?? null });
-      form.reset({ name: "", category: data.category ?? "" });
+      // Keep the category selected for fast same-section entry.
+      form.reset({ name: "", category: data.category ?? null });
       form.setFocus("name");
     } catch (e) {
       posthog.captureException(e, {
@@ -88,9 +83,8 @@ export default function NewTemplateItem({
               <CategoryPicker
                 variant="ghost"
                 categories={project?.categories ?? []}
-                value={field.value || null}
-                onChange={(categoryId) => field.onChange(categoryId ?? "")}
-                onCreate={createAndSelect}
+                value={field.value ?? null}
+                onChange={field.onChange}
                 disabled={form.formState.isSubmitting}
               />
             )}
