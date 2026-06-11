@@ -9,7 +9,16 @@ import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Fab, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Fab,
+  Field,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+  useFabScroll,
+} from "@/ui";
 
 type Template = FunctionReturnType<typeof api.templates.listByProject>[number];
 type Project = FunctionReturnType<typeof api.projects.listMine>[number];
@@ -22,6 +31,7 @@ export default function Templates() {
   const tr = useTranslations("mobile.templates");
 
   const [creating, setCreating] = useState(false);
+  const fab = useFabScroll();
   // Visibility is separate from the content so the sheet keeps showing the
   // template while it slides out (matches the other sheets in the app).
   const [actionsVisible, setActionsVisible] = useState(false);
@@ -43,6 +53,8 @@ export default function Templates() {
       ) : (
         <FlatList
           data={templates}
+          onScroll={fab.onScroll}
+          scrollEventThrottle={16}
           keyExtractor={(template) => template._id}
           contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
           ListEmptyComponent={
@@ -104,7 +116,11 @@ export default function Templates() {
       )}
 
       {!creating && !actionsVisible && (
-        <Fab onPress={() => setCreating(true)} label={tr("newTemplate")} />
+        <Fab
+          onPress={() => setCreating(true)}
+          label={tr("newTemplate")}
+          extended={fab.extended}
+        />
       )}
       <CreateTemplateSheet
         visible={creating}

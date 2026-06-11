@@ -17,6 +17,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -52,6 +54,7 @@ import {
   Screen,
   Sheet,
   Txt,
+  useFabScroll,
 } from "@/ui";
 
 type ListResult = NonNullable<FunctionReturnType<typeof api.lists.get>>;
@@ -153,6 +156,7 @@ export function ListDetailScreen({
   // `mode` picks the title/action, and `editingItem` is the target when editing.
   // The mode and target persist while the sheet slides out so its content
   // doesn't flicker during the close animation.
+  const fab = useFabScroll();
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
   const [itemSheetMode, setItemSheetMode] = useState<"create" | "edit">(
     "create",
@@ -275,7 +279,8 @@ export function ListDetailScreen({
     dropProviderRef.current?.requestPositionUpdate();
   }
 
-  function handleScroll() {
+  function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    fab.onScroll?.(e);
     const now = Date.now();
     if (now - lastPositionUpdate.current > 100) {
       lastPositionUpdate.current = now;
@@ -614,7 +619,11 @@ export function ListDetailScreen({
             ) : null}
           </ScrollView>
 
-          <Fab onPress={openCreate} label={tl("newItem")} />
+          <Fab
+            onPress={openCreate}
+            label={tl("newItem")}
+            extended={fab.extended}
+          />
 
           <ItemSheet
             visible={itemSheetOpen}
