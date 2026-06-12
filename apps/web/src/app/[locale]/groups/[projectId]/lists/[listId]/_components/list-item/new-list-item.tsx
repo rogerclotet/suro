@@ -1,25 +1,32 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { api } from "backend/convex/_generated/api";
-import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import type * as v from "valibot";
 import type { List } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
-import { useSession } from "@/lib/session";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { listItemSchema } from "./data";
+import useCreateListItem from "./use-create-list-item";
 
-export default function NewListItem({ list }: { list: List }) {
+/**
+ * The list's always-visible add form at the top: a name input plus the quick
+ * category selector (defaults to no category, whose section sits right below).
+ * Categorized adds hand focus to that category's inline row via `onSubmitted`.
+ */
+export default function NewListItem({
+  list,
+  onSubmitted,
+}: {
+  list: List;
+  /** Reports the category actually used so focus can follow the item. */
+  onSubmitted: (category: string | null) => void;
+}) {
   const form = useForm({
     defaultValues: {
       name: "",
@@ -29,49 +36,30 @@ export default function NewListItem({ list }: { list: List }) {
     resolver: valibotResolver(listItemSchema),
   });
   const { project } = useProjects();
-  const { data: session } = useSession();
-  const createItem = useMutation(api.listItems.create);
   const t = useTranslations("lists");
+
+  const { submit } = useCreateListItem(list, (lostName) => {
+    // Restore the lost name for a retry, unless a new one is mid-typing.
+    if (form.getValues("name") === "") {
+      form.setValue("name", lostName, { shouldDirty: true });
+    }
+  });
 
   function onSubmit(data: v.InferInput<typeof listItemSchema>) {
     if (data.name === "") {
       return;
     }
-
-    if (
-      list.items.find(
-        (i) => i.category === data.category && i.name === data.name,
-      )
-    ) {
-      toast.error(t("itemAlreadyExists"));
-      return;
+    if (!submit(data.name, data.category)) {
+      return; // duplicate: keep the text for editing
     }
-
-    // Clear synchronously and let the mutation race in the background:
-    // awaiting it would disable the input mid-flight, which blurs it and
-    // closes the mobile keyboard between consecutive adds. The category stays
-    // selected for fast same-section entry.
-    form.reset({ name: "", completed: false, category: data.category });
-    form.setFocus("name");
-
-    createItem({
-      listId: list.id as Id<"lists">,
-      name: data.name,
-      category: data.category,
-    }).catch((e: unknown) => {
-      console.error("[new-list-item] createListItemOffline failed:", e);
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_list_item",
-        projectId: list.projectId,
-        listId: list.id,
-      });
-      // Restore the lost name for a retry, unless a new one is mid-typing.
-      if (form.getValues("name") === "") {
-        form.setValue("name", data.name, { shouldDirty: true });
-      }
-      toast.error(t("itemCreateError"));
-    });
+    // Clear synchronously (see useCreateListItem for why the mutation is not
+    // awaited). No-category adds land right below, so focus stays here;
+    // categorized adds hand it to that category's row.
+    form.reset({ name: "", completed: false, category: null });
+    if (data.category === null) {
+      form.setFocus("name");
+    }
+    onSubmitted(data.category);
   }
 
   return (
@@ -101,17 +89,19 @@ export default function NewListItem({ list }: { list: List }) {
         />
       }
       submitButton={
-        form.formState.isDirty ? (
-          <Button
-            size="icon"
-            variant="ghost"
-            // Keep focus (and the mobile keyboard) in the name input when
-            // confirming with a tap instead of the keyboard's return key.
-            onPointerDown={(e) => e.preventDefault()}
-          >
-            <Check />
-          </Button>
-        ) : null
+        // Always visible so the affordance isn't enter-key-only; disabled
+        // until there's something to add.
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={t("addItem")}
+          disabled={!form.formState.isDirty}
+          // Keep focus (and the mobile keyboard) in the name input when
+          // confirming with a tap instead of the keyboard's return key.
+          onPointerDown={(e) => e.preventDefault()}
+        >
+          <Check />
+        </Button>
       }
     />
   );

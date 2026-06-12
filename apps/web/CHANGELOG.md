@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.5.0] — 2026-06-12
+
+### ca
+
+- [improvement] Afegir elements a una llista ara es fa en línia: cada categoria té la seva pròpia fila "Afegeix un element", i la fila sempre visible a dalt de la llista inclou un selector ràpid de categoria. Després d'afegir un element, el focus es queda al lloc per continuar afegint-ne ràpidament.
+- [improvement] Els detalls d'un element ara es mostren sota el seu nom a la versió web.
+
+### es
+
+- [improvement] Añadir elementos a una lista ahora se hace en línea: cada categoría tiene su propia fila "Añadir elemento", y la fila siempre visible en la parte superior de la lista incluye un selector rápido de categoría. Después de añadir un elemento, el foco se queda en su sitio para seguir añadiendo rápidamente.
+- [improvement] Los detalles de un elemento ahora se muestran debajo de su nombre en la versión web.
+
+### en
+
+- [improvement] Adding items to a list now happens inline: each category has its own "Add item" row, and the always-visible row at the top of the list includes a quick category selector. After adding an item, focus stays in place so you can keep adding quickly.
+- [improvement] An item's details now show below its name on the web version.
+
 ## [1.4.0] — 2026-06-11
 
 ### ca

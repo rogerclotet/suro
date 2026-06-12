@@ -26,6 +26,13 @@ export default function CheckList(props: { list: List }) {
   const t = useTranslations("lists");
 
   const [dragging, setDragging] = useState(false);
+  // Which category section's inline add row is expanded (undefined = none;
+  // null = the top no-category form, which is always visible and only tracked
+  // here so a categorized add collapses any open section row). Set after each
+  // add so focus follows the item into the category it went to.
+  const [activeAdd, setActiveAdd] = useState<string | null | undefined>(
+    undefined,
+  );
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor);
   const keyboardSensor = useSensor(KeyboardSensor);
@@ -77,6 +84,20 @@ export default function CheckList(props: { list: List }) {
     },
     [removeItem],
   );
+
+  const handleAddActivate = useCallback((category: string | null) => {
+    setActiveAdd(category);
+  }, []);
+
+  // Functional update keyed to the caller's own category so a stale blur from
+  // a collapsing row never clears another row's activation (focus-follow).
+  const handleAddDeactivate = useCallback((category: string | null) => {
+    setActiveAdd((prev) => (prev === category ? undefined : prev));
+  }, []);
+
+  const handleAddSubmitted = useCallback((category: string | null) => {
+    setActiveAdd(category);
+  }, []);
 
   function handleDragStart(_event: DragStartEvent) {
     setDragging(true);
@@ -150,7 +171,9 @@ export default function CheckList(props: { list: List }) {
             </span>
           </div>
         )}
-        <NewListItem list={list} />
+        {/* The always-visible no-category entry point with the quick category
+            selector; the uncategorized section sorts first, right below it. */}
+        <NewListItem list={list} onSubmitted={handleAddSubmitted} />
       </div>
 
       <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
@@ -163,6 +186,10 @@ export default function CheckList(props: { list: List }) {
             isDragging={dragging}
             handleChange={handleChange}
             handleDelete={handleDelete}
+            addActive={activeAdd === category}
+            onAddActivate={handleAddActivate}
+            onAddDeactivate={handleAddDeactivate}
+            onAddSubmitted={handleAddSubmitted}
           />
         ))}
       </div>
@@ -201,11 +228,12 @@ function groupItemsByCategory(items: List["items"]) {
     result.push({ category, items: categoryItems });
   }
 
+  // The no-category bucket always sorts first so its items sit right below
+  // the always-visible add form at the top (the no-category entry point).
   result.sort((a, b) => {
-    if (a.items.length !== 0 && b.items.length !== 0) {
-      return a.category.localeCompare(b.category);
-    }
-    return b.items.length - a.items.length;
+    if (a.category === "") return -1;
+    if (b.category === "") return 1;
+    return a.category.localeCompare(b.category);
   });
 
   return result;
