@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.5.1] — 2026-06-12
+
+### ca
+
+- [improvement] Les interaccions amb les llistes ara estan animades: en marcar un element el ratllat apareix gradualment, els elements nous entren suaument i els elements que canvien de categoria llisquen fins al seu nou lloc.
+
+### es
+
+- [improvement] Las interacciones con las listas ahora están animadas: al marcar un elemento el tachado aparece gradualmente, los elementos nuevos entran suavemente y los elementos que cambian de categoría se deslizan hasta su nuevo sitio.
+
+### en
+
+- [improvement] List interactions are now animated: checking off an item fades in its strike-through, new items ease in, and items that change category glide to their new spot.
+
 ## [1.5.0] — 2026-06-12
 
 ### ca

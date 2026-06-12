@@ -18,12 +18,18 @@ import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
+import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import CategoryItems from "./category-items";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const list = props.list;
   const t = useTranslations("lists");
+
+  // Animates category sections appearing/disappearing and sliding into place
+  // (e.g. a new category created by a move, or one emptied out). Items moving
+  // within a section are animated by the section's own list (CategoryItems).
+  const sectionsParent = useStableAutoAnimate<HTMLDivElement>();
 
   const [dragging, setDragging] = useState(false);
   // Which category section's inline add row is expanded (undefined = none;
@@ -176,7 +182,10 @@ export default function CheckList(props: { list: List }) {
         <NewListItem list={list} onSubmitted={handleAddSubmitted} />
       </div>
 
-      <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
+      <div
+        ref={sectionsParent}
+        className="mx-auto flex max-w-lg flex-col items-stretch gap-4"
+      >
         {itemsByCategory.map(({ category, items }) => (
           <CategoryItems
             key={`category-${category === "" ? "<none>" : category}`}

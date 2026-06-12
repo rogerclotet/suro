@@ -1,11 +1,11 @@
 "use client";
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import type { Template } from "@/app/_data/list";
+import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import NewTemplateItem from "./new-template-item";
 import TemplateItem from "./template-item";
 
@@ -14,7 +14,9 @@ type ItemWithIndex = Item & { index: number };
 
 export default function TemplateItems({ template }: { template: Template }) {
   const [items, setItems] = useState<Template["items"]>(template.items);
-  const [animationParent] = useAutoAnimate();
+  // Strict-mode-safe variant: useAutoAnimate double-initializes in dev and
+  // the duplicate observers cancel each other's animations.
+  const animationParent = useStableAutoAnimate<HTMLUListElement>();
   const updateTemplate = useMutation(api.templates.update);
 
   // Persist the full items array (Convex stores template items inline).
