@@ -26,10 +26,12 @@ import {
 } from "react-native";
 import Animated, {
   FadeIn,
+  FadeOut,
   LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  ZoomIn,
 } from "react-native-reanimated";
 import {
   Draggable,
@@ -551,6 +553,8 @@ export function ListDetailScreen({
             {sections.map((section) => (
               <Animated.View
                 key={section.title}
+                entering={FadeIn.duration(200)}
+                exiting={FadeOut.duration(150)}
                 layout={LinearTransition.duration(200)}
                 // The section a row is dragged out of must stack above its
                 // sibling sections, or the lifted row slides underneath them.
@@ -755,6 +759,9 @@ function DraggableItemRow({
     >
       <Animated.View
         entering={FadeIn.duration(150)}
+        // Also softens the reset-key remounts after a no-op drop: the stuck
+        // row cross-fades from the drop slot back to its home position.
+        exiting={FadeOut.duration(150)}
         layout={LinearTransition.duration(200)}
         style={[
           {
@@ -774,6 +781,10 @@ function DraggableItemRow({
         ]}
       >
         <Pressable
+          // Remounting on toggle keeps every style set at mount, sidestepping
+          // the Android Fabric bug where recoloring a mounted View drops its
+          // borderRadius; it also replays the fill's entering animation.
+          key={item.completed ? "checked" : "unchecked"}
           onPress={() => onToggle(item)}
           hitSlop={8}
           style={{
@@ -782,13 +793,30 @@ function DraggableItemRow({
             borderRadius: 8,
             borderWidth: 2,
             borderColor: item.completed ? t.primary : t.muted,
-            backgroundColor: item.completed ? t.primary : "transparent",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
           {item.completed ? (
-            <Check color={t.onPrimary} size={16} strokeWidth={3} />
+            // The fill zooms in from the center on completion; it sits inside
+            // the border (insets are relative to the padding box), so the
+            // inner radius is the outer one minus the border width.
+            <Animated.View
+              entering={ZoomIn.duration(150)}
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                borderRadius: 6,
+                backgroundColor: t.primary,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Check color={t.onPrimary} size={16} strokeWidth={3} />
+            </Animated.View>
           ) : null}
         </Pressable>
         <Pressable style={{ flex: 1 }} onPress={() => onEdit(item)}>

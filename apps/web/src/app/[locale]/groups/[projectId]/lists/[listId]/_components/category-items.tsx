@@ -1,27 +1,12 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import { type AnimationController, autoAnimate } from "@formkit/auto-animate";
-import { type CSSProperties, memo, useCallback, useRef } from "react";
+import { type CSSProperties, memo } from "react";
 import type { List } from "@/app/_data/list";
+import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import { cn } from "@/lib/utils";
 import InlineAddItem from "./list-item/inline-add-item";
 import ListItem from "./list-item/list-item";
-
-// useAutoAnimate fires the callback ref twice in React Strict Mode (dev), creating
-// duplicate MutationObservers that cancel each other's FLIP animations. This hook
-// prevents double-initialization by tracking the controller and calling destroy() on cleanup.
-function useStableAutoAnimate() {
-  const controllerRef = useRef<AnimationController | null>(null);
-  return useCallback((node: HTMLUListElement | null) => {
-    if (node && !controllerRef.current) {
-      controllerRef.current = autoAnimate(node);
-    } else if (!node && controllerRef.current) {
-      controllerRef.current.destroy?.();
-      controllerRef.current = null;
-    }
-  }, []);
-}
 
 export default memo(function CategoryItems(props: {
   items: List["items"];
@@ -41,7 +26,7 @@ export default memo(function CategoryItems(props: {
   onAddDeactivate: (category: string | null) => void;
   onAddSubmitted: (category: string | null) => void;
 }) {
-  const animationParent = useStableAutoAnimate();
+  const animationParent = useStableAutoAnimate<HTMLUListElement>();
   const { isOver, setNodeRef } = useDroppable({
     id: props.category === "" ? "droppable" : `droppable-${props.category}`,
     data: { category: props.category },
@@ -80,7 +65,9 @@ export default memo(function CategoryItems(props: {
             />
           ))
         ) : (
-          <div className="mb-2 h-10 rounded-md border-2 border-border border-dashed" />
+          // Drop placeholder for an emptied section; it (re)appears via a
+          // display toggle when a drag starts, which restarts the fade-in.
+          <div className="mb-2 h-10 animate-in rounded-md border-2 border-border border-dashed duration-300 fade-in" />
         )}
       </ul>
 
