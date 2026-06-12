@@ -1,0 +1,1 @@
+First release of Suro: shared lists, calendar, notes, files and expenses for your groups.

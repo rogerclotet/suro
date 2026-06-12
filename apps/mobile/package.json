@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "build:android:preview": "mkdir -p build && eas build --platform android --profile preview --local --output build/suro-preview.apk",
     "build:android:prod-apk": "mkdir -p build && eas build --platform android --profile production-apk --local --output build/suro-prod.apk",

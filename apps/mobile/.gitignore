@@ -47,3 +47,6 @@ example
 *.apk
 *.aab
 *.ipa
+
+# store submission credentials (Play service account JSON etc.) — never commit
+/credentials

@@ -1,0 +1,25 @@
+Suro es el corcho compartido para la gente con la que compartes tu día a día. Listas, calendario, notas, archivos y gastos compartidos de tu grupo en un solo sitio, para que dejes de saltar entre chats, hojas de cálculo y recordatorios.
+
+LISTAS
+Listas de la compra, de equipaje, de tareas. Organiza los elementos por categorías, guarda plantillas reutilizables y marcadlas juntos en tiempo real.
+
+CALENDARIO
+Planifica viajes, cenas y cumpleaños. Enlaza una lista o una nota a un evento para que el equipaje o la compra estén justo donde los necesitas. Suscríbete desde Google Calendar o Apple Calendar.
+
+NOTAS Y ARCHIVOS
+Comparte notas con formato, fotos y PDFs con todo el grupo. Se acabó buscar en el historial del chat.
+
+GASTOS COMPARTIDOS
+Apunta quién ha pagado qué, repártelo de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.
+
+AL DÍA SIN ESFUERZO
+Recibe avisos cuando alguien actualiza una lista, añade un evento o salda una deuda, sin el ruido de los chats.
+
+PENSADO PARA LOS GRUPOS DE TU VIDA
+• Compañeros de piso: tened la compra, las tareas y las facturas bajo control, juntos, no solo en la cabeza de uno.
+• Familias: desde los menús semanales hasta el equipaje de las vacaciones, compartid lo que importa con la gente de casa.
+• Grupos de amigos: organizad el viaje y repartid los gastos sin perderos en el chat del grupo.
+
+Crea tu primer grupo en menos de un minuto: inicia sesión con Google o con tu correo, crea un grupo e invita a tu gente con un enlace. Sin tarjeta de crédito, sin configuración.
+
+Suro no vende tus datos ni usa feeds algorítmicos. Política de privacidad: https://suro.clotet.dev/es/privacidad

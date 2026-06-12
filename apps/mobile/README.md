@@ -54,7 +54,9 @@ Notes:
   the build — commit first.
 - Production builds bake `EXPO_PUBLIC_CONVEX_URL`/`EXPO_PUBLIC_SITE_URL` from
   the `production` profile's `env` in `eas.json` and auto-increment the remote
-  version (`appVersionSource: "remote"`). No `eas submit` step yet.
+  version (`appVersionSource: "remote"`). Store submission + listing metadata:
+  see `store/README.md` (EAS Submit profiles in `eas.json`, App Store text via
+  EAS Metadata, Play listing under `store/play/`).
 
 ## Notes
 
