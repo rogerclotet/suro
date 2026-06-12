@@ -1,0 +1,25 @@
+Suro is a shared corkboard for the people you do life with. Lists, calendar, notes, files and shared expenses for your group, in one calm place — so you can stop juggling chats, spreadsheets and reminders.
+
+LISTS
+Shopping lists, packing lists, to-dos. Organize items into categories, save reusable templates, and check things off together in real time.
+
+CALENDAR
+Plan trips, dinners and birthdays. Link a list or a note to an event so the packing or the shopping is right where you need it. Subscribe from Google Calendar or Apple Calendar.
+
+NOTES & FILES
+Share rich-text notes, photos and PDFs with the whole group. No more digging through chat history.
+
+SHARED EXPENSES
+Track who paid for what, split the bill fairly, and let Suro work out the simplest way to settle up.
+
+STAY IN THE LOOP
+Get notified when someone updates a list, adds an event, or settles a debt. No chat-app noise.
+
+MADE FOR THE GROUPS IN YOUR LIFE
+• Flatmates — keep the shopping, chores and bills under control, together, not just in one person's head.
+• Families — from weekly meal planning to holiday packing, share what matters with the people at home.
+• Friend groups — plan the trip and split the costs without endless group-chat scrolling.
+
+Start your first group in under a minute: sign in with Google or your email, create a group, and invite your people with a link. No credit card, no setup.
+
+Suro doesn't sell your data and runs no algorithmic feeds. Privacy policy: https://suro.clotet.dev/en/privacy

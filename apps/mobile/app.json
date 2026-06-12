@@ -8,9 +8,12 @@
     "scheme": "suro",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "app.suro.mobile",
-      "associatedDomains": ["applinks:suro.clotet.dev"]
+      "associatedDomains": ["applinks:suro.clotet.dev"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "app.suro.mobile",
@@ -20,7 +23,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.RECORD_AUDIO"],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
       "intentFilters": [
         {
           "action": "VIEW",

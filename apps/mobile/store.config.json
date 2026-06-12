@@ -1,0 +1,100 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 Roger Clotet",
+    "categories": ["PRODUCTIVITY", "LIFESTYLE"],
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null
+    },
+    "release": {
+      "automaticRelease": false
+    },
+    "review": {
+      "firstName": "Roger",
+      "lastName": "Clotet",
+      "email": "suro@clotet.dev",
+      "phone": "TODO_REVIEW_CONTACT_PHONE",
+      "demoUsername": "review@suro.clotet.dev",
+      "demoPassword": "TODO_FIXED_OTP_CODE",
+      "demoRequired": true,
+      "notes": "Suro requires an account. To sign in as the demo user: on the login screen choose 'Continue with email', enter the demo email above, then enter the one-time code given as the demo password (this reviewer account uses a fixed code instead of an emailed one). The account is a member of a demo group with sample lists, calendar events, notes and shared expenses."
+    },
+    "info": {
+      "en-US": {
+        "title": "Suro",
+        "subtitle": "Lists & plans, together",
+        "promoText": "Suro keeps your group's lists, plans, files and shared expenses in one calm place, so you can stop juggling chats, spreadsheets and reminders.",
+        "description": "Suro is a shared corkboard for the people you do life with. Lists, calendar, notes, files and shared expenses for your group, in one calm place — so you can stop juggling chats, spreadsheets and reminders.\n\nLISTS\nShopping lists, packing lists, to-dos. Organize items into categories, save reusable templates, and check things off together in real time.\n\nCALENDAR\nPlan trips, dinners and birthdays. Link a list or a note to an event so the packing or the shopping is right where you need it. Subscribe from Apple Calendar or Google Calendar.\n\nNOTES & FILES\nShare rich-text notes, photos and PDFs with the whole group. No more digging through chat history.\n\nSHARED EXPENSES\nTrack who paid for what, split the bill fairly, and let Suro work out the simplest way to settle up.\n\nSTAY IN THE LOOP\nGet notified when someone updates a list, adds an event, or settles a debt. No chat-app noise.\n\nMADE FOR THE GROUPS IN YOUR LIFE\n• Flatmates — keep the shopping, chores and bills under control, together, not just in one person's head.\n• Families — from weekly meal planning to holiday packing, share what matters with the people at home.\n• Friend groups — plan the trip and split the costs without endless group-chat scrolling.\n\nStart your first group in under a minute: sign in with Google or your email, create a group, and invite your people with a link. No credit card, no setup.\n\nSuro doesn't sell your data and runs no algorithmic feeds. Privacy policy: https://suro.clotet.dev/privacy",
+        "keywords": [
+          "shared list",
+          "grocery",
+          "flatmate",
+          "family",
+          "split expenses",
+          "group calendar",
+          "household",
+          "trip",
+          "roommate"
+        ],
+        "releaseNotes": "First release of Suro: shared lists, calendar, notes, files and expenses for your groups.",
+        "marketingUrl": "https://suro.clotet.dev",
+        "supportUrl": "https://suro.clotet.dev",
+        "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
+      },
+      "es-ES": {
+        "title": "Suro",
+        "subtitle": "Listas y planes, juntos",
+        "promoText": "Suro guarda las listas, los planes, los archivos y los gastos de tu grupo en un solo sitio, para que dejes de saltar entre chats, hojas de cálculo y recordatorios.",
+        "description": "Suro es el corcho compartido para la gente con la que compartes tu día a día. Listas, calendario, notas, archivos y gastos compartidos de tu grupo en un solo sitio, para que dejes de saltar entre chats, hojas de cálculo y recordatorios.\n\nLISTAS\nListas de la compra, de equipaje, de tareas. Organiza los elementos por categorías, guarda plantillas reutilizables y marcadlas juntos en tiempo real.\n\nCALENDARIO\nPlanifica viajes, cenas y cumpleaños. Enlaza una lista o una nota a un evento para que el equipaje o la compra estén justo donde los necesitas. Suscríbete desde Apple Calendar o Google Calendar.\n\nNOTAS Y ARCHIVOS\nComparte notas con formato, fotos y PDFs con todo el grupo. Se acabó buscar en el historial del chat.\n\nGASTOS COMPARTIDOS\nApunta quién ha pagado qué, repártelo de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.\n\nAL DÍA SIN ESFUERZO\nRecibe avisos cuando alguien actualiza una lista, añade un evento o salda una deuda, sin el ruido de los chats.\n\nPENSADO PARA LOS GRUPOS DE TU VIDA\n• Compañeros de piso: tened la compra, las tareas y las facturas bajo control, juntos, no solo en la cabeza de uno.\n• Familias: desde los menús semanales hasta el equipaje de las vacaciones, compartid lo que importa con la gente de casa.\n• Grupos de amigos: organizad el viaje y repartid los gastos sin perderos en el chat del grupo.\n\nCrea tu primer grupo en menos de un minuto: inicia sesión con Google o con tu correo, crea un grupo e invita a tu gente con un enlace. Sin tarjeta de crédito, sin configuración.\n\nSuro no vende tus datos ni usa feeds algorítmicos. Política de privacidad: https://suro.clotet.dev/es/privacidad",
+        "keywords": [
+          "lista compra",
+          "gastos compartidos",
+          "familia",
+          "piso compartido",
+          "calendario grupo",
+          "viaje",
+          "hogar",
+          "notas"
+        ],
+        "releaseNotes": "Primera versión de Suro: listas, calendario, notas, archivos y gastos compartidos para tus grupos.",
+        "marketingUrl": "https://suro.clotet.dev",
+        "supportUrl": "https://suro.clotet.dev",
+        "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
+      },
+      "ca": {
+        "title": "Suro",
+        "subtitle": "Llistes i plans, junts",
+        "promoText": "Suro guarda les llistes, els plans, els fitxers i les despeses del teu grup en un sol lloc, perquè deixis de saltar entre xats, fulls de càlcul i recordatoris.",
+        "description": "Suro és el suro compartit per a la gent amb qui comparteixes el dia a dia. Llistes, calendari, notes, fitxers i despeses compartides del teu grup en un sol lloc, perquè deixis de saltar entre xats, fulls de càlcul i recordatoris.\n\nLLISTES\nLlistes de la compra, de l'equipatge, de tasques. Organitza els elements per categories, desa plantilles reutilitzables i marqueu-les junts en temps real.\n\nCALENDARI\nPlanifica viatges, sopars i aniversaris. Enllaça una llista o una nota a un esdeveniment perquè l'equipatge o la compra sigui just on la necessites. Subscriu-t'hi des de l'Apple Calendar o el Google Calendar.\n\nNOTES I FITXERS\nComparteix notes amb format, fotos i PDFs amb tot el grup. S'ha acabat haver de buscar per l'historial del xat.\n\nDESPESES COMPARTIDES\nApunta qui ha pagat què, reparteix-ho de manera justa i deixa que Suro calculi la manera més senzilla de quadrar comptes.\n\nMANTÉN-TE AL DIA\nRep notificacions quan algú actualitza una llista, afegeix un esdeveniment o salda un deute, sense el soroll dels xats.\n\nPENSAT PER ALS GRUPS DE LA TEVA VIDA\n• Companys de pis: tingueu la compra, les tasques i les factures sota control, junts, no només al cap d'un.\n• Famílies: des dels menús setmanals fins a l'equipatge de les vacances, compartiu el que importa amb la gent de casa.\n• Colles d'amics: organitzeu el viatge i repartiu les despeses sense perdre-us al xat del grup.\n\nCrea el teu primer grup en menys d'un minut: inicia sessió amb Google o amb el teu correu, crea un grup i convida la teva gent amb un enllaç. Sense targeta de crèdit, sense configuració.\n\nSuro no ven les teves dades ni fa servir feeds algorítmics. Política de privacitat: https://suro.clotet.dev/ca/privacitat",
+        "keywords": [
+          "llista compra",
+          "despeses compartides",
+          "família",
+          "pis compartit",
+          "calendari grup",
+          "viatge",
+          "llar",
+          "notes"
+        ],
+        "releaseNotes": "Primera versió de Suro: llistes, calendari, notes, fitxers i despeses compartides per als teus grups.",
+        "marketingUrl": "https://suro.clotet.dev",
+        "supportUrl": "https://suro.clotet.dev",
+        "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
+      }
+    }
+  }
+}

@@ -32,6 +32,8 @@ import type * as pdfThumbnails from "../pdfThumbnails.js";
 import type * as projects from "../projects.js";
 import type * as push from "../push.js";
 import type * as pushTokens from "../pushTokens.js";
+import type * as reviewOtp from "../reviewOtp.js";
+import type * as seed from "../seed.js";
 import type * as templates from "../templates.js";
 import type * as users from "../users.js";
 
@@ -66,6 +68,8 @@ declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   push: typeof push;
   pushTokens: typeof pushTokens;
+  reviewOtp: typeof reviewOtp;
+  seed: typeof seed;
   templates: typeof templates;
   users: typeof users;
 }>;
