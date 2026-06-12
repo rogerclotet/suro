@@ -89,17 +89,19 @@ export default function NewListItem({
         />
       }
       submitButton={
-        form.formState.isDirty ? (
-          <Button
-            size="icon"
-            variant="ghost"
-            // Keep focus (and the mobile keyboard) in the name input when
-            // confirming with a tap instead of the keyboard's return key.
-            onPointerDown={(e) => e.preventDefault()}
-          >
-            <Check />
-          </Button>
-        ) : null
+        // Always visible so the affordance isn't enter-key-only; disabled
+        // until there's something to add.
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={t("addItem")}
+          disabled={!form.formState.isDirty}
+          // Keep focus (and the mobile keyboard) in the name input when
+          // confirming with a tap instead of the keyboard's return key.
+          onPointerDown={(e) => e.preventDefault()}
+        >
+          <Check />
+        </Button>
       }
     />
   );

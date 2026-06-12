@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react-native";
+import { Check, Plus } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Pressable, type TextInput, View } from "react-native";
 import {
@@ -8,6 +8,40 @@ import {
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
+
+/**
+ * Confirm button sitting right of an add row's input, for users who don't
+ * reach for the keyboard's return key. Sized to match `Field`'s height.
+ */
+function SubmitItemButton({
+  disabled,
+  onPress,
+}: {
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  const tc = useTranslations("mobile.common");
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={tc("add")}
+      style={{
+        width: 44,
+        borderRadius: 12,
+        backgroundColor: disabled ? t.inputBg : t.primary,
+        borderWidth: 1,
+        borderColor: disabled ? t.border : t.primary,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Check color={disabled ? t.muted : t.onPrimary} size={20} />
+    </Pressable>
+  );
+}
 
 /**
  * The list's always-visible add row at the top: a name input plus the quick
@@ -44,17 +78,24 @@ export function NewItemRow({
 
   return (
     <View style={{ gap: 8, paddingBottom: 8 }}>
-      <Field
-        ref={nameRef}
-        value={name}
-        onChangeText={setName}
-        placeholder={tl("addItemPlaceholder")}
-        returnKeyType="done"
-        // Keep focus through the submit so consecutive adds don't bounce the
-        // keyboard (RN 0.85 replacement for blurOnSubmit={false}).
-        submitBehavior="submit"
-        onSubmitEditing={handleSubmit}
-      />
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <Field
+          ref={nameRef}
+          value={name}
+          onChangeText={setName}
+          placeholder={tl("addItemPlaceholder")}
+          returnKeyType="done"
+          // Keep focus through the submit so consecutive adds don't bounce the
+          // keyboard (RN 0.85 replacement for blurOnSubmit={false}).
+          submitBehavior="submit"
+          onSubmitEditing={handleSubmit}
+          style={{ flex: 1 }}
+        />
+        <SubmitItemButton
+          disabled={name.trim() === ""}
+          onPress={handleSubmit}
+        />
+      </View>
       <CategoryPicker
         categories={categories}
         value={category}
@@ -144,7 +185,7 @@ function ActiveAddItemRow({
   }
 
   return (
-    <View style={{ paddingVertical: 8 }}>
+    <View style={{ flexDirection: "row", gap: 8, paddingVertical: 8 }}>
       <Field
         value={name}
         onChangeText={setName}
@@ -156,7 +197,9 @@ function ActiveAddItemRow({
         submitBehavior="submit"
         onSubmitEditing={handleSubmit}
         onBlur={handleBlur}
+        style={{ flex: 1 }}
       />
+      <SubmitItemButton disabled={name.trim() === ""} onPress={handleSubmit} />
     </View>
   );
 }
