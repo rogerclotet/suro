@@ -217,6 +217,7 @@
     "welcome": "Welcome",
     "signInPrompt": "Sign in to access your Suro",
     "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
     "continueWithEmail": "Continue with email",
     "or": "or",
     "emailPlaceholder": "your@email.com",
@@ -792,6 +793,7 @@
       "differentEmail": "Use a different email",
       "or": "or",
       "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple",
       "genericError": "Something went wrong"
     },
     "groups": {

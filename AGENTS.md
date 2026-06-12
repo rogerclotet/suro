@@ -12,7 +12,7 @@ Both clients talk to the same Convex deployment. There is no separate server or 
 
 ## Stack
 
-- **Backend**: Convex (`packages/backend/convex`), Convex Auth (`@convex-dev/auth`: Google + Resend email OTP), Convex file storage. Schema in `convex/schema.ts`.
+- **Backend**: Convex (`packages/backend/convex`), Convex Auth (`@convex-dev/auth`: Google + Apple OAuth + Resend email OTP; Apple stays hidden client-side until its env vars are set), Convex file storage. Schema in `convex/schema.ts`.
 - **Web**: Next.js 16 App Router, React 19, TypeScript (strict), Tailwind v4, next-intl (`[locale]` routing).
 - **Data flow**: reactive Convex (`useQuery`/`useMutation`) in client components; `fetchQuery`/`preloadQuery` in RSC. No ORM, no REST layer.
 - **UI/state**: Radix UI + Tiptap (rich text), React Hook Form + Valibot/Zod, Zustand.
@@ -42,7 +42,7 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 ## Backend (`packages/backend/convex`)
 
 - `schema.ts` — the tables (`users`, `projects`, `projectMembers`, `categories`, `events`, `lists`, `listItems`, `listTemplates`, `files`, `notes`, `pots`, `potMembers`, `spendings`). Migrated rows carry a `legacyId` + `by_legacyId` index (dropped after cutover).
-- `auth.ts` / `auth.config.ts` — Convex Auth (Google + Resend OTP); `afterUserCreatedOrUpdated` provisions the personal project on sign-up.
+- `auth.ts` / `auth.config.ts` — Convex Auth (Google + Apple + Resend OTP); `afterUserCreatedOrUpdated` provisions the personal project on sign-up. `oauthProviders` tells the clients which optional providers are configured.
 - One file per domain (`lists.ts`, `events.ts`, `expenses.ts`, `files.ts`, `projects.ts`, `users.ts`, …) exporting public `query`/`mutation` functions — these **are** the API. Shared helpers live under `convex/model/` (`auth` → `requireUserId`, `permissions` → `requireProjectMember`, …); gate every project-scoped function with one of them.
 - `http.ts` — the public `.ics` calendar feed, gated by `projects.calendarToken` (distinct from `inviteToken`).
 - `migrations.ts` — one-off Postgres→Convex upserts driven by `scripts/migrate.mjs`, gated by the `MIGRATION_SECRET` deployment env var (remove this file + `legacyId` after cutover).
@@ -86,7 +86,7 @@ Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr c
 
 Data, auth, and storage all run on **Convex** — the web container is just the Next server (`node server.js`), with no migrate/seed step at start.
 
-- **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Resend/JWT/`SITE_URL`, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI.
+- **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Apple/Resend/JWT/`SITE_URL`, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI.
 - **Prod web**: `scripts/deploy.sh` SSHes into the host, pulls the image built by CI, and restarts the `familia` container behind Traefik (`$PROD_DOMAIN`). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time.
 - **MR previews**: `scripts/deploy-preview.sh` boots `suro-mr-<iid>` at `https://mr-<iid>.<PREVIEW_DOMAIN>`, built against `NEXT_PUBLIC_CONVEX_URL_PREVIEW` so **all previews share the dev Convex deployment** — no per-MR database. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
 - **Mobile builds**: deliberately **not in CI** (runner build times were prohibitive). Build locally via the `build:*` scripts in `apps/mobile` — `pnpm --filter mobile build:android:preview` (dev-Convex `.apk`), `build:android:release` (store-ready `.aab`), `build:ios:release` (store-ready `.ipa`, pending Apple Developer credentials). Signing uses EAS-managed credentials (`eas login` once); public build env (`EXPO_PUBLIC_*`) is baked per profile in `apps/mobile/eas.json`. No `eas submit` step yet. See `apps/mobile/README.md` for prerequisites.

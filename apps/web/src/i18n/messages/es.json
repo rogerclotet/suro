@@ -217,6 +217,7 @@
     "welcome": "Bienvenido/a",
     "signInPrompt": "Inicia sesión para entrar en tu Suro",
     "continueWithGoogle": "Continuar con Google",
+    "continueWithApple": "Continuar con Apple",
     "continueWithEmail": "Continuar con correo electrónico",
     "or": "o bien",
     "emailPlaceholder": "tu@correo.com",
