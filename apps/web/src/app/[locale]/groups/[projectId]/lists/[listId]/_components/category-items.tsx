@@ -85,7 +85,7 @@ export default memo(function CategoryItems(props: {
       </ul>
 
       {/* Items created here go straight to this category; the no-category
-          bucket's entry point is the bottom row owned by CheckList. */}
+          bucket's entry point is the always-visible form at the top. */}
       {props.category !== "" && (
         <InlineAddItem
           list={props.list}

@@ -10,27 +10,80 @@ import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
 
 /**
+ * The list's always-visible add row at the top: a name input plus the quick
+ * category selector (defaults to no category, whose section sits right below).
+ * Submits keep focus so consecutive adds don't bounce the keyboard; the parent
+ * hands focus to a category's inline row when one is picked.
+ */
+export function NewItemRow({
+  categories,
+  onSubmit,
+}: {
+  categories: PickerCategory[];
+  /** Returns false when blocked (duplicate name); the typed text is kept. */
+  onSubmit: (name: string, category: string | null) => boolean;
+}) {
+  const tl = useTranslations("mobile.lists");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
+  const nameRef = useRef<TextInput>(null);
+
+  function handleSubmit() {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+    if (!onSubmit(trimmed, category)) {
+      return; // duplicate: keep the text for editing
+    }
+    // Clear synchronously; the parent fires the mutation without awaiting, so
+    // focus (and the keyboard) survives into the next add.
+    setName("");
+    setCategory(null);
+  }
+
+  return (
+    <View style={{ gap: 8, paddingBottom: 8 }}>
+      <Field
+        ref={nameRef}
+        value={name}
+        onChangeText={setName}
+        placeholder={tl("addItemPlaceholder")}
+        returnKeyType="done"
+        // Keep focus through the submit so consecutive adds don't bounce the
+        // keyboard (RN 0.85 replacement for blurOnSubmit={false}).
+        submitBehavior="submit"
+        onSubmitEditing={handleSubmit}
+      />
+      <CategoryPicker
+        categories={categories}
+        value={category}
+        onChange={(next) => {
+          setCategory(next);
+          // Hand focus back to the name input once a category is picked.
+          nameRef.current?.focus();
+        }}
+      />
+    </View>
+  );
+}
+
+/**
  * Inline "add item" row at the bottom of a category section: a muted ghost row
  * that expands into a focused input on tap. Items go to the row's own section;
- * only the bottom no-category row carries a quick category selector
- * (`withCategoryPicker`) to redirect the new item anywhere.
+ * the no-category entry point is the always-visible `NewItemRow` at the top.
  */
 export function InlineAddItemRow({
   active,
-  withCategoryPicker,
-  categories = [],
   onActivate,
   onDeactivate,
   onSubmit,
 }: {
   active: boolean;
-  /** Bottom no-category row only. */
-  withCategoryPicker?: boolean;
-  categories?: PickerCategory[];
   onActivate: () => void;
   onDeactivate: () => void;
   /** Returns false when blocked (duplicate name); the typed text is kept. */
-  onSubmit: (name: string, category: string | null) => boolean;
+  onSubmit: (name: string) => boolean;
 }) {
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -56,35 +109,19 @@ export function InlineAddItemRow({
     );
   }
 
-  return (
-    <ActiveAddItemRow
-      withCategoryPicker={withCategoryPicker}
-      categories={categories}
-      onDeactivate={onDeactivate}
-      onSubmit={onSubmit}
-    />
-  );
+  return <ActiveAddItemRow onDeactivate={onDeactivate} onSubmit={onSubmit} />;
 }
 
 /** The expanded input; separate so its draft state mounts fresh per activation. */
 function ActiveAddItemRow({
-  withCategoryPicker,
-  categories,
   onDeactivate,
   onSubmit,
 }: {
-  withCategoryPicker?: boolean;
-  categories: PickerCategory[];
   onDeactivate: () => void;
-  onSubmit: (name: string, category: string | null) => boolean;
+  onSubmit: (name: string) => boolean;
 }) {
   const tl = useTranslations("mobile.lists");
   const [name, setName] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
-  // The picker's inline search panel autofocuses, blurring the name field
-  // without the user abandoning the row; skip the blur-collapse while open.
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const nameRef = useRef<TextInput>(null);
 
   function handleSubmit() {
     const trimmed = name.trim();
@@ -92,25 +129,23 @@ function ActiveAddItemRow({
       onDeactivate();
       return;
     }
-    if (!onSubmit(trimmed, category)) {
+    if (!onSubmit(trimmed)) {
       return; // duplicate: keep the text for editing
     }
     // Clear synchronously; the parent fires the mutation without awaiting, so
     // focus (and the keyboard) survives into the next add.
     setName("");
-    setCategory(null);
   }
 
   function handleBlur() {
-    if (!pickerOpen && name.trim() === "") {
+    if (name.trim() === "") {
       onDeactivate();
     }
   }
 
   return (
-    <View style={{ gap: 8, paddingVertical: 8 }}>
+    <View style={{ paddingVertical: 8 }}>
       <Field
-        ref={nameRef}
         value={name}
         onChangeText={setName}
         placeholder={tl("addItemPlaceholder")}
@@ -122,18 +157,6 @@ function ActiveAddItemRow({
         onSubmitEditing={handleSubmit}
         onBlur={handleBlur}
       />
-      {withCategoryPicker ? (
-        <CategoryPicker
-          categories={categories}
-          value={category}
-          onChange={(next) => {
-            setCategory(next);
-            // Hand focus back to the name input once a category is picked.
-            nameRef.current?.focus();
-          }}
-          onOpenChange={setPickerOpen}
-        />
-      ) : null}
     </View>
   );
 }

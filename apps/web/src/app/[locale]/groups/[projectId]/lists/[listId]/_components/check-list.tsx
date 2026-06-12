@@ -19,16 +19,17 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import CategoryItems from "./category-items";
-import InlineAddItem from "./list-item/inline-add-item";
+import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
   const list = props.list;
   const t = useTranslations("lists");
 
   const [dragging, setDragging] = useState(false);
-  // Which inline add row is expanded: undefined = none, null = the bottom
-  // no-category row, a string = that category's row. Set after each add so
-  // focus follows the item into the category it went to.
+  // Which category section's inline add row is expanded (undefined = none;
+  // null = the top no-category form, which is always visible and only tracked
+  // here so a categorized add collapses any open section row). Set after each
+  // add so focus follows the item into the category it went to.
   const [activeAdd, setActiveAdd] = useState<string | null | undefined>(
     undefined,
   );
@@ -156,8 +157,8 @@ export default function CheckList(props: { list: List }) {
       onDragEnd={handleDragEnd}
       sensors={sensors}
     >
-      {totalCount > 0 && (
-        <div className="mx-auto max-w-lg">
+      <div className="mx-auto max-w-lg">
+        {totalCount > 0 && (
           <div className="mb-3 flex items-center gap-2.5">
             <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
               <div
@@ -169,8 +170,11 @@ export default function CheckList(props: { list: List }) {
               {doneCount}/{totalCount}
             </span>
           </div>
-        </div>
-      )}
+        )}
+        {/* The always-visible no-category entry point with the quick category
+            selector; the uncategorized section sorts first, right below it. */}
+        <NewListItem list={list} onSubmitted={handleAddSubmitted} />
+      </div>
 
       <div className="mx-auto flex max-w-lg flex-col items-stretch gap-4">
         {itemsByCategory.map(({ category, items }) => (
@@ -188,18 +192,6 @@ export default function CheckList(props: { list: List }) {
             onAddSubmitted={handleAddSubmitted}
           />
         ))}
-        {/* The always-visible no-category entry point; the only row with a
-            category quick-selector. Sits under the uncategorized section,
-            which sorts last. */}
-        <InlineAddItem
-          list={list}
-          category={null}
-          active={activeAdd === null}
-          withCategoryPicker
-          onActivate={() => handleAddActivate(null)}
-          onDeactivate={() => handleAddDeactivate(null)}
-          onSubmitted={handleAddSubmitted}
-        />
       </div>
     </DndContext>
   );
@@ -236,11 +228,11 @@ function groupItemsByCategory(items: List["items"]) {
     result.push({ category, items: categoryItems });
   }
 
-  // The no-category bucket always sorts last so its items sit right above the
-  // bottom inline add row (the no-category entry point).
+  // The no-category bucket always sorts first so its items sit right below
+  // the always-visible add form at the top (the no-category entry point).
   result.sort((a, b) => {
-    if (a.category === "") return 1;
-    if (b.category === "") return -1;
+    if (a.category === "") return -1;
+    if (b.category === "") return 1;
     return a.category.localeCompare(b.category);
   });
 

@@ -39,7 +39,7 @@ import {
   Droppable,
 } from "react-native-reanimated-dnd";
 import { CategoryPicker } from "@/components/category-picker";
-import { InlineAddItemRow } from "@/components/inline-add-item";
+import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { useProjectId } from "@/lib/project-id";
@@ -83,11 +83,11 @@ function groupByCategory(items: Item[], uncategorized: string): Section[] {
       groups.set(title, { title, category, data: [item] });
     }
   }
-  // The uncategorized bucket always sorts last so its items sit right above
-  // the bottom inline add row (the no-category entry point).
+  // The uncategorized bucket always sorts first so its items sit right below
+  // the always-visible add row at the top (the no-category entry point).
   return [...groups.values()].sort((a, b) => {
-    if (a.category === null) return 1;
-    if (b.category === null) return -1;
+    if (a.category === null) return -1;
+    if (b.category === null) return 1;
     return a.title.localeCompare(b.title);
   });
 }
@@ -200,10 +200,11 @@ export function ListDetailScreen({
 
   // Editing happens in a drawer (`ItemSheet`); the target and drafts persist
   // while the sheet slides out so its content doesn't flicker during the close
-  // animation. Creation is inline: `activeAddCategory` tracks which section's
-  // add row is expanded (undefined = none, null = the bottom no-category row,
-  // a string = that category's row) and is set after each add so focus follows
-  // the item into the category it went to.
+  // animation. Creation is inline: `activeAddCategory` tracks which category
+  // section's add row is expanded (undefined = none; null = the top
+  // no-category row, which is always visible and only tracked here so a
+  // categorized add collapses any open section row) and is set after each add
+  // so focus follows the item into the category it went to.
   const [activeAddCategory, setActiveAddCategory] = useState<
     string | null | undefined
   >(undefined);
@@ -533,6 +534,14 @@ export function ListDetailScreen({
               </Txt>
             </View>
 
+            {/* The always-visible no-category entry point with the quick
+                category selector; the uncategorized section sorts first, so
+                its items land right below. */}
+            <NewItemRow
+              categories={categories ?? []}
+              onSubmit={handleInlineAdd}
+            />
+
             {list.items.length === 0 ? (
               <Txt muted style={{ padding: 16 }}>
                 {tl("noItems")}
@@ -601,7 +610,8 @@ export function ListDetailScreen({
                     />
                   ))}
                   {/* Items created here go straight to this category; the
-                      no-category entry point is the bottom row below. */}
+                      no-category entry point is the always-visible row at
+                      the top. */}
                   {section.category !== null ? (
                     <InlineAddItemRow
                       active={activeAddCategory === section.category}
@@ -615,18 +625,6 @@ export function ListDetailScreen({
                 </Droppable>
               </Animated.View>
             ))}
-
-            {/* The always-visible no-category entry point; the only row with a
-                category quick-selector. The uncategorized section sorts last,
-                so this row sits right beneath its items. */}
-            <InlineAddItemRow
-              active={activeAddCategory === null}
-              withCategoryPicker
-              categories={categories ?? []}
-              onActivate={() => setActiveAddCategory(null)}
-              onDeactivate={() => deactivateAddRow(null)}
-              onSubmit={handleInlineAdd}
-            />
 
             {/* Ghost drop sections: placeholder targets that fade in below the
                 real sections while a drag is active. Kept mounted (their slots
