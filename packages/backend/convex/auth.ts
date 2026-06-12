@@ -1,15 +1,26 @@
+import Apple from "@auth/core/providers/apple";
 import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
+import { query } from "./_generated/server";
 import { getRandomColor } from "./model/colors";
 import { ResendOTP } from "./ResendOTP";
 
 /**
- * Convex Auth: Google OAuth + email one-time-code (Resend). Required deployment
- * env vars:
+ * Convex Auth: Google + Apple OAuth + email one-time-code (Resend). Required
+ * deployment env vars:
  *   AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET (Google), AUTH_RESEND_KEY, AUTH_EMAIL_FROM
  *   (email OTP), SITE_URL, plus JWT_PRIVATE_KEY + JWKS (`npx @convex-dev/auth`).
- * Optional: ALLOWED_WEB_ORIGINS (see `isAllowedWebOrigin`).
+ * Optional: ALLOWED_WEB_ORIGINS (see `isAllowedWebOrigin`), and AUTH_APPLE_ID +
+ *   AUTH_APPLE_SECRET (Apple; the secret is a self-signed ES256 JWT that expires
+ *   after at most 6 months — regenerate it before then). The clients hide the
+ *   Apple button until those are set (see `oauthProviders`).
  */
+
+/** Apple's `user` payload, sent only on the user's very first authorization. */
+type AppleFirstAuthUser = {
+  name?: { firstName?: string; lastName?: string };
+  email?: string;
+};
 
 /**
  * Whether an absolute web `redirectTo` may be returned to after an OAuth
@@ -51,7 +62,31 @@ function isAllowedWebOrigin(redirectTo: string): boolean {
 }
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Google, ResendOTP],
+  providers: [
+    Google,
+    // Defaults (scope `name email`, `form_post`, `client_secret_post`) are
+    // what Apple requires; only the profile mapping needs overriding, because
+    // Apple sends the user's name solely on the first authorization.
+    Apple({
+      profile: (appleInfo) => {
+        const firstAuthUser = appleInfo.user as AppleFirstAuthUser | undefined;
+        const name = [
+          firstAuthUser?.name?.firstName,
+          firstAuthUser?.name?.lastName,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        return {
+          // Falling back to the email as the name happens in
+          // `afterUserCreatedOrUpdated`, same as for the other providers.
+          id: appleInfo.sub,
+          name: name === "" ? undefined : name,
+          email: appleInfo.email,
+        };
+      },
+    }),
+    ResendOTP,
+  ],
   callbacks: {
     // Validate the post-flow redirect. Overriding Convex Auth's default means we
     // own every branch the default handled (native deep links, relative paths,
@@ -102,4 +137,17 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       await ctx.db.patch(userId, { locale: "ca", onboardingCompleted: false });
     },
   },
+});
+
+/**
+ * Which optional OAuth providers have credentials on this deployment, so the
+ * login screens can hide a provider's button until it's configured (Apple
+ * needs the paid developer enrollment) instead of baking flags into each
+ * client build. Deliberately public and auth-free: it feeds the login screen.
+ */
+export const oauthProviders = query({
+  args: {},
+  handler: async () => ({
+    apple: Boolean(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET),
+  }),
 });
