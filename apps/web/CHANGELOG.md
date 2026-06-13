@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.7.0] — 2026-06-13
+
+### ca
+
+- [feature] Ja pots canviar la imatge dels grups que gestiones des de l'aplicació mòbil.
+- [improvement] En obrir un grup tornes a les seves llistes: les llistes són de nou la pàgina d'inici i encapçalen la navegació.
+
+### es
+
+- [feature] Ya puedes cambiar la imagen de los grupos que gestionas desde la aplicación móvil.
+- [improvement] Al abrir un grupo vuelves a sus listas: las listas son de nuevo la página de inicio y encabezan la navegación.
+
+### en
+
+- [feature] You can now change the picture of the groups you manage from the mobile app.
+- [improvement] Opening a group takes you back to its lists: lists are the home page again and lead the navigation.
+
 ## [1.6.0] — 2026-06-13
 
 ### ca

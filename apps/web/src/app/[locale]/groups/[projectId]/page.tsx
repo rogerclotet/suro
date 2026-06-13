@@ -13,7 +13,7 @@ export default async function ProjectPage({
   redirect(
     getPathname({
       href: {
-        pathname: "/groups/[projectId]/calendar",
+        pathname: "/groups/[projectId]/lists",
         params: { projectId },
       },
       locale,

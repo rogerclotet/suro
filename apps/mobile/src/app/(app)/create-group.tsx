@@ -28,7 +28,7 @@ export default function CreateGroup() {
     setBusy(true);
     try {
       const projectId = await create({ name: trimmed });
-      router.replace(`/${projectId}/calendar`);
+      router.replace(`/${projectId}/lists`);
     } catch {
       Alert.alert(t("createError"));
       setBusy(false);
