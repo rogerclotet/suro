@@ -35,13 +35,12 @@ export default function Index() {
   // Resume the last group when it still exists; otherwise land in the first
   // group the user belongs to, falling back to group creation only if they have
   // none (the manage-groups list page is gone — the switcher owns that now).
-  // The calendar is the group's home tab — the hub every other feature hangs off.
   const resume =
     storedProjectId && projects.some((p) => p._id === storedProjectId);
   const target = resume
-    ? `/${storedProjectId}/calendar`
+    ? `/${storedProjectId}/lists`
     : projects[0]
-      ? `/${projects[0]._id}/calendar`
+      ? `/${projects[0]._id}/lists`
       : "/create-group";
   return <Redirect href={target} />;
 }

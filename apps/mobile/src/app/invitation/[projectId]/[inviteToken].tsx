@@ -91,7 +91,7 @@ function Invite({
     setJoining(true);
     try {
       await acceptInvite({ projectId, inviteToken });
-      router.replace(`/${projectId}/calendar`);
+      router.replace(`/${projectId}/lists`);
     } catch {
       setJoining(false);
       Alert.alert(t("acceptError"));
