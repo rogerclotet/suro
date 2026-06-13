@@ -138,12 +138,12 @@ describe("webPathToRoute", () => {
   });
 
   it("routes a bare group link to the group home", () => {
-    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/lists`);
+    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/calendar`);
   });
 
   it("falls back to the group home for features without a native screen", () => {
     expect(webPathToRoute(`/ca/grups/${PID}/amic-invisible`)).toBe(
-      `/${PID}/lists`,
+      `/${PID}/calendar`,
     );
   });
 

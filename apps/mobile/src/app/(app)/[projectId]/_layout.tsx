@@ -74,13 +74,13 @@ export default function ProjectTabs() {
           labelVisibilityMode="labeled"
           backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
         >
-          <Trigger name="lists">
-            <Label>{tNav("lists")}</Label>
-            <Icon sf="checklist" md="checklist" />
-          </Trigger>
           <Trigger name="calendar">
             <Label>{tNav("calendar")}</Label>
             <Icon sf="calendar" md="calendar_month" />
+          </Trigger>
+          <Trigger name="lists">
+            <Label>{tNav("lists")}</Label>
+            <Icon sf="checklist" md="checklist" />
           </Trigger>
           <Trigger name="files">
             <Label>{tNav("files")}</Label>
