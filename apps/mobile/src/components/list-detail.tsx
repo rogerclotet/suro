@@ -73,9 +73,35 @@ function nextOptimisticItemId(): Id<"listItems"> {
   return `optimistic-item-${optimisticItemCounter}` as Id<"listItems">;
 }
 
+/**
+ * A gentle, barely-underdamped spring shared by rows and sections so items
+ * glide to their new positions instead of snapping along a robotic linear
+ * path. Reused as a config descriptor across every animated row/section.
+ */
+const ITEM_TRANSITION = LinearTransition.springify()
+  .damping(24)
+  .stiffness(220)
+  .mass(0.9);
+
+/**
+ * Mirrors the backend's item ordering (completed last, then by name, then id)
+ * so the client sorts the same way the server does. Applying it client-side
+ * means an optimistic toggle or drop re-sorts in the very commit the user
+ * acts in — the row slides straight to its sorted spot under `ITEM_TRANSITION`
+ * instead of sitting still and then jumping when the server's re-sorted list
+ * arrives a round-trip later.
+ */
+function compareItems(a: Item, b: Item): number {
+  if (a.completed !== b.completed) {
+    return a.completed ? 1 : -1;
+  }
+  const byName = a.name.localeCompare(b.name);
+  return byName !== 0 ? byName : a._id.localeCompare(b._id);
+}
+
 function groupByCategory(items: Item[], uncategorized: string): Section[] {
   const groups = new Map<string, Section>();
-  for (const item of items) {
+  for (const item of [...items].sort(compareItems)) {
     const category = item.category ?? null;
     const title = category ?? uncategorized;
     const bucket = groups.get(title);
@@ -555,7 +581,7 @@ export function ListDetailScreen({
                 key={section.title}
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(150)}
-                layout={LinearTransition.duration(200)}
+                layout={ITEM_TRANSITION}
                 // The section a row is dragged out of must stack above its
                 // sibling sections, or the lifted row slides underneath them.
                 style={
@@ -743,104 +769,112 @@ function DraggableItemRow({
   }));
 
   return (
-    <Draggable<DragData>
-      draggableId={item._id}
-      data={{ id: item._id }}
-      dragAxis="y"
-      collisionAlgorithm="center"
+    // The outer wrapper is the row's flex slot, so it (not the inner view) is
+    // what reflows when items re-sort or change sections — the layout/enter/
+    // exit animations must live here to fire. The Draggable's own translation
+    // during a drag stays on the inner view, so this wrapper's layout only
+    // animates on commits (toggle re-sort, category move, no-op reset).
+    <Animated.View
+      entering={FadeIn.duration(160)}
+      // Also softens the reset-key remounts after a no-op drop: the stuck
+      // row cross-fades back into its home slot.
+      exiting={FadeOut.duration(160)}
+      layout={ITEM_TRANSITION}
       // Stack the lifted row above its sibling rows; the parent section is
       // raised above sibling sections separately.
       style={dragging ? { zIndex: 100 } : undefined}
-      onStateChange={(state) => {
-        const isDragging = state === DraggableState.DRAGGING;
-        setDragging(isDragging);
-        lift.value = withTiming(isDragging ? 1 : 0, { duration: 150 });
-      }}
     >
-      <Animated.View
-        entering={FadeIn.duration(150)}
-        // Also softens the reset-key remounts after a no-op drop: the stuck
-        // row cross-fades from the drop slot back to its home position.
-        exiting={FadeOut.duration(150)}
-        layout={LinearTransition.duration(200)}
-        style={[
-          {
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
-            paddingVertical: 10,
-            borderBottomWidth: 1,
-            borderColor: t.border,
-            backgroundColor: t.bg,
-            borderRadius: 10,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowRadius: 10,
-          },
-          liftStyle,
-        ]}
+      <Draggable<DragData>
+        draggableId={item._id}
+        data={{ id: item._id }}
+        dragAxis="y"
+        collisionAlgorithm="center"
+        onStateChange={(state) => {
+          const isDragging = state === DraggableState.DRAGGING;
+          setDragging(isDragging);
+          lift.value = withTiming(isDragging ? 1 : 0, { duration: 150 });
+        }}
       >
-        <Pressable
-          // Remounting on toggle keeps every style set at mount, sidestepping
-          // the Android Fabric bug where recoloring a mounted View drops its
-          // borderRadius; it also replays the fill's entering animation.
-          key={item.completed ? "checked" : "unchecked"}
-          onPress={() => onToggle(item)}
-          hitSlop={8}
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 8,
-            borderWidth: 2,
-            borderColor: item.completed ? t.primary : t.muted,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+        <Animated.View
+          style={[
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingVertical: 10,
+              borderBottomWidth: 1,
+              borderColor: t.border,
+              backgroundColor: t.bg,
+              borderRadius: 10,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowRadius: 10,
+            },
+            liftStyle,
+          ]}
         >
-          {item.completed ? (
-            // The fill zooms in from the center on completion; it sits inside
-            // the border (insets are relative to the padding box), so the
-            // inner radius is the outer one minus the border width.
-            <Animated.View
-              entering={ZoomIn.duration(150)}
-              style={{
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                borderRadius: 6,
-                backgroundColor: t.primary,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Check color={t.onPrimary} size={16} strokeWidth={3} />
-            </Animated.View>
-          ) : null}
-        </Pressable>
-        <Pressable style={{ flex: 1 }} onPress={() => onEdit(item)}>
-          <Txt size={16} muted={item.completed} strike={item.completed}>
-            {item.name}
-          </Txt>
-          {item.details ? (
-            <Txt muted size={13}>
-              {item.details}
+          <Pressable
+            // Remounting on toggle keeps every style set at mount, sidestepping
+            // the Android Fabric bug where recoloring a mounted View drops its
+            // borderRadius; it also replays the fill's entering animation.
+            key={item.completed ? "checked" : "unchecked"}
+            onPress={() => onToggle(item)}
+            hitSlop={8}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 8,
+              borderWidth: 2,
+              borderColor: item.completed ? t.primary : t.muted,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {item.completed ? (
+              // The fill zooms in from the center on completion; it sits inside
+              // the border (insets are relative to the padding box), so the
+              // inner radius is the outer one minus the border width.
+              <Animated.View
+                entering={ZoomIn.duration(150)}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  borderRadius: 6,
+                  backgroundColor: t.primary,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Check color={t.onPrimary} size={16} strokeWidth={3} />
+              </Animated.View>
+            ) : null}
+          </Pressable>
+          <Pressable style={{ flex: 1 }} onPress={() => onEdit(item)}>
+            <Txt size={16} muted={item.completed} strike={item.completed}>
+              {item.name}
             </Txt>
-          ) : null}
-        </Pressable>
-        <Draggable.Handle
-          style={{
-            alignSelf: "stretch",
-            justifyContent: "center",
-            paddingLeft: 8,
-            paddingVertical: 4,
-          }}
-        >
-          <GripVertical color={t.muted} size={18} />
-        </Draggable.Handle>
-      </Animated.View>
-    </Draggable>
+            {item.details ? (
+              <Txt muted size={13}>
+                {item.details}
+              </Txt>
+            ) : null}
+          </Pressable>
+          <Draggable.Handle
+            style={{
+              alignSelf: "stretch",
+              justifyContent: "center",
+              paddingLeft: 8,
+              paddingVertical: 4,
+            }}
+          >
+            <GripVertical color={t.muted} size={18} />
+          </Draggable.Handle>
+        </Animated.View>
+      </Draggable>
+    </Animated.View>
   );
 }
 
