@@ -30,6 +30,15 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "TODO_SET_AFTER_APP_STORE_CONNECT_APP_EXISTS",
+        "metadataPath": "./store.config.json"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./credentials/play-service-account.json",
+        "track": "internal"
+      }
+    }
   }
 }
