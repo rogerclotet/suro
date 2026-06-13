@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.6.0] — 2026-06-13
+
+### ca
+
+- [feature] El calendari ara és la pàgina d'inici de l'aplicació: en obrir un grup es mostra el calendari en lloc de les llistes, i el calendari encapçala la navegació, ja que és el punt de connexió entre la resta de funcions.
+
+### es
+
+- [feature] El calendario ahora es la página de inicio de la aplicación: al abrir un grupo se muestra el calendario en lugar de las listas, y el calendario encabeza la navegación, ya que es el punto de conexión entre el resto de funciones.
+
+### en
+
+- [feature] The calendar is now the app's home: opening a group shows the calendar instead of lists, and the calendar leads the navigation since it's the connection point between the other features.
+
 ## [1.5.1] — 2026-06-12
 
 ### ca

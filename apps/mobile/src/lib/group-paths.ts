@@ -67,8 +67,8 @@ export function localizeGroupPath(path: string, locale: string): string {
 // In-app tab features under /[projectId]. A group link to anything else (no
 // feature, or one with no native screen like secret-santa) opens the home tab.
 const MOBILE_FEATURES = new Set([
-  "lists",
   "calendar",
+  "lists",
   "files",
   "notes",
   "expenses",
@@ -111,10 +111,10 @@ export function webPathToRoute(path: string): string {
   }
 
   // No feature, or one with no native screen (e.g. secret-santa): open the
-  // group's home tab rather than a dead route.
+  // group's home tab (the calendar) rather than a dead route.
   const mappedFeature = feature ? toCanonicalSegment(feature) : undefined;
   if (!mappedFeature || !MOBILE_FEATURES.has(mappedFeature)) {
-    return `/${projectId}/lists`;
+    return `/${projectId}/calendar`;
   }
 
   const tail = rest.map(toCanonicalSegment).join("/");

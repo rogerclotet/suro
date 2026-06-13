@@ -46,9 +46,17 @@ type MenuItemPart = {
   isActive?: (project: Project) => boolean;
 };
 
-const DEFAULT_SECTION = "lists";
+// The calendar is the group's home: it's where every other feature connects
+// (events link lists, notes, and expenses), so it leads the menu and is the
+// section we land on by default.
+const DEFAULT_SECTION = "calendar";
 
 const itemParts: MenuItemPart[] = [
+  {
+    nameKey: "calendar",
+    pathPart: "calendar",
+    icon: <Calendar />,
+  },
   {
     nameKey: "lists",
     pathPart: "lists",
@@ -60,11 +68,6 @@ const itemParts: MenuItemPart[] = [
         icon: <LayoutTemplateIcon />,
       },
     ],
-  },
-  {
-    nameKey: "calendar",
-    pathPart: "calendar",
-    icon: <Calendar />,
   },
   {
     nameKey: "files",
