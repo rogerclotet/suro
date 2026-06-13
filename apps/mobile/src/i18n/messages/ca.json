@@ -884,7 +884,9 @@
       "searchPlaceholder": "Cerca o crea…",
       "noResults": "No s'ha trobat cap categoria.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sense categoria"
+      "noCategory": "Sense categoria",
+      "deleteSuggestion": "Elimina el suggeriment",
+      "deleteSuggestionMessage": "Vols treure \"{name}\" dels suggeriments de categories? Els elements que ja la fan servir conserven la categoria."
     },
     "templates": {
       "title": "Plantilles",
