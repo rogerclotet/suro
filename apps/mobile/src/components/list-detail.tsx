@@ -616,7 +616,7 @@ export function ListDetailScreen({
                     borderColor: t.primary,
                   }}
                 >
-                  {sections.length > 1 ? (
+                  {section.category !== null ? (
                     <Txt
                       muted
                       size={12}
