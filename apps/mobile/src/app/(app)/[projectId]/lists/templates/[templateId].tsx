@@ -3,13 +3,25 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Copy, Ellipsis, Trash2 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, SectionList, View } from "react-native";
+import { Alert, Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { ExportTargetPicker } from "@/components/template-export";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Field,
+  HEADER_BUTTON_INSET,
+  IconAction,
+  IconActionBar,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type Template = FunctionReturnType<typeof api.templates.get>;
 type TemplateItem = Template["items"][number];
@@ -60,6 +72,9 @@ export default function TemplateEditor() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsDescription, setSettingsDescription] = useState("");
+  // The settings sheet hosts the export-to-group picker inline (no second
+  // Modal), mirroring the index actions sheet.
+  const [showExport, setShowExport] = useState(false);
 
   const uncategorized = tr("uncategorized");
   const sections = useMemo(
@@ -130,21 +145,39 @@ export default function TemplateEditor() {
     }
     setSettingsName(template.name);
     setSettingsDescription(template.description ?? "");
+    setShowExport(false);
     setSettingsOpen(true);
   }
 
-  async function saveSettings() {
+  function closeSettings() {
+    setShowExport(false);
     setSettingsOpen(false);
+  }
+
+  async function saveSettings() {
+    closeSettings();
     if (!template) {
       return;
     }
     await persist(template.items, settingsName, settingsDescription.trim());
   }
 
-  async function deleteTemplate() {
-    setSettingsOpen(false);
-    await remove({ templateId: tid });
-    router.back();
+  function confirmDeleteTemplate() {
+    if (!template) {
+      return;
+    }
+    const name = template.name;
+    Alert.alert(tr("deleteTemplate"), tr("deleteMessage", { name }), [
+      { text: tc("cancel"), style: "cancel" },
+      {
+        text: tc("delete"),
+        style: "destructive",
+        onPress: () => {
+          closeSettings();
+          void remove({ templateId: tid }).then(() => router.back());
+        },
+      },
+    ]);
   }
 
   if (template === undefined) {
@@ -161,10 +194,14 @@ export default function TemplateEditor() {
         options={{
           title: template.name,
           headerRight: () => (
-            <Pressable onPress={openSettings} hitSlop={8}>
-              <Txt size={20} style={{ color: t.primary }}>
-                ⋯
-              </Txt>
+            <Pressable
+              onPress={openSettings}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={tr("templateSettings")}
+              style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
+            >
+              <Ellipsis color={t.primary} size={22} />
             </Pressable>
           ),
         }}
@@ -246,26 +283,52 @@ export default function TemplateEditor() {
         onClose={() => setEditingIndex(null)}
       />
 
-      <Sheet visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
+      <Sheet visible={settingsOpen} onClose={closeSettings}>
         <Txt size={18} weight="700">
           {tr("templateSettings")}
         </Txt>
-        <Field
-          placeholder={tr("namePlaceholder")}
-          value={settingsName}
-          onChangeText={setSettingsName}
-        />
-        <Field
-          placeholder={tr("descriptionPlaceholder")}
-          value={settingsDescription}
-          onChangeText={setSettingsDescription}
-        />
-        <Button title={tc("save")} onPress={saveSettings} />
-        <Pressable onPress={deleteTemplate} style={{ padding: 10 }}>
-          <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            {tr("deleteTemplate")}
-          </Txt>
-        </Pressable>
+        {showExport ? (
+          <ExportTargetPicker
+            templateId={tid}
+            currentProjectId={pid}
+            onExported={(name) => {
+              closeSettings();
+              Alert.alert(tr("exportedTitle"), tr("exportedMessage", { name }));
+            }}
+            onBack={() => setShowExport(false)}
+          />
+        ) : (
+          <>
+            <Field
+              placeholder={tr("namePlaceholder")}
+              value={settingsName}
+              onChangeText={setSettingsName}
+            />
+            <Field
+              placeholder={tr("descriptionPlaceholder")}
+              value={settingsDescription}
+              onChangeText={setSettingsDescription}
+            />
+            <Button title={tc("save")} onPress={saveSettings} />
+            {/* Secondary template actions as a compact icon toolbar, matching
+                the list settings sheet. */}
+            <IconActionBar>
+              <IconAction
+                icon={Copy}
+                caption={tr("exportCaption")}
+                label={tr("exportToGroup")}
+                onPress={() => setShowExport(true)}
+              />
+              <IconAction
+                icon={Trash2}
+                destructive
+                caption={tc("delete")}
+                label={tr("deleteTemplate")}
+                onPress={confirmDeleteTemplate}
+              />
+            </IconActionBar>
+          </>
+        )}
       </Sheet>
     </Screen>
   );
@@ -292,6 +355,7 @@ function EditTemplateItemSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const theme = useTheme();
   const t = useTranslations("mobile.templates");
   const tc = useTranslations("mobile.common");
   return (
@@ -311,7 +375,7 @@ function EditTemplateItemSheet({
       />
       <Button title={tc("save")} onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>
+        <Txt style={{ textAlign: "center", color: theme.danger }}>
           {t("deleteItem")}
         </Txt>
       </Pressable>

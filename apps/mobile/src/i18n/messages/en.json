@@ -891,6 +891,7 @@
       "createTemplate": "Create template",
       "createListFromTemplate": "Create list from template",
       "exportToGroup": "Export to another group",
+      "exportCaption": "Export",
       "noOtherGroups": "You have no other groups.",
       "deleteTemplate": "Delete template",
       "deleteMessage": "Delete \"{name}\"? This can't be undone.",

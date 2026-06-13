@@ -891,6 +891,7 @@
       "createTemplate": "Crear plantilla",
       "createListFromTemplate": "Crear llista des de la plantilla",
       "exportToGroup": "Exportar a un altre grup",
+      "exportCaption": "Exportar",
       "noOtherGroups": "No tens cap altre grup.",
       "deleteTemplate": "Eliminar plantilla",
       "deleteMessage": "Vols eliminar \"{name}\"? No es pot desfer.",

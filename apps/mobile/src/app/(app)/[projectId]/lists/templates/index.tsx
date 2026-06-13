@@ -3,9 +3,11 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
+import { Copy, Ellipsis, LayoutTemplate, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, View } from "react-native";
 import { headerCreateAction } from "@/components/header-badges";
+import { ExportTargetPicker } from "@/components/template-export";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -13,6 +15,8 @@ import {
   Button,
   Fab,
   Field,
+  IconAction,
+  IconActionBar,
   Loading,
   Screen,
   Sheet,
@@ -21,13 +25,11 @@ import {
 } from "@/ui";
 
 type Template = FunctionReturnType<typeof api.templates.listByProject>[number];
-type Project = FunctionReturnType<typeof api.projects.listMine>[number];
 
 export default function Templates() {
   const pid = useProjectId();
   const templates = useQuery(api.templates.listByProject, { projectId: pid });
   const router = useRouter();
-  const t = useTheme();
   const tr = useTranslations("mobile.templates");
 
   const [creating, setCreating] = useState(false);
@@ -56,72 +58,30 @@ export default function Templates() {
           onScroll={fab.onScroll}
           scrollEventThrottle={16}
           keyExtractor={(template) => template._id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 10 }}
           ListEmptyComponent={
-            <Txt muted style={{ padding: 8 }}>
+            <Txt muted style={{ paddingVertical: 24, textAlign: "center" }}>
               {tr("empty")}
             </Txt>
           }
           renderItem={({ item }) => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
+            <TemplateCard
+              template={item}
+              onOpen={() => router.push(`/${pid}/lists/templates/${item._id}`)}
+              onActions={() => {
+                setActionsTemplate(item);
+                setActionsVisible(true);
               }}
-            >
-              <Pressable
-                style={{ flex: 1 }}
-                onPress={() =>
-                  router.push(`/${pid}/lists/templates/${item._id}`)
-                }
-              >
-                <View
-                  style={{
-                    backgroundColor: t.card,
-                    borderColor: t.border,
-                    borderWidth: 1,
-                    borderRadius: 14,
-                    padding: 14,
-                  }}
-                >
-                  <Txt size={17} weight="700">
-                    {item.name}
-                  </Txt>
-                  {item.description ? (
-                    <Txt muted size={13} numberOfLines={2}>
-                      {item.description}
-                    </Txt>
-                  ) : null}
-                  <Txt muted size={13}>
-                    {tr("itemCount", { count: item.items.length })}
-                  </Txt>
-                </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  setActionsTemplate(item);
-                  setActionsVisible(true);
-                }}
-                hitSlop={10}
-                style={{ padding: 6 }}
-              >
-                <Txt size={22} style={{ color: t.primary }}>
-                  ⋯
-                </Txt>
-              </Pressable>
-            </View>
+            />
           )}
         />
       )}
 
-      {!creating && !actionsVisible && (
-        <Fab
-          onPress={() => setCreating(true)}
-          label={tr("newTemplate")}
-          extended={fab.extended}
-        />
-      )}
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tr("newTemplate")}
+        extended={fab.extended}
+      />
       <CreateTemplateSheet
         visible={creating}
         projectId={pid}
@@ -134,6 +94,86 @@ export default function Templates() {
         onClose={() => setActionsVisible(false)}
       />
     </Screen>
+  );
+}
+
+// A template row as a self-contained card: a primary-tinted icon badge, the
+// name + description + item count, and a trailing overflow that opens the
+// actions sheet. The body and the overflow are sibling Pressables inside a
+// non-pressable card, so tapping the menu never also navigates into the editor.
+function TemplateCard({
+  template,
+  onOpen,
+  onActions,
+}: {
+  template: Template;
+  onOpen: () => void;
+  onActions: () => void;
+}) {
+  const t = useTheme();
+  const tr = useTranslations("mobile.templates");
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: t.card,
+        borderColor: t.border,
+        borderWidth: 1,
+        borderRadius: 14,
+        paddingLeft: 14,
+        paddingRight: 6,
+      }}
+    >
+      <Pressable
+        onPress={onOpen}
+        accessibilityRole="button"
+        style={({ pressed }) => ({
+          flex: 1,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          paddingVertical: 14,
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <View
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 11,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: `${t.primary}1a`,
+          }}
+        >
+          <LayoutTemplate color={t.primary} size={20} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Txt size={16} weight="700">
+            {template.name}
+          </Txt>
+          {template.description ? (
+            <Txt muted size={13} numberOfLines={2} style={{ marginTop: 1 }}>
+              {template.description}
+            </Txt>
+          ) : null}
+          <Txt muted size={12} style={{ marginTop: 2 }}>
+            {tr("itemCount", { count: template.items.length })}
+          </Txt>
+        </View>
+      </Pressable>
+      <Pressable
+        onPress={onActions}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={tr("templateSettings")}
+        style={({ pressed }) => ({ padding: 10, opacity: pressed ? 0.6 : 1 })}
+      >
+        <Ellipsis color={t.muted} size={20} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -212,16 +252,17 @@ function TemplateActionsSheet({
   projectId: Id<"projects">;
   onClose: () => void;
 }) {
-  const projects = useQuery(api.projects.listMine);
   const createList = useMutation(api.lists.create);
-  const exportToProject = useMutation(api.templates.exportToProject);
   const remove = useMutation(api.templates.remove);
   const router = useRouter();
   const t = useTranslations("mobile.templates");
   const tc = useTranslations("mobile.common");
   const [showExport, setShowExport] = useState(false);
 
-  const otherProjects = (projects ?? []).filter((p) => p._id !== projectId);
+  function close() {
+    setShowExport(false);
+    onClose();
+  }
 
   async function createListFromTemplate() {
     if (!template) {
@@ -232,7 +273,7 @@ function TemplateActionsSheet({
       name: template.name,
       templateIds: [template._id],
     });
-    onClose();
+    close();
     router.push(`/${projectId}/lists/${listId}`);
   }
 
@@ -250,7 +291,7 @@ function TemplateActionsSheet({
           text: tc("delete"),
           style: "destructive",
           onPress: () => {
-            onClose();
+            close();
             void remove({ templateId: target._id });
           },
         },
@@ -258,74 +299,49 @@ function TemplateActionsSheet({
     );
   }
 
-  async function doExport(target: Project) {
-    if (!template) {
-      return;
-    }
-    await exportToProject({
-      templateId: template._id,
-      targetProjectId: target._id,
-    });
-    setShowExport(false);
-    onClose();
-    Alert.alert(
-      t("exportedTitle"),
-      t("exportedMessage", { name: target.name }),
-    );
-  }
-
   return (
-    <Sheet
-      visible={visible}
-      onClose={() => {
-        setShowExport(false);
-        onClose();
-      }}
-    >
+    <Sheet visible={visible} onClose={close}>
       <Txt size={18} weight="700">
         {template?.name ?? ""}
       </Txt>
-      {showExport ? (
-        <>
-          <Txt muted size={13}>
-            {t("exportToGroup")}
-          </Txt>
-          {otherProjects.length === 0 ? (
-            <Txt muted style={{ paddingVertical: 8 }}>
-              {t("noOtherGroups")}
-            </Txt>
-          ) : (
-            otherProjects.map((project) => (
-              <Button
-                key={project._id}
-                title={project.name}
-                variant="ghost"
-                onPress={() => void doExport(project)}
-              />
-            ))
-          )}
-          <Button
-            title={tc("back")}
-            variant="ghost"
-            onPress={() => setShowExport(false)}
-          />
-        </>
+      {template ? (
+        <Txt muted size={13}>
+          {t("itemCount", { count: template.items.length })}
+        </Txt>
+      ) : null}
+      {showExport && template ? (
+        <ExportTargetPicker
+          templateId={template._id}
+          currentProjectId={projectId}
+          onExported={(name) => {
+            close();
+            Alert.alert(t("exportedTitle"), t("exportedMessage", { name }));
+          }}
+          onBack={() => setShowExport(false)}
+        />
       ) : (
         <>
           <Button
             title={t("createListFromTemplate")}
             onPress={createListFromTemplate}
           />
-          <Button
-            title={t("exportToGroup")}
-            variant="ghost"
-            onPress={() => setShowExport(true)}
-          />
-          <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
-            <Txt style={{ textAlign: "center", color: "#e64553" }}>
-              {t("deleteTemplate")}
-            </Txt>
-          </Pressable>
+          {/* Secondary template actions as a compact icon toolbar, matching the
+              list settings sheet. */}
+          <IconActionBar>
+            <IconAction
+              icon={Copy}
+              caption={t("exportCaption")}
+              label={t("exportToGroup")}
+              onPress={() => setShowExport(true)}
+            />
+            <IconAction
+              icon={Trash2}
+              destructive
+              caption={tc("delete")}
+              label={t("deleteTemplate")}
+              onPress={confirmDelete}
+            />
+          </IconActionBar>
         </>
       )}
     </Sheet>
