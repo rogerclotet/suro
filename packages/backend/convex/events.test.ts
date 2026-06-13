@@ -271,6 +271,80 @@ describe("events: linked lists", () => {
   });
 });
 
+describe("events: linked pots", () => {
+  // A pot needs at least two members, so add Bob to the family.
+  beforeEach(async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("projectMembers", {
+        projectId: ids.family,
+        userId: ids.bob,
+      }),
+    );
+  });
+
+  async function makeEvent() {
+    return alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Ski trip",
+      startAt: JAN_10,
+      endAt: JAN_10_END,
+      allDay: false,
+    });
+  }
+
+  it("seeds every project member when memberIds is omitted", async () => {
+    const eventId = await makeEvent();
+    const potId = await alice.mutation(api.events.createLinkedPot, { eventId });
+    const pot = await alice.query(api.expenses.getPot, { potId });
+    expect(pot.name).toBe("Ski trip");
+    expect(new Set(pot.members.map((m) => m._id))).toEqual(
+      new Set([ids.alice, ids.bob]),
+    );
+  });
+
+  it("uses only the chosen members when memberIds is provided", async () => {
+    // A third member makes the chosen subset a real choice.
+    const carol = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Carol", email: "carol@example.test" }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("projectMembers", { projectId: ids.family, userId: carol }),
+    );
+    const eventId = await makeEvent();
+    const potId = await alice.mutation(api.events.createLinkedPot, {
+      eventId,
+      memberIds: [ids.alice, ids.bob],
+    });
+    const pot = await alice.query(api.expenses.getPot, { potId });
+    expect(new Set(pot.members.map((m) => m._id))).toEqual(
+      new Set([ids.alice, ids.bob]),
+    );
+  });
+
+  it("rejects a chosen member who isn't in the group", async () => {
+    const stranger = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Stranger", email: "s@example.test" }),
+    );
+    const eventId = await makeEvent();
+    await expect(
+      alice.mutation(api.events.createLinkedPot, {
+        eventId,
+        memberIds: [ids.alice, stranger],
+      }),
+    ).rejects.toThrow("Member is not in this group");
+  });
+
+  it("rejects fewer than two chosen members", async () => {
+    const eventId = await makeEvent();
+    await expect(
+      alice.mutation(api.events.createLinkedPot, {
+        eventId,
+        memberIds: [ids.alice],
+      }),
+    ).rejects.toThrow("at least two members");
+  });
+});
+
 describe("calendar feed (ICS export)", () => {
   it("returns a stable token across calls and rejects non-members", async () => {
     const token = await alice.mutation(api.events.getOrCreateCalendarToken, {

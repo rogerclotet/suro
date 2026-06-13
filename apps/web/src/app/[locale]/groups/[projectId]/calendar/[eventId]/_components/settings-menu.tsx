@@ -23,6 +23,7 @@ import {
   ResponsiveMenuItem,
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
+import CreateEventPotForm from "./create-event-pot-form";
 import DeleteEventModal from "./delete-event-modal";
 import EditEventForm from "./edit-event-form";
 import LinkListForm from "./link-list-form";
@@ -44,11 +45,8 @@ export default function SettingsMenu({
   canCreatePot: boolean;
 }) {
   const t = useTranslations("calendar");
-  const {
-    handleCreateLinkedList,
-    handleCreateLinkedNote,
-    handleCreateLinkedPot,
-  } = useCreateLinked(event);
+  const { handleCreateLinkedList, handleCreateLinkedNote } =
+    useCreateLinked(event);
 
   return (
     <ResponsiveMenu>
@@ -146,13 +144,18 @@ export default function SettingsMenu({
         ) : (
           canCreatePot && (
             <>
-              <ResponsiveMenuItem
-                onClick={handleCreateLinkedPot}
-                className="cursor-pointer gap-2"
-              >
-                <PiggyBank />
-                {t("createPotMenuItem")}
-              </ResponsiveMenuItem>
+              <CreateEventPotForm
+                event={event}
+                trigger={
+                  <ResponsiveMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <PiggyBank />
+                    {t("createPotMenuItem")}
+                  </ResponsiveMenuItem>
+                }
+              />
 
               <LinkPotForm
                 trigger={
