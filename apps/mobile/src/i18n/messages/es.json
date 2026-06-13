@@ -884,7 +884,9 @@
       "searchPlaceholder": "Busca o crea…",
       "noResults": "No se encontró ninguna categoría.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sin categoría"
+      "noCategory": "Sin categoría",
+      "deleteSuggestion": "Eliminar sugerencia",
+      "deleteSuggestionMessage": "¿Quitar \"{name}\" de las sugerencias de categorías? Los elementos que ya la usan conservan su categoría."
     },
     "templates": {
       "title": "Plantillas",
@@ -1030,6 +1032,11 @@
       "newPot": "Nuevo bote",
       "namePlaceholder": "Nombre",
       "createPot": "Crear bote",
+      "choosePotMembers": "¿Quién está en el bote?",
+      "potOptions": "Opciones del bote",
+      "deletePot": "Eliminar bote",
+      "deletePotMessage": "¿Eliminar \"{name}\"? No se puede deshacer.",
+      "cantDeletePot": "Solo puedes eliminar un bote cuando está saldado, o antes de añadir ningún gasto.",
       "members": "Miembros ({count})",
       "newSpending": "Nuevo gasto",
       "amountPlaceholder": "Cantidad",

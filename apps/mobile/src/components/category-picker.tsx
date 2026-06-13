@@ -1,7 +1,9 @@
+import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { Check, ChevronDown, Plus, Tag } from "lucide-react-native";
+import { useMutation } from "convex/react";
+import { Check, ChevronDown, Plus, Tag, Trash2 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
@@ -62,6 +64,8 @@ export function CategoryPicker({
 }) {
   const t = useTheme();
   const tcat = useTranslations("mobile.categories");
+  const tc = useTranslations("mobile.common");
+  const deleteCategory = useMutation(api.categories.remove);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -86,6 +90,23 @@ export function CategoryPicker({
           : row.name,
     );
     close();
+  }
+
+  function confirmDelete(category: PickerCategory) {
+    Alert.alert(
+      tcat("deleteSuggestion"),
+      tcat("deleteSuggestionMessage", { name: category.name }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: tc("delete"),
+          style: "destructive",
+          onPress: () => {
+            void deleteCategory({ categoryId: category._id });
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -188,6 +209,20 @@ export function CategoryPicker({
                   >
                     {label}
                   </Txt>
+                  {row.type === "category" ? (
+                    <Pressable
+                      onPress={() => confirmDelete(row.category)}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel={tcat("deleteSuggestion")}
+                      style={({ pressed }) => ({
+                        padding: 4,
+                        opacity: pressed ? 0.5 : 1,
+                      })}
+                    >
+                      <Trash2 color={t.muted} size={16} />
+                    </Pressable>
+                  ) : null}
                 </Pressable>
               );
             })}

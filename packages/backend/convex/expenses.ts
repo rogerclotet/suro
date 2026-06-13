@@ -161,6 +161,39 @@ export const createPot = mutation({
   },
 });
 
+/**
+ * Delete a pot, but only when it's settled or not-yet-started (no spendings) —
+ * an in-progress pot keeps its recorded expenses. Any project member may delete
+ * (matches event/list removal). Cascades its members and any settle-up rows.
+ */
+export const deletePot = mutation({
+  args: { potId: v.id("pots") },
+  handler: async (ctx, { potId }) => {
+    const { pot } = await requirePotAccess(ctx, potId);
+    const spendings = await ctx.db
+      .query("spendings")
+      .withIndex("by_pot", (q) => q.eq("potId", potId))
+      .collect();
+    const deletable = pot.settledAt !== undefined || spendings.length === 0;
+    if (!deletable) {
+      throw new Error("Only settled or not-yet-started pots can be deleted");
+    }
+    // Manual cascade (Convex has no FK cascade) — mirrors projects.remove.
+    const members = await ctx.db
+      .query("potMembers")
+      .withIndex("by_pot", (q) => q.eq("potId", potId))
+      .collect();
+    for (const member of members) {
+      await ctx.db.delete(member._id);
+    }
+    for (const spending of spendings) {
+      await ctx.db.delete(spending._id);
+    }
+    await ctx.db.delete(potId);
+    return null;
+  },
+});
+
 export const createSpending = mutation({
   args: {
     potId: v.id("pots"),

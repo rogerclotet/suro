@@ -16,13 +16,11 @@ import { useSession } from "@/lib/session";
 export function useCreateLinked(event: Event): {
   handleCreateLinkedList: () => Promise<void>;
   handleCreateLinkedNote: () => Promise<void>;
-  handleCreateLinkedPot: () => Promise<void>;
 } {
   const { data: session } = useSession();
   const t = useTranslations("calendar");
   const createLinkedList = useMutation(api.events.createLinkedList);
   const createLinkedNote = useMutation(api.events.createLinkedNote);
-  const createLinkedPot = useMutation(api.events.createLinkedPot);
 
   async function handleCreateLinkedList() {
     try {
@@ -54,24 +52,8 @@ export function useCreateLinked(event: Event): {
     }
   }
 
-  async function handleCreateLinkedPot() {
-    try {
-      await createLinkedPot({ eventId: event.id as Id<"events"> });
-      toast.success(t("createPotSuccess"));
-    } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_pot",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
-      toast.error(t("createPotError"));
-    }
-  }
-
   return {
     handleCreateLinkedList,
     handleCreateLinkedNote,
-    handleCreateLinkedPot,
   };
 }

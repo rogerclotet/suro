@@ -2,9 +2,10 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ellipsis, Trash2 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Dimensions, Pressable, ScrollView, View } from "react-native";
+import { Alert, Dimensions, Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { headerCreateAction } from "@/components/header-badges";
 import { useLocale, useTranslations } from "@/i18n";
@@ -172,6 +173,8 @@ export default function PotDetail() {
   const { potId } = useLocalSearchParams<{ potId: string }>();
   const id = potId as Id<"pots">;
   const pot = useQuery(api.expenses.getPot, { potId: id });
+  const deletePot = useMutation(api.expenses.deletePot);
+  const router = useRouter();
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");
@@ -179,6 +182,7 @@ export default function PotDetail() {
   const [adding, setAdding] = useState(false);
   const fab = useFabScroll();
   const [settling, setSettling] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   if (pot === undefined) {
     return (
@@ -187,6 +191,28 @@ export default function PotDetail() {
       </Screen>
     );
   }
+
+  // Only settled or not-yet-started (no spendings) pots can be removed, so an
+  // in-progress pot's recorded expenses can't be lost. Mirrors the backend.
+  const deletable = pot.settledAt != null || pot.spendings.length === 0;
+
+  const confirmDelete = () => {
+    Alert.alert(
+      tExp("deletePot"),
+      tExp("deletePotMessage", { name: pot.name }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: tc("delete"),
+          style: "destructive",
+          onPress: () => {
+            setOptionsOpen(false);
+            void deletePot({ potId: id }).then(() => router.back());
+          },
+        },
+      ],
+    );
+  };
 
   const maxAbs = Math.max(
     0,
@@ -198,10 +224,19 @@ export default function PotDetail() {
       <Stack.Screen
         options={{
           title: pot.name,
-          ...headerCreateAction({
-            onPress: () => setAdding(true),
-            label: tExp("newSpending"),
-          }),
+          ...headerCreateAction(
+            {
+              onPress: () => setAdding(true),
+              label: tExp("newSpending"),
+            },
+            [
+              {
+                icon: Ellipsis,
+                onPress: () => setOptionsOpen(true),
+                label: tExp("potOptions"),
+              },
+            ],
+          ),
         }}
       />
       <ScrollView
@@ -314,6 +349,37 @@ export default function PotDetail() {
         pot={pot}
         onClose={() => setSettling(false)}
       />
+
+      <Sheet visible={optionsOpen} onClose={() => setOptionsOpen(false)}>
+        <Txt size={18} weight="700">
+          {tExp("potOptions")}
+        </Txt>
+        <Pressable
+          onPress={confirmDelete}
+          disabled={!deletable}
+          accessibilityRole="button"
+          accessibilityLabel={tExp("deletePot")}
+          accessibilityState={{ disabled: !deletable }}
+          style={({ pressed }) => ({
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+            paddingVertical: 10,
+            opacity: deletable ? (pressed ? 0.6 : 1) : 0.4,
+          })}
+        >
+          <Trash2 color={t.danger} size={20} />
+          <Txt size={16} style={{ color: t.danger }}>
+            {tExp("deletePot")}
+          </Txt>
+        </Pressable>
+        {/* In-progress pots can't be deleted; explain why the action is off. */}
+        {deletable ? null : (
+          <Txt muted size={13}>
+            {tExp("cantDeletePot")}
+          </Txt>
+        )}
+      </Sheet>
     </Screen>
   );
 }

@@ -884,7 +884,9 @@
       "searchPlaceholder": "Search or create…",
       "noResults": "No categories found.",
       "createNamed": "Create \"{name}\"",
-      "noCategory": "No category"
+      "noCategory": "No category",
+      "deleteSuggestion": "Delete suggestion",
+      "deleteSuggestionMessage": "Remove \"{name}\" from category suggestions? Items already using it keep their category."
     },
     "templates": {
       "title": "Templates",
@@ -1030,6 +1032,11 @@
       "newPot": "New pot",
       "namePlaceholder": "Name",
       "createPot": "Create pot",
+      "choosePotMembers": "Who's in the pot?",
+      "potOptions": "Pot options",
+      "deletePot": "Delete pot",
+      "deletePotMessage": "Delete \"{name}\"? This can't be undone.",
+      "cantDeletePot": "You can only delete a pot once it's settled, or before any spending is added.",
       "members": "Members ({count})",
       "newSpending": "New spending",
       "amountPlaceholder": "Amount",
