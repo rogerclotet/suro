@@ -28,8 +28,8 @@ without restructuring.
 ### Apple
 
 1. Apple Developer Program membership (pending — see `../README.md`), then
-   `pnpm exec eas credentials -p ios` for `app.suro.mobile`.
-2. Create the app in App Store Connect (bundle id `app.suro.mobile`, name
+   `pnpm exec eas credentials -p ios` for `dev.clotet.suro`.
+2. Create the app in App Store Connect (bundle id `dev.clotet.suro`, name
    "Suro", default locale Catalan).
 3. Put the numeric App Store Connect app id into `submit.production.ios.ascAppId`
    in `../eas.json` (currently a TODO placeholder).
@@ -42,7 +42,7 @@ without restructuring.
 
 ### Google Play
 
-1. Create the app in the Play Console (package `app.suro.mobile`).
+1. Create the app in the Play Console (package `dev.clotet.suro`).
 2. Create a service account with "Release manager" access
    ([EAS docs](https://docs.expo.dev/submit/android/)), download its JSON key
    to `../credentials/play-service-account.json` (gitignored).

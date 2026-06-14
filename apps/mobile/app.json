@@ -9,14 +9,14 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.suro.mobile",
+      "bundleIdentifier": "dev.clotet.suro",
       "associatedDomains": ["applinks:suro.clotet.dev"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "app.suro.mobile",
+      "package": "dev.clotet.suro",
       "adaptiveIcon": {
         "backgroundColor": "#17100c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
