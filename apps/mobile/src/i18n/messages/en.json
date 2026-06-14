@@ -217,6 +217,7 @@
     "welcome": "Welcome",
     "signInPrompt": "Sign in to access your Suro",
     "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
     "continueWithEmail": "Continue with email",
     "or": "or",
     "emailPlaceholder": "your@email.com",
@@ -329,7 +330,11 @@
     "editTitle": "Edit group",
     "editDescription": "Edit the name, image and color of the group",
     "groupImage": "Group image",
+    "changeImage": "Change image",
     "removeImage": "Remove image",
+    "imagePermissionTitle": "Permission needed",
+    "imagePermissionBody": "Allow photo access to set a picture.",
+    "imageError": "Couldn't update image",
     "color": "Color",
     "name": "Name",
     "namePlaceholder": "Group name",
@@ -792,6 +797,7 @@
       "differentEmail": "Use a different email",
       "or": "or",
       "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple",
       "genericError": "Something went wrong"
     },
     "groups": {
@@ -878,7 +884,9 @@
       "searchPlaceholder": "Search or create…",
       "noResults": "No categories found.",
       "createNamed": "Create \"{name}\"",
-      "noCategory": "No category"
+      "noCategory": "No category",
+      "deleteSuggestion": "Delete suggestion",
+      "deleteSuggestionMessage": "Remove \"{name}\" from category suggestions? Items already using it keep their category."
     },
     "templates": {
       "title": "Templates",
@@ -889,6 +897,7 @@
       "createTemplate": "Create template",
       "createListFromTemplate": "Create list from template",
       "exportToGroup": "Export to another group",
+      "exportCaption": "Export",
       "noOtherGroups": "You have no other groups.",
       "deleteTemplate": "Delete template",
       "deleteMessage": "Delete \"{name}\"? This can't be undone.",
@@ -1023,6 +1032,11 @@
       "newPot": "New pot",
       "namePlaceholder": "Name",
       "createPot": "Create pot",
+      "choosePotMembers": "Who's in the pot?",
+      "potOptions": "Pot options",
+      "deletePot": "Delete pot",
+      "deletePotMessage": "Delete \"{name}\"? This can't be undone.",
+      "cantDeletePot": "You can only delete a pot once it's settled, or before any spending is added.",
       "members": "Members ({count})",
       "newSpending": "New spending",
       "amountPlaceholder": "Amount",

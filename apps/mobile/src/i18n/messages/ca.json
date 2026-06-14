@@ -217,6 +217,7 @@
     "welcome": "Benvingut/da",
     "signInPrompt": "Inicia sessió per entrar al teu Suro",
     "continueWithGoogle": "Continua amb Google",
+    "continueWithApple": "Continua amb Apple",
     "continueWithEmail": "Continua amb correu electrònic",
     "or": "o bé",
     "emailPlaceholder": "el-teu@correu.com",
@@ -329,7 +330,11 @@
     "editTitle": "Editar grup",
     "editDescription": "Editar el nom, la imatge i el color del grup",
     "groupImage": "Imatge del grup",
+    "changeImage": "Canviar la imatge",
     "removeImage": "Eliminar imatge",
+    "imagePermissionTitle": "Cal permís",
+    "imagePermissionBody": "Permet l'accés a les fotos per posar una imatge.",
+    "imageError": "No s'ha pogut actualitzar la imatge",
     "color": "Color",
     "name": "Nom",
     "namePlaceholder": "Nom del grup",
@@ -792,6 +797,7 @@
       "differentEmail": "Usa un altre correu",
       "or": "o bé",
       "continueWithGoogle": "Continua amb Google",
+      "continueWithApple": "Continua amb Apple",
       "genericError": "Alguna cosa ha anat malament"
     },
     "groups": {
@@ -878,7 +884,9 @@
       "searchPlaceholder": "Cerca o crea…",
       "noResults": "No s'ha trobat cap categoria.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sense categoria"
+      "noCategory": "Sense categoria",
+      "deleteSuggestion": "Elimina el suggeriment",
+      "deleteSuggestionMessage": "Vols treure \"{name}\" dels suggeriments de categories? Els elements que ja la fan servir conserven la categoria."
     },
     "templates": {
       "title": "Plantilles",
@@ -889,6 +897,7 @@
       "createTemplate": "Crear plantilla",
       "createListFromTemplate": "Crear llista des de la plantilla",
       "exportToGroup": "Exportar a un altre grup",
+      "exportCaption": "Exportar",
       "noOtherGroups": "No tens cap altre grup.",
       "deleteTemplate": "Eliminar plantilla",
       "deleteMessage": "Vols eliminar \"{name}\"? No es pot desfer.",
@@ -1023,6 +1032,11 @@
       "newPot": "Nou pot",
       "namePlaceholder": "Nom",
       "createPot": "Crear pot",
+      "choosePotMembers": "Qui hi ha al pot?",
+      "potOptions": "Opcions del pot",
+      "deletePot": "Eliminar pot",
+      "deletePotMessage": "Vols eliminar \"{name}\"? No es pot desfer.",
+      "cantDeletePot": "Només pots eliminar un pot quan està saldat, o abans d'afegir cap despesa.",
       "members": "Membres ({count})",
       "newSpending": "Nova despesa",
       "amountPlaceholder": "Quantitat",

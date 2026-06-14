@@ -20,6 +20,7 @@ import {
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
 import type { LinkedNote, LinkedPot } from "@/lib/queries/use-events";
+import CreateEventPotForm from "./create-event-pot-form";
 import LinkListForm from "./link-list-form";
 import LinkNoteForm from "./link-note-form";
 import LinkPotForm from "./link-pot-form";
@@ -50,11 +51,8 @@ export default function AddToEventChips({
   canCreatePot: boolean;
 }) {
   const t = useTranslations("calendar");
-  const {
-    handleCreateLinkedList,
-    handleCreateLinkedNote,
-    handleCreateLinkedPot,
-  } = useCreateLinked(event);
+  const { handleCreateLinkedList, handleCreateLinkedNote } =
+    useCreateLinked(event);
 
   const missingList = list === null;
   const missingNote = note === null;
@@ -88,15 +86,15 @@ export default function AddToEventChips({
         </Button>
       )}
       {missingPot && (
-        <Button
-          variant="outline"
-          size="sm"
-          className={CHIP_CLASSES}
-          onClick={handleCreateLinkedPot}
-        >
-          <PiggyBank />
-          {t("addPotChip")}
-        </Button>
+        <CreateEventPotForm
+          event={event}
+          trigger={
+            <Button variant="outline" size="sm" className={CHIP_CLASSES}>
+              <PiggyBank />
+              {t("addPotChip")}
+            </Button>
+          }
+        />
       )}
       <ResponsiveMenu>
         <ResponsiveMenuTrigger>

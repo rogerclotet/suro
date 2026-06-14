@@ -77,9 +77,14 @@ export default function ListItem(props: {
         trigger={
           <button
             type="button"
+            // The strike-through is always present and fades in/out via
+            // text-decoration-color (covered by transition-colors), which
+            // animates per line box so wrapped names stay struck correctly.
             className={cn(
-              "wrap-break-word grow overflow-hidden text-left",
-              props.item.completed ? "text-muted-foreground line-through" : "",
+              "wrap-break-word grow overflow-hidden text-left line-through transition-colors duration-300",
+              props.item.completed
+                ? "text-muted-foreground decoration-current"
+                : "decoration-transparent",
             )}
           >
             {props.item.name}

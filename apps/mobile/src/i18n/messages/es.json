@@ -217,6 +217,7 @@
     "welcome": "Bienvenido/a",
     "signInPrompt": "Inicia sesión para entrar en tu Suro",
     "continueWithGoogle": "Continuar con Google",
+    "continueWithApple": "Continuar con Apple",
     "continueWithEmail": "Continuar con correo electrónico",
     "or": "o bien",
     "emailPlaceholder": "tu@correo.com",
@@ -329,7 +330,11 @@
     "editTitle": "Editar grupo",
     "editDescription": "Editar el nombre, la imagen y el color del grupo",
     "groupImage": "Imagen del grupo",
+    "changeImage": "Cambiar la imagen",
     "removeImage": "Eliminar imagen",
+    "imagePermissionTitle": "Permiso necesario",
+    "imagePermissionBody": "Permite el acceso a las fotos para poner una imagen.",
+    "imageError": "No se pudo actualizar la imagen",
     "color": "Color",
     "name": "Nombre",
     "namePlaceholder": "Nombre del grupo",
@@ -792,6 +797,7 @@
       "differentEmail": "Usar otro correo",
       "or": "o bien",
       "continueWithGoogle": "Continuar con Google",
+      "continueWithApple": "Continuar con Apple",
       "genericError": "Algo salió mal"
     },
     "groups": {
@@ -878,7 +884,9 @@
       "searchPlaceholder": "Busca o crea…",
       "noResults": "No se encontró ninguna categoría.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sin categoría"
+      "noCategory": "Sin categoría",
+      "deleteSuggestion": "Eliminar sugerencia",
+      "deleteSuggestionMessage": "¿Quitar \"{name}\" de las sugerencias de categorías? Los elementos que ya la usan conservan su categoría."
     },
     "templates": {
       "title": "Plantillas",
@@ -889,6 +897,7 @@
       "createTemplate": "Crear plantilla",
       "createListFromTemplate": "Crear lista desde la plantilla",
       "exportToGroup": "Exportar a otro grupo",
+      "exportCaption": "Exportar",
       "noOtherGroups": "No tienes ningún otro grupo.",
       "deleteTemplate": "Eliminar plantilla",
       "deleteMessage": "¿Eliminar \"{name}\"? No se puede deshacer.",
@@ -1023,6 +1032,11 @@
       "newPot": "Nuevo bote",
       "namePlaceholder": "Nombre",
       "createPot": "Crear bote",
+      "choosePotMembers": "¿Quién está en el bote?",
+      "potOptions": "Opciones del bote",
+      "deletePot": "Eliminar bote",
+      "deletePotMessage": "¿Eliminar \"{name}\"? No se puede deshacer.",
+      "cantDeletePot": "Solo puedes eliminar un bote cuando está saldado, o antes de añadir ningún gasto.",
       "members": "Miembros ({count})",
       "newSpending": "Nuevo gasto",
       "amountPlaceholder": "Cantidad",

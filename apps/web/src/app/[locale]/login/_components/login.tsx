@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
-import { useConvexAuth } from "convex/react";
+import { SiApple } from "@icons-pack/react-simple-icons";
+import { api } from "backend/convex/_generated/api";
+import { useConvexAuth, useQuery } from "convex/react";
 import { Info, Mail, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,6 +12,31 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { getSafeRedirectTo } from "@/lib/auth-redirect";
+
+// The official multicolor "G" from Google's sign-in branding guidelines —
+// the standard mark, unlike simple-icons' monochrome glyph.
+function GoogleLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 18 18" aria-hidden="true" className={className}>
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2045c0-.6382-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9087c1.7018-1.5668 2.6836-3.874 2.6836-6.615z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.4673-.806 5.9564-2.1805l-2.9087-2.2581c-.8059.54-1.8368.859-3.0477.859-2.344 0-4.3282-1.5831-5.0359-3.7104H.9574v2.3318C2.4382 15.9832 5.4818 18 9 18z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.9641 10.71c-.18-.54-.2823-1.1168-.2823-1.71s.1023-1.17.2823-1.71V4.9582H.9574A8.9965 8.9965 0 0 0 0 9c0 1.4523.3477 2.8268.9574 4.0418L3.9641 10.71z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5813-2.5814C13.4632.8918 11.4259 0 9 0 5.4818 0 2.4382 2.0168.9574 4.9582L3.9641 7.29C4.6718 5.1627 6.6559 3.5795 9 3.5795z"
+      />
+    </svg>
+  );
+}
 
 export default function Login({
   redirectTo: redirectToProp,
@@ -22,6 +48,10 @@ export default function Login({
   const t = useTranslations("auth");
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  // Auth-free config query: it must fire while signed out — it feeds the
+  // login screen — so it is deliberately not gated with "skip". Apple's
+  // button stays hidden until the deployment has Apple credentials.
+  const oauthProviders = useQuery(api.auth.oauthProviders);
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = getSafeRedirectTo(
@@ -73,6 +103,14 @@ export default function Login({
     }
   }
 
+  // Pass an absolute URL on this origin so the OAuth round-trip returns here
+  // (prod, a preview, or localhost) — the shared dev backend can't infer the
+  // origin from a relative path.
+  const oauthSignIn = (provider: "google" | "apple") =>
+    void signIn(provider, {
+      redirectTo: `${window.location.origin}${redirectTo}`,
+    });
+
   const inner = (
     <div className="w-full max-w-xs space-y-6">
       {error && (
@@ -105,25 +143,27 @@ export default function Login({
 
       {step === "signIn" ? (
         <>
-          {/* Primary CTA: Google */}
-          <button
-            type="button"
-            onClick={() =>
-              // Pass an absolute URL on this origin so the OAuth round-trip
-              // returns here (prod, a preview, or localhost) — the shared dev
-              // backend can't infer the origin from a relative path.
-              void signIn("google", {
-                redirectTo: `${window.location.origin}${redirectTo}`,
-              })
-            }
-            className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
-          >
-            <SiGoogle
-              className="h-4 w-4 shrink-0"
-              style={{ color: "#4285F4" }}
-            />
-            {t("continueWithGoogle")}
-          </button>
+          {/* Primary CTAs: OAuth providers */}
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => oauthSignIn("google")}
+              className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+            >
+              <GoogleLogo className="h-[18px] w-[18px] shrink-0" />
+              {t("continueWithGoogle")}
+            </button>
+            {oauthProviders?.apple && (
+              <button
+                type="button"
+                onClick={() => oauthSignIn("apple")}
+                className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+              >
+                <SiApple className="h-[18px] w-[18px] shrink-0" />
+                {t("continueWithApple")}
+              </button>
+            )}
+          </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3">

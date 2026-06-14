@@ -6,6 +6,51 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.7.0] — 2026-06-13
+
+### ca
+
+- [feature] Ja pots canviar la imatge dels grups que gestiones des de l'aplicació mòbil.
+- [improvement] En obrir un grup tornes a les seves llistes: les llistes són de nou la pàgina d'inici i encapçalen la navegació.
+
+### es
+
+- [feature] Ya puedes cambiar la imagen de los grupos que gestionas desde la aplicación móvil.
+- [improvement] Al abrir un grupo vuelves a sus listas: las listas son de nuevo la página de inicio y encabezan la navegación.
+
+### en
+
+- [feature] You can now change the picture of the groups you manage from the mobile app.
+- [improvement] Opening a group takes you back to its lists: lists are the home page again and lead the navigation.
+
+## [1.6.0] — 2026-06-13
+
+### ca
+
+- [feature] El calendari ara és la pàgina d'inici de l'aplicació: en obrir un grup es mostra el calendari en lloc de les llistes, i el calendari encapçala la navegació, ja que és el punt de connexió entre la resta de funcions.
+
+### es
+
+- [feature] El calendario ahora es la página de inicio de la aplicación: al abrir un grupo se muestra el calendario en lugar de las listas, y el calendario encabeza la navegación, ya que es el punto de conexión entre el resto de funciones.
+
+### en
+
+- [feature] The calendar is now the app's home: opening a group shows the calendar instead of lists, and the calendar leads the navigation since it's the connection point between the other features.
+
+## [1.5.1] — 2026-06-12
+
+### ca
+
+- [improvement] Les interaccions amb les llistes ara estan animades: en marcar un element el ratllat apareix gradualment, els elements nous entren suaument i els elements que canvien de categoria llisquen fins al seu nou lloc.
+
+### es
+
+- [improvement] Las interacciones con las listas ahora están animadas: al marcar un elemento el tachado aparece gradualmente, los elementos nuevos entran suavemente y los elementos que cambian de categoría se deslizan hasta su nuevo sitio.
+
+### en
+
+- [improvement] List interactions are now animated: checking off an item fades in its strike-through, new items ease in, and items that change category glide to their new spot.
+
 ## [1.5.0] — 2026-06-12
 
 ### ca

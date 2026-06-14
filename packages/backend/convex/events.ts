@@ -276,28 +276,51 @@ export const unlinkNote = mutation({
 });
 
 /**
- * Create an expense pot already linked to the event, seeded with every project
- * member (a pot needs at least two — expenses are inherently a group feature).
+ * Create an expense pot already linked to the event. Pass `memberIds` to choose
+ * who's in it; omit it to seed with every project member (the default). A pot
+ * needs at least two — expenses are inherently a group feature.
  */
 export const createLinkedPot = mutation({
-  args: { eventId: v.id("events") },
-  handler: async (ctx, { eventId }) => {
+  args: {
+    eventId: v.id("events"),
+    memberIds: v.optional(v.array(v.id("users"))),
+  },
+  handler: async (ctx, { eventId, memberIds }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
-    const members = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project", (q) => q.eq("projectId", event.projectId))
-      .collect();
-    const memberIds = [...new Set(members.map((m) => m.userId))];
-    if (memberIds.length < 2) {
+
+    let resolved: Id<"users">[];
+    if (memberIds === undefined) {
+      const members = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", event.projectId))
+        .collect();
+      resolved = [...new Set(members.map((m) => m.userId))];
+    } else {
+      // De-dupe and require every chosen member to belong to the group.
+      resolved = [...new Set(memberIds)];
+      for (const memberId of resolved) {
+        const membership = await ctx.db
+          .query("projectMembers")
+          .withIndex("by_project_user", (q) =>
+            q.eq("projectId", event.projectId).eq("userId", memberId),
+          )
+          .unique();
+        if (membership === null) {
+          throw new Error("Member is not in this group");
+        }
+      }
+    }
+    if (resolved.length < 2) {
       throw new Error("A pot needs at least two members");
     }
+
     const potId = await ctx.db.insert("pots", {
       name: event.name,
       projectId: event.projectId,
       eventId: event._id,
       createdBy: userId,
     });
-    for (const memberId of memberIds) {
+    for (const memberId of resolved) {
       await ctx.db.insert("potMembers", { potId, userId: memberId });
     }
     return potId;
