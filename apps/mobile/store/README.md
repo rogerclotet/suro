@@ -28,8 +28,8 @@ without restructuring.
 ### Apple
 
 1. Apple Developer Program membership (pending — see `../README.md`), then
-   `pnpm exec eas credentials -p ios` for `app.suro.mobile`.
-2. Create the app in App Store Connect (bundle id `app.suro.mobile`, name
+   `pnpm exec eas credentials -p ios` for `dev.clotet.suro`.
+2. Create the app in App Store Connect (bundle id `dev.clotet.suro`, name
    "Suro", default locale Catalan).
 3. Put the numeric App Store Connect app id into `submit.production.ios.ascAppId`
    in `../eas.json` (currently a TODO placeholder).
@@ -42,7 +42,7 @@ without restructuring.
 
 ### Google Play
 
-1. Create the app in the Play Console (package `app.suro.mobile`).
+1. Create the app in the Play Console (package `dev.clotet.suro`).
 2. Create a service account with "Release manager" access
    ([EAS docs](https://docs.expo.dev/submit/android/)), download its JSON key
    to `../credentials/play-service-account.json` (gitignored).
@@ -82,9 +82,13 @@ pnpm --filter mobile exec eas metadata:push --profile production
 #    (release.automaticRelease=false: you release manually after approval).
 ```
 
-Versioning is remote (`appVersionSource: "remote"`, `autoIncrement: true` in
-`eas.json`): version code/build number bump automatically; bump the
-user-facing `version` in `app.json` when it should change.
+Versioning: the Android version code / iOS build number bump automatically
+(`appVersionSource: "remote"`, `autoIncrement: true` in `eas.json`). The
+user-facing `version` (versionName / "1.7.0") is derived in `app.config.ts`
+from the monorepo root `package.json`, so it tracks each release on its own —
+bump the root `package.json` version (in lockstep with the matching
+`CHANGELOG.md` entry) and the store version follows. No need to touch
+`app.json`.
 
 ## Screenshot capture
 

@@ -45,7 +45,7 @@ Prerequisites:
   on EAS (created via `eas credentials -p android`); the build fetches it.
 - **iOS**: Xcode, fastlane and CocoaPods, plus an Apple Developer Program
   membership with distribution credentials on EAS (`eas credentials -p ios`
-  for `app.suro.mobile`) — **still pending**, so `build:ios:release` fails at
+  for `dev.clotet.suro`) — **still pending**, so `build:ios:release` fails at
   credential fetch until that exists.
 
 Notes:
