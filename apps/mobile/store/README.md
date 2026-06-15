@@ -82,9 +82,13 @@ pnpm --filter mobile exec eas metadata:push --profile production
 #    (release.automaticRelease=false: you release manually after approval).
 ```
 
-Versioning is remote (`appVersionSource: "remote"`, `autoIncrement: true` in
-`eas.json`): version code/build number bump automatically; bump the
-user-facing `version` in `app.json` when it should change.
+Versioning: the Android version code / iOS build number bump automatically
+(`appVersionSource: "remote"`, `autoIncrement: true` in `eas.json`). The
+user-facing `version` (versionName / "1.7.0") is derived in `app.config.ts`
+from the monorepo root `package.json`, so it tracks each release on its own —
+bump the root `package.json` version (in lockstep with the matching
+`CHANGELOG.md` entry) and the store version follows. No need to touch
+`app.json`.
 
 ## Screenshot capture
 
