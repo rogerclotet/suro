@@ -1,1 +1,2 @@
-Primera versió de Suro: llistes, calendari, notes, fitxers i despeses compartides per als teus grups.
+• Ja pots canviar la imatge dels grups que gestiones des de l'aplicació mòbil.
+• En obrir un grup tornes a les seves llistes: les llistes són de nou la pàgina d'inici i encapçalen la navegació.

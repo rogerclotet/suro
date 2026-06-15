@@ -1,1 +1,2 @@
-First release of Suro: shared lists, calendar, notes, files and expenses for your groups.
+• You can now change the picture of the groups you manage from the mobile app.
+• Opening a group takes you back to its lists: lists are the home page again and lead the navigation.
