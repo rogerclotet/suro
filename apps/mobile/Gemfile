@@ -1,0 +1,9 @@
+# fastlane owns store submission + metadata (Android `supply` now, iOS
+# `pilot`/`deliver` once the Apple Developer account exists). EAS still builds
+# the binaries — it owns native build, signing and remote versioning.
+#
+# One-time:  bundle install
+# Run lanes: bundle exec fastlane <platform> <lane>  (see fastlane/Fastfile)
+source "https://rubygems.org"
+
+gem "fastlane"

@@ -1,1 +1,2 @@
-Primera versión de Suro: listas, calendario, notas, archivos y gastos compartidos para tus grupos.
+• Ya puedes cambiar la imagen de los grupos que gestionas desde la aplicación móvil.
+• Al abrir un grupo vuelves a sus listas: las listas son de nuevo la página de inicio y encabezan la navegación.

@@ -15,6 +15,7 @@
  * Run via `pnpm changelog:generate` (also wired into postinstall/predev/prebuild).
  */
 
+import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,6 +23,16 @@ import { fileURLToPath } from "node:url";
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = resolve(REPO_ROOT, "CHANGELOG.md");
 const OUTPUT = resolve(REPO_ROOT, "src/data/changelog.generated.ts");
+
+// Play Store "what's new" notes derive from the latest CHANGELOG entry so they
+// never drift from the release. Maps source locale -> Play (fastlane-supply)
+// locale folder under apps/mobile/store/play/metadata/android/.
+const PLAY_CHANGELOG_DIR = resolve(
+  REPO_ROOT,
+  "../mobile/store/play/metadata/android",
+);
+const PLAY_LOCALES = { ca: "ca", es: "es-ES", en: "en-US" };
+const PLAY_NOTE_MAX = 500; // Play per-language release-notes limit (see check-metadata.mjs)
 
 const LOCALES = ["ca", "es", "en"];
 const CHANGE_TYPES = ["feature", "fix", "improvement"];
@@ -140,6 +151,51 @@ export const CURRENT_VERSION = ${JSON.stringify(currentVersion)};
 `;
 }
 
+/**
+ * Mirror the latest release's notes into the Play Store changelog files
+ * (apps/mobile/store/play/metadata/android/<locale>/changelogs/default.txt),
+ * one bullet per change, so Play "what's new" always matches the newest
+ * CHANGELOG entry instead of a hand-maintained file. Skipped when the mobile
+ * metadata tree is absent (e.g. a web-only build context).
+ * @param {ReturnType<typeof parseChangelog>} entries
+ */
+async function writePlayChangelogs(entries) {
+  if (!existsSync(PLAY_CHANGELOG_DIR)) {
+    console.warn(
+      `[changelog] Play metadata dir not found; skipping Play notes (${PLAY_CHANGELOG_DIR})`,
+    );
+    return;
+  }
+  const latest = entries[0];
+  for (const [source, playLocale] of Object.entries(PLAY_LOCALES)) {
+    const changes = latest.changes[source];
+    if (!changes || changes.length === 0) {
+      console.warn(
+        `[changelog] No "${source}" notes for ${latest.version}; left Play ${playLocale} unchanged`,
+      );
+      continue;
+    }
+    const note = changes.map((change) => `• ${change.text}`).join("\n");
+    if (note.length > PLAY_NOTE_MAX) {
+      fail(
+        0,
+        `Play notes for ${playLocale} (${latest.version}) are ${note.length} chars, over Play's ${PLAY_NOTE_MAX} limit — shorten the CHANGELOG entry`,
+      );
+    }
+    const dest = resolve(
+      PLAY_CHANGELOG_DIR,
+      playLocale,
+      "changelogs",
+      "default.txt",
+    );
+    await mkdir(dirname(dest), { recursive: true });
+    await writeFile(dest, `${note}\n`, "utf8");
+    console.log(
+      `[changelog] Play notes -> ${playLocale}/changelogs/default.txt (${note.length}/${PLAY_NOTE_MAX} chars)`,
+    );
+  }
+}
+
 async function main() {
   const markdown = await readFile(SOURCE, "utf8");
   const entries = parseChangelog(markdown);
@@ -148,6 +204,7 @@ async function main() {
   console.log(
     `[changelog] Generated ${OUTPUT} (${entries.length} version(s)).`,
   );
+  await writePlayChangelogs(entries);
 }
 
 main().catch((error) => {
