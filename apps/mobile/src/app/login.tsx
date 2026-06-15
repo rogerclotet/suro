@@ -10,7 +10,7 @@ import { Image, Pressable, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
-import { Button, Field, Screen, Txt } from "@/ui";
+import { Button, Field, KeyboardAwareScreen, Txt } from "@/ui";
 
 // Finishes any auth session that was pending when the app was backgrounded.
 WebBrowser.maybeCompleteAuthSession();
@@ -150,9 +150,9 @@ export default function Login() {
       setStep("code");
     });
 
-  const verifyCode = () =>
+  const verifyCode = (value: string = code) =>
     run(async () => {
-      await signIn("resend-otp", { email, code });
+      await signIn("resend-otp", { email, code: value });
     });
 
   const signInWithOAuth = (provider: OAuthProvider) =>
@@ -183,8 +183,8 @@ export default function Login() {
   }
 
   return (
-    <Screen>
-      <View style={{ flex: 1, justifyContent: "center", gap: 16, padding: 24 }}>
+    <KeyboardAwareScreen center>
+      <View style={{ gap: 16, padding: 24 }}>
         <Image
           source={logo}
           resizeMode="contain"
@@ -250,15 +250,24 @@ export default function Login() {
             <Field
               placeholder={t("codePlaceholder")}
               value={code}
-              onChangeText={setCode}
+              onChangeText={(text) => {
+                setCode(text);
+                // number-pad has no return key, so auto-submit once the full
+                // 6-digit code is entered — the user never has to find a button.
+                if (text.length === 6 && !busy) {
+                  verifyCode(text);
+                }
+              }}
               keyboardType="number-pad"
               inputMode="numeric"
+              maxLength={6}
               editable={!busy}
+              autoFocus
             />
             <Button
               title={busy ? t("verifying") : t("verifyCode")}
               disabled={busy || code.length === 0}
-              onPress={verifyCode}
+              onPress={() => verifyCode()}
             />
             <Button
               title={t("differentEmail")}
@@ -278,6 +287,6 @@ export default function Login() {
           </Txt>
         ) : null}
       </View>
-    </Screen>
+    </KeyboardAwareScreen>
   );
 }

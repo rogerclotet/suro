@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.7.1] — 2026-06-15
+
+### ca
+
+- [fix] A la pantalla d'inici de sessió per correu, el teclat ja no tapa el botó de verificar i el codi s'envia automàticament quan l'acabes d'introduir.
+
+### es
+
+- [fix] En la pantalla de inicio de sesión por correo, el teclado ya no tapa el botón de verificar y el código se envía automáticamente al terminar de introducirlo.
+
+### en
+
+- [fix] On the email sign-in screen the keyboard no longer covers the verify button, and the code is submitted automatically once you finish entering it.
+
 ## [1.7.0] — 2026-06-13
 
 ### ca
