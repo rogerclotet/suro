@@ -19,9 +19,9 @@ store/
 
 Locales everywhere: `en-US`, `es-ES`, `ca` (both stores support Catalan).
 EAS Metadata only supports the App Store (and no screenshot upload), which is
-why the Play listing is plain files: paste/upload them in the Play Console, or
-wire `fastlane supply --metadata_path apps/mobile/store/play/metadata` later
-without restructuring.
+why the Play listing is plain files in fastlane-supply layout, pushed by the
+fastlane lanes (`metadata_path: store/play/metadata/android` — the directory
+that directly holds the locale folders).
 
 ## One-time setup
 

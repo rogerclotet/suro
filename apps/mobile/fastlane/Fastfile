@@ -9,7 +9,8 @@
 
 ANDROID_AAB = "build/suro-release.aab"
 IOS_IPA = "build/suro-release.ipa"
-PLAY_METADATA = "store/play/metadata"
+# supply wants the dir that directly holds the locale folders (ca/, en-US/, …).
+PLAY_METADATA = "store/play/metadata/android"
 PLAY_TRACK = "internal"
 
 platform :android do
