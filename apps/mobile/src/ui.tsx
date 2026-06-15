@@ -16,11 +16,13 @@ import {
   Dimensions,
   Easing,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -296,6 +298,39 @@ export function Fab({
 export function Screen({ children }: { children: ReactNode }) {
   const t = useTheme();
   return <View style={{ flex: 1, backgroundColor: t.bg }}>{children}</View>;
+}
+
+// Screen for full-screen forms: lifts content above the keyboard (iOS `padding`)
+// and wraps it in a ScrollView so the action button stays reachable and taps
+// land while the keyboard is up (`keyboardShouldPersistTaps`). Android resizes
+// the window (adjustResize) so the same ScrollView handles it there. `center`
+// vertically centers the content when the keyboard is down.
+export function KeyboardAwareScreen({
+  children,
+  center,
+}: {
+  children: ReactNode;
+  center?: boolean;
+}) {
+  const t = useTheme();
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: t.bg }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          ...(center ? { justifyContent: "center" } : null),
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
+      >
+        {children}
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 export function Center({ children }: { children: ReactNode }) {
