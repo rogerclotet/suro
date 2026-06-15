@@ -12,6 +12,8 @@
     "build:android:prod-apk": "mkdir -p build && eas build --platform android --profile production-apk --local --output build/suro-prod.apk",
     "build:android:release": "mkdir -p build && eas build --platform android --profile production --local --output build/suro-release.aab",
     "build:ios:release": "mkdir -p build && PATH=/usr/bin:$PATH eas build --platform ios --profile production --local --output build/suro-release.ipa",
+    "submit:android:release": "eas submit -p android --profile production --path build/suro-release.aab --non-interactive",
+    "release:android": "pnpm run build:android:release && pnpm run submit:android:release",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "vitest run",
