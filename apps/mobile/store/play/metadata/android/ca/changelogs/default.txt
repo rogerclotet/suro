@@ -1,2 +1,1 @@
-• Ja pots canviar la imatge dels grups que gestiones des de l'aplicació mòbil.
-• En obrir un grup tornes a les seves llistes: les llistes són de nou la pàgina d'inici i encapçalen la navegació.
+• A la pantalla d'inici de sessió per correu, el teclat ja no tapa el botó de verificar i el codi s'envia automàticament quan l'acabes d'introduir.

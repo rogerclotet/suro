@@ -1,2 +1,1 @@
-• Ya puedes cambiar la imagen de los grupos que gestionas desde la aplicación móvil.
-• Al abrir un grupo vuelves a sus listas: las listas son de nuevo la página de inicio y encabezan la navegación.
+• En la pantalla de inicio de sesión por correo, el teclado ya no tapa el botón de verificar y el código se envía automáticamente al terminar de introducirlo.
