@@ -211,7 +211,28 @@
     "changesHeading": "Canvis en aquesta política",
     "changesBody": "Si canviem aquesta política, actualitzarem la data d'entrada en vigor a la part superior. Si els canvis són rellevants, t'avisarem dins l'app o per correu electrònic.",
     "contactHeading": "Contacte",
-    "contactBody": "Per a qualsevol consulta o sol·licitud relacionada amb aquesta política, escriu a <email>suro@clotet.dev</email>."
+    "contactBody": "Per a qualsevol consulta o sol·licitud relacionada amb aquesta política, escriu a <email>suro@clotet.dev</email>.",
+    "deletionPageLink": "Com eliminar el teu compte"
+  },
+  "accountDeletion": {
+    "title": "Eliminar el teu compte",
+    "intro": "Pots eliminar permanentment el teu compte de Suro i tot el que hi està vinculat en qualsevol moment. T'expliquem com fer-ho i què s'elimina exactament.",
+    "inAppHeading": "Des de l'app",
+    "inAppIntro": "La manera més ràpida és des de la mateixa app de Suro:",
+    "inAppStep1": "Obre Suro i ves a Perfil.",
+    "inAppStep2": "Toca «Elimina el compte».",
+    "inAppStep3": "Confirma. El teu compte s'elimina immediatament i es tanca la sessió a tots els dispositius.",
+    "emailHeading": "Per correu",
+    "emailBody": "No pots accedir a l'app? Escriu a <email>suro@clotet.dev</email> des de l'adreça del teu compte i l'eliminarem per tu. És possible que et demanem que confirmis la sol·licitud per assegurar-nos que ets tu.",
+    "dataHeading": "Què s'elimina",
+    "dataIntro": "L'eliminació és permanent i no en conservem cap còpia. Eliminem:",
+    "dataProfile": "El teu perfil i les teves dades d'inici de sessió.",
+    "dataGroups": "Tots els grups que hagis creat, amb totes les seves llistes, esdeveniments, notes, fitxers i despeses.",
+    "dataMemberships": "La teva pertinença a grups creats per altres persones: aquests grups es mantenen per a la resta de membres.",
+    "dataDevices": "Els teus tokens de notificació, perquè els teus dispositius deixin de rebre notificacions push.",
+    "timingHeading": "Quant triga",
+    "timingBody": "Les eliminacions des de l'app són immediates. Les sol·licituds per correu es gestionen en un termini de 30 dies, normalment molt abans.",
+    "privacyLink": "Llegeix la nostra política de privacitat completa"
   },
   "auth": {
     "welcome": "Benvingut/da",
