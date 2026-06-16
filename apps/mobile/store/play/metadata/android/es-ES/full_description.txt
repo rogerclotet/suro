@@ -22,4 +22,4 @@ PENSADO PARA LOS GRUPOS DE TU VIDA
 
 Crea tu primer grupo en menos de un minuto: inicia sesión con Google o con tu correo, crea un grupo e invita a tu gente con un enlace. Sin tarjeta de crédito, sin configuración.
 
-Suro no vende tus datos ni usa feeds algorítmicos. Política de privacidad: https://suro.clotet.dev/es/privacidad
+Suro no vende tus datos ni usa feeds algorítmicos.

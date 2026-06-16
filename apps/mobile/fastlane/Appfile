@@ -1,0 +1,8 @@
+# Shared app identity for fastlane. The Google Play service-account JSON is the
+# same key EAS used; it stays gitignored under apps/mobile/credentials/.
+json_key_file(File.expand_path("../credentials/play-service-account.json", __dir__))
+package_name("dev.clotet.suro")
+
+# iOS (App Store Connect). Auth is via an App Store Connect API key passed
+# through APP_STORE_CONNECT_API_KEY_* env vars (see Fastfile), not an Apple ID.
+app_identifier("dev.clotet.suro")

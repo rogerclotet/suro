@@ -21,6 +21,7 @@ import {
   type NativeSyntheticEvent,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -29,6 +30,10 @@ import {
   View,
 } from "react-native";
 import { AnimatedFAB } from "react-native-paper";
+import Reanimated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
 
@@ -296,6 +301,51 @@ export function Fab({
 export function Screen({ children }: { children: ReactNode }) {
   const t = useTheme();
   return <View style={{ flex: 1, backgroundColor: t.bg }}>{children}</View>;
+}
+
+// Screen for full-screen forms: lifts content above the soft keyboard and wraps
+// it in a ScrollView so the action button stays reachable and taps land while
+// the keyboard is up (`keyboardShouldPersistTaps`). The lift is driven by
+// Reanimated's `useAnimatedKeyboard`, which tracks the keyboard height on the UI
+// thread on both platforms — crucially including Android edge-to-edge, where the
+// window no longer resizes, so `KeyboardAvoidingView`/`adjustResize` does nothing
+// and content stays pinned under the keyboard. Padding (not translate) shrinks
+// the ScrollView so centered content re-centers above the keyboard and taller
+// content scrolls instead of being clipped. `center` vertically centers the
+// content when the keyboard is down.
+export function KeyboardAwareScreen({
+  children,
+  center,
+}: {
+  children: ReactNode;
+  center?: boolean;
+}) {
+  const t = useTheme();
+  // The app is edge-to-edge (the RN 0.85 default), so the system bars are
+  // translucent; tell Reanimated as much or it measures the keyboard height
+  // against the wrong baseline on Android and under-lifts by the nav-bar inset.
+  const keyboard = useAnimatedKeyboard({
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+  const liftStyle = useAnimatedStyle(() => ({
+    paddingBottom: keyboard.height.value,
+  }));
+  return (
+    <Reanimated.View style={[{ flex: 1, backgroundColor: t.bg }, liftStyle]}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          ...(center ? { justifyContent: "center" } : null),
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
+      >
+        {children}
+      </ScrollView>
+    </Reanimated.View>
+  );
 }
 
 export function Center({ children }: { children: ReactNode }) {

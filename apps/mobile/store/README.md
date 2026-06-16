@@ -19,17 +19,25 @@ store/
 
 Locales everywhere: `en-US`, `es-ES`, `ca` (both stores support Catalan).
 EAS Metadata only supports the App Store (and no screenshot upload), which is
-why the Play listing is plain files: paste/upload them in the Play Console, or
-wire `fastlane supply --metadata_path apps/mobile/store/play/metadata` later
-without restructuring.
+why the Play listing is plain files in fastlane-supply layout, pushed by the
+fastlane lanes (`metadata_path: store/play/metadata/android` — the directory
+that directly holds the locale folders).
 
 ## One-time setup
+
+### fastlane (both stores)
+
+`bundle install` once (installs fastlane, pinned in `Gemfile.lock`). Submission
+and store metadata run through fastlane lanes (`fastlane/Fastfile`); EAS only
+builds the binaries. Android reuses the Play service-account key below. iOS lanes
+are scaffolded but inert until the Apple account + an App Store Connect API key
+exist (`APP_STORE_CONNECT_API_KEY_*`, e.g. in a gitignored `fastlane/.env`).
 
 ### Apple
 
 1. Apple Developer Program membership (pending — see `../README.md`), then
-   `pnpm exec eas credentials -p ios` for `app.suro.mobile`.
-2. Create the app in App Store Connect (bundle id `app.suro.mobile`, name
+   `pnpm exec eas credentials -p ios` for `dev.clotet.suro`.
+2. Create the app in App Store Connect (bundle id `dev.clotet.suro`, name
    "Suro", default locale Catalan).
 3. Put the numeric App Store Connect app id into `submit.production.ios.ascAppId`
    in `../eas.json` (currently a TODO placeholder).
@@ -42,12 +50,13 @@ without restructuring.
 
 ### Google Play
 
-1. Create the app in the Play Console (package `app.suro.mobile`).
+1. Create the app in the Play Console (package `dev.clotet.suro`).
 2. Create a service account with "Release manager" access
    ([EAS docs](https://docs.expo.dev/submit/android/)), download its JSON key
    to `../credentials/play-service-account.json` (gitignored).
 3. The **first** AAB must be uploaded manually in the Console (Play
-   requirement); later uploads go through `eas submit`.
+   requirement); later uploads go through fastlane (`pnpm --filter mobile
+   submit:android:release`).
 4. Fill Data safety, content rating, app access (review credentials) and
    target audience from `declarations.md`.
 5. Paste the listing texts and upload `images/*` from
@@ -60,31 +69,38 @@ without restructuring.
 # 0. copy & screenshots still accurate? lints lengths + dimensions:
 node apps/mobile/store/check-metadata.mjs
 
-# 1. release notes: update per locale
-#    - store.config.json -> apple.info.<locale>.releaseNotes
-#    - store/play/metadata/android/<locale>/changelogs/default.txt
+# 1. release notes:
+#    - add the new version entry to apps/web/CHANGELOG.md (per locale), then
+#      `pnpm changelog:generate` — it regenerates the Play
+#      store/play/metadata/android/<locale>/changelogs/default.txt from the
+#      latest entry automatically (≤500 chars, enforced).
+#    - Apple (manual): store.config.json -> apple.info.<locale>.releaseNotes
 
 # 2. build (EAS local builds; commit first — EAS archives via git)
 pnpm --filter mobile build:android:release   # build/suro-release.aab
 pnpm --filter mobile build:ios:release       # build/suro-release.ipa
 
-# 3. submit the binaries
-pnpm --filter mobile exec eas submit -p android --profile production --path build/suro-release.aab
-pnpm --filter mobile exec eas submit -p ios --profile production --path build/suro-release.ipa
+# 3. submit (fastlane uploads the binary + release notes). build + submit in one:
+pnpm --filter mobile release:android    # = build:android:release, then fastlane android release
+pnpm --filter mobile release:ios        # iOS: inert until the Apple account exists
 
-# 4. push App Store listing text (validates against ASC first)
-pnpm --filter mobile exec eas metadata:push --profile production
+# 4. Play/App Store listing changed (text, images, screenshots)? push it explicitly:
+pnpm --filter mobile submit:android:metadata
+#    (iOS App Store metadata: `fastlane ios release` once store.config.json is
+#     migrated to fastlane deliver `metadata/`)
 
-# 5. Play listing changed? paste/upload from play/metadata/android/ in the
-#    Console (or run fastlane supply if wired up by then).
-
-# 6. promote: Play internal track -> production; ASC -> submit for review
-#    (release.automaticRelease=false: you release manually after approval).
+# 5. promote internal -> production when ready:
+pnpm --filter mobile submit:android:promote   # defaults to production (or use the Console)
+#    iOS: submit for review in App Store Connect.
 ```
 
-Versioning is remote (`appVersionSource: "remote"`, `autoIncrement: true` in
-`eas.json`): version code/build number bump automatically; bump the
-user-facing `version` in `app.json` when it should change.
+Versioning: the Android version code / iOS build number bump automatically
+(`appVersionSource: "remote"`, `autoIncrement: true` in `eas.json`). The
+user-facing `version` (versionName / "1.7.0") is derived in `app.config.ts`
+from the monorepo root `package.json`, so it tracks each release on its own —
+bump the root `package.json` version (in lockstep with the matching
+`CHANGELOG.md` entry) and the store version follows. No need to touch
+`app.json`.
 
 ## Screenshot capture
 
