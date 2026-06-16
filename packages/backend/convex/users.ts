@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { deleteUserAccount } from "./model/account";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS } from "./model/colors";
 
@@ -182,6 +183,21 @@ export const resetProviderImage = mutation({
       customImage: undefined,
       customImageStorageId: undefined,
     });
+    return null;
+  },
+});
+
+/**
+ * Permanently delete the signed-in user and all data linked to them (see
+ * `deleteUserAccount`). Satisfies the in-app account-deletion requirement
+ * (App Store guideline 5.1.1(v)). The client signs out afterwards — this also
+ * invalidates every session server-side, so other devices are signed out too.
+ */
+export const deleteAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    await deleteUserAccount(ctx, userId);
     return null;
   },
 });
