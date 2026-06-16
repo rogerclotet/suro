@@ -29,18 +29,18 @@ that directly holds the locale folders).
 
 `bundle install` once (installs fastlane, pinned in `Gemfile.lock`). Submission
 and store metadata run through fastlane lanes (`fastlane/Fastfile`); EAS only
-builds the binaries. Android reuses the Play service-account key below. iOS lanes
-are scaffolded but inert until the Apple account + an App Store Connect API key
-exist (`APP_STORE_CONNECT_API_KEY_*`, e.g. in a gitignored `fastlane/.env`).
+builds the binaries. Android reuses the Play service-account key below; iOS lanes
+use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
+`fastlane/.env`).
 
 ### Apple
 
-1. Apple Developer Program membership (pending — see `../README.md`), then
-   `pnpm exec eas credentials -p ios` for `dev.clotet.suro`.
+1. Apple Developer Program membership + iOS distribution/APNs credentials on
+   EAS (`pnpm exec eas credentials -p ios` for `dev.clotet.suro`) — **done**.
 2. Create the app in App Store Connect (bundle id `dev.clotet.suro`, name
    "Suro", default locale Catalan).
-3. Put the numeric App Store Connect app id into `submit.production.ios.ascAppId`
-   in `../eas.json` (currently a TODO placeholder).
+3. The numeric App Store Connect app id is set in `submit.production.ios.ascAppId`
+   in `../eas.json`.
 4. Set the review demo account env vars on the **prod** Convex deployment and
    mirror them into `apple.review.demo*` in `store.config.json` locally (don't
    commit the real code) — see `declarations.md` → Review notes.
@@ -82,7 +82,7 @@ pnpm --filter mobile build:ios:release       # build/suro-release.ipa
 
 # 3. submit (fastlane uploads the binary + release notes). build + submit in one:
 pnpm --filter mobile release:android    # = build:android:release, then fastlane android release
-pnpm --filter mobile release:ios        # iOS: inert until the Apple account exists
+pnpm --filter mobile release:ios        # = build:ios:release, then fastlane ios release
 
 # 4. Play/App Store listing changed (text, images, screenshots)? push it explicitly:
 pnpm --filter mobile submit:android:metadata

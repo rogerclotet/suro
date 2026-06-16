@@ -10,18 +10,19 @@ Derived from the privacy policy at https://suro.clotet.dev/en/privacy
 talks only to the Convex backend (+ file storage); PostHog runs on the **web**
 app only — the Expo app ships no analytics or crash SDK.
 
-## ⚠️ Pre-submission blockers
+## Account deletion
 
-- **In-app account deletion is not implemented in the mobile app.** Apple
-  guideline 5.1.1(v) requires that apps supporting account creation let users
-  initiate account deletion *in the app*; Google Play additionally requires a
-  **web URL** where users can request deletion (linked from the Data safety
-  form). The privacy policy promises full deletion on request, but a
-  reviewer-visible flow must exist before submission. Track this as its own
-  work item (profile screen → delete account + backend cascade + web request
-  page).
-- iOS distribution credentials on EAS are still pending (Apple Developer
-  Program membership) — see `apps/mobile/README.md`.
+In-app deletion is implemented (Apple guideline 5.1.1(v)): Profile → **Delete
+account** calls `users.deleteAccount`, which hard-deletes the user and all
+linked data — groups they created (full cascade incl. stored files), their
+memberships in other groups, pot memberships, push tokens, the avatar blob, and
+the Convex Auth rows — then signs out everywhere. Authored content in groups
+created by *others* stays for the remaining members.
+
+The Google Play **web deletion URL** (link it from the Data safety form) is
+`https://suro.clotet.dev/<locale>/account-deletion` (e.g. `/en/account-deletion`,
+`/ca/eliminacio-del-compte`, `/es/eliminacion-de-la-cuenta`). It explains both
+the in-app flow and the email fallback (`suro@clotet.dev`).
 
 ## Google Play — Data safety form
 
@@ -39,8 +40,8 @@ app only — the Expo app ships no analytics or crash SDK.
 - **Is all of the user data collected by your app encrypted in transit?** Yes
   (HTTPS/WSS to Convex).
 - **Do you provide a way for users to request that their data is deleted?**
-  Yes — full account deletion on request (privacy policy); web deletion URL
-  required, see blockers above.
+  Yes — in-app (Profile → Delete account) and via the web deletion URL above
+  (`/<locale>/account-deletion`), plus email on request (privacy policy).
 - **Data shared with third parties:** none. Processors (Convex hosting, Resend
   for sign-in emails) act on our behalf — that's "collected", not "shared", in
   Play's taxonomy.
