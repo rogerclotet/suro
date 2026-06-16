@@ -36,13 +36,16 @@ export default function Profile() {
 
 function ProfileForm({ user }: { user: Doc<"users"> }) {
   const t = useTranslations("mobile.profile");
+  const tc = useTranslations("common");
   const theme = useTheme();
   const { signOut } = useAuthActions();
   const updateProfile = useMutation(api.users.updateProfile);
   const unregisterPush = useMutation(api.pushTokens.unregister);
+  const deleteAccount = useMutation(api.users.deleteAccount);
 
   const [name, setName] = useState(user.name ?? "");
   const [savingName, setSavingName] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const trimmedName = name.trim();
   const nameDirty = trimmedName !== (user.name ?? "").trim();
@@ -68,6 +71,34 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
     } catch {
       Alert.alert(t("saveError"));
     }
+  }
+
+  async function runDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      // The backend wipes the account (incl. every push token) and invalidates
+      // all sessions; sign out locally to clear auth state and route to login.
+      await deleteAccount({});
+      await signOut();
+    } catch {
+      setDeletingAccount(false);
+      Alert.alert(t("deleteAccountError"));
+    }
+  }
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      t("deleteAccountConfirmTitle"),
+      t("deleteAccountConfirmDescription"),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: t("deleteAccount"),
+          style: "destructive",
+          onPress: () => void runDeleteAccount(),
+        },
+      ],
+    );
   }
 
   return (
@@ -136,6 +167,13 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
             await signOut();
           })();
         }}
+      />
+
+      <Button
+        title={deletingAccount ? t("deletingAccount") : t("deleteAccount")}
+        variant="danger"
+        disabled={deletingAccount}
+        onPress={confirmDeleteAccount}
       />
     </ScrollView>
   );

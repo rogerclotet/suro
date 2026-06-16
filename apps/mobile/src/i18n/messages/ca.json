@@ -822,7 +822,12 @@
       "photoPermissionTitle": "Cal permís",
       "photoPermissionBody": "Permet l'accés a les fotos per posar una imatge.",
       "photoError": "No s'ha pogut actualitzar la foto",
-      "saveError": "No s'ha pogut desar"
+      "saveError": "No s'ha pogut desar",
+      "deleteAccount": "Elimina el compte",
+      "deletingAccount": "Eliminant…",
+      "deleteAccountConfirmTitle": "Vols eliminar el compte?",
+      "deleteAccountConfirmDescription": "Això elimina permanentment el teu compte i totes les dades vinculades, inclosos els grups que hagis creat. No es pot desfer.",
+      "deleteAccountError": "No s'ha pogut eliminar el compte"
     },
     "preferences": {
       "title": "Preferències",
