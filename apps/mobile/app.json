@@ -16,6 +16,7 @@
     },
     "android": {
       "package": "dev.clotet.suro",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#17100c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

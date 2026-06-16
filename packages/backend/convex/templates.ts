@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { type MutationCtx, mutation, query } from "./_generated/server";
 import {
@@ -70,7 +71,7 @@ export const create = mutation({
     if (trimmed === "") {
       throw new Error("Template name is required");
     }
-    return ctx.db.insert("listTemplates", {
+    const templateId = await ctx.db.insert("listTemplates", {
       name: trimmed,
       description: (description ?? "").trim() || undefined,
       items: await prepareTemplateItems(ctx, projectId, items),
@@ -78,6 +79,14 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "template_created",
+      bodyParams: { name: trimmed },
+      path: `/${projectId}/lists/templates`,
+    });
+    return templateId;
   },
 });
 

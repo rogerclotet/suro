@@ -82,6 +82,13 @@ export const saveFile = mutation({
         storageId: args.storageId,
       });
     }
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId: args.projectId,
+      actorId: userId,
+      bodyKey: "file_uploaded",
+      bodyParams: { name },
+      path: `/${args.projectId}/files`,
+    });
     return fileId;
   },
 });

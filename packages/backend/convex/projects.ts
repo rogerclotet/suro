@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
@@ -189,6 +190,14 @@ export const acceptInvite = mutation({
       .unique();
     if (existing === null) {
       await ctx.db.insert("projectMembers", { projectId, userId });
+      const user = await ctx.db.get(userId);
+      await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+        projectId,
+        actorId: userId,
+        bodyKey: "member_joined",
+        bodyParams: { userName: user?.name ?? "" },
+        path: `/group-settings?projectId=${projectId}`,
+      });
     }
     return { projectId };
   },
@@ -260,7 +269,15 @@ export const leave = mutation({
     if (membership === null) {
       throw new Error("Not a member of this group");
     }
+    const user = await ctx.db.get(userId);
     await ctx.db.delete(membership._id);
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "member_left",
+      bodyParams: { userName: user?.name ?? "" },
+      path: `/group-settings?projectId=${projectId}`,
+    });
     return null;
   },
 });
