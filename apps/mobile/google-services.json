@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178621403831",
+    "project_id": "suro-app",
+    "storage_bucket": "suro-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178621403831:android:392bb6076678bfc0d37332",
+        "android_client_info": {
+          "package_name": "dev.clotet.suro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB97EVMnRyX2DJzlfGv94FLXtPlGu8ief4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
