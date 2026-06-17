@@ -1,5 +1,8 @@
+import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useLocalSearchParams } from "expo-router";
+import { useQuery } from "convex/react";
+import type { ErrorBoundaryProps } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 import type {
   NativeTabsProps,
   NativeTabTriggerProps,
@@ -7,12 +10,59 @@ import type {
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import type { FC, PropsWithChildren } from "react";
 import { useEffect } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { setLastProjectId } from "@/lib/last-project";
 import { ProjectIdProvider } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
-import { Loading, SheetHost } from "@/ui";
+import { Button, Loading, Screen, SheetHost, Txt } from "@/ui";
+
+// Opaque "…not found" errors the project-scoped queries throw when the group, or
+// our membership in it, disappears while we're viewing it: the creator deleted
+// the group, we were removed, or we deleted our own account.
+const VANISHED_RESOURCE_ERRORS = new Set([
+  "Project not found",
+  "List not found",
+  "List item not found",
+  "Event not found",
+  "Note not found",
+  "Pot not found",
+  "Template not found",
+  "File not found",
+]);
+
+// Catches errors from this group's screens. When the group vanished underneath
+// us, bounce to the index route — it resumes a remaining group, offers group
+// creation, or (once signed out) sends us to login — instead of surfacing a
+// fatal "Project not found". Any other error falls through to a retryable
+// message rather than redirecting, which could loop back into the same screen.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const tc = useTranslations("common");
+  if (VANISHED_RESOURCE_ERRORS.has(error.message)) {
+    return <Redirect href="/" />;
+  }
+  return (
+    <Screen>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          padding: 24,
+        }}
+      >
+        <Txt size={18} weight="700">
+          {tc("error")}
+        </Txt>
+        <Txt muted style={{ textAlign: "center" }}>
+          {error.message}
+        </Txt>
+        <Button title={tc("tryAgain")} onPress={() => void retry()} />
+      </View>
+    </Screen>
+  );
+}
 
 // `unstable-native-tabs`'s published types are off in two ways: `NativeTabs`
 // and its `Trigger` are typed as `function & statics` (which TS won't treat as
@@ -30,6 +80,7 @@ export default function ProjectTabs() {
   const t = useTheme();
   const tNav = useTranslations("nav");
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
+  const projects = useQuery(api.projects.listMine);
 
   // Remember this group so the next launch resumes here.
   useEffect(() => {
@@ -42,6 +93,18 @@ export default function ProjectTabs() {
   // pre-hydration tick so descendants never read an undefined id.
   if (!projectId) {
     return <Loading />;
+  }
+
+  // When our membership in this group goes away while we're inside it (the
+  // creator deleted it, we were removed, or we deleted our account), Convex's
+  // consistent snapshot drops it from `listMine` in the *same* update that makes
+  // the project-scoped queries below throw "Project not found". Redirect before
+  // rendering the tabs so those queries never mount and throw — the index route
+  // then resumes a remaining group, offers creation, or routes to login once
+  // signed out. `undefined` means still loading, so render optimistically and
+  // avoid a flash on normal entry.
+  if (projects !== undefined && !projects.some((p) => p._id === projectId)) {
+    return <Redirect href="/" />;
   }
 
   // Native tab bar: on iOS this is a real UITabBar, so iOS 26 renders it as

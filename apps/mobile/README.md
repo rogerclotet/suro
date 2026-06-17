@@ -45,8 +45,7 @@ Prerequisites:
   on EAS (created via `eas credentials -p android`); the build fetches it.
 - **iOS**: Xcode, fastlane and CocoaPods, plus an Apple Developer Program
   membership with distribution credentials on EAS (`eas credentials -p ios`
-  for `dev.clotet.suro`) — **still pending**, so `build:ios:release` fails at
-  credential fetch until that exists.
+  for `dev.clotet.suro`) — configured, so `build:ios:release` fetches them.
 
 Notes:
 
@@ -69,6 +68,14 @@ Notes:
 - **Data**: all reads/writes go through `backend`'s Convex functions via
   `useQuery`/`useMutation` (reactive — no offline/sync layer). The complete-item
   toggle uses a Convex optimistic update.
+- **Push notifications**: delivery runs through the Expo Push API → APNs (iOS) /
+  FCM (Android). The client registers in `src/lib/push.ts` (`usePushNotifications`,
+  mounted in the authed `(app)/_layout.tsx`); the backend sends from
+  `packages/backend/convex/push.ts`, localized per recipient with a deep-link
+  `data.path`. APNs key + FCM V1 key live on EAS (`eas credentials`); Android
+  also needs `google-services.json` (committed, referenced from `app.json`).
+  Push is a no-op in Expo Go and on simulators — test on a dev/release build on a
+  physical device.
 
 ## Verified
 

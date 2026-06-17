@@ -437,10 +437,16 @@ export function Button({
 }: {
   title: string;
   onPress: () => void;
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "ghost" | "danger";
   disabled?: boolean;
 }) {
   const t = useTheme();
+  const textColor =
+    variant === "primary"
+      ? t.onPrimary
+      : variant === "danger"
+        ? t.danger
+        : t.primary;
   return (
     <Pressable
       onPress={onPress}
@@ -459,7 +465,7 @@ export function Button({
           fontWeight: "700",
           fontSize: 16,
           textAlign: "center",
-          color: variant === "primary" ? t.onPrimary : t.primary,
+          color: textColor,
         }}
       >
         {title}

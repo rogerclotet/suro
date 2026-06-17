@@ -822,7 +822,12 @@
       "photoPermissionTitle": "Permission needed",
       "photoPermissionBody": "Allow photo access to set a picture.",
       "photoError": "Couldn't update photo",
-      "saveError": "Couldn't save"
+      "saveError": "Couldn't save",
+      "deleteAccount": "Delete account",
+      "deletingAccount": "Deleting…",
+      "deleteAccountConfirmTitle": "Delete account?",
+      "deleteAccountConfirmDescription": "This permanently deletes your account and all data linked to it, including any groups you created. This can't be undone.",
+      "deleteAccountError": "Couldn't delete your account"
     },
     "preferences": {
       "title": "Preferences",

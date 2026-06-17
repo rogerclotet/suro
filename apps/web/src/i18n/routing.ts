@@ -13,6 +13,11 @@ export const routing = defineRouting({
       es: "/privacidad",
       en: "/privacy",
     },
+    "/account-deletion": {
+      ca: "/eliminacio-del-compte",
+      es: "/eliminacion-de-la-cuenta",
+      en: "/account-deletion",
+    },
     "/profile": {
       ca: "/perfil",
       es: "/perfil",

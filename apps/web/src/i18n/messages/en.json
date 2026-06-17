@@ -211,7 +211,28 @@
     "changesHeading": "Changes to this policy",
     "changesBody": "If we change this policy, we'll update the effective date at the top. For significant changes we'll let you know in the app or by email.",
     "contactHeading": "Contact",
-    "contactBody": "For any question or request related to this policy, write to <email>suro@clotet.dev</email>."
+    "contactBody": "For any question or request related to this policy, write to <email>suro@clotet.dev</email>.",
+    "deletionPageLink": "How to delete your account"
+  },
+  "accountDeletion": {
+    "title": "Deleting your account",
+    "intro": "You can permanently delete your Suro account and everything linked to it at any time. Here's how to do it, and exactly what gets removed.",
+    "inAppHeading": "From the app",
+    "inAppIntro": "The quickest way is right inside Suro:",
+    "inAppStep1": "Open Suro and go to Profile.",
+    "inAppStep2": "Tap “Delete account”.",
+    "inAppStep3": "Confirm. Your account is deleted immediately and you're signed out on every device.",
+    "emailHeading": "By email",
+    "emailBody": "Can't access the app? Write to <email>suro@clotet.dev</email> from the address on your account and we'll delete it for you. We may ask you to confirm the request so we know it's really you.",
+    "dataHeading": "What gets deleted",
+    "dataIntro": "Deletion is permanent and we keep no copies. We remove:",
+    "dataProfile": "Your profile and sign-in details.",
+    "dataGroups": "Every group you created, with all of its lists, events, notes, files, and expenses.",
+    "dataMemberships": "Your membership in groups created by others — those groups stay for their remaining members.",
+    "dataDevices": "Your notification tokens, so your devices stop receiving push notifications.",
+    "timingHeading": "How long it takes",
+    "timingBody": "Deletions from the app happen immediately. Email requests are handled within 30 days, and usually much sooner.",
+    "privacyLink": "Read our full privacy policy"
   },
   "auth": {
     "welcome": "Welcome",

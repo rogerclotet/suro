@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
 
 const CONTACT_EMAIL = "suro@clotet.dev";
 
@@ -83,6 +84,14 @@ export default function PrivacyContent() {
 
       <Section title={t("retentionHeading")}>
         <p>{t.rich("retentionBody", { email: emailTag })}</p>
+        <p>
+          <Link
+            href="/account-deletion"
+            className="text-primary hover:underline"
+          >
+            {t("deletionPageLink")}
+          </Link>
+        </p>
       </Section>
 
       <Section title={t("rightsHeading")}>

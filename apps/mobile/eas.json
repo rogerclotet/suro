@@ -32,7 +32,7 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "TODO_SET_AFTER_APP_STORE_CONNECT_APP_EXISTS",
+        "ascAppId": "6780486033",
         "metadataPath": "./store.config.json"
       },
       "android": {

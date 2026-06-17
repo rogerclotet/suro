@@ -822,7 +822,12 @@
       "photoPermissionTitle": "Permiso necesario",
       "photoPermissionBody": "Permite el acceso a las fotos para poner una imagen.",
       "photoError": "No se pudo actualizar la foto",
-      "saveError": "No se pudo guardar"
+      "saveError": "No se pudo guardar",
+      "deleteAccount": "Eliminar cuenta",
+      "deletingAccount": "Eliminando…",
+      "deleteAccountConfirmTitle": "¿Eliminar la cuenta?",
+      "deleteAccountConfirmDescription": "Esto elimina permanentemente tu cuenta y todos los datos vinculados, incluidos los grupos que hayas creado. No se puede deshacer.",
+      "deleteAccountError": "No se pudo eliminar la cuenta"
     },
     "preferences": {
       "title": "Preferencias",
