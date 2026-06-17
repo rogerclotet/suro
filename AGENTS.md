@@ -99,7 +99,7 @@ The deploy host must have:
 
 - **Pangolin/Traefik** already running (uses the `pangolin` Docker network, cert resolver `letsencrypt`). Routing uses Traefik's **file provider** — no Docker provider needed.
   - One-time: change the file provider in `/srv/pangolin/config/traefik/traefik_config.yml` from `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir /srv/pangolin/config/traefik/routes && mv /srv/pangolin/config/traefik/dynamic_config.yml /srv/pangolin/config/traefik/routes/` and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
-- Wildcard DNS `*.preview.suro.app` → server IP, and a wildcard TLS cert (DNS-01) covering it.
+- Wildcard DNS `*.suro.clotet.dev` → server IP, and a wildcard TLS cert (DNS-01) covering it.
 - `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH. (No Postgres or per-MR database needed anymore; the web container talks only to Convex.)
 
 ## Don't
