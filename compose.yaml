@@ -1,22 +1,25 @@
 # Production web app (Next.js standalone) behind Pangolin/Traefik.
 #
-# The image is built and pushed by GitLab CI; this file just runs it. The
-# container joins the shared proxy network so Pangolin/Traefik reaches it by name
-# at http://familia:3000 — point your Pangolin resource(s) for suro.clotet.dev and
-# suroapp.cat there (see AGENTS.md). Nothing here touches the proxy config.
+# The image is built and pushed by GitLab CI; this file just runs it. Pangolin
+# reaches the app two ways — point your route(s) for suro.clotet.dev and
+# suroapp.cat at either (see AGENTS.md):
+#   - a Pangolin local site -> 172.17.0.1:${WEB_PORT} (the host publish below), or
+#   - the shared Docker network by name -> http://familia:3000.
+# Nothing here touches the proxy config.
 #
 # Manage from SSH (bare commands, no flags or host .env needed):
 #   docker compose pull && docker compose up -d   # deploy the latest image
 #   docker compose ps                              # status / health
 #   docker compose logs -f                         # tail logs
 #   docker compose restart                         # restart
-#   curl localhost:3000/api/health                 # app health, bypassing the proxy
+#   curl 172.17.0.1:$WEB_PORT/api/health           # app health, bypassing the proxy
 #
 # Overridable via shell env or an optional .env file in this directory:
 #   WEB_IMAGE      registry path of the image     (CI exports the real one)
 #   IMAGE_TAG      tag to run                      (default: latest; CI pins the commit SHA)
 #   PROXY_NETWORK  shared network Pangolin is on   (default: familia-previews)
 #   WEB_PORT       host port for the local publish (default: 3000; container always listens on 3000)
+#   WEB_BIND       host address to publish on      (default: 172.17.0.1, the Docker bridge gateway Pangolin uses)
 
 services:
   web:
@@ -29,10 +32,11 @@ services:
       - path: .env
         required: false
     ports:
-      # Host-local only, so `curl localhost:${WEB_PORT}` works over SSH to check the
-      # app independently of the proxy. Pangolin reaches the app over the network,
-      # not this published port. Override WEB_PORT if 3000 is taken on the host.
-      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+      # Published on the Docker bridge gateway (172.17.0.1) so a Pangolin local site
+      # targeting 172.17.0.1:${WEB_PORT} can reach it — the same pattern as the other
+      # services on this host. Bridge interface only, not exposed publicly. Set
+      # WEB_PORT to a free port; override WEB_BIND if your bridge gateway differs.
+      - "${WEB_BIND:-172.17.0.1}:${WEB_PORT:-3000}:3000"
     networks:
       proxy:
         aliases:
