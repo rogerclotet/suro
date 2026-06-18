@@ -86,8 +86,8 @@ Remote is **GitLab** (`gitlab.com/rogerclotet/suro`), not GitHub. Use `glab mr c
 
 Data, auth, and storage all run on **Convex** — the web container is just the Next server (`node server.js`), with no migrate/seed step at start.
 
-- **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Apple/Resend/JWT/`SITE_URL`, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI.
-- **Prod web**: `scripts/deploy.sh` SSHes into the host, pulls the image built by CI, and restarts the `familia` container behind Traefik (`$PROD_DOMAIN`). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time.
+- **Convex backend**: pushes to `main` run the `convex_deploy` CI job (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`deploy` `needs: [build, convex_deploy]`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Apple/Resend/JWT, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI. Two of those vars govern the web domains: `SITE_URL` (canonical origin for OAuth redirects and email/calendar links — set to `https://suroapp.cat`) and `ALLOWED_WEB_ORIGINS` (comma-separated allowlist of origins valid as OAuth redirect targets — set to `https://suroapp.cat,https://suro.clotet.dev,https://*.suro.clotet.dev` so login works on both domains and on previews).
+- **Prod web**: `apps/web/scripts/deploy.sh` SSHes into the host, pulls the CI-built image, and runs it via `docker compose` (root `compose.yaml`) as the `familia` container on the shared `familia-previews` network. Pangolin/Traefik reaches it by name at `http://familia:3000`; the deploy no longer writes any proxy config (routing is a one-time Pangolin setup — see below). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time. Manage it from SSH with bare `docker compose` commands (`ps`, `logs -f`, `pull && up -d`) — see the header of `compose.yaml`.
 - **MR previews**: `scripts/deploy-preview.sh` boots `suro-mr-<iid>` at `https://mr-<iid>.<PREVIEW_DOMAIN>`, built against `NEXT_PUBLIC_CONVEX_URL_PREVIEW` so **all previews share the dev Convex deployment** — no per-MR database. Merging/closing the MR (or 1-week idle) triggers `scripts/teardown-preview.sh`.
 - **Mobile builds**: deliberately **not in CI** (runner build times were prohibitive). Build locally via the `build:*` scripts in `apps/mobile` — `pnpm --filter mobile build:android:preview` (dev-Convex `.apk`), `build:android:release` (store-ready `.aab`), `build:ios:release` (store-ready `.ipa`, pending Apple Developer credentials). Signing uses EAS-managed credentials (`eas login` once); public build env (`EXPO_PUBLIC_*`) is baked per profile in `apps/mobile/eas.json`. Store publishing (EAS Submit profiles, listing metadata for both stores, screenshots, console declarations) lives in `apps/mobile/store/` — see `apps/mobile/store/README.md`. See `apps/mobile/README.md` for build prerequisites.
 
@@ -97,10 +97,16 @@ CI variables to set: `CONVEX_DEPLOY_KEY` (prod deploy key), `NEXT_PUBLIC_CONVEX_
 
 The deploy host must have:
 
-- **Pangolin/Traefik** already running (uses the `pangolin` Docker network, cert resolver `letsencrypt`). Routing uses Traefik's **file provider** — no Docker provider needed.
-  - One-time: change the file provider in `/srv/pangolin/config/traefik/traefik_config.yml` from `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir /srv/pangolin/config/traefik/routes && mv /srv/pangolin/config/traefik/dynamic_config.yml /srv/pangolin/config/traefik/routes/` and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
-- Wildcard DNS `*.suro.clotet.dev` → server IP, and a wildcard TLS cert (DNS-01) covering it.
-- `deploy.env` at the project root (gitignored) — copy from `deploy.env.example` and fill in values. Sourced by all deploy scripts over SSH. (No Postgres or per-MR database needed anymore; the web container talks only to Convex.)
+- **Pangolin/Traefik** already running (cert resolver `letsencrypt`).
+- **A shared Docker network** Traefik can reach — `familia-previews` by default. Create it and join Pangolin's `gerbil` (Traefik shares gerbil's network namespace) so it resolves containers by name:
+  ```sh
+  docker network create familia-previews
+  docker network connect familia-previews gerbil
+  ```
+- **Prod routing for both domains** → `http://familia:3000`. Either (recommended) add a Pangolin dashboard *resource* for `suro.clotet.dev` and one for `suroapp.cat`, both targeting `http://familia:3000`; or use Traefik's file provider by copying the ready-made route into the watched dir: `cp deploy/traefik/familia.yml "$TRAEFIK_ROUTES_DIR/familia.yml"`.
+  - The file provider also drives MR previews. To enable it: in `/srv/pangolin/config/traefik/traefik_config.yml` change `filename: /etc/traefik/dynamic_config.yml` to `directory: /etc/traefik/routes/` with `watch: true`, then `mkdir -p /srv/pangolin/config/traefik/routes`, move any existing `dynamic_config.yml` into it, and `docker compose -f /srv/pangolin/docker-compose.yml restart traefik`.
+- **DNS + TLS**: `suroapp.cat` → server IP (Traefik fetches its cert on demand via `letsencrypt`), plus the existing wildcard `*.suro.clotet.dev` → server IP with a DNS-01 wildcard cert (still used by previews).
+- **`$SSH_PROJECT_DIRECTORY`** exists on the host. The deploy `scp`s `compose.yaml` there on every run, so you don't manage it by hand — but for a manual first deploy, copy `compose.yaml` there yourself. Prod needs no other host config. For MR previews only, also add `deploy.env` there (gitignored — copy from `deploy.env.example`). The web container talks only to Convex — no Postgres or per-MR database.
 
 ## Don't
 

@@ -32,7 +32,9 @@ const calendarIcs = httpAction(async (ctx, request) => {
     return new Response("Not found", { status: 404 });
   }
 
-  const siteUrl = process.env.SITE_URL ?? "https://suro.clotet.dev";
+  // Canonical origin for absolute links (calendar event URLs, etc.). Set SITE_URL
+  // explicitly on the Convex deployment; this fallback is just the prod default.
+  const siteUrl = process.env.SITE_URL ?? "https://suroapp.cat";
   const organizerById = new Map<Id<"events">, IcsAttendee>(
     data.organizers.map((o) => [o.eventId, { name: o.name, email: o.email }]),
   );
