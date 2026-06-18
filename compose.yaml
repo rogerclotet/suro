@@ -13,9 +13,10 @@
 #   curl localhost:3000/api/health                 # app health, bypassing the proxy
 #
 # Overridable via shell env or an optional .env file in this directory:
-#   WEB_IMAGE      registry path of the image    (CI exports the real one)
-#   IMAGE_TAG      tag to run                     (default: latest; CI pins the commit SHA)
-#   PROXY_NETWORK  shared network Pangolin is on  (default: familia-previews)
+#   WEB_IMAGE      registry path of the image     (CI exports the real one)
+#   IMAGE_TAG      tag to run                      (default: latest; CI pins the commit SHA)
+#   PROXY_NETWORK  shared network Pangolin is on   (default: familia-previews)
+#   WEB_PORT       host port for the local publish (default: 3000; container always listens on 3000)
 
 services:
   web:
@@ -28,10 +29,10 @@ services:
       - path: .env
         required: false
     ports:
-      # Host-local only, so `curl localhost:3000` works over SSH to check the app
-      # independently of the proxy. Pangolin reaches the app over the network, not
-      # this published port.
-      - "127.0.0.1:3000:3000"
+      # Host-local only, so `curl localhost:${WEB_PORT}` works over SSH to check the
+      # app independently of the proxy. Pangolin reaches the app over the network,
+      # not this published port. Override WEB_PORT if 3000 is taken on the host.
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
     networks:
       proxy:
         aliases:
