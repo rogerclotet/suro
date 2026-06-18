@@ -1,16 +1,18 @@
 # Store submission + metadata. EAS builds the binaries (`pnpm build:android:release`
 # / `build:ios:release`) — these lanes upload those artifacts and push store
-# metadata. Paths are relative to apps/mobile (fastlane's working dir).
+# metadata. fastlane's working dir is the fastlane/ folder, so paths are anchored
+# to apps/mobile (its parent) via MOBILE_ROOT.
 #
 #   android release   upload the built AAB + release notes -> internal track
 #   android metadata  push the full Play listing (text, images, screenshots)
 #   android promote   promote the internal release to a higher track
 #   ios beta/release   SCAFFOLD — inert until the Apple account + ASC key exist
 
-ANDROID_AAB = "build/suro-release.aab"
-IOS_IPA = "build/suro-release.ipa"
+MOBILE_ROOT = File.expand_path("..", __dir__)
+ANDROID_AAB = File.join(MOBILE_ROOT, "build/suro-release.aab")
+IOS_IPA = File.join(MOBILE_ROOT, "build/suro-release.ipa")
 # supply wants the dir that directly holds the locale folders (ca/, en-US/, …).
-PLAY_METADATA = "store/play/metadata/android"
+PLAY_METADATA = File.join(MOBILE_ROOT, "store/play/metadata/android")
 PLAY_TRACK = "internal"
 
 platform :android do
