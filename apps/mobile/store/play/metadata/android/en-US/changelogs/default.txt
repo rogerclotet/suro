@@ -1,1 +1,2 @@
-• When you create a list from an event, its description now appears in your language instead of always in English.
+• Editing a template now works just like editing a list, and the templates screen shows the same clean rows as your lists.
+• The category selector for list and template items is now a small tag rather than a second input box, so it's clearer that adding a category is optional.

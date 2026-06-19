@@ -1,1 +1,2 @@
-• Cuando creas una lista desde un evento, su descripción ahora aparece en tu idioma en lugar de siempre en inglés.
+• Editar una plantilla ahora funciona igual que editar una lista, y la pantalla de plantillas muestra las mismas filas limpias que tus listas.
+• El selector de categoría de los elementos de listas y plantillas ahora es una etiqueta pequeña en lugar de un segundo campo de texto, así queda claro que añadir una categoría es opcional.
