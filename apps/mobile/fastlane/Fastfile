@@ -7,6 +7,11 @@
 #   android metadata  push the full Play listing (text, images, screenshots)
 #   android promote   promote the internal release to a higher track
 #   ios beta/release   SCAFFOLD — inert until the Apple account + ASC key exist
+#
+# App Store *listing text* is NOT handled here — it's pushed from
+# store.config.json by EAS Metadata (`pnpm submit:ios:metadata` ->
+# `eas metadata:push`). The iOS lanes below only move the binary, so they keep
+# `skip_metadata`/`skip_screenshots` set; screenshots stay a manual ASC upload.
 
 MOBILE_ROOT = File.expand_path("..", __dir__)
 ANDROID_AAB = File.join(MOBILE_ROOT, "build/suro-release.aab")
@@ -63,9 +68,9 @@ platform :ios do
   #   1. Create an App Store Connect API key (Users and Access -> Integrations).
   #   2. Export APP_STORE_CONNECT_API_KEY_KEY_ID / _ISSUER_ID / _KEY (the base64
   #      .p8 contents) — e.g. in a gitignored fastlane/.env.
-  #   3. Set submit.production.ios.ascAppId in eas.json (currently a TODO).
-  #   4. Migrate store.config.json -> fastlane `metadata/` (deliver) and drop the
-  #      skip_metadata flags below, so the App Store listing runs through fastlane.
+  #   3. Set submit.production.ios.ascAppId in eas.json (done: 6780486033).
+  # Listing text is owned by EAS Metadata (`pnpm submit:ios:metadata`), so these
+  # lanes intentionally keep skip_metadata: true and only ship the binary.
   private_lane :asc_api_key do
     unless ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
       UI.user_error!("Apple account pending — set APP_STORE_CONNECT_API_KEY_* env vars first")
@@ -92,8 +97,8 @@ platform :ios do
     upload_to_app_store(
       api_key: key,
       ipa: IOS_IPA,
-      skip_metadata: true,    # TODO: migrate store.config.json -> fastlane metadata/, then drop
-      skip_screenshots: true, # TODO: screenshots live under store/apple/screenshots/
+      skip_metadata: true,    # listing text -> EAS Metadata (`pnpm submit:ios:metadata`)
+      skip_screenshots: true, # screenshots -> manual ASC upload from store/apple/screenshots/
       precheck_include_in_app_purchases: false,
     )
   end

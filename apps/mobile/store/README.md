@@ -47,6 +47,11 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
 5. Fill the App Privacy labels + age rating from `declarations.md`.
 6. Upload screenshots from `apple/screenshots/<locale>/` (ASC → version →
    App Previews and Screenshots; EAS Metadata does not push images).
+7. Push the listing text with `pnpm --filter mobile submit:ios:metadata`
+   (`eas metadata:push`, sourced from `store.config.json`). The submit profile
+   carries no ASC API key, so the first run authenticates with your Apple ID
+   interactively (App Store Connect access required); set
+   `EXPO_APPLE_APP_SPECIFIC_PASSWORD` to skip the 2FA prompt on later runs.
 
 ### Google Play
 
@@ -86,8 +91,8 @@ pnpm --filter mobile release:ios        # = build:ios:release, then fastlane ios
 
 # 4. Play/App Store listing changed (text, images, screenshots)? push it explicitly:
 pnpm --filter mobile submit:android:metadata
-#    (iOS App Store metadata: `fastlane ios release` once store.config.json is
-#     migrated to fastlane deliver `metadata/`)
+pnpm --filter mobile submit:ios:metadata   # `eas metadata:push` from store.config.json
+#    (iOS screenshots are not pushed by EAS Metadata — upload them manually in ASC)
 
 # 5. promote internal -> production when ready:
 pnpm --filter mobile submit:android:promote   # defaults to production (or use the Console)
@@ -101,6 +106,12 @@ from the monorepo root `package.json`, so it tracks each release on its own —
 bump the root `package.json` version (in lockstep with the matching
 `CHANGELOG.md` entry) and the store version follows. No need to touch
 `app.json`.
+
+One exception: `store.config.json`'s `apple.version` is plain JSON and can't
+read `package.json`, so bump it to the same value each release — it tells EAS
+Metadata which App Store version to write the listing to (without it, the push
+sends an empty `versionString` and fails before a build exists).
+`check-metadata.mjs` fails if it drifts from the root `package.json`.
 
 ## Screenshot capture
 
