@@ -109,27 +109,40 @@ export function CategoryPicker({
     );
   }
 
+  const selected = value !== null;
   return (
     <View style={{ gap: 8 }}>
+      {/* A compact pill, not a full-width input box: it reads as an optional tag
+          attached to the item rather than a second primary field next to the
+          name. Self-sized (alignSelf), so the expanded panel below still spans
+          the full width. */}
       <Pressable
         onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 8,
+          alignSelf: "flex-start",
+          maxWidth: "100%",
+          gap: 6,
           borderWidth: 1,
-          borderColor: t.border,
-          borderRadius: 12,
-          paddingHorizontal: 14,
-          paddingVertical: 11,
-          backgroundColor: t.inputBg,
+          borderColor: selected ? t.primary : t.border,
+          borderRadius: 999,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          backgroundColor: selected ? `${t.primary}1a` : "transparent",
         }}
       >
-        <Tag color={t.muted} size={16} />
-        <Txt style={{ flex: 1 }} muted={value === null} numberOfLines={1}>
+        <Tag color={selected ? t.primary : t.muted} size={14} />
+        <Txt
+          size={14}
+          muted={!selected}
+          numberOfLines={1}
+          style={{ flexShrink: 1, ...(selected ? { color: t.primary } : null) }}
+        >
           {value ?? tcat("noCategory")}
         </Txt>
-        <ChevronDown color={t.muted} size={16} />
+        <ChevronDown color={selected ? t.primary : t.muted} size={14} />
       </Pressable>
 
       {open ? (

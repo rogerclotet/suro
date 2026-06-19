@@ -914,6 +914,7 @@
       "editItem": "Editar element",
       "deleteItem": "Eliminar element",
       "itemCount": "{count, plural, =1 {# element} other {# elements}}",
+      "templateLabel": "Plantilla",
       "uncategorized": "Altres"
     },
     "calendar": {
