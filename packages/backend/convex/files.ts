@@ -7,6 +7,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { serveFileUrl } from "./model/fileUrls";
 import {
   requireEventAccess,
   requireFileOwner,
@@ -16,9 +17,9 @@ import {
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
   const [url, thumbnailUrl, uploader, event] = await Promise.all([
-    ctx.storage.getUrl(file.storageId),
+    serveFileUrl(file.storageId, (id) => ctx.storage.getUrl(id)),
     file.thumbnailStorageId
-      ? ctx.storage.getUrl(file.thumbnailStorageId)
+      ? serveFileUrl(file.thumbnailStorageId, (id) => ctx.storage.getUrl(id))
       : Promise.resolve(null),
     ctx.db.get(file.uploadedBy),
     file.eventId ? ctx.db.get(file.eventId) : Promise.resolve(null),

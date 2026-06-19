@@ -6,6 +6,14 @@
 # It points both hostnames at the compose `familia` container over the shared
 # network. Traefik fetches a cert for suroapp.cat on demand via `letsencrypt`
 # (the existing wildcard only covers *.suro.clotet.dev).
+#
+# The `files` router below serves branded, token-gated file URLs: it reverse-
+# proxies files.suroapp.cat to the Convex HTTP-actions host so blobs appear under
+# our domain (see packages/backend/convex/model/fileUrls.ts). passHostHeader is
+# false so Convex receives its own host as SNI + Host and routes to the right
+# deployment. Point the prod backend's FILE_URL_BASE at https://files.suroapp.cat,
+# add a DNS record for files.suroapp.cat, and set the server url to the matching
+# `<deployment>.convex.site`.
 http:
   routers:
     familia:
@@ -15,8 +23,21 @@ http:
       service: familia
       tls:
         certResolver: letsencrypt
+    files:
+      rule: "Host(`files.suroapp.cat`)"
+      entryPoints:
+        - websecure
+      service: convex-files
+      tls:
+        certResolver: letsencrypt
   services:
     familia:
       loadBalancer:
         servers:
           - url: "http://familia:3000"
+    convex-files:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          # Prod Convex deployment's HTTP-actions origin (see apps/mobile/eas.json).
+          - url: "https://marvelous-lobster-518.convex.site"

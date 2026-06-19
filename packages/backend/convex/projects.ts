@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
+import { serveFileUrl } from "./model/fileUrls";
 import { requireProjectMember } from "./model/permissions";
 
 /** Projects (groups) the current user belongs to. Ported from getProjects. */
@@ -317,10 +318,12 @@ export const setImage = mutation({
     if (project.createdBy !== userId) {
       throw new Error("Only the creator can edit this group");
     }
-    const url = await ctx.storage.getUrl(storageId);
-    if (url === null) {
+    const rawUrl = await ctx.storage.getUrl(storageId);
+    if (rawUrl === null) {
       throw new Error("Uploaded image not found");
     }
+    const url =
+      (await serveFileUrl(storageId, () => Promise.resolve(rawUrl))) ?? rawUrl;
     if (project.imageStorageId) {
       await ctx.storage.delete(project.imageStorageId);
     }
