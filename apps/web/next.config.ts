@@ -10,7 +10,7 @@ const cspReportOnly = [
   // next/script + dev hot reload need 'unsafe-inline'/'unsafe-eval'; tighten later via nonces
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com https://*.convex.cloud",
+  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com https://*.convex.cloud https://*.suroapp.cat https://*.convex.site",
   "font-src 'self' data:",
   "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud",
   "worker-src 'self' blob:",
@@ -59,9 +59,22 @@ const nextConfig = {
         // Convex file storage serves avatars/group images/files from
         // <deployment>.convex.cloud and its regional variant
         // (<deployment>.<region>.convex.cloud); ** covers both, across the
-        // dev and prod deployments.
+        // dev and prod deployments. Still needed for avatars/group images
+        // stored before branded file URLs were enabled.
         protocol: "https",
         hostname: "**.convex.cloud",
+      },
+      {
+        // Branded, token-gated file URLs (backend model/fileUrls.ts) serve from
+        // a host we own — files.suroapp.cat in prod — proxied to the Convex
+        // HTTP-actions origin. ** also covers the *.convex.site fallback host
+        // used until FILE_URL_BASE is set.
+        protocol: "https",
+        hostname: "**.suroapp.cat",
+      },
+      {
+        protocol: "https",
+        hostname: "**.convex.site",
       },
     ],
   },

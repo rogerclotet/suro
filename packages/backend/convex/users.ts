@@ -4,6 +4,7 @@ import { mutation, query } from "./_generated/server";
 import { deleteUserAccount } from "./model/account";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS } from "./model/colors";
+import { serveFileUrl } from "./model/fileUrls";
 
 /** The current signed-in user, or null. */
 export const me = query({
@@ -130,10 +131,12 @@ export const setAvatarImage = mutation({
   handler: async (ctx, { storageId }) => {
     const userId = await requireUserId(ctx);
     const user = await ctx.db.get(userId);
-    const url = await ctx.storage.getUrl(storageId);
-    if (url === null) {
+    const rawUrl = await ctx.storage.getUrl(storageId);
+    if (rawUrl === null) {
       throw new Error("Uploaded image not found");
     }
+    const url =
+      (await serveFileUrl(storageId, () => Promise.resolve(rawUrl))) ?? rawUrl;
     if (user?.customImageStorageId) {
       await ctx.storage.delete(user.customImageStorageId);
     }
