@@ -17,7 +17,7 @@ import {
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
   const [url, thumbnailUrl, uploader, event] = await Promise.all([
-    serveFileUrl(file.storageId, (id) => ctx.storage.getUrl(id)),
+    serveFileUrl(file.storageId, (id) => ctx.storage.getUrl(id), file.name),
     file.thumbnailStorageId
       ? serveFileUrl(file.thumbnailStorageId, (id) => ctx.storage.getUrl(id))
       : Promise.resolve(null),
