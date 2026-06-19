@@ -1,1 +1,1 @@
-• On the email sign-in screen the keyboard no longer covers the verify button, and the code is submitted automatically once you finish entering it.
+• When you create a list from an event, its description now appears in your language instead of always in English.

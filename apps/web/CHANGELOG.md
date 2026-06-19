@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.7.2] — 2026-06-19
+
+### ca
+
+- [fix] Quan crees una llista des d'un esdeveniment, la seva descripció ara surt en el teu idioma en comptes de sempre en anglès.
+
+### es
+
+- [fix] Cuando creas una lista desde un evento, su descripción ahora aparece en tu idioma en lugar de siempre en inglés.
+
+### en
+
+- [fix] When you create a list from an event, its description now appears in your language instead of always in English.
+
 ## [1.7.1] — 2026-06-15
 
 ### ca

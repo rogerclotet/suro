@@ -188,14 +188,33 @@ export const remove = mutation({
   },
 });
 
+/** The default description is rendered here at creation time, so it must be
+ * localized from the creator's stored `locale` — the client locale isn't
+ * available to the mutation. Mirrors the apps' i18n `calendar` copy; only
+ * `{name}` interpolation is supported. */
+const LINKED_LIST_DESCRIPTION: Record<"ca" | "es" | "en", string> = {
+  ca: "Llista per a {name}",
+  es: "Lista para {name}",
+  en: "List for {name}",
+};
+
+function linkedListDescription(eventName: string, locale: string | undefined) {
+  const template =
+    LINKED_LIST_DESCRIPTION[
+      locale === "es" ? "es" : locale === "en" ? "en" : "ca"
+    ];
+  return template.replace("{name}", eventName);
+}
+
 /** Create a fresh list already linked to the event (ports createLinkedList). */
 export const createLinkedList = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
+    const creator = await ctx.db.get(userId);
     return ctx.db.insert("lists", {
       name: event.name,
-      description: `List for ${event.name}`,
+      description: linkedListDescription(event.name, creator?.locale),
       projectId: event.projectId,
       favorite: false,
       eventId: event._id,

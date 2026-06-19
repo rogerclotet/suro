@@ -1,1 +1,1 @@
-• En la pantalla de inicio de sesión por correo, el teclado ya no tapa el botón de verificar y el código se envía automáticamente al terminar de introducirlo.
+• Cuando creas una lista desde un evento, su descripción ahora aparece en tu idioma en lugar de siempre en inglés.

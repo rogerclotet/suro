@@ -1,1 +1,1 @@
-• A la pantalla d'inici de sessió per correu, el teclat ja no tapa el botó de verificar i el codi s'envia automàticament quan l'acabes d'introduir.
+• Quan crees una llista des d'un esdeveniment, la seva descripció ara surt en el teu idioma en comptes de sempre en anglès.

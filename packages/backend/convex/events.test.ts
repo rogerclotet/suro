@@ -203,6 +203,27 @@ describe("events: linked lists", () => {
     // The list carries the event backlink.
     const list = await alice.query(api.lists.get, { listId });
     expect(list?.event?._id).toBe(eventId);
+    // The default description is localized from the creator's locale; Alice has
+    // none set, so it falls back to Catalan.
+    expect(list?.description).toBe("Llista per a Camping");
+  });
+
+  it("localizes the linked list description from the creator's locale", async () => {
+    await t.run(async (ctx) => {
+      await ctx.db.patch(ids.alice, { locale: "en" });
+    });
+    const eventId = await alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Camping",
+      startAt: JAN_10,
+      endAt: JAN_10_END,
+      allDay: false,
+    });
+    const listId = await alice.mutation(api.events.createLinkedList, {
+      eventId,
+    });
+    const list = await alice.query(api.lists.get, { listId });
+    expect(list?.description).toBe("List for Camping");
   });
 
   it("links and unlinks an existing list", async () => {
