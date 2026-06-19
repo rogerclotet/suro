@@ -67,7 +67,10 @@ http.route({ path: "/calendar.ics", method: "GET", handler: calendarIcs });
  *   GET /f?id=<storageId>&token=<hmac>
  * `token` (HMAC over the id, keyed by FILE_URL_SECRET) is the only gate — the
  * route is public, so the unguessable URL is the bearer secret, exactly like the
- * calendar feed. URLs are minted by `serveFileUrl`.
+ * calendar feed. URLs are minted by `serveFileUrl`. The optional `name` param is
+ * cosmetic — echoed into Content-Disposition so the browser shows the real file
+ * name (PDF tab title, download default) instead of "f".
+ *   GET /f?id=<storageId>&token=<hmac>&name=<filename>
  */
 const serveFile = httpAction(async (ctx, request) => {
   const url = new URL(request.url);
@@ -92,8 +95,28 @@ const serveFile = httpAction(async (ctx, request) => {
   if (blob.type) {
     headers["Content-Type"] = blob.type;
   }
+  const name = url.searchParams.get("name");
+  if (name) {
+    // inline so images/PDFs still render in-tab; the filename drives the title.
+    headers["Content-Disposition"] = contentDispositionInline(name);
+  }
   return new Response(blob, { status: 200, headers });
 });
+
+/**
+ * Build a safe `Content-Disposition: inline` value for a (user-controlled) file
+ * name: an ASCII-sanitised `filename` for legacy clients plus an RFC 5987
+ * `filename*` carrying the exact UTF-8 name. Percent-encoding both prevents
+ * header injection via quotes/newlines in the name.
+ */
+function contentDispositionInline(name: string): string {
+  const ascii = name.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
+  const encoded = encodeURIComponent(name).replace(
+    /['()*]/g,
+    (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `inline; filename="${ascii}"; filename*=UTF-8''${encoded}`;
+}
 
 http.route({ path: "/f", method: "GET", handler: serveFile });
 

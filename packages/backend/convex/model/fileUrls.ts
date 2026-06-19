@@ -81,17 +81,24 @@ function timingSafeEqual(a: string, b: string): boolean {
  * `*.convex.cloud` URL). `getUrl` is passed in so callers control which ctx
  * (query/mutation) signs it — and so the fallback reuses a URL they may already
  * hold. Returns null only when the fallback itself yields null (blob missing).
+ *
+ * `name`, when given, rides along as a cosmetic query param the `/f` route
+ * echoes into `Content-Disposition` so the browser shows the real file name
+ * (e.g. as the PDF tab title) instead of "f". It's outside the signature — it
+ * doesn't gate access, so leaving it unsigned is fine.
  */
 export async function serveFileUrl(
   storageId: Id<"_storage">,
   getUrl: (id: Id<"_storage">) => Promise<string | null>,
+  name?: string,
 ): Promise<string | null> {
   const key = secret();
   if (key === null) {
     return getUrl(storageId);
   }
   const token = await hmac(storageId, key);
-  return `${base()}/f?id=${storageId}&token=${token}`;
+  const nameParam = name ? `&name=${encodeURIComponent(name)}` : "";
+  return `${base()}/f?id=${storageId}&token=${token}${nameParam}`;
 }
 
 /**

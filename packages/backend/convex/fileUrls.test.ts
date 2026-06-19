@@ -39,4 +39,24 @@ describe("file URLs: branded token-gated serving", () => {
     const missing = await t.fetch("/f");
     expect(missing.status).toBe(400);
   });
+
+  it("echoes the file name into Content-Disposition for the tab title", async () => {
+    const t = convexTest(schema, modules);
+    const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["hi"])));
+    // A name with a space + accent exercises both filename fallbacks + encoding.
+    const url = await serveFileUrl(
+      storageId,
+      () => Promise.resolve("unused"),
+      "Açtes März.pdf",
+    );
+    const { pathname, search } = new URL(url ?? "");
+
+    const res = await t.fetch(`${pathname}${search}`);
+    expect(res.status).toBe(200);
+    const disposition = res.headers.get("Content-Disposition") ?? "";
+    expect(disposition).toContain('filename="A_tes M_rz.pdf"');
+    expect(disposition).toContain(
+      "filename*=UTF-8''A%C3%A7tes%20M%C3%A4rz.pdf",
+    );
+  });
 });
