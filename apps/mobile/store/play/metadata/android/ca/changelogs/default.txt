@@ -1,1 +1,1 @@
-• Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.
+• En arrossegar un element d'una llista, la pàgina ara es desplaça automàticament en acostar-te a la vora superior o inferior, perquè puguis deixar-lo anar a categories que quedaven fora de la pantalla.

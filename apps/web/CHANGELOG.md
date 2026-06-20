@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.9.0] — 2026-06-20
+
+### ca
+
+- [improvement] En arrossegar un element d'una llista, la pàgina ara es desplaça automàticament en acostar-te a la vora superior o inferior, perquè puguis deixar-lo anar a categories que quedaven fora de la pantalla.
+
+### es
+
+- [improvement] Al arrastrar un elemento de una lista, la página ahora se desplaza automáticamente al acercarte al borde superior o inferior, para que puedas soltarlo en categorías que quedaban fuera de la pantalla.
+
+### en
+
+- [improvement] When you drag an item in a list, the page now scrolls automatically as you near the top or bottom edge, so you can drop it into categories that were off-screen.
+
 ## [1.8.1] — 2026-06-20
 
 ### ca

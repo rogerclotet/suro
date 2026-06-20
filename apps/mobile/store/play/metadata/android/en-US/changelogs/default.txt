@@ -1,1 +1,1 @@
-• Templates without a description now show their item count in the templates list.
+• When you drag an item in a list, the page now scrolls automatically as you near the top or bottom edge, so you can drop it into categories that were off-screen.

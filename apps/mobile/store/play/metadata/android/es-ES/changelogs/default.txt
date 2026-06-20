@@ -1,1 +1,1 @@
-• Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.
+• Al arrastrar un elemento de una lista, la página ahora se desplaza automáticamente al acercarte al borde superior o inferior, para que puedas soltarlo en categorías que quedaban fuera de la pantalla.
