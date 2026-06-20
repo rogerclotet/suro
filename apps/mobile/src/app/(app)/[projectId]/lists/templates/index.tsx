@@ -103,8 +103,13 @@ function TemplateRow({
 }) {
   const t = useTheme();
   const tr = useTranslations("mobile.templates");
+  // Show the description, or fall back to the item count when there's none.
+  // Must test for a *non-blank* description, not just non-null: migrated
+  // templates carry an empty-string description, and `??` would treat that as
+  // present and hide the count.
+  const description = template.description?.trim();
   const subtitle =
-    template.description ?? tr("itemCount", { count: template.items.length });
+    description || tr("itemCount", { count: template.items.length });
   return (
     <Pressable
       onPress={onOpen}
