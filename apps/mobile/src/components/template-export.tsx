@@ -1,10 +1,11 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { ChevronRight } from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useTheme } from "@/theme";
 import { Button, Txt } from "@/ui";
 
@@ -29,7 +30,7 @@ export function ExportTargetPicker({
   onExported: (projectName: string) => void;
   onBack: () => void;
 }) {
-  const projects = useQuery(api.projects.listMine);
+  const projects = usePersistentQuery(api.projects.listMine);
   const exportToProject = useMutation(api.templates.exportToProject);
   const t = useTheme();
   const tr = useTranslations("mobile.templates");

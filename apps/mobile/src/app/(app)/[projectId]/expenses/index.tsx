@@ -1,12 +1,16 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import {
+  useOfflineListPots,
+  usePersistentQuery,
+  useQueuedMutation,
+} from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -23,8 +27,8 @@ import {
 
 export default function ExpensesOverview() {
   const pid = useProjectId();
-  const pots = useQuery(api.expenses.listPots, { projectId: pid });
-  const members = useQuery(api.projects.members, { projectId: pid });
+  const pots = useOfflineListPots(pid);
+  const members = usePersistentQuery(api.projects.members, { projectId: pid });
   const router = useRouter();
   const t = useTheme();
   const [creating, setCreating] = useState(false);
@@ -150,9 +154,9 @@ function CreatePotSheet({
   projectId: Id<"projects">;
   onClose: () => void;
 }) {
-  const members = useQuery(api.projects.members, { projectId });
-  const me = useQuery(api.users.me);
-  const createPot = useMutation(api.expenses.createPot);
+  const members = usePersistentQuery(api.projects.members, { projectId });
+  const me = usePersistentQuery(api.users.me);
+  const createPot = useQueuedMutation(api.expenses.createPot);
   const router = useRouter();
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");

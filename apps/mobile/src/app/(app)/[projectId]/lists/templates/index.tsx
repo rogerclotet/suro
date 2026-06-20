@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { LayoutTemplate } from "lucide-react-native";
@@ -8,6 +8,7 @@ import { useState } from "react";
 import { FlatList, Pressable, View } from "react-native";
 import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -25,7 +26,9 @@ type Template = FunctionReturnType<typeof api.templates.listByProject>[number];
 
 export default function Templates() {
   const pid = useProjectId();
-  const templates = useQuery(api.templates.listByProject, { projectId: pid });
+  const templates = usePersistentQuery(api.templates.listByProject, {
+    projectId: pid,
+  });
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.templates");

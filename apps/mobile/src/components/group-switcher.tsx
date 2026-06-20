@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import {
   Check,
@@ -15,6 +14,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
 import { catppuccinSwatch } from "@/lib/catppuccin-colors";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Card, HEADER_BUTTON_INSET, Loading, Sheet, Txt } from "@/ui";
@@ -39,8 +39,8 @@ export function GroupSwitcherSheet({
   section: string;
   onClose: () => void;
 }) {
-  const groups = useQuery(api.projects.listMine);
-  const me = useQuery(api.users.me);
+  const groups = usePersistentQuery(api.projects.listMine);
+  const me = usePersistentQuery(api.users.me);
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
@@ -268,7 +268,7 @@ export function GroupBadge({
   variant?: "filled" | "glass";
 }) {
   const projectId = useProjectId();
-  const project = useQuery(api.projects.get, { projectId });
+  const project = usePersistentQuery(api.projects.get, { projectId });
   const [switching, setSwitching] = useState(false);
   const t = useTheme();
   const tr = useTranslations("mobile.groups");

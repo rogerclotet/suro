@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
@@ -9,6 +9,7 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { notePreview } from "@/lib/note-content";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -69,7 +70,7 @@ function packColumns(tiles: Tile[]): Tile[][] {
 
 export default function NotesOverview() {
   const pid = useProjectId();
-  const notes = useQuery(api.notes.listByProject, { projectId: pid });
+  const notes = usePersistentQuery(api.notes.listByProject, { projectId: pid });
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
   const tNotes = useTranslations("mobile.notes");

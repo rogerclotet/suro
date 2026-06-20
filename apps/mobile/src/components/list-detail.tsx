@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import {
@@ -45,6 +44,11 @@ import { CategoryPicker } from "@/components/category-picker";
 import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
+import {
+  useOfflineListGet,
+  usePersistentQuery,
+  useQueuedMutation,
+} from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -168,7 +172,7 @@ export function ListDetailScreen({
   const timeAgo = useTimeAgo();
   const router = useRouter();
 
-  const list = useQuery(api.lists.get, { listId: lid });
+  const list = useOfflineListGet(lid);
 
   // `null` means the list no longer exists (deleted here or from another
   // client); leave the now-empty detail screen instead of rendering stale chrome.
@@ -177,74 +181,72 @@ export function ListDetailScreen({
       router.back();
     }
   }, [list, router]);
-  const categories = useQuery(api.categories.listByProject, { projectId: pid });
+  const categories = usePersistentQuery(api.categories.listByProject, {
+    projectId: pid,
+  });
   // Optimistic so the new row (and a brand-new category section) mounts in the
   // same commit as the focus-follow state change — the inline input can grab
   // focus without waiting a server round-trip or bouncing the keyboard.
-  const createItem = useMutation(api.listItems.create).withOptimisticUpdate(
-    (store, args) => {
-      const current = store.getQuery(api.lists.get, { listId: lid });
-      if (!current) {
-        return;
-      }
-      store.setQuery(
-        api.lists.get,
-        { listId: lid },
-        {
-          ...current,
-          items: [
-            ...current.items,
-            {
-              // Placeholder identity; Convex swaps in the server row on
-              // completion. `createdBy` isn't rendered, so the list's creator
-              // stands in for the current user.
-              _id: nextOptimisticItemId(),
-              _creationTime: Date.now(),
-              name: args.name,
-              completed: false,
-              listId: lid,
-              category: args.category ?? undefined,
-              createdBy: current.createdBy,
-              updatedAt: Date.now(),
-            },
-          ],
-        },
-      );
-    },
-  );
-  const removeItem = useMutation(api.listItems.remove);
-  const toggleFavorite = useMutation(api.lists.toggleFavorite);
-  const updateList = useMutation(api.lists.update);
-  const removeList = useMutation(api.lists.remove);
-  const clearCompleted = useMutation(api.lists.clearCompleted);
+  const createItem = useQueuedMutation(api.listItems.create, (store, args) => {
+    const current = store.getQuery(api.lists.get, { listId: lid });
+    if (!current) {
+      return;
+    }
+    store.setQuery(
+      api.lists.get,
+      { listId: lid },
+      {
+        ...current,
+        items: [
+          ...current.items,
+          {
+            // Placeholder identity; Convex swaps in the server row on
+            // completion. `createdBy` isn't rendered, so the list's creator
+            // stands in for the current user.
+            _id: nextOptimisticItemId(),
+            _creationTime: Date.now(),
+            name: args.name,
+            completed: false,
+            listId: lid,
+            category: args.category ?? undefined,
+            createdBy: current.createdBy,
+            updatedAt: Date.now(),
+          },
+        ],
+      },
+    );
+  });
+  const removeItem = useQueuedMutation(api.listItems.remove);
+  const toggleFavorite = useQueuedMutation(api.lists.toggleFavorite);
+  const updateList = useQueuedMutation(api.lists.update);
+  const removeList = useQueuedMutation(api.lists.remove);
+  const clearCompleted = useQueuedMutation(api.lists.clearCompleted);
   // Optimistic so checkbox toggles and drag-drops re-section instantly instead
   // of waiting a server round-trip.
-  const updateItem = useMutation(api.listItems.update).withOptimisticUpdate(
-    (store, args) => {
-      const current = store.getQuery(api.lists.get, { listId: lid });
-      if (!current) {
-        return;
-      }
-      store.setQuery(
-        api.lists.get,
-        { listId: lid },
-        {
-          ...current,
-          items: current.items.map((item) =>
-            item._id === args.itemId
-              ? {
-                  ...item,
-                  name: args.name,
-                  details: args.details?.trim() || undefined,
-                  completed: args.completed,
-                  category: args.category?.trim() || undefined,
-                }
-              : item,
-          ),
-        },
-      );
-    },
-  );
+  const updateItem = useQueuedMutation(api.listItems.update, (store, args) => {
+    const current = store.getQuery(api.lists.get, { listId: lid });
+    if (!current) {
+      return;
+    }
+    store.setQuery(
+      api.lists.get,
+      { listId: lid },
+      {
+        ...current,
+        items: current.items.map((item) =>
+          item._id === args.itemId
+            ? {
+                ...item,
+                name: args.name,
+                details: args.details?.trim() || undefined,
+                completed: args.completed,
+                category: args.category?.trim() || undefined,
+              }
+            : item,
+        ),
+      },
+    );
+  });
 
   // Editing happens in a drawer (`ItemSheet`); the target and drafts persist
   // while the sheet slides out so its content doesn't flicker during the close
@@ -1279,8 +1281,10 @@ function ImportTemplatesSheet({
   listId: Id<"lists">;
   onClose: () => void;
 }) {
-  const templates = useQuery(api.templates.listByProject, { projectId });
-  const importTemplates = useMutation(api.lists.importTemplates);
+  const templates = usePersistentQuery(api.templates.listByProject, {
+    projectId,
+  });
+  const importTemplates = useQueuedMutation(api.lists.importTemplates);
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);

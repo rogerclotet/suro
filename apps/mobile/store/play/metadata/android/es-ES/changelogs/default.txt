@@ -1,1 +1,1 @@
-• Al arrastrar un elemento de una lista, la página ahora se desplaza automáticamente al acercarte al borde superior o inferior, para que puedas soltarlo en categorías que quedaban fuera de la pantalla.
+• La aplicación móvil ahora funciona sin conexión: todo lo que hayas abierto sigue disponible sin red, y los cambios que hagas en listas y gastos se sincronizan automáticamente cuando vuelves a tener conexión.

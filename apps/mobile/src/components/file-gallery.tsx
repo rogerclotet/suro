@@ -1,5 +1,5 @@
 import { api } from "backend/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import {
   Calendar,
@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { useTranslations } from "@/i18n";
 import { isImage, isPdf, readableSize } from "@/lib/files";
+import { usePersistentQuery } from "@/lib/offline";
 import type { PendingUpload } from "@/lib/use-upload-file";
 import { useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
@@ -56,7 +57,7 @@ export function FileGallery({
   const t = useTheme();
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
-  const me = useQuery(api.users.me);
+  const me = usePersistentQuery(api.users.me);
   const rename = useMutation(api.files.rename);
   const remove = useMutation(api.files.remove);
 

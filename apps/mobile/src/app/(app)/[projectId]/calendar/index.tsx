@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
@@ -14,6 +14,7 @@ import { MonthGrid } from "@/components/month-grid";
 import { useTranslations } from "@/i18n";
 import { useFormatEventRange, useLongDate } from "@/lib/datetime";
 import { isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Card, Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
@@ -51,7 +52,7 @@ export default function CalendarScreen() {
     999,
   ).getTime();
 
-  const events = useQuery(api.events.listByRange, {
+  const events = usePersistentQuery(api.events.listByRange, {
     projectId: pid,
     from: monthStart,
     to: monthEnd,
