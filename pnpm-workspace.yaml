@@ -5,8 +5,13 @@ packages:
 # Moved here from the root package.json "pnpm" field — pnpm 10.26+ reads these
 # from the workspace manifest, not package.json.
 overrides:
-  "@types/react": 19.2.14
+  "@types/react": 19.2.17
   "@types/react-dom": 19.2.3
+  # Security: pin patched transitive deps (API-compatible patch bumps).
+  # ws<8.21.0 (via convex) memory-exhaustion DoS — GHSA-96hv-2xvq-fx4p.
+  "ws@>=8.0.0 <8.21.0": ">=8.21.0"
+  # postcss<8.5.10 (via next) XSS in CSS processing — GHSA-qx2v-qp2m-jg93.
+  "postcss@<8.5.10": ">=8.5.10"
 
 onlyBuiltDependencies:
   - "@napi-rs/canvas"
