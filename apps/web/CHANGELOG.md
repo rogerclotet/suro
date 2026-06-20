@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.10.0] — 2026-06-20
+
+### ca
+
+- [feature] L'aplicació mòbil ara funciona sense connexió: tot el que hagis obert continua disponible sense xarxa, i els canvis que facis a llistes i despeses se sincronitzen automàticament quan tornes a tenir connexió.
+
+### es
+
+- [feature] La aplicación móvil ahora funciona sin conexión: todo lo que hayas abierto sigue disponible sin red, y los cambios que hagas en listas y gastos se sincronizan automáticamente cuando vuelves a tener conexión.
+
+### en
+
+- [feature] The mobile app now works offline: everything you've opened stays available with no connection, and changes you make to lists and expenses sync automatically once you're back online.
+
 ## [1.9.0] — 2026-06-20
 
 ### ca

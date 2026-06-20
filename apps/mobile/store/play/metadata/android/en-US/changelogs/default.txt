@@ -1,1 +1,1 @@
-• When you drag an item in a list, the page now scrolls automatically as you near the top or bottom edge, so you can drop it into categories that were off-screen.
+• The mobile app now works offline: everything you've opened stays available with no connection, and changes you make to lists and expenses sync automatically once you're back online.
