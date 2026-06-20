@@ -914,6 +914,7 @@
       "editItem": "Edit item",
       "deleteItem": "Delete item",
       "itemCount": "{count, plural, =1 {# item} other {# items}}",
+      "templateLabel": "Template",
       "uncategorized": "Other"
     },
     "calendar": {

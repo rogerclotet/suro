@@ -17,6 +17,7 @@
     "submit:android:promote": "bundle exec fastlane android promote",
     "release:android": "pnpm run build:android:release && pnpm run submit:android:release",
     "submit:ios:beta": "bundle exec fastlane ios beta",
+    "submit:ios:metadata": "eas metadata:push --profile production",
     "submit:ios:release": "bundle exec fastlane ios release",
     "release:ios": "pnpm run build:ios:release && pnpm run submit:ios:release",
     "typecheck": "tsc --noEmit",
@@ -71,7 +72,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@types/react": "~19.2.2",
-    "eas-cli": "^20.1.0",
+    "eas-cli": "^20.3.0",
     "eslint": "^9.39.4",
     "eslint-config-expo": "~56.0.4",
     "typescript": "~6.0.3",

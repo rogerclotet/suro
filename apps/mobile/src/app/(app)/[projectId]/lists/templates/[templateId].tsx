@@ -3,10 +3,11 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Copy, Ellipsis, Trash2 } from "lucide-react-native";
+import { Copy, Ellipsis, LayoutTemplate, Trash2 } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
 import { ExportTargetPicker } from "@/components/template-export";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
@@ -28,24 +29,37 @@ type TemplateItem = Template["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 /** A template item plus its position in the template's `items` array. */
 type IndexedItem = TemplateItem & { index: number };
+type Section = { title: string; category: string | null; data: IndexedItem[] };
 
-/** Group items by their category name, sorted like the PWA (category & item alpha). */
-function groupByCategory(items: TemplateItem[], uncategorized: string) {
-  const groups = new Map<string, IndexedItem[]>();
+/**
+ * Group items by category, ordered like the list detail: the uncategorized
+ * bucket first (so its items sit right under the always-visible add row at the
+ * top), then the rest alphabetically; items within a section sort by name.
+ */
+function groupByCategory(
+  items: TemplateItem[],
+  uncategorized: string,
+): Section[] {
+  const groups = new Map<string, Section>();
   items.forEach((item, index) => {
-    const key = item.category ?? uncategorized;
-    const bucket = groups.get(key);
+    const category = item.category ?? null;
+    const title = category ?? uncategorized;
+    const bucket = groups.get(title);
     if (bucket) {
-      bucket.push({ ...item, index });
+      bucket.data.push({ ...item, index });
     } else {
-      groups.set(key, [{ ...item, index }]);
+      groups.set(title, { title, category, data: [{ ...item, index }] });
     }
   });
-  return [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([title, data]) => ({
-      title,
-      data: data.sort((x, y) => x.name.localeCompare(y.name)),
+  return [...groups.values()]
+    .sort((a, b) => {
+      if (a.category === null) return -1;
+      if (b.category === null) return 1;
+      return a.title.localeCompare(b.title);
+    })
+    .map((section) => ({
+      ...section,
+      data: section.data.sort((x, y) => x.name.localeCompare(y.name)),
     }));
 }
 
@@ -60,11 +74,37 @@ export default function TemplateEditor() {
 
   const template = useQuery(api.templates.get, { templateId: tid });
   const categories = useQuery(api.categories.listByProject, { projectId: pid });
-  const update = useMutation(api.templates.update);
+  // Optimistic so an inline add re-sections instantly and consecutive adds read
+  // the freshly-updated items (the mutation rewrites the whole array, so without
+  // this a second add fired before the server round-trip would clobber the
+  // first). Every update flows through here, so edits/deletes/settings reflect
+  // immediately too.
+  const update = useMutation(api.templates.update).withOptimisticUpdate(
+    (store, args) => {
+      const current = store.getQuery(api.templates.get, { templateId: tid });
+      if (!current) {
+        return;
+      }
+      store.setQuery(
+        api.templates.get,
+        { templateId: tid },
+        {
+          ...current,
+          name: args.name,
+          description: args.description,
+          items: args.items,
+        },
+      );
+    },
+  );
   const remove = useMutation(api.templates.remove);
+  const createList = useMutation(api.lists.create);
 
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<string | null>(null);
+  // Which category section's inline add row is expanded (null = none); set after
+  // each add so focus follows the item into the category it went to.
+  const [activeAddCategory, setActiveAddCategory] = useState<string | null>(
+    null,
+  );
   // Edit state is lifted to the parent (persists through the sheet's slide-out).
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -98,14 +138,33 @@ export default function TemplateEditor() {
     });
   }
 
-  async function addItem() {
-    const trimmed = newName.trim();
-    if (!trimmed || !template) {
+  /**
+   * Append an item from an inline add row. Fire-and-forget: the optimistic
+   * update inserts it instantly, so awaiting (which would blur the input and
+   * drop the keyboard between consecutive adds) isn't needed. Always succeeds —
+   * templates allow duplicate item names. Focus follows the item into its
+   * category so the next entry continues there.
+   */
+  function handleInlineAdd(name: string, category: string | null): boolean {
+    if (!template) {
+      return false;
+    }
+    void persist([...template.items, { name, category }]);
+    setActiveAddCategory(category);
+    return true;
+  }
+
+  async function createListFromTemplate() {
+    if (!template) {
       return;
     }
-    setNewName("");
-    const category = newCategory;
-    await persist([...template.items, { name: trimmed, category }]);
+    closeSettings();
+    const listId = await createList({
+      projectId: pid,
+      name: template.name,
+      templateIds: [tid],
+    });
+    router.push(`/${pid}/lists/${listId}`);
   }
 
   function openEdit(item: IndexedItem) {
@@ -214,31 +273,32 @@ export default function TemplateEditor() {
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View style={{ gap: 8, paddingBottom: 12 }}>
-            {template.description ? (
-              <Txt muted style={{ paddingBottom: 4 }}>
-                {template.description}
-              </Txt>
-            ) : null}
-            <Field
-              placeholder={tr("addItemPlaceholder")}
-              value={newName}
-              onChangeText={setNewName}
-              onSubmitEditing={addItem}
-              returnKeyType="done"
-            />
-            <View
-              style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}
-            >
-              <View style={{ flex: 1 }}>
-                <CategoryPicker
-                  categories={categories ?? []}
-                  value={newCategory}
-                  onChange={setNewCategory}
-                />
+          <View style={{ paddingBottom: 8 }}>
+            {/* Blurb plus a clear "this is a template" cue, in the same spot the
+                list detail shows its description/provenance block. */}
+            <View style={{ gap: 6, paddingBottom: 12 }}>
+              {template.description ? (
+                <Txt muted size={14} style={{ lineHeight: 20 }}>
+                  {template.description}
+                </Txt>
+              ) : null}
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+              >
+                <LayoutTemplate color={t.muted} size={14} />
+                <Txt muted size={13}>
+                  {`${tr("templateLabel")} · ${tr("itemCount", {
+                    count: template.items.length,
+                  })}`}
+                </Txt>
               </View>
-              <Button title={tc("add")} onPress={addItem} />
             </View>
+            {/* Always-visible no-category entry point with the quick category
+                chip; uncategorized items sort first, right below it. */}
+            <NewItemRow
+              categories={categories ?? []}
+              onSubmit={handleInlineAdd}
+            />
           </View>
         }
         ListEmptyComponent={
@@ -247,7 +307,7 @@ export default function TemplateEditor() {
           </Txt>
         }
         renderSectionHeader={({ section }) =>
-          sections.length > 1 ? (
+          section.category !== null ? (
             <Txt
               muted
               size={12}
@@ -257,11 +317,31 @@ export default function TemplateEditor() {
             </Txt>
           ) : null
         }
+        renderSectionFooter={({ section }) => {
+          const category = section.category;
+          // The no-category section's entry point is the always-visible row at
+          // the top; only categorized sections get their own inline add row.
+          if (category === null) {
+            return null;
+          }
+          return (
+            <InlineAddItemRow
+              active={activeAddCategory === category}
+              onActivate={() => setActiveAddCategory(category)}
+              onDeactivate={() =>
+                setActiveAddCategory((prev) =>
+                  prev === category ? null : prev,
+                )
+              }
+              onSubmit={(name) => handleInlineAdd(name, category)}
+            />
+          );
+        }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => openEdit(item)}
             style={{
-              paddingVertical: 12,
+              paddingVertical: 10,
               borderBottomWidth: 1,
               borderColor: t.border,
             }}
@@ -310,6 +390,11 @@ export default function TemplateEditor() {
               onChangeText={setSettingsDescription}
             />
             <Button title={tc("save")} onPress={saveSettings} />
+            <Button
+              title={tr("createListFromTemplate")}
+              variant="ghost"
+              onPress={createListFromTemplate}
+            />
             {/* Secondary template actions as a compact icon toolbar, matching
                 the list settings sheet. */}
             <IconActionBar>

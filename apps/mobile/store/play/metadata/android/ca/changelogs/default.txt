@@ -1,1 +1,1 @@
-• Quan crees una llista des d'un esdeveniment, la seva descripció ara surt en el teu idioma en comptes de sempre en anglès.
+• Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.

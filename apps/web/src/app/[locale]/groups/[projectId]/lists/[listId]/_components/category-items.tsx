@@ -67,7 +67,7 @@ export default memo(function CategoryItems(props: {
         ) : (
           // Drop placeholder for an emptied section; it (re)appears via a
           // display toggle when a drag starts, which restarts the fade-in.
-          <div className="mb-2 h-10 animate-in rounded-md border-2 border-border border-dashed duration-300 fade-in" />
+          <div className="fade-in mb-2 h-10 animate-in rounded-md border-2 border-border border-dashed duration-300" />
         )}
       </ul>
 

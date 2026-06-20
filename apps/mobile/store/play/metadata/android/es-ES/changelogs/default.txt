@@ -1,1 +1,1 @@
-• Cuando creas una lista desde un evento, su descripción ahora aparece en tu idioma en lugar de siempre en inglés.
+• Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.

@@ -6,6 +6,37 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.8.1] — 2026-06-20
+
+### ca
+
+- [fix] Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.
+
+### es
+
+- [fix] Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.
+
+### en
+
+- [fix] Templates without a description now show their item count in the templates list.
+
+## [1.8.0] — 2026-06-19
+
+### ca
+
+- [improvement] Editar una plantilla ara funciona igual que editar una llista, i la pantalla de plantilles mostra les mateixes files netes que les teves llistes.
+- [improvement] El selector de categoria dels elements de llistes i plantilles ara és una etiqueta petita en lloc d'un segon camp de text, així queda clar que afegir una categoria és opcional.
+
+### es
+
+- [improvement] Editar una plantilla ahora funciona igual que editar una lista, y la pantalla de plantillas muestra las mismas filas limpias que tus listas.
+- [improvement] El selector de categoría de los elementos de listas y plantillas ahora es una etiqueta pequeña en lugar de un segundo campo de texto, así queda claro que añadir una categoría es opcional.
+
+### en
+
+- [improvement] Editing a template now works just like editing a list, and the templates screen shows the same clean rows as your lists.
+- [improvement] The category selector for list and template items is now a small tag rather than a second input box, so it's clearer that adding a category is optional.
+
 ## [1.7.2] — 2026-06-19
 
 ### ca

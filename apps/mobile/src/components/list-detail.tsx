@@ -355,7 +355,7 @@ export function ListDetailScreen({
     dropProviderRef.current?.requestPositionUpdate();
   }
 
-  function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+  function handleScroll(_e: NativeSyntheticEvent<NativeScrollEvent>) {
     const now = Date.now();
     if (now - lastPositionUpdate.current > 100) {
       lastPositionUpdate.current = now;

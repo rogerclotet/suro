@@ -1,1 +1,1 @@
-• When you create a list from an event, its description now appears in your language instead of always in English.
+• Templates without a description now show their item count in the templates list.
