@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ellipsis, Trash2 } from "lucide-react-native";
@@ -11,6 +10,11 @@ import { headerCreateAction } from "@/components/header-badges";
 import { useLocale, useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { formatMoney, parseMoney } from "@/lib/money";
+import {
+  useOfflineGetPot,
+  usePersistentQuery,
+  useQueuedMutation,
+} from "@/lib/offline";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -172,8 +176,8 @@ function SpendingLine({ spending }: { spending: Spending }) {
 export default function PotDetail() {
   const { potId } = useLocalSearchParams<{ potId: string }>();
   const id = potId as Id<"pots">;
-  const pot = useQuery(api.expenses.getPot, { potId: id });
-  const deletePot = useMutation(api.expenses.deletePot);
+  const pot = useOfflineGetPot(id);
+  const deletePot = useQueuedMutation(api.expenses.deletePot);
   const router = useRouter();
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
@@ -436,8 +440,8 @@ function AddSpendingSheet({
   pot: Pot;
   onClose: () => void;
 }) {
-  const me = useQuery(api.users.me);
-  const createSpending = useMutation(api.expenses.createSpending);
+  const me = usePersistentQuery(api.users.me);
+  const createSpending = useQueuedMutation(api.expenses.createSpending);
   const members = useMemo(() => loadedMembers(pot.members), [pot.members]);
   const tExp = useTranslations("mobile.expenses");
 
@@ -556,7 +560,7 @@ function SettleSheet({
   pot: Pot;
   onClose: () => void;
 }) {
-  const settlePayments = useMutation(api.expenses.settlePayments);
+  const settlePayments = useQueuedMutation(api.expenses.settlePayments);
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");

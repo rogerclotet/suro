@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
 import type { ErrorBoundaryProps } from "expo-router";
 import { Redirect, useLocalSearchParams } from "expo-router";
 import type {
@@ -13,6 +12,7 @@ import { useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { setLastProjectId } from "@/lib/last-project";
+import { usePersistentQuery } from "@/lib/offline";
 import { ProjectIdProvider } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
 import { Button, Loading, Screen, SheetHost, Txt } from "@/ui";
@@ -80,7 +80,7 @@ export default function ProjectTabs() {
   const t = useTheme();
   const tNav = useTranslations("nav");
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
-  const projects = useQuery(api.projects.listMine);
+  const projects = usePersistentQuery(api.projects.listMine);
 
   // Remember this group so the next launch resumes here.
   useEffect(() => {

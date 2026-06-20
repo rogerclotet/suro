@@ -1,18 +1,18 @@
 import { api } from "backend/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { FileGallery } from "@/components/file-gallery";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useUploadFile } from "@/lib/use-upload-file";
 import { Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 export default function Files() {
   const pid = useProjectId();
-  const files = useQuery(api.files.listByProject, { projectId: pid });
+  const files = usePersistentQuery(api.files.listByProject, { projectId: pid });
   const { pickImage, pickDocument, pending } = useUploadFile(pid);
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");

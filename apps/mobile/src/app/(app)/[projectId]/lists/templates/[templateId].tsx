@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Copy, Ellipsis, LayoutTemplate, Trash2 } from "lucide-react-native";
@@ -10,6 +10,7 @@ import { CategoryPicker } from "@/components/category-picker";
 import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
 import { ExportTargetPicker } from "@/components/template-export";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -72,8 +73,10 @@ export default function TemplateEditor() {
   const tc = useTranslations("mobile.common");
   const router = useRouter();
 
-  const template = useQuery(api.templates.get, { templateId: tid });
-  const categories = useQuery(api.categories.listByProject, { projectId: pid });
+  const template = usePersistentQuery(api.templates.get, { templateId: tid });
+  const categories = usePersistentQuery(api.categories.listByProject, {
+    projectId: pid,
+  });
   // Optimistic so an inline add re-sections instantly and consecutive adds read
   // the freshly-updated items (the mutation rewrites the whole array, so without
   // this a second add fired before the server round-trip would clobber the

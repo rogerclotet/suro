@@ -1,7 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Stack } from "expo-router";
@@ -14,12 +14,13 @@ import {
   CATPPUCCIN_COLOR_KEYS,
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
+import { usePersistentQuery } from "@/lib/offline";
 import { unregisterPushToken } from "@/lib/push";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Section, Txt } from "@/ui";
 
 export default function Profile() {
-  const user = useQuery(api.users.me);
+  const user = usePersistentQuery(api.users.me);
   const t = useTranslations("mobile.profile");
 
   return (

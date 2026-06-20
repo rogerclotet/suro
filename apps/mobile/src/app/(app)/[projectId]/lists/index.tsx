@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import {
   Check,
@@ -13,6 +12,11 @@ import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import {
+  useOfflineListsOverview,
+  usePersistentQuery,
+  useQueuedMutation,
+} from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -42,9 +46,7 @@ function useStable<T>(value: T | undefined): T | undefined {
 export default function ListsOverview() {
   const pid = useProjectId();
   const [completedLimit, setCompletedLimit] = useState(COMPLETED_PAGE_SIZE);
-  const overview = useStable(
-    useQuery(api.lists.overviewByProject, { projectId: pid, completedLimit }),
-  );
+  const overview = useStable(useOfflineListsOverview(pid, completedLimit));
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -359,8 +361,10 @@ function CreateListSheet({
   projectId: Id<"projects">;
   onClose: () => void;
 }) {
-  const templates = useQuery(api.templates.listByProject, { projectId });
-  const createList = useMutation(api.lists.create);
+  const templates = usePersistentQuery(api.templates.listByProject, {
+    projectId,
+  });
+  const createList = useQueuedMutation(api.lists.create);
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");

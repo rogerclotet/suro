@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -14,6 +14,7 @@ import {
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
 import { localizeGroupPath } from "@/lib/group-paths";
+import { usePersistentQuery } from "@/lib/offline";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
@@ -28,10 +29,10 @@ import { Button, Field, Loading, Screen, Txt } from "@/ui";
 export default function GroupSettings() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const tr = useTranslations("mobile.groups");
-  const project = useQuery(api.projects.get, {
+  const project = usePersistentQuery(api.projects.get, {
     projectId: projectId as Id<"projects">,
   });
-  const me = useQuery(api.users.me);
+  const me = usePersistentQuery(api.users.me);
 
   const loading = project === undefined || me === undefined;
   const isCreator = !!project && !!me && project.createdBy === me._id;

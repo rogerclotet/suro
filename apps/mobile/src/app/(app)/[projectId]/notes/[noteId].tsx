@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Trash2 } from "lucide-react-native";
@@ -10,6 +10,7 @@ import { NoteRichEditor } from "@/components/note-rich-editor";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { isBlankHtml, toEditorHtml } from "@/lib/note-content";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
 import { Button, HEADER_BUTTON_INSET, Loading, Screen, Txt } from "@/ui";
@@ -24,7 +25,7 @@ export default function NoteEditor() {
     name?: string;
   }>();
   const id = noteId as Id<"notes">;
-  const note = useQuery(api.notes.get, { noteId: id });
+  const note = usePersistentQuery(api.notes.get, { noteId: id });
 
   if (note === undefined) {
     return (

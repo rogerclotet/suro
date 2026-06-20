@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   CirclePlus,
@@ -34,6 +34,7 @@ import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { localizeGroupPath } from "@/lib/group-paths";
 import { notePreview } from "@/lib/note-content";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useUploadFile } from "@/lib/use-upload-file";
@@ -71,8 +72,10 @@ export default function EventDetail() {
   const formatRange = useFormatEventRange();
   const timeRemaining = useTimeRemaining();
 
-  const event = useQuery(api.events.get, { eventId: eid });
-  const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
+  const event = usePersistentQuery(api.events.get, { eventId: eid });
+  const eventFiles = usePersistentQuery(api.files.listByEvent, {
+    eventId: eid,
+  });
   const { pickImage, pickDocument, pending } = useUploadFile(pid, eid);
   const updateEvent = useMutation(api.events.update);
   const removeEvent = useMutation(api.events.remove);
@@ -548,7 +551,7 @@ function CreatePotMembersSheet({
   eventId: Id<"events">;
   onClose: () => void;
 }) {
-  const members = useQuery(api.projects.members, { projectId });
+  const members = usePersistentQuery(api.projects.members, { projectId });
   const createLinkedPot = useMutation(api.events.createLinkedPot);
   const router = useRouter();
   const t = useTheme();
@@ -669,15 +672,15 @@ function useLinkCandidates(
   projectId: Id<"projects">,
   linked: { list: boolean; note: boolean; pot: boolean },
 ): LinkCandidate[] {
-  const lists = useQuery(
+  const lists = usePersistentQuery(
     api.lists.listByProject,
     linked.list ? "skip" : { projectId },
   );
-  const notes = useQuery(
+  const notes = usePersistentQuery(
     api.notes.listByProject,
     linked.note ? "skip" : { projectId },
   );
-  const pots = useQuery(
+  const pots = usePersistentQuery(
     api.expenses.listPots,
     linked.pot ? "skip" : { projectId },
   );
