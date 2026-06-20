@@ -28,6 +28,7 @@ import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -82,6 +83,25 @@ const ITEM_TRANSITION = LinearTransition.springify()
   .damping(24)
   .stiffness(220)
   .mass(0.9);
+
+// Auto-scroll while a dragged row nears a screen edge, so categories above or
+// below the fold come into reach. The zone is the band (in px) inside each
+// viewport edge that arms scrolling; speed ramps from MIN at the band's inner
+// boundary to MAX at the edge itself, both in px per animation frame. The inset
+// approximates half a row so the row's center — not its top — drives detection.
+const AUTO_SCROLL_EDGE = 90;
+const AUTO_SCROLL_MIN_SPEED = 3;
+const AUTO_SCROLL_MAX_SPEED = 18;
+const DRAG_POINT_INSET = 24;
+
+/** px/frame to auto-scroll given how far the row pushed past a zone boundary. */
+function edgeAutoScrollSpeed(penetration: number): number {
+  const ratio = Math.min(1, Math.max(0, penetration) / AUTO_SCROLL_EDGE);
+  return (
+    AUTO_SCROLL_MIN_SPEED +
+    ratio * (AUTO_SCROLL_MAX_SPEED - AUTO_SCROLL_MIN_SPEED)
+  );
+}
 
 /**
  * Mirrors the backend's item ordering (completed last, then by name, then id)
@@ -270,6 +290,33 @@ export function ListDetailScreen({
     transform: [{ translateY: (1 - dragActive.value) * 8 }],
   }));
 
+  // Auto-scroll while dragging toward a screen edge. `onDragging` reports the
+  // lifted row's window position; once it enters an edge zone a rAF loop nudges
+  // the ScrollView. Because the row lives inside that ScrollView, the loop also
+  // feeds `autoScrollComp` an equal counter-translation so the row stays pinned
+  // under the finger instead of sliding off with the content — and so the drop,
+  // which the dnd library resolves from the row's frozen drag origin, lands
+  // where the row visually sits. `scrollOffset`/`contentHeight`/the viewport
+  // rect are the bookkeeping the loop needs to clamp and place each step.
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollOffset = useRef(0);
+  const contentHeight = useRef(0);
+  const viewportTop = useRef(0);
+  const viewportHeight = useRef(0);
+  const autoScrollDir = useRef<-1 | 0 | 1>(0);
+  const autoScrollSpeed = useRef(0);
+  const autoScrollFrame = useRef<number | null>(null);
+  const autoScrollComp = useSharedValue(0);
+
+  // Cancel an in-flight auto-scroll loop if the screen unmounts mid-drag.
+  useEffect(() => {
+    return () => {
+      if (autoScrollFrame.current !== null) {
+        cancelAnimationFrame(autoScrollFrame.current);
+      }
+    };
+  }, []);
+
   const uncategorized = tl("uncategorized");
   const sections = useMemo(
     () => (list ? groupByCategory(list.items, uncategorized) : []),
@@ -355,11 +402,89 @@ export function ListDetailScreen({
     dropProviderRef.current?.requestPositionUpdate();
   }
 
-  function handleScroll(_e: NativeSyntheticEvent<NativeScrollEvent>) {
+  function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    // Track the resting offset so auto-scroll has an accurate base to build on.
+    scrollOffset.current = e.nativeEvent.contentOffset.y;
     const now = Date.now();
     if (now - lastPositionUpdate.current > 100) {
       lastPositionUpdate.current = now;
       refreshDropPositions();
+    }
+  }
+
+  // Capture the scroll viewport's window rect (it sits below the navigation
+  // header) so edge detection can compare the dragged row's window position
+  // against the visible area. Re-measured on layout and at each drag start.
+  function measureViewport() {
+    scrollRef.current?.getNativeScrollRef()?.measureInWindow((_x, y, _w, h) => {
+      viewportTop.current = y;
+      viewportHeight.current = h;
+    });
+  }
+
+  function stopAutoScroll() {
+    if (autoScrollFrame.current !== null) {
+      cancelAnimationFrame(autoScrollFrame.current);
+      autoScrollFrame.current = null;
+    }
+    autoScrollDir.current = 0;
+    autoScrollSpeed.current = 0;
+  }
+
+  function autoScrollStep() {
+    const dir = autoScrollDir.current;
+    if (dir === 0) {
+      autoScrollFrame.current = null;
+      return;
+    }
+    const maxOffset = Math.max(
+      0,
+      contentHeight.current - viewportHeight.current,
+    );
+    const next = Math.min(
+      maxOffset,
+      Math.max(0, scrollOffset.current + dir * autoScrollSpeed.current),
+    );
+    const delta = next - scrollOffset.current;
+    // Reached the top or bottom of the content: idle until the finger moves
+    // again (the next onDragging restarts the loop).
+    if (delta === 0) {
+      autoScrollFrame.current = null;
+      return;
+    }
+    scrollOffset.current = next;
+    scrollRef.current?.scrollTo({ y: next, animated: false });
+    // Keep the lifted row under the finger, and refresh the drop zones that
+    // just moved with the page so the hovered target and the release resolve
+    // against where the categories are now.
+    autoScrollComp.value += delta;
+    refreshDropPositions();
+    autoScrollFrame.current = requestAnimationFrame(autoScrollStep);
+  }
+
+  // Called continuously while a row is dragged. Picks an auto-scroll direction
+  // and speed from how far the row's center has pushed into an edge zone, then
+  // makes sure the loop is running.
+  function handleDragging({ y, ty }: { y: number; ty: number }) {
+    if (viewportHeight.current === 0) {
+      return;
+    }
+    const center = y + ty + DRAG_POINT_INSET;
+    const topZone = viewportTop.current + AUTO_SCROLL_EDGE;
+    const bottomZone =
+      viewportTop.current + viewportHeight.current - AUTO_SCROLL_EDGE;
+    if (center < topZone) {
+      autoScrollDir.current = -1;
+      autoScrollSpeed.current = edgeAutoScrollSpeed(topZone - center);
+    } else if (center > bottomZone) {
+      autoScrollDir.current = 1;
+      autoScrollSpeed.current = edgeAutoScrollSpeed(center - bottomZone);
+    } else {
+      autoScrollDir.current = 0;
+      autoScrollSpeed.current = 0;
+    }
+    if (autoScrollDir.current !== 0 && autoScrollFrame.current === null) {
+      autoScrollFrame.current = requestAnimationFrame(autoScrollStep);
     }
   }
 
@@ -518,17 +643,22 @@ export function ListDetailScreen({
         <DropProvider
           ref={dropProviderRef}
           onDragStart={(data: DragData) => {
+            autoScrollComp.value = 0;
+            measureViewport();
             dragActive.value = withTiming(1, { duration: 150 });
             setDraggingItem(
               list.items.find((item) => item._id === data.id) ?? null,
             );
           }}
+          onDragging={handleDragging}
           onDragEnd={() => {
+            stopAutoScroll();
             dragActive.value = withTiming(0, { duration: 200 });
             setDraggingItem(null);
           }}
         >
           <ScrollView
+            ref={scrollRef}
             contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
             keyboardShouldPersistTaps="handled"
             // iOS: inset the content so the focused inline input (especially
@@ -536,11 +666,20 @@ export function ListDetailScreen({
             // on the window's adjustResize.
             automaticallyAdjustKeyboardInsets
             onScroll={handleScroll}
-            scrollEventThrottle={100}
+            // Fire often so the cached scroll offset that drag auto-scroll
+            // builds on stays current; the drop-position refresh inside
+            // handleScroll stays throttled regardless.
+            scrollEventThrottle={16}
             onScrollEndDrag={refreshDropPositions}
             onMomentumScrollEnd={refreshDropPositions}
-            onContentSizeChange={refreshDropPositions}
-            onLayout={refreshDropPositions}
+            onContentSizeChange={(_w, h) => {
+              contentHeight.current = h;
+              refreshDropPositions();
+            }}
+            onLayout={() => {
+              measureViewport();
+              refreshDropPositions();
+            }}
           >
             {/* The list's blurb and provenance. The "updated" stamp only
                 appears once the list has been edited after creation
@@ -635,6 +774,7 @@ export function ListDetailScreen({
                       // clearing the library's lingering drop-slot translation.
                       key={`${item._id}:${dragResetKey}`}
                       item={item}
+                      autoScrollComp={autoScrollComp}
                       onToggle={toggle}
                       onEdit={openEdit}
                     />
@@ -752,10 +892,12 @@ export function ListDetailScreen({
  */
 function DraggableItemRow({
   item,
+  autoScrollComp,
   onToggle,
   onEdit,
 }: {
   item: Item;
+  autoScrollComp: SharedValue<number>;
   onToggle: (item: Item) => void;
   onEdit: (item: Item) => void;
 }) {
@@ -766,6 +908,13 @@ function DraggableItemRow({
     transform: [{ scale: 1 + lift.value * 0.03 }],
     shadowOpacity: lift.value * 0.3,
     elevation: lift.value * 8,
+  }));
+  // Counter the page's auto-scroll so this row, while it's the one being
+  // dragged, stays under the finger instead of scrolling away with the content
+  // it lives in. Applied only while dragging (see the wrapper below), so other
+  // rows scroll normally.
+  const autoScrollStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: autoScrollComp.value }],
   }));
 
   return (
@@ -781,8 +930,9 @@ function DraggableItemRow({
       exiting={FadeOut.duration(160)}
       layout={ITEM_TRANSITION}
       // Stack the lifted row above its sibling rows; the parent section is
-      // raised above sibling sections separately.
-      style={dragging ? { zIndex: 100 } : undefined}
+      // raised above sibling sections separately. The auto-scroll
+      // counter-translation rides here too so it shifts the whole flex slot.
+      style={dragging ? [{ zIndex: 100 }, autoScrollStyle] : undefined}
     >
       <Draggable<DragData>
         draggableId={item._id}
