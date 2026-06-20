@@ -1,2 +1,1 @@
-• Editar una plantilla ara funciona igual que editar una llista, i la pantalla de plantilles mostra les mateixes files netes que les teves llistes.
-• El selector de categoria dels elements de llistes i plantilles ara és una etiqueta petita en lloc d'un segon camp de text, així queda clar que afegir una categoria és opcional.
+• Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.

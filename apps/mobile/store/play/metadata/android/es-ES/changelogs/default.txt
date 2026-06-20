@@ -1,2 +1,1 @@
-• Editar una plantilla ahora funciona igual que editar una lista, y la pantalla de plantillas muestra las mismas filas limpias que tus listas.
-• El selector de categoría de los elementos de listas y plantillas ahora es una etiqueta pequeña en lugar de un segundo campo de texto, así queda claro que añadir una categoría es opcional.
+• Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.

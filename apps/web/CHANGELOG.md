@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.8.1] — 2026-06-20
+
+### ca
+
+- [fix] Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.
+
+### es
+
+- [fix] Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.
+
+### en
+
+- [fix] Templates without a description now show their item count in the templates list.
+
 ## [1.8.0] — 2026-06-19
 
 ### ca
