@@ -1,1 +1,1 @@
-• La aplicación móvil ahora funciona sin conexión: todo lo que hayas abierto sigue disponible sin red, y los cambios que hagas en listas y gastos se sincronizan automáticamente cuando vuelves a tener conexión.
+• Añadimos el inicio de sesión con Apple: ahora puedes entrar con tu cuenta de Apple, igual que ya podías con Google o con el correo electrónico.

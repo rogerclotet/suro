@@ -78,7 +78,8 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": false

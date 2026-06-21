@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.11.0] — 2026-06-21
+
+### ca
+
+- [feature] Hem afegit l'inici de sessió amb Apple: ara pots entrar amb el teu compte d'Apple, igual que ja podies amb Google o amb el correu electrònic.
+
+### es
+
+- [feature] Añadimos el inicio de sesión con Apple: ahora puedes entrar con tu cuenta de Apple, igual que ya podías con Google o con el correo electrónico.
+
+### en
+
+- [feature] Added Sign in with Apple: you can now log in with your Apple account, just like you already could with Google or email.
+
 ## [1.10.0] — 2026-06-20
 
 ### ca

@@ -1,1 +1,1 @@
-• L'aplicació mòbil ara funciona sense connexió: tot el que hagis obert continua disponible sense xarxa, i els canvis que facis a llistes i despeses se sincronitzen automàticament quan tornes a tenir connexió.
+• Hem afegit l'inici de sessió amb Apple: ara pots entrar amb el teu compte d'Apple, igual que ja podies amb Google o amb el correu electrònic.
