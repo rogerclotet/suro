@@ -14,21 +14,20 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  *    manages those via remote auto-increment (`appVersionSource: "remote"` in
  *    eas.json), so they bump on every build regardless of this value.
  *
- * 2. Keeps entitlements that need a provisioning profile off builds that can't
- *    sign them:
- *    - `associatedDomains` (universal links to suro.clotet.dev) ships only in the
- *      production build. It needs the App ID's Associated Domains capability and a
- *      matching provisioning profile; local and dev/preview builds don't have
- *      those, so EAS fails with "provisioning profile doesn't include the
- *      Associated Domains capability." Gated on `EAS_BUILD_PROFILE === "production"`
- *      (set by `build:ios:release`, which runs `eas build --profile production`).
- *    - Sign in with Apple (the `expo-apple-authentication` plugin) is kept on every
- *      EAS build so native login is testable, and dropped only on local builds
- *      (`expo run:ios`, which can't sign it either).
- *    `prebuild` rewrites the native config on every run, so hand-editing the
- *    generated files never sticks — these have to be filtered here. Test native
- *    Apple on a dev/preview EAS build (or Expo Go, which carries its own Apple
- *    entitlement), not `expo run:ios`.
+ * 2. Drops the two iOS entitlements a local `expo run:ios` simulator build can't
+ *    sign — Sign in with Apple (the `expo-apple-authentication` plugin) and
+ *    `associatedDomains` (universal links to suro.clotet.dev). Both need a
+ *    provisioning profile, so on the simulator they fail with "No code signing
+ *    certificates are available." `prebuild` rewrites the native files every run,
+ *    so this has to be filtered here.
+ *
+ *    This is gated on `LOCAL_IOS_SIM_BUILD` (set only by the `ios` package
+ *    script), NOT on `EAS_BUILD`. app.json is the single source of truth for
+ *    these entitlements: every EAS build keeps them, so EAS's capability syncing
+ *    enables and then maintains the capabilities on the App ID. Gating on
+ *    `EAS_BUILD` failed because EAS runs the capability-sync introspection
+ *    BEFORE `EAS_BUILD` is set — it saw the stripped config and disabled
+ *    Associated Domains mid-build, breaking signing.
  */
 
 const { version } = JSON.parse(
@@ -39,21 +38,20 @@ const APPLE_AUTH_PLUGIN = "expo-apple-authentication";
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const resolved: ExpoConfig = { ...(config as ExpoConfig), version };
-  const isEasBuild = process.env.EAS_BUILD === "true";
-  const keepAssociatedDomains = process.env.EAS_BUILD_PROFILE === "production";
+  // Only a local `expo run:ios` sim build strips entitlements it can't sign;
+  // everything else (EAS builds and EAS's capability-sync introspection) keeps
+  // them, so EAS enables and maintains the capabilities from app.json.
+  if (process.env.LOCAL_IOS_SIM_BUILD !== "1") {
+    return resolved;
+  }
   return {
     ...resolved,
-    ios:
-      resolved.ios && !keepAssociatedDomains
-        ? { ...resolved.ios, associatedDomains: undefined }
-        : resolved.ios,
-    // The Apple plugin (Sign in with Apple entitlement) stays on EAS builds and
-    // is dropped only locally, where `expo run:ios` can't sign it.
-    plugins: isEasBuild
-      ? resolved.plugins
-      : (resolved.plugins ?? []).filter(
-          (plugin) =>
-            (Array.isArray(plugin) ? plugin[0] : plugin) !== APPLE_AUTH_PLUGIN,
-        ),
+    ios: resolved.ios
+      ? { ...resolved.ios, associatedDomains: undefined }
+      : resolved.ios,
+    plugins: (resolved.plugins ?? []).filter(
+      (plugin) =>
+        (Array.isArray(plugin) ? plugin[0] : plugin) !== APPLE_AUTH_PLUGIN,
+    ),
   };
 };
