@@ -1025,6 +1025,7 @@
       "empty": "No pots yet. Tap + to start a shared tab.",
       "settled": "Settled",
       "settledAgo": "Settled {time}",
+      "showMoreSettled": "Show more",
       "balances": "Balances",
       "spendings": "Spendings",
       "noSpendings": "No spendings yet. Tap + to add one.",

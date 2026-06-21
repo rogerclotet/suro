@@ -1025,6 +1025,7 @@
       "empty": "Encara no hi ha pots. Toca + per començar un compte compartit.",
       "settled": "Saldat",
       "settledAgo": "Saldat {time}",
+      "showMoreSettled": "Mostra'n més",
       "balances": "Saldos",
       "spendings": "Despeses",
       "noSpendings": "Encara no hi ha despeses. Toca + per afegir-ne una.",

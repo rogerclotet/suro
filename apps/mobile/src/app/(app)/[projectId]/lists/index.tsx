@@ -7,7 +7,7 @@ import {
   ChevronRight,
   LayoutTemplate,
 } from "lucide-react-native";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
@@ -18,6 +18,7 @@ import {
   useQueuedMutation,
 } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { useStable } from "@/lib/use-stable";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -31,17 +32,6 @@ import {
 } from "@/ui";
 
 const COMPLETED_PAGE_SIZE = 5;
-
-// Holds the last loaded result while the query re-runs with new args (Convex
-// returns undefined during the swap), so "show more" grows the completed
-// section in place instead of flashing the screen back to the spinner.
-function useStable<T>(value: T | undefined): T | undefined {
-  const last = useRef<T | undefined>(undefined);
-  if (value !== undefined) {
-    last.current = value;
-  }
-  return last.current;
-}
 
 export default function ListsOverview() {
   const pid = useProjectId();

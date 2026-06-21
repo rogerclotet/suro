@@ -24,7 +24,7 @@ type Overview = NonNullable<
   FunctionReturnType<typeof api.lists.overviewByProject>
 >;
 type ListWithItems = Overview["active"][number];
-type PotWithMembers = FunctionReturnType<typeof api.expenses.listPots>[number];
+type PotsOverview = FunctionReturnType<typeof api.expenses.listPotsOverview>;
 type PotDetail = NonNullable<FunctionReturnType<typeof api.expenses.getPot>>;
 type PublicUser = PotDetail["members"][number];
 
@@ -185,10 +185,14 @@ function toPublicUser(id: Id<"users">, members: PublicUser[]): PublicUser {
   return found ?? { _id: id, name: null, image: null, avatarColor: null };
 }
 
-export function useOfflineListPots(
+export function useOfflineListPotsOverview(
   projectId: Id<"projects">,
-): PotWithMembers[] | undefined {
-  const base = usePersistentQuery(api.expenses.listPots, { projectId });
+  settledLimit: number,
+): PotsOverview | undefined {
+  const base = usePersistentQuery(api.expenses.listPotsOverview, {
+    projectId,
+    settledLimit,
+  });
   const projectMembers = usePersistentQuery(api.projects.members, {
     projectId,
   });
@@ -205,7 +209,8 @@ export function useOfflineListPots(
         .filter((e) => e.functionName === "expenses:deletePot")
         .map((e) => resolve(String(e.args.potId))),
     );
-    let pots = base.filter((pot) => !removed.has(pot._id));
+    const settled = base.settled.filter((pot) => !removed.has(pot._id));
+    let active = base.active.filter((pot) => !removed.has(pot._id));
 
     for (const entry of entries) {
       if (
@@ -219,17 +224,21 @@ export function useOfflineListPots(
       if (tempId === undefined || String(entry.args.projectId) !== projectId) {
         continue;
       }
+      // New pots are always active; dedup against both groups so a just-synced
+      // create isn't shown twice.
+      const present = (id: string) =>
+        active.some((p) => p._id === id) || settled.some((p) => p._id === id);
       const realId = idmap[tempId];
-      if (realId !== undefined && pots.some((p) => p._id === realId)) {
+      if (realId !== undefined && present(realId)) {
         continue;
       }
-      if (pots.some((p) => p._id === tempId)) {
+      if (present(tempId)) {
         continue;
       }
       const memberIds = (
         Array.isArray(entry.args.memberIds) ? entry.args.memberIds : []
       ).map((id) => String(id) as Id<"users">);
-      pots = [
+      active = [
         {
           _id: tempId as Id<"pots">,
           _creationTime: entry.createdAt,
@@ -238,10 +247,10 @@ export function useOfflineListPots(
           createdBy: user.id,
           members: memberIds.map((id) => toPublicUser(id, projectMembers)),
         },
-        ...pots,
+        ...active,
       ];
     }
-    return pots;
+    return { active, settled, hasMoreSettled: base.hasMoreSettled };
   }, [base, projectMembers, entries, idmap, user, projectId]);
 }
 

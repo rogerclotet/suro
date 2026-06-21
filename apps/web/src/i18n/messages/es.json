@@ -605,6 +605,7 @@
     "noPotsTitle": "No hay ningún bote.",
     "noPotsHint": "Crea un bote para empezar a compartir gastos.",
     "settled": "Saldados",
+    "showMoreSettled": "Mostrar más",
     "createPotTitle": "Crear bote",
     "createPotDescription": "Crea un nuevo bote de gastos compartidos",
     "createPotSuccess": "Bote creado",

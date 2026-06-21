@@ -10,12 +10,33 @@ import {
   type PotDetail,
 } from "@/app/_data/pot";
 
-/** Reactive project pots (active first, then settled). */
-export function useProjectPots(projectId: string): Pot[] | undefined {
-  const data = useQuery(api.expenses.listPots, {
+export type PotsOverview = {
+  active: Pot[];
+  settled: Pot[];
+  hasMoreSettled: boolean;
+};
+
+/**
+ * Reactive project pots split into active and a page of the most recently
+ * settled ones. `settledLimit` trims settled pots that pile up after a trip;
+ * "show more" re-runs with a larger limit. `hasMoreSettled` gates the button.
+ */
+export function useProjectPotsOverview(
+  projectId: string,
+  settledLimit: number,
+): PotsOverview | undefined {
+  const data = useQuery(api.expenses.listPotsOverview, {
     projectId: projectId as Id<"projects">,
+    settledLimit,
   });
-  return data?.map(adaptPot);
+  if (data === undefined) {
+    return undefined;
+  }
+  return {
+    active: data.active.map(adaptPot),
+    settled: data.settled.map(adaptPot),
+    hasMoreSettled: data.hasMoreSettled,
+  };
 }
 
 /** A single pot with members + spendings. `null` if it's gone. */

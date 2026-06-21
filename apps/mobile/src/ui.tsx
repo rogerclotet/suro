@@ -629,14 +629,20 @@ export function Field({
 export function Card({
   children,
   onPress,
+  muted = false,
 }: {
   children: ReactNode;
   onPress?: () => void;
+  // Recede the card into a tonal surface (e.g. settled expense pots).
+  muted?: boolean;
 }) {
   const t = useTheme();
   const inner = (
     <View
-      style={[styles.card, { backgroundColor: t.card, borderColor: t.border }]}
+      style={[
+        styles.card,
+        { backgroundColor: muted ? t.navBar : t.card, borderColor: t.border },
+      ]}
     >
       {children}
     </View>

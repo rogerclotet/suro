@@ -605,6 +605,7 @@
     "noPotsTitle": "No hi ha cap pot.",
     "noPotsHint": "Crea un pot per començar a compartir despeses.",
     "settled": "Saldats",
+    "showMoreSettled": "Mostra'n més",
     "createPotTitle": "Crear pot",
     "createPotDescription": "Crea un nou pot de despeses compartides",
     "createPotSuccess": "Pot creat",
