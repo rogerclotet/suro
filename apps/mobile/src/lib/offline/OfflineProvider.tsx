@@ -1,11 +1,11 @@
 import { api } from "backend/convex/_generated/api";
-import { useConvexAuth } from "convex/react";
 import { type ReactNode, useEffect, useRef } from "react";
 import { AppState } from "react-native";
 import { flush } from "./flush";
 import { isOnlineNow, subscribeOnline } from "./network";
 import { outbox } from "./outbox-store";
 import { clearQueryCache } from "./storage";
+import { useAuthGate } from "./use-auth-gate";
 import { usePersistentQuery } from "./use-persistent-query";
 
 /**
@@ -15,7 +15,7 @@ import { usePersistentQuery } from "./use-persistent-query";
  * nothing — it mounts inside `ConvexAuthProvider` so it can read auth + client.
  */
 export function OfflineProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated } = useAuthGate();
   const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");
   const wasAuthenticated = useRef(false);
 

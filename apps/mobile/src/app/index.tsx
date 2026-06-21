@@ -1,13 +1,12 @@
 import { api } from "backend/convex/_generated/api";
-import { useConvexAuth } from "convex/react";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { getLastProjectId } from "@/lib/last-project";
-import { usePersistentQuery } from "@/lib/offline";
+import { useAuthGate, usePersistentQuery } from "@/lib/offline";
 import { Loading } from "@/ui";
 
 export default function Index() {
-  const { isLoading, isAuthenticated } = useConvexAuth();
+  const { isLoading, isAuthenticated } = useAuthGate();
   const projects = usePersistentQuery(
     api.projects.listMine,
     isAuthenticated ? {} : "skip",
