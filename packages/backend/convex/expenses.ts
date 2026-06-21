@@ -63,6 +63,54 @@ export const listPots = query({
 });
 
 /**
+ * The mobile/web expenses overview: every active pot plus a page of the most
+ * recently settled ones. Settled pots pile up once a trip is over, so we trim
+ * the payload with `settledLimit` and grow it behind "show more" — mirrors the
+ * lists overview (`lists.ts:overviewByProject`). `listPots` stays the full list
+ * for pickers that need every pot.
+ */
+export const listPotsOverview = query({
+  args: { projectId: v.id("projects"), settledLimit: v.number() },
+  handler: async (ctx, { projectId, settledLimit }) => {
+    await requireProjectMember(ctx, projectId);
+    const pots = await ctx.db
+      .query("pots")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+
+    // `createdAt` is set only for migrated pots; native ones fall back to
+    // `_creationTime` (which equals their creation time).
+    const active = pots
+      .filter((pot) => !pot.settledAt)
+      .sort(
+        (a, b) =>
+          (b.createdAt ?? b._creationTime) - (a.createdAt ?? a._creationTime),
+      );
+    const settled = pots
+      .filter(
+        (pot): pot is typeof pot & { settledAt: number } => !!pot.settledAt,
+      )
+      .sort((a, b) => b.settledAt - a.settledAt);
+
+    const limit = Math.max(0, Math.floor(settledLimit));
+    const settledPage = settled.slice(0, limit);
+
+    // Enrich only the pots we return — settled pots beyond the page never load.
+    const withMembers = async (pot: Doc<"pots">) => {
+      const ids = await potMemberIds(ctx, pot._id);
+      const users = await Promise.all(ids.map((id) => ctx.db.get(id)));
+      return { ...pot, members: users.map(publicUser) };
+    };
+
+    return {
+      active: await Promise.all(active.map(withMembers)),
+      settled: await Promise.all(settledPage.map(withMembers)),
+      hasMoreSettled: settled.length > limit,
+    };
+  },
+});
+
+/**
  * A pot with its members, spendings (newest first, enriched with payer/payee
  * names), per-member balances, and the suggested settle-up payments.
  */

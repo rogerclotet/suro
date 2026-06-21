@@ -23,6 +23,7 @@ import type * as model_auth from "../model/auth.js";
 import type * as model_categories from "../model/categories.js";
 import type * as model_colors from "../model/colors.js";
 import type * as model_expenses from "../model/expenses.js";
+import type * as model_fileUrls from "../model/fileUrls.js";
 import type * as model_ics from "../model/ics.js";
 import type * as model_lists from "../model/lists.js";
 import type * as model_pdfThumbnail from "../model/pdfThumbnail.js";
@@ -60,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   "model/categories": typeof model_categories;
   "model/colors": typeof model_colors;
   "model/expenses": typeof model_expenses;
+  "model/fileUrls": typeof model_fileUrls;
   "model/ics": typeof model_ics;
   "model/lists": typeof model_lists;
   "model/pdfThumbnail": typeof model_pdfThumbnail;

@@ -1025,6 +1025,7 @@
       "empty": "Todavía no hay botes. Toca + para empezar una cuenta compartida.",
       "settled": "Saldado",
       "settledAgo": "Saldado {time}",
+      "showMoreSettled": "Mostrar más",
       "balances": "Saldos",
       "spendings": "Gastos",
       "noSpendings": "Todavía no hay gastos. Toca + para añadir uno.",

@@ -30,7 +30,8 @@ export default function PotPreview({
       }
       className="block break-inside-avoid-column"
     >
-      <Card className={cn("h-full", isSettled ? "opacity-50" : "")}>
+      {/* Settled pots recede: a muted fill plus a slight fade. */}
+      <Card className={cn("h-full", isSettled && "bg-muted opacity-75")}>
         <CardHeader>
           <CardTitle>{pot.name}</CardTitle>
 

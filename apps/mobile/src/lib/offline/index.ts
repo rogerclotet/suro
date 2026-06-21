@@ -3,7 +3,7 @@ export { OfflineProvider } from "./OfflineProvider";
 export {
   useOfflineGetPot,
   useOfflineListGet,
-  useOfflineListPots,
+  useOfflineListPotsOverview,
   useOfflineListsOverview,
 } from "./queries";
 export { usePersistentQuery } from "./use-persistent-query";

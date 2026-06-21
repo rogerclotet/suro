@@ -605,6 +605,7 @@
     "noPotsTitle": "No pots yet.",
     "noPotsHint": "Create a pot to start sharing expenses.",
     "settled": "Settled",
+    "showMoreSettled": "Show more",
     "createPotTitle": "Create pot",
     "createPotDescription": "Create a new shared expenses pot",
     "createPotSuccess": "Pot created",
