@@ -10,6 +10,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import AppBadges from "./app-badges";
 import LanguageSwitcher from "./language-switcher";
 import PrivacyContent from "./privacy-content";
 import PrivacyDialog from "./privacy-dialog";
@@ -106,13 +107,14 @@ export default async function Landing() {
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground leading-relaxed">
             {t("heroSubtitle")}
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/login">{t("heroCta")}</Link>
-            </Button>
-            <Button asChild size="lg" variant="link">
-              <Link href="/login">{t("heroCtaSecondary")}</Link>
-            </Button>
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <AppBadges />
+            <Link
+              href="/login"
+              className="text-muted-foreground text-sm underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            >
+              {t("heroWebLink")}
+            </Link>
           </div>
         </div>
       </section>
@@ -179,10 +181,11 @@ export default async function Landing() {
           <p className="mx-auto mt-4 max-w-xl text-pretty text-base text-secondary-foreground/80 leading-relaxed">
             {t("ctaBody")}
           </p>
+          <AppBadges className="mt-8" />
           <Button
             asChild
             size="lg"
-            className="mt-8 bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90"
+            className="mt-6 bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90"
           >
             <Link href="/login">{t("ctaButton")}</Link>
           </Button>
