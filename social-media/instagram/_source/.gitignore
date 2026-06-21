@@ -1,0 +1,3 @@
+# Generated slide HTML — regenerable from generate.mjs (embeds base64 fonts/images,
+# multi-MB each). Source of truth is generate.mjs; final PNGs are committed.
+slide-*.html
