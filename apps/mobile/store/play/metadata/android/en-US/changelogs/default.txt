@@ -1,1 +1,1 @@
-• The mobile app now works offline: everything you've opened stays available with no connection, and changes you make to lists and expenses sync automatically once you're back online.
+• Added Sign in with Apple: you can now log in with your Apple account, just like you already could with Google or email.

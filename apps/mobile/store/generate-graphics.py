@@ -2,13 +2,20 @@
 # requires-python = ">=3.11"
 # dependencies = ["pillow>=10"]
 # ///
-"""Generate the Play Store graphics from the app's brand assets.
+"""Generate the store graphics from the app's brand assets, and normalize the
+App Store screenshots to the size Apple requires.
 
 Run from anywhere:  uv run apps/mobile/store/generate-graphics.py
 
 Outputs (committed to the repo):
   - play/metadata/android/en-US/images/icon.png          512x512 hi-res icon
   - play/metadata/android/<locale>/images/featureGraphic.png  1024x500, localized tagline
+  - apple/screenshots/<locale>/*.png   resized to 1320x2868 (App Store 6.9")
+
+The App Store screenshots are captured by hand; this never invents UI, it only
+resizes whatever is in apple/screenshots to the exact dimensions App Store
+Connect accepts (keeping store/check-metadata.mjs green). Capture on a 6.9"
+simulator (iPhone 16 Pro Max) for best quality, so resizing is a no-op.
 """
 
 from pathlib import Path
@@ -38,6 +45,11 @@ TAGLINES: dict[str, str] = {
 }
 
 CANVAS = (1024, 500)
+
+# App Store 6.9" portrait (iPhone 16 Pro Max). check-metadata.mjs also accepts
+# 1290x2796; target the largest so a single set covers every required device.
+APPLE_SCREENSHOT = (1320, 2868)
+APPLE_SCREENSHOT_DIR = STORE_DIR / "apple" / "screenshots"
 
 
 def make_icon() -> None:
@@ -94,6 +106,44 @@ def make_feature_graphic(locale: str, tagline: str) -> None:
     print(f"wrote {out.relative_to(MOBILE_DIR)}")
 
 
+def fit_to_cover(image: Image.Image, target: tuple[int, int]) -> Image.Image:
+    """Scale `image` to fully cover `target`, then center-crop to it.
+
+    Preserves aspect ratio with no padding bars: the capture is scaled to the
+    smallest size that covers the target box and the overflow is trimmed evenly.
+    For near-identical phone aspect ratios this removes only a few pixels.
+    """
+    target_w, target_h = target
+    scale = max(target_w / image.width, target_h / image.height)
+    scaled = image.resize(
+        (round(image.width * scale), round(image.height * scale)), Image.LANCZOS
+    )
+    left = (scaled.width - target_w) // 2
+    top = (scaled.height - target_h) // 2
+    return scaled.crop((left, top, left + target_w, top + target_h))
+
+
+def normalize_apple_screenshots() -> None:
+    """Rewrite every App Store screenshot at the exact dimensions Apple requires.
+
+    Idempotent: files already at APPLE_SCREENSHOT are skipped, so re-running is a
+    no-op. Converting to RGB also drops any alpha channel, which the App Store
+    rejects on screenshots.
+    """
+    if not APPLE_SCREENSHOT_DIR.exists():
+        return
+    for shot in sorted(APPLE_SCREENSHOT_DIR.rglob("*.png")):
+        with Image.open(shot) as image:
+            if image.size == APPLE_SCREENSHOT:
+                continue
+            framed = fit_to_cover(image.convert("RGB"), APPLE_SCREENSHOT)
+        framed.save(shot, optimize=True)
+        print(
+            f"resized {shot.relative_to(MOBILE_DIR)} "
+            f"-> {APPLE_SCREENSHOT[0]}x{APPLE_SCREENSHOT[1]}"
+        )
+
+
 def main() -> None:
     if not FONT_PATH.exists():
         raise SystemExit(
@@ -102,6 +152,7 @@ def main() -> None:
     make_icon()
     for locale, tagline in TAGLINES.items():
         make_feature_graphic(locale, tagline)
+    normalize_apple_screenshots()
 
 
 if __name__ == "__main__":
