@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
+import { track } from "./model/analytics";
 import { ensureCategorySuggestion } from "./model/categories";
 import { requireItemAccess, requireListAccess } from "./model/permissions";
 
@@ -17,7 +18,7 @@ export const create = mutation({
       list.projectId,
       category,
     );
-    return ctx.db.insert("listItems", {
+    const itemId = await ctx.db.insert("listItems", {
       name,
       details: details?.trim() || undefined,
       completed: false,
@@ -26,6 +27,11 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "list_item_created", {
+      projectId: list.projectId,
+      hasCategory: categoryName != null,
+    });
+    return itemId;
   },
 });
 
@@ -52,6 +58,13 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    // Only the false->true transition is a meaningful "completed" action; plain
+    // edits (renames, re-saves of an already-checked item) shouldn't re-fire it.
+    if (!item.completed && completed) {
+      await track(ctx, userId, "list_item_completed", {
+        projectId: list.projectId,
+      });
+    }
     return null;
   },
 });

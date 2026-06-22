@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { loadListWithItems } from "./model/lists";
 import {
   requireEventAccess,
@@ -112,6 +113,7 @@ export const create = mutation({
       bodyParams: { name: trimmed },
       path: `/${projectId}/calendar`,
     });
+    await track(ctx, userId, "event_created", { projectId, allDay });
     return eventId;
   },
 });
@@ -152,7 +154,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    const { event, userId } = await requireEventAccess(ctx, eventId);
     // Mirror ON DELETE SET NULL for the things that point at this event:
     // unlink any linked lists and detach any attached files (they survive).
     const linkedLists = await ctx.db
@@ -184,6 +186,7 @@ export const remove = mutation({
       await ctx.db.patch(pot._id, { eventId: undefined });
     }
     await ctx.db.delete(event._id);
+    await track(ctx, userId, "event_deleted", { projectId: event.projectId });
     return null;
   },
 });
@@ -212,7 +215,7 @@ export const createLinkedList = mutation({
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
     const creator = await ctx.db.get(userId);
-    return ctx.db.insert("lists", {
+    const listId = await ctx.db.insert("lists", {
       name: event.name,
       description: linkedListDescription(event.name, creator?.locale),
       projectId: event.projectId,
@@ -221,6 +224,11 @@ export const createLinkedList = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "list",
+    });
+    return listId;
   },
 });
 
@@ -256,7 +264,7 @@ export const createLinkedNote = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
-    return ctx.db.insert("notes", {
+    const noteId = await ctx.db.insert("notes", {
       name: event.name,
       contents: "",
       format: "html",
@@ -265,6 +273,11 @@ export const createLinkedNote = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "note",
+    });
+    return noteId;
   },
 });
 
@@ -342,6 +355,10 @@ export const createLinkedPot = mutation({
     for (const memberId of resolved) {
       await ctx.db.insert("potMembers", { potId, userId: memberId });
     }
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "pot",
+    });
     return potId;
   },
 });

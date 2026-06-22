@@ -11,6 +11,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 import { GestureHandlerRootView as RNGestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { I18nProvider } from "@/i18n";
+import { AnalyticsBridge, AnalyticsProvider } from "@/lib/analytics";
 import { convex, secureStorage } from "@/lib/convex";
 import { OfflineProvider } from "@/lib/offline";
 import { ThemeProvider } from "@/theme";
@@ -34,13 +35,16 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <ConvexAuthProvider client={convex} storage={secureStorage}>
-            <OfflineProvider>
-              <I18nProvider>
-                <Stack screenOptions={{ headerShown: false }} />
-              </I18nProvider>
-            </OfflineProvider>
-          </ConvexAuthProvider>
+          <AnalyticsProvider>
+            <ConvexAuthProvider client={convex} storage={secureStorage}>
+              <OfflineProvider>
+                <I18nProvider>
+                  <AnalyticsBridge />
+                  <Stack screenOptions={{ headerShown: false }} />
+                </I18nProvider>
+              </OfflineProvider>
+            </ConvexAuthProvider>
+          </AnalyticsProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

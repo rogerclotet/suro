@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { ensureCategorySuggestions } from "./model/categories";
 import {
   instantiateTemplateItems,
@@ -130,6 +131,10 @@ export const create = mutation({
       bodyParams: { name: trimmedName },
       path: `/${projectId}/lists`,
     });
+    await track(ctx, userId, "list_created", {
+      projectId,
+      hasTemplates: (templateIds?.length ?? 0) > 0,
+    });
 
     return listId;
   },
@@ -197,7 +202,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
-    const { list } = await requireListAccess(ctx, listId);
+    const { list, userId } = await requireListAccess(ctx, listId);
     // Manual cascade (no FK ON DELETE CASCADE in Convex).
     const items = await ctx.db
       .query("listItems")
@@ -207,6 +212,7 @@ export const remove = mutation({
       await ctx.db.delete(item._id);
     }
     await ctx.db.delete(list._id);
+    await track(ctx, userId, "list_deleted", { projectId: list.projectId });
     return null;
   },
 });
@@ -220,6 +226,10 @@ export const toggleFavorite = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "list_favorite_toggled", {
+      projectId: list.projectId,
+      favorite: !list.favorite,
+    });
     return null;
   },
 });
@@ -227,7 +237,7 @@ export const toggleFavorite = mutation({
 export const clearCompleted = mutation({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
-    const { list } = await requireListAccess(ctx, listId);
+    const { list, userId } = await requireListAccess(ctx, listId);
     const items = await ctx.db
       .query("listItems")
       .withIndex("by_list", (q) => q.eq("listId", list._id))
@@ -237,6 +247,9 @@ export const clearCompleted = mutation({
         await ctx.db.delete(item._id);
       }
     }
+    await track(ctx, userId, "list_cleared_completed", {
+      projectId: list.projectId,
+    });
     return null;
   },
 });

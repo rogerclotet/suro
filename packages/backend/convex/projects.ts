@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
@@ -156,6 +157,7 @@ export const create = mutation({
       color: getRandomColor(),
     });
     await ctx.db.insert("projectMembers", { projectId, userId });
+    await track(ctx, userId, "group_created", { projectId });
     return projectId;
   },
 });
@@ -199,6 +201,7 @@ export const acceptInvite = mutation({
         bodyParams: { userName: user?.name ?? "" },
         path: `/group-settings?projectId=${projectId}`,
       });
+      await track(ctx, userId, "group_joined", { projectId });
     }
     return { projectId };
   },
@@ -279,6 +282,7 @@ export const leave = mutation({
       bodyParams: { userName: user?.name ?? "" },
       path: `/group-settings?projectId=${projectId}`,
     });
+    await track(ctx, userId, "group_left", { projectId });
     return null;
   },
 });
@@ -474,6 +478,7 @@ export const remove = mutation({
       await ctx.storage.delete(project.imageStorageId);
     }
     await ctx.db.delete(projectId);
+    await track(ctx, userId, "group_deleted", { projectId });
     return null;
   },
 });

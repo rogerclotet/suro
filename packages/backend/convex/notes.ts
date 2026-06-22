@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { requireNoteAccess, requireProjectMember } from "./model/permissions";
 
 /** Attach the creator's and last-editor's display names to a note row. */
@@ -75,6 +76,10 @@ export const create = mutation({
       bodyParams: { name: trimmed },
       path: `/${projectId}/notes`,
     });
+    await track(ctx, userId, "note_created", {
+      projectId,
+      format: format ?? "plain",
+    });
     return noteId;
   },
 });
@@ -109,8 +114,9 @@ export const update = mutation({
 export const remove = mutation({
   args: { noteId: v.id("notes") },
   handler: async (ctx, { noteId }) => {
-    const { note } = await requireNoteAccess(ctx, noteId);
+    const { note, userId } = await requireNoteAccess(ctx, noteId);
     await ctx.db.delete(note._id);
+    await track(ctx, userId, "note_deleted", { projectId: note.projectId });
     return null;
   },
 });
