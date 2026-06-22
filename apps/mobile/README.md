@@ -28,10 +28,12 @@ Native Google OAuth additionally needs the redirect wired to the `suro://` schem
 
 ## Builds (local)
 
-Client builds run locally — runner build times made CI builds impractical. All
-three scripts are EAS **local** builds signed with the EAS-managed credentials;
-log in once with `eas login` (eas-cli is a devDependency, so the scripts
-resolve it from the workspace).
+Build locally with the scripts below, or let CI do it: on `main`, native-code
+changes trigger EAS **cloud** builds that publish the `.aab`/`.ipa` as
+downloadable artifacts, plus manual fastlane submit jobs — see the root
+`AGENTS.md` → Deploys and `.gitlab-ci.yml`. The local scripts are EAS **local**
+builds signed with the EAS-managed credentials; log in once with `eas login`
+(eas-cli is a devDependency, so the scripts resolve it from the workspace).
 
 | Script (`pnpm --filter mobile …`) | Profile (`eas.json`) | Output |
 | --- | --- | --- |
