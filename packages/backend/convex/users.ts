@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { deleteUserAccount } from "./model/account";
+import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
@@ -70,6 +71,8 @@ export const updateProfile = mutation({
     }
 
     await ctx.db.patch(userId, patch);
+    // Only the field names are sent (e.g. ["name", "locale"]) — never the values.
+    await track(ctx, userId, "profile_updated", { fields: Object.keys(patch) });
     return null;
   },
 });
@@ -105,6 +108,7 @@ export const completeOnboarding = mutation({
     }
 
     await ctx.db.patch(userId, patch);
+    await track(ctx, userId, "onboarding_completed");
     return null;
   },
 });
@@ -200,6 +204,9 @@ export const deleteAccount = mutation({
   args: {},
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
+    // Capture before the cascade deletes the user (the scheduled action only
+    // needs the id, but read it while it's unambiguously still ours).
+    await track(ctx, userId, "account_deleted");
     await deleteUserAccount(ctx, userId);
     return null;
   },

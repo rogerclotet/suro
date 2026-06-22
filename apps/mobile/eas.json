@@ -11,21 +11,24 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud"
+        "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     },
     "production-apk": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     }
   },

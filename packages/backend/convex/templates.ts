@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { type MutationCtx, mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import {
   ensureCategorySuggestions,
   normalizeCategoryName,
@@ -85,6 +86,10 @@ export const create = mutation({
       bodyKey: "template_created",
       bodyParams: { name: trimmed },
       path: `/${projectId}/lists/templates`,
+    });
+    await track(ctx, userId, "template_created", {
+      projectId,
+      itemCount: items.length,
     });
     return templateId;
   },

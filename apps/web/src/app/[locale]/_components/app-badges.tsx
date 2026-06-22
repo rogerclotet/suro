@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
+import { TrackBadgeLink } from "./track-badge-link";
 
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=dev.clotet.suro";
@@ -23,7 +24,8 @@ export default async function AppBadges({ className }: AppBadgesProps) {
         className,
       )}
     >
-      <a
+      <TrackBadgeLink
+        store="google_play"
         href={PLAY_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
@@ -37,7 +39,7 @@ export default async function AppBadges({ className }: AppBadgesProps) {
           unoptimized
           className={BADGE_IMG}
         />
-      </a>
+      </TrackBadgeLink>
 
       {/* iOS is still pending review — show the badge as a non-interactive teaser. */}
       <div className="flex flex-col items-center gap-1.5">

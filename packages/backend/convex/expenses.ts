@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { calculateBalances, generateProposals } from "./model/expenses";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
 
@@ -205,6 +206,10 @@ export const createPot = mutation({
       bodyParams: { name: trimmed },
       path: `/${projectId}/expenses`,
     });
+    await track(ctx, userId, "pot_created", {
+      projectId,
+      memberCount: unique.length,
+    });
     return potId;
   },
 });
@@ -217,7 +222,7 @@ export const createPot = mutation({
 export const deletePot = mutation({
   args: { potId: v.id("pots") },
   handler: async (ctx, { potId }) => {
-    const { pot } = await requirePotAccess(ctx, potId);
+    const { pot, userId } = await requirePotAccess(ctx, potId);
     const spendings = await ctx.db
       .query("spendings")
       .withIndex("by_pot", (q) => q.eq("potId", potId))
@@ -238,6 +243,7 @@ export const deletePot = mutation({
       await ctx.db.delete(spending._id);
     }
     await ctx.db.delete(potId);
+    await track(ctx, userId, "pot_deleted", { projectId: pot.projectId });
     return null;
   },
 });
@@ -295,6 +301,10 @@ export const createSpending = mutation({
         : { amount: (amount / 100).toFixed(2) },
       path: `/${pot.projectId}/expenses`,
     });
+    await track(ctx, userId, "spending_created", {
+      projectId: pot.projectId,
+      split: to === undefined ? "equal" : "single",
+    });
     return spendingId;
   },
 });
@@ -336,6 +346,10 @@ export const settlePayments = mutation({
       });
     }
     await ctx.db.patch(pot._id, { settledAt: Date.now() });
+    await track(ctx, userId, "payments_settled", {
+      projectId: pot.projectId,
+      paymentCount: payments.length,
+    });
     return null;
   },
 });
