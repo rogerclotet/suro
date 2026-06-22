@@ -234,8 +234,9 @@ build_native_android:
   needs:
     - job: check
       artifacts: false
-  variables:
-    EXPO_TOKEN: $EXPO_TOKEN
+  # EXPO_TOKEN (EAS auth) is auto-injected from the project CI/CD variables — do
+  # not re-declare it. The variable is `raw`, so `EXPO_TOKEN: $EXPO_TOKEN` passes
+  # the literal string "$EXPO_TOKEN" (11 chars) into the job instead of the token.
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
     - npm install -g pnpm@latest-10
@@ -265,8 +266,9 @@ build_native_ios:
   needs:
     - job: check
       artifacts: false
-  variables:
-    EXPO_TOKEN: $EXPO_TOKEN
+  # EXPO_TOKEN (EAS auth) is auto-injected from the project CI/CD variables — do
+  # not re-declare it. The variable is `raw`, so `EXPO_TOKEN: $EXPO_TOKEN` passes
+  # the literal string "$EXPO_TOKEN" (11 chars) into the job instead of the token.
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
     - npm install -g pnpm@latest-10
@@ -333,12 +335,10 @@ submit_ios:
   needs:
     - job: build_native_ios
       artifacts: true
-  variables:
-    # fastlane's own App Store Connect API key auth (separate from the iOS
-    # signing creds EAS holds). Set these as protected CI variables.
-    APP_STORE_CONNECT_API_KEY_KEY_ID: $APP_STORE_CONNECT_API_KEY_KEY_ID
-    APP_STORE_CONNECT_API_KEY_ISSUER_ID: $APP_STORE_CONNECT_API_KEY_ISSUER_ID
-    APP_STORE_CONNECT_API_KEY_KEY: $APP_STORE_CONNECT_API_KEY_KEY # base64 .p8 contents
+  # fastlane's App Store Connect API key auth — APP_STORE_CONNECT_API_KEY_KEY_ID /
+  # _ISSUER_ID / _KEY (last is the base64 .p8). Protected CI/CD variables, auto-
+  # injected into this protected-branch job and read by the Fastfile from the env.
+  # Not re-declared here: they're `raw`, so a `$VAR` self-reference would be literal.
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates
     - cd apps/mobile
