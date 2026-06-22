@@ -248,7 +248,7 @@ build_native_android:
   # not re-declare it. The variable is `raw`, so `EXPO_TOKEN: $EXPO_TOKEN` passes
   # the literal string "$EXPO_TOKEN" (11 chars) into the job instead of the token.
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
+    - apt-get update && apt-get install -y --no-install-recommends git jq curl ca-certificates
     - npm install -g pnpm@latest-10
     - pnpm install --frozen-lockfile --filter mobile...
   script:
@@ -280,7 +280,7 @@ build_native_ios:
   # not re-declare it. The variable is `raw`, so `EXPO_TOKEN: $EXPO_TOKEN` passes
   # the literal string "$EXPO_TOKEN" (11 chars) into the job instead of the token.
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
+    - apt-get update && apt-get install -y --no-install-recommends git jq curl ca-certificates
     - npm install -g pnpm@latest-10
     - pnpm install --frozen-lockfile --filter mobile...
   script:
