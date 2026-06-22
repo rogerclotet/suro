@@ -2,6 +2,41 @@ stages:
   - check
   - build
   - deploy
+  - submit
+
+# Per-area change sets, reused in job `rules:` so each build only runs when files
+# affecting it changed. web and mobile both import packages/backend's generated
+# Convex API (workspace:*), so backend changes trigger both. Root config
+# (lockfile, workspace, package.json, biome, Docker) affects everything.
+#
+# `.gitlab-ci.yml` is intentionally OUT of the mobile set: editing CI must not
+# trigger paid EAS builds (+ remote version bumps). It stays in web/backend
+# (cheap Docker build / convex deploy).
+.changes-web: &changes-web
+  - apps/web/**/*
+  - packages/backend/**/*
+  - package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - biome.json
+  - Dockerfile
+  - .dockerignore
+  - compose.yaml
+  - .gitlab-ci.yml
+
+.changes-backend: &changes-backend
+  - packages/backend/**/*
+  - package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - .gitlab-ci.yml
+
+.changes-mobile: &changes-mobile
+  - apps/mobile/**/*
+  - packages/backend/**/*
+  - package.json # app.config.ts derives the store version from root package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
 
 workflow:
   rules:
@@ -13,6 +48,9 @@ workflow:
       when: never
     - if: $CI_COMMIT_BRANCH
 
+# Repo-wide validation. Always runs (ungated) — it's the correctness floor and
+# guarantees the pipeline is never empty when every gated job is skipped. The web
+# build lives in web_build_check so non-web changes skip it.
 check:
   stage: check
   image: node:25.1-slim
@@ -31,13 +69,36 @@ check:
     - pnpm biome:check
     - pnpm typecheck
     - pnpm test
-    - pnpm run build
   artifacts:
     paths:
       - node_modules
       - test-report.xml
     reports:
       junit: test-report.xml
+
+# Next.js production build as a pre-merge compile-check. Web-gated: skipped on
+# mobile/backend-only changes. Not run on the default branch — there the Docker
+# `build` job compiles web for real, so a second build here would be redundant.
+# Own install (pnpm's symlinked node_modules does not survive GitLab artifact
+# round-trips reliably).
+web_build_check:
+  stage: check
+  image: node:25.1-slim
+  before_script:
+    - npm install -g pnpm@latest-10
+    - pnpm install
+  variables:
+    SKIP_ENV_VALIDATION: "1"
+    NEXT_TELEMETRY_DISABLED: "1"
+    POSTHOG_API_KEY: ""
+    POSTHOG_ENV_ID: ""
+  script:
+    - pnpm run build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *changes-web
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      changes: *changes-web
 
 build_preview:
   stage: build
@@ -60,7 +121,9 @@ build_preview:
   rules:
     # Preview is opt-in: trigger this job manually from the MR pipeline.
     # It doesn't block the pipeline, and deploy_preview waits on it.
+    # Web-gated: a mobile/backend-only MR gets no (useless) web preview.
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *changes-web
       when: manual
       allow_failure: true
 
@@ -85,8 +148,9 @@ build:
         -t $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE:latest
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-web
 
 # Deploy the Convex backend (schema + functions) to the production deployment
 # that CONVEX_DEPLOY_KEY belongs to. Runs before the web deploy (see needs:)
@@ -99,20 +163,28 @@ convex_deploy:
     - pnpm install --frozen-lockfile --filter backend...
   script:
     - cd packages/backend && npx convex deploy
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-backend
 
 deploy:
   stage: deploy
   image: alpine
-  needs: [build, convex_deploy]
+  # deploy.sh pulls $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA, so deploy must run iff
+  # `build` ran (same web gate). convex_deploy is optional: a web-only change
+  # skips it, but when backend also changed the ordering still holds.
+  needs:
+    - build
+    - job: convex_deploy
+      optional: true
   before_script:
     - apk add openssh-client sshpass
   script:
     - chmod +x apps/web/scripts/deploy.sh
     - apps/web/scripts/deploy.sh
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-web
 
 deploy_preview:
   stage: deploy
@@ -130,6 +202,7 @@ deploy_preview:
     auto_stop_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: *changes-web
 
 stop_preview:
   stage: deploy
@@ -144,5 +217,144 @@ stop_preview:
     action: stop
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
+
+# ---------------------------------------------------------------------------
+# Native mobile builds (EAS cloud). On main, when native code changes, build the
+# store-ready binaries on Expo's infra (no Android/iOS toolchain on the runner)
+# and download them as downloadable CI artifacts at the exact paths the fastlane
+# lanes expect. Needs EXPO_TOKEN (protected+masked CI variable). Gated behind
+# `check` so a lint/test failure never burns EAS build credits.
+# Note: the `production` profile auto-increments the remote version every build.
+# ---------------------------------------------------------------------------
+build_native_android:
+  stage: build
+  image: node:25.1-slim
+  needs:
+    - job: check
+      artifacts: false
+  variables:
+    EXPO_TOKEN: $EXPO_TOKEN
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
+    - npm install -g pnpm@latest-10
+    - pnpm install --frozen-lockfile --filter mobile...
+  script:
+    - cd apps/mobile
+    - mkdir -p build
+    - pnpm exec eas build --platform android --profile production --non-interactive --json --wait > build/eas-android.json
+    - |
+      URL=$(jq -r '(if type=="array" then .[0] else . end) | .artifacts.applicationArchiveUrl // .artifacts.buildUrl' build/eas-android.json)
+      if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No artifact URL in EAS build output" >&2; exit 1; fi
+      curl -fL "$URL" -o build/suro-release.aab
+      ls -lh build/suro-release.aab
+  artifacts:
+    name: "suro-android-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - apps/mobile/build/suro-release.aab
+      - apps/mobile/build/eas-android.json
+    expire_in: 2 weeks
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-mobile
+
+build_native_ios:
+  stage: build
+  image: node:25.1-slim
+  needs:
+    - job: check
+      artifacts: false
+  variables:
+    EXPO_TOKEN: $EXPO_TOKEN
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends jq curl ca-certificates
+    - npm install -g pnpm@latest-10
+    - pnpm install --frozen-lockfile --filter mobile...
+  script:
+    - cd apps/mobile
+    - mkdir -p build
+    - pnpm exec eas build --platform ios --profile production --non-interactive --json --wait > build/eas-ios.json
+    - |
+      URL=$(jq -r '(if type=="array" then .[0] else . end) | .artifacts.applicationArchiveUrl // .artifacts.buildUrl' build/eas-ios.json)
+      if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No artifact URL in EAS build output" >&2; exit 1; fi
+      curl -fL "$URL" -o build/suro-release.ipa
+      ls -lh build/suro-release.ipa
+  artifacts:
+    name: "suro-ios-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - apps/mobile/build/suro-release.ipa
+      - apps/mobile/build/eas-ios.json
+    expire_in: 2 weeks
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-mobile
+
+# ---------------------------------------------------------------------------
+# Manual store submission (fastlane), mirroring the local
+# `pnpm --filter mobile release:android` / `release:ios` flow. Pulls the binary
+# from the native build job into apps/mobile/build/ (the path the Fastfile
+# checks), then runs the lane from apps/mobile. `when: manual` + allow_failure
+# makes these OPTIONAL buttons (the pipeline still passes if you don't submit).
+# ---------------------------------------------------------------------------
+submit_android:
+  stage: submit
+  image: ruby:3.3-slim
+  needs:
+    - job: build_native_android
+      artifacts: true
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates
+    # PLAY_SERVICE_ACCOUNT_JSON is a File-type CI variable; place it where the
+    # fastlane Appfile expects it.
+    - mkdir -p apps/mobile/credentials
+    - cp "$PLAY_SERVICE_ACCOUNT_JSON" apps/mobile/credentials/play-service-account.json
+    - cd apps/mobile
+    - bundle config set --local deployment true
+    - bundle install
+  script:
+    - test -f build/suro-release.aab
+    - bundle exec fastlane android release # uploads AAB + release notes to the internal track
+  cache:
+    key:
+      files:
+        - apps/mobile/Gemfile.lock
+    paths:
+      - apps/mobile/vendor/bundle
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-mobile
+      when: manual
+      allow_failure: true
+
+submit_ios:
+  stage: submit
+  image: ruby:3.3-slim
+  needs:
+    - job: build_native_ios
+      artifacts: true
+  variables:
+    # fastlane's own App Store Connect API key auth (separate from the iOS
+    # signing creds EAS holds). Set these as protected CI variables.
+    APP_STORE_CONNECT_API_KEY_KEY_ID: $APP_STORE_CONNECT_API_KEY_KEY_ID
+    APP_STORE_CONNECT_API_KEY_ISSUER_ID: $APP_STORE_CONNECT_API_KEY_ISSUER_ID
+    APP_STORE_CONNECT_API_KEY_KEY: $APP_STORE_CONNECT_API_KEY_KEY # base64 .p8 contents
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates
+    - cd apps/mobile
+    - bundle config set --local deployment true
+    - bundle install
+  script:
+    - test -f build/suro-release.ipa
+    - bundle exec fastlane ios release # uploads IPA + submits for App Store review
+  cache:
+    key:
+      files:
+        - apps/mobile/Gemfile.lock
+    paths:
+      - apps/mobile/vendor/bundle
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: *changes-mobile
       when: manual
       allow_failure: true
