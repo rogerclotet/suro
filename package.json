@@ -2,6 +2,7 @@
   "name": "suro",
   "version": "1.11.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter web dev",
