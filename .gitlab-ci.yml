@@ -7,7 +7,8 @@ stages:
 # Per-area change sets, reused in job `rules:` so each build only runs when files
 # affecting it changed. web and mobile both import packages/backend's generated
 # Convex API (workspace:*), so backend changes trigger both. Root config
-# (lockfile, workspace, package.json, biome, Docker) affects everything.
+# (lockfile, workspace, package.json, biome, Docker) affects web/backend builds;
+# the mobile set is deliberately narrower (native binary inputs only — see below).
 #
 # `.gitlab-ci.yml` is intentionally OUT of the mobile set: editing CI must not
 # trigger paid EAS builds (+ remote version bumps). It stays in web/backend
@@ -31,12 +32,21 @@ stages:
   - pnpm-workspace.yaml
   - .gitlab-ci.yml
 
+# Native binary inputs only: trigger a native build when files that actually
+# change the compiled .aab/.ipa change. Excludes root package.json (just the
+# marketing version + monorepo lint/hook tooling — not baked into the binary),
+# the shared lockfile/workspace (they churn on web-only dependency bumps), and
+# apps/mobile's docs / store-metadata / fastlane dirs (submit-time, not build).
 .changes-mobile: &changes-mobile
-  - apps/mobile/**/*
+  - apps/mobile/src/**/*
+  - apps/mobile/assets/**/*
+  - apps/mobile/app.json
+  - apps/mobile/app.config.ts
+  - apps/mobile/eas.json
+  - apps/mobile/package.json
+  - apps/mobile/metro.config.js
+  - apps/mobile/google-services.json
   - packages/backend/**/*
-  - package.json # app.config.ts derives the store version from root package.json
-  - pnpm-lock.yaml
-  - pnpm-workspace.yaml
 
 workflow:
   rules:
