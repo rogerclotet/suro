@@ -3,6 +3,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import { endOfWeek, startOfWeek } from "date-fns";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -105,8 +106,19 @@ export default function Calendar({
   const [date, setDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(monthStart);
   const { project } = useProjects();
-  const monthEnd = useMemo(() => getMonthEnd(currentMonth), [currentMonth]);
-  const events = useEventsInRange(project?.id, currentMonth, monthEnd);
+  const dfLocale = useMemo(() => getDateFnsLocaleForUi(uiLocale), [uiLocale]);
+  // Cover the whole visible grid, including the adjacent-month days
+  // react-day-picker renders at the edges (showOutsideDays), so their events
+  // get dots and show when such a day is selected.
+  const rangeStart = useMemo(
+    () => startOfWeek(currentMonth, { locale: dfLocale }),
+    [currentMonth, dfLocale],
+  );
+  const rangeEnd = useMemo(
+    () => endOfWeek(getMonthEnd(currentMonth), { locale: dfLocale }),
+    [currentMonth, dfLocale],
+  );
+  const events = useEventsInRange(project?.id, rangeStart, rangeEnd);
   const router = useRouter();
   const getCalendarToken = useMutation(api.events.getOrCreateCalendarToken);
 
@@ -214,7 +226,7 @@ export default function Calendar({
             selected={date}
             onSelect={handleDaySelect}
             onMonthChange={setCurrentMonth}
-            locale={getDateFnsLocaleForUi(uiLocale)}
+            locale={dfLocale}
             dateLocale={dateLocale}
             className="mx-auto"
             classNames={{

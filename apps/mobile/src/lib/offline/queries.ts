@@ -254,7 +254,9 @@ export function useOfflineListPotsOverview(
   }, [base, projectMembers, entries, idmap, user, projectId]);
 }
 
-export function useOfflineGetPot(potId: Id<"pots">): PotDetail | undefined {
+export function useOfflineGetPot(
+  potId: Id<"pots">,
+): PotDetail | null | undefined {
   const base = usePersistentQuery(api.expenses.getPot, { potId });
   const entries = useOutboxEntries();
   const idmap = useIdmap();
@@ -274,6 +276,11 @@ export function useOfflineGetPot(potId: Id<"pots">): PotDetail | undefined {
     synthProjectId ? { projectId: synthProjectId as Id<"projects"> } : "skip",
   );
   return useMemo(() => {
+    // A null base means the pot was deleted server-side; surface it so the
+    // detail screen can navigate away rather than rendering stale chrome.
+    if (base === null) {
+      return null;
+    }
     let potBase: PotDetail | undefined = base;
     if (base === undefined) {
       if (!create || !user || projectMembers === undefined) {

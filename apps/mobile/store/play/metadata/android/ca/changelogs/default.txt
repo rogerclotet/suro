@@ -1,1 +1,3 @@
-• Hem afegit l'inici de sessió amb Apple: ara pots entrar amb el teu compte d'Apple, igual que ja podies amb Google o amb el correu electrònic.
+• Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el tens obert ja no mostra cap error i simplement et fa enrere.
+• El calendari ara mostra els esdeveniments dels dies dels mesos veïns que es veuen a dalt i a baix del mes.
+• A l'aplicació mòbil, llisca cap a l'esquerra o la dreta al calendari per canviar de mes.

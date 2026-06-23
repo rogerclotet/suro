@@ -1,10 +1,14 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import { TrackBadgeLink } from "./track-badge-link";
 
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=dev.clotet.suro";
+
+// Country-less smart link: Apple redirects each visitor to their own
+// storefront and localizes the listing automatically. Hardcoding a country
+// segment instead forces one store (and 404s where the app isn't sold).
+const APP_STORE_URL = "https://apps.apple.com/app/id6780486033";
 
 // Brand lockups are kept in English and served unoptimized so the official
 // artwork is never re-encoded. Heights are matched across the two badges.
@@ -14,9 +18,7 @@ type AppBadgesProps = {
   className?: string;
 };
 
-export default async function AppBadges({ className }: AppBadgesProps) {
-  const t = await getTranslations("landing");
-
+export default function AppBadges({ className }: AppBadgesProps) {
   return (
     <div
       className={cn(
@@ -41,20 +43,22 @@ export default async function AppBadges({ className }: AppBadgesProps) {
         />
       </TrackBadgeLink>
 
-      {/* iOS is still pending review — show the badge as a non-interactive teaser. */}
-      <div className="flex flex-col items-center gap-1.5">
+      <TrackBadgeLink
+        store="app_store"
+        href={APP_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      >
         <Image
           src="/badges/app-store.svg"
           alt="Download on the App Store"
           width={120}
           height={40}
           unoptimized
-          className={cn(BADGE_IMG, "opacity-60")}
+          className={BADGE_IMG}
         />
-        <span className="font-medium text-xs uppercase tracking-wide opacity-70">
-          {t("iosComingSoon")}
-        </span>
-      </div>
+      </TrackBadgeLink>
     </div>
   );
 }

@@ -1,5 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { useCallback, useMemo } from "react";
 import { Pressable, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 import { useMonthLabel, useWeekdayShortLabels } from "@/lib/datetime";
 import { sameDay } from "@/lib/event-dates";
 import { useTheme } from "@/theme";
@@ -23,6 +26,22 @@ function monthWeeks(month: Date): Date[][] {
   );
 }
 
+/**
+ * First and last day shown in the 6-week grid for `month` — including the
+ * trailing days of the previous month and leading days of the next that fill
+ * the grid's edges. Drives the calendar's event query so those visible
+ * adjacent-month days still get their event dots.
+ */
+export function monthGridRange(month: Date): { start: Date; end: Date } {
+  const weeks = monthWeeks(month);
+  const firstWeek = weeks[0] as Date[];
+  const lastWeek = weeks[weeks.length - 1] as Date[];
+  return {
+    start: firstWeek[0] as Date,
+    end: lastWeek[lastWeek.length - 1] as Date,
+  };
+}
+
 function isBetween(day: Date, start: Date, end: Date): boolean {
   const d = day.getTime();
   const lo = Math.min(start.getTime(), end.getTime());
@@ -39,6 +58,9 @@ const RANGE_BAR = DAY_TILE;
 // Corner radius of the selected-day tile (and the range bar's outer ends), so
 // selected days read as rounded squares rather than circles.
 const DAY_RADIUS = 10;
+// Minimum horizontal travel (px) for a swipe to page the month, so a vertical
+// scroll's drift or a day tap never flips the month.
+const SWIPE_THRESHOLD = 48;
 
 /**
  * Reusable Monday-first month grid. Drives the calendar view (with event dots)
@@ -51,6 +73,7 @@ export function MonthGrid({
   selectedStart,
   selectedEnd,
   dotsForDay,
+  swipeToChangeMonth,
 }: {
   month: Date;
   onChangeMonth: (firstOfMonth: Date) => void;
@@ -65,6 +88,12 @@ export function MonthGrid({
   dotsForDay?: (
     day: Date,
   ) => { key: string; color: string; onPrimary?: string }[];
+  /**
+   * Enable a horizontal swipe over the grid to page months (left = next,
+   * right = previous). Off by default so the event-form date picker keeps its
+   * tap-only behavior; the calendar view opts in.
+   */
+  swipeToChangeMonth?: boolean;
 }) {
   const t = useTheme();
   const weeks = monthWeeks(month);
@@ -72,13 +101,35 @@ export function MonthGrid({
   const monthLabelOf = useMonthLabel();
   const weekdays = useWeekdayShortLabels();
 
-  function shiftMonth(delta: number) {
-    onChangeMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1));
-  }
+  const shiftMonth = useCallback(
+    (delta: number) => {
+      onChangeMonth(new Date(month.getFullYear(), month.getMonth() + delta, 1));
+    },
+    [month, onChangeMonth],
+  );
+
+  // Horizontal swipe to page months: left → next, right → previous.
+  // `activeOffsetX` waits for a clear horizontal intent and `failOffsetY`
+  // yields to a surrounding vertical ScrollView, so day taps and scrolling keep
+  // working. `onEnd` runs on the UI thread, so hop back to JS with `runOnJS`.
+  const swipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-20, 20])
+        .failOffsetY([-20, 20])
+        .onEnd((e) => {
+          if (e.translationX <= -SWIPE_THRESHOLD) {
+            runOnJS(shiftMonth)(1);
+          } else if (e.translationX >= SWIPE_THRESHOLD) {
+            runOnJS(shiftMonth)(-1);
+          }
+        }),
+    [shiftMonth],
+  );
 
   const monthLabel = monthLabelOf(month);
 
-  return (
+  const content = (
     <View>
       <View
         style={{
@@ -246,5 +297,13 @@ export function MonthGrid({
         </View>
       ))}
     </View>
+  );
+
+  // Only the calendar view opts into swipe; the event-form date picker renders
+  // in a sheet and keeps its plain, tap-only grid.
+  return swipeToChangeMonth ? (
+    <GestureDetector gesture={swipeGesture}>{content}</GestureDetector>
+  ) : (
+    content
   );
 }

@@ -6,6 +6,16 @@ import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 
+/** Narrow a detail-query result the test just created: `getPot` now returns
+ * null for a missing pot, so field access needs the non-null guarantee the
+ * test already relies on. */
+function present<T>(value: T | null): T {
+  if (value === null) {
+    throw new Error("expected the document to exist");
+  }
+  return value;
+}
+
 type Ids = {
   alice: Id<"users">;
   bob: Id<"users">;
@@ -80,9 +90,9 @@ describe("expenses: deletePot", () => {
     const potId = await makePot();
     await alice.mutation(api.expenses.deletePot, { potId });
 
-    await expect(alice.query(api.expenses.getPot, { potId })).rejects.toThrow(
-      "Pot not found",
-    );
+    // A deleted pot reads back as null (not an error) so the detail screen can
+    // navigate away cleanly instead of surfacing a server error.
+    expect(await alice.query(api.expenses.getPot, { potId })).toBeNull();
     expect(await potMembers(potId)).toHaveLength(0);
   });
 
@@ -98,9 +108,9 @@ describe("expenses: deletePot", () => {
       alice.mutation(api.expenses.deletePot, { potId }),
     ).rejects.toThrow("settled or not-yet-started");
     // The pot and its spending survive the rejected delete.
-    expect((await alice.query(api.expenses.getPot, { potId })).name).toBe(
-      "Trip",
-    );
+    expect(
+      present(await alice.query(api.expenses.getPot, { potId })).name,
+    ).toBe("Trip");
     expect(await potSpendings(potId)).toHaveLength(1);
   });
 
@@ -112,7 +122,7 @@ describe("expenses: deletePot", () => {
       amount: 1000,
       from: ids.alice,
     });
-    const pot = await alice.query(api.expenses.getPot, { potId });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
     expect(pot.settlements.length).toBeGreaterThan(0);
     await alice.mutation(api.expenses.settlePayments, {
       potId,
@@ -125,9 +135,7 @@ describe("expenses: deletePot", () => {
 
     // Now settled — deletion is allowed and removes every spending row.
     await alice.mutation(api.expenses.deletePot, { potId });
-    await expect(alice.query(api.expenses.getPot, { potId })).rejects.toThrow(
-      "Pot not found",
-    );
+    expect(await alice.query(api.expenses.getPot, { potId })).toBeNull();
     expect(await potSpendings(potId)).toHaveLength(0);
   });
 

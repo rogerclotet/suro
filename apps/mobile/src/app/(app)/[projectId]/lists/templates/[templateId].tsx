@@ -4,7 +4,7 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Copy, Ellipsis, LayoutTemplate, Trash2 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
 import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
@@ -25,7 +25,7 @@ import {
   Txt,
 } from "@/ui";
 
-type Template = FunctionReturnType<typeof api.templates.get>;
+type Template = NonNullable<FunctionReturnType<typeof api.templates.get>>;
 type TemplateItem = Template["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 /** A template item plus its position in the template's `items` array. */
@@ -118,6 +118,15 @@ export default function TemplateEditor() {
   // The settings sheet hosts the export-to-group picker inline (no second
   // Modal), mirroring the index actions sheet.
   const [showExport, setShowExport] = useState(false);
+
+  // `null` means the template no longer exists (deleted here or from another
+  // client): leave the editor instead of re-querying a deleted template, which
+  // would surface a "Template not found" server error.
+  useEffect(() => {
+    if (template === null && router.canGoBack()) {
+      router.back();
+    }
+  }, [template, router]);
 
   const uncategorized = tr("uncategorized");
   const sections = useMemo(
@@ -242,7 +251,7 @@ export default function TemplateEditor() {
     ]);
   }
 
-  if (template === undefined) {
+  if (template === undefined || template === null) {
     return (
       <Screen>
         <Loading />

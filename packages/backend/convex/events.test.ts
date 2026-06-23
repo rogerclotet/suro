@@ -6,6 +6,16 @@ import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 
+/** Narrow a detail-query result the test just created: the `get` reads now
+ * return null for a missing doc, so field access needs the non-null guarantee
+ * the test already relies on. */
+function present<T>(value: T | null): T {
+  if (value === null) {
+    throw new Error("expected the document to exist");
+  }
+  return value;
+}
+
 const DAY = 86_400_000;
 // Fixed reference instants so tests don't depend on the wall clock.
 const JAN_10 = Date.parse("2024-01-10T09:00:00.000Z");
@@ -72,7 +82,7 @@ describe("events: CRUD", () => {
       endAt: JAN_10_END,
       allDay: false,
     });
-    const event = await alice.query(api.events.get, { eventId: id });
+    const event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.name).toBe("Dinner");
     expect(event.description).toBe("out");
     expect(event.startAt).toBe(JAN_10);
@@ -90,7 +100,7 @@ describe("events: CRUD", () => {
       endAt: dayStart, // single all-day; mutation normalizes end to +1 day
       allDay: true,
     });
-    let event = await alice.query(api.events.get, { eventId: id });
+    let event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.endAt).toBe(dayStart + DAY);
 
     // Switching to a timed event must clear the +1-day normalization.
@@ -101,7 +111,7 @@ describe("events: CRUD", () => {
       endAt: JAN_10_END,
       allDay: false,
     });
-    event = await alice.query(api.events.get, { eventId: id });
+    event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.allDay).toBe(false);
     expect(event.endAt).toBe(JAN_10_END);
   });
@@ -127,9 +137,9 @@ describe("events: CRUD", () => {
       allDay: false,
     });
     await alice.mutation(api.events.remove, { eventId: id });
-    await expect(alice.query(api.events.get, { eventId: id })).rejects.toThrow(
-      "Event not found",
-    );
+    // A deleted event reads back as null (not an error) so a detail screen
+    // still subscribed mid-navigation never surfaces a server error.
+    expect(await alice.query(api.events.get, { eventId: id })).toBeNull();
   });
 
   it("rejects non-members", async () => {
@@ -197,7 +207,7 @@ describe("events: linked lists", () => {
     const listId = await alice.mutation(api.events.createLinkedList, {
       eventId,
     });
-    const event = await alice.query(api.events.get, { eventId });
+    const event = present(await alice.query(api.events.get, { eventId }));
     expect(event.list?._id).toBe(listId);
     expect(event.list?.name).toBe("Camping");
     // The list carries the event backlink.
@@ -241,12 +251,14 @@ describe("events: linked lists", () => {
     });
 
     await alice.mutation(api.events.linkList, { eventId, listId });
-    expect((await alice.query(api.events.get, { eventId })).list?._id).toBe(
-      listId,
-    );
+    expect(
+      present(await alice.query(api.events.get, { eventId })).list?._id,
+    ).toBe(listId);
 
     await alice.mutation(api.events.unlinkList, { eventId, listId });
-    expect((await alice.query(api.events.get, { eventId })).list).toBeNull();
+    expect(
+      present(await alice.query(api.events.get, { eventId })).list,
+    ).toBeNull();
     // The list itself survives the unlink.
     expect((await alice.query(api.lists.get, { listId }))?.event).toBeNull();
   });
@@ -316,7 +328,7 @@ describe("events: linked pots", () => {
   it("seeds every project member when memberIds is omitted", async () => {
     const eventId = await makeEvent();
     const potId = await alice.mutation(api.events.createLinkedPot, { eventId });
-    const pot = await alice.query(api.expenses.getPot, { potId });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
     expect(pot.name).toBe("Ski trip");
     expect(new Set(pot.members.map((m) => m._id))).toEqual(
       new Set([ids.alice, ids.bob]),
@@ -336,7 +348,7 @@ describe("events: linked pots", () => {
       eventId,
       memberIds: [ids.alice, ids.bob],
     });
-    const pot = await alice.query(api.expenses.getPot, { potId });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
     expect(new Set(pot.members.map((m) => m._id))).toEqual(
       new Set([ids.alice, ids.bob]),
     );

@@ -10,10 +10,10 @@ import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { ExportCalendarSheet } from "@/components/export-calendar-sheet";
 import { sectionHeaderBadges } from "@/components/header-badges";
-import { MonthGrid } from "@/components/month-grid";
+import { MonthGrid, monthGridRange } from "@/components/month-grid";
 import { useTranslations } from "@/i18n";
 import { useFormatEventRange, useLongDate } from "@/lib/datetime";
-import { isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -37,25 +37,18 @@ export default function CalendarScreen() {
   const fab = useFabScroll();
   const [exporting, setExporting] = useState(false);
 
-  const monthStart = new Date(
-    month.getFullYear(),
-    month.getMonth(),
-    1,
-  ).getTime();
-  const monthEnd = new Date(
-    month.getFullYear(),
-    month.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999,
-  ).getTime();
+  // Query the whole visible 6-week grid, not just the calendar month, so events
+  // on the leading/trailing days of the adjacent months (shown at the grid's
+  // edges) still get their dots and appear when such a day is selected.
+  const { from, to } = useMemo(() => {
+    const { start, end } = monthGridRange(month);
+    return { from: startOfDay(start).getTime(), to: endOfDay(end).getTime() };
+  }, [month]);
 
   const events = usePersistentQuery(api.events.listByRange, {
     projectId: pid,
-    from: monthStart,
-    to: monthEnd,
+    from,
+    to,
   });
   const createEvent = useMutation(api.events.create);
 
@@ -135,6 +128,7 @@ export default function CalendarScreen() {
           onSelectDay={setSelectedDay}
           selectedStart={selectedDay}
           dotsForDay={dotsForDay}
+          swipeToChangeMonth
         />
 
         <Txt size={17} weight="700" style={{ marginTop: 20, marginBottom: 8 }}>

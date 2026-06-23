@@ -3,7 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ellipsis, Trash2 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Dimensions, Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { headerCreateAction } from "@/components/header-badges";
@@ -188,7 +188,16 @@ export default function PotDetail() {
   const [settling, setSettling] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
-  if (pot === undefined) {
+  // `null` means the pot no longer exists (deleted here or from another
+  // client): leave the detail screen instead of re-querying a deleted pot,
+  // which would surface a "Pot not found" server error.
+  useEffect(() => {
+    if (pot === null && router.canGoBack()) {
+      router.back();
+    }
+  }, [pot, router]);
+
+  if (pot === undefined || pot === null) {
     return (
       <Screen>
         <Loading />

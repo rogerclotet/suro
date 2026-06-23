@@ -30,7 +30,10 @@ export default function EventDetail({
   const data = useEvent(eventId);
   const files = useEventFiles(eventId);
 
-  if (data === undefined) {
+  // `null` means the event was deleted (here or by another member); the delete
+  // flow navigates to the calendar, so render nothing rather than a deleted
+  // event while that happens.
+  if (data === undefined || data === null) {
     return null;
   }
 
