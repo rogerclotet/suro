@@ -31,6 +31,13 @@ export function startOfDay(date: Date): Date {
   return d;
 }
 
+/** Last instant (23:59:59.999) of the given day in the device's local zone. */
+export function endOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
 /** UTC midnight epoch-ms for a calendar day — the all-day storage boundary. */
 export function utcMidnight(year: number, month: number, day: number): number {
   return Date.UTC(year, month, day, 0, 0, 0, 0);

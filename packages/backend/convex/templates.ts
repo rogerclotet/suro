@@ -54,7 +54,15 @@ export const listByProject = query({
 export const get = query({
   args: { templateId: v.id("listTemplates") },
   handler: async (ctx, { templateId }) => {
-    const { template } = await requireTemplateAccess(ctx, templateId);
+    // Return null rather than throwing when the template is gone (see
+    // notes.get): the editor stays subscribed while it navigates away after a
+    // delete, and re-running against the deleted row would otherwise surface a
+    // "Template not found" server error on the client.
+    const template = await ctx.db.get(templateId);
+    if (template === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, template.projectId);
     return template;
   },
 });

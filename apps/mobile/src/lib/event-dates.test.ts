@@ -3,6 +3,7 @@ import {
   allDayDisplayEnd,
   DAY_MS,
   type EventTimes,
+  endOfDay,
   formatTimeRange,
   inclusiveDayCount,
   isEventOnDay,
@@ -81,6 +82,25 @@ describe("startOfDay", () => {
   it("does not mutate the input", () => {
     const input = new Date(2024, 5, 20, 14, 0);
     startOfDay(input);
+    expect(input.getHours()).toBe(14);
+  });
+});
+
+describe("endOfDay", () => {
+  it("returns the last instant of the given day", () => {
+    const result = endOfDay(new Date(2024, 5, 20, 14, 37, 12, 500));
+    expect(result.getFullYear()).toBe(2024);
+    expect(result.getMonth()).toBe(5);
+    expect(result.getDate()).toBe(20);
+    expect(result.getHours()).toBe(23);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
+  });
+
+  it("does not mutate the input", () => {
+    const input = new Date(2024, 5, 20, 14, 0);
+    endOfDay(input);
     expect(input.getHours()).toBe(14);
   });
 });

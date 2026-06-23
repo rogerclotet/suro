@@ -118,7 +118,15 @@ export const listPotsOverview = query({
 export const getPot = query({
   args: { potId: v.id("pots") },
   handler: async (ctx, { potId }) => {
-    const { pot } = await requirePotAccess(ctx, potId);
+    // Return null rather than throwing when the pot is gone (see notes.get):
+    // the detail screen stays subscribed while it navigates away after a
+    // delete, and re-running against the deleted row would otherwise surface a
+    // "Pot not found" server error on the client.
+    const pot = await ctx.db.get(potId);
+    if (pot === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, pot.projectId);
 
     const memberIds = await potMemberIds(ctx, potId);
     const memberDocs = await Promise.all(memberIds.map((id) => ctx.db.get(id)));

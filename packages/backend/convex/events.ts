@@ -45,7 +45,15 @@ export const listByRange = query({
 export const get = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    // Return null rather than throwing when the event is gone: the detail
+    // screen keeps this query subscribed while it navigates away after a
+    // delete, and a dangling subscription re-running against the deleted row
+    // would otherwise surface an "Event not found" server error on the client.
+    const event = await ctx.db.get(eventId);
+    if (event === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, event.projectId);
     const [linkedList, linkedNote, linkedPot] = await Promise.all([
       ctx.db
         .query("lists")

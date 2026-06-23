@@ -37,11 +37,18 @@ export type EventWithLinks = {
   pot: LinkedPot | null;
 };
 
-/** A single event with its linked list / note / pot (Convex `events.get`). */
-export function useEvent(eventId: string): EventWithLinks | undefined {
+/**
+ * A single event with its linked list / note / pot (Convex `events.get`).
+ * `null` once the event is gone, so the detail page can stop rendering it
+ * instead of surfacing a server error from the now-dangling subscription.
+ */
+export function useEvent(eventId: string): EventWithLinks | null | undefined {
   const data = useQuery(api.events.get, { eventId: eventId as Id<"events"> });
   if (data === undefined) {
     return undefined;
+  }
+  if (data === null) {
+    return null;
   }
   return {
     event: adaptEvent(data),

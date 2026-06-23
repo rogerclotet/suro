@@ -112,6 +112,20 @@ export default function EventDetail() {
     return () => clearInterval(id);
   }, []);
 
+  // `null` means the event no longer exists (deleted here or from another
+  // client): return to the calendar instead of rendering — or re-querying — a
+  // deleted event, which would surface an "Event not found" server error.
+  useEffect(() => {
+    if (event !== null) {
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace(`/${pid}/calendar`);
+    }
+  }, [event, router, pid]);
+
   async function handleEdit(values: EventFormValues) {
     setEditing(false);
     await updateEvent({ eventId: eid, ...values });
@@ -196,7 +210,7 @@ export default function EventDetail() {
     await Share.share({ title: event.name, message, url: link });
   }
 
-  if (event === undefined) {
+  if (event === undefined || event === null) {
     return (
       <Screen>
         <Stack.Screen options={{ title: "" }} />
