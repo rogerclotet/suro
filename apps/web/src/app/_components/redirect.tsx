@@ -40,7 +40,7 @@ export default function Redirect({ projectId }: { projectId?: string }) {
       projects.length > 0
     ) {
       router.push({
-        pathname: "/groups/[projectId]/lists",
+        pathname: "/groups/[projectId]/home",
         params: { projectId: targetProjectId },
       });
     }

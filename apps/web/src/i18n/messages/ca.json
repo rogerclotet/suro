@@ -256,6 +256,7 @@
     "codeError": "El codi no es valid o ha caducat. Torna-ho a provar."
   },
   "nav": {
+    "home": "Inici",
     "lists": "Llistes",
     "templates": "Plantilles",
     "calendar": "Calendari",
@@ -275,6 +276,16 @@
     "themeLight": "Clar",
     "themeDark": "Fosc",
     "themeSystem": "Sistema"
+  },
+  "home": {
+    "today": "Avui",
+    "upcoming": "Properament",
+    "goToCalendar": "Ves al calendari",
+    "showAllLists": "Mostra-les totes",
+    "goToPots": "Ves als pots",
+    "noUpcoming": "Cap esdeveniment proper",
+    "noActiveLists": "Cap llista activa",
+    "noActivePots": "Cap pot actiu"
   },
   "feedback": {
     "title": "Envia suggeriments",
