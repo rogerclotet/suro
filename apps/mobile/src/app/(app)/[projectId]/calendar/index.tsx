@@ -12,7 +12,7 @@ import { ExportCalendarSheet } from "@/components/export-calendar-sheet";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { MonthGrid, monthGridRange } from "@/components/month-grid";
 import { useTranslations } from "@/i18n";
-import { useFormatEventRange, useLongDate } from "@/lib/datetime";
+import { useFormatEventTime, useLongDate } from "@/lib/datetime";
 import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
@@ -187,7 +187,7 @@ function EventCard({
   color: string;
   onPress: () => void;
 }) {
-  const formatRange = useFormatEventRange();
+  const formatTime = useFormatEventTime();
   return (
     <Card onPress={onPress}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -204,7 +204,7 @@ function EventCard({
         </Txt>
       </View>
       <Txt muted size={13} style={{ marginTop: 2 }}>
-        {formatRange(event)}
+        {formatTime(event)}
       </Txt>
       {event.description ? (
         <Txt size={14} style={{ marginTop: 6 }} numberOfLines={2}>

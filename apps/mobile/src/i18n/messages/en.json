@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Home",
     "lists": "Lists",
     "templates": "Templates",
     "categories": "Categories",
@@ -764,6 +765,37 @@
     "letsGo": "Let's go!"
   },
   "mobile": {
+    "home": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "goToCalendar": "Go to calendar",
+      "showAllLists": "Show all",
+      "goToPots": "Go to pots",
+      "noUpcoming": "No upcoming events",
+      "noActiveLists": "No active lists",
+      "noActivePots": "No active pots"
+    },
+    "onboarding": {
+      "welcomeTitle": "Welcome to Suro!",
+      "welcomeBody": "Suro is a shared corkboard for the people you do life with. Let's take a quick tour of what you can do.",
+      "homeTitle": "Home",
+      "homeBody": "Your starting point: today's plans, what's coming up, and your active lists and pots — your group at a glance.",
+      "listsTitle": "Lists",
+      "listsBody": "Create shopping lists, to-dos, and packing lists. Categorize items, save reusable templates, and check things off together in real time.",
+      "calendarTitle": "Calendar",
+      "calendarBody": "Plan trips, dinners and birthdays. Link a list to any event so everything you need is in one place.",
+      "expensesTitle": "Expenses",
+      "expensesBody": "Track who paid for what, split costs fairly, and let Suro work out the simplest way to settle up.",
+      "moreTitle": "More",
+      "moreBody": "Tap More for files and notes: share photos, PDFs and documents, and write rich-text notes with your group.",
+      "profileTitle": "Set up your profile",
+      "profileBody": "Add your name and pick a color so your group members can recognize you.",
+      "profileNamePlaceholder": "Your name",
+      "next": "Next",
+      "skip": "Skip",
+      "back": "Back",
+      "letsGo": "Let's go!"
+    },
     "common": {
       "add": "Add",
       "save": "Save",
@@ -919,6 +951,7 @@
     },
     "calendar": {
       "title": "Calendar",
+      "allDay": "All day",
       "exportCalendar": "Export calendar",
       "exportExplainer": "Subscribing adds a live, read-only copy of this calendar to your calendar app. New and changed events show up automatically. It's one-way: edits you make there won't sync back to Suro.",
       "subscribeApple": "Add to Apple Calendar",

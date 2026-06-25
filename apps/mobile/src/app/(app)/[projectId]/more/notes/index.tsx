@@ -5,7 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
-import { sectionHeaderBadges } from "@/components/header-badges";
+import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { notePreview } from "@/lib/note-content";
@@ -91,7 +91,7 @@ export default function NotesOverview() {
       <Stack.Screen
         options={{
           title: tNotes("title"),
-          ...sectionHeaderBadges("notes", {
+          ...headerCreateAction({
             onPress: () => setCreating(true),
             label: tNotes("newNote"),
           }),
@@ -158,7 +158,7 @@ function NoteCard({
     <Pressable
       onPress={() =>
         router.push({
-          pathname: `/${projectId}/notes/${note._id}`,
+          pathname: `/${projectId}/more/notes/${note._id}`,
           params: { name: note.name },
         })
       }
@@ -229,7 +229,7 @@ function CreateNoteSheet({
       setName("");
       onClose();
       router.push({
-        pathname: `/${projectId}/notes/${noteId}`,
+        pathname: `/${projectId}/more/notes/${noteId}`,
         params: { name: trimmed },
       });
     } finally {

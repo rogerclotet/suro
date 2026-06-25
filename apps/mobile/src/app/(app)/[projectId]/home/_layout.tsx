@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { FONT, useTheme } from "@/theme";
 
-export default function FilesLayout() {
+export default function HomeLayout() {
   const t = useTheme();
   return (
     <Stack

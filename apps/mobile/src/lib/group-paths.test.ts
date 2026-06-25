@@ -133,17 +133,24 @@ describe("webPathToRoute", () => {
 
   it("accepts a full absolute URL and strips the locale prefix", () => {
     expect(
-      webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/files`),
-    ).toBe(`/${PID}/files`);
+      webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/calendar`),
+    ).toBe(`/${PID}/calendar`);
   });
 
-  it("routes a bare group link to the group home", () => {
-    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/lists`);
+  it("nests overflow sections (files, notes) under the More tab", () => {
+    expect(webPathToRoute(`/groups/${PID}/files`)).toBe(`/${PID}/more/files`);
+    expect(webPathToRoute(`/ca/grups/${PID}/notes/n1`)).toBe(
+      `/${PID}/more/notes/n1`,
+    );
   });
 
-  it("falls back to the group home for features without a native screen", () => {
+  it("routes a bare group link to Home", () => {
+    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/home`);
+  });
+
+  it("falls back to Home for features without a native screen", () => {
     expect(webPathToRoute(`/ca/grups/${PID}/amic-invisible`)).toBe(
-      `/${PID}/lists`,
+      `/${PID}/home`,
     );
   });
 

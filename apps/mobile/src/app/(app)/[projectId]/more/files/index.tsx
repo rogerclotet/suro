@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import { Stack } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { FileGallery } from "@/components/file-gallery";
-import { sectionHeaderBadges } from "@/components/header-badges";
+import { headerCreateAction } from "@/components/header-badges";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
@@ -34,7 +34,7 @@ export default function Files() {
       <Stack.Screen
         options={{
           title: tFiles("title"),
-          ...sectionHeaderBadges("files", {
+          ...headerCreateAction({
             onPress: onCreate,
             label: tFiles("shareFiles"),
           }),

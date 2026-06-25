@@ -115,6 +115,30 @@ export function formatTimeRange(event: EventTimes, locale?: string): string {
 }
 
 /**
+ * Time-of-day label for contexts where the event's date is already shown (a
+ * calendar day header, the Home "Today" section): just the clock times for a
+ * same-day timed event, so the date isn't repeated. A single all-day event
+ * returns "" — the caller supplies a translated "All day" — and an event that
+ * genuinely spans multiple days falls back to the full dated range, since the
+ * span can't be conveyed by times alone.
+ */
+export function formatTimeOfDay(event: EventTimes, locale?: string): string {
+  const start = new Date(event.startAt);
+
+  if (event.allDay) {
+    return sameDay(allDayDisplayEnd(event.endAt), start)
+      ? ""
+      : formatTimeRange(event, locale);
+  }
+
+  const end = new Date(event.endAt);
+  if (sameDay(start, end)) {
+    return `${start.toLocaleTimeString(locale, TIME_OPTS)} - ${end.toLocaleTimeString(locale, TIME_OPTS)}`;
+  }
+  return formatTimeRange(event, locale);
+}
+
+/**
  * Countdown to the event start as a localizable descriptor, ported from
  * time-remaining.tsx. Returns null once the event has started (or is < 1 minute
  * away). The UI maps the descriptor to a translated, pluralized string.

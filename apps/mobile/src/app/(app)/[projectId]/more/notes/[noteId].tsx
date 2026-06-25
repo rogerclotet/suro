@@ -59,7 +59,7 @@ function DeletedNote() {
         </Txt>
         <Button
           title={tNotes("title")}
-          onPress={() => router.replace(`/${pid}/notes`)}
+          onPress={() => router.replace(`/${pid}/more/notes`)}
         />
       </View>
     </Screen>
@@ -144,7 +144,7 @@ function NoteEditorContent({ id, note }: { id: Id<"notes">; note: Note }) {
           onPress: () => {
             pending.current = null;
             void remove({ noteId: id }).then(() =>
-              router.replace(`/${pid}/notes`),
+              router.replace(`/${pid}/more/notes`),
             );
           },
         },
