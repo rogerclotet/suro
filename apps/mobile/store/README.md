@@ -116,9 +116,9 @@ sends an empty `versionString` and fails before a build exists).
 ## Screenshot capture
 
 Committed screenshots are captured from the real app with seeded demo data —
-5 per platform per locale: lists overview, list detail, calendar month,
-expenses pot, notes. Naming: `01-lists.png` … `05-notes.png` (order = store
-order; supply uploads alphabetically).
+6 per platform per locale: home dashboard, lists overview, list detail,
+calendar month, expenses pot, notes. Naming: `01-home.png` … `06-notes.png`
+(order = store order; supply uploads alphabetically).
 
 Prep (once per capture session):
 
@@ -137,7 +137,7 @@ iOS — needs a native build (NativeTabs don't render in Expo Go); the
 ```sh
 pnpm --filter mobile exec npx expo run:ios --device "iPhone 17 Pro Max"
 xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
-xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-lists.png
+xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-home.png
 ```
 
 Android — Pixel 9 AVD (1080x2424; reuse a running emulator if there is one):
@@ -148,7 +148,7 @@ adb shell settings put global sysui_demo_allowed 1
 adb shell am broadcast -a com.android.systemui.demo -e command enter
 adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
 adb shell am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false
-adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-lists.png
+adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-home.png
 adb shell am broadcast -a com.android.systemui.demo -e command exit
 ```
 

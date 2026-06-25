@@ -6,22 +6,25 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
-## [1.12.0] — 2026-06-23
+## [1.12.0] — 2026-06-25
 
 ### ca
 
+- [feature] Nova pestanya d'Inici: una vista general del grup amb els esdeveniments propers, les llistes i les despeses.
 - [fix] Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el tens obert ja no mostra cap error i simplement et fa enrere.
 - [improvement] El calendari ara mostra els esdeveniments dels dies dels mesos veïns que es veuen a dalt i a baix del mes.
 - [feature] A l'aplicació mòbil, llisca cap a l'esquerra o la dreta al calendari per canviar de mes.
 
 ### es
 
+- [feature] Nueva pestaña de Inicio: una vista general del grupo con los próximos eventos, las listas y los gastos.
 - [fix] Eliminar un evento, una lista, una nota, un gasto o una plantilla mientras lo tienes abierto ya no muestra un error y simplemente te lleva atrás.
 - [improvement] El calendario ahora muestra los eventos de los días de los meses vecinos que se ven arriba y abajo del mes.
 - [feature] En la aplicación móvil, desliza a la izquierda o a la derecha en el calendario para cambiar de mes.
 
 ### en
 
+- [feature] New Home tab: an at-a-glance overview of your group — upcoming events, your lists and expenses.
 - [fix] Deleting an event, list, note, expense or template while you have it open no longer shows an error and simply takes you back.
 - [improvement] The calendar now shows events on the neighbouring-month days visible at the top and bottom of the month.
 - [feature] On the mobile app, swipe left or right on the calendar to move between months.
