@@ -23,6 +23,7 @@ import {
   getDateFnsLocaleForUi,
   parseDateOnly,
 } from "@/lib/date-locale";
+import { isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
 import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
@@ -123,7 +124,7 @@ export default function Calendar({
   const getCalendarToken = useMutation(api.events.getOrCreateCalendarToken);
 
   const currentEvents = useMemo(
-    () => events?.filter((event) => isCurrentDayEvent(event, date)),
+    () => events?.filter((event) => isEventOnDay(event, date)),
     [events, date],
   );
 
@@ -150,7 +151,7 @@ export default function Calendar({
     modifiers: Modifiers;
   } & ComponentProps<typeof DayButton>) {
     const dayEvents = events
-      ?.filter((event) => isCurrentDayEvent(event, day.date))
+      ?.filter((event) => isEventOnDay(event, day.date))
       .slice(0, 3);
 
     return (
@@ -266,32 +267,4 @@ export default function Calendar({
       </div>
     </div>
   );
-}
-
-function isCurrentDayEvent(event: CalendarEvent, date?: Date) {
-  if (!date || !event.startAt || !event.endAt) {
-    return false;
-  }
-
-  let endAt = event.endAt;
-  if (event.allDay) {
-    endAt = new Date(endAt.getTime() - 86400000);
-  }
-
-  const eventStart = new Date(
-    event.startAt.getFullYear(),
-    event.startAt.getMonth(),
-    event.startAt.getDate(),
-  );
-  const eventEnd = new Date(
-    endAt.getFullYear(),
-    endAt.getMonth(),
-    endAt.getDate(),
-    23,
-    59,
-    59,
-    999,
-  );
-
-  return eventStart <= date && eventEnd >= date;
 }

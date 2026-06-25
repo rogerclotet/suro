@@ -38,6 +38,11 @@ export const routing = defineRouting({
       es: "/grupos/[projectId]",
       en: "/groups/[projectId]",
     },
+    "/groups/[projectId]/home": {
+      ca: "/grups/[projectId]/inici",
+      es: "/grupos/[projectId]/inicio",
+      en: "/groups/[projectId]/home",
+    },
     "/groups/[projectId]/lists": {
       ca: "/grups/[projectId]/llistes",
       es: "/grupos/[projectId]/listas",

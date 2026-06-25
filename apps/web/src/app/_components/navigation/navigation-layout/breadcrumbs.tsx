@@ -25,6 +25,10 @@ type BreadcrumbHref = Parameters<typeof Link>[0]["href"];
 type HrefFactory = (projectId: string) => BreadcrumbHref;
 
 const breadcrumbHrefMap: Record<string, HrefFactory> = {
+  home: (projectId) => ({
+    pathname: "/groups/[projectId]/home",
+    params: { projectId },
+  }),
   lists: (projectId) => ({
     pathname: "/groups/[projectId]/lists",
     params: { projectId },
@@ -63,6 +67,7 @@ const standalonePages: Record<string, string> = {
 const breadcrumbToTranslationKey: Record<string, string> = {
   groups: "groups",
   profile: "profile",
+  home: "home",
   lists: "lists",
   templates: "templates",
   calendar: "calendar",

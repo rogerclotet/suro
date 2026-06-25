@@ -256,6 +256,7 @@
     "codeError": "Invalid or expired code. Please try again."
   },
   "nav": {
+    "home": "Home",
     "lists": "Lists",
     "templates": "Templates",
     "calendar": "Calendar",
@@ -275,6 +276,16 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System"
+  },
+  "home": {
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "goToCalendar": "Go to calendar",
+    "showAllLists": "Show all",
+    "goToPots": "Go to pots",
+    "noUpcoming": "No upcoming events",
+    "noActiveLists": "No active lists",
+    "noActivePots": "No active pots"
   },
   "feedback": {
     "title": "Send feedback",

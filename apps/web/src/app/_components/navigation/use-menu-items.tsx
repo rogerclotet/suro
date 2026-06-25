@@ -7,6 +7,7 @@ import {
   FolderOpen,
   GiftIcon,
   HandCoins,
+  Home,
   LayoutTemplateIcon,
   LightbulbIcon,
   ListTodo,
@@ -46,9 +47,14 @@ type MenuItemPart = {
   isActive?: (project: Project) => boolean;
 };
 
-const DEFAULT_SECTION = "lists";
+const DEFAULT_SECTION = "home";
 
 const itemParts: MenuItemPart[] = [
+  {
+    nameKey: "home",
+    pathPart: "home",
+    icon: <Home />,
+  },
   {
     nameKey: "lists",
     pathPart: "lists",
@@ -67,6 +73,11 @@ const itemParts: MenuItemPart[] = [
     icon: <Calendar />,
   },
   {
+    nameKey: "expenses",
+    pathPart: "expenses",
+    icon: <HandCoins />,
+  },
+  {
     nameKey: "files",
     pathPart: "files",
     icon: <FolderOpen />,
@@ -75,11 +86,6 @@ const itemParts: MenuItemPart[] = [
     nameKey: "notes",
     pathPart: "notes",
     icon: <FileTextIcon />,
-  },
-  {
-    nameKey: "expenses",
-    pathPart: "expenses",
-    icon: <HandCoins />,
   },
   {
     nameKey: "secretSanta",
@@ -220,7 +226,10 @@ export function useMenuItems(): MenuItem[] {
   return items;
 }
 
-const MAX_BOTTOM_NAV_ITEMS = 5;
+// Four content tabs (Home / Lists / Calendar / Expenses) plus a trailing
+// "More", matching the native bottom bar — overflow sections (Files, Notes) live
+// under More.
+const MAX_BOTTOM_NAV_ITEMS = 4;
 
 export type BottomNavItem = MenuItem & {
   overflow?: MenuItem[];
