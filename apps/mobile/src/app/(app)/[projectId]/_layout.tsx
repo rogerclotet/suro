@@ -107,12 +107,13 @@ export default function ProjectTabs() {
     return <Redirect href="/" />;
   }
 
-  // Native tab bar: on iOS this is a real UITabBar, so iOS 26 renders it as
-  // Liquid Glass automatically — we deliberately set no `blurEffect` so the
-  // system glass isn't overridden (earlier iOS falls back to a default blur).
-  // On Android it's the Material 3 BottomNavigation, tinted below. Each section
-  // is a folder route with its own nested Stack that owns the header (and the
-  // iOS Liquid Glass badges), so headers are unaffected by this navigator.
+  // Native tab bar: a content-first Home, the high-traffic sections (lists,
+  // calendar, expenses), and a "More" tab holding the overflow sections — so the
+  // bar stays at five however many sections we add. On iOS this is a real
+  // UITabBar (Liquid Glass on iOS 26, no `blurEffect` override); on Android it's
+  // the Material 3 BottomNavigation, tinted below. Each tab is a folder route
+  // with its own nested Stack that owns the header (and the iOS Liquid Glass
+  // badges), so headers are unaffected by this navigator.
   return (
     <ProjectIdProvider projectId={projectId as Id<"projects">}>
       <SheetHost>
@@ -137,6 +138,10 @@ export default function ProjectTabs() {
           labelVisibilityMode="labeled"
           backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
         >
+          <Trigger name="home">
+            <Label>{tNav("home")}</Label>
+            <Icon sf="house" md="home" />
+          </Trigger>
           <Trigger name="lists">
             <Label>{tNav("lists")}</Label>
             <Icon sf="checklist" md="checklist" />
@@ -145,17 +150,13 @@ export default function ProjectTabs() {
             <Label>{tNav("calendar")}</Label>
             <Icon sf="calendar" md="calendar_month" />
           </Trigger>
-          <Trigger name="files">
-            <Label>{tNav("files")}</Label>
-            <Icon sf="folder" md="folder" />
-          </Trigger>
-          <Trigger name="notes">
-            <Label>{tNav("notes")}</Label>
-            <Icon sf="note.text" md="description" />
-          </Trigger>
           <Trigger name="expenses">
             <Label>{tNav("expenses")}</Label>
             <Icon sf="creditcard" md="payments" />
+          </Trigger>
+          <Trigger name="more">
+            <Label>{tNav("more")}</Label>
+            <Icon sf="ellipsis" md="more_horiz" />
           </Trigger>
         </Tabs>
       </SheetHost>

@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "@/i18n";
 import {
   type EventTimes,
+  formatTimeOfDay,
   formatTimeRange,
   timeRemainingParts,
 } from "@/lib/event-dates";
@@ -45,6 +46,18 @@ function timeAgoParts(epochMs: number, now: number): TimeAgoParts {
 export function useFormatEventRange(): (event: EventTimes) => string {
   const locale = useLocale();
   return (event) => formatTimeRange(event, locale);
+}
+
+/**
+ * Localized time-of-day formatter for when the event's date is shown elsewhere
+ * (a day header, the Home "Today" section): clock times for a same-day event,
+ * the translated "All day" for a single all-day event, the full range only when
+ * it spans days. Avoids repeating a date the surrounding UI already shows.
+ */
+export function useFormatEventTime(): (event: EventTimes) => string {
+  const locale = useLocale();
+  const tc = useTranslations("mobile.calendar");
+  return (event) => formatTimeOfDay(event, locale) || tc("allDay");
 }
 
 /** Localized relative time ("2 days ago" / "fa 2 dies"), older items show a date. */

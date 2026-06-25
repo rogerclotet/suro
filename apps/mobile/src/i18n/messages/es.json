@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Inicio",
     "lists": "Listas",
     "templates": "Plantillas",
     "categories": "Categorías",
@@ -764,6 +765,37 @@
     "letsGo": "¡Vamos!"
   },
   "mobile": {
+    "home": {
+      "today": "Hoy",
+      "upcoming": "Próximamente",
+      "goToCalendar": "Ir al calendario",
+      "showAllLists": "Ver todas",
+      "goToPots": "Ir a los botes",
+      "noUpcoming": "Ningún evento próximo",
+      "noActiveLists": "Ninguna lista activa",
+      "noActivePots": "Ningún bote activo"
+    },
+    "onboarding": {
+      "welcomeTitle": "¡Bienvenido a Suro!",
+      "welcomeBody": "Suro es un tablón compartido para la gente con la que compartes tu día a día. Vamos a hacer un recorrido rápido por lo que puedes hacer.",
+      "homeTitle": "Inicio",
+      "homeBody": "Tu punto de partida: los planes de hoy, lo que viene, y tus listas y botes activos — tu grupo de un vistazo.",
+      "listsTitle": "Listas",
+      "listsBody": "Crea listas de la compra, tareas pendientes y listas de equipaje. Categoriza elementos, guarda plantillas reutilizables y marca cosas juntos en tiempo real.",
+      "calendarTitle": "Calendario",
+      "calendarBody": "Planifica viajes, cenas y cumpleaños. Vincula una lista a cualquier evento para tener todo lo que necesitas en un solo lugar.",
+      "expensesTitle": "Gastos",
+      "expensesBody": "Registra quién pagó qué, divide los costes de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.",
+      "moreTitle": "Más",
+      "moreBody": "Toca Más para los archivos y las notas: comparte fotos, PDFs y documentos, y escribe notas con formato con tu grupo.",
+      "profileTitle": "Configura tu perfil",
+      "profileBody": "Añade tu nombre y elige un color para que los miembros de tu grupo te reconozcan.",
+      "profileNamePlaceholder": "Tu nombre",
+      "next": "Siguiente",
+      "skip": "Saltar",
+      "back": "Atrás",
+      "letsGo": "¡Vamos!"
+    },
     "common": {
       "add": "Añadir",
       "save": "Guardar",
@@ -919,6 +951,7 @@
     },
     "calendar": {
       "title": "Calendario",
+      "allDay": "Todo el día",
       "exportCalendar": "Exportar calendario",
       "exportExplainer": "Al suscribirte se añade una copia en directo y de solo lectura de este calendario a tu app de calendario: los eventos nuevos y modificados aparecen automáticamente. Es unidireccional: los cambios que hagas allí no se sincronizan de vuelta con Suro.",
       "subscribeApple": "Añadir a Apple Calendar",

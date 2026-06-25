@@ -289,8 +289,8 @@ export function Fab({
       style={{
         position: "absolute",
         right: 16,
-        // Screen content is already inset above the M3 navigation bar, so the
-        // spec's 16dp margin clears it.
+        // Screen content is already inset above the M3 navigation bar (the
+        // native tab bar applies the bottom inset), so the spec's 16dp clears it.
         bottom: 16,
         backgroundColor: t.primary,
       }}

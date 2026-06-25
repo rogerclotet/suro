@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Inici",
     "lists": "Llistes",
     "templates": "Plantilles",
     "categories": "Categories",
@@ -764,6 +765,37 @@
     "letsGo": "Som-hi!"
   },
   "mobile": {
+    "home": {
+      "today": "Avui",
+      "upcoming": "Properament",
+      "goToCalendar": "Ves al calendari",
+      "showAllLists": "Mostra-les totes",
+      "goToPots": "Ves als pots",
+      "noUpcoming": "Cap esdeveniment proper",
+      "noActiveLists": "Cap llista activa",
+      "noActivePots": "Cap pot actiu"
+    },
+    "onboarding": {
+      "welcomeTitle": "Benvingut a Suro!",
+      "welcomeBody": "Suro és un tauler compartit per a la gent amb qui comparteixes el dia a dia. Fem un recorregut ràpid per tot el que pots fer.",
+      "homeTitle": "Inici",
+      "homeBody": "El teu punt de partida: els plans d'avui, el que ve, i les teves llistes i pots actius — el teu grup d'un cop d'ull.",
+      "listsTitle": "Llistes",
+      "listsBody": "Crea llistes de la compra, tasques pendents i llistes d'equipatge. Categoritza elements, desa plantilles reutilitzables i marca coses junts en temps real.",
+      "calendarTitle": "Calendari",
+      "calendarBody": "Planifica viatges, sopars i aniversaris. Vincula una llista a qualsevol esdeveniment per tenir tot el que necessites en un sol lloc.",
+      "expensesTitle": "Despeses",
+      "expensesBody": "Registra qui ha pagat què, divideix els costos de manera justa i deixa que Suro calculi la manera més senzilla de saldar comptes.",
+      "moreTitle": "Més",
+      "moreBody": "Toca Més per als fitxers i les notes: comparteix fotos, PDFs i documents, i escriu notes amb format amb el teu grup.",
+      "profileTitle": "Configura el teu perfil",
+      "profileBody": "Afegeix el teu nom i tria un color perquè els membres del teu grup et reconeguin.",
+      "profileNamePlaceholder": "El teu nom",
+      "next": "Següent",
+      "skip": "Saltar",
+      "back": "Enrere",
+      "letsGo": "Som-hi!"
+    },
     "common": {
       "add": "Afegir",
       "save": "Desar",
@@ -919,6 +951,7 @@
     },
     "calendar": {
       "title": "Calendari",
+      "allDay": "Tot el dia",
       "exportCalendar": "Exportar calendari",
       "exportExplainer": "En subscriure't s'afegeix una còpia en directe i només de lectura d'aquest calendari a la teva app de calendari: els esdeveniments nous i modificats apareixen automàticament. És unidireccional: els canvis que hi facis no es sincronitzen de tornada amb Suro.",
       "subscribeApple": "Afegir a Apple Calendar",

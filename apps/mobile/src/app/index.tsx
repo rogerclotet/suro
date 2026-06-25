@@ -38,9 +38,9 @@ export default function Index() {
   const resume =
     storedProjectId && projects.some((p) => p._id === storedProjectId);
   const target = resume
-    ? `/${storedProjectId}/lists`
+    ? `/${storedProjectId}/home`
     : projects[0]
-      ? `/${projects[0]._id}/lists`
+      ? `/${projects[0]._id}/home`
       : "/create-group";
   return <Redirect href={target} />;
 }

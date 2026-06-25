@@ -4,6 +4,7 @@ import {
   DAY_MS,
   type EventTimes,
   endOfDay,
+  formatTimeOfDay,
   formatTimeRange,
   inclusiveDayCount,
   isEventOnDay,
@@ -233,6 +234,40 @@ describe("formatTimeRange", () => {
       ...TIME_OPTS,
     })}`;
     expect(formatTimeRange(event, "en-US")).toBe(expected);
+  });
+});
+
+describe("formatTimeOfDay", () => {
+  const TIME_OPTS = { hour: "numeric", minute: "2-digit" } as const;
+
+  it("shows only the clock times for a same-day timed event", () => {
+    const event = timed([2024, 0, 15, 9, 0], [2024, 0, 15, 11, 30]);
+    const expected = `${new Date(2024, 0, 15, 9, 0).toLocaleTimeString(
+      "en-US",
+      TIME_OPTS,
+    )} - ${new Date(2024, 0, 15, 11, 30).toLocaleTimeString("en-US", TIME_OPTS)}`;
+    expect(formatTimeOfDay(event, "en-US")).toBe(expected);
+    // The date isn't repeated — the surrounding UI already shows it.
+    expect(formatTimeOfDay(event, "en-US")).not.toContain("2024");
+  });
+
+  it("returns '' for a single all-day event (caller supplies 'All day')", () => {
+    const event = allDay([2024, 0, 15], [2024, 0, 16]);
+    expect(formatTimeOfDay(event, "en-US")).toBe("");
+  });
+
+  it("falls back to the full dated range when a timed event spans days", () => {
+    const event = timed([2024, 0, 15, 22, 0], [2024, 0, 16, 1, 0]);
+    expect(formatTimeOfDay(event, "en-US")).toBe(
+      formatTimeRange(event, "en-US"),
+    );
+  });
+
+  it("falls back to the date range for a multi-day all-day event", () => {
+    const event = allDay([2024, 0, 15], [2024, 0, 18]);
+    expect(formatTimeOfDay(event, "en-US")).toBe(
+      formatTimeRange(event, "en-US"),
+    );
   });
 });
 

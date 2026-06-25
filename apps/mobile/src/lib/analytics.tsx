@@ -56,7 +56,18 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
  * providers (for `api.users.me`) and inside `AnalyticsProvider` (for
  * `usePostHog`). No-ops when analytics is unconfigured.
  */
-export function AnalyticsBridge(): null {
+export function AnalyticsBridge(): ReactNode {
+  // When unconfigured (local dev / no key) `AnalyticsProvider` mounts no
+  // `PostHogProvider`, and `usePostHog` throws if called without one — so bail
+  // before any hook runs. `POSTHOG_KEY` is a stable module constant, keeping the
+  // early return hooks-safe.
+  if (!POSTHOG_KEY) {
+    return null;
+  }
+  return <AnalyticsTracker />;
+}
+
+function AnalyticsTracker(): null {
   const posthog = usePostHog();
   const { isAuthenticated } = useAuthGate();
   const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");

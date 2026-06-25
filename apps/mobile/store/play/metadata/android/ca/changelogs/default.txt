@@ -1,3 +1,4 @@
+• Nova pestanya d'Inici: una vista general del grup amb els esdeveniments propers, les llistes i les despeses.
 • Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el tens obert ja no mostra cap error i simplement et fa enrere.
 • El calendari ara mostra els esdeveniments dels dies dels mesos veïns que es veuen a dalt i a baix del mes.
 • A l'aplicació mòbil, llisca cap a l'esquerra o la dreta al calendari per canviar de mes.

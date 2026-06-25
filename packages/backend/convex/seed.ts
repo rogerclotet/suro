@@ -443,8 +443,12 @@ export const demoGroup = internalMutation({
           updatedAt: now,
         });
       }
+      return listId;
     };
-    await insertList(content.shopping, { favorite: true });
+    // The favorite list is the one screenshots open for the list-detail shot.
+    const favoriteListId = await insertList(content.shopping, {
+      favorite: true,
+    });
     await insertList(content.packing, { eventId: tripEventId });
     await insertList(content.chores);
 
@@ -490,6 +494,6 @@ export const demoGroup = internalMutation({
       });
     }
 
-    return { projectId, locale };
+    return { projectId, locale, favoriteListId, potId };
   },
 });

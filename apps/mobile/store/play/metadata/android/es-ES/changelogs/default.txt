@@ -1,3 +1,4 @@
+• Nueva pestaña de Inicio: una vista general del grupo con los próximos eventos, las listas y los gastos.
 • Eliminar un evento, una lista, una nota, un gasto o una plantilla mientras lo tienes abierto ya no muestra un error y simplemente te lleva atrás.
 • El calendario ahora muestra los eventos de los días de los meses vecinos que se ven arriba y abajo del mes.
 • En la aplicación móvil, desliza a la izquierda o a la derecha en el calendario para cambiar de mes.
