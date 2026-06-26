@@ -38,8 +38,8 @@
     },
     "info": {
       "en-US": {
-        "title": "My Suro",
-        "subtitle": "Lists & plans, together",
+        "title": "Suro: Shared Plans",
+        "subtitle": "Lists, calendar & expenses",
         "promoText": "Suro keeps your group's lists, plans, files and shared expenses in one calm place, so you can stop juggling chats, spreadsheets and reminders.",
         "description": "Suro is a shared corkboard for the people you do life with. Lists, calendar, notes, files and shared expenses for your group, in one calm place — so you can stop juggling chats, spreadsheets and reminders.\n\nLISTS\nShopping lists, packing lists, to-dos. Organize items into categories, save reusable templates, and check things off together in real time.\n\nCALENDAR\nPlan trips, dinners and birthdays. Link a list or a note to an event so the packing or the shopping is right where you need it. Subscribe from third-party calendars.\n\nNOTES & FILES\nShare rich-text notes, photos and PDFs with the whole group. No more digging through chat history.\n\nSHARED EXPENSES\nTrack who paid for what, split the bill fairly, and let Suro work out the simplest way to settle up.\n\nSTAY IN THE LOOP\nGet notified when someone updates a list, adds an event, or settles a debt. No chat-app noise.\n\nMADE FOR THE GROUPS IN YOUR LIFE\n• Flatmates — keep the shopping, chores and bills under control, together, not just in one person's head.\n• Families — from weekly meal planning to holiday packing, share what matters with the people at home.\n• Friend groups — plan the trip and split the costs without endless group-chat scrolling.\n\nStart your first group in under a minute: sign in, create a group, and invite your people with a link. No credit card, no setup.\n\nSuro doesn't sell your data and runs no algorithmic feeds.",
         "keywords": [
@@ -59,8 +59,8 @@
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
       },
       "es-ES": {
-        "title": "Mi Suro",
-        "subtitle": "Listas y planes, juntos",
+        "title": "Suro: Planes compartidos",
+        "subtitle": "Listas, calendario y gastos",
         "promoText": "Suro guarda las listas, los planes, los archivos y los gastos de tu grupo en un solo sitio, para que dejes de saltar entre chats, hojas de cálculo y recordatorios.",
         "description": "Suro es el corcho compartido para la gente con la que compartes tu día a día. Listas, calendario, notas, archivos y gastos compartidos de tu grupo en un solo sitio, para que dejes de saltar entre chats, hojas de cálculo y recordatorios.\n\nLISTAS\nListas de la compra, de equipaje, de tareas. Organiza los elementos por categorías, guarda plantillas reutilizables y marcadlas juntos en tiempo real.\n\nCALENDARIO\nPlanifica viajes, cenas y cumpleaños. Enlaza una lista o una nota a un evento para que el equipaje o la compra estén justo donde los necesitas. Suscríbete desde calendarios de terceros.\n\nNOTAS Y ARCHIVOS\nComparte notas con formato, fotos y PDFs con todo el grupo. Se acabó buscar en el historial del chat.\n\nGASTOS COMPARTIDOS\nApunta quién ha pagado qué, repártelo de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.\n\nAL DÍA SIN ESFUERZO\nRecibe avisos cuando alguien actualiza una lista, añade un evento o salda una deuda, sin el ruido de los chats.\n\nPENSADO PARA LOS GRUPOS DE TU VIDA\n• Compañeros de piso: tened la compra, las tareas y las facturas bajo control, juntos, no solo en la cabeza de uno.\n• Familias: desde los menús semanales hasta el equipaje de las vacaciones, compartid lo que importa con la gente de casa.\n• Grupos de amigos: organizad el viaje y repartid los gastos sin perderos en el chat del grupo.\n\nCrea tu primer grupo en menos de un minuto: inicia sesión, crea un grupo e invita a tu gente con un enlace. Sin tarjeta de crédito, sin configuración.\n\nSuro no vende tus datos ni usa feeds algorítmicos.",
         "keywords": [
