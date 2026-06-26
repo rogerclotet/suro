@@ -115,12 +115,51 @@ export default async function InvitePage({
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("invitation");
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; projectId: string; inviteToken: string }>;
+}): Promise<Metadata> {
+  const { locale, projectId, inviteToken } = await params;
+  const t = await getTranslations({ locale, namespace: "invitation" });
+
+  // Unauthenticated on purpose: the link unfurler (WhatsApp/Telegram) is never
+  // signed in, and the token gates the data. Falls back to the generic copy on
+  // a bad token. robots stays noindex — crawlers read OG tags regardless.
+  const preview = await fetchQuery(api.projects.getInvitePreview, {
+    projectId: projectId as Id<"projects">,
+    inviteToken,
+  }).catch(() => null);
+
+  if (!preview) {
+    return {
+      title: t("metadataInviteTitle"),
+      description: t("metadataInviteBody"),
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const names = preview.members
+    .map((m) => m.name)
+    .filter((name): name is string => name !== null && name.length > 0);
+  const title = t("metadataInviteTitleNamed", { name: preview.name });
+  const description =
+    names.length === 0
+      ? t("metadataInviteBody")
+      : names.length <= 6
+        ? t("metadataInviteBodyMembers", {
+            names: new Intl.ListFormat(locale, { type: "conjunction" }).format(
+              names,
+            ),
+          })
+        : t("metadataInviteBodyCount", { count: preview.members.length });
 
   return {
-    title: t("metadataInviteTitle"),
-    description: t("metadataInviteBody"),
+    title,
+    description,
     robots: { index: false, follow: false },
+    // og:image / twitter:image come from the colocated opengraph-image route.
+    openGraph: { title, description, type: "website", locale },
+    twitter: { card: "summary_large_image", title, description },
   };
 }

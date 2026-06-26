@@ -137,6 +137,43 @@ export const getByInvite = query({
 });
 
 /**
+ * Public (unauthenticated) preview of a group behind an invite link, for link
+ * unfurling — the OpenGraph card WhatsApp/Telegram render when the link is
+ * shared. Unlike getByInvite this skips the auth check on purpose: the crawler
+ * is never signed in, and the invite token is itself the bearer credential
+ * (anyone with the link is meant to be able to see the group and join). Returns
+ * only what a preview needs — no member ids — and null on a bad token.
+ */
+export const getInvitePreview = query({
+  args: { projectId: v.id("projects"), inviteToken: v.string() },
+  handler: async (ctx, { projectId, inviteToken }) => {
+    const project = await ctx.db.get(projectId);
+    if (project === null || project.inviteToken !== inviteToken) {
+      return null;
+    }
+    const memberships = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const users = await Promise.all(
+      memberships.map((m) => ctx.db.get(m.userId)),
+    );
+    return {
+      name: project.name,
+      color: project.color,
+      image: project.image ?? null,
+      members: users
+        .filter((u) => u !== null)
+        .map((u) => ({
+          name: u.name ?? null,
+          image: u.customImage ?? u.image ?? null,
+          avatarColor: u.avatarColor ?? null,
+        })),
+    };
+  },
+});
+
+/**
  * Create a new group and add the caller as its first member, atomically. Mirrors
  * the PWA's createProject (and the signup-time "Personal" group): a fresh invite
  * token and a random Catppuccin color. Returns the new project's id so the caller
