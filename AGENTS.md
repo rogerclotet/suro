@@ -76,6 +76,7 @@ When an entry is warranted:
 - Add a typed bullet in **all three** locales (`ca`, `es`, `en`) — the build fails if a type or locale is malformed. Format: `- [feature|fix|improvement] <text>`.
 - No em dashes (`—`) in entry text; use commas, colons, or separate sentences instead. (The `## [x.y.z] — date` heading separator is fine.)
 - **Never** append to an existing version block. Always start a **new** `## [x.y.z] — YYYY-MM-DD` block at the top (newest first) and bump `package.json` `version` to match. Use a **patch** bump for minimal changes or a lone fix; use a **minor** bump otherwise. The topmost version is shown in-app and drives the "app updated" toast, so the version bump is what notifies users.
+- **Bump `apps/mobile/store.config.json` `apple.version` in lockstep** with the root `package.json` version. It's plain JSON and can't read `package.json`, so forgetting it lets the two drift. EAS Metadata writes the App Store listing to whichever version `apple.version` names, so a stale value targets the wrong/old App Store version on the next iOS metadata push. The always-run CI `check` job runs `apps/mobile/store/check-metadata.mjs`, which fails the pipeline on a mismatch — so a forgotten bump shows up as a red pipeline rather than a silent miss.
 - No manual codegen needed — `src/data/changelog.generated.ts` is regenerated from `CHANGELOG.md` by the `pre*` hooks (`predev`/`prebuild`/`pretest`/`pretypecheck`). Run `pnpm changelog:generate` to preview.
 
 ## Git
