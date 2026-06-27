@@ -74,7 +74,7 @@ export const create = mutation({
       actorId: userId,
       bodyKey: "note_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/notes`,
+      path: `/${projectId}/notes/${noteId}`,
     });
     await track(ctx, userId, "note_created", {
       projectId,

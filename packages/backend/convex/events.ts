@@ -119,7 +119,7 @@ export const create = mutation({
       actorId: userId,
       bodyKey: "event_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/calendar`,
+      path: `/${projectId}/calendar/${eventId}`,
     });
     await track(ctx, userId, "event_created", { projectId, allDay });
     return eventId;

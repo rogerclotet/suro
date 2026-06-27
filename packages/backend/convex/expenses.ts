@@ -212,7 +212,7 @@ export const createPot = mutation({
       actorId: userId,
       bodyKey: "pot_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/expenses`,
+      path: `/${projectId}/expenses/${potId}`,
     });
     await track(ctx, userId, "pot_created", {
       projectId,
@@ -307,7 +307,9 @@ export const createSpending = mutation({
       bodyParams: cleanDescription
         ? { amount: (amount / 100).toFixed(2), description: cleanDescription }
         : { amount: (amount / 100).toFixed(2) },
-      path: `/${pot.projectId}/expenses`,
+      // A spending has no screen of its own; open the pot it belongs to, where
+      // the expense list lives.
+      path: `/${pot.projectId}/expenses/${potId}`,
     });
     await track(ctx, userId, "spending_created", {
       projectId: pot.projectId,

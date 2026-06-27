@@ -235,8 +235,10 @@ export function usePushNotifications(): void {
     function open(response: Notifications.NotificationResponse) {
       const path = response.notification.request.content.data?.path;
       if (typeof path === "string") {
-        // Payloads are built server-side as `/<pid>/<section>` with no knowledge
-        // of the mobile tab layout; nest overflow sections under the More tab.
+        // Payloads are built server-side as `/<pid>/<section>` or
+        // `/<pid>/<section>/<id>` (the entity the push is about), with no
+        // knowledge of the mobile tab layout; nest overflow sections under the
+        // More tab.
         router.push(withOverflowPrefix(path));
       }
     }
