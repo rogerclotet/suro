@@ -196,11 +196,17 @@ export function usePushNotifications(): void {
           void register({ token: result.token, platform: Platform.OS });
           return;
         }
-        // A signed-in physical device that yields no token is unexpected (a
-        // failed FCM/APNs registration, not just "push is off here"). Surface
-        // the reason once per session — visible in `adb logcat` — since the
+        // Log only genuine defects (a failed FCM/APNs registration, missing
+        // config) — once per session, visible in `adb logcat`, since the
         // failure is otherwise silent and PostHog isn't keyed in this build yet.
-        if (!warned && result.reason !== "push-unavailable") {
+        // Skip the expected states: push can't run here, or the user just
+        // hasn't granted permission. (An FCM block — e.g. NextDNS filtering
+        // Google's endpoints — surfaces here as `getExpoPushTokenAsync threw`.)
+        const benign =
+          result.reason === "push-unavailable" ||
+          result.reason === "not-a-physical-device" ||
+          result.reason.startsWith("permission-");
+        if (!warned && !benign) {
           warned = true;
           console.warn(`[push] no token registered: ${result.reason}`);
         }
