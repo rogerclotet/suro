@@ -6,7 +6,8 @@ import * as Device from "expo-device";
 import type * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
+import { useTranslations } from "@/i18n";
 import { withOverflowPrefix } from "@/lib/group-paths";
 
 // expo-notifications eagerly registers a device-push-token listener at *import*
@@ -60,21 +61,74 @@ function easProjectId(): string | undefined {
 }
 
 /**
- * Fetch this device's Expo push token, requesting permission if needed. Returns
- * null (never throws) when push can't work here: a simulator, Expo Go, the web,
- * a denied permission, or before EAS is configured.
+ * One Android notification channel per app section. The OS exposes each channel
+ * as its own toggle, so a member can mute a single category (e.g. expenses)
+ * without silencing the rest. The ids are the `channelId`s the backend stamps
+ * onto each push (packages/backend/convex/push.ts) — keep the two lists in sync.
+ * iOS has no channels, so channel setup is a no-op there.
  */
-async function getDeviceToken(): Promise<string | null> {
+const ANDROID_CHANNELS = [
+  "events",
+  "lists",
+  "notes",
+  "templates",
+  "files",
+  "members",
+  "expenses",
+] as const;
+type AndroidChannel = (typeof ANDROID_CHANNELS)[number];
+
+/**
+ * Register the per-section Android channels, naming each in the user's language.
+ * Idempotent: re-running refreshes the localized names (Android keeps a channel's
+ * importance fixed once created, but name/description stay editable). Also retires
+ * the single catch-all "default" channel earlier builds created. Never throws —
+ * push is a best-effort enhancement.
+ */
+function configureAndroidChannels(
+  name: (channel: AndroidChannel) => string,
+): void {
+  if (!PUSH_AVAILABLE || Platform.OS !== "android") {
+    return;
+  }
+  try {
+    const N = notifications();
+    void N.deleteNotificationChannelAsync("default").catch(() => {});
+    for (const channel of ANDROID_CHANNELS) {
+      void N.setNotificationChannelAsync(channel, {
+        name: name(channel),
+        importance: N.AndroidImportance.DEFAULT,
+      }).catch(() => {});
+    }
+  } catch {
+    // expo-notifications' native side failed to init; ignore (push is optional).
+  }
+}
+
+/**
+ * The outcome of a token fetch. On failure it carries a `reason` instead of a
+ * bare null, so the caller can log *why* a real signed-in device produced no
+ * token — the failure was otherwise swallowed, leaving prod issues (e.g. a
+ * device whose FCM registration throws) undiagnosable without a debugger.
+ */
+type TokenResult = { token: string } | { token: null; reason: string };
+
+/**
+ * Fetch this device's Expo push token, requesting permission if needed. Never
+ * throws; returns a reason when push can't work here: a simulator, Expo Go, the
+ * web, a denied permission, before EAS is configured, or a native FCM/APNs error.
+ */
+async function getDeviceToken(): Promise<TokenResult> {
   if (!PUSH_AVAILABLE) {
-    return null;
+    return { token: null, reason: "push-unavailable" };
   }
   try {
     if (!Device.isDevice) {
-      return null;
+      return { token: null, reason: "not-a-physical-device" };
     }
     const projectId = easProjectId();
     if (!projectId) {
-      return null;
+      return { token: null, reason: "missing-eas-project-id" };
     }
     const N = notifications();
     const current = await N.getPermissionsAsync();
@@ -83,18 +137,13 @@ async function getDeviceToken(): Promise<string | null> {
         ? "granted"
         : (await N.requestPermissionsAsync()).status;
     if (status !== "granted") {
-      return null;
-    }
-    if (Platform.OS === "android") {
-      await N.setNotificationChannelAsync("default", {
-        name: "Default",
-        importance: N.AndroidImportance.DEFAULT,
-      });
+      return { token: null, reason: `permission-${status}` };
     }
     const { data } = await N.getExpoPushTokenAsync({ projectId });
-    return data;
-  } catch {
-    return null;
+    return { token: data };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { token: null, reason: `getExpoPushTokenAsync threw: ${message}` };
   }
 }
 
@@ -102,7 +151,7 @@ async function getDeviceToken(): Promise<string | null> {
 export async function unregisterPushToken(
   unregister: (args: { token: string }) => Promise<null>,
 ): Promise<void> {
-  const token = await getDeviceToken();
+  const { token } = await getDeviceToken();
   if (token) {
     await unregister({ token }).catch(() => {});
   }
@@ -117,19 +166,65 @@ export function usePushNotifications(): void {
   const { isAuthenticated } = useConvexAuth();
   const register = useMutation(api.pushTokens.register);
   const router = useRouter();
+  const t = useTranslations("notifications.channels");
+
+  // Register the Android channels up front (and re-localize them when the locale
+  // changes) so server pushes land in the right, individually-mutable category.
+  useEffect(() => {
+    configureAndroidChannels((channel) => t(channel));
+  }, [t]);
 
   useEffect(() => {
     if (!isAuthenticated) {
       return;
     }
     let cancelled = false;
-    void getDeviceToken().then((token) => {
-      if (!cancelled && token) {
-        void register({ token, platform: Platform.OS });
+    // Per auth session: stop re-fetching the token once we've registered it, so
+    // the foreground listener below doesn't hit Expo's servers on every resume.
+    let registered = false;
+    let warned = false;
+    function syncToken(): void {
+      if (registered) {
+        return;
+      }
+      void getDeviceToken().then((result) => {
+        if (cancelled) {
+          return;
+        }
+        if (result.token !== null) {
+          registered = true;
+          void register({ token: result.token, platform: Platform.OS });
+          return;
+        }
+        // Log only genuine defects (a failed FCM/APNs registration, missing
+        // config) — once per session, visible in `adb logcat`, since the
+        // failure is otherwise silent and PostHog isn't keyed in this build yet.
+        // Skip the expected states: push can't run here, or the user just
+        // hasn't granted permission. (An FCM block — e.g. NextDNS filtering
+        // Google's endpoints — surfaces here as `getExpoPushTokenAsync threw`.)
+        const benign =
+          result.reason === "push-unavailable" ||
+          result.reason === "not-a-physical-device" ||
+          result.reason.startsWith("permission-");
+        if (!warned && !benign) {
+          warned = true;
+          console.warn(`[push] no token registered: ${result.reason}`);
+        }
+      });
+    }
+    syncToken();
+    // Re-attempt on foreground: a fresh mount is the only other trigger, so a
+    // permission granted later in the OS settings (Android 13+ asks at runtime,
+    // and a denied prompt never re-asks in-app) would otherwise not register a
+    // token until the next cold start. Mirrors OfflineProvider's AppState use.
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        syncToken();
       }
     });
     return () => {
       cancelled = true;
+      sub.remove();
     };
   }, [isAuthenticated, register]);
 

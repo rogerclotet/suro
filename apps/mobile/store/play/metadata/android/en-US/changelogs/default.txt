@@ -1,4 +1,2 @@
-• New Home tab: an at-a-glance overview of your group — upcoming events, your lists and expenses.
-• Deleting an event, list, note, expense or template while you have it open no longer shows an error and simply takes you back.
-• The calendar now shows events on the neighbouring-month days visible at the top and bottom of the month.
-• On the mobile app, swipe left or right on the calendar to move between months.
+• Android notifications are now split into categories (events, lists, notes, expenses and more), so you can switch off the ones you don't want from your phone settings without losing the rest.
+• Push notifications now arrive reliably on Android, including when you enable them later in settings or use the app on more than one device.

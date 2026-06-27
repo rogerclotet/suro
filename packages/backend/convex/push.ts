@@ -10,6 +10,26 @@ import { localizeNotification } from "./model/pushI18n";
 const EXPO_PUSH_ENDPOINT = "https://exp.host/--/api/v2/push/send";
 
 /**
+ * The Android notification channel each push lands in, grouped by app section so
+ * a member can mute one category (e.g. expenses) from the OS settings without
+ * losing the rest. The ids must match the channels the mobile app registers in
+ * apps/mobile/src/lib/push.ts — keep the two lists in sync. iOS has no channels,
+ * so Expo ignores `channelId` for those tokens.
+ */
+const CHANNEL_BY_BODY_KEY: Record<string, string> = {
+  event_created: "events",
+  list_created: "lists",
+  note_created: "notes",
+  template_created: "templates",
+  file_uploaded: "files",
+  member_joined: "members",
+  member_left: "members",
+  pot_created: "expenses",
+  spending_created: "expenses",
+  spending_created_with_description: "expenses",
+};
+
+/**
  * The project's name plus the push tokens of every member EXCEPT the actor, each
  * paired with that member's locale (for server-side copy localization).
  */
@@ -79,11 +99,15 @@ export const sendToProject = internalAction({
       return null;
     }
 
+    // Android-only; Expo ignores it for iOS tokens. Routes the push to the
+    // section's channel so members can mute one category in the OS settings.
+    const channelId = CHANNEL_BY_BODY_KEY[bodyKey];
     const messages = recipients.map((recipient) => ({
       to: recipient.token,
       title: projectName,
       body: localizeNotification(bodyKey, bodyParams, recipient.locale),
       data: { path },
+      ...(channelId ? { channelId } : {}),
     }));
 
     // Expo accepts up to 100 messages per request; groups are small, so a single

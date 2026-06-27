@@ -741,7 +741,16 @@
     "permissionPromptBanner": "Enable push notifications to get updates even when the app isn't open.",
     "permissionDeniedBanner": "Push notifications are currently blocked.",
     "permissionEnable": "Enable",
-    "permissionDeniedHint": "To unblock them, go to your browser or OS settings and allow notifications for this site."
+    "permissionDeniedHint": "To unblock them, go to your browser or OS settings and allow notifications for this site.",
+    "channels": {
+      "events": "Events",
+      "lists": "Lists",
+      "notes": "Notes",
+      "templates": "Templates",
+      "files": "Files",
+      "members": "Group members",
+      "expenses": "Expenses"
+    }
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Suro!",
