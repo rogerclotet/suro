@@ -148,6 +148,25 @@ describe("files: event attachment", () => {
     expect(files[0]?.eventId).toBeUndefined();
   });
 
+  it("returns [] (not an error) when the event no longer exists", async () => {
+    // The detail screen keeps this query subscribed while it navigates away
+    // after deleting the event; it must resolve to [] rather than throwing
+    // "Event not found" and surfacing a Convex error on the client.
+    const eventId = await alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Trip",
+      startAt: Date.now(),
+      endAt: Date.now() + 3600_000,
+      allDay: false,
+    });
+    await saveFamilyFile("Map", { eventId });
+    await alice.mutation(api.events.remove, { eventId });
+
+    await expect(
+      alice.query(api.files.listByEvent, { eventId }),
+    ).resolves.toEqual([]);
+  });
+
   it("rejects attaching to an event from another project", async () => {
     const foreignEvent = await t.run((ctx) =>
       ctx.db.insert("events", {
