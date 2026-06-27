@@ -106,21 +106,29 @@ function configureAndroidChannels(
 }
 
 /**
- * Fetch this device's Expo push token, requesting permission if needed. Returns
- * null (never throws) when push can't work here: a simulator, Expo Go, the web,
- * a denied permission, or before EAS is configured.
+ * The outcome of a token fetch. On failure it carries a `reason` instead of a
+ * bare null, so the caller can log *why* a real signed-in device produced no
+ * token — the failure was otherwise swallowed, leaving prod issues (e.g. a
+ * device whose FCM registration throws) undiagnosable without a debugger.
  */
-async function getDeviceToken(): Promise<string | null> {
+type TokenResult = { token: string } | { token: null; reason: string };
+
+/**
+ * Fetch this device's Expo push token, requesting permission if needed. Never
+ * throws; returns a reason when push can't work here: a simulator, Expo Go, the
+ * web, a denied permission, before EAS is configured, or a native FCM/APNs error.
+ */
+async function getDeviceToken(): Promise<TokenResult> {
   if (!PUSH_AVAILABLE) {
-    return null;
+    return { token: null, reason: "push-unavailable" };
   }
   try {
     if (!Device.isDevice) {
-      return null;
+      return { token: null, reason: "not-a-physical-device" };
     }
     const projectId = easProjectId();
     if (!projectId) {
-      return null;
+      return { token: null, reason: "missing-eas-project-id" };
     }
     const N = notifications();
     const current = await N.getPermissionsAsync();
@@ -129,12 +137,13 @@ async function getDeviceToken(): Promise<string | null> {
         ? "granted"
         : (await N.requestPermissionsAsync()).status;
     if (status !== "granted") {
-      return null;
+      return { token: null, reason: `permission-${status}` };
     }
     const { data } = await N.getExpoPushTokenAsync({ projectId });
-    return data;
-  } catch {
-    return null;
+    return { token: data };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { token: null, reason: `getExpoPushTokenAsync threw: ${message}` };
   }
 }
 
@@ -142,7 +151,7 @@ async function getDeviceToken(): Promise<string | null> {
 export async function unregisterPushToken(
   unregister: (args: { token: string }) => Promise<null>,
 ): Promise<void> {
-  const token = await getDeviceToken();
+  const { token } = await getDeviceToken();
   if (token) {
     await unregister({ token }).catch(() => {});
   }
@@ -173,14 +182,27 @@ export function usePushNotifications(): void {
     // Per auth session: stop re-fetching the token once we've registered it, so
     // the foreground listener below doesn't hit Expo's servers on every resume.
     let registered = false;
+    let warned = false;
     function syncToken(): void {
       if (registered) {
         return;
       }
-      void getDeviceToken().then((token) => {
-        if (!cancelled && token) {
+      void getDeviceToken().then((result) => {
+        if (cancelled) {
+          return;
+        }
+        if (result.token !== null) {
           registered = true;
-          void register({ token, platform: Platform.OS });
+          void register({ token: result.token, platform: Platform.OS });
+          return;
+        }
+        // A signed-in physical device that yields no token is unexpected (a
+        // failed FCM/APNs registration, not just "push is off here"). Surface
+        // the reason once per session — visible in `adb logcat` — since the
+        // failure is otherwise silent and PostHog isn't keyed in this build yet.
+        if (!warned && result.reason !== "push-unavailable") {
+          warned = true;
+          console.warn(`[push] no token registered: ${result.reason}`);
         }
       });
     }
