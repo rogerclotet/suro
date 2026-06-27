@@ -143,7 +143,11 @@ export default function EventDetail() {
         style: "destructive",
         onPress: () => {
           setSettingsOpen(false);
-          void removeEvent({ eventId: eid }).then(() => router.back());
+          // Navigation back to the calendar is owned by the `event === null`
+          // effect above, which fires once the delete propagates (and also
+          // covers deletes from another client) — so don't also navigate here,
+          // which would pop twice.
+          void removeEvent({ eventId: eid });
         },
       },
     ]);

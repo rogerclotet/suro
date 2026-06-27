@@ -1,2 +1,2 @@
-• Les notificacions de l'Android ara es divideixen en categories (esdeveniments, llistes, notes, despeses i més), així pots desactivar des dels ajustos del telèfon les que no vulguis sense perdre la resta.
-• Les notificacions push ara arriben de manera fiable a l'Android, també si les actives més tard als ajustos o fas servir l'app en més d'un dispositiu.
+• En tocar una notificació ara s'obre directament l'esdeveniment, la llista, la nota o la despesa a què fa referència, en comptes d'obrir només l'app.
+• Les notificacions de l'Android ara mostren una icona pròpia de Suro.

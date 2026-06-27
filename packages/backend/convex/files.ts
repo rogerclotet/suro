@@ -8,11 +8,7 @@ import {
   query,
 } from "./_generated/server";
 import { serveFileUrl } from "./model/fileUrls";
-import {
-  requireEventAccess,
-  requireFileOwner,
-  requireProjectMember,
-} from "./model/permissions";
+import { requireFileOwner, requireProjectMember } from "./model/permissions";
 
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
@@ -133,7 +129,16 @@ export const listByProject = query({
 export const listByEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    // Return [] rather than throwing when the event is gone (mirrors
+    // events.get): the event detail screen keeps this query subscribed while it
+    // navigates away after a delete, and a dangling subscription re-running
+    // against the deleted row would otherwise surface an "Event not found"
+    // server error on the client.
+    const event = await ctx.db.get(eventId);
+    if (event === null) {
+      return [];
+    }
+    await requireProjectMember(ctx, event.projectId);
     const files = await ctx.db
       .query("files")
       .withIndex("by_event", (q) => q.eq("eventId", event._id))
