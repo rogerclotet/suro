@@ -1,2 +1,2 @@
-• Android notifications are now split into categories (events, lists, notes, expenses and more), so you can switch off the ones you don't want from your phone settings without losing the rest.
-• Push notifications now arrive reliably on Android, including when you enable them later in settings or use the app on more than one device.
+• Tapping a notification now opens the event, list, note or expense it's about, instead of just opening the app.
+• Android notifications now show a dedicated Suro icon.

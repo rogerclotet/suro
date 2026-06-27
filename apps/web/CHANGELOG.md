@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.13.1] — 2026-06-27
+
+### ca
+
+- [improvement] En tocar una notificació ara s'obre directament l'esdeveniment, la llista, la nota o la despesa a què fa referència, en comptes d'obrir només l'app.
+- [improvement] Les notificacions de l'Android ara mostren una icona pròpia de Suro.
+
+### es
+
+- [improvement] Al tocar una notificación ahora se abre directamente el evento, la lista, la nota o el gasto al que se refiere, en lugar de solo abrir la app.
+- [improvement] Las notificaciones de Android ahora muestran un icono propio de Suro.
+
+### en
+
+- [improvement] Tapping a notification now opens the event, list, note or expense it's about, instead of just opening the app.
+- [improvement] Android notifications now show a dedicated Suro icon.
+
 ## [1.13.0] — 2026-06-27
 
 ### ca

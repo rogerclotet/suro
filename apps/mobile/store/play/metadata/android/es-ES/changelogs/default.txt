@@ -1,2 +1,2 @@
-• Las notificaciones de Android ahora se dividen en categorías (eventos, listas, notas, gastos y más), así puedes desactivar desde los ajustes del teléfono las que no quieras sin perder el resto.
-• Las notificaciones push ahora llegan de forma fiable en Android, también si las activas más tarde en los ajustes o usas la app en más de un dispositivo.
+• Al tocar una notificación ahora se abre directamente el evento, la lista, la nota o el gasto al que se refiere, en lugar de solo abrir la app.
+• Las notificaciones de Android ahora muestran un icono propio de Suro.
