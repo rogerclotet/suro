@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.13.0] — 2026-06-27
+
+### ca
+
+- [improvement] Les notificacions de l'Android ara es divideixen en categories (esdeveniments, llistes, notes, despeses i més), així pots desactivar des dels ajustos del telèfon les que no vulguis sense perdre la resta.
+- [fix] Les notificacions push ara arriben de manera fiable a l'Android, també si les actives més tard als ajustos o fas servir l'app en més d'un dispositiu.
+
+### es
+
+- [improvement] Las notificaciones de Android ahora se dividen en categorías (eventos, listas, notas, gastos y más), así puedes desactivar desde los ajustes del teléfono las que no quieras sin perder el resto.
+- [fix] Las notificaciones push ahora llegan de forma fiable en Android, también si las activas más tarde en los ajustes o usas la app en más de un dispositivo.
+
+### en
+
+- [improvement] Android notifications are now split into categories (events, lists, notes, expenses and more), so you can switch off the ones you don't want from your phone settings without losing the rest.
+- [fix] Push notifications now arrive reliably on Android, including when you enable them later in settings or use the app on more than one device.
+
 ## [1.12.0] — 2026-06-25
 
 ### ca
