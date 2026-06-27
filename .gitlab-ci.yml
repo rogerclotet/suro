@@ -79,6 +79,10 @@ check:
     - pnpm biome:check
     - pnpm typecheck
     - pnpm test
+    # Store metadata lint: fails the pipeline if store.config.json apple.version
+    # drifts from root package.json, or any listing copy/screenshot breaks a
+    # store limit. Ungated so a web-only version bump can't silently desync it.
+    - node apps/mobile/store/check-metadata.mjs
   artifacts:
     paths:
       - node_modules
