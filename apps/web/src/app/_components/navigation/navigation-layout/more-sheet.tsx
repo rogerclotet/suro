@@ -1,7 +1,10 @@
 "use client";
 
-import { useAuthActions } from "@convex-dev/auth/react";
-import { LayoutGridIcon, LogOut, MessageSquarePlusIcon } from "lucide-react";
+import {
+  LayoutGridIcon,
+  MessageSquarePlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/app/_state/feedback-state";
 import {
@@ -26,10 +29,8 @@ export default function MoreSheet({
   overflowItems: MenuItem[];
 }) {
   const { data: session } = useSession();
-  const { signOut } = useAuthActions();
   const { openFeedback } = useFeedback();
   const t = useTranslations("nav");
-  const tAuth = useTranslations("auth");
   const tChangelog = useTranslations("changelog");
 
   return (
@@ -95,28 +96,21 @@ export default function MoreSheet({
           <Link
             href="/profile"
             onClick={() => onOpenChange(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent"
+            className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-foreground transition-colors hover:bg-accent"
           >
-            <UserAvatar user={session?.user ?? {}} className="size-5" />
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">{session?.user?.name}</span>
-              <span className="text-muted-foreground text-xs">
-                {session?.user?.email}
-              </span>
+            <div className="flex min-w-0 items-center gap-3">
+              <UserAvatar user={session?.user ?? {}} className="size-5" />
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-medium text-sm">
+                  {session?.user?.name}
+                </span>
+                <span className="truncate text-muted-foreground text-xs">
+                  {session?.user?.email}
+                </span>
+              </div>
             </div>
+            <SettingsIcon className="size-5 shrink-0 text-muted-foreground" />
           </Link>
-
-          <button
-            type="button"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-destructive transition-colors hover:bg-accent [&_svg]:size-5"
-            onClick={() => {
-              onOpenChange(false);
-              void signOut();
-            }}
-          >
-            <LogOut />
-            <span>{tAuth("signOut")}</span>
-          </button>
 
           <div className="my-1 border-border border-t" />
 
