@@ -312,6 +312,10 @@
     "typeFix": "Corrección",
     "typeImprovement": "Mejora"
   },
+  "downloadBanner": {
+    "message": "Suro va mejor en la app",
+    "dismiss": "Descartar"
+  },
   "profile": {
     "header": "Perfil",
     "publicInfo": "Esta es la información que se muestra en todos tus grupos y que es visible públicamente.",

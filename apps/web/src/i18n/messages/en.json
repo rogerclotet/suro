@@ -312,6 +312,10 @@
     "typeFix": "Fix",
     "typeImprovement": "Improvement"
   },
+  "downloadBanner": {
+    "message": "Suro is better in the app",
+    "dismiss": "Dismiss"
+  },
   "profile": {
     "header": "Profile",
     "publicInfo": "This is the information shown across all your groups and is publicly visible.",
