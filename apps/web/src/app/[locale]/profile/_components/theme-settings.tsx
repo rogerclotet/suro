@@ -41,8 +41,10 @@ export default function ThemeSettings() {
         <SelectContent>
           {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
             <SelectItem key={value} value={value}>
-              <Icon className="size-4" />
-              {tNav(labelKey)}
+              <span className="flex items-center gap-2">
+                <Icon className="size-4 shrink-0" />
+                {tNav(labelKey)}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>

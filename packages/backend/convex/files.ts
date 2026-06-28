@@ -7,6 +7,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { track } from "./model/analytics";
 import { serveFileUrl } from "./model/fileUrls";
 import { requireFileOwner, requireProjectMember } from "./model/permissions";
 
@@ -86,6 +87,11 @@ export const saveFile = mutation({
       bodyParams: { name },
       path: `/${args.projectId}/files`,
     });
+    await track(ctx, userId, "file_uploaded", {
+      projectId: args.projectId,
+      type: args.type,
+      hasEvent: args.eventId != null,
+    });
     return fileId;
   },
 });
@@ -164,12 +170,13 @@ export const rename = mutation({
 export const remove = mutation({
   args: { fileId: v.id("files") },
   handler: async (ctx, { fileId }) => {
-    const { file } = await requireFileOwner(ctx, fileId);
+    const { file, userId } = await requireFileOwner(ctx, fileId);
     await ctx.storage.delete(file.storageId);
     if (file.thumbnailStorageId) {
       await ctx.storage.delete(file.thumbnailStorageId);
     }
     await ctx.db.delete(file._id);
+    await track(ctx, userId, "file_deleted", { projectId: file.projectId });
     return null;
   },
 });

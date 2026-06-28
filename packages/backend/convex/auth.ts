@@ -3,6 +3,7 @@ import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
 import { AppleNative } from "./AppleNative";
+import { track } from "./model/analytics";
 import { getRandomColor } from "./model/colors";
 import { ResendOTP } from "./ResendOTP";
 
@@ -142,6 +143,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       });
       await ctx.db.insert("projectMembers", { projectId, userId });
       await ctx.db.patch(userId, { locale: "ca", onboardingCompleted: false });
+      await track(ctx, userId, "signed_up");
     },
   },
 });

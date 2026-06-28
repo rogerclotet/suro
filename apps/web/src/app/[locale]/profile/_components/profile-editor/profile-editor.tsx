@@ -1,9 +1,10 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { api } from "backend/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Info, SaveIcon } from "lucide-react";
+import { Info, LogOut, SaveIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import ImageUpload, {
   Undo2,
 } from "@/components/image-upload";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -71,6 +73,8 @@ function normalizeLocale(value: string | null | undefined) {
 export default function ProfileEditor({ user }: { user: ProfileUser }) {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
+  const { signOut } = useAuthActions();
   const router = useRouter();
   // Default the language field to the current interface locale so what the
   // user sees in the dropdown matches what they're currently browsing in,
@@ -298,6 +302,18 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
 
       <div className="border-t pt-4">
         <ThemeSettings />
+      </div>
+
+      <div className="border-t pt-4">
+        <Button
+          type="button"
+          variant="ghostDestructive"
+          className="w-full justify-start"
+          onClick={() => void signOut()}
+        >
+          <LogOut />
+          {tAuth("signOut")}
+        </Button>
       </div>
     </div>
   );

@@ -64,6 +64,10 @@ export const update = mutation({
       await track(ctx, userId, "list_item_completed", {
         projectId: list.projectId,
       });
+    } else if (item.completed && !completed) {
+      await track(ctx, userId, "list_item_uncompleted", {
+        projectId: list.projectId,
+      });
     }
     return null;
   },

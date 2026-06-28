@@ -312,6 +312,10 @@
     "typeFix": "Correcció",
     "typeImprovement": "Millora"
   },
+  "downloadBanner": {
+    "message": "Suro va millor amb l'app",
+    "dismiss": "Descarta"
+  },
   "profile": {
     "header": "Perfil",
     "publicInfo": "Aquesta és la informació que es mostra a tots els teus grups i que es pot veure públicament.",
