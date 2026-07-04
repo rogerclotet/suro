@@ -50,13 +50,12 @@ stages:
 
 workflow:
   rules:
-    # Run for MRs (so preview jobs fire) and for the default branch (prod deploy).
-    # Skip branch pipelines that have an open MR — the MR pipeline supersedes them.
+    # MR pipelines (pre-merge checks, previews) and default-branch pushes (prod deploy).
+    # No pipelines on plain feature-branch pushes — open an MR to get CI.
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
-    - if: $CI_COMMIT_BRANCH
 
 # Repo-wide validation. Always runs (ungated) — it's the correctness floor and
 # guarantees the pipeline is never empty when every gated job is skipped. The web
@@ -110,8 +109,6 @@ web_build_check:
     - pnpm run build
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes: *changes-web
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       changes: *changes-web
 
 build_preview:
