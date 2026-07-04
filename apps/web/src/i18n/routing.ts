@@ -13,6 +13,11 @@ export const routing = defineRouting({
       es: "/privacidad",
       en: "/privacy",
     },
+    "/account-deletion": {
+      ca: "/eliminacio-del-compte",
+      es: "/eliminacion-de-la-cuenta",
+      en: "/account-deletion",
+    },
     "/profile": {
       ca: "/perfil",
       es: "/perfil",
@@ -33,10 +38,20 @@ export const routing = defineRouting({
       es: "/grupos/[projectId]",
       en: "/groups/[projectId]",
     },
+    "/groups/[projectId]/home": {
+      ca: "/grups/[projectId]/inici",
+      es: "/grupos/[projectId]/inicio",
+      en: "/groups/[projectId]/home",
+    },
     "/groups/[projectId]/lists": {
       ca: "/grups/[projectId]/llistes",
       es: "/grupos/[projectId]/listas",
       en: "/groups/[projectId]/lists",
+    },
+    "/groups/[projectId]/lists/tasks": {
+      ca: "/grups/[projectId]/llistes/tasques",
+      es: "/grupos/[projectId]/listas/tareas",
+      en: "/groups/[projectId]/lists/tasks",
     },
     "/groups/[projectId]/lists/templates": {
       ca: "/grups/[projectId]/llistes/plantilles",

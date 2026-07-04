@@ -9,6 +9,8 @@ store/
   README.md                  this runbook
   declarations.md            console questionnaire answers + review notes
   check-metadata.mjs         lints text limits + image dimensions
+  capture-ios-screenshots.py automates iOS captures (simctl + suro:// deep links)
+  port-android-screenshots-to-ios.py  letterbox Play PNGs → App Store size
   generate-graphics.py       regenerates Play icon + feature graphics
   apple/screenshots/<loc>/   committed App Store screenshots (1320x2868)
   play/metadata/android/     Play listing in fastlane-supply layout
@@ -58,7 +60,7 @@ without restructuring.
 
 ```sh
 # 0. copy & screenshots still accurate? lints lengths + dimensions:
-node apps/mobile/store/check-metadata.mjs
+pnpm check:metadata
 
 # 1. release notes: update per locale
 #    - store.config.json -> apple.info.<locale>.releaseNotes
@@ -93,6 +95,21 @@ Committed screenshots are captured from the real app with seeded demo data —
 expenses pot, notes. Naming: `01-lists.png` … `05-notes.png` (order = store
 order; supply uploads alphabetically).
 
+**iOS (App Store)** — native Liquid Glass chrome, 1320×2868 from an iPhone
+16/17 Pro Max simulator:
+
+```sh
+# Build + install on the booted simulator (needs a dev signing identity):
+pnpm --filter mobile ios
+
+# App must be logged in as review@suro.clotet.dev (OTP from AUTH_REVIEW_OTP).
+# Then seed + capture per locale via deep links:
+python3 apps/mobile/store/capture-ios-screenshots.py ca es en
+```
+
+**Android (Play Store)** — Pixel 9 AVD, 1080×2400 (committed under
+`play/metadata/android/.../phoneScreenshots/`).
+
 Prep (once per capture session):
 
 1. Run the dev backend (`pnpm --filter backend dev`) and point the app at it
@@ -105,10 +122,23 @@ Prep (once per capture session):
    `npx convex run seed:demoGroup '{"email": "review@suro.clotet.dev", "locale": "ca"}'`
 
 iOS — needs a native build (NativeTabs don't render in Expo Go); the
-6.9" simulator produces store-ready 1320x2868 PNGs directly:
+6.9" simulator produces store-ready 1320×2868 PNGs directly:
 
 ```sh
-pnpm --filter mobile exec npx expo run:ios --device "iPhone 17 Pro Max"
+pnpm --filter mobile ios
+python3 apps/mobile/store/capture-ios-screenshots.py ca es en
+```
+
+If tab automation fails, letterbox the Play phone PNGs to iOS size as a
+stopgap (Material chrome — re-run capture-ios before submitting to Apple):
+
+```sh
+python3 apps/mobile/store/port-android-screenshots-to-ios.py ca es en
+```
+
+Manual single-frame capture (optional):
+
+```sh
 xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
 xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-lists.png
 ```
@@ -128,5 +158,5 @@ adb shell am broadcast -a com.android.systemui.demo -e command exit
 Repeat the seed + capture pass per locale (`ca`, `es`, `en`), then validate:
 
 ```sh
-node apps/mobile/store/check-metadata.mjs
+pnpm check:metadata
 ```

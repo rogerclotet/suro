@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.6.0] — 2026-07-04
+
+### ca
+
+- [feature] Tots els elements de llista poden tenir responsable, prioritat, data de venciment i repetició, sense triar un tipus de llista apart.
+
+### es
+
+- [feature] Todos los elementos de lista pueden tener responsable, prioridad, fecha de vencimiento y repetición, sin elegir un tipo de lista aparte.
+
+### en
+
+- [feature] Every list item can have an assignee, priority, due date, and repeat, with no separate task-list type to choose.
+
 ## [1.5.1] — 2026-06-12
 
 ### ca

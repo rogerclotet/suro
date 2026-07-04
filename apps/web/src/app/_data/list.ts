@@ -2,6 +2,15 @@ import type { api } from "backend/convex/_generated/api";
 import type { Doc } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 
+/** Task priority; only meaningful on task-mode lists. */
+export type ItemPriority = "low" | "normal" | "high";
+
+/** Repeat rule; only meaningful on task-mode lists. */
+export type ItemRecurrence = {
+  freq: "daily" | "weekly" | "monthly" | "yearly";
+  interval: number;
+};
+
 /**
  * List / item / template shapes consumed across the app. Backed by Convex via
  * the adapters below, but kept field-compatible with the former Drizzle shape so
@@ -19,6 +28,13 @@ export type ListItem = {
   updatedBy: string | null;
   updatedAt: Date | null;
   createdAt: Date | null;
+  // Task fields, only populated on task-mode lists (see `List.taskMode`).
+  // `dueAt` is a point in time; for an all-day due it's UTC midnight of the day.
+  dueAt: Date | null;
+  dueAllDay: boolean;
+  assigneeId: string | null;
+  priority: ItemPriority | null;
+  recurrence: ItemRecurrence | null;
 };
 
 export type ListEvent = {
@@ -35,6 +51,8 @@ export type List = {
   name: string;
   description: string | null;
   favorite: boolean;
+  /** When true the list is a task list: items gain due dates, assignees, etc. */
+  taskMode: boolean;
   eventId: string | null;
   createdBy: string;
   /** Creator display name (resolved server-side), or null if the account is gone. */
@@ -63,6 +81,16 @@ type ConvexListWithItems = FunctionReturnType<
 >[number];
 type ConvexItem = ConvexListWithItems["items"][number];
 
+/** A task from `tasks.myTasks`: an adapted list item plus its list's name. */
+export type TaskWithList = ListItem & { listName: string };
+
+type ConvexTask = FunctionReturnType<typeof api.tasks.myTasks>[number];
+
+/** Map a Convex `myTasks` row to the app's `TaskWithList`. */
+export function adaptTask(t: ConvexTask): TaskWithList {
+  return { ...adaptItem(t), listName: t.listName };
+}
+
 function adaptItem(i: ConvexItem): ListItem {
   return {
     id: i._id,
@@ -75,6 +103,11 @@ function adaptItem(i: ConvexItem): ListItem {
     updatedBy: i.updatedBy ?? null,
     updatedAt: i.updatedAt ? new Date(i.updatedAt) : null,
     createdAt: new Date(i._creationTime),
+    dueAt: i.dueAt !== undefined ? new Date(i.dueAt) : null,
+    dueAllDay: i.dueAllDay ?? false,
+    assigneeId: i.assigneeId ?? null,
+    priority: i.priority ?? null,
+    recurrence: i.recurrence ?? null,
   };
 }
 
@@ -99,6 +132,7 @@ export function adaptList(
     name: l.name,
     description: l.description ?? null,
     favorite: l.favorite,
+    taskMode: l.taskMode ?? true,
     eventId: l.eventId ?? null,
     createdBy: l.createdBy,
     createdByName: l.createdByName,

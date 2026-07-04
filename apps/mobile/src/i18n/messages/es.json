@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Inicio",
     "lists": "Listas",
     "templates": "Plantillas",
     "categories": "Categorías",
@@ -330,7 +331,11 @@
     "editTitle": "Editar grupo",
     "editDescription": "Editar el nombre, la imagen y el color del grupo",
     "groupImage": "Imagen del grupo",
+    "changeImage": "Cambiar la imagen",
     "removeImage": "Eliminar imagen",
+    "imagePermissionTitle": "Permiso necesario",
+    "imagePermissionBody": "Permite el acceso a las fotos para poner una imagen.",
+    "imageError": "No se pudo actualizar la imagen",
     "color": "Color",
     "name": "Nombre",
     "namePlaceholder": "Nombre del grupo",
@@ -736,7 +741,17 @@
     "permissionPromptBanner": "Activa las notificaciones push para recibir actualizaciones incluso cuando la aplicación no esté abierta.",
     "permissionDeniedBanner": "Las notificaciones push están bloqueadas.",
     "permissionEnable": "Activar",
-    "permissionDeniedHint": "Para desbloquearlas, ve a la configuración de tu navegador o del sistema y permite las notificaciones para este sitio."
+    "permissionDeniedHint": "Para desbloquearlas, ve a la configuración de tu navegador o del sistema y permite las notificaciones para este sitio.",
+    "channels": {
+      "events": "Eventos",
+      "lists": "Listas",
+      "notes": "Notas",
+      "templates": "Plantillas",
+      "files": "Archivos",
+      "members": "Miembros del grupo",
+      "expenses": "Gastos",
+      "tasks": "Tareas"
+    }
   },
   "onboarding": {
     "welcomeTitle": "¡Bienvenido a Suro!",
@@ -760,6 +775,37 @@
     "letsGo": "¡Vamos!"
   },
   "mobile": {
+    "home": {
+      "today": "Hoy",
+      "upcoming": "Próximamente",
+      "goToCalendar": "Ir al calendario",
+      "showAllLists": "Ver todas",
+      "goToPots": "Ir a los botes",
+      "noUpcoming": "Ningún evento próximo",
+      "noActiveLists": "Ninguna lista activa",
+      "noActivePots": "Ningún bote activo"
+    },
+    "onboarding": {
+      "welcomeTitle": "¡Bienvenido a Suro!",
+      "welcomeBody": "Suro es un tablón compartido para la gente con la que compartes tu día a día. Vamos a hacer un recorrido rápido por lo que puedes hacer.",
+      "homeTitle": "Inicio",
+      "homeBody": "Tu punto de partida: los planes de hoy, lo que viene, y tus listas y botes activos — tu grupo de un vistazo.",
+      "listsTitle": "Listas",
+      "listsBody": "Crea listas de la compra, tareas pendientes y listas de equipaje. Categoriza elementos, guarda plantillas reutilizables y marca cosas juntos en tiempo real.",
+      "calendarTitle": "Calendario",
+      "calendarBody": "Planifica viajes, cenas y cumpleaños. Vincula una lista a cualquier evento para tener todo lo que necesitas en un solo lugar.",
+      "expensesTitle": "Gastos",
+      "expensesBody": "Registra quién pagó qué, divide los costes de forma justa y deja que Suro calcule la manera más sencilla de saldar cuentas.",
+      "moreTitle": "Más",
+      "moreBody": "Toca Más para los archivos y las notas: comparte fotos, PDFs y documentos, y escribe notas con formato con tu grupo.",
+      "profileTitle": "Configura tu perfil",
+      "profileBody": "Añade tu nombre y elige un color para que los miembros de tu grupo te reconozcan.",
+      "profileNamePlaceholder": "Tu nombre",
+      "next": "Siguiente",
+      "skip": "Saltar",
+      "back": "Atrás",
+      "letsGo": "¡Vamos!"
+    },
     "common": {
       "add": "Añadir",
       "save": "Guardar",
@@ -818,7 +864,12 @@
       "photoPermissionTitle": "Permiso necesario",
       "photoPermissionBody": "Permite el acceso a las fotos para poner una imagen.",
       "photoError": "No se pudo actualizar la foto",
-      "saveError": "No se pudo guardar"
+      "saveError": "No se pudo guardar",
+      "deleteAccount": "Eliminar cuenta",
+      "deletingAccount": "Eliminando…",
+      "deleteAccountConfirmTitle": "¿Eliminar la cuenta?",
+      "deleteAccountConfirmDescription": "Esto elimina permanentemente tu cuenta y todos los datos vinculados, incluidos los grupos que hayas creado. No se puede deshacer.",
+      "deleteAccountError": "No se pudo eliminar la cuenta"
     },
     "preferences": {
       "title": "Preferencias",
@@ -874,13 +925,40 @@
       "dropNoCategory": "Sin categoría",
       "dropNewCategory": "Nueva categoría…",
       "newCategoryTitle": "Nueva categoría",
-      "newCategoryPlaceholder": "Nombre de la categoría"
+      "newCategoryPlaceholder": "Nombre de la categoría",
+      "taskList": "Lista de tareas",
+      "taskListHint": "Añade fechas de vencimiento, responsables, prioridad y repeticiones a los elementos.",
+      "myTasks": "Mis tareas",
+      "noTasks": "No tienes ninguna tarea asignada.",
+      "dueDate": "Fecha de vencimiento",
+      "setDueDate": "Poner una fecha de vencimiento",
+      "clearDueDate": "Quitar la fecha de vencimiento",
+      "allDay": "Todo el día",
+      "assignee": "Responsable",
+      "unassigned": "Sin asignar",
+      "unknownMember": "Miembro",
+      "priority": "Prioridad",
+      "priority_low": "Baja",
+      "priority_normal": "Normal",
+      "priority_high": "Alta",
+      "repeat": "Repetición",
+      "repeat_none": "Nunca",
+      "repeat_daily": "Cada día",
+      "repeat_weekly": "Cada semana",
+      "repeat_monthly": "Cada mes",
+      "repeat_yearly": "Cada año",
+      "agendaOverdue": "Atrasadas",
+      "agendaToday": "Hoy",
+      "agendaUpcoming": "Próximas",
+      "agendaNoDate": "Sin fecha"
     },
     "categories": {
       "searchPlaceholder": "Busca o crea…",
       "noResults": "No se encontró ninguna categoría.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sin categoría"
+      "noCategory": "Sin categoría",
+      "deleteSuggestion": "Eliminar sugerencia",
+      "deleteSuggestionMessage": "¿Quitar \"{name}\" de las sugerencias de categorías? Los elementos que ya la usan conservan su categoría."
     },
     "templates": {
       "title": "Plantillas",
@@ -891,6 +969,7 @@
       "createTemplate": "Crear plantilla",
       "createListFromTemplate": "Crear lista desde la plantilla",
       "exportToGroup": "Exportar a otro grupo",
+      "exportCaption": "Exportar",
       "noOtherGroups": "No tienes ningún otro grupo.",
       "deleteTemplate": "Eliminar plantilla",
       "deleteMessage": "¿Eliminar \"{name}\"? No se puede deshacer.",
@@ -902,10 +981,12 @@
       "editItem": "Editar elemento",
       "deleteItem": "Eliminar elemento",
       "itemCount": "{count, plural, =1 {# elemento} other {# elementos}}",
+      "templateLabel": "Plantilla",
       "uncategorized": "Otros"
     },
     "calendar": {
       "title": "Calendario",
+      "allDay": "Todo el día",
       "exportCalendar": "Exportar calendario",
       "exportExplainer": "Al suscribirte se añade una copia en directo y de solo lectura de este calendario a tu app de calendario: los eventos nuevos y modificados aparecen automáticamente. Es unidireccional: los cambios que hagas allí no se sincronizan de vuelta con Suro.",
       "subscribeApple": "Añadir a Apple Calendar",
@@ -1012,6 +1093,7 @@
       "empty": "Todavía no hay botes. Toca + para empezar una cuenta compartida.",
       "settled": "Saldado",
       "settledAgo": "Saldado {time}",
+      "showMoreSettled": "Mostrar más",
       "balances": "Saldos",
       "spendings": "Gastos",
       "noSpendings": "Todavía no hay gastos. Toca + para añadir uno.",
@@ -1025,6 +1107,11 @@
       "newPot": "Nuevo bote",
       "namePlaceholder": "Nombre",
       "createPot": "Crear bote",
+      "choosePotMembers": "¿Quién está en el bote?",
+      "potOptions": "Opciones del bote",
+      "deletePot": "Eliminar bote",
+      "deletePotMessage": "¿Eliminar \"{name}\"? No se puede deshacer.",
+      "cantDeletePot": "Solo puedes eliminar un bote cuando está saldado, o antes de añadir ningún gasto.",
       "members": "Miembros ({count})",
       "newSpending": "Nuevo gasto",
       "amountPlaceholder": "Cantidad",

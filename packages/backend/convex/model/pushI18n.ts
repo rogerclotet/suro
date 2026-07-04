@@ -25,6 +25,26 @@ const MESSAGES: Record<string, Record<Locale, string>> = {
     ca: "Nova nota: {name}",
     es: "Nueva nota: {name}",
   },
+  template_created: {
+    en: "New template: {name}",
+    ca: "Nova plantilla: {name}",
+    es: "Nueva plantilla: {name}",
+  },
+  file_uploaded: {
+    en: "File {name} added",
+    ca: "Fitxer {name} afegit",
+    es: "Archivo {name} añadido",
+  },
+  member_joined: {
+    en: "{userName} joined the group",
+    ca: "{userName} s'ha unit al grup",
+    es: "{userName} se ha unido al grupo",
+  },
+  member_left: {
+    en: "{userName} left the group",
+    ca: "{userName} ha deixat el grup",
+    es: "{userName} ha dejado el grupo",
+  },
   pot_created: {
     en: "New pot created: {name}",
     ca: "Nou pot creat: {name}",
@@ -40,6 +60,16 @@ const MESSAGES: Record<string, Record<Locale, string>> = {
     ca: "Nova despesa: {description} ({amount}€)",
     es: "Nuevo gasto: {description} ({amount}€)",
   },
+  task_assigned: {
+    en: "Task assigned: {name}",
+    ca: "Tasca assignada: {name}",
+    es: "Tarea asignada: {name}",
+  },
+  task_due: {
+    en: "Task due: {name}",
+    ca: "Tasca per fer: {name}",
+    es: "Tarea pendiente: {name}",
+  },
 };
 
 function normalizeLocale(locale: string): Locale {
@@ -53,7 +83,7 @@ export function localizeNotification(
 ): string {
   const template = MESSAGES[key]?.[normalizeLocale(locale)];
   if (template === undefined) {
-    return params.name ?? params.description ?? "";
+    return params.name ?? params.description ?? params.userName ?? "";
   }
   return template.replace(/\{(\w+)\}/g, (_, name) => params[name] ?? "");
 }

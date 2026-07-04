@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Inici",
     "lists": "Llistes",
     "templates": "Plantilles",
     "categories": "Categories",
@@ -330,7 +331,11 @@
     "editTitle": "Editar grup",
     "editDescription": "Editar el nom, la imatge i el color del grup",
     "groupImage": "Imatge del grup",
+    "changeImage": "Canviar la imatge",
     "removeImage": "Eliminar imatge",
+    "imagePermissionTitle": "Cal permís",
+    "imagePermissionBody": "Permet l'accés a les fotos per posar una imatge.",
+    "imageError": "No s'ha pogut actualitzar la imatge",
     "color": "Color",
     "name": "Nom",
     "namePlaceholder": "Nom del grup",
@@ -736,7 +741,17 @@
     "permissionPromptBanner": "Activa les notificacions push per rebre actualitzacions fins i tot quan l'aplicació no estigui oberta.",
     "permissionDeniedBanner": "Les notificacions push estan bloquejades.",
     "permissionEnable": "Activar",
-    "permissionDeniedHint": "Per desbloquejar-les, ves a la configuració del teu navegador o del sistema i permet les notificacions per a aquest lloc."
+    "permissionDeniedHint": "Per desbloquejar-les, ves a la configuració del teu navegador o del sistema i permet les notificacions per a aquest lloc.",
+    "channels": {
+      "events": "Esdeveniments",
+      "lists": "Llistes",
+      "notes": "Notes",
+      "templates": "Plantilles",
+      "files": "Fitxers",
+      "members": "Membres del grup",
+      "expenses": "Despeses",
+      "tasks": "Tasques"
+    }
   },
   "onboarding": {
     "welcomeTitle": "Benvingut a Suro!",
@@ -760,6 +775,37 @@
     "letsGo": "Som-hi!"
   },
   "mobile": {
+    "home": {
+      "today": "Avui",
+      "upcoming": "Properament",
+      "goToCalendar": "Ves al calendari",
+      "showAllLists": "Mostra-les totes",
+      "goToPots": "Ves als pots",
+      "noUpcoming": "Cap esdeveniment proper",
+      "noActiveLists": "Cap llista activa",
+      "noActivePots": "Cap pot actiu"
+    },
+    "onboarding": {
+      "welcomeTitle": "Benvingut a Suro!",
+      "welcomeBody": "Suro és un tauler compartit per a la gent amb qui comparteixes el dia a dia. Fem un recorregut ràpid per tot el que pots fer.",
+      "homeTitle": "Inici",
+      "homeBody": "El teu punt de partida: els plans d'avui, el que ve, i les teves llistes i pots actius — el teu grup d'un cop d'ull.",
+      "listsTitle": "Llistes",
+      "listsBody": "Crea llistes de la compra, tasques pendents i llistes d'equipatge. Categoritza elements, desa plantilles reutilitzables i marca coses junts en temps real.",
+      "calendarTitle": "Calendari",
+      "calendarBody": "Planifica viatges, sopars i aniversaris. Vincula una llista a qualsevol esdeveniment per tenir tot el que necessites en un sol lloc.",
+      "expensesTitle": "Despeses",
+      "expensesBody": "Registra qui ha pagat què, divideix els costos de manera justa i deixa que Suro calculi la manera més senzilla de saldar comptes.",
+      "moreTitle": "Més",
+      "moreBody": "Toca Més per als fitxers i les notes: comparteix fotos, PDFs i documents, i escriu notes amb format amb el teu grup.",
+      "profileTitle": "Configura el teu perfil",
+      "profileBody": "Afegeix el teu nom i tria un color perquè els membres del teu grup et reconeguin.",
+      "profileNamePlaceholder": "El teu nom",
+      "next": "Següent",
+      "skip": "Saltar",
+      "back": "Enrere",
+      "letsGo": "Som-hi!"
+    },
     "common": {
       "add": "Afegir",
       "save": "Desar",
@@ -818,7 +864,12 @@
       "photoPermissionTitle": "Cal permís",
       "photoPermissionBody": "Permet l'accés a les fotos per posar una imatge.",
       "photoError": "No s'ha pogut actualitzar la foto",
-      "saveError": "No s'ha pogut desar"
+      "saveError": "No s'ha pogut desar",
+      "deleteAccount": "Elimina el compte",
+      "deletingAccount": "Eliminant…",
+      "deleteAccountConfirmTitle": "Vols eliminar el compte?",
+      "deleteAccountConfirmDescription": "Això elimina permanentment el teu compte i totes les dades vinculades, inclosos els grups que hagis creat. No es pot desfer.",
+      "deleteAccountError": "No s'ha pogut eliminar el compte"
     },
     "preferences": {
       "title": "Preferències",
@@ -874,13 +925,40 @@
       "dropNoCategory": "Sense categoria",
       "dropNewCategory": "Nova categoria…",
       "newCategoryTitle": "Nova categoria",
-      "newCategoryPlaceholder": "Nom de la categoria"
+      "newCategoryPlaceholder": "Nom de la categoria",
+      "taskList": "Llista de tasques",
+      "taskListHint": "Afegeix dates de venciment, responsables, prioritat i repeticions als elements.",
+      "myTasks": "Les meves tasques",
+      "noTasks": "No tens cap tasca assignada.",
+      "dueDate": "Venciment",
+      "setDueDate": "Posa una data de venciment",
+      "clearDueDate": "Treu la data de venciment",
+      "allDay": "Tot el dia",
+      "assignee": "Responsable",
+      "unassigned": "Sense assignar",
+      "unknownMember": "Membre",
+      "priority": "Prioritat",
+      "priority_low": "Baixa",
+      "priority_normal": "Normal",
+      "priority_high": "Alta",
+      "repeat": "Repetició",
+      "repeat_none": "Mai",
+      "repeat_daily": "Cada dia",
+      "repeat_weekly": "Cada setmana",
+      "repeat_monthly": "Cada mes",
+      "repeat_yearly": "Cada any",
+      "agendaOverdue": "Endarrerides",
+      "agendaToday": "Avui",
+      "agendaUpcoming": "Pròximes",
+      "agendaNoDate": "Sense data"
     },
     "categories": {
       "searchPlaceholder": "Cerca o crea…",
       "noResults": "No s'ha trobat cap categoria.",
       "createNamed": "Crear \"{name}\"",
-      "noCategory": "Sense categoria"
+      "noCategory": "Sense categoria",
+      "deleteSuggestion": "Elimina el suggeriment",
+      "deleteSuggestionMessage": "Vols treure \"{name}\" dels suggeriments de categories? Els elements que ja la fan servir conserven la categoria."
     },
     "templates": {
       "title": "Plantilles",
@@ -891,6 +969,7 @@
       "createTemplate": "Crear plantilla",
       "createListFromTemplate": "Crear llista des de la plantilla",
       "exportToGroup": "Exportar a un altre grup",
+      "exportCaption": "Exportar",
       "noOtherGroups": "No tens cap altre grup.",
       "deleteTemplate": "Eliminar plantilla",
       "deleteMessage": "Vols eliminar \"{name}\"? No es pot desfer.",
@@ -902,10 +981,12 @@
       "editItem": "Editar element",
       "deleteItem": "Eliminar element",
       "itemCount": "{count, plural, =1 {# element} other {# elements}}",
+      "templateLabel": "Plantilla",
       "uncategorized": "Altres"
     },
     "calendar": {
       "title": "Calendari",
+      "allDay": "Tot el dia",
       "exportCalendar": "Exportar calendari",
       "exportExplainer": "En subscriure't s'afegeix una còpia en directe i només de lectura d'aquest calendari a la teva app de calendari: els esdeveniments nous i modificats apareixen automàticament. És unidireccional: els canvis que hi facis no es sincronitzen de tornada amb Suro.",
       "subscribeApple": "Afegir a Apple Calendar",
@@ -1012,6 +1093,7 @@
       "empty": "Encara no hi ha pots. Toca + per començar un compte compartit.",
       "settled": "Saldat",
       "settledAgo": "Saldat {time}",
+      "showMoreSettled": "Mostra'n més",
       "balances": "Saldos",
       "spendings": "Despeses",
       "noSpendings": "Encara no hi ha despeses. Toca + per afegir-ne una.",
@@ -1025,6 +1107,11 @@
       "newPot": "Nou pot",
       "namePlaceholder": "Nom",
       "createPot": "Crear pot",
+      "choosePotMembers": "Qui hi ha al pot?",
+      "potOptions": "Opcions del pot",
+      "deletePot": "Eliminar pot",
+      "deletePotMessage": "Vols eliminar \"{name}\"? No es pot desfer.",
+      "cantDeletePot": "Només pots eliminar un pot quan està saldat, o abans d'afegir cap despesa.",
       "members": "Membres ({count})",
       "newSpending": "Nova despesa",
       "amountPlaceholder": "Quantitat",

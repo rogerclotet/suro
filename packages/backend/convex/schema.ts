@@ -1,6 +1,7 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { priorityValidator, recurrenceValidator } from "./model/tasks";
 
 /**
  * Convex schema for the Lists + Calendar slices and their foundations (users,
@@ -115,6 +116,10 @@ export default defineSchema({
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
     legacyId: v.optional(v.string()),
+    // When true the list is a "task list": its items surface optional due dates,
+    // assignees, priorities, and repeat rules (see listItems below). Undefined or
+    // false = a plain checklist, so existing lists keep their current UI.
+    taskMode: v.optional(v.boolean()),
   })
     .index("by_project", ["projectId"])
     // Pre-sorted overview (updatedAt desc) without an in-memory sort.
@@ -134,9 +139,24 @@ export default defineSchema({
     updatedBy: v.optional(v.id("users")),
     updatedAt: v.number(),
     legacyId: v.optional(v.string()),
+    // Optional task fields, only meaningful when the parent list is in task mode.
+    // `dueAt` is epoch ms; for an all-day due date it's UTC midnight of the day
+    // (a point, not a half-open range like events — no +DAY_MS end).
+    dueAt: v.optional(v.number()),
+    dueAllDay: v.optional(v.boolean()),
+    assigneeId: v.optional(v.id("users")),
+    priority: v.optional(priorityValidator),
+    recurrence: v.optional(recurrenceValidator),
+    // The `dueAt` we already pushed a due reminder for, so the hourly cron sends
+    // one reminder per due moment. Cleared whenever `dueAt` changes (edit/reschedule).
+    reminderSentForDueAt: v.optional(v.number()),
   })
     .index("by_list", ["listId"])
-    .index("by_legacyId", ["legacyId"]),
+    .index("by_legacyId", ["legacyId"])
+    // Lets the reminder cron range-scan items due up to now across all projects;
+    // Convex skips undefined-`dueAt` rows in a range bound, so only real due
+    // dates are visited.
+    .index("by_due", ["dueAt"]),
 
   listTemplates: defineTable({
     name: v.string(),

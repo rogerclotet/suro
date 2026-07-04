@@ -29,6 +29,7 @@ check:
     POSTHOG_ENV_ID: ""
   script:
     - pnpm biome:check
+    - pnpm check:metadata
     - pnpm typecheck
     - pnpm test
     - pnpm run build

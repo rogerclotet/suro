@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { ensureCategorySuggestions } from "./model/categories";
 import {
   instantiateTemplateItems,
@@ -87,8 +88,12 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     templateIds: v.optional(v.array(v.id("listTemplates"))),
+    taskMode: v.optional(v.boolean()),
   },
-  handler: async (ctx, { projectId, name, description, templateIds }) => {
+  handler: async (
+    ctx,
+    { projectId, name, description, templateIds, taskMode },
+  ) => {
     const userId = await requireProjectMember(ctx, projectId);
     const trimmedName = name.trim();
     if (trimmedName === "") {
@@ -100,6 +105,7 @@ export const create = mutation({
       description: (description ?? "").trim(),
       projectId,
       favorite: false,
+      taskMode,
       createdBy: userId,
       updatedAt: now,
     });
@@ -128,7 +134,12 @@ export const create = mutation({
       actorId: userId,
       bodyKey: "list_created",
       bodyParams: { name: trimmedName },
-      path: `/${projectId}/lists`,
+      path: `/${projectId}/lists/${listId}`,
+    });
+    await track(ctx, userId, "list_created", {
+      projectId,
+      hasTemplates: (templateIds?.length ?? 0) > 0,
+      taskMode: taskMode === true,
     });
 
     return listId;
@@ -177,8 +188,9 @@ export const update = mutation({
     listId: v.id("lists"),
     name: v.string(),
     description: v.optional(v.string()),
+    taskMode: v.optional(v.boolean()),
   },
-  handler: async (ctx, { listId, name, description }) => {
+  handler: async (ctx, { listId, name, description, taskMode }) => {
     const { list, userId } = await requireListAccess(ctx, listId);
     const trimmedName = name.trim();
     if (trimmedName === "") {
@@ -187,6 +199,9 @@ export const update = mutation({
     await ctx.db.patch(list._id, {
       name: trimmedName,
       description: (description ?? "").trim(),
+      // Sticky: only callers that pass the flag (the settings toggle) change it,
+      // so a rename-only update never silently turns a task list back into a list.
+      ...(taskMode !== undefined ? { taskMode } : {}),
       updatedBy: userId,
       updatedAt: Date.now(),
     });
@@ -197,7 +212,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
-    const { list } = await requireListAccess(ctx, listId);
+    const { list, userId } = await requireListAccess(ctx, listId);
     // Manual cascade (no FK ON DELETE CASCADE in Convex).
     const items = await ctx.db
       .query("listItems")
@@ -207,6 +222,7 @@ export const remove = mutation({
       await ctx.db.delete(item._id);
     }
     await ctx.db.delete(list._id);
+    await track(ctx, userId, "list_deleted", { projectId: list.projectId });
     return null;
   },
 });
@@ -220,6 +236,10 @@ export const toggleFavorite = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "list_favorite_toggled", {
+      projectId: list.projectId,
+      favorite: !list.favorite,
+    });
     return null;
   },
 });
@@ -227,7 +247,7 @@ export const toggleFavorite = mutation({
 export const clearCompleted = mutation({
   args: { listId: v.id("lists") },
   handler: async (ctx, { listId }) => {
-    const { list } = await requireListAccess(ctx, listId);
+    const { list, userId } = await requireListAccess(ctx, listId);
     const items = await ctx.db
       .query("listItems")
       .withIndex("by_list", (q) => q.eq("listId", list._id))
@@ -237,6 +257,9 @@ export const clearCompleted = mutation({
         await ctx.db.delete(item._id);
       }
     }
+    await track(ctx, userId, "list_cleared_completed", {
+      projectId: list.projectId,
+    });
     return null;
   },
 });

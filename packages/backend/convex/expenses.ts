@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { calculateBalances, generateProposals } from "./model/expenses";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
 
@@ -63,13 +64,69 @@ export const listPots = query({
 });
 
 /**
+ * The mobile/web expenses overview: every active pot plus a page of the most
+ * recently settled ones. Settled pots pile up once a trip is over, so we trim
+ * the payload with `settledLimit` and grow it behind "show more" — mirrors the
+ * lists overview (`lists.ts:overviewByProject`). `listPots` stays the full list
+ * for pickers that need every pot.
+ */
+export const listPotsOverview = query({
+  args: { projectId: v.id("projects"), settledLimit: v.number() },
+  handler: async (ctx, { projectId, settledLimit }) => {
+    await requireProjectMember(ctx, projectId);
+    const pots = await ctx.db
+      .query("pots")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+
+    // `createdAt` is set only for migrated pots; native ones fall back to
+    // `_creationTime` (which equals their creation time).
+    const active = pots
+      .filter((pot) => !pot.settledAt)
+      .sort(
+        (a, b) =>
+          (b.createdAt ?? b._creationTime) - (a.createdAt ?? a._creationTime),
+      );
+    const settled = pots
+      .filter(
+        (pot): pot is typeof pot & { settledAt: number } => !!pot.settledAt,
+      )
+      .sort((a, b) => b.settledAt - a.settledAt);
+
+    const limit = Math.max(0, Math.floor(settledLimit));
+    const settledPage = settled.slice(0, limit);
+
+    // Enrich only the pots we return — settled pots beyond the page never load.
+    const withMembers = async (pot: Doc<"pots">) => {
+      const ids = await potMemberIds(ctx, pot._id);
+      const users = await Promise.all(ids.map((id) => ctx.db.get(id)));
+      return { ...pot, members: users.map(publicUser) };
+    };
+
+    return {
+      active: await Promise.all(active.map(withMembers)),
+      settled: await Promise.all(settledPage.map(withMembers)),
+      hasMoreSettled: settled.length > limit,
+    };
+  },
+});
+
+/**
  * A pot with its members, spendings (newest first, enriched with payer/payee
  * names), per-member balances, and the suggested settle-up payments.
  */
 export const getPot = query({
   args: { potId: v.id("pots") },
   handler: async (ctx, { potId }) => {
-    const { pot } = await requirePotAccess(ctx, potId);
+    // Return null rather than throwing when the pot is gone (see notes.get):
+    // the detail screen stays subscribed while it navigates away after a
+    // delete, and re-running against the deleted row would otherwise surface a
+    // "Pot not found" server error on the client.
+    const pot = await ctx.db.get(potId);
+    if (pot === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, pot.projectId);
 
     const memberIds = await potMemberIds(ctx, potId);
     const memberDocs = await Promise.all(memberIds.map((id) => ctx.db.get(id)));
@@ -155,9 +212,47 @@ export const createPot = mutation({
       actorId: userId,
       bodyKey: "pot_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/expenses`,
+      path: `/${projectId}/expenses/${potId}`,
+    });
+    await track(ctx, userId, "pot_created", {
+      projectId,
+      memberCount: unique.length,
     });
     return potId;
+  },
+});
+
+/**
+ * Delete a pot, but only when it's settled or not-yet-started (no spendings) —
+ * an in-progress pot keeps its recorded expenses. Any project member may delete
+ * (matches event/list removal). Cascades its members and any settle-up rows.
+ */
+export const deletePot = mutation({
+  args: { potId: v.id("pots") },
+  handler: async (ctx, { potId }) => {
+    const { pot, userId } = await requirePotAccess(ctx, potId);
+    const spendings = await ctx.db
+      .query("spendings")
+      .withIndex("by_pot", (q) => q.eq("potId", potId))
+      .collect();
+    const deletable = pot.settledAt !== undefined || spendings.length === 0;
+    if (!deletable) {
+      throw new Error("Only settled or not-yet-started pots can be deleted");
+    }
+    // Manual cascade (Convex has no FK cascade) — mirrors projects.remove.
+    const members = await ctx.db
+      .query("potMembers")
+      .withIndex("by_pot", (q) => q.eq("potId", potId))
+      .collect();
+    for (const member of members) {
+      await ctx.db.delete(member._id);
+    }
+    for (const spending of spendings) {
+      await ctx.db.delete(spending._id);
+    }
+    await ctx.db.delete(potId);
+    await track(ctx, userId, "pot_deleted", { projectId: pot.projectId });
+    return null;
   },
 });
 
@@ -212,7 +307,13 @@ export const createSpending = mutation({
       bodyParams: cleanDescription
         ? { amount: (amount / 100).toFixed(2), description: cleanDescription }
         : { amount: (amount / 100).toFixed(2) },
-      path: `/${pot.projectId}/expenses`,
+      // A spending has no screen of its own; open the pot it belongs to, where
+      // the expense list lives.
+      path: `/${pot.projectId}/expenses/${potId}`,
+    });
+    await track(ctx, userId, "spending_created", {
+      projectId: pot.projectId,
+      split: to === undefined ? "equal" : "single",
     });
     return spendingId;
   },
@@ -255,6 +356,10 @@ export const settlePayments = mutation({
       });
     }
     await ctx.db.patch(pot._id, { settledAt: Date.now() });
+    await track(ctx, userId, "payments_settled", {
+      projectId: pot.projectId,
+      paymentCount: payments.length,
+    });
     return null;
   },
 });

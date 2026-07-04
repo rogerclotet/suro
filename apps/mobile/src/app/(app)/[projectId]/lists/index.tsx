@@ -1,19 +1,25 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import {
   Check,
   ChevronDown,
   ChevronRight,
   LayoutTemplate,
+  ListChecks,
 } from "lucide-react-native";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import {
+  useOfflineListsOverview,
+  usePersistentQuery,
+  useQueuedMutation,
+} from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { useStable } from "@/lib/use-stable";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -28,23 +34,10 @@ import {
 
 const COMPLETED_PAGE_SIZE = 5;
 
-// Holds the last loaded result while the query re-runs with new args (Convex
-// returns undefined during the swap), so "show more" grows the completed
-// section in place instead of flashing the screen back to the spinner.
-function useStable<T>(value: T | undefined): T | undefined {
-  const last = useRef<T | undefined>(undefined);
-  if (value !== undefined) {
-    last.current = value;
-  }
-  return last.current;
-}
-
 export default function ListsOverview() {
   const pid = useProjectId();
   const [completedLimit, setCompletedLimit] = useState(COMPLETED_PAGE_SIZE);
-  const overview = useStable(
-    useQuery(api.lists.overviewByProject, { projectId: pid, completedLimit }),
-  );
+  const overview = useStable(useOfflineListsOverview(pid, completedLimit));
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -96,7 +89,12 @@ export default function ListsOverview() {
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View style={{ marginHorizontal: 16 }}>
+            <View style={{ marginHorizontal: 16, gap: 8 }}>
+              <NavButton
+                icon={<ListChecks color={t.primary} size={18} />}
+                label={tl("myTasks")}
+                onPress={() => router.push(`/${pid}/lists/tasks`)}
+              />
               <NavButton
                 icon={<LayoutTemplate color={t.primary} size={18} />}
                 label={tl("templates")}
@@ -359,8 +357,10 @@ function CreateListSheet({
   projectId: Id<"projects">;
   onClose: () => void;
 }) {
-  const templates = useQuery(api.templates.listByProject, { projectId });
-  const createList = useMutation(api.lists.create);
+  const templates = usePersistentQuery(api.templates.listByProject, {
+    projectId,
+  });
+  const createList = useQueuedMutation(api.lists.create);
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -388,6 +388,7 @@ function CreateListSheet({
         name: trimmed,
         description: description.trim() || undefined,
         templateIds: selected.length > 0 ? selected : undefined,
+        taskMode: true,
       });
       setName("");
       setDescription("");

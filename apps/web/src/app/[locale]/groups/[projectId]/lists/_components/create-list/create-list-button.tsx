@@ -62,6 +62,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
         templateIds: (data.templates ?? []).map(
           (id) => id as Id<"listTemplates">,
         ),
+        taskMode: true,
       });
       toast.success(t("createSuccess", { name: form.getValues().name }));
       router.push({

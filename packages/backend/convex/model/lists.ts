@@ -1,6 +1,7 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { normalizeCategoryName } from "./categories";
+import { compareTaskItems } from "./tasks";
 
 export type ListWithItems = Doc<"lists"> & {
   items: Doc<"listItems">[];
@@ -25,7 +26,8 @@ export async function loadListWithItems(
     .query("listItems")
     .withIndex("by_list", (q) => q.eq("listId", list._id))
     .collect();
-  items.sort(compareItems);
+  // Task lists order by due date/priority; plain checklists keep the Postgres order.
+  items.sort(list.taskMode ? compareTaskItems : compareItems);
   const creator = await ctx.db.get(list.createdBy);
   return { ...list, items, createdByName: creator?.name ?? null };
 }

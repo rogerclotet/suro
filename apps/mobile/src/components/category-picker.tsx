@@ -45,6 +45,116 @@ export function buildCategoryRows(
   return rows;
 }
 
+/** Searchable category list shared by the inline field and sheet pickers. */
+export function CategoryPickerPanel({
+  categories,
+  value,
+  onChange,
+  autoFocus = false,
+}: {
+  categories: PickerCategory[];
+  value: string | null;
+  onChange: (category: string | null) => void;
+  autoFocus?: boolean;
+}) {
+  const t = useTheme();
+  const tcat = useTranslations("mobile.categories");
+  const [query, setQuery] = useState("");
+
+  const rows = useMemo(
+    () => buildCategoryRows(categories, query),
+    [categories, query],
+  );
+  const trimmedQuery = query.trim();
+  const hasCategoryRows = rows.some((row) => row.type === "category");
+
+  function select(row: Row) {
+    onChange(
+      row.type === "none"
+        ? null
+        : row.type === "category"
+          ? row.category.name
+          : row.name,
+    );
+    setQuery("");
+  }
+
+  return (
+    <View style={{ gap: 8 }}>
+      <Field
+        value={query}
+        onChangeText={setQuery}
+        placeholder={tcat("searchPlaceholder")}
+        autoFocus={autoFocus}
+        returnKeyType="done"
+        onSubmitEditing={() => {
+          const first = rows[0];
+          if (first) {
+            select(first);
+          }
+        }}
+      />
+      <ScrollView
+        style={{ maxHeight: 220 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {trimmedQuery !== "" && !hasCategoryRows ? (
+          <Txt muted size={14} style={{ padding: 10 }}>
+            {tcat("noResults")}
+          </Txt>
+        ) : null}
+        {rows.map((row) => {
+          const key =
+            row.type === "category" ? `cat-${row.category._id}` : row.type;
+          const isSelected =
+            (row.type === "none" && value === null) ||
+            (row.type === "category" && row.category.name === value);
+          const label =
+            row.type === "create"
+              ? tcat("createNamed", { name: row.name })
+              : row.type === "none"
+                ? tcat("noCategory")
+                : row.category.name;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => select(row)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 12,
+                borderRadius: 8,
+              }}
+            >
+              {row.type === "create" ? (
+                <Plus color={t.primary} size={16} />
+              ) : (
+                <Check
+                  color={t.primary}
+                  size={16}
+                  style={{ opacity: isSelected ? 1 : 0 }}
+                />
+              )}
+              <Txt
+                size={15}
+                numberOfLines={1}
+                style={{
+                  flex: 1,
+                  color: row.type === "create" ? t.primary : t.text,
+                }}
+              >
+                {label}
+              </Txt>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 /**
  * Inline-expandable category selector. Renders a trigger that toggles an in-flow
  * panel (search + options), so it composes inside a Sheet or a screen without
@@ -63,28 +173,13 @@ export function CategoryPicker({
   const t = useTheme();
   const tcat = useTranslations("mobile.categories");
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-
-  const rows = useMemo(
-    () => buildCategoryRows(categories, query),
-    [categories, query],
-  );
-  const trimmedQuery = query.trim();
-  const hasCategoryRows = rows.some((row) => row.type === "category");
 
   function close() {
     setOpen(false);
-    setQuery("");
   }
 
-  function select(row: Row) {
-    onChange(
-      row.type === "none"
-        ? null
-        : row.type === "category"
-          ? row.category.name
-          : row.name,
-    );
+  function handleChange(category: string | null) {
+    onChange(category);
     close();
   }
 
@@ -119,79 +214,14 @@ export function CategoryPicker({
             borderRadius: 12,
             backgroundColor: t.card,
             padding: 8,
-            gap: 8,
           }}
         >
-          <Field
-            value={query}
-            onChangeText={setQuery}
-            placeholder={tcat("searchPlaceholder")}
+          <CategoryPickerPanel
+            categories={categories}
+            value={value}
+            onChange={handleChange}
             autoFocus
-            returnKeyType="done"
-            onSubmitEditing={() => {
-              const first = rows[0];
-              if (first) {
-                select(first);
-              }
-            }}
           />
-          <ScrollView
-            style={{ maxHeight: 220 }}
-            keyboardShouldPersistTaps="handled"
-          >
-            {trimmedQuery !== "" && !hasCategoryRows ? (
-              <Txt muted size={14} style={{ padding: 10 }}>
-                {tcat("noResults")}
-              </Txt>
-            ) : null}
-            {rows.map((row) => {
-              const key =
-                row.type === "category" ? `cat-${row.category._id}` : row.type;
-              const isSelected =
-                (row.type === "none" && value === null) ||
-                (row.type === "category" && row.category.name === value);
-              const label =
-                row.type === "create"
-                  ? tcat("createNamed", { name: row.name })
-                  : row.type === "none"
-                    ? tcat("noCategory")
-                    : row.category.name;
-              return (
-                <Pressable
-                  key={key}
-                  onPress={() => select(row)}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 10,
-                    paddingHorizontal: 10,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                  }}
-                >
-                  {row.type === "create" ? (
-                    <Plus color={t.primary} size={16} />
-                  ) : (
-                    <Check
-                      color={t.primary}
-                      size={16}
-                      style={{ opacity: isSelected ? 1 : 0 }}
-                    />
-                  )}
-                  <Txt
-                    size={15}
-                    numberOfLines={1}
-                    style={{
-                      flex: 1,
-                      color: row.type === "create" ? t.primary : t.text,
-                    }}
-                  >
-                    {label}
-                  </Txt>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
         </View>
       ) : null}
     </View>

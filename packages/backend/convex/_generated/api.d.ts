@@ -9,8 +9,10 @@
  */
 
 import type * as ResendOTP from "../ResendOTP.js";
+import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
+import type * as crons from "../crons.js";
 import type * as events from "../events.js";
 import type * as expenses from "../expenses.js";
 import type * as files from "../files.js";
@@ -18,6 +20,7 @@ import type * as http from "../http.js";
 import type * as listItems from "../listItems.js";
 import type * as lists from "../lists.js";
 import type * as migrations from "../migrations.js";
+import type * as model_analytics from "../model/analytics.js";
 import type * as model_auth from "../model/auth.js";
 import type * as model_categories from "../model/categories.js";
 import type * as model_colors from "../model/colors.js";
@@ -27,6 +30,7 @@ import type * as model_lists from "../model/lists.js";
 import type * as model_pdfThumbnail from "../model/pdfThumbnail.js";
 import type * as model_permissions from "../model/permissions.js";
 import type * as model_pushI18n from "../model/pushI18n.js";
+import type * as model_tasks from "../model/tasks.js";
 import type * as notes from "../notes.js";
 import type * as pdfThumbnails from "../pdfThumbnails.js";
 import type * as projects from "../projects.js";
@@ -34,6 +38,7 @@ import type * as push from "../push.js";
 import type * as pushTokens from "../pushTokens.js";
 import type * as reviewOtp from "../reviewOtp.js";
 import type * as seed from "../seed.js";
+import type * as tasks from "../tasks.js";
 import type * as templates from "../templates.js";
 import type * as users from "../users.js";
 
@@ -45,8 +50,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ResendOTP: typeof ResendOTP;
+  analytics: typeof analytics;
   auth: typeof auth;
   categories: typeof categories;
+  crons: typeof crons;
   events: typeof events;
   expenses: typeof expenses;
   files: typeof files;
@@ -54,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   listItems: typeof listItems;
   lists: typeof lists;
   migrations: typeof migrations;
+  "model/analytics": typeof model_analytics;
   "model/auth": typeof model_auth;
   "model/categories": typeof model_categories;
   "model/colors": typeof model_colors;
@@ -63,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   "model/pdfThumbnail": typeof model_pdfThumbnail;
   "model/permissions": typeof model_permissions;
   "model/pushI18n": typeof model_pushI18n;
+  "model/tasks": typeof model_tasks;
   notes: typeof notes;
   pdfThumbnails: typeof pdfThumbnails;
   projects: typeof projects;
@@ -70,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   pushTokens: typeof pushTokens;
   reviewOtp: typeof reviewOtp;
   seed: typeof seed;
+  tasks: typeof tasks;
   templates: typeof templates;
   users: typeof users;
 }>;

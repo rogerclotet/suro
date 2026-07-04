@@ -10,7 +10,6 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.suro.mobile",
-      "associatedDomains": ["applinks:suro.clotet.dev"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

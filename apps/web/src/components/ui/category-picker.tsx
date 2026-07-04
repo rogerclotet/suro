@@ -31,6 +31,8 @@ export type CategoryPickerProps = {
   disabled?: boolean;
   variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
+  /** Render just the tag icon + chevron (no label) so it fits a compact row. */
+  iconOnly?: boolean;
 };
 
 // Like responsive-menu.tsx: useMediaQuery throws on the server, so render the
@@ -94,6 +96,7 @@ function CategoryPickerView({
   disabled,
   variant = "outline",
   className,
+  iconOnly,
 }: CategoryPickerProps & { mode: "desktop" | "mobile" }) {
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
@@ -164,17 +167,23 @@ function CategoryPickerView({
       role="combobox"
       aria-expanded={open}
       aria-haspopup="listbox"
+      aria-label={iconOnly ? triggerLabel : undefined}
       disabled={disabled}
       className={cn(
         "h-10 justify-between gap-2 font-normal sm:h-9",
         value === null && "text-muted-foreground",
+        iconOnly && "justify-start gap-1 px-2",
         className,
       )}
     >
-      <span className="flex min-w-0 items-center gap-2">
+      {iconOnly ? (
         <Tag className="size-4 shrink-0 opacity-60" />
-        <span className="truncate">{triggerLabel}</span>
-      </span>
+      ) : (
+        <span className="flex min-w-0 items-center gap-2">
+          <Tag className="size-4 shrink-0 opacity-60" />
+          <span className="truncate">{triggerLabel}</span>
+        </span>
+      )}
       <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
     </Button>
   );
@@ -227,6 +236,12 @@ function CategoryPickerView({
           className="w-(--radix-popover-trigger-width) min-w-56 p-2"
         >
           <div className="flex flex-col gap-2">
+            {/* Without a trigger label, name the field in the dropdown itself. */}
+            {iconOnly && (
+              <div className="px-1 font-medium text-muted-foreground text-xs">
+                {t("label")}
+              </div>
+            )}
             {search}
             <div className="max-h-64 overflow-y-auto">{list}</div>
           </div>
@@ -240,8 +255,8 @@ function CategoryPickerView({
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle className="sr-only">
-            {t("searchPlaceholder")}
+          <DrawerTitle className={cn(!iconOnly && "sr-only")}>
+            {iconOnly ? t("label") : t("searchPlaceholder")}
           </DrawerTitle>
           {search}
         </DrawerHeader>

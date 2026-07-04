@@ -23,7 +23,13 @@ import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { listItemSchema } from "./data";
+import {
+  listItemSchema,
+  presetFromRecurrence,
+  type TaskMutationArgs,
+  taskArgsFromForm,
+} from "./data";
+import { TaskFields } from "./task-fields";
 
 export default function EditListItemForm(props: {
   list: List;
@@ -33,6 +39,7 @@ export default function EditListItemForm(props: {
     details: string,
     completed: boolean,
     category: string | null,
+    task: TaskMutationArgs,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
   trigger: React.ReactNode;
@@ -52,6 +59,7 @@ function EditListItemFormContent(props: {
     details: string,
     completed: boolean,
     category: string | null,
+    task: TaskMutationArgs,
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
@@ -65,6 +73,11 @@ function EditListItemFormContent(props: {
       details: item.details ?? "",
       completed: item.completed ?? false,
       category: item.category,
+      dueAt: item.dueAt,
+      dueAllDay: item.dueAllDay,
+      assigneeId: item.assigneeId,
+      priority: item.priority,
+      recurrence: presetFromRecurrence(item.recurrence),
     },
     resolver: valibotResolver(listItemSchema),
   });
@@ -93,11 +106,16 @@ function EditListItemFormContent(props: {
           return;
         }
 
+        // Task lists send the edited task fields; plain checklists forward the
+        // item's existing ones (all undefined) so nothing is cleared.
+        const task = taskArgsFromForm(parsed);
+
         await onChange(
           parsed.name,
           parsed.details ?? "",
           parsed.completed,
           parsed.category,
+          task,
         );
 
         form.reset({
@@ -105,6 +123,11 @@ function EditListItemFormContent(props: {
           details: parsed.details ?? "",
           completed: parsed.completed,
           category: parsed.category,
+          dueAt: parsed.dueAt,
+          dueAllDay: parsed.dueAllDay,
+          assigneeId: parsed.assigneeId,
+          priority: parsed.priority,
+          recurrence: parsed.recurrence,
         });
         toast.success(t("itemUpdated"));
         close();
@@ -202,6 +225,12 @@ function EditListItemFormContent(props: {
             <FieldError errors={[fieldState.error]} />
           </Field>
         )}
+      />
+
+      <TaskFields
+        control={form.control}
+        members={project.users}
+        disabled={form.formState.isSubmitting}
       />
 
       <SubmitButton

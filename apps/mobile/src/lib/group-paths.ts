@@ -64,8 +64,8 @@ export function localizeGroupPath(path: string, locale: string): string {
   return `/${[target, ...localized].join("/")}`;
 }
 
-// In-app tab features under /[projectId]. A group link to anything else (no
-// feature, or one with no native screen like secret-santa) opens the home tab.
+// In-app features under /[projectId]. A group link to anything else (no
+// feature, or one with no native screen like secret-santa) opens Home.
 const MOBILE_FEATURES = new Set([
   "lists",
   "calendar",
@@ -73,6 +73,30 @@ const MOBILE_FEATURES = new Set([
   "notes",
   "expenses",
 ]);
+
+// Features that live behind the "More" tab rather than the bottom bar, so their
+// in-app route is nested one level deeper (`/<pid>/more/<feature>`). Keep in
+// sync with the tab triggers in [projectId]/_layout.tsx and OVERFLOW_SECTIONS
+// in more/index.tsx.
+const OVERFLOW_FEATURES = new Set(["files", "notes"]);
+
+/**
+ * Rewrite an in-app group route so overflow sections carry their `more/` prefix:
+ * `/<pid>/notes/<x>` → `/<pid>/more/notes/<x>`. Primary sections and non-section
+ * paths pass through unchanged. The single source of truth for the More-tab
+ * nesting — shared by the universal-link resolver below and the
+ * push-notification tap handler (lib/push.ts), whose payloads are built without
+ * knowledge of the mobile tab layout.
+ */
+export function withOverflowPrefix(route: string): string {
+  const segments = route.split("/").filter(Boolean); // [projectId, feature, ...]
+  const feature = segments[1];
+  if (!feature || !OVERFLOW_FEATURES.has(feature)) {
+    return route;
+  }
+  segments.splice(1, 0, "more");
+  return `/${segments.join("/")}`;
+}
 
 /**
  * Resolve an incoming Universal Link / App Link web path to the matching in-app
@@ -111,14 +135,15 @@ export function webPathToRoute(path: string): string {
   }
 
   // No feature, or one with no native screen (e.g. secret-santa): open the
-  // group's home tab rather than a dead route.
+  // group's Home tab rather than a dead route.
   const mappedFeature = feature ? toCanonicalSegment(feature) : undefined;
   if (!mappedFeature || !MOBILE_FEATURES.has(mappedFeature)) {
-    return `/${projectId}/lists`;
+    return `/${projectId}/home`;
   }
 
   const tail = rest.map(toCanonicalSegment).join("/");
-  return tail
+  const route = tail
     ? `/${projectId}/${mappedFeature}/${tail}`
     : `/${projectId}/${mappedFeature}`;
+  return withOverflowPrefix(route);
 }

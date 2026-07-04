@@ -134,16 +134,16 @@ describe("webPathToRoute", () => {
   it("accepts a full absolute URL and strips the locale prefix", () => {
     expect(
       webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/files`),
-    ).toBe(`/${PID}/files`);
+    ).toBe(`/${PID}/more/files`);
   });
 
   it("routes a bare group link to the group home", () => {
-    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/lists`);
+    expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/home`);
   });
 
   it("falls back to the group home for features without a native screen", () => {
     expect(webPathToRoute(`/ca/grups/${PID}/amic-invisible`)).toBe(
-      `/${PID}/lists`,
+      `/${PID}/home`,
     );
   });
 

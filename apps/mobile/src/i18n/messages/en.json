@@ -232,6 +232,7 @@
     }
   },
   "nav": {
+    "home": "Home",
     "lists": "Lists",
     "templates": "Templates",
     "categories": "Categories",
@@ -330,7 +331,11 @@
     "editTitle": "Edit group",
     "editDescription": "Edit the name, image and color of the group",
     "groupImage": "Group image",
+    "changeImage": "Change image",
     "removeImage": "Remove image",
+    "imagePermissionTitle": "Permission needed",
+    "imagePermissionBody": "Allow photo access to set a picture.",
+    "imageError": "Couldn't update image",
     "color": "Color",
     "name": "Name",
     "namePlaceholder": "Group name",
@@ -736,7 +741,17 @@
     "permissionPromptBanner": "Enable push notifications to get updates even when the app isn't open.",
     "permissionDeniedBanner": "Push notifications are currently blocked.",
     "permissionEnable": "Enable",
-    "permissionDeniedHint": "To unblock them, go to your browser or OS settings and allow notifications for this site."
+    "permissionDeniedHint": "To unblock them, go to your browser or OS settings and allow notifications for this site.",
+    "channels": {
+      "events": "Events",
+      "lists": "Lists",
+      "notes": "Notes",
+      "templates": "Templates",
+      "files": "Files",
+      "members": "Group members",
+      "expenses": "Expenses",
+      "tasks": "Tasks"
+    }
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Suro!",
@@ -760,6 +775,37 @@
     "letsGo": "Let's go!"
   },
   "mobile": {
+    "home": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "goToCalendar": "Go to calendar",
+      "showAllLists": "Show all",
+      "goToPots": "Go to pots",
+      "noUpcoming": "No upcoming events",
+      "noActiveLists": "No active lists",
+      "noActivePots": "No active pots"
+    },
+    "onboarding": {
+      "welcomeTitle": "Welcome to Suro!",
+      "welcomeBody": "Suro is a shared corkboard for the people you do life with. Let's take a quick tour of what you can do.",
+      "homeTitle": "Home",
+      "homeBody": "Your starting point: today's plans, what's coming up, and your active lists and pots — your group at a glance.",
+      "listsTitle": "Lists",
+      "listsBody": "Create shopping lists, to-dos, and packing lists. Categorize items, save reusable templates, and check things off together in real time.",
+      "calendarTitle": "Calendar",
+      "calendarBody": "Plan trips, dinners and birthdays. Link a list to any event so everything you need is in one place.",
+      "expensesTitle": "Expenses",
+      "expensesBody": "Track who paid for what, split costs fairly, and let Suro work out the simplest way to settle up.",
+      "moreTitle": "More",
+      "moreBody": "Tap More for files and notes: share photos, PDFs and documents, and write rich-text notes with your group.",
+      "profileTitle": "Set up your profile",
+      "profileBody": "Add your name and pick a color so your group members can recognize you.",
+      "profileNamePlaceholder": "Your name",
+      "next": "Next",
+      "skip": "Skip",
+      "back": "Back",
+      "letsGo": "Let's go!"
+    },
     "common": {
       "add": "Add",
       "save": "Save",
@@ -818,7 +864,12 @@
       "photoPermissionTitle": "Permission needed",
       "photoPermissionBody": "Allow photo access to set a picture.",
       "photoError": "Couldn't update photo",
-      "saveError": "Couldn't save"
+      "saveError": "Couldn't save",
+      "deleteAccount": "Delete account",
+      "deletingAccount": "Deleting…",
+      "deleteAccountConfirmTitle": "Delete account?",
+      "deleteAccountConfirmDescription": "This permanently deletes your account and all data linked to it, including any groups you created. This can't be undone.",
+      "deleteAccountError": "Couldn't delete your account"
     },
     "preferences": {
       "title": "Preferences",
@@ -874,13 +925,40 @@
       "dropNoCategory": "No category",
       "dropNewCategory": "New category…",
       "newCategoryTitle": "New category",
-      "newCategoryPlaceholder": "Category name"
+      "newCategoryPlaceholder": "Category name",
+      "taskList": "Task list",
+      "taskListHint": "Add due dates, assignees, priority and repeats to items.",
+      "myTasks": "My tasks",
+      "noTasks": "No tasks assigned to you.",
+      "dueDate": "Due date",
+      "setDueDate": "Set a due date",
+      "clearDueDate": "Clear due date",
+      "allDay": "All day",
+      "assignee": "Assignee",
+      "unassigned": "Unassigned",
+      "unknownMember": "Member",
+      "priority": "Priority",
+      "priority_low": "Low",
+      "priority_normal": "Normal",
+      "priority_high": "High",
+      "repeat": "Repeat",
+      "repeat_none": "Never",
+      "repeat_daily": "Daily",
+      "repeat_weekly": "Weekly",
+      "repeat_monthly": "Monthly",
+      "repeat_yearly": "Yearly",
+      "agendaOverdue": "Overdue",
+      "agendaToday": "Today",
+      "agendaUpcoming": "Upcoming",
+      "agendaNoDate": "No date"
     },
     "categories": {
       "searchPlaceholder": "Search or create…",
       "noResults": "No categories found.",
       "createNamed": "Create \"{name}\"",
-      "noCategory": "No category"
+      "noCategory": "No category",
+      "deleteSuggestion": "Delete suggestion",
+      "deleteSuggestionMessage": "Remove \"{name}\" from category suggestions? Items already using it keep their category."
     },
     "templates": {
       "title": "Templates",
@@ -891,6 +969,7 @@
       "createTemplate": "Create template",
       "createListFromTemplate": "Create list from template",
       "exportToGroup": "Export to another group",
+      "exportCaption": "Export",
       "noOtherGroups": "You have no other groups.",
       "deleteTemplate": "Delete template",
       "deleteMessage": "Delete \"{name}\"? This can't be undone.",
@@ -902,10 +981,12 @@
       "editItem": "Edit item",
       "deleteItem": "Delete item",
       "itemCount": "{count, plural, =1 {# item} other {# items}}",
+      "templateLabel": "Template",
       "uncategorized": "Other"
     },
     "calendar": {
       "title": "Calendar",
+      "allDay": "All day",
       "exportCalendar": "Export calendar",
       "exportExplainer": "Subscribing adds a live, read-only copy of this calendar to your calendar app. New and changed events show up automatically. It's one-way: edits you make there won't sync back to Suro.",
       "subscribeApple": "Add to Apple Calendar",
@@ -1012,6 +1093,7 @@
       "empty": "No pots yet. Tap + to start a shared tab.",
       "settled": "Settled",
       "settledAgo": "Settled {time}",
+      "showMoreSettled": "Show more",
       "balances": "Balances",
       "spendings": "Spendings",
       "noSpendings": "No spendings yet. Tap + to add one.",
@@ -1025,6 +1107,11 @@
       "newPot": "New pot",
       "namePlaceholder": "Name",
       "createPot": "Create pot",
+      "choosePotMembers": "Who's in the pot?",
+      "potOptions": "Pot options",
+      "deletePot": "Delete pot",
+      "deletePotMessage": "Delete \"{name}\"? This can't be undone.",
+      "cantDeletePot": "You can only delete a pot once it's settled, or before any spending is added.",
       "members": "Members ({count})",
       "newSpending": "New spending",
       "amountPlaceholder": "Amount",
