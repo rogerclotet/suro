@@ -1,1 +1,1 @@
-• Every list item can have an assignee, priority, due date, and repeat, with no separate task-list type to choose.
+• The new list item form no longer blanks the page when you confirm, and the category picker stays open while you search.

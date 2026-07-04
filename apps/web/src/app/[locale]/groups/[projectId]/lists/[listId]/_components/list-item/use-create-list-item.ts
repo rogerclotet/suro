@@ -57,7 +57,9 @@ export default function useCreateListItem(
           api.lists.listByProject,
           { projectId },
           lists.map((l) =>
-            l._id === args.listId ? { ...l, items: [...l.items, tempItem] } : l,
+            l._id === args.listId
+              ? { ...l, items: [...(l.items ?? []), tempItem] }
+              : l,
           ),
         );
       }
@@ -71,7 +73,10 @@ export default function useCreateListItem(
             { eventId },
             {
               ...event,
-              list: { ...event.list, items: [...event.list.items, tempItem] },
+              list: {
+                ...event.list,
+                items: [...(event.list.items ?? []), tempItem],
+              },
             },
           );
         }

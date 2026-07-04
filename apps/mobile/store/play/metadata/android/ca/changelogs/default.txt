@@ -1,1 +1,1 @@
-• Tots els elements de llista poden tenir responsable, prioritat, data de venciment i repetició, sense triar un tipus de llista apart.
+• El formulari per afegir elements ja no deixa la pàgina en blanc en confirmar, i el selector de categoria es manté obert mentre es cerca.

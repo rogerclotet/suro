@@ -1,1 +1,1 @@
-• Todos los elementos de lista pueden tener responsable, prioridad, fecha de vencimiento y repetición, sin elegir un tipo de lista aparte.
+• El formulario para añadir elementos ya no deja la página en blanco al confirmar, y el selector de categoría se mantiene abierto mientras se busca.

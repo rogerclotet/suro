@@ -116,6 +116,7 @@ export default function NewListItem({
         // Always visible so the affordance isn't enter-key-only; disabled
         // until there's something to add.
         <Button
+          type="submit"
           size="icon"
           variant="ghost"
           aria-label={t("addItem")}

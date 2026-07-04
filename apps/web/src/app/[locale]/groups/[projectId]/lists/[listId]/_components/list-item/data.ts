@@ -97,7 +97,10 @@ export function taskArgsFromForm(values: {
     dueAllDay: dueAt === null ? undefined : true,
     // The picker exposes member ids as plain strings; cast at this boundary.
     assigneeId: (values.assigneeId ?? undefined) as Id<"users"> | undefined,
-    priority: values.priority ?? undefined,
+    priority:
+      values.priority === "normal" || values.priority === null
+        ? undefined
+        : values.priority,
     recurrence: recurrenceFromPreset(values.recurrence),
   };
 }

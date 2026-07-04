@@ -55,34 +55,50 @@ const inputGroupAddonVariants = cva(
   },
 );
 
+/** Portaled popovers/comboboxes still bubble React events through this addon. */
+function shouldIgnoreAddonFocusRedirect(target: EventTarget | null) {
+  if (!(target instanceof Element)) {
+    return true;
+  }
+  return Boolean(
+    target.closest(
+      "button, input, textarea, select, [role='combobox'], [role='listbox'], [data-radix-popper-content-wrapper]",
+    ),
+  );
+}
+
 function InputGroupAddon({
   className,
   align = "inline-start",
   ...props
 }: React.ComponentProps<"fieldset"> &
   VariantProps<typeof inputGroupAddonVariants>) {
+  function focusPrimaryInput(currentTarget: EventTarget & Element) {
+    currentTarget.parentElement?.querySelector("input")?.focus();
+  }
+
   return (
     <fieldset
       data-slot="input-group-addon"
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), className)}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
+        if (shouldIgnoreAddonFocusRedirect(e.target)) {
           return;
         }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
+        focusPrimaryInput(e.currentTarget);
       }}
       onKeyUp={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
+        if (shouldIgnoreAddonFocusRedirect(e.target)) {
           return;
         }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
+        focusPrimaryInput(e.currentTarget);
       }}
       onKeyDown={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
+        if (shouldIgnoreAddonFocusRedirect(e.target)) {
           return;
         }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
+        focusPrimaryInput(e.currentTarget);
       }}
       {...props}
     />

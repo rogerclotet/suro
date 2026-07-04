@@ -3,7 +3,13 @@
 import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
 import { Check, ChevronsUpDown, Plus, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type KeyboardEvent, useMemo, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -104,6 +110,7 @@ function CategoryPickerView({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const trimmedQuery = query.trim();
 
@@ -138,7 +145,15 @@ function CategoryPickerView({
     handleOpenChange(false);
   }
 
+  useEffect(() => {
+    if (open && mode === "desktop") {
+      searchRef.current?.focus();
+    }
+  }, [open, mode]);
+
   function handleSearchKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    // Popovers are portaled but still bubble through InputGroupAddon in React.
+    e.stopPropagation();
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlight((h) => Math.min(h + 1, rows.length - 1));
@@ -190,6 +205,7 @@ function CategoryPickerView({
 
   const search = (
     <Input
+      ref={searchRef}
       value={query}
       onChange={(e) => {
         setQuery(e.target.value);
@@ -198,7 +214,6 @@ function CategoryPickerView({
       onKeyDown={handleSearchKeyDown}
       placeholder={t("searchPlaceholder")}
       aria-label={t("searchPlaceholder")}
-      autoFocus
     />
   );
 
@@ -234,6 +249,8 @@ function CategoryPickerView({
         <PopoverContent
           align="start"
           className="w-(--radix-popover-trigger-width) min-w-56 p-2"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <div className="flex flex-col gap-2">
             {/* Without a trigger label, name the field in the dropdown itself. */}

@@ -139,7 +139,7 @@ export function adaptList(
     updatedBy: l.updatedBy ?? null,
     updatedAt: l.updatedAt ? new Date(l.updatedAt) : null,
     createdAt: new Date(l._creationTime),
-    items: l.items.map(adaptItem),
+    items: (l.items ?? []).map(adaptItem),
     event: event ? adaptEvent(event) : null,
   };
 }

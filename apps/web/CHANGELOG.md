@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.14.1] — 2026-07-04
+
+### ca
+
+- [fix] El formulari per afegir elements ja no deixa la pàgina en blanc en confirmar, i el selector de categoria es manté obert mentre es cerca.
+
+### es
+
+- [fix] El formulario para añadir elementos ya no deja la página en blanco al confirmar, y el selector de categoría se mantiene abierto mientras se busca.
+
+### en
+
+- [fix] The new list item form no longer blanks the page when you confirm, and the category picker stays open while you search.
+
 ## [1.14.0] — 2026-07-04
 
 ### ca
