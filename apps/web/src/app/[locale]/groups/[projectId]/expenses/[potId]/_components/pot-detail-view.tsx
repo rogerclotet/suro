@@ -1,12 +1,15 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { usePot } from "@/lib/queries/use-expenses";
 import CreateSpendingButton from "../../_components/create-spending-button/create-spending-button";
 import SettleButton from "../../_components/settle-button/settle-button";
 import SpendingsList from "../../_components/spendings-list";
 import SpendingsTable from "../../_components/spendings-table";
+import DeletePotModal from "./delete-pot-modal";
 
 export default function PotDetailView({
   potId,
@@ -20,6 +23,10 @@ export default function PotDetailView({
   if (pot === undefined || pot === null) {
     return null;
   }
+
+  // Only settled or not-yet-started (no spendings) pots can be removed, so an
+  // in-progress pot's recorded expenses can't be lost. Mirrors the backend.
+  const deletable = pot.settledAt !== null || pot.spendings.length === 0;
 
   return (
     <div className="space-y-6">
@@ -40,6 +47,21 @@ export default function PotDetailView({
             potId={pot.id}
           />
           <CreateSpendingButton members={pot.users} pot={pot} />
+          {deletable && (
+            <DeletePotModal
+              pot={{ id: pot.id, name: pot.name, projectId: pot.projectId }}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("deletePot")}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 />
+                </Button>
+              }
+            />
+          )}
         </div>
       </div>
 

@@ -1,1 +1,1 @@
-Primera versión de Suro: listas, calendario, notas, archivos y gastos compartidos para tus grupos.
+• Todos los elementos de lista pueden tener responsable, prioridad, fecha de vencimiento y repetición, sin elegir un tipo de lista aparte.

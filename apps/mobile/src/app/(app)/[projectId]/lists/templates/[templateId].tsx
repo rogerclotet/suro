@@ -1,39 +1,66 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { Pressable, SectionList, View } from "react-native";
+import { Copy, Ellipsis, LayoutTemplate, Trash2 } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Pressable, SectionList, View } from "react-native";
 import { CategoryPicker } from "@/components/category-picker";
+import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
+import { ExportTargetPicker } from "@/components/template-export";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Field,
+  HEADER_BUTTON_INSET,
+  IconAction,
+  IconActionBar,
+  Loading,
+  Screen,
+  Sheet,
+  Txt,
+} from "@/ui";
 
-type Template = FunctionReturnType<typeof api.templates.get>;
+type Template = NonNullable<FunctionReturnType<typeof api.templates.get>>;
 type TemplateItem = Template["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
 /** A template item plus its position in the template's `items` array. */
 type IndexedItem = TemplateItem & { index: number };
+type Section = { title: string; category: string | null; data: IndexedItem[] };
 
-/** Group items by their category name, sorted like the PWA (category & item alpha). */
-function groupByCategory(items: TemplateItem[], uncategorized: string) {
-  const groups = new Map<string, IndexedItem[]>();
+/**
+ * Group items by category, ordered like the list detail: the uncategorized
+ * bucket first (so its items sit right under the always-visible add row at the
+ * top), then the rest alphabetically; items within a section sort by name.
+ */
+function groupByCategory(
+  items: TemplateItem[],
+  uncategorized: string,
+): Section[] {
+  const groups = new Map<string, Section>();
   items.forEach((item, index) => {
-    const key = item.category ?? uncategorized;
-    const bucket = groups.get(key);
+    const category = item.category ?? null;
+    const title = category ?? uncategorized;
+    const bucket = groups.get(title);
     if (bucket) {
-      bucket.push({ ...item, index });
+      bucket.data.push({ ...item, index });
     } else {
-      groups.set(key, [{ ...item, index }]);
+      groups.set(title, { title, category, data: [{ ...item, index }] });
     }
   });
-  return [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([title, data]) => ({
-      title,
-      data: data.sort((x, y) => x.name.localeCompare(y.name)),
+  return [...groups.values()]
+    .sort((a, b) => {
+      if (a.category === null) return -1;
+      if (b.category === null) return 1;
+      return a.title.localeCompare(b.title);
+    })
+    .map((section) => ({
+      ...section,
+      data: section.data.sort((x, y) => x.name.localeCompare(y.name)),
     }));
 }
 
@@ -46,13 +73,41 @@ export default function TemplateEditor() {
   const tc = useTranslations("mobile.common");
   const router = useRouter();
 
-  const template = useQuery(api.templates.get, { templateId: tid });
-  const categories = useQuery(api.categories.listByProject, { projectId: pid });
-  const update = useMutation(api.templates.update);
+  const template = usePersistentQuery(api.templates.get, { templateId: tid });
+  const categories = usePersistentQuery(api.categories.listByProject, {
+    projectId: pid,
+  });
+  // Optimistic so an inline add re-sections instantly and consecutive adds read
+  // the freshly-updated items (the mutation rewrites the whole array, so without
+  // this a second add fired before the server round-trip would clobber the
+  // first). Every update flows through here, so edits/deletes/settings reflect
+  // immediately too.
+  const update = useMutation(api.templates.update).withOptimisticUpdate(
+    (store, args) => {
+      const current = store.getQuery(api.templates.get, { templateId: tid });
+      if (!current) {
+        return;
+      }
+      store.setQuery(
+        api.templates.get,
+        { templateId: tid },
+        {
+          ...current,
+          name: args.name,
+          description: args.description,
+          items: args.items,
+        },
+      );
+    },
+  );
   const remove = useMutation(api.templates.remove);
+  const createList = useMutation(api.lists.create);
 
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<string | null>(null);
+  // Which category section's inline add row is expanded (null = none); set after
+  // each add so focus follows the item into the category it went to.
+  const [activeAddCategory, setActiveAddCategory] = useState<string | null>(
+    null,
+  );
   // Edit state is lifted to the parent (persists through the sheet's slide-out).
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -60,6 +115,18 @@ export default function TemplateEditor() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsName, setSettingsName] = useState("");
   const [settingsDescription, setSettingsDescription] = useState("");
+  // The settings sheet hosts the export-to-group picker inline (no second
+  // Modal), mirroring the index actions sheet.
+  const [showExport, setShowExport] = useState(false);
+
+  // `null` means the template no longer exists (deleted here or from another
+  // client): leave the editor instead of re-querying a deleted template, which
+  // would surface a "Template not found" server error.
+  useEffect(() => {
+    if (template === null && router.canGoBack()) {
+      router.back();
+    }
+  }, [template, router]);
 
   const uncategorized = tr("uncategorized");
   const sections = useMemo(
@@ -83,14 +150,33 @@ export default function TemplateEditor() {
     });
   }
 
-  async function addItem() {
-    const trimmed = newName.trim();
-    if (!trimmed || !template) {
+  /**
+   * Append an item from an inline add row. Fire-and-forget: the optimistic
+   * update inserts it instantly, so awaiting (which would blur the input and
+   * drop the keyboard between consecutive adds) isn't needed. Always succeeds —
+   * templates allow duplicate item names. Focus follows the item into its
+   * category so the next entry continues there.
+   */
+  function handleInlineAdd(name: string, category: string | null): boolean {
+    if (!template) {
+      return false;
+    }
+    void persist([...template.items, { name, category }]);
+    setActiveAddCategory(category);
+    return true;
+  }
+
+  async function createListFromTemplate() {
+    if (!template) {
       return;
     }
-    setNewName("");
-    const category = newCategory;
-    await persist([...template.items, { name: trimmed, category }]);
+    closeSettings();
+    const listId = await createList({
+      projectId: pid,
+      name: template.name,
+      templateIds: [tid],
+    });
+    router.push(`/${pid}/lists/${listId}`);
   }
 
   function openEdit(item: IndexedItem) {
@@ -130,24 +216,42 @@ export default function TemplateEditor() {
     }
     setSettingsName(template.name);
     setSettingsDescription(template.description ?? "");
+    setShowExport(false);
     setSettingsOpen(true);
   }
 
-  async function saveSettings() {
+  function closeSettings() {
+    setShowExport(false);
     setSettingsOpen(false);
+  }
+
+  async function saveSettings() {
+    closeSettings();
     if (!template) {
       return;
     }
     await persist(template.items, settingsName, settingsDescription.trim());
   }
 
-  async function deleteTemplate() {
-    setSettingsOpen(false);
-    await remove({ templateId: tid });
-    router.back();
+  function confirmDeleteTemplate() {
+    if (!template) {
+      return;
+    }
+    const name = template.name;
+    Alert.alert(tr("deleteTemplate"), tr("deleteMessage", { name }), [
+      { text: tc("cancel"), style: "cancel" },
+      {
+        text: tc("delete"),
+        style: "destructive",
+        onPress: () => {
+          closeSettings();
+          void remove({ templateId: tid }).then(() => router.back());
+        },
+      },
+    ]);
   }
 
-  if (template === undefined) {
+  if (template === undefined || template === null) {
     return (
       <Screen>
         <Loading />
@@ -161,10 +265,14 @@ export default function TemplateEditor() {
         options={{
           title: template.name,
           headerRight: () => (
-            <Pressable onPress={openSettings} hitSlop={8}>
-              <Txt size={20} style={{ color: t.primary }}>
-                ⋯
-              </Txt>
+            <Pressable
+              onPress={openSettings}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={tr("templateSettings")}
+              style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
+            >
+              <Ellipsis color={t.primary} size={22} />
             </Pressable>
           ),
         }}
@@ -177,31 +285,34 @@ export default function TemplateEditor() {
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View style={{ gap: 8, paddingBottom: 12 }}>
-            {template.description ? (
-              <Txt muted style={{ paddingBottom: 4 }}>
-                {template.description}
-              </Txt>
-            ) : null}
-            <Field
-              placeholder={tr("addItemPlaceholder")}
-              value={newName}
-              onChangeText={setNewName}
-              onSubmitEditing={addItem}
-              returnKeyType="done"
-            />
-            <View
-              style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}
-            >
-              <View style={{ flex: 1 }}>
-                <CategoryPicker
-                  categories={categories ?? []}
-                  value={newCategory}
-                  onChange={setNewCategory}
-                />
+          <View style={{ paddingBottom: 8 }}>
+            {/* Blurb plus a clear "this is a template" cue, in the same spot the
+                list detail shows its description/provenance block. */}
+            <View style={{ gap: 6, paddingBottom: 12 }}>
+              {template.description ? (
+                <Txt muted size={14} style={{ lineHeight: 20 }}>
+                  {template.description}
+                </Txt>
+              ) : null}
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+              >
+                <LayoutTemplate color={t.muted} size={14} />
+                <Txt muted size={13}>
+                  {`${tr("templateLabel")} · ${tr("itemCount", {
+                    count: template.items.length,
+                  })}`}
+                </Txt>
               </View>
-              <Button title={tc("add")} onPress={addItem} />
             </View>
+            {/* Always-visible no-category entry point with the quick category
+                chip; uncategorized items sort first, right below it. */}
+            <NewItemRow
+              projectId={pid}
+              categories={categories ?? []}
+              showTaskControls={false}
+              onSubmit={handleInlineAdd}
+            />
           </View>
         }
         ListEmptyComponent={
@@ -210,7 +321,7 @@ export default function TemplateEditor() {
           </Txt>
         }
         renderSectionHeader={({ section }) =>
-          sections.length > 1 ? (
+          section.category !== null ? (
             <Txt
               muted
               size={12}
@@ -220,11 +331,31 @@ export default function TemplateEditor() {
             </Txt>
           ) : null
         }
+        renderSectionFooter={({ section }) => {
+          const category = section.category;
+          // The no-category section's entry point is the always-visible row at
+          // the top; only categorized sections get their own inline add row.
+          if (category === null) {
+            return null;
+          }
+          return (
+            <InlineAddItemRow
+              active={activeAddCategory === category}
+              onActivate={() => setActiveAddCategory(category)}
+              onDeactivate={() =>
+                setActiveAddCategory((prev) =>
+                  prev === category ? null : prev,
+                )
+              }
+              onSubmit={(name) => handleInlineAdd(name, category)}
+            />
+          );
+        }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => openEdit(item)}
             style={{
-              paddingVertical: 12,
+              paddingVertical: 10,
               borderBottomWidth: 1,
               borderColor: t.border,
             }}
@@ -246,26 +377,57 @@ export default function TemplateEditor() {
         onClose={() => setEditingIndex(null)}
       />
 
-      <Sheet visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
+      <Sheet visible={settingsOpen} onClose={closeSettings}>
         <Txt size={18} weight="700">
           {tr("templateSettings")}
         </Txt>
-        <Field
-          placeholder={tr("namePlaceholder")}
-          value={settingsName}
-          onChangeText={setSettingsName}
-        />
-        <Field
-          placeholder={tr("descriptionPlaceholder")}
-          value={settingsDescription}
-          onChangeText={setSettingsDescription}
-        />
-        <Button title={tc("save")} onPress={saveSettings} />
-        <Pressable onPress={deleteTemplate} style={{ padding: 10 }}>
-          <Txt style={{ textAlign: "center", color: "#e64553" }}>
-            {tr("deleteTemplate")}
-          </Txt>
-        </Pressable>
+        {showExport ? (
+          <ExportTargetPicker
+            templateId={tid}
+            currentProjectId={pid}
+            onExported={(name) => {
+              closeSettings();
+              Alert.alert(tr("exportedTitle"), tr("exportedMessage", { name }));
+            }}
+            onBack={() => setShowExport(false)}
+          />
+        ) : (
+          <>
+            <Field
+              placeholder={tr("namePlaceholder")}
+              value={settingsName}
+              onChangeText={setSettingsName}
+            />
+            <Field
+              placeholder={tr("descriptionPlaceholder")}
+              value={settingsDescription}
+              onChangeText={setSettingsDescription}
+            />
+            <Button title={tc("save")} onPress={saveSettings} />
+            <Button
+              title={tr("createListFromTemplate")}
+              variant="ghost"
+              onPress={createListFromTemplate}
+            />
+            {/* Secondary template actions as a compact icon toolbar, matching
+                the list settings sheet. */}
+            <IconActionBar>
+              <IconAction
+                icon={Copy}
+                caption={tr("exportCaption")}
+                label={tr("exportToGroup")}
+                onPress={() => setShowExport(true)}
+              />
+              <IconAction
+                icon={Trash2}
+                destructive
+                caption={tc("delete")}
+                label={tr("deleteTemplate")}
+                onPress={confirmDeleteTemplate}
+              />
+            </IconActionBar>
+          </>
+        )}
       </Sheet>
     </Screen>
   );
@@ -292,6 +454,7 @@ function EditTemplateItemSheet({
   onDelete: () => void;
   onClose: () => void;
 }) {
+  const theme = useTheme();
   const t = useTranslations("mobile.templates");
   const tc = useTranslations("mobile.common");
   return (
@@ -311,7 +474,7 @@ function EditTemplateItemSheet({
       />
       <Button title={tc("save")} onPress={onSave} />
       <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: "#e64553" }}>
+        <Txt style={{ textAlign: "center", color: theme.danger }}>
           {t("deleteItem")}
         </Txt>
       </Pressable>

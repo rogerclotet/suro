@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as AppleNative from "../AppleNative.js";
 import type * as ResendOTP from "../ResendOTP.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
@@ -20,11 +21,13 @@ import type * as http from "../http.js";
 import type * as listItems from "../listItems.js";
 import type * as lists from "../lists.js";
 import type * as migrations from "../migrations.js";
+import type * as model_account from "../model/account.js";
 import type * as model_analytics from "../model/analytics.js";
 import type * as model_auth from "../model/auth.js";
 import type * as model_categories from "../model/categories.js";
 import type * as model_colors from "../model/colors.js";
 import type * as model_expenses from "../model/expenses.js";
+import type * as model_fileUrls from "../model/fileUrls.js";
 import type * as model_ics from "../model/ics.js";
 import type * as model_lists from "../model/lists.js";
 import type * as model_pdfThumbnail from "../model/pdfThumbnail.js";
@@ -49,6 +52,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  AppleNative: typeof AppleNative;
   ResendOTP: typeof ResendOTP;
   analytics: typeof analytics;
   auth: typeof auth;
@@ -61,11 +65,13 @@ declare const fullApi: ApiFromModules<{
   listItems: typeof listItems;
   lists: typeof lists;
   migrations: typeof migrations;
+  "model/account": typeof model_account;
   "model/analytics": typeof model_analytics;
   "model/auth": typeof model_auth;
   "model/categories": typeof model_categories;
   "model/colors": typeof model_colors;
   "model/expenses": typeof model_expenses;
+  "model/fileUrls": typeof model_fileUrls;
   "model/ics": typeof model_ics;
   "model/lists": typeof model_lists;
   "model/pdfThumbnail": typeof model_pdfThumbnail;

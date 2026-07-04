@@ -3,8 +3,11 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "app.suro.mobile",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_ANDROID_SHA256_FINGERPRINT"]
+      "package_name": "dev.clotet.suro",
+      "sha256_cert_fingerprints": [
+        "45:C8:DF:07:FB:06:3D:61:76:36:C5:97:AB:C9:6B:0D:A7:6E:7C:02:28:83:DF:32:29:06:89:2C:91:D4:19:95",
+        "09:94:D7:B4:66:A6:FD:A5:FB:10:8C:24:66:0D:DC:58:C1:9A:11:0D:8B:3C:8B:D9:5C:DD:3F:AD:9E:90:24:45"
+      ]
     }
   }
 ]

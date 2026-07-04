@@ -25,7 +25,7 @@ const Checkbox = forwardRef<
     <CheckboxPrimitive.Indicator
       // The indicator mounts on check, so the enter animation pops the mark in.
       className={cn(
-        "flex animate-in items-center justify-center text-current duration-200 zoom-in-50",
+        "zoom-in-50 flex animate-in items-center justify-center text-current duration-200",
       )}
     >
       <Check className="h-4 w-4" />

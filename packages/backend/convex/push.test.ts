@@ -98,6 +98,26 @@ describe("pushTokens.register / unregister", () => {
     expect(rows[0]?.userId).toBe(ctx.alice);
   });
 
+  it("keeps a separate row per device for the same user", async () => {
+    const asBob = ctx.t.withIdentity({ subject: `${ctx.bob}|session` });
+    await asBob.mutation(api.pushTokens.register, {
+      token: "ExpoToken[bob-phone]",
+      platform: "android",
+    });
+    await asBob.mutation(api.pushTokens.register, {
+      token: "ExpoToken[bob-ipad]",
+      platform: "ios",
+    });
+    const rows = await ctx.t.run((c) =>
+      c.db
+        .query("pushTokens")
+        .withIndex("by_user", (q) => q.eq("userId", ctx.bob))
+        .collect(),
+    );
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.platform).sort()).toEqual(["android", "ios"]);
+  });
+
   it("unregister only removes the caller's own token", async () => {
     const asBob = ctx.t.withIdentity({ subject: `${ctx.bob}|session` });
     const asAlice = ctx.t.withIdentity({ subject: `${ctx.alice}|session` });
@@ -155,7 +175,58 @@ describe("push.sendToProject", () => {
       title: "Family",
       body: "Nueva lista: Groceries", // bob's locale is "es"
       data: { path: `/${ctx.family}/lists` },
+      channelId: "lists",
     });
+  });
+
+  it("delivers to every device a member has registered", async () => {
+    const fetchMock = stubExpo({ data: [{ status: "ok" }, { status: "ok" }] });
+    await ctx.t.run(async (c) => {
+      await c.db.insert("pushTokens", {
+        userId: ctx.bob,
+        token: "ExpoToken[bob-ipad]",
+        platform: "ios",
+      });
+    });
+    await ctx.t.action(internal.push.sendToProject, {
+      projectId: ctx.family,
+      actorId: ctx.alice,
+      bodyKey: "list_created",
+      bodyParams: { name: "Groceries" },
+      path: `/${ctx.family}/lists`,
+    });
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+    expect(body).toHaveLength(2);
+    expect(body.map((m: { to: string }) => m.to).sort()).toEqual(
+      ["ExpoToken[bob]", "ExpoToken[bob-ipad]"].sort(),
+    );
+  });
+
+  // The Android channel is derived from the bodyKey's section so each category
+  // is mutable on its own; a typo'd map entry would land the push in the wrong
+  // (or no) channel. iOS ignores channelId, so this is safe for every recipient.
+  it.each([
+    ["event_created", "events"],
+    ["spending_created", "expenses"],
+    ["spending_created_with_description", "expenses"],
+    ["member_joined", "members"],
+    ["file_uploaded", "files"],
+  ])("routes %s to the %s channel", async (bodyKey, channelId) => {
+    const fetchMock = stubExpo();
+    await ctx.t.action(internal.push.sendToProject, {
+      projectId: ctx.family,
+      actorId: ctx.alice,
+      bodyKey,
+      bodyParams: {
+        name: "X",
+        amount: "1",
+        userName: "Carol",
+        description: "D",
+      },
+      path: `/${ctx.family}/home`,
+    });
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+    expect(body[0]).toMatchObject({ channelId });
   });
 
   it("does not call Expo when there are no recipient tokens", async () => {
@@ -196,5 +267,25 @@ describe("push.sendToProject", () => {
         .unique(),
     );
     expect(row).toBeNull();
+  });
+
+  // Guards the four notification types added for PWA parity: a typo'd bodyKey or
+  // a missing locale entry in pushI18n would surface here as an empty/wrong body.
+  it.each([
+    ["template_created", { name: "Camping" }, "Nueva plantilla: Camping"],
+    ["file_uploaded", { name: "photo.jpg" }, "Archivo photo.jpg añadido"],
+    ["member_joined", { userName: "Carol" }, "Carol se ha unido al grupo"],
+    ["member_left", { userName: "Carol" }, "Carol ha dejado el grupo"],
+  ])("localizes %s for the recipient", async (bodyKey, bodyParams, expected) => {
+    const fetchMock = stubExpo();
+    await ctx.t.action(internal.push.sendToProject, {
+      projectId: ctx.family,
+      actorId: ctx.alice,
+      bodyKey,
+      bodyParams,
+      path: `/${ctx.family}/lists`,
+    });
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+    expect(body[0]).toMatchObject({ to: "ExpoToken[bob]", body: expected });
   });
 });

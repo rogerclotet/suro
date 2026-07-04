@@ -3,6 +3,8 @@ import {
   allDayDisplayEnd,
   DAY_MS,
   type EventTimes,
+  endOfDay,
+  formatTimeOfDay,
   formatTimeRange,
   inclusiveDayCount,
   isEventOnDay,
@@ -81,6 +83,25 @@ describe("startOfDay", () => {
   it("does not mutate the input", () => {
     const input = new Date(2024, 5, 20, 14, 0);
     startOfDay(input);
+    expect(input.getHours()).toBe(14);
+  });
+});
+
+describe("endOfDay", () => {
+  it("returns the last instant of the given day", () => {
+    const result = endOfDay(new Date(2024, 5, 20, 14, 37, 12, 500));
+    expect(result.getFullYear()).toBe(2024);
+    expect(result.getMonth()).toBe(5);
+    expect(result.getDate()).toBe(20);
+    expect(result.getHours()).toBe(23);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
+  });
+
+  it("does not mutate the input", () => {
+    const input = new Date(2024, 5, 20, 14, 0);
+    endOfDay(input);
     expect(input.getHours()).toBe(14);
   });
 });
@@ -213,6 +234,40 @@ describe("formatTimeRange", () => {
       ...TIME_OPTS,
     })}`;
     expect(formatTimeRange(event, "en-US")).toBe(expected);
+  });
+});
+
+describe("formatTimeOfDay", () => {
+  const TIME_OPTS = { hour: "numeric", minute: "2-digit" } as const;
+
+  it("shows only the clock times for a same-day timed event", () => {
+    const event = timed([2024, 0, 15, 9, 0], [2024, 0, 15, 11, 30]);
+    const expected = `${new Date(2024, 0, 15, 9, 0).toLocaleTimeString(
+      "en-US",
+      TIME_OPTS,
+    )} - ${new Date(2024, 0, 15, 11, 30).toLocaleTimeString("en-US", TIME_OPTS)}`;
+    expect(formatTimeOfDay(event, "en-US")).toBe(expected);
+    // The date isn't repeated — the surrounding UI already shows it.
+    expect(formatTimeOfDay(event, "en-US")).not.toContain("2024");
+  });
+
+  it("returns '' for a single all-day event (caller supplies 'All day')", () => {
+    const event = allDay([2024, 0, 15], [2024, 0, 16]);
+    expect(formatTimeOfDay(event, "en-US")).toBe("");
+  });
+
+  it("falls back to the full dated range when a timed event spans days", () => {
+    const event = timed([2024, 0, 15, 22, 0], [2024, 0, 16, 1, 0]);
+    expect(formatTimeOfDay(event, "en-US")).toBe(
+      formatTimeRange(event, "en-US"),
+    );
+  });
+
+  it("falls back to the date range for a multi-day all-day event", () => {
+    const event = allDay([2024, 0, 15], [2024, 0, 18]);
+    expect(formatTimeOfDay(event, "en-US")).toBe(
+      formatTimeRange(event, "en-US"),
+    );
   });
 });
 

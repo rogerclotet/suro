@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   CirclePlus,
@@ -25,6 +25,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { Avatar } from "@/components/avatar";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { FileGallery } from "@/components/file-gallery";
@@ -33,6 +34,7 @@ import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
 import { localizeGroupPath } from "@/lib/group-paths";
 import { notePreview } from "@/lib/note-content";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { webUrl } from "@/lib/urls";
 import { useUploadFile } from "@/lib/use-upload-file";
@@ -70,8 +72,10 @@ export default function EventDetail() {
   const formatRange = useFormatEventRange();
   const timeRemaining = useTimeRemaining();
 
-  const event = useQuery(api.events.get, { eventId: eid });
-  const eventFiles = useQuery(api.files.listByEvent, { eventId: eid });
+  const event = usePersistentQuery(api.events.get, { eventId: eid });
+  const eventFiles = usePersistentQuery(api.files.listByEvent, {
+    eventId: eid,
+  });
   const { pickImage, pickDocument, pending } = useUploadFile(pid, eid);
   const updateEvent = useMutation(api.events.update);
   const removeEvent = useMutation(api.events.remove);
@@ -79,7 +83,6 @@ export default function EventDetail() {
   const unlinkList = useMutation(api.events.unlinkList);
   const createLinkedNote = useMutation(api.events.createLinkedNote);
   const unlinkNote = useMutation(api.events.unlinkNote);
-  const createLinkedPot = useMutation(api.events.createLinkedPot);
   const unlinkPot = useMutation(api.events.unlinkPot);
   const linkList = useMutation(api.events.linkList);
   const linkNote = useMutation(api.events.linkNote);
@@ -95,11 +98,12 @@ export default function EventDetail() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [potPicker, setPotPicker] = useState(false);
   // Presenting a second sheet while the options sheet is still animating out is
   // dropped on iOS, so defer it until the options sheet has fully closed.
-  const [pendingSheet, setPendingSheet] = useState<null | "edit" | "link">(
-    null,
-  );
+  const [pendingSheet, setPendingSheet] = useState<
+    null | "edit" | "link" | "pot"
+  >(null);
 
   // Live countdown: refresh "now" each minute.
   const [now, setNow] = useState(() => Date.now());
@@ -107,6 +111,20 @@ export default function EventDetail() {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // `null` means the event no longer exists (deleted here or from another
+  // client): return to the calendar instead of rendering — or re-querying — a
+  // deleted event, which would surface an "Event not found" server error.
+  useEffect(() => {
+    if (event !== null) {
+      return;
+    }
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace(`/${pid}/calendar`);
+    }
+  }, [event, router, pid]);
 
   async function handleEdit(values: EventFormValues) {
     setEditing(false);
@@ -125,7 +143,11 @@ export default function EventDetail() {
         style: "destructive",
         onPress: () => {
           setSettingsOpen(false);
-          void removeEvent({ eventId: eid }).then(() => router.back());
+          // Navigation back to the calendar is owned by the `event === null`
+          // effect above, which fires once the delete propagates (and also
+          // covers deletes from another client) — so don't also navigate here,
+          // which would pop twice.
+          void removeEvent({ eventId: eid });
         },
       },
     ]);
@@ -164,15 +186,8 @@ export default function EventDetail() {
     router.push(`/${pid}/calendar/note/${noteId}`);
   }
 
-  async function handleCreateLinkedPot() {
-    try {
-      const potId = await createLinkedPot({ eventId: eid });
-      router.push(`/${pid}/calendar/expense/${potId}`);
-    } catch {
-      // The only failure mode is a solo project — expenses need a group.
-      Alert.alert(tCal("expenseNeedsMembers"));
-    }
-  }
+  // Pots ask who's in them first, so "create" just opens the member picker;
+  // the sheet itself creates the pot and navigates to it.
 
   function linkExisting(candidate: LinkCandidate) {
     setLinking(false);
@@ -199,7 +214,7 @@ export default function EventDetail() {
     await Share.share({ title: event.name, message, url: link });
   }
 
-  if (event === undefined) {
+  if (event === undefined || event === null) {
     return (
       <Screen>
         <Stack.Screen options={{ title: "" }} />
@@ -235,6 +250,8 @@ export default function EventDetail() {
       setEditing(true);
     } else if (pendingSheet === "link") {
       setLinking(true);
+    } else if (pendingSheet === "pot") {
+      setPotPicker(true);
     }
     setPendingSheet(null);
   }
@@ -402,7 +419,7 @@ export default function EventDetail() {
               <AddChip
                 icon={CirclePlus}
                 label={tCal("createExpense")}
-                onPress={() => void handleCreateLinkedPot()}
+                onPress={() => setPotPicker(true)}
               />
             ) : null}
             {!hasFiles ? (
@@ -479,8 +496,8 @@ export default function EventDetail() {
             icon={CirclePlus}
             label={tCal("createExpense")}
             onPress={() => {
+              setPendingSheet("pot");
               setSettingsOpen(false);
-              void handleCreateLinkedPot();
             }}
           />
         ) : null}
@@ -525,7 +542,143 @@ export default function EventDetail() {
         onPick={linkExisting}
         onClose={() => setLinking(false)}
       />
+
+      <CreatePotMembersSheet
+        visible={potPicker}
+        projectId={pid}
+        eventId={eid}
+        onClose={() => setPotPicker(false)}
+      />
     </Screen>
+  );
+}
+
+/**
+ * Picks who's in a new event-linked pot before creating it. Defaults to every
+ * group member selected (the prior auto-seed behaviour) but lets the user trim
+ * the list. The pot inherits the event's name, so there's no name field here.
+ */
+function CreatePotMembersSheet({
+  visible,
+  projectId,
+  eventId,
+  onClose,
+}: {
+  visible: boolean;
+  projectId: Id<"projects">;
+  eventId: Id<"events">;
+  onClose: () => void;
+}) {
+  const members = usePersistentQuery(api.projects.members, { projectId });
+  const createLinkedPot = useMutation(api.events.createLinkedPot);
+  const router = useRouter();
+  const t = useTheme();
+  const tExp = useTranslations("mobile.expenses");
+  const tCal = useTranslations("mobile.calendar");
+  const tc = useTranslations("mobile.common");
+  // `null` means untouched — everyone is selected until the user changes it.
+  const [selected, setSelected] = useState<Set<Id<"users">> | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const allIds = useMemo(
+    () => new Set((members ?? []).map((m) => m._id)),
+    [members],
+  );
+  const chosen = selected ?? allIds;
+
+  function toggle(userId: Id<"users">) {
+    const next = new Set(chosen);
+    if (next.has(userId)) {
+      next.delete(userId);
+    } else {
+      next.add(userId);
+    }
+    setSelected(next);
+  }
+
+  async function submit() {
+    if (chosen.size < 2) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const potId = await createLinkedPot({
+        eventId,
+        memberIds: [...chosen],
+      });
+      setSelected(null);
+      onClose();
+      router.push(`/${projectId}/calendar/expense/${potId}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Expenses are a group feature; a solo group can't make a pot.
+  const tooFew = members !== undefined && members.length < 2;
+
+  return (
+    <Sheet visible={visible} onClose={onClose}>
+      <Txt size={18} weight="700">
+        {tExp("choosePotMembers")}
+      </Txt>
+      {members === undefined ? (
+        <Loading />
+      ) : tooFew ? (
+        <Txt muted style={{ paddingVertical: 8 }}>
+          {tCal("expenseNeedsMembers")}
+        </Txt>
+      ) : (
+        <>
+          <Txt muted size={13}>
+            {tExp("members", { count: chosen.size })}
+          </Txt>
+          <ScrollView
+            style={{ maxHeight: 260 }}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {members.map((member) => {
+              const on = chosen.has(member._id);
+              return (
+                <Pressable
+                  key={member._id}
+                  onPress={() => toggle(member._id)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                    borderWidth: 1,
+                    borderColor: on ? t.primary : t.border,
+                    borderRadius: 12,
+                    padding: 10,
+                  }}
+                >
+                  <Avatar
+                    name={member.name}
+                    image={member.image}
+                    color={member.avatarColor}
+                    size={28}
+                  />
+                  <Txt style={{ flex: 1 }} numberOfLines={1}>
+                    {member.name ?? tc("member")}
+                  </Txt>
+                  {on ? (
+                    <Txt weight="700" style={{ color: t.primary }}>
+                      ✓
+                    </Txt>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <Button
+            title={busy ? tc("creating") : tExp("createPot")}
+            disabled={busy || chosen.size < 2}
+            onPress={submit}
+          />
+        </>
+      )}
+    </Sheet>
   );
 }
 
@@ -537,15 +690,15 @@ function useLinkCandidates(
   projectId: Id<"projects">,
   linked: { list: boolean; note: boolean; pot: boolean },
 ): LinkCandidate[] {
-  const lists = useQuery(
+  const lists = usePersistentQuery(
     api.lists.listByProject,
     linked.list ? "skip" : { projectId },
   );
-  const notes = useQuery(
+  const notes = usePersistentQuery(
     api.notes.listByProject,
     linked.note ? "skip" : { projectId },
   );
-  const pots = useQuery(
+  const pots = usePersistentQuery(
     api.expenses.listPots,
     linked.pot ? "skip" : { projectId },
   );

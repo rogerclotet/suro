@@ -16,5 +16,5 @@ export default async function GroupSettingsPage({
   }
 
   const { projectId } = await params;
-  redirect(`/groups/${projectId}/lists`);
+  redirect(`/groups/${projectId}/home`);
 }

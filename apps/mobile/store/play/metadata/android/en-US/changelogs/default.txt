@@ -1,1 +1,1 @@
-First release of Suro: shared lists, calendar, notes, files and expenses for your groups.
+• Every list item can have an assignee, priority, due date, and repeat, with no separate task-list type to choose.

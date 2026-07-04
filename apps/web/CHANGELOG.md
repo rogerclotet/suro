@@ -6,7 +6,7 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
-## [1.6.0] — 2026-07-04
+## [1.14.0] — 2026-07-04
 
 ### ca
 
@@ -19,6 +19,195 @@ with a type: `feature`, `fix`, or `improvement`.
 ### en
 
 - [feature] Every list item can have an assignee, priority, due date, and repeat, with no separate task-list type to choose.
+
+## [1.13.1] — 2026-06-27
+
+### ca
+
+- [improvement] En tocar una notificació ara s'obre directament l'esdeveniment, la llista, la nota o la despesa a què fa referència, en comptes d'obrir només l'app.
+- [improvement] Les notificacions de l'Android ara mostren una icona pròpia de Suro.
+
+### es
+
+- [improvement] Al tocar una notificación ahora se abre directamente el evento, la lista, la nota o el gasto al que se refiere, en lugar de solo abrir la app.
+- [improvement] Las notificaciones de Android ahora muestran un icono propio de Suro.
+
+### en
+
+- [improvement] Tapping a notification now opens the event, list, note or expense it's about, instead of just opening the app.
+- [improvement] Android notifications now show a dedicated Suro icon.
+
+## [1.13.0] — 2026-06-27
+
+### ca
+
+- [improvement] Les notificacions de l'Android ara es divideixen en categories (esdeveniments, llistes, notes, despeses i més), així pots desactivar des dels ajustos del telèfon les que no vulguis sense perdre la resta.
+- [fix] Les notificacions push ara arriben de manera fiable a l'Android, també si les actives més tard als ajustos o fas servir l'app en més d'un dispositiu.
+
+### es
+
+- [improvement] Las notificaciones de Android ahora se dividen en categorías (eventos, listas, notas, gastos y más), así puedes desactivar desde los ajustes del teléfono las que no quieras sin perder el resto.
+- [fix] Las notificaciones push ahora llegan de forma fiable en Android, también si las activas más tarde en los ajustes o usas la app en más de un dispositivo.
+
+### en
+
+- [improvement] Android notifications are now split into categories (events, lists, notes, expenses and more), so you can switch off the ones you don't want from your phone settings without losing the rest.
+- [fix] Push notifications now arrive reliably on Android, including when you enable them later in settings or use the app on more than one device.
+
+## [1.12.0] — 2026-06-25
+
+### ca
+
+- [feature] Nova pestanya d'Inici: una vista general del grup amb els esdeveniments propers, les llistes i les despeses.
+- [fix] Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el tens obert ja no mostra cap error i simplement et fa enrere.
+- [improvement] El calendari ara mostra els esdeveniments dels dies dels mesos veïns que es veuen a dalt i a baix del mes.
+- [feature] A l'aplicació mòbil, llisca cap a l'esquerra o la dreta al calendari per canviar de mes.
+
+### es
+
+- [feature] Nueva pestaña de Inicio: una vista general del grupo con los próximos eventos, las listas y los gastos.
+- [fix] Eliminar un evento, una lista, una nota, un gasto o una plantilla mientras lo tienes abierto ya no muestra un error y simplemente te lleva atrás.
+- [improvement] El calendario ahora muestra los eventos de los días de los meses vecinos que se ven arriba y abajo del mes.
+- [feature] En la aplicación móvil, desliza a la izquierda o a la derecha en el calendario para cambiar de mes.
+
+### en
+
+- [feature] New Home tab: an at-a-glance overview of your group — upcoming events, your lists and expenses.
+- [fix] Deleting an event, list, note, expense or template while you have it open no longer shows an error and simply takes you back.
+- [improvement] The calendar now shows events on the neighbouring-month days visible at the top and bottom of the month.
+- [feature] On the mobile app, swipe left or right on the calendar to move between months.
+
+## [1.11.0] — 2026-06-21
+
+### ca
+
+- [feature] Hem afegit l'inici de sessió amb Apple: ara pots entrar amb el teu compte d'Apple, igual que ja podies amb Google o amb el correu electrònic.
+
+### es
+
+- [feature] Añadimos el inicio de sesión con Apple: ahora puedes entrar con tu cuenta de Apple, igual que ya podías con Google o con el correo electrónico.
+
+### en
+
+- [feature] Added Sign in with Apple: you can now log in with your Apple account, just like you already could with Google or email.
+
+## [1.10.0] — 2026-06-20
+
+### ca
+
+- [feature] L'aplicació mòbil ara funciona sense connexió: tot el que hagis obert continua disponible sense xarxa, i els canvis que facis a llistes i despeses se sincronitzen automàticament quan tornes a tenir connexió.
+
+### es
+
+- [feature] La aplicación móvil ahora funciona sin conexión: todo lo que hayas abierto sigue disponible sin red, y los cambios que hagas en listas y gastos se sincronizan automáticamente cuando vuelves a tener conexión.
+
+### en
+
+- [feature] The mobile app now works offline: everything you've opened stays available with no connection, and changes you make to lists and expenses sync automatically once you're back online.
+
+## [1.9.0] — 2026-06-20
+
+### ca
+
+- [improvement] En arrossegar un element d'una llista, la pàgina ara es desplaça automàticament en acostar-te a la vora superior o inferior, perquè puguis deixar-lo anar a categories que quedaven fora de la pantalla.
+
+### es
+
+- [improvement] Al arrastrar un elemento de una lista, la página ahora se desplaza automáticamente al acercarte al borde superior o inferior, para que puedas soltarlo en categorías que quedaban fuera de la pantalla.
+
+### en
+
+- [improvement] When you drag an item in a list, the page now scrolls automatically as you near the top or bottom edge, so you can drop it into categories that were off-screen.
+
+## [1.8.1] — 2026-06-20
+
+### ca
+
+- [fix] Les plantilles sense descripció ara mostren el nombre d'elements a la llista de plantilles.
+
+### es
+
+- [fix] Las plantillas sin descripción ahora muestran el número de elementos en la lista de plantillas.
+
+### en
+
+- [fix] Templates without a description now show their item count in the templates list.
+
+## [1.8.0] — 2026-06-19
+
+### ca
+
+- [improvement] Editar una plantilla ara funciona igual que editar una llista, i la pantalla de plantilles mostra les mateixes files netes que les teves llistes.
+- [improvement] El selector de categoria dels elements de llistes i plantilles ara és una etiqueta petita en lloc d'un segon camp de text, així queda clar que afegir una categoria és opcional.
+
+### es
+
+- [improvement] Editar una plantilla ahora funciona igual que editar una lista, y la pantalla de plantillas muestra las mismas filas limpias que tus listas.
+- [improvement] El selector de categoría de los elementos de listas y plantillas ahora es una etiqueta pequeña en lugar de un segundo campo de texto, así queda claro que añadir una categoría es opcional.
+
+### en
+
+- [improvement] Editing a template now works just like editing a list, and the templates screen shows the same clean rows as your lists.
+- [improvement] The category selector for list and template items is now a small tag rather than a second input box, so it's clearer that adding a category is optional.
+
+## [1.7.2] — 2026-06-19
+
+### ca
+
+- [fix] Quan crees una llista des d'un esdeveniment, la seva descripció ara surt en el teu idioma en comptes de sempre en anglès.
+
+### es
+
+- [fix] Cuando creas una lista desde un evento, su descripción ahora aparece en tu idioma en lugar de siempre en inglés.
+
+### en
+
+- [fix] When you create a list from an event, its description now appears in your language instead of always in English.
+
+## [1.7.1] — 2026-06-15
+
+### ca
+
+- [fix] A la pantalla d'inici de sessió per correu, el teclat ja no tapa el botó de verificar i el codi s'envia automàticament quan l'acabes d'introduir.
+
+### es
+
+- [fix] En la pantalla de inicio de sesión por correo, el teclado ya no tapa el botón de verificar y el código se envía automáticamente al terminar de introducirlo.
+
+### en
+
+- [fix] On the email sign-in screen the keyboard no longer covers the verify button, and the code is submitted automatically once you finish entering it.
+
+## [1.7.0] — 2026-06-13
+
+### ca
+
+- [feature] Ja pots canviar la imatge dels grups que gestiones des de l'aplicació mòbil.
+- [improvement] En obrir un grup tornes a les seves llistes: les llistes són de nou la pàgina d'inici i encapçalen la navegació.
+
+### es
+
+- [feature] Ya puedes cambiar la imagen de los grupos que gestionas desde la aplicación móvil.
+- [improvement] Al abrir un grupo vuelves a sus listas: las listas son de nuevo la página de inicio y encabezan la navegación.
+
+### en
+
+- [feature] You can now change the picture of the groups you manage from the mobile app.
+- [improvement] Opening a group takes you back to its lists: lists are the home page again and lead the navigation.
+
+## [1.6.0] — 2026-06-13
+
+### ca
+
+- [feature] El calendari ara és la pàgina d'inici de l'aplicació: en obrir un grup es mostra el calendari en lloc de les llistes, i el calendari encapçala la navegació, ja que és el punt de connexió entre la resta de funcions.
+
+### es
+
+- [feature] El calendario ahora es la página de inicio de la aplicación: al abrir un grupo se muestra el calendario en lugar de las listas, y el calendario encabeza la navegación, ya que es el punto de conexión entre el resto de funciones.
+
+### en
+
+- [feature] The calendar is now the app's home: opening a group shows the calendar instead of lists, and the calendar leads the navigation since it's the connection point between the other features.
 
 ## [1.5.1] — 2026-06-12
 

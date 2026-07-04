@@ -1,16 +1,20 @@
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
+import { File, UploadType } from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Check } from "lucide-react-native";
+import { Camera, Check, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
+import { Avatar } from "@/components/avatar";
 import { useLocale, useTranslations } from "@/i18n";
 import {
   CATPPUCCIN_COLOR_KEYS,
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
 import { localizeGroupPath } from "@/lib/group-paths";
+import { usePersistentQuery } from "@/lib/offline";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Txt } from "@/ui";
@@ -25,10 +29,10 @@ import { Button, Field, Loading, Screen, Txt } from "@/ui";
 export default function GroupSettings() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const tr = useTranslations("mobile.groups");
-  const project = useQuery(api.projects.get, {
+  const project = usePersistentQuery(api.projects.get, {
     projectId: projectId as Id<"projects">,
   });
-  const me = useQuery(api.users.me);
+  const me = usePersistentQuery(api.users.me);
 
   const loading = project === undefined || me === undefined;
   const isCreator = !!project && !!me && project.createdBy === me._id;
@@ -168,6 +172,13 @@ function Editor({ project }: { project: Doc<"projects"> }) {
     <>
       <View style={{ gap: 8 }}>
         <Txt size={16} weight="700">
+          {t("groupImage")}
+        </Txt>
+        <GroupImage project={project} />
+      </View>
+
+      <View style={{ gap: 8 }}>
+        <Txt size={16} weight="700">
           {t("name")}
         </Txt>
         <Field
@@ -219,5 +230,132 @@ function Editor({ project }: { project: Doc<"projects"> }) {
         </View>
       </View>
     </>
+  );
+}
+
+/**
+ * Creator-only group picture editor. Mirrors the profile avatar flow: pick from
+ * the photo library, stream the bytes natively to a Convex upload URL, then
+ * persist the storage id. Creator-only access is enforced server-side in the
+ * `projects` mutations; this section only renders inside the creator `Editor`.
+ */
+function GroupImage({ project }: { project: Doc<"projects"> }) {
+  const t = useTranslations("groups");
+  const generateUploadUrl = useMutation(api.projects.generateImageUploadUrl);
+  const setImage = useMutation(api.projects.setImage);
+  const removeImage = useMutation(api.projects.removeImage);
+  const [busy, setBusy] = useState(false);
+
+  async function changeImage() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(t("imagePermissionTitle"), t("imagePermissionBody"));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    const asset = result.canceled ? null : result.assets[0];
+    if (!asset) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const postUrl = await generateUploadUrl({ projectId: project._id });
+      // RN's fetch can't turn a file:// URI into a Blob, so stream the bytes
+      // natively (same as the profile avatar upload).
+      const res = await new File(asset.uri).upload(postUrl, {
+        httpMethod: "POST",
+        uploadType: UploadType.BINARY_CONTENT,
+        headers: { "Content-Type": asset.mimeType ?? "image/jpeg" },
+      });
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(`Upload failed (${res.status})`);
+      }
+      const { storageId } = JSON.parse(res.body) as { storageId: string };
+      await setImage({
+        projectId: project._id,
+        storageId: storageId as Id<"_storage">,
+      });
+    } catch {
+      Alert.alert(t("imageError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    setBusy(true);
+    try {
+      await removeImage({ projectId: project._id });
+    } catch {
+      Alert.alert(t("imageError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <View style={{ alignItems: "center", gap: 12 }}>
+      <Avatar
+        name={project.name}
+        image={project.image}
+        color={project.color}
+        size={96}
+        onPress={busy ? undefined : changeImage}
+        accessibilityLabel={t("changeImage")}
+      />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
+        <ImageAction
+          icon={Camera}
+          label={busy ? t("saving") : t("changeImage")}
+          onPress={changeImage}
+          disabled={busy}
+        />
+        {project.image ? (
+          <ImageAction
+            icon={Trash2}
+            label={t("removeImage")}
+            onPress={() => void remove()}
+            disabled={busy}
+          />
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function ImageAction({
+  icon: Icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: typeof Camera;
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={6}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        opacity: disabled ? 0.5 : pressed ? 0.7 : 1,
+      })}
+    >
+      <Icon color={theme.primary} size={16} />
+      <Txt size={14} style={{ color: theme.primary }}>
+        {label}
+      </Txt>
+    </Pressable>
   );
 }

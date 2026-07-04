@@ -1,7 +1,8 @@
 {
   "name": "suro",
-  "version": "1.6.0",
+  "version": "1.14.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter web dev",
@@ -17,9 +18,9 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.14",
+    "@biomejs/biome": "^2.5.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.2"
+    "lint-staged": "^17.0.7"
   },
   "packageManager": "pnpm@10.26.2",
   "engines": {

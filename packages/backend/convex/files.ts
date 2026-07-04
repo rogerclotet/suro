@@ -7,18 +7,16 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
-import {
-  requireEventAccess,
-  requireFileOwner,
-  requireProjectMember,
-} from "./model/permissions";
+import { track } from "./model/analytics";
+import { serveFileUrl } from "./model/fileUrls";
+import { requireFileOwner, requireProjectMember } from "./model/permissions";
 
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
   const [url, thumbnailUrl, uploader, event] = await Promise.all([
-    ctx.storage.getUrl(file.storageId),
+    serveFileUrl(file.storageId, (id) => ctx.storage.getUrl(id), file.name),
     file.thumbnailStorageId
-      ? ctx.storage.getUrl(file.thumbnailStorageId)
+      ? serveFileUrl(file.thumbnailStorageId, (id) => ctx.storage.getUrl(id))
       : Promise.resolve(null),
     ctx.db.get(file.uploadedBy),
     file.eventId ? ctx.db.get(file.eventId) : Promise.resolve(null),
@@ -82,6 +80,18 @@ export const saveFile = mutation({
         storageId: args.storageId,
       });
     }
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId: args.projectId,
+      actorId: userId,
+      bodyKey: "file_uploaded",
+      bodyParams: { name },
+      path: `/${args.projectId}/files`,
+    });
+    await track(ctx, userId, "file_uploaded", {
+      projectId: args.projectId,
+      type: args.type,
+      hasEvent: args.eventId != null,
+    });
     return fileId;
   },
 });
@@ -125,7 +135,16 @@ export const listByProject = query({
 export const listByEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    // Return [] rather than throwing when the event is gone (mirrors
+    // events.get): the event detail screen keeps this query subscribed while it
+    // navigates away after a delete, and a dangling subscription re-running
+    // against the deleted row would otherwise surface an "Event not found"
+    // server error on the client.
+    const event = await ctx.db.get(eventId);
+    if (event === null) {
+      return [];
+    }
+    await requireProjectMember(ctx, event.projectId);
     const files = await ctx.db
       .query("files")
       .withIndex("by_event", (q) => q.eq("eventId", event._id))
@@ -151,12 +170,13 @@ export const rename = mutation({
 export const remove = mutation({
   args: { fileId: v.id("files") },
   handler: async (ctx, { fileId }) => {
-    const { file } = await requireFileOwner(ctx, fileId);
+    const { file, userId } = await requireFileOwner(ctx, fileId);
     await ctx.storage.delete(file.storageId);
     if (file.thumbnailStorageId) {
       await ctx.storage.delete(file.thumbnailStorageId);
     }
     await ctx.db.delete(file._id);
+    await track(ctx, userId, "file_deleted", { projectId: file.projectId });
     return null;
   },
 });

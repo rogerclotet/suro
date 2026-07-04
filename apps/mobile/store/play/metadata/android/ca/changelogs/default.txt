@@ -1,1 +1,1 @@
-Primera versió de Suro: llistes, calendari, notes, fitxers i despeses compartides per als teus grups.
+• Tots els elements de llista poden tenir responsable, prioritat, data de venciment i repetició, sense triar un tipus de llista apart.

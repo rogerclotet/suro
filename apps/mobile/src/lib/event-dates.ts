@@ -31,6 +31,13 @@ export function startOfDay(date: Date): Date {
   return d;
 }
 
+/** Last instant (23:59:59.999) of the given day in the device's local zone. */
+export function endOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
 /** UTC midnight epoch-ms for a calendar day — the all-day storage boundary. */
 export function utcMidnight(year: number, month: number, day: number): number {
   return Date.UTC(year, month, day, 0, 0, 0, 0);
@@ -105,6 +112,30 @@ export function formatTimeRange(event: EventTimes, locale?: string): string {
     return `${start.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleTimeString(locale, TIME_OPTS)}`;
   }
   return `${start.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })} - ${end.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })}`;
+}
+
+/**
+ * Time-of-day label for contexts where the event's date is already shown (a
+ * calendar day header, the Home "Today" section): just the clock times for a
+ * same-day timed event, so the date isn't repeated. A single all-day event
+ * returns "" — the caller supplies a translated "All day" — and an event that
+ * genuinely spans multiple days falls back to the full dated range, since the
+ * span can't be conveyed by times alone.
+ */
+export function formatTimeOfDay(event: EventTimes, locale?: string): string {
+  const start = new Date(event.startAt);
+
+  if (event.allDay) {
+    return sameDay(allDayDisplayEnd(event.endAt), start)
+      ? ""
+      : formatTimeRange(event, locale);
+  }
+
+  const end = new Date(event.endAt);
+  if (sameDay(start, end)) {
+    return `${start.toLocaleTimeString(locale, TIME_OPTS)} - ${end.toLocaleTimeString(locale, TIME_OPTS)}`;
+  }
+  return formatTimeRange(event, locale);
 }
 
 /**

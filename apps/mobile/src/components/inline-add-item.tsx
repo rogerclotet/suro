@@ -58,14 +58,16 @@ export function NewItemRow({
   projectId,
   categories,
   onSubmit,
+  showTaskControls = true,
 }: {
   projectId: Id<"projects">;
   categories: PickerCategory[];
+  showTaskControls?: boolean;
   /** Returns false when blocked (duplicate name); the typed text is kept. */
   onSubmit: (
     name: string,
     category: string | null,
-    task: ItemTaskFields,
+    task?: ItemTaskFields,
   ) => boolean;
 }) {
   const tl = useTranslations("mobile.lists");
@@ -79,7 +81,13 @@ export function NewItemRow({
     if (!trimmed) {
       return;
     }
-    if (!onSubmit(trimmed, category, taskDraftToArgs(task))) {
+    if (
+      !onSubmit(
+        trimmed,
+        category,
+        showTaskControls ? taskDraftToArgs(task) : undefined,
+      )
+    ) {
       return; // duplicate: keep the text for editing
     }
     // Clear synchronously; the parent fires the mutation without awaiting, so
@@ -117,6 +125,7 @@ export function NewItemRow({
         category={category}
         onChangeCategory={setCategory}
         onCategorySelected={() => nameRef.current?.focus()}
+        showTaskFields={showTaskControls}
       />
     </View>
   );

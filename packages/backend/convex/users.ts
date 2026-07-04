@@ -1,8 +1,11 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { deleteUserAccount } from "./model/account";
+import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS } from "./model/colors";
+import { serveFileUrl } from "./model/fileUrls";
 
 /** The current signed-in user, or null. */
 export const me = query({
@@ -68,6 +71,8 @@ export const updateProfile = mutation({
     }
 
     await ctx.db.patch(userId, patch);
+    // Only the field names are sent (e.g. ["name", "locale"]) — never the values.
+    await track(ctx, userId, "profile_updated", { fields: Object.keys(patch) });
     return null;
   },
 });
@@ -103,6 +108,7 @@ export const completeOnboarding = mutation({
     }
 
     await ctx.db.patch(userId, patch);
+    await track(ctx, userId, "onboarding_completed");
     return null;
   },
 });
@@ -129,10 +135,12 @@ export const setAvatarImage = mutation({
   handler: async (ctx, { storageId }) => {
     const userId = await requireUserId(ctx);
     const user = await ctx.db.get(userId);
-    const url = await ctx.storage.getUrl(storageId);
-    if (url === null) {
+    const rawUrl = await ctx.storage.getUrl(storageId);
+    if (rawUrl === null) {
       throw new Error("Uploaded image not found");
     }
+    const url =
+      (await serveFileUrl(storageId, () => Promise.resolve(rawUrl))) ?? rawUrl;
     if (user?.customImageStorageId) {
       await ctx.storage.delete(user.customImageStorageId);
     }
@@ -182,6 +190,24 @@ export const resetProviderImage = mutation({
       customImage: undefined,
       customImageStorageId: undefined,
     });
+    return null;
+  },
+});
+
+/**
+ * Permanently delete the signed-in user and all data linked to them (see
+ * `deleteUserAccount`). Satisfies the in-app account-deletion requirement
+ * (App Store guideline 5.1.1(v)). The client signs out afterwards — this also
+ * invalidates every session server-side, so other devices are signed out too.
+ */
+export const deleteAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    // Capture before the cascade deletes the user (the scheduled action only
+    // needs the id, but read it while it's unambiguously still ours).
+    await track(ctx, userId, "account_deleted");
+    await deleteUserAccount(ctx, userId);
     return null;
   },
 });

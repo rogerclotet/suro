@@ -1,7 +1,10 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
+import { serveFileUrl } from "./model/fileUrls";
 import { requireProjectMember } from "./model/permissions";
 
 /** Projects (groups) the current user belongs to. Ported from getProjects. */
@@ -134,6 +137,43 @@ export const getByInvite = query({
 });
 
 /**
+ * Public (unauthenticated) preview of a group behind an invite link, for link
+ * unfurling — the OpenGraph card WhatsApp/Telegram render when the link is
+ * shared. Unlike getByInvite this skips the auth check on purpose: the crawler
+ * is never signed in, and the invite token is itself the bearer credential
+ * (anyone with the link is meant to be able to see the group and join). Returns
+ * only what a preview needs — no member ids — and null on a bad token.
+ */
+export const getInvitePreview = query({
+  args: { projectId: v.id("projects"), inviteToken: v.string() },
+  handler: async (ctx, { projectId, inviteToken }) => {
+    const project = await ctx.db.get(projectId);
+    if (project === null || project.inviteToken !== inviteToken) {
+      return null;
+    }
+    const memberships = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const users = await Promise.all(
+      memberships.map((m) => ctx.db.get(m.userId)),
+    );
+    return {
+      name: project.name,
+      color: project.color,
+      image: project.image ?? null,
+      members: users
+        .filter((u) => u !== null)
+        .map((u) => ({
+          name: u.name ?? null,
+          image: u.customImage ?? u.image ?? null,
+          avatarColor: u.avatarColor ?? null,
+        })),
+    };
+  },
+});
+
+/**
  * Create a new group and add the caller as its first member, atomically. Mirrors
  * the PWA's createProject (and the signup-time "Personal" group): a fresh invite
  * token and a random Catppuccin color. Returns the new project's id so the caller
@@ -154,6 +194,7 @@ export const create = mutation({
       color: getRandomColor(),
     });
     await ctx.db.insert("projectMembers", { projectId, userId });
+    await track(ctx, userId, "group_created", { projectId });
     return projectId;
   },
 });
@@ -189,6 +230,15 @@ export const acceptInvite = mutation({
       .unique();
     if (existing === null) {
       await ctx.db.insert("projectMembers", { projectId, userId });
+      const user = await ctx.db.get(userId);
+      await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+        projectId,
+        actorId: userId,
+        bodyKey: "member_joined",
+        bodyParams: { userName: user?.name ?? "" },
+        path: `/group-settings?projectId=${projectId}`,
+      });
+      await track(ctx, userId, "group_joined", { projectId });
     }
     return { projectId };
   },
@@ -260,7 +310,16 @@ export const leave = mutation({
     if (membership === null) {
       throw new Error("Not a member of this group");
     }
+    const user = await ctx.db.get(userId);
     await ctx.db.delete(membership._id);
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "member_left",
+      bodyParams: { userName: user?.name ?? "" },
+      path: `/group-settings?projectId=${projectId}`,
+    });
+    await track(ctx, userId, "group_left", { projectId });
     return null;
   },
 });
@@ -300,10 +359,12 @@ export const setImage = mutation({
     if (project.createdBy !== userId) {
       throw new Error("Only the creator can edit this group");
     }
-    const url = await ctx.storage.getUrl(storageId);
-    if (url === null) {
+    const rawUrl = await ctx.storage.getUrl(storageId);
+    if (rawUrl === null) {
       throw new Error("Uploaded image not found");
     }
+    const url =
+      (await serveFileUrl(storageId, () => Promise.resolve(rawUrl))) ?? rawUrl;
     if (project.imageStorageId) {
       await ctx.storage.delete(project.imageStorageId);
     }
@@ -454,6 +515,7 @@ export const remove = mutation({
       await ctx.storage.delete(project.imageStorageId);
     }
     await ctx.db.delete(projectId);
+    await track(ctx, userId, "group_deleted", { projectId });
     return null;
   },
 });

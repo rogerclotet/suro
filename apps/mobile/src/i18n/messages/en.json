@@ -749,8 +749,7 @@
       "templates": "Templates",
       "files": "Files",
       "members": "Group members",
-      "expenses": "Expenses",
-      "tasks": "Tasks"
+      "expenses": "Expenses"
     }
   },
   "onboarding": {

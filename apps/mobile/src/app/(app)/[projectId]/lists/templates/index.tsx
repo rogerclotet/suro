@@ -1,12 +1,14 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
+import { LayoutTemplate } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, FlatList, Pressable, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 import { headerCreateAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import {
@@ -21,21 +23,18 @@ import {
 } from "@/ui";
 
 type Template = FunctionReturnType<typeof api.templates.listByProject>[number];
-type Project = FunctionReturnType<typeof api.projects.listMine>[number];
 
 export default function Templates() {
   const pid = useProjectId();
-  const templates = useQuery(api.templates.listByProject, { projectId: pid });
+  const templates = usePersistentQuery(api.templates.listByProject, {
+    projectId: pid,
+  });
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.templates");
 
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
-  // Visibility is separate from the content so the sheet keeps showing the
-  // template while it slides out (matches the other sheets in the app).
-  const [actionsVisible, setActionsVisible] = useState(false);
-  const [actionsTemplate, setActionsTemplate] = useState<Template | null>(null);
 
   return (
     <Screen>
@@ -56,84 +55,96 @@ export default function Templates() {
           onScroll={fab.onScroll}
           scrollEventThrottle={16}
           keyExtractor={(template) => template._id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                height: 1,
+                marginHorizontal: 16,
+                backgroundColor: t.border,
+              }}
+            />
+          )}
           ListEmptyComponent={
-            <Txt muted style={{ padding: 8 }}>
+            <Txt muted style={{ paddingVertical: 24, textAlign: "center" }}>
               {tr("empty")}
             </Txt>
           }
           renderItem={({ item }) => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <Pressable
-                style={{ flex: 1 }}
-                onPress={() =>
-                  router.push(`/${pid}/lists/templates/${item._id}`)
-                }
-              >
-                <View
-                  style={{
-                    backgroundColor: t.card,
-                    borderColor: t.border,
-                    borderWidth: 1,
-                    borderRadius: 14,
-                    padding: 14,
-                  }}
-                >
-                  <Txt size={17} weight="700">
-                    {item.name}
-                  </Txt>
-                  {item.description ? (
-                    <Txt muted size={13} numberOfLines={2}>
-                      {item.description}
-                    </Txt>
-                  ) : null}
-                  <Txt muted size={13}>
-                    {tr("itemCount", { count: item.items.length })}
-                  </Txt>
-                </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  setActionsTemplate(item);
-                  setActionsVisible(true);
-                }}
-                hitSlop={10}
-                style={{ padding: 6 }}
-              >
-                <Txt size={22} style={{ color: t.primary }}>
-                  ⋯
-                </Txt>
-              </Pressable>
-            </View>
+            <TemplateRow
+              template={item}
+              onOpen={() => router.push(`/${pid}/lists/templates/${item._id}`)}
+            />
           )}
         />
       )}
 
-      {!creating && !actionsVisible && (
-        <Fab
-          onPress={() => setCreating(true)}
-          label={tr("newTemplate")}
-          extended={fab.extended}
-        />
-      )}
+      <Fab
+        onPress={() => setCreating(true)}
+        label={tr("newTemplate")}
+        extended={fab.extended}
+      />
       <CreateTemplateSheet
         visible={creating}
         projectId={pid}
         onClose={() => setCreating(false)}
       />
-      <TemplateActionsSheet
-        visible={actionsVisible}
-        template={actionsTemplate}
-        projectId={pid}
-        onClose={() => setActionsVisible(false)}
-      />
     </Screen>
+  );
+}
+
+// A template as a tappable row, mirroring the lists list: a primary-tinted icon
+// badge, then the name over a single muted subtitle (its description, or the
+// item count when it has none). Per-template actions live in the editor's
+// settings sheet, so the whole row just navigates in — no trailing overflow.
+function TemplateRow({
+  template,
+  onOpen,
+}: {
+  template: Template;
+  onOpen: () => void;
+}) {
+  const t = useTheme();
+  const tr = useTranslations("mobile.templates");
+  // Show the description, or fall back to the item count when there's none.
+  // Must test for a *non-blank* description, not just non-null: migrated
+  // templates carry an empty-string description, and `??` would treat that as
+  // present and hide the count.
+  const description = template.description?.trim();
+  const subtitle =
+    description || tr("itemCount", { count: template.items.length });
+  return (
+    <Pressable
+      onPress={onOpen}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: pressed ? t.border : "transparent",
+      })}
+    >
+      <View
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 11,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: `${t.primary}1a`,
+        }}
+      >
+        <LayoutTemplate color={t.primary} size={20} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Txt size={16}>{template.name}</Txt>
+        <Txt muted size={13} numberOfLines={1} style={{ marginTop: 2 }}>
+          {subtitle}
+        </Txt>
+      </View>
+    </Pressable>
   );
 }
 
@@ -197,137 +208,6 @@ function CreateTemplateSheet({
         disabled={busy || name.trim().length === 0}
         onPress={submit}
       />
-    </Sheet>
-  );
-}
-
-function TemplateActionsSheet({
-  visible,
-  template,
-  projectId,
-  onClose,
-}: {
-  visible: boolean;
-  template: Template | null;
-  projectId: Id<"projects">;
-  onClose: () => void;
-}) {
-  const projects = useQuery(api.projects.listMine);
-  const createList = useMutation(api.lists.create);
-  const exportToProject = useMutation(api.templates.exportToProject);
-  const remove = useMutation(api.templates.remove);
-  const router = useRouter();
-  const t = useTranslations("mobile.templates");
-  const tc = useTranslations("mobile.common");
-  const [showExport, setShowExport] = useState(false);
-
-  const otherProjects = (projects ?? []).filter((p) => p._id !== projectId);
-
-  async function createListFromTemplate() {
-    if (!template) {
-      return;
-    }
-    const listId = await createList({
-      projectId,
-      name: template.name,
-      templateIds: [template._id],
-    });
-    onClose();
-    router.push(`/${projectId}/lists/${listId}`);
-  }
-
-  function confirmDelete() {
-    if (!template) {
-      return;
-    }
-    const target = template;
-    Alert.alert(
-      t("deleteTemplate"),
-      t("deleteMessage", { name: target.name }),
-      [
-        { text: tc("cancel"), style: "cancel" },
-        {
-          text: tc("delete"),
-          style: "destructive",
-          onPress: () => {
-            onClose();
-            void remove({ templateId: target._id });
-          },
-        },
-      ],
-    );
-  }
-
-  async function doExport(target: Project) {
-    if (!template) {
-      return;
-    }
-    await exportToProject({
-      templateId: template._id,
-      targetProjectId: target._id,
-    });
-    setShowExport(false);
-    onClose();
-    Alert.alert(
-      t("exportedTitle"),
-      t("exportedMessage", { name: target.name }),
-    );
-  }
-
-  return (
-    <Sheet
-      visible={visible}
-      onClose={() => {
-        setShowExport(false);
-        onClose();
-      }}
-    >
-      <Txt size={18} weight="700">
-        {template?.name ?? ""}
-      </Txt>
-      {showExport ? (
-        <>
-          <Txt muted size={13}>
-            {t("exportToGroup")}
-          </Txt>
-          {otherProjects.length === 0 ? (
-            <Txt muted style={{ paddingVertical: 8 }}>
-              {t("noOtherGroups")}
-            </Txt>
-          ) : (
-            otherProjects.map((project) => (
-              <Button
-                key={project._id}
-                title={project.name}
-                variant="ghost"
-                onPress={() => void doExport(project)}
-              />
-            ))
-          )}
-          <Button
-            title={tc("back")}
-            variant="ghost"
-            onPress={() => setShowExport(false)}
-          />
-        </>
-      ) : (
-        <>
-          <Button
-            title={t("createListFromTemplate")}
-            onPress={createListFromTemplate}
-          />
-          <Button
-            title={t("exportToGroup")}
-            variant="ghost"
-            onPress={() => setShowExport(true)}
-          />
-          <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
-            <Txt style={{ textAlign: "center", color: "#e64553" }}>
-              {t("deleteTemplate")}
-            </Txt>
-          </Pressable>
-        </>
-      )}
     </Sheet>
   );
 }

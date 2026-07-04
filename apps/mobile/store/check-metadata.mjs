@@ -62,6 +62,22 @@ function checkAppleConfig() {
   const config = JSON.parse(
     readFileSync(join(MOBILE_DIR, "store.config.json"), "utf8"),
   );
+
+  // EAS Metadata needs an explicit `version` to resolve the App Store version
+  // it writes to (auto-detection feeds an empty versionString before a build
+  // exists). It must track the release version of record — the monorepo root
+  // package.json, the same source app.config.ts reads — or the push targets the
+  // wrong version.
+  const { version: appVersion } = JSON.parse(
+    readFileSync(join(MOBILE_DIR, "..", "..", "package.json"), "utf8"),
+  );
+  const configVersion = config.apple?.version;
+  check(
+    configVersion === appVersion,
+    `apple.version ${configVersion} matches root package.json`,
+    `store.config.json apple.version is ${configVersion}, expected ${appVersion} (root package.json) — bump it in lockstep`,
+  );
+
   const info = config.apple?.info ?? {};
   for (const locale of LOCALES) {
     const entry = info[locale];

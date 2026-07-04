@@ -1,7 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Stack } from "expo-router";
@@ -14,12 +14,13 @@ import {
   CATPPUCCIN_COLOR_KEYS,
   CATPPUCCIN_COLORS,
 } from "@/lib/catppuccin-colors";
+import { usePersistentQuery } from "@/lib/offline";
 import { unregisterPushToken } from "@/lib/push";
 import { useTheme } from "@/theme";
 import { Button, Field, Loading, Screen, Section, Txt } from "@/ui";
 
 export default function Profile() {
-  const user = useQuery(api.users.me);
+  const user = usePersistentQuery(api.users.me);
   const t = useTranslations("mobile.profile");
 
   return (
@@ -36,13 +37,16 @@ export default function Profile() {
 
 function ProfileForm({ user }: { user: Doc<"users"> }) {
   const t = useTranslations("mobile.profile");
+  const tc = useTranslations("common");
   const theme = useTheme();
   const { signOut } = useAuthActions();
   const updateProfile = useMutation(api.users.updateProfile);
   const unregisterPush = useMutation(api.pushTokens.unregister);
+  const deleteAccount = useMutation(api.users.deleteAccount);
 
   const [name, setName] = useState(user.name ?? "");
   const [savingName, setSavingName] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const trimmedName = name.trim();
   const nameDirty = trimmedName !== (user.name ?? "").trim();
@@ -68,6 +72,34 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
     } catch {
       Alert.alert(t("saveError"));
     }
+  }
+
+  async function runDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      // The backend wipes the account (incl. every push token) and invalidates
+      // all sessions; sign out locally to clear auth state and route to login.
+      await deleteAccount({});
+      await signOut();
+    } catch {
+      setDeletingAccount(false);
+      Alert.alert(t("deleteAccountError"));
+    }
+  }
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      t("deleteAccountConfirmTitle"),
+      t("deleteAccountConfirmDescription"),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: t("deleteAccount"),
+          style: "destructive",
+          onPress: () => void runDeleteAccount(),
+        },
+      ],
+    );
   }
 
   return (
@@ -136,6 +168,13 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
             await signOut();
           })();
         }}
+      />
+
+      <Button
+        title={deletingAccount ? t("deletingAccount") : t("deleteAccount")}
+        variant="danger"
+        disabled={deletingAccount}
+        onPress={confirmDeleteAccount}
       />
     </ScrollView>
   );

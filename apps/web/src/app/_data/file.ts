@@ -5,7 +5,7 @@ type ConvexFile = FunctionReturnType<typeof api.files.listByProject>[number];
 
 /**
  * File shape consumed by the files UI. Backed by Convex storage via `adaptFile`;
- * `url`/`thumbnailUrl` are short-lived Convex storage URLs.
+ * `url`/`thumbnailUrl` are branded, token-gated serving URLs (model/fileUrls.ts).
  */
 export type File = {
   id: string;

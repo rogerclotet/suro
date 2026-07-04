@@ -259,7 +259,6 @@
     "home": "Inici",
     "lists": "Llistes",
     "templates": "Plantilles",
-    "myTasks": "Les meves tasques",
     "calendar": "Calendari",
     "files": "Fitxers",
     "notes": "Notes",
@@ -283,7 +282,6 @@
     "upcoming": "Properament",
     "goToCalendar": "Ves al calendari",
     "showAllLists": "Mostra-les totes",
-    "showAllTasks": "Mostra-les totes",
     "goToPots": "Ves als pots",
     "noUpcoming": "Cap esdeveniment proper",
     "noActiveLists": "Cap llista activa",
@@ -467,7 +465,6 @@
     "taskBucket_noDate": "Sense data"
   },
   "categories": {
-    "label": "Categoria",
     "searchPlaceholder": "Cerca categories",
     "createNamed": "Crea \"{name}\"",
     "noResults": "No s'ha trobat cap categoria"

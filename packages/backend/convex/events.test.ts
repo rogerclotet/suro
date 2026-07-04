@@ -6,6 +6,16 @@ import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 
+/** Narrow a detail-query result the test just created: the `get` reads now
+ * return null for a missing doc, so field access needs the non-null guarantee
+ * the test already relies on. */
+function present<T>(value: T | null): T {
+  if (value === null) {
+    throw new Error("expected the document to exist");
+  }
+  return value;
+}
+
 const DAY = 86_400_000;
 // Fixed reference instants so tests don't depend on the wall clock.
 const JAN_10 = Date.parse("2024-01-10T09:00:00.000Z");
@@ -72,7 +82,7 @@ describe("events: CRUD", () => {
       endAt: JAN_10_END,
       allDay: false,
     });
-    const event = await alice.query(api.events.get, { eventId: id });
+    const event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.name).toBe("Dinner");
     expect(event.description).toBe("out");
     expect(event.startAt).toBe(JAN_10);
@@ -90,7 +100,7 @@ describe("events: CRUD", () => {
       endAt: dayStart, // single all-day; mutation normalizes end to +1 day
       allDay: true,
     });
-    let event = await alice.query(api.events.get, { eventId: id });
+    let event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.endAt).toBe(dayStart + DAY);
 
     // Switching to a timed event must clear the +1-day normalization.
@@ -101,7 +111,7 @@ describe("events: CRUD", () => {
       endAt: JAN_10_END,
       allDay: false,
     });
-    event = await alice.query(api.events.get, { eventId: id });
+    event = present(await alice.query(api.events.get, { eventId: id }));
     expect(event.allDay).toBe(false);
     expect(event.endAt).toBe(JAN_10_END);
   });
@@ -127,9 +137,9 @@ describe("events: CRUD", () => {
       allDay: false,
     });
     await alice.mutation(api.events.remove, { eventId: id });
-    await expect(alice.query(api.events.get, { eventId: id })).rejects.toThrow(
-      "Event not found",
-    );
+    // A deleted event reads back as null (not an error) so a detail screen
+    // still subscribed mid-navigation never surfaces a server error.
+    expect(await alice.query(api.events.get, { eventId: id })).toBeNull();
   });
 
   it("rejects non-members", async () => {
@@ -197,12 +207,33 @@ describe("events: linked lists", () => {
     const listId = await alice.mutation(api.events.createLinkedList, {
       eventId,
     });
-    const event = await alice.query(api.events.get, { eventId });
+    const event = present(await alice.query(api.events.get, { eventId }));
     expect(event.list?._id).toBe(listId);
     expect(event.list?.name).toBe("Camping");
     // The list carries the event backlink.
     const list = await alice.query(api.lists.get, { listId });
     expect(list?.event?._id).toBe(eventId);
+    // The default description is localized from the creator's locale; Alice has
+    // none set, so it falls back to Catalan.
+    expect(list?.description).toBe("Llista per a Camping");
+  });
+
+  it("localizes the linked list description from the creator's locale", async () => {
+    await t.run(async (ctx) => {
+      await ctx.db.patch(ids.alice, { locale: "en" });
+    });
+    const eventId = await alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Camping",
+      startAt: JAN_10,
+      endAt: JAN_10_END,
+      allDay: false,
+    });
+    const listId = await alice.mutation(api.events.createLinkedList, {
+      eventId,
+    });
+    const list = await alice.query(api.lists.get, { listId });
+    expect(list?.description).toBe("List for Camping");
   });
 
   it("links and unlinks an existing list", async () => {
@@ -220,12 +251,14 @@ describe("events: linked lists", () => {
     });
 
     await alice.mutation(api.events.linkList, { eventId, listId });
-    expect((await alice.query(api.events.get, { eventId })).list?._id).toBe(
-      listId,
-    );
+    expect(
+      present(await alice.query(api.events.get, { eventId })).list?._id,
+    ).toBe(listId);
 
     await alice.mutation(api.events.unlinkList, { eventId, listId });
-    expect((await alice.query(api.events.get, { eventId })).list).toBeNull();
+    expect(
+      present(await alice.query(api.events.get, { eventId })).list,
+    ).toBeNull();
     // The list itself survives the unlink.
     expect((await alice.query(api.lists.get, { listId }))?.event).toBeNull();
   });
@@ -268,6 +301,80 @@ describe("events: linked lists", () => {
     await expect(
       alice.mutation(api.events.linkList, { eventId, listId: foreignList }),
     ).rejects.toThrow();
+  });
+});
+
+describe("events: linked pots", () => {
+  // A pot needs at least two members, so add Bob to the family.
+  beforeEach(async () => {
+    await t.run((ctx) =>
+      ctx.db.insert("projectMembers", {
+        projectId: ids.family,
+        userId: ids.bob,
+      }),
+    );
+  });
+
+  async function makeEvent() {
+    return alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Ski trip",
+      startAt: JAN_10,
+      endAt: JAN_10_END,
+      allDay: false,
+    });
+  }
+
+  it("seeds every project member when memberIds is omitted", async () => {
+    const eventId = await makeEvent();
+    const potId = await alice.mutation(api.events.createLinkedPot, { eventId });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
+    expect(pot.name).toBe("Ski trip");
+    expect(new Set(pot.members.map((m) => m._id))).toEqual(
+      new Set([ids.alice, ids.bob]),
+    );
+  });
+
+  it("uses only the chosen members when memberIds is provided", async () => {
+    // A third member makes the chosen subset a real choice.
+    const carol = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Carol", email: "carol@example.test" }),
+    );
+    await t.run((ctx) =>
+      ctx.db.insert("projectMembers", { projectId: ids.family, userId: carol }),
+    );
+    const eventId = await makeEvent();
+    const potId = await alice.mutation(api.events.createLinkedPot, {
+      eventId,
+      memberIds: [ids.alice, ids.bob],
+    });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
+    expect(new Set(pot.members.map((m) => m._id))).toEqual(
+      new Set([ids.alice, ids.bob]),
+    );
+  });
+
+  it("rejects a chosen member who isn't in the group", async () => {
+    const stranger = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Stranger", email: "s@example.test" }),
+    );
+    const eventId = await makeEvent();
+    await expect(
+      alice.mutation(api.events.createLinkedPot, {
+        eventId,
+        memberIds: [ids.alice, stranger],
+      }),
+    ).rejects.toThrow("Member is not in this group");
+  });
+
+  it("rejects fewer than two chosen members", async () => {
+    const eventId = await makeEvent();
+    await expect(
+      alice.mutation(api.events.createLinkedPot, {
+        eventId,
+        memberIds: [ids.alice],
+      }),
+    ).rejects.toThrow("at least two members");
   });
 });
 

@@ -1,0 +1,105 @@
+# Store submission + metadata. EAS builds the binaries (`pnpm build:android:release`
+# / `build:ios:release`) — these lanes upload those artifacts and push store
+# metadata. fastlane's working dir is the fastlane/ folder, so paths are anchored
+# to apps/mobile (its parent) via MOBILE_ROOT.
+#
+#   android release   upload the built AAB + release notes -> internal track
+#   android metadata  push the full Play listing (text, images, screenshots)
+#   android promote   promote the internal release to a higher track
+#   ios beta/release   SCAFFOLD — inert until the Apple account + ASC key exist
+#
+# App Store *listing text* is NOT handled here — it's pushed from
+# store.config.json by EAS Metadata (`pnpm submit:ios:metadata` ->
+# `eas metadata:push`). The iOS lanes below only move the binary, so they keep
+# `skip_metadata`/`skip_screenshots` set; screenshots stay a manual ASC upload.
+
+MOBILE_ROOT = File.expand_path("..", __dir__)
+ANDROID_AAB = File.join(MOBILE_ROOT, "build/suro-release.aab")
+IOS_IPA = File.join(MOBILE_ROOT, "build/suro-release.ipa")
+# supply wants the dir that directly holds the locale folders (ca/, en-US/, …).
+PLAY_METADATA = File.join(MOBILE_ROOT, "store/play/metadata/android")
+PLAY_TRACK = "internal"
+
+platform :android do
+  desc "Upload the built AAB + release notes to the #{PLAY_TRACK} track"
+  lane :release do
+    UI.user_error!("#{ANDROID_AAB} not found — run `pnpm build:android:release` first") unless File.exist?(ANDROID_AAB)
+    upload_to_play_store(
+      track: PLAY_TRACK,
+      aab: ANDROID_AAB,
+      metadata_path: PLAY_METADATA,
+      release_status: "completed",
+      skip_upload_apk: true,
+      skip_upload_changelogs: false, # release notes — the point of this lane
+      skip_upload_metadata: true,    # listing text — see the `metadata` lane
+      skip_upload_images: true,      # icon / feature graphic — `metadata` lane
+      skip_upload_screenshots: true, # screenshots — `metadata` lane
+    )
+  end
+
+  desc "Push the full Play listing (text, images, screenshots) — run when the listing changes"
+  lane :metadata do
+    upload_to_play_store(
+      track: PLAY_TRACK,
+      metadata_path: PLAY_METADATA,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true, # notes ride with the binary in `release`
+    )
+  end
+
+  desc "Promote the latest internal release to a higher track (default: production)"
+  lane :promote do |options|
+    upload_to_play_store(
+      track: PLAY_TRACK,
+      track_promote_to: options[:track] || "production",
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+end
+
+platform :ios do
+  # SCAFFOLD. Inert until the Apple Developer Program membership exists. To enable:
+  #   1. Create an App Store Connect API key (Users and Access -> Integrations).
+  #   2. Export APP_STORE_CONNECT_API_KEY_KEY_ID / _ISSUER_ID / _KEY (the base64
+  #      .p8 contents) — e.g. in a gitignored fastlane/.env.
+  #   3. Set submit.production.ios.ascAppId in eas.json (done: 6780486033).
+  # Listing text is owned by EAS Metadata (`pnpm submit:ios:metadata`), so these
+  # lanes intentionally keep skip_metadata: true and only ship the binary.
+  private_lane :asc_api_key do
+    unless ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
+      UI.user_error!("Apple account pending — set APP_STORE_CONNECT_API_KEY_* env vars first")
+    end
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      key_content: ENV["APP_STORE_CONNECT_API_KEY_KEY"],
+      is_key_content_base64: true,
+    )
+  end
+
+  desc "Upload the built IPA to TestFlight (inert until the Apple account exists)"
+  lane :beta do
+    key = asc_api_key
+    UI.user_error!("#{IOS_IPA} not found — run `pnpm build:ios:release` first") unless File.exist?(IOS_IPA)
+    upload_to_testflight(api_key: key, ipa: IOS_IPA, skip_waiting_for_build_processing: true)
+  end
+
+  desc "Upload the IPA + submit for App Store review (inert until the Apple account exists)"
+  lane :release do
+    key = asc_api_key
+    UI.user_error!("#{IOS_IPA} not found — run `pnpm build:ios:release` first") unless File.exist?(IOS_IPA)
+    upload_to_app_store(
+      api_key: key,
+      ipa: IOS_IPA,
+      skip_metadata: true,    # listing text -> EAS Metadata (`pnpm submit:ios:metadata`)
+      skip_screenshots: true, # screenshots -> manual ASC upload from store/apple/screenshots/
+      precheck_include_in_app_purchases: false,
+    )
+  end
+end

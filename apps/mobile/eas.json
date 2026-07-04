@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 20.0.0",
+    "version": ">= 20.3.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -11,28 +11,38 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud"
+        "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
+      }
+    },
+    "dev": {
+      "extends": "preview",
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "dev"
       }
     },
     "production-apk": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev"
+        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "TODO_SET_AFTER_APP_STORE_CONNECT_APP_EXISTS",
+        "ascAppId": "6780486033",
         "metadataPath": "./store.config.json"
       },
       "android": {

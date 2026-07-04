@@ -1,17 +1,17 @@
 #!/bin/sh -e
 
-# Production deploy. Pulls the image built by CI from the registry and restarts
-# the production container.
+# Production deploy. Pulls the image CI built from the registry and (re)starts the
+# prod container via docker compose. Routing now lives in Pangolin (see AGENTS.md);
+# this script no longer writes any Traefik config.
 #
 # Required env (from GitLab CI):
 #   CI_COMMIT_SHA
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
-# Required env on the remote (deploy.env):
-#   PROD_DOMAIN            — production hostname for the Traefik route
-#   PREVIEW_DOCKER_NETWORK — Docker network shared with Traefik/gerbil
-#   TRAEFIK_ROUTES_DIR     — directory watched by Traefik's file provider
+# On the remote, compose.yaml must sit in $SSH_PROJECT_DIRECTORY. It needs no host
+# .env: WEB_IMAGE and IMAGE_TAG are exported below and PROXY_NETWORK defaults to
+# familia-previews (override it in an optional .env there if yours differs).
 
 : "${CI_COMMIT_SHA:?missing}"
 : "${CI_REGISTRY:?missing}"
@@ -23,47 +23,31 @@
 : "${SSH_IP:?missing}"
 : "${SSH_PROJECT_DIRECTORY:?missing}"
 
-(
-  sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=no <<-EOF
-    set -e
-    cd $SSH_PROJECT_DIRECTORY
-    . ./deploy.env
+# Ship the compose file from this commit so the host always runs the current
+# version — the deploy never relies on a repo checkout being present there.
+sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no \
+  compose.yaml "$SSH_USERNAME@$SSH_IP:$SSH_PROJECT_DIRECTORY/compose.yaml"
 
-    IMAGE="$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+sshpass -p "$SSH_PASSWORD" ssh "$SSH_USERNAME@$SSH_IP" -o StrictHostKeyChecking=no <<EOF
+set -e
+cd $SSH_PROJECT_DIRECTORY
 
-    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    docker pull "\$IMAGE"
-    docker logout "$CI_REGISTRY"
+docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 
-    docker stop familia 2>/dev/null || true
-    docker rm familia 2>/dev/null || true
+# Run exactly the image this pipeline built and pushed.
+export WEB_IMAGE="$CI_REGISTRY_IMAGE"
+export IMAGE_TAG="$CI_COMMIT_SHA"
 
-    docker run --name=familia --restart=unless-stopped -d \\
-      --env-file .env \\
-      --network "\$PREVIEW_DOCKER_NETWORK" \\
-      "\$IMAGE"
+# One-time migration off the old 'docker run' deploy: a non-compose 'familia'
+# container would block compose from claiming the name. Drop it once; from here on
+# compose owns and recreates it.
+legacy_project="\$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' familia 2>/dev/null || true)"
+if docker inspect familia >/dev/null 2>&1 && [ -z "\$legacy_project" ]; then
+  docker rm -f familia
+fi
 
-    # Routing uses Traefik's file provider (no Docker provider, so labels are
-    # ignored): write the production route pointing at the container by name
-    # over the shared network, mirroring scripts/deploy-preview.sh.
-    TMPL=\$(mktemp)
-    cat > "\$TMPL" <<'ROUTEEOF'
-http:
-  routers:
-    familia:
-      rule: "Host(\`__HOST__\`)"
-      entryPoints:
-        - websecure
-      service: familia
-      tls:
-        certResolver: letsencrypt
-  services:
-    familia:
-      loadBalancer:
-        servers:
-          - url: "http://familia:3000"
-ROUTEEOF
-    sed -e "s|__HOST__|\$PROD_DOMAIN|g" "\$TMPL" > "\$TRAEFIK_ROUTES_DIR/familia.yml"
-    rm "\$TMPL"
+docker compose pull
+docker compose up -d
+
+docker logout "$CI_REGISTRY"
 EOF
-)

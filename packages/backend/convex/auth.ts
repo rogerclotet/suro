@@ -2,6 +2,8 @@ import Apple from "@auth/core/providers/apple";
 import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
+import { AppleNative } from "./AppleNative";
+import { track } from "./model/analytics";
 import { getRandomColor } from "./model/colors";
 import { ResendOTP } from "./ResendOTP";
 
@@ -11,9 +13,11 @@ import { ResendOTP } from "./ResendOTP";
  *   AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET (Google), AUTH_RESEND_KEY, AUTH_EMAIL_FROM
  *   (email OTP), SITE_URL, plus JWT_PRIVATE_KEY + JWKS (`npx @convex-dev/auth`).
  * Optional: ALLOWED_WEB_ORIGINS (see `isAllowedWebOrigin`), and AUTH_APPLE_ID +
- *   AUTH_APPLE_SECRET (Apple; the secret is a self-signed ES256 JWT that expires
- *   after at most 6 months — regenerate it before then). The clients hide the
- *   Apple button until those are set (see `oauthProviders`).
+ *   AUTH_APPLE_SECRET (web Apple OAuth; the secret is a self-signed ES256 JWT
+ *   that expires after at most 6 months — regenerate it before then). The web
+ *   client hides its Apple button until those are set (see `oauthProviders`).
+ * iOS uses native Sign in with Apple instead (see `AppleNative`), which needs no
+ *   secret — just the App ID's Sign in with Apple capability.
  */
 
 /** Apple's `user` payload, sent only on the user's very first authorization. */
@@ -85,6 +89,10 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         };
       },
     }),
+    // Native "Sign in with Apple" for iOS — verifies the identity token from the
+    // `expo-apple-authentication` sheet. The web redirect flow above can't run
+    // inside the app (Safari drops the state cookie on Apple's cross-site POST).
+    AppleNative,
     ResendOTP,
   ],
   callbacks: {
@@ -135,6 +143,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       });
       await ctx.db.insert("projectMembers", { projectId, userId });
       await ctx.db.patch(userId, { locale: "ca", onboardingCompleted: false });
+      await track(ctx, userId, "signed_up");
     },
   },
 });

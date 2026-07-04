@@ -1,13 +1,13 @@
 import { api } from "backend/convex/_generated/api";
-import { useConvexAuth, useQuery } from "convex/react";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { getLastProjectId } from "@/lib/last-project";
+import { useAuthGate, usePersistentQuery } from "@/lib/offline";
 import { Loading } from "@/ui";
 
 export default function Index() {
-  const { isLoading, isAuthenticated } = useConvexAuth();
-  const projects = useQuery(
+  const { isLoading, isAuthenticated } = useAuthGate();
+  const projects = usePersistentQuery(
     api.projects.listMine,
     isAuthenticated ? {} : "skip",
   );
@@ -38,9 +38,9 @@ export default function Index() {
   const resume =
     storedProjectId && projects.some((p) => p._id === storedProjectId);
   const target = resume
-    ? `/${storedProjectId}/lists`
+    ? `/${storedProjectId}/home`
     : projects[0]
-      ? `/${projects[0]._id}/lists`
+      ? `/${projects[0]._id}/home`
       : "/create-group";
   return <Redirect href={target} />;
 }

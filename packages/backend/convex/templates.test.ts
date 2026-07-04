@@ -6,6 +6,16 @@ import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
 
+/** Narrow a detail-query result the test just created: `templates.get` now
+ * returns null for a missing template, so field access needs the non-null
+ * guarantee the test already relies on. */
+function present<T>(value: T | null): T {
+  if (value === null) {
+    throw new Error("expected the document to exist");
+  }
+  return value;
+}
+
 type Ids = {
   alice: Id<"users">;
   bob: Id<"users">;
@@ -85,7 +95,9 @@ describe("templates: CRUD", () => {
       description: "  weekend kit  ",
       items: [{ name: "Tent", category: " Gear " }],
     });
-    const template = await alice.query(api.templates.get, { templateId: id });
+    const template = present(
+      await alice.query(api.templates.get, { templateId: id }),
+    );
     expect(template.name).toBe("Camping");
     expect(template.description).toBe("weekend kit");
     // Item category names are trimmed and recorded as suggestions.
@@ -103,7 +115,9 @@ describe("templates: CRUD", () => {
       description: "   ",
       items: [],
     });
-    const template = await alice.query(api.templates.get, { templateId: id });
+    const template = present(
+      await alice.query(api.templates.get, { templateId: id }),
+    );
     expect(template.description).toBeUndefined();
   });
 
@@ -132,7 +146,9 @@ describe("templates: CRUD", () => {
         { name: "Eggs", category: null },
       ],
     });
-    const template = await alice.query(api.templates.get, { templateId: id });
+    const template = present(
+      await alice.query(api.templates.get, { templateId: id }),
+    );
     expect(template.name).toBe("New");
     expect(template.description).toBe("desc");
     expect(template.items).toHaveLength(2);
@@ -168,9 +184,9 @@ describe("templates: CRUD", () => {
       items: [],
     });
     await alice.mutation(api.templates.remove, { templateId: id });
-    await expect(
-      alice.query(api.templates.get, { templateId: id }),
-    ).rejects.toThrow("Template not found");
+    // A deleted template reads back as null (not an error) so the editor can
+    // navigate away cleanly instead of surfacing a server error.
+    expect(await alice.query(api.templates.get, { templateId: id })).toBeNull();
   });
 
   it("rejects non-members (opaque not-found)", async () => {
@@ -204,7 +220,9 @@ describe("templates: export", () => {
       targetProjectId: ids.shared,
     });
 
-    const copy = await alice.query(api.templates.get, { templateId: copyId });
+    const copy = present(
+      await alice.query(api.templates.get, { templateId: copyId }),
+    );
     expect(copy._id).not.toBe(id);
     expect(copy.projectId).toBe(ids.shared);
     expect(copy.name).toBe("Starter");
@@ -274,9 +292,9 @@ describe("lists: import templates into an existing list", () => {
     });
 
     const result = await alice.query(api.lists.get, { listId: list });
-    expect(result).not.toBeNull();
+    if (!result) throw new Error("expected list to exist");
     const byName = Object.fromEntries(
-      result!.items.map((item) => [item.name, item.category ?? null]),
+      result.items.map((item) => [item.name, item.category ?? null]),
     );
     expect(byName).toEqual({
       Existing: null,

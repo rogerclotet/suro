@@ -1,16 +1,17 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "backend/convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
 import * as Linking from "expo-linking";
 import { Redirect } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { type ReactNode, useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { type ReactNode, useEffect, useState } from "react";
+import { Image, Platform, Pressable, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
-import { Button, Field, Screen, Txt } from "@/ui";
+import { Button, Field, KeyboardAwareScreen, Txt } from "@/ui";
 
 // Finishes any auth session that was pending when the app was backgrounded.
 WebBrowser.maybeCompleteAuthSession();
@@ -131,6 +132,17 @@ export default function Login() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // iOS uses the native Sign in with Apple sheet: the web redirect flow can't
+  // complete inside the app because Safari/WebKit drops the OAuth state cookie
+  // on Apple's cross-site `form_post`. Native availability is async, so gate the
+  // button on it (false on Android/web, where we keep the web OAuth flow).
+  const [appleNativeReady, setAppleNativeReady] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== "ios") {
+      return;
+    }
+    AppleAuthentication.isAvailableAsync().then(setAppleNativeReady);
+  }, []);
 
   async function run(fn: () => Promise<void>) {
     setBusy(true);
@@ -150,9 +162,9 @@ export default function Login() {
       setStep("code");
     });
 
-  const verifyCode = () =>
+  const verifyCode = (value: string = code) =>
     run(async () => {
-      await signIn("resend-otp", { email, code });
+      await signIn("resend-otp", { email, code: value });
     });
 
   const signInWithOAuth = (provider: OAuthProvider) =>
@@ -174,6 +186,56 @@ export default function Login() {
       }
     });
 
+  // Native iOS flow: the system sheet returns an identity token (a JWT Apple
+  // signs) which the `apple-native` backend provider verifies — no browser.
+  const signInWithAppleNative = () =>
+    run(async () => {
+      let credential: AppleAuthentication.AppleAuthenticationCredential;
+      try {
+        credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          ],
+        });
+      } catch (err) {
+        // Tapping Cancel on the native sheet throws — treat it as a no-op.
+        if (
+          err !== null &&
+          typeof err === "object" &&
+          "code" in err &&
+          err.code === "ERR_REQUEST_CANCELED"
+        ) {
+          return;
+        }
+        throw err;
+      }
+      if (credential.identityToken === null) {
+        throw new Error(t("genericError"));
+      }
+      // Apple sends the name only on the first authorization; forward it when
+      // present so the backend can store it before falling back to the email.
+      const name = [
+        credential.fullName?.givenName,
+        credential.fullName?.familyName,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      await signIn("apple-native", {
+        identityToken: credential.identityToken,
+        name,
+      });
+    });
+
+  // iOS shows the Apple button when the native sheet is available; other
+  // platforms show it only when the web Apple OAuth provider is configured.
+  const showAppleButton =
+    Platform.OS === "ios" ? appleNativeReady : Boolean(oauthProviders?.apple);
+  const onApplePress =
+    Platform.OS === "ios"
+      ? signInWithAppleNative
+      : () => signInWithOAuth("apple");
+
   // Once Convex Auth flips to authenticated (OAuth or OTP), leave the login
   // screen automatically — otherwise it sits here until a manual reload.
   if (isAuthenticated) {
@@ -183,8 +245,8 @@ export default function Login() {
   }
 
   return (
-    <Screen>
-      <View style={{ flex: 1, justifyContent: "center", gap: 16, padding: 24 }}>
+    <KeyboardAwareScreen center>
+      <View style={{ gap: 16, padding: 24 }}>
         <Image
           source={logo}
           resizeMode="contain"
@@ -212,9 +274,10 @@ export default function Login() {
               disabled={busy}
               onPress={() => signInWithOAuth("google")}
             />
-            {oauthProviders?.apple ? (
+            {showAppleButton ? (
               // Apple's HIG: black button on light surfaces, white on dark —
-              // `text` over `bg` gives exactly that in both schemes.
+              // `text` over `bg` gives exactly that in both schemes. iOS runs
+              // the native sheet; Android falls back to the web OAuth flow.
               <OAuthButton
                 title={t("continueWithApple")}
                 logo={<AppleLogo size={20} color={theme.bg} />}
@@ -222,7 +285,7 @@ export default function Login() {
                 borderColor={theme.text}
                 labelColor={theme.bg}
                 disabled={busy}
-                onPress={() => signInWithOAuth("apple")}
+                onPress={onApplePress}
               />
             ) : null}
             <Divider label={t("or")} />
@@ -250,15 +313,24 @@ export default function Login() {
             <Field
               placeholder={t("codePlaceholder")}
               value={code}
-              onChangeText={setCode}
+              onChangeText={(text) => {
+                setCode(text);
+                // number-pad has no return key, so auto-submit once the full
+                // 6-digit code is entered — the user never has to find a button.
+                if (text.length === 6 && !busy) {
+                  verifyCode(text);
+                }
+              }}
               keyboardType="number-pad"
               inputMode="numeric"
+              maxLength={6}
               editable={!busy}
+              autoFocus
             />
             <Button
               title={busy ? t("verifying") : t("verifyCode")}
               disabled={busy || code.length === 0}
-              onPress={verifyCode}
+              onPress={() => verifyCode()}
             />
             <Button
               title={t("differentEmail")}
@@ -278,6 +350,6 @@ export default function Login() {
           </Txt>
         ) : null}
       </View>
-    </Screen>
+    </KeyboardAwareScreen>
   );
 }

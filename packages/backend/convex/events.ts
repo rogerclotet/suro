@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import { loadListWithItems } from "./model/lists";
 import {
   requireEventAccess,
@@ -44,7 +45,15 @@ export const listByRange = query({
 export const get = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    // Return null rather than throwing when the event is gone: the detail
+    // screen keeps this query subscribed while it navigates away after a
+    // delete, and a dangling subscription re-running against the deleted row
+    // would otherwise surface an "Event not found" server error on the client.
+    const event = await ctx.db.get(eventId);
+    if (event === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, event.projectId);
     const [linkedList, linkedNote, linkedPot] = await Promise.all([
       ctx.db
         .query("lists")
@@ -110,8 +119,9 @@ export const create = mutation({
       actorId: userId,
       bodyKey: "event_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/calendar`,
+      path: `/${projectId}/calendar/${eventId}`,
     });
+    await track(ctx, userId, "event_created", { projectId, allDay });
     return eventId;
   },
 });
@@ -152,7 +162,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
-    const { event } = await requireEventAccess(ctx, eventId);
+    const { event, userId } = await requireEventAccess(ctx, eventId);
     // Mirror ON DELETE SET NULL for the things that point at this event:
     // unlink any linked lists and detach any attached files (they survive).
     const linkedLists = await ctx.db
@@ -184,24 +194,49 @@ export const remove = mutation({
       await ctx.db.patch(pot._id, { eventId: undefined });
     }
     await ctx.db.delete(event._id);
+    await track(ctx, userId, "event_deleted", { projectId: event.projectId });
     return null;
   },
 });
+
+/** The default description is rendered here at creation time, so it must be
+ * localized from the creator's stored `locale` — the client locale isn't
+ * available to the mutation. Mirrors the apps' i18n `calendar` copy; only
+ * `{name}` interpolation is supported. */
+const LINKED_LIST_DESCRIPTION: Record<"ca" | "es" | "en", string> = {
+  ca: "Llista per a {name}",
+  es: "Lista para {name}",
+  en: "List for {name}",
+};
+
+function linkedListDescription(eventName: string, locale: string | undefined) {
+  const template =
+    LINKED_LIST_DESCRIPTION[
+      locale === "es" ? "es" : locale === "en" ? "en" : "ca"
+    ];
+  return template.replace("{name}", eventName);
+}
 
 /** Create a fresh list already linked to the event (ports createLinkedList). */
 export const createLinkedList = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
-    return ctx.db.insert("lists", {
+    const creator = await ctx.db.get(userId);
+    const listId = await ctx.db.insert("lists", {
       name: event.name,
-      description: `List for ${event.name}`,
+      description: linkedListDescription(event.name, creator?.locale),
       projectId: event.projectId,
       favorite: false,
       eventId: event._id,
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "list",
+    });
+    return listId;
   },
 });
 
@@ -237,7 +272,7 @@ export const createLinkedNote = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
-    return ctx.db.insert("notes", {
+    const noteId = await ctx.db.insert("notes", {
       name: event.name,
       contents: "",
       format: "html",
@@ -246,6 +281,11 @@ export const createLinkedNote = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "note",
+    });
+    return noteId;
   },
 });
 
@@ -276,30 +316,57 @@ export const unlinkNote = mutation({
 });
 
 /**
- * Create an expense pot already linked to the event, seeded with every project
- * member (a pot needs at least two — expenses are inherently a group feature).
+ * Create an expense pot already linked to the event. Pass `memberIds` to choose
+ * who's in it; omit it to seed with every project member (the default). A pot
+ * needs at least two — expenses are inherently a group feature.
  */
 export const createLinkedPot = mutation({
-  args: { eventId: v.id("events") },
-  handler: async (ctx, { eventId }) => {
+  args: {
+    eventId: v.id("events"),
+    memberIds: v.optional(v.array(v.id("users"))),
+  },
+  handler: async (ctx, { eventId, memberIds }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
-    const members = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project", (q) => q.eq("projectId", event.projectId))
-      .collect();
-    const memberIds = [...new Set(members.map((m) => m.userId))];
-    if (memberIds.length < 2) {
+
+    let resolved: Id<"users">[];
+    if (memberIds === undefined) {
+      const members = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", event.projectId))
+        .collect();
+      resolved = [...new Set(members.map((m) => m.userId))];
+    } else {
+      // De-dupe and require every chosen member to belong to the group.
+      resolved = [...new Set(memberIds)];
+      for (const memberId of resolved) {
+        const membership = await ctx.db
+          .query("projectMembers")
+          .withIndex("by_project_user", (q) =>
+            q.eq("projectId", event.projectId).eq("userId", memberId),
+          )
+          .unique();
+        if (membership === null) {
+          throw new Error("Member is not in this group");
+        }
+      }
+    }
+    if (resolved.length < 2) {
       throw new Error("A pot needs at least two members");
     }
+
     const potId = await ctx.db.insert("pots", {
       name: event.name,
       projectId: event.projectId,
       eventId: event._id,
       createdBy: userId,
     });
-    for (const memberId of memberIds) {
+    for (const memberId of resolved) {
       await ctx.db.insert("potMembers", { potId, userId: memberId });
     }
+    await track(ctx, userId, "event_linked_resource_created", {
+      projectId: event.projectId,
+      type: "pot",
+    });
     return potId;
   },
 });

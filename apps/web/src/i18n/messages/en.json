@@ -259,7 +259,6 @@
     "home": "Home",
     "lists": "Lists",
     "templates": "Templates",
-    "myTasks": "My tasks",
     "calendar": "Calendar",
     "files": "Files",
     "notes": "Notes",
@@ -283,7 +282,6 @@
     "upcoming": "Upcoming",
     "goToCalendar": "Go to calendar",
     "showAllLists": "Show all",
-    "showAllTasks": "Show all",
     "goToPots": "Go to pots",
     "noUpcoming": "No upcoming events",
     "noActiveLists": "No active lists",
@@ -467,7 +465,6 @@
     "taskBucket_noDate": "No date"
   },
   "categories": {
-    "label": "Category",
     "searchPlaceholder": "Search categories",
     "createNamed": "Create \"{name}\"",
     "noResults": "No categories found"

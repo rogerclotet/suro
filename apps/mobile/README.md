@@ -28,10 +28,12 @@ Native Google OAuth additionally needs the redirect wired to the `suro://` schem
 
 ## Builds (local)
 
-Client builds run locally — runner build times made CI builds impractical. All
-three scripts are EAS **local** builds signed with the EAS-managed credentials;
-log in once with `eas login` (eas-cli is a devDependency, so the scripts
-resolve it from the workspace).
+Build locally with the scripts below, or let CI do it: on `main`, native-code
+changes trigger EAS **cloud** builds that publish the `.aab`/`.ipa` as
+downloadable artifacts, plus manual fastlane submit jobs — see the root
+`AGENTS.md` → Deploys and `.gitlab-ci.yml`. The local scripts are EAS **local**
+builds signed with the EAS-managed credentials; log in once with `eas login`
+(eas-cli is a devDependency, so the scripts resolve it from the workspace).
 
 | Script (`pnpm --filter mobile …`) | Profile (`eas.json`) | Output |
 | --- | --- | --- |
@@ -45,8 +47,7 @@ Prerequisites:
   on EAS (created via `eas credentials -p android`); the build fetches it.
 - **iOS**: Xcode, fastlane and CocoaPods, plus an Apple Developer Program
   membership with distribution credentials on EAS (`eas credentials -p ios`
-  for `app.suro.mobile`) — **still pending**, so `build:ios:release` fails at
-  credential fetch until that exists.
+  for `dev.clotet.suro`) — configured, so `build:ios:release` fetches them.
 
 Notes:
 
@@ -69,6 +70,14 @@ Notes:
 - **Data**: all reads/writes go through `backend`'s Convex functions via
   `useQuery`/`useMutation` (reactive — no offline/sync layer). The complete-item
   toggle uses a Convex optimistic update.
+- **Push notifications**: delivery runs through the Expo Push API → APNs (iOS) /
+  FCM (Android). The client registers in `src/lib/push.ts` (`usePushNotifications`,
+  mounted in the authed `(app)/_layout.tsx`); the backend sends from
+  `packages/backend/convex/push.ts`, localized per recipient with a deep-link
+  `data.path`. APNs key + FCM V1 key live on EAS (`eas credentials`); Android
+  also needs `google-services.json` (committed, referenced from `app.json`).
+  Push is a no-op in Expo Go and on simulators — test on a dev/release build on a
+  physical device.
 
 ## Verified
 

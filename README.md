@@ -44,3 +44,7 @@ pnpm test
 ```bash
 pnpm dev
 ```
+
+## License
+
+Suro is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). If you run a modified version of Suro as a network service, you must make your source code available to its users.

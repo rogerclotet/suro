@@ -1,6 +1,8 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { type MutationCtx, mutation, query } from "./_generated/server";
+import { track } from "./model/analytics";
 import {
   ensureCategorySuggestions,
   normalizeCategoryName,
@@ -52,7 +54,15 @@ export const listByProject = query({
 export const get = query({
   args: { templateId: v.id("listTemplates") },
   handler: async (ctx, { templateId }) => {
-    const { template } = await requireTemplateAccess(ctx, templateId);
+    // Return null rather than throwing when the template is gone (see
+    // notes.get): the editor stays subscribed while it navigates away after a
+    // delete, and re-running against the deleted row would otherwise surface a
+    // "Template not found" server error on the client.
+    const template = await ctx.db.get(templateId);
+    if (template === null) {
+      return null;
+    }
+    await requireProjectMember(ctx, template.projectId);
     return template;
   },
 });
@@ -70,7 +80,7 @@ export const create = mutation({
     if (trimmed === "") {
       throw new Error("Template name is required");
     }
-    return ctx.db.insert("listTemplates", {
+    const templateId = await ctx.db.insert("listTemplates", {
       name: trimmed,
       description: (description ?? "").trim() || undefined,
       items: await prepareTemplateItems(ctx, projectId, items),
@@ -78,6 +88,18 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
+    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      projectId,
+      actorId: userId,
+      bodyKey: "template_created",
+      bodyParams: { name: trimmed },
+      path: `/${projectId}/lists/templates/${templateId}`,
+    });
+    await track(ctx, userId, "template_created", {
+      projectId,
+      itemCount: items.length,
+    });
+    return templateId;
   },
 });
 

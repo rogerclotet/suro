@@ -50,3 +50,12 @@ example
 
 # store submission credentials (Play service account JSON etc.) — never commit
 /credentials
+/store/play-service-account.json
+
+# fastlane: generated reports + local secrets. Committed: Gemfile(.lock),
+# fastlane/{Appfile,Fastfile,.env.default}. The ASC .p8 is covered by *.p8 above.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
+fastlane/.env

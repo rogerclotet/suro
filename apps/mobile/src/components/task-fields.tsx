@@ -183,6 +183,7 @@ export function NewItemTaskControls({
   category,
   onChangeCategory,
   onCategorySelected,
+  showTaskFields = true,
 }: {
   projectId: Id<"projects">;
   draft: TaskDraft;
@@ -191,6 +192,7 @@ export function NewItemTaskControls({
   category?: string | null;
   onChangeCategory?: (category: string | null) => void;
   onCategorySelected?: () => void;
+  showTaskFields?: boolean;
 }) {
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -227,35 +229,42 @@ export function NewItemTaskControls({
             onPress={() => setSheet("category")}
           />
         ) : null}
-        <TaskControlChip
-          icon={UserIcon}
-          label={assignee?.name ?? tl("assignee")}
-          active={draft.assigneeId !== null}
-          onPress={() => setSheet("assignee")}
-        />
-        <TaskControlChip
-          icon={Flag}
-          label={tl(`priority_${draft.priority}`)}
-          active={draft.priority !== "normal"}
-          accent={priorityColor(t, draft.priority)}
-          onPress={() => setSheet("priority")}
-        />
-        <TaskControlChip
-          icon={CalendarClock}
-          label={
-            draft.dueAt !== null
-              ? formatDue({ dueAt: draft.dueAt, dueAllDay: draft.dueAllDay })
-              : tl("dueDate")
-          }
-          active={draft.dueAt !== null}
-          onPress={() => setSheet("due")}
-        />
-        <TaskControlChip
-          icon={Repeat}
-          label={tl(`repeat_${draft.repeat}`)}
-          active={draft.repeat !== "none"}
-          onPress={() => setSheet("repeat")}
-        />
+        {showTaskFields ? (
+          <>
+            <TaskControlChip
+              icon={UserIcon}
+              label={assignee?.name ?? tl("assignee")}
+              active={draft.assigneeId !== null}
+              onPress={() => setSheet("assignee")}
+            />
+            <TaskControlChip
+              icon={Flag}
+              label={tl(`priority_${draft.priority}`)}
+              active={draft.priority !== "normal"}
+              accent={priorityColor(t, draft.priority)}
+              onPress={() => setSheet("priority")}
+            />
+            <TaskControlChip
+              icon={CalendarClock}
+              label={
+                draft.dueAt !== null
+                  ? formatDue({
+                      dueAt: draft.dueAt,
+                      dueAllDay: draft.dueAllDay,
+                    })
+                  : tl("dueDate")
+              }
+              active={draft.dueAt !== null}
+              onPress={() => setSheet("due")}
+            />
+            <TaskControlChip
+              icon={Repeat}
+              label={tl(`repeat_${draft.repeat}`)}
+              active={draft.repeat !== "none"}
+              onPress={() => setSheet("repeat")}
+            />
+          </>
+        ) : null}
       </ScrollView>
 
       <Sheet visible={sheet !== null} onClose={closeSheet}>

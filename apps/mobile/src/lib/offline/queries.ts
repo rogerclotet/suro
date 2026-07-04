@@ -55,7 +55,6 @@ function buildListBase(
       typeof args.description === "string" ? args.description : undefined,
     projectId: String(args.projectId) as Id<"projects">,
     favorite: false,
-    taskMode: args.taskMode === true ? true : undefined,
     createdBy: user.id,
     updatedAt: create.createdAt,
     items: [],
@@ -82,8 +81,6 @@ function patchListFields(
         name: typeof args.name === "string" ? args.name : patched.name,
         description:
           typeof args.description === "string" ? args.description : undefined,
-        taskMode:
-          typeof args.taskMode === "boolean" ? args.taskMode : patched.taskMode,
       };
     } else if (
       entry.functionName === "lists:toggleFavorite" &&

@@ -2,20 +2,21 @@
   "expo": {
     "name": "Suro",
     "slug": "suro",
-    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "suro",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.suro.mobile",
+      "bundleIdentifier": "dev.clotet.suro",
+      "associatedDomains": ["applinks:suro.clotet.dev"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "app.suro.mobile",
+      "package": "dev.clotet.suro",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#17100c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -60,7 +61,13 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png"
+        }
+      ],
+      "expo-localization",
       [
         "expo-image-picker",
         {
@@ -77,7 +84,8 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": false

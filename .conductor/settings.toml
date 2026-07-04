@@ -1,6 +1,6 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
-setup = '''pnpm install && { git -C "$CONDUCTOR_ROOT_PATH" fetch --prune origin && git -C "$CONDUCTOR_ROOT_PATH" pull --ff-only || true; } && { [ -f apps/web/.env ] || cp "$CONDUCTOR_ROOT_PATH/apps/web/.env" apps/web/.env || echo 'WARN: apps/web/.env missing in the root repo — create it from apps/web/.env.example or the web app will fail env validation'; }'''
+setup = '''pnpm install && { git -C "$CONDUCTOR_ROOT_PATH" fetch --prune origin && git -C "$CONDUCTOR_ROOT_PATH" pull --ff-only || true; } && { [ -f apps/web/.env ] || cp "$CONDUCTOR_ROOT_PATH/apps/web/.env" apps/web/.env || echo 'WARN: apps/web/.env missing in the root repo — create it from apps/web/.env.example or the web app will fail env validation'; } && { [ -f apps/mobile/credentials/play-service-account.json ] || { mkdir -p apps/mobile/credentials && cp "$CONDUCTOR_ROOT_PATH/apps/mobile/credentials/play-service-account.json" apps/mobile/credentials/play-service-account.json; } || echo 'WARN: apps/mobile/credentials/play-service-account.json missing in the root repo — place the Play service account JSON there to enable Android release submission'; }'''
 run = 'pnpm --filter web dev --port "$CONDUCTOR_PORT"'
 run_mode = "concurrent"

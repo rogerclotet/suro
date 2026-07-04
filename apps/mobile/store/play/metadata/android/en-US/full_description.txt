@@ -22,4 +22,4 @@ MADE FOR THE GROUPS IN YOUR LIFE
 
 Start your first group in under a minute: sign in with Google or your email, create a group, and invite your people with a link. No credit card, no setup.
 
-Suro doesn't sell your data and runs no algorithmic feeds. Privacy policy: https://suro.clotet.dev/en/privacy
+Suro doesn't sell your data and runs no algorithmic feeds.

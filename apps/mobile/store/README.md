@@ -9,8 +9,6 @@ store/
   README.md                  this runbook
   declarations.md            console questionnaire answers + review notes
   check-metadata.mjs         lints text limits + image dimensions
-  capture-ios-screenshots.py automates iOS captures (simctl + suro:// deep links)
-  port-android-screenshots-to-ios.py  letterbox Play PNGs → App Store size
   generate-graphics.py       regenerates Play icon + feature graphics
   apple/screenshots/<loc>/   committed App Store screenshots (1320x2868)
   play/metadata/android/     Play listing in fastlane-supply layout
@@ -21,35 +19,49 @@ store/
 
 Locales everywhere: `en-US`, `es-ES`, `ca` (both stores support Catalan).
 EAS Metadata only supports the App Store (and no screenshot upload), which is
-why the Play listing is plain files: paste/upload them in the Play Console, or
-wire `fastlane supply --metadata_path apps/mobile/store/play/metadata` later
-without restructuring.
+why the Play listing is plain files in fastlane-supply layout, pushed by the
+fastlane lanes (`metadata_path: store/play/metadata/android` — the directory
+that directly holds the locale folders).
 
 ## One-time setup
 
+### fastlane (both stores)
+
+`bundle install` once (installs fastlane, pinned in `Gemfile.lock`). Submission
+and store metadata run through fastlane lanes (`fastlane/Fastfile`); EAS only
+builds the binaries. Android reuses the Play service-account key below; iOS lanes
+use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
+`fastlane/.env`).
+
 ### Apple
 
-1. Apple Developer Program membership (pending — see `../README.md`), then
-   `pnpm exec eas credentials -p ios` for `app.suro.mobile`.
-2. Create the app in App Store Connect (bundle id `app.suro.mobile`, name
+1. Apple Developer Program membership + iOS distribution/APNs credentials on
+   EAS (`pnpm exec eas credentials -p ios` for `dev.clotet.suro`) — **done**.
+2. Create the app in App Store Connect (bundle id `dev.clotet.suro`, name
    "Suro", default locale Catalan).
-3. Put the numeric App Store Connect app id into `submit.production.ios.ascAppId`
-   in `../eas.json` (currently a TODO placeholder).
+3. The numeric App Store Connect app id is set in `submit.production.ios.ascAppId`
+   in `../eas.json`.
 4. Set the review demo account env vars on the **prod** Convex deployment and
    mirror them into `apple.review.demo*` in `store.config.json` locally (don't
    commit the real code) — see `declarations.md` → Review notes.
 5. Fill the App Privacy labels + age rating from `declarations.md`.
 6. Upload screenshots from `apple/screenshots/<locale>/` (ASC → version →
    App Previews and Screenshots; EAS Metadata does not push images).
+7. Push the listing text with `pnpm --filter mobile submit:ios:metadata`
+   (`eas metadata:push`, sourced from `store.config.json`). The submit profile
+   carries no ASC API key, so the first run authenticates with your Apple ID
+   interactively (App Store Connect access required); set
+   `EXPO_APPLE_APP_SPECIFIC_PASSWORD` to skip the 2FA prompt on later runs.
 
 ### Google Play
 
-1. Create the app in the Play Console (package `app.suro.mobile`).
+1. Create the app in the Play Console (package `dev.clotet.suro`).
 2. Create a service account with "Release manager" access
    ([EAS docs](https://docs.expo.dev/submit/android/)), download its JSON key
    to `../credentials/play-service-account.json` (gitignored).
 3. The **first** AAB must be uploaded manually in the Console (Play
-   requirement); later uploads go through `eas submit`.
+   requirement); later uploads go through fastlane (`pnpm --filter mobile
+   submit:android:release`).
 4. Fill Data safety, content rating, app access (review credentials) and
    target audience from `declarations.md`.
 5. Paste the listing texts and upload `images/*` from
@@ -60,55 +72,53 @@ without restructuring.
 
 ```sh
 # 0. copy & screenshots still accurate? lints lengths + dimensions:
-pnpm check:metadata
+node apps/mobile/store/check-metadata.mjs
 
-# 1. release notes: update per locale
-#    - store.config.json -> apple.info.<locale>.releaseNotes
-#    - store/play/metadata/android/<locale>/changelogs/default.txt
+# 1. release notes:
+#    - add the new version entry to apps/web/CHANGELOG.md (per locale), then
+#      `pnpm changelog:generate` — it regenerates the Play
+#      store/play/metadata/android/<locale>/changelogs/default.txt from the
+#      latest entry automatically (≤500 chars, enforced).
+#    - Apple (manual): store.config.json -> apple.info.<locale>.releaseNotes
 
 # 2. build (EAS local builds; commit first — EAS archives via git)
 pnpm --filter mobile build:android:release   # build/suro-release.aab
 pnpm --filter mobile build:ios:release       # build/suro-release.ipa
 
-# 3. submit the binaries
-pnpm --filter mobile exec eas submit -p android --profile production --path build/suro-release.aab
-pnpm --filter mobile exec eas submit -p ios --profile production --path build/suro-release.ipa
+# 3. submit (fastlane uploads the binary + release notes). build + submit in one:
+pnpm --filter mobile release:android    # = build:android:release, then fastlane android release
+pnpm --filter mobile release:ios        # = build:ios:release, then fastlane ios release
 
-# 4. push App Store listing text (validates against ASC first)
-pnpm --filter mobile exec eas metadata:push --profile production
+# 4. Play/App Store listing changed (text, images, screenshots)? push it explicitly:
+pnpm --filter mobile submit:android:metadata
+pnpm --filter mobile submit:ios:metadata   # `eas metadata:push` from store.config.json
+#    (iOS screenshots are not pushed by EAS Metadata — upload them manually in ASC)
 
-# 5. Play listing changed? paste/upload from play/metadata/android/ in the
-#    Console (or run fastlane supply if wired up by then).
-
-# 6. promote: Play internal track -> production; ASC -> submit for review
-#    (release.automaticRelease=false: you release manually after approval).
+# 5. promote internal -> production when ready:
+pnpm --filter mobile submit:android:promote   # defaults to production (or use the Console)
+#    iOS: submit for review in App Store Connect.
 ```
 
-Versioning is remote (`appVersionSource: "remote"`, `autoIncrement: true` in
-`eas.json`): version code/build number bump automatically; bump the
-user-facing `version` in `app.json` when it should change.
+Versioning: the Android version code / iOS build number bump automatically
+(`appVersionSource: "remote"`, `autoIncrement: true` in `eas.json`). The
+user-facing `version` (versionName / "1.7.0") is derived in `app.config.ts`
+from the monorepo root `package.json`, so it tracks each release on its own —
+bump the root `package.json` version (in lockstep with the matching
+`CHANGELOG.md` entry) and the store version follows. No need to touch
+`app.json`.
+
+One exception: `store.config.json`'s `apple.version` is plain JSON and can't
+read `package.json`, so bump it to the same value each release — it tells EAS
+Metadata which App Store version to write the listing to (without it, the push
+sends an empty `versionString` and fails before a build exists).
+`check-metadata.mjs` fails if it drifts from the root `package.json`.
 
 ## Screenshot capture
 
 Committed screenshots are captured from the real app with seeded demo data —
-5 per platform per locale: lists overview, list detail, calendar month,
-expenses pot, notes. Naming: `01-lists.png` … `05-notes.png` (order = store
-order; supply uploads alphabetically).
-
-**iOS (App Store)** — native Liquid Glass chrome, 1320×2868 from an iPhone
-16/17 Pro Max simulator:
-
-```sh
-# Build + install on the booted simulator (needs a dev signing identity):
-pnpm --filter mobile ios
-
-# App must be logged in as review@suro.clotet.dev (OTP from AUTH_REVIEW_OTP).
-# Then seed + capture per locale via deep links:
-python3 apps/mobile/store/capture-ios-screenshots.py ca es en
-```
-
-**Android (Play Store)** — Pixel 9 AVD, 1080×2400 (committed under
-`play/metadata/android/.../phoneScreenshots/`).
+6 per platform per locale: home dashboard, lists overview, list detail,
+calendar month, expenses pot, notes. Naming: `01-home.png` … `06-notes.png`
+(order = store order; supply uploads alphabetically).
 
 Prep (once per capture session):
 
@@ -122,25 +132,12 @@ Prep (once per capture session):
    `npx convex run seed:demoGroup '{"email": "review@suro.clotet.dev", "locale": "ca"}'`
 
 iOS — needs a native build (NativeTabs don't render in Expo Go); the
-6.9" simulator produces store-ready 1320×2868 PNGs directly:
+6.9" simulator produces store-ready 1320x2868 PNGs directly:
 
 ```sh
-pnpm --filter mobile ios
-python3 apps/mobile/store/capture-ios-screenshots.py ca es en
-```
-
-If tab automation fails, letterbox the Play phone PNGs to iOS size as a
-stopgap (Material chrome — re-run capture-ios before submitting to Apple):
-
-```sh
-python3 apps/mobile/store/port-android-screenshots-to-ios.py ca es en
-```
-
-Manual single-frame capture (optional):
-
-```sh
+pnpm --filter mobile exec npx expo run:ios --device "iPhone 17 Pro Max"
 xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
-xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-lists.png
+xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-home.png
 ```
 
 Android — Pixel 9 AVD (1080x2424; reuse a running emulator if there is one):
@@ -151,12 +148,12 @@ adb shell settings put global sysui_demo_allowed 1
 adb shell am broadcast -a com.android.systemui.demo -e command enter
 adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
 adb shell am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false
-adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-lists.png
+adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-home.png
 adb shell am broadcast -a com.android.systemui.demo -e command exit
 ```
 
 Repeat the seed + capture pass per locale (`ca`, `es`, `en`), then validate:
 
 ```sh
-pnpm check:metadata
+node apps/mobile/store/check-metadata.mjs
 ```
