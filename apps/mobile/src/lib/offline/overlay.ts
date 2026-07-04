@@ -1,4 +1,5 @@
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
+import { advanceDueAt, type Recurrence } from "../recurrence";
 import type { IdMap, OutboxEntry } from "./types";
 
 /**
@@ -31,6 +32,74 @@ function optStr(args: Args, key: string): string | undefined {
 function num(args: Args, key: string): number {
   const value = args[key];
   return typeof value === "number" ? value : 0;
+}
+
+/** A number arg that may be absent (e.g. an optional `dueAt`). */
+function optNum(args: Args, key: string): number | undefined {
+  const value = args[key];
+  return typeof value === "number" ? value : undefined;
+}
+
+/** A boolean arg that may be absent (e.g. an optional `dueAllDay`). */
+function optBool(args: Args, key: string): boolean | undefined {
+  const value = args[key];
+  return typeof value === "boolean" ? value : undefined;
+}
+
+/** An optional user-id arg (`assigneeId`), kept as the raw id when present. */
+function optUserId(args: Args, key: string): Id<"users"> | undefined {
+  const value = args[key];
+  return typeof value === "string" && value !== ""
+    ? (value as Id<"users">)
+    : undefined;
+}
+
+const PRIORITIES: ReadonlySet<string> = new Set(["low", "normal", "high"]);
+const FREQS: ReadonlySet<string> = new Set([
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+]);
+
+/** An optional `priority` arg, validated against the allowed literals. */
+function optPriority(args: Args, key: string): Doc<"listItems">["priority"] {
+  const value = args[key];
+  return typeof value === "string" && PRIORITIES.has(value)
+    ? (value as Doc<"listItems">["priority"])
+    : undefined;
+}
+
+/** An optional `recurrence` arg, shape-validated so a bad payload reads as none. */
+function optRecurrence(args: Args, key: string): Recurrence | undefined {
+  const value = args[key];
+  if (value === null || typeof value !== "object") {
+    return undefined;
+  }
+  const rule = value as Record<string, unknown>;
+  if (typeof rule.freq !== "string" || !FREQS.has(rule.freq)) {
+    return undefined;
+  }
+  if (typeof rule.interval !== "number") {
+    return undefined;
+  }
+  return { freq: rule.freq as Recurrence["freq"], interval: rule.interval };
+}
+
+/** The five optional task fields, read from an outbox entry's args together. */
+function taskFields(
+  args: Args,
+): Pick<
+  Doc<"listItems">,
+  "dueAt" | "dueAllDay" | "assigneeId" | "priority" | "recurrence"
+> {
+  return {
+    dueAt: optNum(args, "dueAt"),
+    dueAllDay: optBool(args, "dueAllDay"),
+    assigneeId: optUserId(args, "assigneeId"),
+    priority: optPriority(args, "priority"),
+    recurrence: optRecurrence(args, "recurrence"),
+  };
 }
 
 const resolver = (idmap: IdMap) => (id: string) => idmap[id] ?? id;
@@ -77,23 +146,48 @@ export function overlayItems(
           details: optStr(args, "details"),
           createdBy: ctx.createdBy,
           updatedAt: entry.createdAt,
+          ...taskFields(args),
         });
         break;
       }
       case "listItems:update": {
         const target = resolve(str(args, "itemId"));
-        items = items.map((it) =>
-          it._id === target
-            ? {
-                ...it,
-                name: str(args, "name"),
-                details: optStr(args, "details"),
-                completed: args.completed === true,
-                category: optStr(args, "category"),
-                updatedAt: entry.createdAt,
-              }
-            : it,
-        );
+        const fields = taskFields(args);
+        const completed = args.completed === true;
+        items = items.map((it) => {
+          if (it._id !== target) {
+            return it;
+          }
+          // Mirror the server's reschedule-on-complete: checking off a still-open
+          // recurring task doesn't complete it — it advances to the next
+          // occurrence and stays open. Keyed off the *incoming* recurrence so
+          // clearing the repeat in the same edit lets it complete normally.
+          if (fields.recurrence !== undefined && completed && !it.completed) {
+            return {
+              ...it,
+              name: str(args, "name"),
+              details: optStr(args, "details"),
+              completed: false,
+              category: optStr(args, "category"),
+              ...fields,
+              dueAt: advanceDueAt(
+                fields.dueAt ?? entry.createdAt,
+                fields.recurrence,
+                entry.createdAt,
+              ),
+              updatedAt: entry.createdAt,
+            };
+          }
+          return {
+            ...it,
+            name: str(args, "name"),
+            details: optStr(args, "details"),
+            completed,
+            category: optStr(args, "category"),
+            ...fields,
+            updatedAt: entry.createdAt,
+          };
+        });
         break;
       }
       case "listItems:remove": {

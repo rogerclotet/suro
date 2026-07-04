@@ -25,6 +25,26 @@ export async function requireProjectMember(
   return userId;
 }
 
+/**
+ * Throw unless `userId` belongs to the project — for validating that a chosen
+ * task assignee is actually a group member. Mirrors createLinkedPot's check.
+ */
+export async function assertProjectMembership(
+  ctx: QueryCtx,
+  projectId: Id<"projects">,
+  userId: Id<"users">,
+) {
+  const membership = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project_user", (q) =>
+      q.eq("projectId", projectId).eq("userId", userId),
+    )
+    .unique();
+  if (membership === null) {
+    throw new Error("Assignee is not in this group");
+  }
+}
+
 /** Load the list, then authorize via its project (mirrors requireList). */
 export async function requireListAccess(ctx: QueryCtx, listId: Id<"lists">) {
   const list = await ctx.db.get(listId);

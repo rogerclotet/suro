@@ -13,7 +13,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { listItemSchema } from "./data";
+import {
+  DEFAULT_TASK_FORM_VALUES,
+  listItemSchema,
+  taskArgsFromForm,
+} from "./data";
 import useCreateListItem from "./use-create-list-item";
 
 type InlineAddItemProps = {
@@ -60,6 +64,7 @@ function ActiveAddItemRow(props: InlineAddItemProps) {
       name: "",
       completed: false,
       category: props.category,
+      ...DEFAULT_TASK_FORM_VALUES,
     },
     resolver: valibotResolver(listItemSchema),
   });
@@ -75,12 +80,20 @@ function ActiveAddItemRow(props: InlineAddItemProps) {
     if (data.name === "") {
       return;
     }
-    if (!submit(data.name, props.category)) {
+    // Quick-add rows stay name-only; on task lists the item is created with no
+    // task fields (set them later via the edit form).
+    const task = taskArgsFromForm(data);
+    if (!submit(data.name, props.category, task)) {
       return; // duplicate: keep the text for editing
     }
     // Clear synchronously (see useCreateListItem for why the mutation is not
     // awaited) and keep focus here for the next entry.
-    form.reset({ name: "", completed: false, category: props.category });
+    form.reset({
+      name: "",
+      completed: false,
+      category: props.category,
+      ...DEFAULT_TASK_FORM_VALUES,
+    });
     form.setFocus("name");
     props.onSubmitted(props.category);
   }
@@ -123,6 +136,7 @@ function ActiveAddItemRow(props: InlineAddItemProps) {
           {/* Always visible so the affordance isn't enter-key-only; disabled
               until there's something to add. */}
           <Button
+            type="submit"
             size="icon"
             variant="ghost"
             aria-label={t("addItem")}

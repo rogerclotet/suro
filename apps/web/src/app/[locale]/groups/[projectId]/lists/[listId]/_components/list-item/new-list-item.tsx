@@ -11,7 +11,12 @@ import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
 import AddItemForm from "../../../_components/add-item/add-item-form";
-import { listItemSchema } from "./data";
+import {
+  DEFAULT_TASK_FORM_VALUES,
+  listItemSchema,
+  taskArgsFromForm,
+} from "./data";
+import { NewItemTaskControls } from "./new-item-task-controls";
 import useCreateListItem from "./use-create-list-item";
 
 /**
@@ -32,6 +37,7 @@ export default function NewListItem({
       name: "",
       completed: false,
       category: null,
+      ...DEFAULT_TASK_FORM_VALUES,
     },
     resolver: valibotResolver(listItemSchema),
   });
@@ -49,13 +55,21 @@ export default function NewListItem({
     if (data.name === "") {
       return;
     }
-    if (!submit(data.name, data.category)) {
+    // On task lists the inline due/assignee/priority/repeat ride along; on a
+    // plain checklist these stay at defaults and resolve to no task fields.
+    const task = taskArgsFromForm(data);
+    if (!submit(data.name, data.category, task)) {
       return; // duplicate: keep the text for editing
     }
     // Clear synchronously (see useCreateListItem for why the mutation is not
     // awaited). No-category adds land right below, so focus stays here;
     // categorized adds hand it to that category's row.
-    form.reset({ name: "", completed: false, category: null });
+    form.reset({
+      name: "",
+      completed: false,
+      category: null,
+      ...DEFAULT_TASK_FORM_VALUES,
+    });
     if (data.category === null) {
       form.setFocus("name");
     }
@@ -81,6 +95,9 @@ export default function NewListItem({
           render={({ field }) => (
             <CategoryPicker
               variant="ghost"
+              // On task lists the row is tight, so show just the tag icon; keep
+              // the "No category" label only on plain checklists.
+              iconOnly
               categories={project?.categories ?? []}
               value={field.value}
               onChange={field.onChange}
@@ -88,10 +105,18 @@ export default function NewListItem({
           )}
         />
       }
+      // Task lists surface the due/assignee/priority/repeat controls inline,
+      // right beside the category picker; a plain checklist never mounts them.
+      extraControls={
+        project ? (
+          <NewItemTaskControls control={form.control} members={project.users} />
+        ) : undefined
+      }
       submitButton={
         // Always visible so the affordance isn't enter-key-only; disabled
         // until there's something to add.
         <Button
+          type="submit"
           size="icon"
           variant="ghost"
           aria-label={t("addItem")}

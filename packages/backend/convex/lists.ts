@@ -88,8 +88,12 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     templateIds: v.optional(v.array(v.id("listTemplates"))),
+    taskMode: v.optional(v.boolean()),
   },
-  handler: async (ctx, { projectId, name, description, templateIds }) => {
+  handler: async (
+    ctx,
+    { projectId, name, description, templateIds, taskMode },
+  ) => {
     const userId = await requireProjectMember(ctx, projectId);
     const trimmedName = name.trim();
     if (trimmedName === "") {
@@ -101,6 +105,7 @@ export const create = mutation({
       description: (description ?? "").trim(),
       projectId,
       favorite: false,
+      taskMode,
       createdBy: userId,
       updatedAt: now,
     });
@@ -134,6 +139,7 @@ export const create = mutation({
     await track(ctx, userId, "list_created", {
       projectId,
       hasTemplates: (templateIds?.length ?? 0) > 0,
+      taskMode: taskMode === true,
     });
 
     return listId;
@@ -182,8 +188,9 @@ export const update = mutation({
     listId: v.id("lists"),
     name: v.string(),
     description: v.optional(v.string()),
+    taskMode: v.optional(v.boolean()),
   },
-  handler: async (ctx, { listId, name, description }) => {
+  handler: async (ctx, { listId, name, description, taskMode }) => {
     const { list, userId } = await requireListAccess(ctx, listId);
     const trimmedName = name.trim();
     if (trimmedName === "") {
@@ -192,6 +199,9 @@ export const update = mutation({
     await ctx.db.patch(list._id, {
       name: trimmedName,
       description: (description ?? "").trim(),
+      // Sticky: only callers that pass the flag (the settings toggle) change it,
+      // so a rename-only update never silently turns a task list back into a list.
+      ...(taskMode !== undefined ? { taskMode } : {}),
       updatedBy: userId,
       updatedAt: Date.now(),
     });

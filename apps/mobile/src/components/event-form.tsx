@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Dimensions, Pressable, ScrollView, Switch, View } from "react-native";
 import { MonthGrid } from "@/components/month-grid";
+import { type Time, TimeStepper, timeOf } from "@/components/time-stepper";
 import { useTranslations } from "@/i18n";
 import { useMediumDate } from "@/lib/datetime";
 import {
@@ -23,17 +23,6 @@ export type EventFormValues = {
   endAt: number;
   allDay: boolean;
 };
-
-type Time = { hour: number; minute: number };
-
-function timeOf(ms: number): Time {
-  const d = new Date(ms);
-  return { hour: d.getHours(), minute: d.getMinutes() };
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, "0");
-}
 
 export function EventForm({
   visible,
@@ -349,65 +338,5 @@ function EndpointRow({
       </View>
       {allDay ? null : <TimeStepper value={time} onChange={onChangeTime} />}
     </Pressable>
-  );
-}
-
-function TimeStepper({
-  value,
-  onChange,
-}: {
-  value: Time;
-  onChange: (value: Time) => void;
-}) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-      <Stepper
-        value={value.hour}
-        onChange={(hour) => onChange({ ...value, hour: (hour + 24) % 24 })}
-      />
-      <Txt size={18} weight="700">
-        :
-      </Txt>
-      <Stepper
-        value={value.minute}
-        step={5}
-        onChange={(minute) =>
-          onChange({ ...value, minute: (minute + 60) % 60 })
-        }
-      />
-    </View>
-  );
-}
-
-function Stepper({
-  value,
-  step = 1,
-  onChange,
-}: {
-  value: number;
-  step?: number;
-  onChange: (value: number) => void;
-}) {
-  const t = useTheme();
-  return (
-    <View style={{ alignItems: "center" }}>
-      <Pressable
-        onPress={() => onChange(value + step)}
-        hitSlop={6}
-        style={{ padding: 2 }}
-      >
-        <ChevronUp color={t.primary} size={20} />
-      </Pressable>
-      <Txt size={18} weight="700" style={{ minWidth: 28, textAlign: "center" }}>
-        {pad(value)}
-      </Txt>
-      <Pressable
-        onPress={() => onChange(value - step)}
-        hitSlop={6}
-        style={{ padding: 2 }}
-      >
-        <ChevronDown color={t.primary} size={20} />
-      </Pressable>
-    </View>
   );
 }

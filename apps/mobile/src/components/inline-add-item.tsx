@@ -1,10 +1,15 @@
+import type { Id } from "backend/convex/_generated/dataModel";
 import { Check, Plus } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Pressable, type TextInput, View } from "react-native";
+import type { PickerCategory } from "@/components/category-picker";
 import {
-  CategoryPicker,
-  type PickerCategory,
-} from "@/components/category-picker";
+  EMPTY_TASK_DRAFT,
+  type ItemTaskFields,
+  NewItemTaskControls,
+  type TaskDraft,
+  taskDraftToArgs,
+} from "@/components/task-fields";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
@@ -44,22 +49,31 @@ function SubmitItemButton({
 }
 
 /**
- * The list's always-visible add row at the top: a name input plus the quick
- * category selector (defaults to no category, whose section sits right below).
- * Submits keep focus so consecutive adds don't bounce the keyboard; the parent
- * hands focus to a category's inline row when one is picked.
+ * The list's always-visible add row at the top: a name input plus property chips
+ * (category, due date, assignee, priority, repeat). Submits keep focus so
+ * consecutive adds don't bounce the keyboard; the parent hands focus to a
+ * category's inline row when one is picked.
  */
 export function NewItemRow({
+  projectId,
   categories,
   onSubmit,
+  showTaskControls = true,
 }: {
+  projectId: Id<"projects">;
   categories: PickerCategory[];
+  showTaskControls?: boolean;
   /** Returns false when blocked (duplicate name); the typed text is kept. */
-  onSubmit: (name: string, category: string | null) => boolean;
+  onSubmit: (
+    name: string,
+    category: string | null,
+    task?: ItemTaskFields,
+  ) => boolean;
 }) {
   const tl = useTranslations("mobile.lists");
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [task, setTask] = useState<TaskDraft>(EMPTY_TASK_DRAFT);
   const nameRef = useRef<TextInput>(null);
 
   function handleSubmit() {
@@ -67,13 +81,20 @@ export function NewItemRow({
     if (!trimmed) {
       return;
     }
-    if (!onSubmit(trimmed, category)) {
+    if (
+      !onSubmit(
+        trimmed,
+        category,
+        showTaskControls ? taskDraftToArgs(task) : undefined,
+      )
+    ) {
       return; // duplicate: keep the text for editing
     }
     // Clear synchronously; the parent fires the mutation without awaiting, so
     // focus (and the keyboard) survives into the next add.
     setName("");
     setCategory(null);
+    setTask(EMPTY_TASK_DRAFT);
   }
 
   return (
@@ -96,14 +117,15 @@ export function NewItemRow({
           onPress={handleSubmit}
         />
       </View>
-      <CategoryPicker
+      <NewItemTaskControls
+        projectId={projectId}
+        draft={task}
+        onChange={setTask}
         categories={categories}
-        value={category}
-        onChange={(next) => {
-          setCategory(next);
-          // Hand focus back to the name input once a category is picked.
-          nameRef.current?.focus();
-        }}
+        category={category}
+        onChangeCategory={setCategory}
+        onCategorySelected={() => nameRef.current?.focus()}
+        showTaskFields={showTaskControls}
       />
     </View>
   );

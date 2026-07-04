@@ -1,2 +1,1 @@
-• Tapping a notification now opens the event, list, note or expense it's about, instead of just opening the app.
-• Android notifications now show a dedicated Suro icon.
+• The new list item form no longer blanks the page when you confirm, and the category picker stays open while you search.

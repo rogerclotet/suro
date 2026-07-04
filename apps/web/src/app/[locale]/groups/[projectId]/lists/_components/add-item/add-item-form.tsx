@@ -23,10 +23,16 @@ export default function AddItemForm({
   onSubmit: (e: FormEvent) => void;
 }) {
   return (
-    <form onSubmit={onSubmit} className="w-full">
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(event);
+      }}
+      className="w-full"
+    >
       <InputGroup>
         {nameInput}
-        <InputGroupAddon align="block-end" className="gap-2">
+        <InputGroupAddon align="block-end" className="flex-wrap gap-2">
           {categoryControl}
           {extraControls}
           <div className="ml-auto">{submitButton}</div>

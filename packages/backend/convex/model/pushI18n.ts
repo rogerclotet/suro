@@ -60,6 +60,16 @@ const MESSAGES: Record<string, Record<Locale, string>> = {
     ca: "Nova despesa: {description} ({amount}€)",
     es: "Nuevo gasto: {description} ({amount}€)",
   },
+  task_assigned: {
+    en: "Task assigned: {name}",
+    ca: "Tasca assignada: {name}",
+    es: "Tarea asignada: {name}",
+  },
+  task_due: {
+    en: "Task due: {name}",
+    ca: "Tasca per fer: {name}",
+    es: "Tarea pendiente: {name}",
+  },
 };
 
 function normalizeLocale(locale: string): Locale {

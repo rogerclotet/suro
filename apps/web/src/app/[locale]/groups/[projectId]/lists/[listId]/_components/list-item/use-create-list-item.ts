@@ -8,6 +8,7 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import { useSession } from "@/lib/session";
+import type { TaskMutationArgs } from "./data";
 
 /**
  * Create-item logic shared by every inline add row: duplicate check, optimistic
@@ -18,7 +19,13 @@ import { useSession } from "@/lib/session";
 export default function useCreateListItem(
   list: List,
   onError: (lostName: string) => void,
-): { submit: (name: string, category: string | null) => boolean } {
+): {
+  submit: (
+    name: string,
+    category: string | null,
+    task?: TaskMutationArgs,
+  ) => boolean;
+} {
   const { data: session } = useSession();
   const t = useTranslations("lists");
 
@@ -34,6 +41,11 @@ export default function useCreateListItem(
         category: args.category ?? undefined,
         createdBy: (session?.user.id ?? "") as Id<"users">,
         updatedAt: Date.now(),
+        dueAt: args.dueAt,
+        dueAllDay: args.dueAllDay,
+        assigneeId: args.assigneeId,
+        priority: args.priority,
+        recurrence: args.recurrence,
       };
 
       // CheckList is fed by `listByProject` on the lists page and by
@@ -45,7 +57,9 @@ export default function useCreateListItem(
           api.lists.listByProject,
           { projectId },
           lists.map((l) =>
-            l._id === args.listId ? { ...l, items: [...l.items, tempItem] } : l,
+            l._id === args.listId
+              ? { ...l, items: [...(l.items ?? []), tempItem] }
+              : l,
           ),
         );
       }
@@ -59,7 +73,10 @@ export default function useCreateListItem(
             { eventId },
             {
               ...event,
-              list: { ...event.list, items: [...event.list.items, tempItem] },
+              list: {
+                ...event.list,
+                items: [...(event.list.items ?? []), tempItem],
+              },
             },
           );
         }
@@ -67,7 +84,11 @@ export default function useCreateListItem(
     },
   );
 
-  function submit(name: string, category: string | null): boolean {
+  function submit(
+    name: string,
+    category: string | null,
+    task?: TaskMutationArgs,
+  ): boolean {
     if (list.items.some((i) => i.category === category && i.name === name)) {
       toast.error(t("itemAlreadyExists"));
       return false;
@@ -80,6 +101,7 @@ export default function useCreateListItem(
       listId: list.id as Id<"lists">,
       name,
       category,
+      ...task,
     }).catch((e: unknown) => {
       console.error("[use-create-list-item] create failed:", e);
       posthog.captureException(e, {

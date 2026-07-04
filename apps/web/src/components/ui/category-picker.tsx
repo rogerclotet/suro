@@ -3,7 +3,13 @@
 import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
 import { Check, ChevronsUpDown, Plus, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type KeyboardEvent, useMemo, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -31,6 +37,8 @@ export type CategoryPickerProps = {
   disabled?: boolean;
   variant?: React.ComponentProps<typeof Button>["variant"];
   className?: string;
+  /** Render just the tag icon + chevron (no label) so it fits a compact row. */
+  iconOnly?: boolean;
 };
 
 // Like responsive-menu.tsx: useMediaQuery throws on the server, so render the
@@ -94,6 +102,7 @@ function CategoryPickerView({
   disabled,
   variant = "outline",
   className,
+  iconOnly,
 }: CategoryPickerProps & { mode: "desktop" | "mobile" }) {
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
@@ -101,6 +110,7 @@ function CategoryPickerView({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const trimmedQuery = query.trim();
 
@@ -135,7 +145,15 @@ function CategoryPickerView({
     handleOpenChange(false);
   }
 
+  useEffect(() => {
+    if (open && mode === "desktop") {
+      searchRef.current?.focus();
+    }
+  }, [open, mode]);
+
   function handleSearchKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    // Popovers are portaled but still bubble through InputGroupAddon in React.
+    e.stopPropagation();
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlight((h) => Math.min(h + 1, rows.length - 1));
@@ -164,23 +182,30 @@ function CategoryPickerView({
       role="combobox"
       aria-expanded={open}
       aria-haspopup="listbox"
+      aria-label={iconOnly ? triggerLabel : undefined}
       disabled={disabled}
       className={cn(
         "h-10 justify-between gap-2 font-normal sm:h-9",
         value === null && "text-muted-foreground",
+        iconOnly && "justify-start gap-1 px-2",
         className,
       )}
     >
-      <span className="flex min-w-0 items-center gap-2">
+      {iconOnly ? (
         <Tag className="size-4 shrink-0 opacity-60" />
-        <span className="truncate">{triggerLabel}</span>
-      </span>
+      ) : (
+        <span className="flex min-w-0 items-center gap-2">
+          <Tag className="size-4 shrink-0 opacity-60" />
+          <span className="truncate">{triggerLabel}</span>
+        </span>
+      )}
       <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
     </Button>
   );
 
   const search = (
     <Input
+      ref={searchRef}
       value={query}
       onChange={(e) => {
         setQuery(e.target.value);
@@ -189,7 +214,6 @@ function CategoryPickerView({
       onKeyDown={handleSearchKeyDown}
       placeholder={t("searchPlaceholder")}
       aria-label={t("searchPlaceholder")}
-      autoFocus
     />
   );
 
@@ -225,8 +249,16 @@ function CategoryPickerView({
         <PopoverContent
           align="start"
           className="w-(--radix-popover-trigger-width) min-w-56 p-2"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <div className="flex flex-col gap-2">
+            {/* Without a trigger label, name the field in the dropdown itself. */}
+            {iconOnly && (
+              <div className="px-1 font-medium text-muted-foreground text-xs">
+                {t("label")}
+              </div>
+            )}
             {search}
             <div className="max-h-64 overflow-y-auto">{list}</div>
           </div>
@@ -240,8 +272,8 @@ function CategoryPickerView({
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle className="sr-only">
-            {t("searchPlaceholder")}
+          <DrawerTitle className={cn(!iconOnly && "sr-only")}>
+            {iconOnly ? t("label") : t("searchPlaceholder")}
           </DrawerTitle>
           {search}
         </DrawerHeader>

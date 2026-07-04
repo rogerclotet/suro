@@ -98,6 +98,7 @@ export default function NewTemplateItem({
         submitButton={
           form.formState.isDirty ? (
             <Button
+              type="submit"
               size="icon"
               variant="ghost"
               // Keep focus (and the mobile keyboard) in the name input when

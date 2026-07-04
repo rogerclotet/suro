@@ -28,6 +28,11 @@ function item(over: {
   details?: string;
   _creationTime?: number;
   updatedAt?: number;
+  dueAt?: number;
+  dueAllDay?: boolean;
+  assigneeId?: string;
+  priority?: Doc<"listItems">["priority"];
+  recurrence?: Doc<"listItems">["recurrence"];
 }): Doc<"listItems"> {
   return {
     _id: over._id as Id<"listItems">,
@@ -39,6 +44,11 @@ function item(over: {
     updatedAt: over.updatedAt ?? 0,
     category: over.category,
     details: over.details,
+    dueAt: over.dueAt,
+    dueAllDay: over.dueAllDay,
+    assigneeId: over.assigneeId as Id<"users"> | undefined,
+    priority: over.priority,
+    recurrence: over.recurrence,
   };
 }
 
@@ -154,6 +164,116 @@ describe("overlayItems", () => {
       ME,
     );
     expect(out.map((i) => i.name)).toEqual(["b"]);
+  });
+
+  it("carries task fields onto a created temp item", () => {
+    const out = overlayItems(
+      [],
+      "list-1",
+      [
+        entry({
+          functionName: "listItems:create",
+          tempIds: ["temp-1"],
+          args: {
+            listId: "list-1",
+            name: "pay rent",
+            dueAt: 1000,
+            dueAllDay: true,
+            assigneeId: "u2",
+            priority: "high",
+            recurrence: { freq: "monthly", interval: 1 },
+          },
+        }),
+      ],
+      {},
+      ME,
+    );
+    expect(out[0]?.dueAt).toBe(1000);
+    expect(out[0]?.dueAllDay).toBe(true);
+    expect(out[0]?.assigneeId).toBe("u2");
+    expect(out[0]?.priority).toBe("high");
+    expect(out[0]?.recurrence).toEqual({ freq: "monthly", interval: 1 });
+  });
+
+  it("updates task fields and clears omitted ones (non-sticky)", () => {
+    const out = overlayItems(
+      [
+        item({
+          _id: "i1",
+          name: "task",
+          dueAt: 5,
+          assigneeId: "u2",
+          priority: "high",
+        }),
+      ],
+      "list-1",
+      [
+        entry({
+          functionName: "listItems:update",
+          args: {
+            itemId: "i1",
+            name: "task",
+            completed: false,
+            priority: "low",
+            // dueAt/assigneeId omitted -> cleared
+          },
+        }),
+      ],
+      {},
+      ME,
+    );
+    expect(out[0]?.priority).toBe("low");
+    expect(out[0]?.dueAt).toBeUndefined();
+    expect(out[0]?.assigneeId).toBeUndefined();
+  });
+
+  it("reschedules instead of completing a recurring task (advances dueAt)", () => {
+    const due = Date.UTC(2026, 0, 10);
+    const out = overlayItems(
+      [item({ _id: "i1", name: "water plants", dueAt: due })],
+      "list-1",
+      [
+        entry({
+          functionName: "listItems:update",
+          createdAt: Date.UTC(2026, 0, 10, 12),
+          args: {
+            itemId: "i1",
+            name: "water plants",
+            completed: true,
+            dueAt: due,
+            recurrence: { freq: "daily", interval: 1 },
+          },
+        }),
+      ],
+      {},
+      ME,
+    );
+    // Stays open, advanced to the next future occurrence (Jan 11).
+    expect(out[0]?.completed).toBe(false);
+    expect(out[0]?.dueAt).toBe(Date.UTC(2026, 0, 11));
+  });
+
+  it("completes a recurring task when the repeat is cleared in the same edit", () => {
+    const out = overlayItems(
+      [
+        item({
+          _id: "i1",
+          name: "task",
+          recurrence: { freq: "daily", interval: 1 },
+        }),
+      ],
+      "list-1",
+      [
+        entry({
+          functionName: "listItems:update",
+          args: { itemId: "i1", name: "task", completed: true },
+        }),
+      ],
+      {},
+      ME,
+    );
+    expect(out[0]?.completed).toBe(true);
+    expect(out[0]?.recurrence).toBeUndefined();
   });
 });
 

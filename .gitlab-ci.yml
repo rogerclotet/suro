@@ -77,6 +77,7 @@ check:
     POSTHOG_ENV_ID: ""
   script:
     - pnpm biome:check
+    - pnpm check:metadata
     - pnpm typecheck
     - pnpm test
     # Store metadata lint: fails the pipeline if store.config.json apple.version

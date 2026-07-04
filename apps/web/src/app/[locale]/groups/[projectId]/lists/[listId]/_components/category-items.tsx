@@ -5,6 +5,7 @@ import { type CSSProperties, memo } from "react";
 import type { List } from "@/app/_data/list";
 import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import { cn } from "@/lib/utils";
+import type { TaskMutationArgs } from "./list-item/data";
 import InlineAddItem from "./list-item/inline-add-item";
 import ListItem from "./list-item/list-item";
 
@@ -19,6 +20,7 @@ export default memo(function CategoryItems(props: {
     details: string,
     completed: boolean,
     category: string | null,
+    task: TaskMutationArgs,
   ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
   addActive: boolean;
@@ -58,8 +60,15 @@ export default memo(function CategoryItems(props: {
               key={item.id}
               list={props.list}
               item={item}
-              onChange={(name, details, completed, category) =>
-                props.handleChange(item, name, details, completed, category)
+              onChange={(name, details, completed, category, task) =>
+                props.handleChange(
+                  item,
+                  name,
+                  details,
+                  completed,
+                  category,
+                  task,
+                )
               }
               onDelete={() => props.handleDelete(item)}
             />

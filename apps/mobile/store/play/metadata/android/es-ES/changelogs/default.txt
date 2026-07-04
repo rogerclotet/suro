@@ -1,2 +1,1 @@
-• Al tocar una notificación ahora se abre directamente el evento, la lista, la nota o el gasto al que se refiere, en lugar de solo abrir la app.
-• Las notificaciones de Android ahora muestran un icono propio de Suro.
+• El formulario para añadir elementos ya no deja la página en blanco al confirmar, y el selector de categoría se mantiene abierto mientras se busca.

@@ -308,7 +308,9 @@ export default function TemplateEditor() {
             {/* Always-visible no-category entry point with the quick category
                 chip; uncategorized items sort first, right below it. */}
             <NewItemRow
+              projectId={pid}
               categories={categories ?? []}
+              showTaskControls={false}
               onSubmit={handleInlineAdd}
             />
           </View>

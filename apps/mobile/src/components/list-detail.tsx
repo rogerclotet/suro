@@ -3,12 +3,15 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import {
+  CalendarClock,
   Check,
   Ellipsis,
+  Flag,
   GripVertical,
   LayoutTemplate,
   ListX,
   Plus,
+  Repeat,
   Star,
   Tag,
   Trash2,
@@ -16,6 +19,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
+  Dimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -40,8 +44,19 @@ import {
   type DropProviderRef,
   Droppable,
 } from "react-native-reanimated-dnd";
+import { Avatar } from "@/components/avatar";
 import { CategoryPicker } from "@/components/category-picker";
 import { InlineAddItemRow, NewItemRow } from "@/components/inline-add-item";
+import {
+  EMPTY_TASK_DRAFT,
+  type ItemTaskFields,
+  priorityColor,
+  type TaskDraft,
+  TaskFieldsEditor,
+  taskDraftFromItem,
+  taskDraftToArgs,
+  useFormatDue,
+} from "@/components/task-fields";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import {
@@ -50,6 +65,8 @@ import {
   useQueuedMutation,
 } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { advanceDueAt, presetForRecurrence } from "@/lib/recurrence";
+import { compareTaskItems } from "@/lib/task-order";
 import { useTheme } from "@/theme";
 import {
   Button,
@@ -66,10 +83,14 @@ import {
 type ListResult = NonNullable<FunctionReturnType<typeof api.lists.get>>;
 type Item = ListResult["items"][number];
 type Category = FunctionReturnType<typeof api.categories.listByProject>[number];
+type Member = FunctionReturnType<typeof api.projects.members>[number];
+type MemberById = Map<Id<"users">, Member>;
 /** Payload carried by a dragged item row into the drop zones. */
 type DragData = { id: Id<"listItems"> };
 
 type Section = { title: string; category: string | null; data: Item[] };
+
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 // Module-level counter for optimistic item ids (Hermes has no crypto.randomUUID).
 let optimisticItemCounter = 0;
@@ -123,9 +144,36 @@ function compareItems(a: Item, b: Item): number {
   return byName !== 0 ? byName : a._id.localeCompare(b._id);
 }
 
-function groupByCategory(items: Item[], uncategorized: string): Section[] {
+/**
+ * The item's current task fields, in the shape `listItems.update` expects. Every
+ * `updateItem` call (toggle, drag-recategorize, edit save) must forward these:
+ * the mutation is non-sticky, so any omitted task field is wiped server-side.
+ */
+function itemTaskArgs(
+  item: Item,
+): Pick<
+  Item,
+  "dueAt" | "dueAllDay" | "assigneeId" | "priority" | "recurrence"
+> {
+  return {
+    dueAt: item.dueAt,
+    dueAllDay: item.dueAllDay,
+    assigneeId: item.assigneeId,
+    priority: item.priority,
+    recurrence: item.recurrence,
+  };
+}
+
+function groupByCategory(
+  items: Item[],
+  uncategorized: string,
+  taskMode: boolean,
+): Section[] {
+  // Task lists order each section by due date/priority (matching the backend and
+  // the "My tasks" agenda); plain checklists keep the name-only order.
+  const compare = taskMode ? compareTaskItems<Item> : compareItems;
   const groups = new Map<string, Section>();
-  for (const item of [...items].sort(compareItems)) {
+  for (const item of [...items].sort(compare)) {
     const category = item.category ?? null;
     const title = category ?? uncategorized;
     const bucket = groups.get(title);
@@ -173,6 +221,7 @@ export function ListDetailScreen({
   const router = useRouter();
 
   const list = useOfflineListGet(lid);
+  const taskMode = true;
 
   // `null` means the list no longer exists (deleted here or from another
   // client); leave the now-empty detail screen instead of rendering stale chrome.
@@ -184,6 +233,11 @@ export function ListDetailScreen({
   const categories = usePersistentQuery(api.categories.listByProject, {
     projectId: pid,
   });
+  const members = usePersistentQuery(api.projects.members, { projectId: pid });
+  const memberById = useMemo(
+    () => new Map((members ?? []).map((member) => [member._id, member])),
+    [members],
+  );
   // Optimistic so the new row (and a brand-new category section) mounts in the
   // same commit as the focus-follow state change — the inline input can grab
   // focus without waiting a server round-trip or bouncing the keyboard.
@@ -211,6 +265,13 @@ export function ListDetailScreen({
             category: args.category ?? undefined,
             createdBy: current.createdBy,
             updatedAt: Date.now(),
+            // Carry any task fields so a created task sorts/renders correctly
+            // before the server row arrives. (Quick inline-add sends none.)
+            dueAt: args.dueAt,
+            dueAllDay: args.dueAllDay,
+            assigneeId: args.assigneeId,
+            priority: args.priority,
+            recurrence: args.recurrence,
           },
         ],
       },
@@ -228,22 +289,38 @@ export function ListDetailScreen({
     if (!current) {
       return;
     }
+    const now = Date.now();
     store.setQuery(
       api.lists.get,
       { listId: lid },
       {
         ...current,
-        items: current.items.map((item) =>
-          item._id === args.itemId
-            ? {
-                ...item,
-                name: args.name,
-                details: args.details?.trim() || undefined,
-                completed: args.completed,
-                category: args.category?.trim() || undefined,
-              }
-            : item,
-        ),
+        items: current.items.map((item) => {
+          if (item._id !== args.itemId) {
+            return item;
+          }
+          // Mirror the server (and the offline overlay): checking off a still-open
+          // recurring task advances its due date and keeps it open instead of
+          // completing. All task fields ride along so an omitted field clears.
+          const recurrence = args.recurrence;
+          const reschedule =
+            recurrence !== undefined && args.completed && !item.completed;
+          return {
+            ...item,
+            name: args.name,
+            details: args.details?.trim() || undefined,
+            completed: reschedule ? false : args.completed,
+            category: args.category?.trim() || undefined,
+            dueAt:
+              reschedule && recurrence !== undefined
+                ? advanceDueAt(args.dueAt ?? now, recurrence, now)
+                : args.dueAt,
+            dueAllDay: args.dueAllDay,
+            assigneeId: args.assigneeId,
+            priority: args.priority,
+            recurrence: args.recurrence,
+          };
+        }),
       },
     );
   });
@@ -263,6 +340,9 @@ export function ListDetailScreen({
   const [draftName, setDraftName] = useState("");
   const [draftDetails, setDraftDetails] = useState("");
   const [draftCategory, setDraftCategory] = useState<string | null>(null);
+  // Task metadata for the item sheet; only surfaced/sent when the list is in
+  // task mode. Seeded from the edited item, reset for a plain edit.
+  const [draftTask, setDraftTask] = useState<TaskDraft>(EMPTY_TASK_DRAFT);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   // Opening the import sheet while the settings sheet is still animating out
@@ -321,7 +401,7 @@ export function ListDetailScreen({
 
   const uncategorized = tl("uncategorized");
   const sections = useMemo(
-    () => (list ? groupByCategory(list.items, uncategorized) : []),
+    () => (list ? groupByCategory(list.items, uncategorized, true) : []),
     [list, uncategorized],
   );
 
@@ -337,6 +417,10 @@ export function ListDetailScreen({
       details: item.details ?? "",
       completed: !item.completed,
       category: item.category ?? null,
+      // The update mutation clears any omitted task field, so a checkbox toggle
+      // must forward the item's current ones (and recurrence drives the
+      // reschedule-on-complete on a recurring task).
+      ...itemTaskArgs(item),
     });
   }
 
@@ -372,6 +456,8 @@ export function ListDetailScreen({
       details: item.details ?? "",
       completed: item.completed,
       category,
+      // Re-categorizing must preserve the item's task fields (omitted = cleared).
+      ...itemTaskArgs(item),
     });
   }
 
@@ -497,7 +583,11 @@ export function ListDetailScreen({
    * awaiting would blur the input and close the keyboard between consecutive
    * adds.
    */
-  function handleInlineAdd(name: string, category: string | null): boolean {
+  function handleInlineAdd(
+    name: string,
+    category: string | null,
+    task: ItemTaskFields = taskDraftToArgs(EMPTY_TASK_DRAFT),
+  ): boolean {
     if (!list) {
       return false;
     }
@@ -508,7 +598,7 @@ export function ListDetailScreen({
       Alert.alert(tl("itemAlreadyExists"));
       return false;
     }
-    void createItem({ listId: lid, name, category });
+    void createItem({ listId: lid, name, category, ...task });
     // Focus follows the item: the used category's row becomes (or stays) the
     // active one, ready for the next entry.
     setActiveAddCategory(category);
@@ -525,6 +615,7 @@ export function ListDetailScreen({
     setDraftName(item.name);
     setDraftDetails(item.details ?? "");
     setDraftCategory(item.category ?? null);
+    setDraftTask(taskDraftFromItem(item));
     setItemSheetOpen(true);
   }
 
@@ -540,6 +631,9 @@ export function ListDetailScreen({
       details: draftDetails,
       completed: target.completed,
       category: draftCategory,
+      // Task lists send the edited metadata; plain lists send the item's current
+      // fields untouched (which for a checklist are all undefined).
+      ...taskDraftToArgs(draftTask),
     });
   }
 
@@ -707,6 +801,7 @@ export function ListDetailScreen({
                 category selector; the uncategorized section sorts first, so
                 its items land right below. */}
             <NewItemRow
+              projectId={pid}
               categories={categories ?? []}
               onSubmit={handleInlineAdd}
             />
@@ -776,6 +871,8 @@ export function ListDetailScreen({
                       // clearing the library's lingering drop-slot translation.
                       key={`${item._id}:${dragResetKey}`}
                       item={item}
+                      taskMode={taskMode}
+                      memberById={memberById}
                       autoScrollComp={autoScrollComp}
                       onToggle={toggle}
                       onEdit={openEdit}
@@ -829,13 +926,17 @@ export function ListDetailScreen({
 
           <ItemSheet
             visible={itemSheetOpen}
+            projectId={pid}
+            taskMode={taskMode}
             name={draftName}
             details={draftDetails}
             category={draftCategory}
             categories={categories ?? []}
+            task={draftTask}
             onChangeName={setDraftName}
             onChangeDetails={setDraftDetails}
             onChangeCategory={setDraftCategory}
+            onChangeTask={setDraftTask}
             onSubmit={submitItem}
             onDelete={deleteCurrentItem}
             onClose={() => setItemSheetOpen(false)}
@@ -894,11 +995,14 @@ export function ListDetailScreen({
  */
 function DraggableItemRow({
   item,
+  memberById,
   autoScrollComp,
   onToggle,
   onEdit,
 }: {
   item: Item;
+  taskMode: boolean;
+  memberById: MemberById;
   autoScrollComp: SharedValue<number>;
   onToggle: (item: Item) => void;
   onEdit: (item: Item) => void;
@@ -1013,6 +1117,7 @@ function DraggableItemRow({
                 {item.details}
               </Txt>
             ) : null}
+            <TaskRowMeta item={item} memberById={memberById} />
           </Pressable>
           <Draggable.Handle
             style={{
@@ -1027,6 +1132,92 @@ function DraggableItemRow({
         </Animated.View>
       </Draggable>
     </Animated.View>
+  );
+}
+
+/**
+ * The task-mode metadata strip under a row's name: a priority flag (omitted for
+ * normal), a due-date chip (red when overdue and still open), and the assignee
+ * avatar with name. Rendered only on task lists, so plain checklists are unaffected.
+ */
+function TaskRowMeta({
+  item,
+  memberById,
+}: {
+  item: Item;
+  memberById: MemberById;
+}) {
+  const t = useTheme();
+  const tl = useTranslations("mobile.lists");
+  const formatDue = useFormatDue();
+  const priority = item.priority ?? "normal";
+  const repeat = presetForRecurrence(item.recurrence);
+  const assignee =
+    item.assigneeId !== undefined ? memberById.get(item.assigneeId) : undefined;
+  const overdue =
+    item.dueAt !== undefined && !item.completed && item.dueAt < Date.now();
+
+  if (
+    priority === "normal" &&
+    item.dueAt === undefined &&
+    !assignee &&
+    repeat === "none"
+  ) {
+    return null;
+  }
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+        marginTop: 4,
+      }}
+    >
+      {assignee ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+          <Avatar
+            name={assignee.name}
+            image={assignee.image}
+            color={assignee.avatarColor}
+            size={18}
+          />
+          <Txt muted size={12} numberOfLines={1}>
+            {assignee.name}
+          </Txt>
+        </View>
+      ) : null}
+      {priority !== "normal" ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+          <Flag
+            color={priorityColor(t, priority)}
+            fill={priorityColor(t, priority)}
+            size={12}
+          />
+          <Txt size={12} style={{ color: priorityColor(t, priority) }}>
+            {tl(`priority_${priority}`)}
+          </Txt>
+        </View>
+      ) : null}
+      {item.dueAt !== undefined ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+          <CalendarClock color={overdue ? t.danger : t.muted} size={12} />
+          <Txt size={12} style={{ color: overdue ? t.danger : t.muted }}>
+            {formatDue({ dueAt: item.dueAt, dueAllDay: item.dueAllDay })}
+          </Txt>
+        </View>
+      ) : null}
+      {repeat !== "none" ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+          <Repeat color={t.muted} size={12} />
+          <Txt muted size={12}>
+            {tl(`repeat_${repeat}`)}
+          </Txt>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -1128,25 +1319,33 @@ function NewCategorySheet({
 // this remains the surface for renaming, details, re-categorizing and delete.
 function ItemSheet({
   visible,
+  projectId,
+  taskMode: _taskMode,
   name,
   details,
   category,
   categories,
+  task,
   onChangeName,
   onChangeDetails,
   onChangeCategory,
+  onChangeTask,
   onSubmit,
   onDelete,
   onClose,
 }: {
   visible: boolean;
+  projectId: Id<"projects">;
+  taskMode: boolean;
   name: string;
   details: string;
   category: string | null;
   categories: Category[];
+  task: TaskDraft;
   onChangeName: (value: string) => void;
   onChangeDetails: (value: string) => void;
   onChangeCategory: (value: string | null) => void;
+  onChangeTask: (task: TaskDraft) => void;
   onSubmit: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -1156,33 +1355,47 @@ function ItemSheet({
   const tc = useTranslations("mobile.common");
   return (
     <Sheet visible={visible} onClose={onClose}>
-      <Txt size={18} weight="700">
-        {tl("editItem")}
-      </Txt>
-      <Field
-        placeholder={tl("namePlaceholder")}
-        value={name}
-        onChangeText={onChangeName}
-      />
-      <Field
-        placeholder={tl("detailsPlaceholder")}
-        value={details}
-        onChangeText={onChangeDetails}
-        multiline
-        textAlignVertical="top"
-        style={{ minHeight: 88, paddingTop: 11 }}
-      />
-      <CategoryPicker
-        categories={categories}
-        value={category}
-        onChange={onChangeCategory}
-      />
-      <Button title={tc("save")} onPress={onSubmit} />
-      <Pressable onPress={onDelete} style={{ padding: 10 }}>
-        <Txt style={{ textAlign: "center", color: t.danger }}>
-          {tl("deleteItem")}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        // A task editor is much taller than a checklist's; cap it so a long form
+        // scrolls inside the sheet instead of pushing the save button off-screen.
+        style={{ maxHeight: SCREEN_HEIGHT * 0.66 }}
+        contentContainerStyle={{ gap: 12 }}
+      >
+        <Txt size={18} weight="700">
+          {tl("editItem")}
         </Txt>
-      </Pressable>
+        <Field
+          placeholder={tl("namePlaceholder")}
+          value={name}
+          onChangeText={onChangeName}
+        />
+        <Field
+          placeholder={tl("detailsPlaceholder")}
+          value={details}
+          onChangeText={onChangeDetails}
+          multiline
+          textAlignVertical="top"
+          style={{ minHeight: 88, paddingTop: 11 }}
+        />
+        <TaskFieldsEditor
+          projectId={projectId}
+          draft={task}
+          onChange={onChangeTask}
+        />
+        <CategoryPicker
+          categories={categories}
+          value={category}
+          onChange={onChangeCategory}
+        />
+        <Button title={tc("save")} onPress={onSubmit} />
+        <Pressable onPress={onDelete} style={{ padding: 10 }}>
+          <Txt style={{ textAlign: "center", color: t.danger }}>
+            {tl("deleteItem")}
+          </Txt>
+        </Pressable>
+      </ScrollView>
     </Sheet>
   );
 }

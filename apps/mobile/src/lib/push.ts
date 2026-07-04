@@ -75,6 +75,7 @@ const ANDROID_CHANNELS = [
   "files",
   "members",
   "expenses",
+  "tasks",
 ] as const;
 type AndroidChannel = (typeof ANDROID_CHANNELS)[number];
 

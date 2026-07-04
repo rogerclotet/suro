@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import CategoryItems from "./category-items";
+import { type TaskMutationArgs, taskArgsFromItem } from "./list-item/data";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
@@ -53,7 +54,7 @@ export default function CheckList(props: { list: List }) {
   listRef.current = list;
 
   const itemsByCategory = useMemo(
-    () => groupItemsByCategory(list.items),
+    () => groupItemsByCategory(list.items, true),
     [list.items],
   );
 
@@ -64,6 +65,9 @@ export default function CheckList(props: { list: List }) {
       details: string,
       completed: boolean,
       category: string | null,
+      // Task fields forwarded verbatim: the backend clears any omitted field, so
+      // the checkbox toggle and edit form alike must pass the full set.
+      task: TaskMutationArgs,
     ) => {
       if (name === "") {
         return;
@@ -75,6 +79,7 @@ export default function CheckList(props: { list: List }) {
           details,
           completed,
           category,
+          ...task,
         });
       } catch (e) {
         toast.error(t("itemUpdateError"));
@@ -149,6 +154,9 @@ export default function CheckList(props: { list: List }) {
       details: item.details ?? "",
       completed: item.completed ?? false,
       category,
+      // Recategorizing must preserve the item's task fields (the backend clears
+      // any omitted field), so forward them unchanged.
+      ...taskArgsFromItem(item),
     });
   }
 
@@ -213,12 +221,36 @@ function compareItems(a: ListItem, b: ListItem) {
   return nameCompare !== 0 ? nameCompare : a.id.localeCompare(b.id);
 }
 
+/** High first, so it sorts ahead of normal/low on a due-date tie. */
+const PRIORITY_RANK: Record<NonNullable<ListItem["priority"]>, number> = {
+  high: 0,
+  normal: 1,
+  low: 2,
+};
+
+/**
+ * Task-mode order, mirroring the backend's `compareTaskItems`: open first, then
+ * due date (no due date last), then priority (high first), then name.
+ */
+function compareTaskItems(a: ListItem, b: ListItem) {
+  if (a.completed !== b.completed) return a.completed ? 1 : -1;
+  const aDue = a.dueAt?.getTime() ?? Number.POSITIVE_INFINITY;
+  const bDue = b.dueAt?.getTime() ?? Number.POSITIVE_INFINITY;
+  if (aDue !== bDue) return aDue - bDue;
+  const aRank = PRIORITY_RANK[a.priority ?? "normal"];
+  const bRank = PRIORITY_RANK[b.priority ?? "normal"];
+  if (aRank !== bRank) return aRank - bRank;
+  const byName = a.name.localeCompare(b.name);
+  return byName !== 0 ? byName : a.id.localeCompare(b.id);
+}
+
 /**
  * Group the list's items into sections by category name. Sections exist only
  * while items use them; the empty-name bucket ("no category") is always
- * present so it stays a drop target while dragging.
+ * present so it stays a drop target while dragging. Task-mode lists sort each
+ * section by due date/priority; plain checklists stay alphabetical.
  */
-function groupItemsByCategory(items: List["items"]) {
+function groupItemsByCategory(items: List["items"], taskMode: boolean) {
   const categories = new Map<string, List["items"]>([["", []]]);
 
   for (const item of items) {
@@ -231,9 +263,10 @@ function groupItemsByCategory(items: List["items"]) {
     }
   }
 
+  const compare = taskMode ? compareTaskItems : compareItems;
   const result = [];
   for (const [category, categoryItems] of categories.entries()) {
-    categoryItems.sort(compareItems);
+    categoryItems.sort(compare);
     result.push({ category, items: categoryItems });
   }
 

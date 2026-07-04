@@ -1,9 +1,7 @@
-import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
-import { Check, ChevronDown, Plus, Tag, Trash2 } from "lucide-react-native";
+import { Check, ChevronDown, Plus, Tag } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Field, Txt } from "@/ui";
@@ -47,6 +45,116 @@ export function buildCategoryRows(
   return rows;
 }
 
+/** Searchable category list shared by the inline field and sheet pickers. */
+export function CategoryPickerPanel({
+  categories,
+  value,
+  onChange,
+  autoFocus = false,
+}: {
+  categories: PickerCategory[];
+  value: string | null;
+  onChange: (category: string | null) => void;
+  autoFocus?: boolean;
+}) {
+  const t = useTheme();
+  const tcat = useTranslations("mobile.categories");
+  const [query, setQuery] = useState("");
+
+  const rows = useMemo(
+    () => buildCategoryRows(categories, query),
+    [categories, query],
+  );
+  const trimmedQuery = query.trim();
+  const hasCategoryRows = rows.some((row) => row.type === "category");
+
+  function select(row: Row) {
+    onChange(
+      row.type === "none"
+        ? null
+        : row.type === "category"
+          ? row.category.name
+          : row.name,
+    );
+    setQuery("");
+  }
+
+  return (
+    <View style={{ gap: 8 }}>
+      <Field
+        value={query}
+        onChangeText={setQuery}
+        placeholder={tcat("searchPlaceholder")}
+        autoFocus={autoFocus}
+        returnKeyType="done"
+        onSubmitEditing={() => {
+          const first = rows[0];
+          if (first) {
+            select(first);
+          }
+        }}
+      />
+      <ScrollView
+        style={{ maxHeight: 220 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {trimmedQuery !== "" && !hasCategoryRows ? (
+          <Txt muted size={14} style={{ padding: 10 }}>
+            {tcat("noResults")}
+          </Txt>
+        ) : null}
+        {rows.map((row) => {
+          const key =
+            row.type === "category" ? `cat-${row.category._id}` : row.type;
+          const isSelected =
+            (row.type === "none" && value === null) ||
+            (row.type === "category" && row.category.name === value);
+          const label =
+            row.type === "create"
+              ? tcat("createNamed", { name: row.name })
+              : row.type === "none"
+                ? tcat("noCategory")
+                : row.category.name;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => select(row)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 12,
+                borderRadius: 8,
+              }}
+            >
+              {row.type === "create" ? (
+                <Plus color={t.primary} size={16} />
+              ) : (
+                <Check
+                  color={t.primary}
+                  size={16}
+                  style={{ opacity: isSelected ? 1 : 0 }}
+                />
+              )}
+              <Txt
+                size={15}
+                numberOfLines={1}
+                style={{
+                  flex: 1,
+                  color: row.type === "create" ? t.primary : t.text,
+                }}
+              >
+                {label}
+              </Txt>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 /**
  * Inline-expandable category selector. Renders a trigger that toggles an in-flow
  * panel (search + options), so it composes inside a Sheet or a screen without
@@ -64,85 +172,38 @@ export function CategoryPicker({
 }) {
   const t = useTheme();
   const tcat = useTranslations("mobile.categories");
-  const tc = useTranslations("mobile.common");
-  const deleteCategory = useMutation(api.categories.remove);
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-
-  const rows = useMemo(
-    () => buildCategoryRows(categories, query),
-    [categories, query],
-  );
-  const trimmedQuery = query.trim();
-  const hasCategoryRows = rows.some((row) => row.type === "category");
 
   function close() {
     setOpen(false);
-    setQuery("");
   }
 
-  function select(row: Row) {
-    onChange(
-      row.type === "none"
-        ? null
-        : row.type === "category"
-          ? row.category.name
-          : row.name,
-    );
+  function handleChange(category: string | null) {
+    onChange(category);
     close();
   }
 
-  function confirmDelete(category: PickerCategory) {
-    Alert.alert(
-      tcat("deleteSuggestion"),
-      tcat("deleteSuggestionMessage", { name: category.name }),
-      [
-        { text: tc("cancel"), style: "cancel" },
-        {
-          text: tc("delete"),
-          style: "destructive",
-          onPress: () => {
-            void deleteCategory({ categoryId: category._id });
-          },
-        },
-      ],
-    );
-  }
-
-  const selected = value !== null;
   return (
     <View style={{ gap: 8 }}>
-      {/* A compact pill, not a full-width input box: it reads as an optional tag
-          attached to the item rather than a second primary field next to the
-          name. Self-sized (alignSelf), so the expanded panel below still spans
-          the full width. */}
       <Pressable
         onPress={() => setOpen((o) => !o)}
-        accessibilityRole="button"
         style={{
           flexDirection: "row",
           alignItems: "center",
-          alignSelf: "flex-start",
-          maxWidth: "100%",
-          gap: 6,
+          gap: 8,
           borderWidth: 1,
-          borderColor: selected ? t.primary : t.border,
-          borderRadius: 999,
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          backgroundColor: selected ? `${t.primary}1a` : "transparent",
+          borderColor: t.border,
+          borderRadius: 12,
+          paddingHorizontal: 14,
+          paddingVertical: 11,
+          backgroundColor: t.inputBg,
         }}
       >
-        <Tag color={selected ? t.primary : t.muted} size={14} />
-        <Txt
-          size={14}
-          muted={!selected}
-          numberOfLines={1}
-          style={{ flexShrink: 1, ...(selected ? { color: t.primary } : null) }}
-        >
+        <Tag color={t.muted} size={16} />
+        <Txt style={{ flex: 1 }} muted={value === null} numberOfLines={1}>
           {value ?? tcat("noCategory")}
         </Txt>
-        <ChevronDown color={selected ? t.primary : t.muted} size={14} />
+        <ChevronDown color={t.muted} size={16} />
       </Pressable>
 
       {open ? (
@@ -153,93 +214,14 @@ export function CategoryPicker({
             borderRadius: 12,
             backgroundColor: t.card,
             padding: 8,
-            gap: 8,
           }}
         >
-          <Field
-            value={query}
-            onChangeText={setQuery}
-            placeholder={tcat("searchPlaceholder")}
+          <CategoryPickerPanel
+            categories={categories}
+            value={value}
+            onChange={handleChange}
             autoFocus
-            returnKeyType="done"
-            onSubmitEditing={() => {
-              const first = rows[0];
-              if (first) {
-                select(first);
-              }
-            }}
           />
-          <ScrollView
-            style={{ maxHeight: 220 }}
-            keyboardShouldPersistTaps="handled"
-          >
-            {trimmedQuery !== "" && !hasCategoryRows ? (
-              <Txt muted size={14} style={{ padding: 10 }}>
-                {tcat("noResults")}
-              </Txt>
-            ) : null}
-            {rows.map((row) => {
-              const key =
-                row.type === "category" ? `cat-${row.category._id}` : row.type;
-              const isSelected =
-                (row.type === "none" && value === null) ||
-                (row.type === "category" && row.category.name === value);
-              const label =
-                row.type === "create"
-                  ? tcat("createNamed", { name: row.name })
-                  : row.type === "none"
-                    ? tcat("noCategory")
-                    : row.category.name;
-              return (
-                <Pressable
-                  key={key}
-                  onPress={() => select(row)}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 10,
-                    paddingHorizontal: 10,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                  }}
-                >
-                  {row.type === "create" ? (
-                    <Plus color={t.primary} size={16} />
-                  ) : (
-                    <Check
-                      color={t.primary}
-                      size={16}
-                      style={{ opacity: isSelected ? 1 : 0 }}
-                    />
-                  )}
-                  <Txt
-                    size={15}
-                    numberOfLines={1}
-                    style={{
-                      flex: 1,
-                      color: row.type === "create" ? t.primary : t.text,
-                    }}
-                  >
-                    {label}
-                  </Txt>
-                  {row.type === "category" ? (
-                    <Pressable
-                      onPress={() => confirmDelete(row.category)}
-                      hitSlop={8}
-                      accessibilityRole="button"
-                      accessibilityLabel={tcat("deleteSuggestion")}
-                      style={({ pressed }) => ({
-                        padding: 4,
-                        opacity: pressed ? 0.5 : 1,
-                      })}
-                    >
-                      <Trash2 color={t.muted} size={16} />
-                    </Pressable>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
         </View>
       ) : null}
     </View>

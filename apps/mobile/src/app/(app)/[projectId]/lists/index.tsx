@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronRight,
   LayoutTemplate,
+  ListChecks,
 } from "lucide-react-native";
 import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
@@ -88,7 +89,12 @@ export default function ListsOverview() {
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 96 }}
           stickySectionHeadersEnabled={false}
           ListHeaderComponent={
-            <View style={{ marginHorizontal: 16 }}>
+            <View style={{ marginHorizontal: 16, gap: 8 }}>
+              <NavButton
+                icon={<ListChecks color={t.primary} size={18} />}
+                label={tl("myTasks")}
+                onPress={() => router.push(`/${pid}/lists/tasks`)}
+              />
               <NavButton
                 icon={<LayoutTemplate color={t.primary} size={18} />}
                 label={tl("templates")}
@@ -382,6 +388,7 @@ function CreateListSheet({
         name: trimmed,
         description: description.trim() || undefined,
         templateIds: selected.length > 0 ? selected : undefined,
+        taskMode: true,
       });
       setName("");
       setDescription("");
