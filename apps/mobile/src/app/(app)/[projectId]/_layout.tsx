@@ -11,6 +11,7 @@ import type { FC, PropsWithChildren } from "react";
 import { useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";
+import { FeedbackProvider } from "@/lib/feedback-state";
 import { setLastProjectId } from "@/lib/last-project";
 import { usePersistentQuery } from "@/lib/offline";
 import { ProjectIdProvider } from "@/lib/project-id";
@@ -117,48 +118,50 @@ export default function ProjectTabs() {
   return (
     <ProjectIdProvider projectId={projectId as Id<"projects">}>
       <SheetHost>
-        <Tabs
-          minimizeBehavior="onScrollDown"
-          tintColor={t.primary}
-          iconColor={{ default: t.muted, selected: t.primary }}
-          labelStyle={{
-            default: { fontFamily: FONT, color: t.muted },
-            selected: { fontFamily: FONT, color: t.primary },
-          }}
-          // Active-item pill: the web app's soft translucent green
-          // (`bg-primary/20`), not M3's opaque tonal container — `33` ≈ 20% alpha.
-          indicatorColor={`${t.primary}33`}
-          rippleColor={`${t.primary}33`}
-          // Android: always show every tab's label, and paint the surface with
-          // a warm M3 `surfaceContainer` tone (`t.navBar`) so the bar reads as a
-          // slightly elevated surface above the page background, per M3, while
-          // still avoiding the default M3 grey that clashes with our warm bg.
-          // iOS is left untouched so the Liquid Glass shows through — setting a
-          // backgroundColor there would replace the glass.
-          labelVisibilityMode="labeled"
-          backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
-        >
-          <Trigger name="home">
-            <Label>{tNav("home")}</Label>
-            <Icon sf="house" md="home" />
-          </Trigger>
-          <Trigger name="lists">
-            <Label>{tNav("lists")}</Label>
-            <Icon sf="checklist" md="checklist" />
-          </Trigger>
-          <Trigger name="calendar">
-            <Label>{tNav("calendar")}</Label>
-            <Icon sf="calendar" md="calendar_month" />
-          </Trigger>
-          <Trigger name="expenses">
-            <Label>{tNav("expenses")}</Label>
-            <Icon sf="creditcard" md="payments" />
-          </Trigger>
-          <Trigger name="more">
-            <Label>{tNav("more")}</Label>
-            <Icon sf="ellipsis" md="more_horiz" />
-          </Trigger>
-        </Tabs>
+        <FeedbackProvider>
+          <Tabs
+            minimizeBehavior="onScrollDown"
+            tintColor={t.primary}
+            iconColor={{ default: t.muted, selected: t.primary }}
+            labelStyle={{
+              default: { fontFamily: FONT, color: t.muted },
+              selected: { fontFamily: FONT, color: t.primary },
+            }}
+            // Active-item pill: the web app's soft translucent green
+            // (`bg-primary/20`), not M3's opaque tonal container — `33` ≈ 20% alpha.
+            indicatorColor={`${t.primary}33`}
+            rippleColor={`${t.primary}33`}
+            // Android: always show every tab's label, and paint the surface with
+            // a warm M3 `surfaceContainer` tone (`t.navBar`) so the bar reads as a
+            // slightly elevated surface above the page background, per M3, while
+            // still avoiding the default M3 grey that clashes with our warm bg.
+            // iOS is left untouched so the Liquid Glass shows through — setting a
+            // backgroundColor there would replace the glass.
+            labelVisibilityMode="labeled"
+            backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
+          >
+            <Trigger name="home">
+              <Label>{tNav("home")}</Label>
+              <Icon sf="house" md="home" />
+            </Trigger>
+            <Trigger name="lists">
+              <Label>{tNav("lists")}</Label>
+              <Icon sf="checklist" md="checklist" />
+            </Trigger>
+            <Trigger name="calendar">
+              <Label>{tNav("calendar")}</Label>
+              <Icon sf="calendar" md="calendar_month" />
+            </Trigger>
+            <Trigger name="expenses">
+              <Label>{tNav("expenses")}</Label>
+              <Icon sf="creditcard" md="payments" />
+            </Trigger>
+            <Trigger name="more">
+              <Label>{tNav("more")}</Label>
+              <Icon sf="ellipsis" md="more_horiz" />
+            </Trigger>
+          </Tabs>
+        </FeedbackProvider>
       </SheetHost>
     </ProjectIdProvider>
   );

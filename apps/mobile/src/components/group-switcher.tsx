@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  MessageSquarePlus,
   Plus,
   Settings,
   Settings2,
@@ -14,6 +15,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Avatar, HEADER_AVATAR_SIZE, initials } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
 import { catppuccinSwatch } from "@/lib/catppuccin-colors";
+import { useFeedback } from "@/lib/feedback-state";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -44,9 +46,12 @@ export function GroupSwitcherSheet({
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
+  const tNav = useTranslations("nav");
   const tp = useTranslations("mobile.profile");
   const tpref = useTranslations("mobile.preferences");
   const ti = useTranslations("groups");
+  const { openFeedback } = useFeedback();
+  const [pendingFeedback, setPendingFeedback] = useState(false);
 
   function selectGroup(id: Id<"projects">) {
     onClose();
@@ -77,8 +82,22 @@ export function GroupSwitcherSheet({
     router.push("/preferences");
   }
 
+  function requestFeedback() {
+    setPendingFeedback(true);
+    onClose();
+  }
+
   return (
-    <Sheet visible={visible} onClose={onClose}>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      onClosed={() => {
+        if (pendingFeedback) {
+          setPendingFeedback(false);
+          openFeedback();
+        }
+      }}
+    >
       <Txt size={18} weight="700">
         {tr("switchGroup")}
       </Txt>
@@ -171,6 +190,15 @@ export function GroupSwitcherSheet({
           <Txt style={{ color: t.primary }}>{ti("createTitle")}</Txt>
         </Pressable>
       </View>
+      <Card onPress={requestFeedback}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <MessageSquarePlus color={t.primary} size={22} />
+          <Txt weight="700" style={{ flex: 1 }}>
+            {tNav("feedback")}
+          </Txt>
+          <ChevronRight color={t.muted} size={18} />
+        </View>
+      </Card>
       {/* Account entries: the profile card (who you are) and its square
           preferences sibling (how the app behaves), styled as one family. */}
       <View style={{ flexDirection: "row", gap: 12, alignItems: "stretch" }}>
