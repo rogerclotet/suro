@@ -233,11 +233,12 @@ stop_preview:
       allow_failure: true
 
 # ---------------------------------------------------------------------------
-# Native mobile builds (EAS cloud). On main, when native code changes, build the
-# store-ready binaries on Expo's infra (no Android/iOS toolchain on the runner)
-# and download them as downloadable CI artifacts at the exact paths the fastlane
-# lanes expect. Needs EXPO_TOKEN (protected+masked CI variable). Gated behind
-# `check` so a lint/test failure never burns EAS build credits.
+# Native mobile builds (EAS cloud). On main, when native code changes, trigger
+# store-ready builds on Expo's infra (no Android/iOS toolchain on the runner).
+# Jobs exit as soon as EAS accepts the build (--no-wait); the manual submit
+# jobs poll until the binary is ready and download it. Needs EXPO_TOKEN
+# (protected+masked CI variable). Gated behind `check` so a lint/test failure
+# never burns EAS build credits.
 # Note: the `production` profile auto-increments the remote version every build.
 # ---------------------------------------------------------------------------
 build_native_android:
@@ -256,16 +257,14 @@ build_native_android:
   script:
     - cd apps/mobile
     - mkdir -p build
-    - pnpm exec eas build --platform android --profile production --non-interactive --json --wait > build/eas-android.json
+    - pnpm exec eas build --platform android --profile production --non-interactive --json --no-wait > build/eas-android.json
     - |
-      URL=$(jq -r '(if type=="array" then .[0] else . end) | .artifacts.applicationArchiveUrl // .artifacts.buildUrl' build/eas-android.json)
-      if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No artifact URL in EAS build output" >&2; exit 1; fi
-      curl -fL "$URL" -o build/suro-release.aab
-      ls -lh build/suro-release.aab
+      BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-android.json)
+      if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+      echo "Triggered EAS android build $BUILD_ID (submit_android waits and downloads)"
   artifacts:
     name: "suro-android-$CI_COMMIT_SHORT_SHA"
     paths:
-      - apps/mobile/build/suro-release.aab
       - apps/mobile/build/eas-android.json
     expire_in: 2 weeks
   rules:
@@ -288,16 +287,14 @@ build_native_ios:
   script:
     - cd apps/mobile
     - mkdir -p build
-    - pnpm exec eas build --platform ios --profile production --non-interactive --json --wait > build/eas-ios.json
+    - pnpm exec eas build --platform ios --profile production --non-interactive --json --no-wait > build/eas-ios.json
     - |
-      URL=$(jq -r '(if type=="array" then .[0] else . end) | .artifacts.applicationArchiveUrl // .artifacts.buildUrl' build/eas-ios.json)
-      if [ -z "$URL" ] || [ "$URL" = "null" ]; then echo "No artifact URL in EAS build output" >&2; exit 1; fi
-      curl -fL "$URL" -o build/suro-release.ipa
-      ls -lh build/suro-release.ipa
+      BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-ios.json)
+      if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+      echo "Triggered EAS ios build $BUILD_ID (submit_ios waits and downloads)"
   artifacts:
     name: "suro-ios-$CI_COMMIT_SHORT_SHA"
     paths:
-      - apps/mobile/build/suro-release.ipa
       - apps/mobile/build/eas-ios.json
     expire_in: 2 weeks
   rules:
@@ -305,22 +302,24 @@ build_native_ios:
       changes: *changes-mobile
 
 # ---------------------------------------------------------------------------
-# Manual store submission. Pulls the binary from the native build job into
-# apps/mobile/build/ (the path each tool expects), then uploads it. Android goes
-# through fastlane (`supply` is a pure Play API client, runs fine on Linux);
-# iOS goes through EAS Submit because fastlane's iTMSTransporter is macOS-only
-# (on a Linux runner it can't locate the transporter and dies). `when: manual` +
-# allow_failure makes these OPTIONAL buttons (the pipeline still passes if you
-# don't submit).
+# Manual store submission. Waits for the EAS build from the native build job to
+# finish, downloads the binary into apps/mobile/build/, then uploads it. Android
+# goes through fastlane (`supply` is a pure Play API client, runs fine on
+# Linux); iOS goes through EAS Submit because fastlane's iTMSTransporter is
+# macOS-only (on a Linux runner it can't locate the transporter and dies).
+# `when: manual` + allow_failure makes these OPTIONAL buttons (the pipeline
+# still passes if you don't submit).
 # ---------------------------------------------------------------------------
 submit_android:
   stage: submit
-  image: ruby:3.3-slim
+  image: node:25.1-slim
   needs:
     - job: build_native_android
       artifacts: true
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates
+    - apt-get update && apt-get install -y --no-install-recommends ruby-full build-essential git ca-certificates curl jq
+    - npm install -g pnpm@latest-10
+    - pnpm install --frozen-lockfile --filter mobile...
     # PLAY_SERVICE_ACCOUNT_JSON is a File-type CI variable; place it where the
     # fastlane Appfile expects it.
     - mkdir -p apps/mobile/credentials
@@ -329,7 +328,8 @@ submit_android:
     - bundle config set --local deployment true
     - bundle install
   script:
-    - test -f build/suro-release.aab
+    - EXPECTED_VERSION=$(jq -r .version ../../package.json)
+    - bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
     - bundle exec fastlane android release # uploads AAB + release notes to the internal track
   cache:
     key:
@@ -356,7 +356,7 @@ submit_ios:
   # they're decoded/mapped here to the EXPO_ASC_* env vars eas submit reads. Not
   # re-declared under `variables:`: they're `raw`, so a `$VAR` ref would be literal.
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends git ca-certificates
+    - apt-get update && apt-get install -y --no-install-recommends git ca-certificates curl jq
     - npm install -g pnpm@latest-10
     - pnpm install --frozen-lockfile --filter mobile...
     - cd apps/mobile
@@ -366,7 +366,8 @@ submit_ios:
     - export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
     - export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
   script:
-    - test -f build/suro-release.ipa
+    - EXPECTED_VERSION=$(jq -r .version ../../package.json)
+    - bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
     - pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
