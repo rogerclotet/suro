@@ -7,7 +7,7 @@
     "start": "expo start",
     "android": "expo run:android",
     "android:dev": "APP_VARIANT=dev expo run:android",
-    "ios": "node scripts/run-ios-simulator.mjs",
+    "ios": "PATH=/usr/bin:$PATH LOCAL_IOS_SIM_BUILD=1 expo run:ios",
     "web": "expo start --web",
     "build:android:preview": "mkdir -p build && eas build --platform android --profile preview --local --output build/suro-preview.apk",
     "build:android:dev": "mkdir -p build && eas build --platform android --profile dev --local --output build/suro-dev.apk",
