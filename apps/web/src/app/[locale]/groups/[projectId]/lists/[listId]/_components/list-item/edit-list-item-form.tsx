@@ -1,7 +1,7 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { SaveIcon } from "lucide-react";
+import { SaveIcon, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import * as v from "valibot";
 import type { List, ListItem } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import {
   Field,
@@ -18,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import ModalAction from "@/components/ui/modal-action";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,7 +65,7 @@ function EditListItemFormContent(props: {
   ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
-  const { item, list, onChange } = props;
+  const { item, list, onChange, onDelete } = props;
   const { id: itemId } = item;
   const { id: listId, items: listItems, projectId } = list;
 
@@ -163,12 +165,33 @@ function EditListItemFormContent(props: {
     [form, onSubmit],
   );
 
+  const handleDelete = useCallback(async () => {
+    if (!onDelete) {
+      return;
+    }
+
+    try {
+      await onDelete();
+      toast.success(t("deleteItemSuccess"));
+      close();
+    } catch (e) {
+      posthog.captureException(e, {
+        distinctId: session?.user.id,
+        action: "delete_list_item",
+        projectId,
+        listId,
+        itemId,
+      });
+      toast.error(t("deleteItemError"));
+    }
+  }, [close, itemId, listId, onDelete, projectId, session?.user.id, t]);
+
   if (!project) {
     return null;
   }
 
   return (
-    <form onSubmit={handleFormSubmit}>
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       <Controller
         control={form.control}
         name="name"
@@ -233,12 +256,34 @@ function EditListItemFormContent(props: {
         disabled={form.formState.isSubmitting}
       />
 
-      <SubmitButton
-        text={tCommon("save")}
-        icon={<SaveIcon />}
-        formState={form.formState}
-        disabled={!form.formState.isDirty}
-      />
+      <div className="flex flex-col gap-3">
+        <SubmitButton
+          text={tCommon("save")}
+          icon={<SaveIcon />}
+          formState={form.formState}
+          disabled={!form.formState.isDirty}
+        />
+
+        {onDelete ? (
+          <ModalAction
+            title={t("deleteItemTitle")}
+            description={t("deleteItemDescription")}
+            actionText={tCommon("delete")}
+            onAction={handleDelete}
+            variant="destructive"
+            trigger={
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full text-destructive hover:text-destructive"
+              >
+                <Trash2 />
+                {tCommon("delete")}
+              </Button>
+            }
+          />
+        ) : null}
+      </div>
     </form>
   );
 }
