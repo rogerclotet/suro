@@ -317,9 +317,8 @@ submit_android:
     - job: build_native_android
       artifacts: true
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends ruby-full build-essential git ca-certificates curl jq
-    - npm install -g pnpm@latest-10
-    - pnpm install --frozen-lockfile --filter mobile...
+    # ruby-full does not ship the `bundle` executable — ruby-bundler does.
+    - apt-get update && apt-get install -y --no-install-recommends ruby-full ruby-bundler build-essential git ca-certificates curl jq
     # PLAY_SERVICE_ACCOUNT_JSON is a File-type CI variable; place it where the
     # fastlane Appfile expects it.
     - mkdir -p apps/mobile/credentials
@@ -368,7 +367,7 @@ submit_ios:
   script:
     - EXPECTED_VERSION=$(jq -r .version ../../package.json)
     - bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
-    - pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+    - EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes: *changes-mobile
