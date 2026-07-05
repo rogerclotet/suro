@@ -7,6 +7,9 @@ packages:
 overrides:
   "@types/react": 19.2.17
   "@types/react-dom": 19.2.3
+  # Single React version across web + mobile (duplicate React breaks native).
+  react: 19.2.3
+  react-dom: 19.2.3
   # Security: pin patched transitive deps (API-compatible patch bumps).
   # ws<8.21.0 (via convex) memory-exhaustion DoS — GHSA-96hv-2xvq-fx4p.
   "ws@>=8.0.0 <8.21.0": ">=8.21.0"
@@ -28,3 +31,11 @@ onlyBuiltDependencies:
 # POSTHOG_API_KEY + POSTHOG_ENV_ID), so they no longer need the download.
 ignoredBuiltDependencies:
   - "@posthog/cli"
+
+# react-native-worklets' Babel plugin require()s @babel/generator at runtime but
+# doesn't declare it; pnpm's strict layout then can't resolve it for Metro.
+packageExtensions:
+  react-native-worklets:
+    dependencies:
+      "@babel/generator": "^7.29.7"
+      "@babel/traverse": "^7.29.7"

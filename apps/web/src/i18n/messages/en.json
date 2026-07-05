@@ -285,7 +285,8 @@
     "goToPots": "Go to pots",
     "noUpcoming": "No upcoming events",
     "noActiveLists": "No active lists",
-    "noActivePots": "No active pots"
+    "noActivePots": "No active pots",
+    "linkedListA11y": "Event with checklist, {done} of {total} items done"
   },
   "feedback": {
     "title": "Send feedback",

@@ -1,7 +1,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { type Href, Stack, useRouter } from "expo-router";
-import { ChevronRight, Star } from "lucide-react-native";
+import { Calendar, ChevronRight, ListTodo, Star } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
@@ -95,29 +95,34 @@ function EmptyLine({ text }: { text: string }) {
 
 function EventRow({
   event,
-  color,
   when,
+  linkedList,
+  linkedListA11y,
 }: {
   event: CalEvent;
-  color: string;
   // Preformatted by the caller: the full date+time for "Upcoming", time-only
   // for "Today" (whose date is implied), so the date is never repeated.
   when: string;
+  linkedList?: ActiveList;
+  linkedListA11y?: (done: number, total: number) => string;
 }) {
   const router = useRouter();
   const pid = useProjectId();
+  const t = useTheme();
+  const total = linkedList?.items.length ?? 0;
+  const done = linkedList?.items.filter((item) => item.completed).length ?? 0;
+  const complete = total > 0 && done === total;
+  const showProgress = Boolean(linkedList);
+
   return (
-    <Card onPress={() => router.navigate(`/${pid}/calendar/${event._id}`)}>
+    <Card
+      onPress={() => router.navigate(`/${pid}/calendar/${event._id}`)}
+      accessibilityLabel={
+        linkedList && linkedListA11y ? linkedListA11y(done, total) : undefined
+      }
+    >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            marginHorizontal: 4,
-            backgroundColor: color,
-          }}
-        />
+        <Calendar color={t.muted} size={18} />
         <View style={{ flex: 1 }}>
           <Txt weight="700" numberOfLines={1}>
             {event.name}
@@ -126,6 +131,15 @@ function EventRow({
             {when}
           </Txt>
         </View>
+        {showProgress ? (
+          <View style={{ alignItems: "flex-end", gap: 4, minWidth: 48 }}>
+            <Txt muted size={13}>{`${done}/${total}`}</Txt>
+            <ProgressBar
+              value={total === 0 ? 0 : done / total}
+              complete={complete}
+            />
+          </View>
+        ) : null}
       </View>
     </Card>
   );
@@ -145,15 +159,9 @@ function ListRow({ list }: { list: ActiveList }) {
   return (
     <Card onPress={() => router.navigate(`/${pid}/lists/${list._id}`)}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        {/* Star sits where event rows put their dot, marking the list as shown
-            because it's a favourite. */}
+        <ListTodo color={t.muted} size={18} />
         {list.favorite ? (
-          <Star
-            size={14}
-            color={t.marker}
-            fill={t.marker}
-            style={{ marginHorizontal: 2 }}
-          />
+          <Star size={14} color={t.marker} fill={t.marker} />
         ) : null}
         <View style={{ flex: 1, gap: 8 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -213,7 +221,6 @@ function PotRow({ pot }: { pot: ActivePot }) {
 
 export default function HomeDashboard() {
   const pid = useProjectId();
-  const t = useTheme();
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
   // Title Home with the group's name so it gives context to the group badge;
@@ -256,12 +263,23 @@ export default function HomeDashboard() {
   );
 
   const listsOverview = useStable(useOfflineListsOverview(pid, 0));
+  const listsByEventId = useMemo(() => {
+    const map = new Map<string, ActiveList>();
+    for (const list of listsOverview?.active ?? []) {
+      if (list.eventId) {
+        map.set(list.eventId, list);
+      }
+    }
+    return map;
+  }, [listsOverview]);
   const activeLists = useMemo(() => {
     if (!listsOverview) {
       return undefined;
     }
-    // Favourites first, mirroring the Lists tab's ordering.
+    // Favourites first, mirroring the Lists tab's ordering. Event-linked lists
+    // surface on their event card instead.
     return [...listsOverview.active]
+      .filter((list) => !list.eventId)
       .sort((a, b) => Number(b.favorite) - Number(a.favorite))
       .slice(0, PREVIEW_LIMIT);
   }, [listsOverview]);
@@ -295,12 +313,15 @@ export default function HomeDashboard() {
         {todayEvents && todayEvents.length > 0 ? (
           <Widget label={tHome("today")}>
             <View style={{ gap: 12 }}>
-              {todayEvents.map((event, index) => (
+              {todayEvents.map((event) => (
                 <EventRow
                   key={event._id}
                   event={event}
-                  color={t.event[index % t.event.length]}
                   when={formatEventTime(event)}
+                  linkedList={listsByEventId.get(event._id)}
+                  linkedListA11y={(done, total) =>
+                    tHome("linkedListA11y", { done, total })
+                  }
                 />
               ))}
             </View>
@@ -318,12 +339,15 @@ export default function HomeDashboard() {
             <EmptyLine text={tHome("noUpcoming")} />
           ) : (
             <View style={{ gap: 12 }}>
-              {upcoming.map((event, index) => (
+              {upcoming.map((event) => (
                 <EventRow
                   key={event._id}
                   event={event}
-                  color={t.event[index % t.event.length]}
                   when={formatEventRange(event)}
+                  linkedList={listsByEventId.get(event._id)}
+                  linkedListA11y={(done, total) =>
+                    tHome("linkedListA11y", { done, total })
+                  }
                 />
               ))}
             </View>

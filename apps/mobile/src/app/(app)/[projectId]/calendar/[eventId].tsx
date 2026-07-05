@@ -16,7 +16,7 @@ import {
   Upload,
   Wallet,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -29,6 +29,7 @@ import { Avatar } from "@/components/avatar";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { FileGallery } from "@/components/file-gallery";
+import { ListChecklist } from "@/components/list-checklist";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventRange, useTimeRemaining } from "@/lib/datetime";
@@ -107,6 +108,7 @@ export default function EventDetail() {
 
   // Live countdown: refresh "now" each minute.
   const [now, setNow] = useState(() => Date.now());
+  const scrollRef = useRef<ScrollView>(null);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
@@ -174,11 +176,10 @@ export default function EventDetail() {
     );
   }
 
-  // Each "create" links a fresh record to the event and opens it within the
-  // calendar stack so Back returns here rather than that section's own tab.
+  // Each "create" links a fresh record to the event. Lists stay inline on this
+  // screen; notes and expenses still open in the calendar stack.
   async function handleCreateLinkedList() {
-    const listId = await createLinkedList({ eventId: eid });
-    router.push(`/${pid}/calendar/list/${listId}`);
+    await createLinkedList({ eventId: eid });
   }
 
   async function handleCreateLinkedNote() {
@@ -230,9 +231,8 @@ export default function EventDetail() {
   // Pending uploads keep the gallery visible so the in-flight tile shows.
   const hasFiles = (eventFiles && eventFiles.length > 0) || pending;
   const hasExtras = Boolean(linkedList || linkedNote || linkedPot || hasFiles);
-  // Quiet prompts for whatever the event still lacks, so the menu's add
-  // actions are discoverable without opening it. Skipped entirely when full,
-  // so the ScrollView gap doesn't show phantom spacing.
+  // Quiet prompts for whatever the event still lacks, sitting under the event
+  // header so add actions are visible before scrolling past a linked list.
   const showAddChips =
     !linkedList ||
     !linkedNote ||
@@ -285,7 +285,11 @@ export default function EventDetail() {
         }}
       />
 
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ padding: 16, gap: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 4 }}>
           <Txt size={26} weight="700">
             {event.name}
@@ -302,6 +306,46 @@ export default function EventDetail() {
 
         {event.description ? <Txt size={18}>{event.description}</Txt> : null}
 
+        {showAddChips ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {!linkedList ? (
+              <AddChip
+                icon={ListPlus}
+                label={tCal("createList")}
+                onPress={() => void handleCreateLinkedList()}
+              />
+            ) : null}
+            {!linkedNote ? (
+              <AddChip
+                icon={FilePlus}
+                label={tCal("createNote")}
+                onPress={() => void handleCreateLinkedNote()}
+              />
+            ) : null}
+            {!linkedPot ? (
+              <AddChip
+                icon={CirclePlus}
+                label={tCal("createExpense")}
+                onPress={() => setPotPicker(true)}
+              />
+            ) : null}
+            {!hasFiles ? (
+              <AddChip
+                icon={Upload}
+                label={tFiles("uploadFile")}
+                onPress={chooseFile}
+              />
+            ) : null}
+            {candidates.length > 0 ? (
+              <AddChip
+                icon={Paperclip}
+                label={tCal("addExisting")}
+                onPress={() => setLinking(true)}
+              />
+            ) : null}
+          </View>
+        ) : null}
+
         {hasExtras ? (
           <>
             {/* Divider sets the event off from the extras attached to it. */}
@@ -313,34 +357,21 @@ export default function EventDetail() {
               }}
             />
             {linkedList ? (
-              <LinkedCard
-                icon={ListTodo}
-                name={kindOrName(linkedList.name, tCal("list"))}
-                subtitle={
-                  linkedList.items.length === 0
-                    ? tc("empty")
-                    : tc("itemsDone", {
-                        done: linkedList.items.filter((i) => i.completed)
-                          .length,
-                        total: linkedList.items.length,
-                      })
-                }
-                unlinkLabel={tCal("unlinkList")}
-                onPress={() =>
-                  router.push({
-                    pathname: `/${pid}/calendar/list/${linkedList._id}`,
-                    params: { name: linkedList.name },
-                  })
-                }
-                onUnlink={() =>
-                  confirmUnlink(
-                    tCal("unlinkList"),
-                    linkedList.name,
-                    () =>
-                      void unlinkList({ eventId: eid, listId: linkedList._id }),
-                  )
-                }
-              />
+              <View style={{ gap: 12 }}>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                >
+                  <ListTodo color={t.text} size={20} />
+                  <Txt size={18} weight="700">
+                    {kindOrName(linkedList.name, tCal("list"))}
+                  </Txt>
+                </View>
+                <ListChecklist
+                  listId={linkedList._id}
+                  embedded
+                  scrollRef={scrollRef}
+                />
+              </View>
             ) : null}
             {linkedNote ? (
               <LinkedCard
@@ -398,46 +429,6 @@ export default function EventDetail() {
             ) : null}
           </>
         ) : null}
-
-        {showAddChips ? (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {!linkedList ? (
-              <AddChip
-                icon={ListPlus}
-                label={tCal("createList")}
-                onPress={() => void handleCreateLinkedList()}
-              />
-            ) : null}
-            {!linkedNote ? (
-              <AddChip
-                icon={FilePlus}
-                label={tCal("createNote")}
-                onPress={() => void handleCreateLinkedNote()}
-              />
-            ) : null}
-            {!linkedPot ? (
-              <AddChip
-                icon={CirclePlus}
-                label={tCal("createExpense")}
-                onPress={() => setPotPicker(true)}
-              />
-            ) : null}
-            {!hasFiles ? (
-              <AddChip
-                icon={Upload}
-                label={tFiles("uploadFile")}
-                onPress={chooseFile}
-              />
-            ) : null}
-            {candidates.length > 0 ? (
-              <AddChip
-                icon={Paperclip}
-                label={tCal("addExisting")}
-                onPress={() => setLinking(true)}
-              />
-            ) : null}
-          </View>
-        ) : null}
       </ScrollView>
 
       <EventForm
@@ -480,7 +471,20 @@ export default function EventDetail() {
               void handleCreateLinkedList();
             }}
           />
-        ) : null}
+        ) : (
+          <SheetAction
+            icon={Unlink}
+            label={tCal("unlinkList")}
+            onPress={() => {
+              setSettingsOpen(false);
+              confirmUnlink(
+                tCal("unlinkList"),
+                linkedList.name,
+                () => void unlinkList({ eventId: eid, listId: linkedList._id }),
+              );
+            }}
+          />
+        )}
         {!linkedNote ? (
           <SheetAction
             icon={FilePlus}

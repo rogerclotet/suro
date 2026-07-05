@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Loader2, Star } from "lucide-react";
+import { Calendar, ChevronRight, ListTodo, Loader2, Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/_data/event";
@@ -21,16 +21,6 @@ import ProgressRing from "../../lists/_components/progress-ring";
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 3;
 const AVATAR_STACK = 3;
-
-// Per-event accent dots cycle through the palette's five accents, like the
-// calendar's month grid.
-const EVENT_DOT_CLASSES = [
-  "bg-event-1",
-  "bg-event-2",
-  "bg-event-3",
-  "bg-event-4",
-  "bg-event-5",
-] as const;
 
 type WidgetHref = Parameters<typeof Link>[0]["href"];
 
@@ -87,15 +77,21 @@ const rowClassName =
 
 function EventRow({
   event,
-  colorClass,
   when,
+  linkedList,
+  linkedListA11y,
 }: {
   event: CalendarEvent;
-  colorClass: string | undefined;
   // Preformatted by the caller: the full dated range for "Upcoming", time-only
   // for "Today" (whose date is implied), so the date is never repeated.
   when: string;
+  linkedList?: List;
+  linkedListA11y?: (done: number, total: number) => string;
 }) {
+  const total = linkedList?.items.length ?? 0;
+  const done = linkedList?.items.filter((item) => item.completed).length ?? 0;
+  const pending = total - done;
+
   return (
     <Link
       href={{
@@ -103,14 +99,22 @@ function EventRow({
         params: { projectId: event.projectId, eventId: event.id },
       }}
       className={rowClassName}
+      aria-label={
+        linkedList && linkedListA11y ? linkedListA11y(done, total) : undefined
+      }
     >
-      <span
-        className={cn("ml-1 h-2.5 w-2.5 shrink-0 rounded-full", colorClass)}
+      <Calendar
+        size={18}
+        className="ml-0.5 shrink-0 text-muted-foreground"
+        aria-hidden
       />
       <div className="min-w-0 flex-1">
         <div className="truncate font-semibold">{event.name}</div>
         <div className="truncate text-[13px] text-muted-foreground">{when}</div>
       </div>
+      {linkedList ? (
+        <ProgressRing done={done} pending={pending} total={total} />
+      ) : null}
     </Link>
   );
 }
@@ -132,6 +136,11 @@ function ListRow({ list }: { list: List }) {
       }}
       className={rowClassName}
     >
+      <ListTodo
+        size={18}
+        className="shrink-0 text-muted-foreground"
+        aria-hidden
+      />
       {list.favorite && (
         <Star size={14} className="shrink-0 fill-yellow-400 text-yellow-400" />
       )}
@@ -278,13 +287,24 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   );
 
   const lists = useProjectLists(projectId);
+  const listsByEventId = useMemo(() => {
+    const map = new Map<string, List>();
+    for (const list of lists ?? []) {
+      if (list.eventId) {
+        map.set(list.eventId, list);
+      }
+    }
+    return map;
+  }, [lists]);
   const activeLists = useMemo(() => {
     if (lists === undefined) {
       return undefined;
     }
     // Lists with at least one pending item (or none yet), favourites first —
-    // mirroring the Lists overview's active sectioning and ordering.
+    // mirroring the Lists overview's active sectioning and ordering. Event-linked
+    // lists surface on their event card instead.
     return lists
+      .filter((list) => !list.eventId)
       .filter(
         (list) =>
           list.items.length === 0 || list.items.some((item) => !item.completed),
@@ -310,12 +330,15 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
       {todayEvents && todayEvents.length > 0 && (
         <Widget label={t("today")}>
           <div className="space-y-3">
-            {todayEvents.map((event, index) => (
+            {todayEvents.map((event) => (
               <EventRow
                 key={event.id}
                 event={event}
-                colorClass={EVENT_DOT_CLASSES[index % EVENT_DOT_CLASSES.length]}
                 when={formatEventTime(event, locale, tCalendar("allDay"))}
+                linkedList={listsByEventId.get(event.id)}
+                linkedListA11y={(done, total) =>
+                  t("linkedListA11y", { done, total })
+                }
               />
             ))}
           </div>
@@ -336,12 +359,15 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
           <EmptyLine text={t("noUpcoming")} />
         ) : (
           <div className="space-y-3">
-            {upcoming.map((event, index) => (
+            {upcoming.map((event) => (
               <EventRow
                 key={event.id}
                 event={event}
-                colorClass={EVENT_DOT_CLASSES[index % EVENT_DOT_CLASSES.length]}
                 when={formatEventRange(event, locale)}
+                linkedList={listsByEventId.get(event.id)}
+                linkedListA11y={(done, total) =>
+                  t("linkedListA11y", { done, total })
+                }
               />
             ))}
           </div>

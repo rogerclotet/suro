@@ -1,6 +1,6 @@
 {
   "name": "suro",
-  "version": "1.14.1",
+  "version": "1.14.2",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -18,9 +18,9 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
+    "@biomejs/biome": "^2.5.2",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7"
+    "lint-staged": "^17.0.8"
   },
   "packageManager": "pnpm@10.26.2",
   "engines": {

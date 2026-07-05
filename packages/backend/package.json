@@ -25,14 +25,14 @@
     "@convex-dev/auth": "^0.0.94",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
-    "convex": "^1.41.0",
-    "jose": "^6.0.0",
-    "mupdf": "^1.27.0",
+    "convex": "^1.42.1",
+    "jose": "^6.2.3",
+    "mupdf": "^1.28.0",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "convex-test": "^0.0.53",
+    "convex-test": "^0.0.54",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   }
