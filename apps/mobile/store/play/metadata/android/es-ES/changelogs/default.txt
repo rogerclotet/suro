@@ -1,1 +1,2 @@
-• El formulario para añadir elementos ya no deja la página en blanco al confirmar, y el selector de categoría se mantiene abierto mientras se busca.
+• La pantalla de inicio muestra iconos de calendario y lista en lugar de puntos de color, con el progreso de la lista vinculada a cada evento.
+• En la app nativa, las listas vinculadas a un evento se pueden editar directamente desde la vista de detalle.

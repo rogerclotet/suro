@@ -285,7 +285,8 @@
     "goToPots": "Ves als pots",
     "noUpcoming": "Cap esdeveniment proper",
     "noActiveLists": "Cap llista activa",
-    "noActivePots": "Cap pot actiu"
+    "noActivePots": "Cap pot actiu",
+    "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
   },
   "feedback": {
     "title": "Envia suggeriments",

@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.14.2] — 2026-07-05
+
+### ca
+
+- [improvement] La pantalla d'inici mostra icones de calendari i llista en lloc de punts de color, amb el progrés de la llista vinculada a cada esdeveniment.
+- [improvement] A l'app nativa, les llistes vinculades a un esdeveniment es poden editar directament des de la vista de detall.
+
+### es
+
+- [improvement] La pantalla de inicio muestra iconos de calendario y lista en lugar de puntos de color, con el progreso de la lista vinculada a cada evento.
+- [improvement] En la app nativa, las listas vinculadas a un evento se pueden editar directamente desde la vista de detalle.
+
+### en
+
+- [improvement] The home screen shows calendar and list icons instead of colored dots, with linked list progress on event cards.
+- [improvement] On the native app, lists linked to an event can be edited directly from the event detail view.
+
 ## [1.14.1] — 2026-07-04
 
 ### ca

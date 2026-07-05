@@ -630,11 +630,13 @@ export function Card({
   children,
   onPress,
   muted = false,
+  accessibilityLabel,
 }: {
   children: ReactNode;
   onPress?: () => void;
   // Recede the card into a tonal surface (e.g. settled expense pots).
   muted?: boolean;
+  accessibilityLabel?: string;
 }) {
   const t = useTheme();
   const inner = (
@@ -653,6 +655,8 @@ export function Card({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
     >
       {inner}

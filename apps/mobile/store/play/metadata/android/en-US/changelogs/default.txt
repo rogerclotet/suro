@@ -1,1 +1,2 @@
-• The new list item form no longer blanks the page when you confirm, and the category picker stays open while you search.
+• The home screen shows calendar and list icons instead of colored dots, with linked list progress on event cards.
+• On the native app, lists linked to an event can be edited directly from the event detail view.
