@@ -785,6 +785,12 @@
       "noActivePots": "No active pots",
       "linkedListA11y": "Event with checklist, {done} of {total} items done"
     },
+    "widget": {
+      "label": "Suro",
+      "description": "Upcoming events and your assigned tasks",
+      "signIn": "Open Suro to sign in",
+      "noGroup": "Open Suro to choose a group"
+    },
     "onboarding": {
       "welcomeTitle": "Welcome to Suro!",
       "welcomeBody": "Suro is a shared corkboard for the people you do life with. Let's take a quick tour of what you can do.",

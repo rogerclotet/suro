@@ -785,6 +785,12 @@
       "noActivePots": "Cap pot actiu",
       "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
     },
+    "widget": {
+      "label": "Suro",
+      "description": "Propers esdeveniments i les teves tasques assignades",
+      "signIn": "Obre Suro per iniciar sessió",
+      "noGroup": "Obre Suro per triar un grup"
+    },
     "onboarding": {
       "welcomeTitle": "Benvingut a Suro!",
       "welcomeBody": "Suro és un tauler compartit per a la gent amb qui comparteixes el dia a dia. Fem un recorregut ràpid per tot el que pots fer.",

@@ -1,2 +1,1 @@
-• La pantalla d'inici mostra icones de calendari i llista en lloc de punts de color, amb el progrés de la llista vinculada a cada esdeveniment.
-• A l'app nativa, les llistes vinculades a un esdeveniment es poden editar directament des de la vista de detall.
+• Widget d'inici d'Android amb els propers esdeveniments i les teves tasques assignades.

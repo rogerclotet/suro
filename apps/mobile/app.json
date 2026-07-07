@@ -85,7 +85,28 @@
         }
       ],
       "expo-sharing",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [
+            "./node_modules/@expo-google-fonts/convergence/400Regular/Convergence_400Regular.ttf"
+          ],
+          "widgets": [
+            {
+              "name": "SuroHome",
+              "label": "Suro",
+              "description": "Upcoming events and your assigned tasks",
+              "minWidth": "250dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 4,
+              "resizeMode": "vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

@@ -1,2 +1,1 @@
-• La pantalla de inicio muestra iconos de calendario y lista en lugar de puntos de color, con el progreso de la lista vinculada a cada evento.
-• En la app nativa, las listas vinculadas a un evento se pueden editar directamente desde la vista de detalle.
+• Widget de inicio de Android con los próximos eventos y tus tareas asignadas.
