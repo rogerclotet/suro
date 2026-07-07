@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.15.0] — 2026-07-05
+
+### ca
+
+- [feature] Widget d'inici d'Android amb els propers esdeveniments i les teves tasques assignades.
+
+### es
+
+- [feature] Widget de inicio de Android con los próximos eventos y tus tareas asignadas.
+
+### en
+
+- [feature] Android home-screen widget with upcoming events and your assigned tasks.
+
 ## [1.14.2] — 2026-07-05
 
 ### ca

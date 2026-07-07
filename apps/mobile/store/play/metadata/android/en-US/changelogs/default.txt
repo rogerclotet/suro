@@ -1,2 +1,1 @@
-• The home screen shows calendar and list icons instead of colored dots, with linked list progress on event cards.
-• On the native app, lists linked to an event can be edited directly from the event detail view.
+• Android home-screen widget with upcoming events and your assigned tasks.

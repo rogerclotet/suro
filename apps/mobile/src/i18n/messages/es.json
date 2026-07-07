@@ -785,6 +785,12 @@
       "noActivePots": "Ningún bote activo",
       "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos"
     },
+    "widget": {
+      "label": "Suro",
+      "description": "Próximos eventos y tus tareas asignadas",
+      "signIn": "Abre Suro para iniciar sesión",
+      "noGroup": "Abre Suro para elegir un grupo"
+    },
     "onboarding": {
       "welcomeTitle": "¡Bienvenido a Suro!",
       "welcomeBody": "Suro es un tablón compartido para la gente con la que compartes tu día a día. Vamos a hacer un recorrido rápido por lo que puedes hacer.",

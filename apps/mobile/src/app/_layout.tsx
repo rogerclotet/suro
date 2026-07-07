@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/convergence";
 import { Stack } from "expo-router";
 import type { ComponentType, ReactNode } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import { Platform, type StyleProp, type ViewStyle } from "react-native";
 import { GestureHandlerRootView as RNGestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Onboarding } from "@/components/onboarding";
@@ -16,6 +16,11 @@ import { AnalyticsBridge, AnalyticsProvider } from "@/lib/analytics";
 import { convex, secureStorage } from "@/lib/convex";
 import { OfflineProvider } from "@/lib/offline";
 import { ThemeProvider } from "@/theme";
+import { WidgetSyncBridge } from "@/widgets/WidgetSyncBridge";
+
+if (Platform.OS === "android") {
+  require("@/widgets/task-handler");
+}
 
 // GestureHandlerRootViewProps drops `children` under React 19 types; re-type it
 // to the props we actually use (runtime behavior is unchanged).
@@ -39,6 +44,7 @@ export default function RootLayout() {
           <AnalyticsProvider>
             <ConvexAuthProvider client={convex} storage={secureStorage}>
               <OfflineProvider>
+                <WidgetSyncBridge />
                 <I18nProvider>
                   <AnalyticsBridge />
                   <Stack screenOptions={{ headerShown: false }} />
