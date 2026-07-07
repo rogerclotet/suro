@@ -312,24 +312,26 @@ build_native_ios:
 # ---------------------------------------------------------------------------
 submit_android:
   stage: submit
-  image: node:25.1-slim
+  # Gemfile.lock is pinned to Bundler 4 (needs Ruby >= 3.2). The apt Ruby on
+  # node:slim is 3.1, which can't run it — use the official Ruby image instead.
+  image: ruby:3.4-slim
   needs:
     - job: build_native_android
       artifacts: true
   before_script:
-    # ruby-full does not ship the `bundle` executable — ruby-bundler does.
-    - apt-get update && apt-get install -y --no-install-recommends ruby-full ruby-bundler build-essential git ca-certificates curl jq
+    - apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
+    - gem install bundler -v 4.0.11 --no-document
     # PLAY_SERVICE_ACCOUNT_JSON is a File-type CI variable; place it where the
     # fastlane Appfile expects it.
     - mkdir -p apps/mobile/credentials
     - cp "$PLAY_SERVICE_ACCOUNT_JSON" apps/mobile/credentials/play-service-account.json
     - cd apps/mobile
-    - bundle config set --local deployment true
-    - bundle install
+    - bundle _4.0.11_ config set --local deployment true
+    - bundle _4.0.11_ install
   script:
     - EXPECTED_VERSION=$(jq -r .version ../../package.json)
     - bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
-    - bundle exec fastlane android release # uploads AAB + release notes to the internal track
+    - bundle _4.0.11_ exec fastlane android release # uploads AAB + release notes to the internal track
   cache:
     key:
       files:

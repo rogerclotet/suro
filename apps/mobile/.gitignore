@@ -59,3 +59,6 @@ fastlane/Preview.html
 fastlane/test_output/
 fastlane/README.md
 fastlane/.env
+
+# bundle install --deployment target (CI caches this path)
+/vendor
