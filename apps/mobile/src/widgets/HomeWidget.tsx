@@ -12,8 +12,7 @@ import type { WidgetSnapshot } from "./types";
 
 const FONT = "Convergence_400Regular";
 const LOGO_SIZE = 22;
-const WIDGET_LOGO =
-  require("../../assets/images/notification-icon.png") as number;
+const WIDGET_LOGO = require("../../assets/images/favicon.png") as number;
 
 const palette = {
   light: {
@@ -234,9 +233,8 @@ function renderForScheme(
           height: "match_parent",
           width: "match_parent",
           backgroundColor: colors.bg,
-          padding: 16,
-          justifyContent: "center",
-          alignItems: "center",
+          padding: 14,
+          flexDirection: "column",
         }}
       >
         {widgetHeader("Suro", colors)}
@@ -246,7 +244,6 @@ function renderForScheme(
             fontSize: 13,
             fontFamily: FONT,
             color: colors.muted,
-            textAlign: "center",
           }}
         />
       </FlexWidget>

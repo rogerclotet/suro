@@ -1,1 +1,1 @@
-• Los comentarios enviados desde la app ahora llegan correctamente.
+• El widget de inicio de Android muestra el logotipo correctamente y abre el selector de grupo al añadirlo.

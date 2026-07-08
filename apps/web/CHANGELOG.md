@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.15.3] — 2026-07-08
+
+### ca
+
+- [fix] El widget d'inici d'Android mostra el logotip correctament i obre el selector de grup en afegir-lo.
+
+### es
+
+- [fix] El widget de inicio de Android muestra el logotipo correctamente y abre el selector de grupo al añadirlo.
+
+### en
+
+- [fix] The Android home-screen widget shows the logo correctly and opens the group picker when you add it.
+
 ## [1.15.2] — 2026-07-08
 
 ### ca
