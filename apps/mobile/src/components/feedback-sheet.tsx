@@ -22,6 +22,23 @@ import { Button, Field, Section, Segmented, Sheet, Txt } from "@/ui";
 const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY;
 const MAX_MESSAGE_LENGTH = 1000;
 
+function reportFeedbackError(
+  posthog: ReturnType<typeof usePostHog> | undefined,
+  error: unknown,
+) {
+  console.error("[feedback] submit failed:", error);
+  if (!POSTHOG_KEY || !posthog) {
+    return;
+  }
+  posthog.captureException(error, { action: "submit_feedback" });
+  posthog.captureLog({
+    body: `feedback submit failed: ${error instanceof Error ? error.message : String(error)}`,
+    level: "error",
+    attributes: { action: "submit_feedback" },
+  });
+  void posthog.flush();
+}
+
 /**
  * In-app feedback drawer. Submits to the same PostHog survey as the web app's
  * feedback dialog via a `survey sent` event with matching question ids.
@@ -79,7 +96,12 @@ function FeedbackSheetForm({
     setSection("other");
     setMessage("");
     setSubmitting(false);
-  }, [visible]);
+    if (POSTHOG_KEY && posthog) {
+      posthog.capture("survey shown", {
+        $survey_id: FEEDBACK_SURVEY_ID,
+      });
+    }
+  }, [visible, posthog]);
 
   const trimmedMessage = message.trim();
   const canSubmit = trimmedMessage.length > 0 && !submitting;
@@ -106,16 +128,12 @@ function FeedbackSheetForm({
           feedback_path: segments.join("/") || "index",
           feedback_app_version: Constants.expoConfig?.version ?? "unknown",
         });
+        await posthog.flush();
       }
       onClose();
       Alert.alert(tf("success"));
     } catch (e) {
-      if (POSTHOG_KEY && posthog) {
-        posthog.capture("$exception", {
-          $exception_message: e instanceof Error ? e.message : String(e),
-          action: "submit_feedback",
-        });
-      }
+      reportFeedbackError(posthog, e);
       Alert.alert(tf("error"));
     } finally {
       setSubmitting(false);
