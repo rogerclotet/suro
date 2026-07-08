@@ -1,1 +1,1 @@
-• El widget d'inici d'Android es pot configurar per mostrar un grup concret, i en pots afegir diversos amb grups diferents.
+• Els suggeriments enviats des de l'app ara arriben correctament.

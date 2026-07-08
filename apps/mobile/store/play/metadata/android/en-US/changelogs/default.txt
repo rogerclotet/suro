@@ -1,1 +1,1 @@
-• The Android home-screen widget can be configured to show a specific group, and you can add multiple widgets for different groups.
+• Feedback sent from the mobile app is now delivered reliably.
