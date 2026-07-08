@@ -1,1 +1,1 @@
-• Widget d'inici d'Android amb els propers esdeveniments i les teves tasques assignades.
+• El widget d'inici d'Android es pot configurar per mostrar un grup concret, i en pots afegir diversos amb grups diferents.

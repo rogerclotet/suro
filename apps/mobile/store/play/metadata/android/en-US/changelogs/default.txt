@@ -1,1 +1,1 @@
-• Android home-screen widget with upcoming events and your assigned tasks.
+• The Android home-screen widget can be configured to show a specific group, and you can add multiple widgets for different groups.

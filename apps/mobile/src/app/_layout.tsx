@@ -20,6 +20,7 @@ import { WidgetSyncBridge } from "@/widgets/WidgetSyncBridge";
 
 if (Platform.OS === "android") {
   require("@/widgets/task-handler");
+  require("@/widgets/widget-configuration");
 }
 
 // GestureHandlerRootViewProps drops `children` under React 19 types; re-type it

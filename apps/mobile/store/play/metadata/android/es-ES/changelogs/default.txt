@@ -1,1 +1,1 @@
-• Widget de inicio de Android con los próximos eventos y tus tareas asignadas.
+• El widget de inicio de Android se puede configurar para mostrar un grupo concreto, y puedes añadir varios con grupos distintos.

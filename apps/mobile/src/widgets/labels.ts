@@ -10,6 +10,7 @@ export function widgetLabels(locale: Locale | undefined): WidgetLabels {
     noTasks: messages.lists.noTasks,
     signIn: messages.widget.signIn,
     noGroup: messages.widget.noGroup,
+    configurePrompt: messages.widget.configurePrompt,
     allDay: messages.calendar.allDay,
   };
 }

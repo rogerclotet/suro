@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.15.1] — 2026-07-08
+
+### ca
+
+- [improvement] El widget d'inici d'Android es pot configurar per mostrar un grup concret, i en pots afegir diversos amb grups diferents.
+
+### es
+
+- [improvement] El widget de inicio de Android se puede configurar para mostrar un grupo concreto, y puedes añadir varios con grupos distintos.
+
+### en
+
+- [improvement] The Android home-screen widget can be configured to show a specific group, and you can add multiple widgets for different groups.
+
 ## [1.15.0] — 2026-07-05
 
 ### ca
