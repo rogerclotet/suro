@@ -1,84 +1,90 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useConvex } from "convex/react";
+import { useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
-import { getLastProjectId } from "@/lib/last-project";
+import { normalizeLocale } from "@/i18n/config";
 import { useAuthGate, usePersistentQuery } from "@/lib/offline";
+import { writeWidgetAuth } from "./auth-state";
 import { buildWidgetSnapshot, widgetEventBounds } from "./build-snapshot";
-import { persistAndRefreshWidget } from "./sync";
+import { configuredProjectIds } from "./config";
+import { persistProjectSnapshot, refreshAllWidgets } from "./sync";
 
 /**
- * Keeps the Android home-screen widget in sync with the user's last group:
- * upcoming events and assigned tasks, formatted in their locale. Android-only;
- * renders nothing.
+ * Keeps Android home-screen widgets in sync. Each widget instance shows the
+ * group chosen in its configuration screen; snapshots are cached per project.
  */
 export function WidgetSyncBridge() {
   const { isAuthenticated } = useAuthGate();
   const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");
-  const projects = usePersistentQuery(
-    api.projects.listMine,
-    isAuthenticated ? {} : "skip",
-  );
-  const [storedProjectId, setStoredProjectId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (Platform.OS !== "android") {
-      return;
-    }
-    getLastProjectId()
-      .then(setStoredProjectId)
-      .catch(() => setStoredProjectId(null));
-  }, []);
-
-  const projectId = useMemo(() => {
-    if (!isAuthenticated || !projects) {
-      return undefined;
-    }
-    if (
-      storedProjectId &&
-      projects.some((project) => project._id === storedProjectId)
-    ) {
-      return storedProjectId as Id<"projects">;
-    }
-    return projects[0]?._id;
-  }, [isAuthenticated, projects, storedProjectId]);
-
+  const convex = useConvex();
   const bounds = useMemo(() => widgetEventBounds(), []);
-  const events = usePersistentQuery(
-    api.events.listByRange,
-    projectId ? { projectId, from: bounds.from, to: bounds.to } : "skip",
-  );
-  const tasks = usePersistentQuery(
-    api.tasks.myTasks,
-    projectId ? { projectId } : "skip",
-  );
-  const project = usePersistentQuery(
-    api.projects.get,
-    projectId ? { projectId } : "skip",
-  );
-
-  const lastPayload = useRef<string>("");
+  const locale = normalizeLocale(me?.locale);
+  const lastSyncKey = useRef("");
 
   useEffect(() => {
     if (Platform.OS !== "android") {
       return;
     }
 
-    const snapshot = buildWidgetSnapshot({
-      locale: me?.locale,
-      signedIn: isAuthenticated,
-      projectId,
-      projectName: project?.name,
-      events,
-      tasks,
-    });
-    const payload = JSON.stringify(snapshot);
-    if (payload === lastPayload.current) {
-      return;
+    let cancelled = false;
+
+    async function sync() {
+      writeWidgetAuth(isAuthenticated, locale);
+
+      if (!isAuthenticated) {
+        await refreshAllWidgets(locale);
+        return;
+      }
+
+      const projectIds = configuredProjectIds();
+      if (projectIds.length === 0) {
+        await refreshAllWidgets(locale);
+        return;
+      }
+
+      const snapshots: string[] = [];
+
+      for (const projectId of projectIds) {
+        const pid = projectId as Id<"projects">;
+        const [events, tasks, project] = await Promise.all([
+          convex.query(api.events.listByRange, {
+            projectId: pid,
+            from: bounds.from,
+            to: bounds.to,
+          }),
+          convex.query(api.tasks.myTasks, { projectId: pid }),
+          convex.query(api.projects.get, { projectId: pid }),
+        ]);
+        if (cancelled) {
+          return;
+        }
+        const snapshot = buildWidgetSnapshot({
+          locale,
+          signedIn: true,
+          projectId: pid,
+          projectName: project?.name,
+          events,
+          tasks,
+        });
+        persistProjectSnapshot(pid, snapshot);
+        snapshots.push(JSON.stringify(snapshot));
+      }
+
+      const payload = `${locale}:${snapshots.join("|")}`;
+      if (payload === lastSyncKey.current) {
+        return;
+      }
+      lastSyncKey.current = payload;
+      await refreshAllWidgets(locale);
     }
-    lastPayload.current = payload;
-    persistAndRefreshWidget(snapshot);
-  }, [isAuthenticated, me?.locale, projectId, project?.name, events, tasks]);
+
+    void sync();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, locale, convex, bounds.from, bounds.to]);
 
   return null;
 }

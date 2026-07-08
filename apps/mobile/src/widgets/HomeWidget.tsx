@@ -2,14 +2,18 @@ import * as Linking from "expo-linking";
 import type React from "react";
 import {
   FlexWidget,
+  ImageWidget,
   TextWidget,
   type WidgetRepresentation,
 } from "react-native-android-widget";
 import { DEFAULT_LOCALE } from "@/i18n/config";
-import { widgetLabels } from "./labels";
+import { unconfiguredWidgetSnapshot } from "./placeholders";
 import type { WidgetSnapshot } from "./types";
 
 const FONT = "Convergence_400Regular";
+const LOGO_SIZE = 22;
+const WIDGET_LOGO =
+  require("../../assets/images/notification-icon.png") as number;
 
 const palette = {
   light: {
@@ -32,6 +36,43 @@ type Scheme = keyof typeof palette;
 
 function appUri(path: string): string {
   return Linking.createURL(path.replace(/^\//, ""));
+}
+
+function widgetHeader(
+  title: string,
+  colors: (typeof palette)[Scheme],
+  homePath?: string,
+) {
+  return (
+    <FlexWidget
+      clickAction={homePath ? "OPEN_URI" : undefined}
+      clickActionData={homePath ? { uri: appUri(homePath) } : undefined}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+      }}
+    >
+      <ImageWidget
+        image={WIDGET_LOGO}
+        imageWidth={LOGO_SIZE}
+        imageHeight={LOGO_SIZE}
+        radius={5}
+      />
+      <TextWidget
+        text={title}
+        maxLines={1}
+        truncate="END"
+        style={{
+          marginLeft: 8,
+          fontSize: 16,
+          fontFamily: FONT,
+          fontWeight: "700",
+          color: colors.text,
+        }}
+      />
+    </FlexWidget>
+  );
 }
 
 function sectionLabel(text: string, colors: (typeof palette)[Scheme]) {
@@ -157,9 +198,6 @@ function renderForScheme(
   scheme: Scheme,
 ): React.JSX.Element {
   const colors = palette[scheme];
-  const title =
-    snapshot.projectName ??
-    (snapshot.signedIn ? snapshot.labels.noGroup : "Suro");
 
   if (!snapshot.signedIn) {
     return (
@@ -174,16 +212,7 @@ function renderForScheme(
           alignItems: "center",
         }}
       >
-        <TextWidget
-          text="Suro"
-          style={{
-            fontSize: 18,
-            fontFamily: FONT,
-            fontWeight: "700",
-            color: colors.text,
-            marginBottom: 8,
-          }}
-        />
+        {widgetHeader("Suro", colors)}
         <TextWidget
           text={snapshot.labels.signIn}
           style={{
@@ -197,12 +226,37 @@ function renderForScheme(
     );
   }
 
+  if (!snapshot.projectId) {
+    return (
+      <FlexWidget
+        clickAction="OPEN_APP"
+        style={{
+          height: "match_parent",
+          width: "match_parent",
+          backgroundColor: colors.bg,
+          padding: 16,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {widgetHeader("Suro", colors)}
+        <TextWidget
+          text={snapshot.labels.configurePrompt}
+          style={{
+            fontSize: 13,
+            fontFamily: FONT,
+            color: colors.muted,
+            textAlign: "center",
+          }}
+        />
+      </FlexWidget>
+    );
+  }
+
+  const title = snapshot.projectName ?? snapshot.labels.noGroup;
+
   return (
     <FlexWidget
-      clickAction={snapshot.homePath ? "OPEN_URI" : "OPEN_APP"}
-      clickActionData={
-        snapshot.homePath ? { uri: appUri(snapshot.homePath) } : undefined
-      }
       style={{
         height: "match_parent",
         width: "match_parent",
@@ -211,56 +265,30 @@ function renderForScheme(
         flexDirection: "column",
       }}
     >
-      <TextWidget
-        text={title}
-        maxLines={1}
-        truncate="END"
-        style={{
-          fontSize: 16,
-          fontFamily: FONT,
-          fontWeight: "700",
-          color: colors.text,
-          marginBottom: 12,
-        }}
-      />
+      {widgetHeader(title, colors, snapshot.homePath)}
 
       {sectionLabel(snapshot.labels.upcoming, colors)}
       {snapshot.events.length === 0
-        ? emptyLine(
-            snapshot.projectId
-              ? snapshot.labels.noEvents
-              : snapshot.labels.noGroup,
-            colors,
-          )
+        ? emptyLine(snapshot.labels.noEvents, colors)
         : snapshot.events.map((event) => eventRow(event, colors))}
 
       {sectionLabel(snapshot.labels.myTasks, colors)}
       {snapshot.tasks.length === 0
-        ? emptyLine(
-            snapshot.projectId
-              ? snapshot.labels.noTasks
-              : snapshot.labels.noGroup,
-            colors,
-          )
+        ? emptyLine(snapshot.labels.noTasks, colors)
         : snapshot.tasks.map((task) => taskRow(task, colors))}
     </FlexWidget>
   );
 }
 
 export function renderHomeWidget(
-  snapshot: WidgetSnapshot | null,
+  snapshot: WidgetSnapshot,
 ): WidgetRepresentation {
-  const data = snapshot ?? {
-    updatedAt: Date.now(),
-    locale: DEFAULT_LOCALE,
-    signedIn: false,
-    labels: widgetLabels(DEFAULT_LOCALE),
-    events: [],
-    tasks: [],
-  };
-
   return {
-    light: renderForScheme(data, "light"),
-    dark: renderForScheme(data, "dark"),
+    light: renderForScheme(snapshot, "light"),
+    dark: renderForScheme(snapshot, "dark"),
   };
+}
+
+export function renderDefaultWidget(): WidgetRepresentation {
+  return renderHomeWidget(unconfiguredWidgetSnapshot(DEFAULT_LOCALE));
 }

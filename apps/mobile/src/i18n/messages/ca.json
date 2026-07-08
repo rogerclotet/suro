@@ -789,7 +789,13 @@
       "label": "Suro",
       "description": "Propers esdeveniments i les teves tasques assignades",
       "signIn": "Obre Suro per iniciar sessió",
-      "noGroup": "Obre Suro per triar un grup"
+      "noGroup": "Obre Suro per triar un grup",
+      "configurePrompt": "Mantén premut el widget per triar un grup",
+      "chooseGroup": "Tria un grup",
+      "chooseGroupHint": "Cada widget pot mostrar un grup diferent. Tria'n un per a aquest widget.",
+      "save": "Desa",
+      "cancel": "Cancel·la",
+      "signInToConfigure": "Inicia sessió a Suro per configurar aquest widget."
     },
     "onboarding": {
       "welcomeTitle": "Benvingut a Suro!",

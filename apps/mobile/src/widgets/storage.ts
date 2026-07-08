@@ -1,10 +1,10 @@
 import { readRaw, writeRaw } from "@/lib/offline/storage";
-import { SNAPSHOT_KEY } from "./constants";
+import { widgetSnapshotKey } from "./constants";
 import type { WidgetSnapshot } from "./types";
 
-export function readWidgetSnapshot(): WidgetSnapshot | null {
-  const raw = readRaw(SNAPSHOT_KEY);
-  if (raw === undefined) {
+export function readWidgetSnapshot(projectId: string): WidgetSnapshot | null {
+  const raw = readRaw(widgetSnapshotKey(projectId));
+  if (raw === undefined || raw === "") {
     return null;
   }
   try {
@@ -14,10 +14,13 @@ export function readWidgetSnapshot(): WidgetSnapshot | null {
   }
 }
 
-export function writeWidgetSnapshot(snapshot: WidgetSnapshot): void {
-  writeRaw(SNAPSHOT_KEY, JSON.stringify(snapshot));
+export function writeWidgetSnapshot(
+  projectId: string,
+  snapshot: WidgetSnapshot,
+): void {
+  writeRaw(widgetSnapshotKey(projectId), JSON.stringify(snapshot));
 }
 
-export function clearWidgetSnapshot(): void {
-  writeRaw(SNAPSHOT_KEY, "");
+export function deleteWidgetSnapshot(projectId: string): void {
+  writeRaw(widgetSnapshotKey(projectId), "");
 }

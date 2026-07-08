@@ -789,7 +789,13 @@
       "label": "Suro",
       "description": "Upcoming events and your assigned tasks",
       "signIn": "Open Suro to sign in",
-      "noGroup": "Open Suro to choose a group"
+      "noGroup": "Open Suro to choose a group",
+      "configurePrompt": "Tap and hold the widget to choose a group",
+      "chooseGroup": "Choose group",
+      "chooseGroupHint": "Each widget can show a different group. Pick one for this widget.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "signInToConfigure": "Sign in to Suro to configure this widget."
     },
     "onboarding": {
       "welcomeTitle": "Welcome to Suro!",

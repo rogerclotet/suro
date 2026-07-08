@@ -25,6 +25,7 @@ export type WidgetLabels = {
   noTasks: string;
   signIn: string;
   noGroup: string;
+  configurePrompt: string;
   allDay: string;
 };
 

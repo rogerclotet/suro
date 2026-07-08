@@ -789,7 +789,13 @@
       "label": "Suro",
       "description": "Próximos eventos y tus tareas asignadas",
       "signIn": "Abre Suro para iniciar sesión",
-      "noGroup": "Abre Suro para elegir un grupo"
+      "noGroup": "Abre Suro para elegir un grupo",
+      "configurePrompt": "Mantén pulsado el widget para elegir un grupo",
+      "chooseGroup": "Elige un grupo",
+      "chooseGroupHint": "Cada widget puede mostrar un grupo distinto. Elige uno para este widget.",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "signInToConfigure": "Inicia sesión en Suro para configurar este widget."
     },
     "onboarding": {
       "welcomeTitle": "¡Bienvenido a Suro!",

@@ -1,7 +1,15 @@
 /** Registered in app.json and passed to the Android widget APIs. */
 export const WIDGET_NAME = "SuroHome";
 
-export const SNAPSHOT_KEY = "suro.widgetSnapshot";
+/** widget instance id → project id */
+export const WIDGET_CONFIG_KEY = "suro.widgetConfigs";
+
+/** Last known auth + locale for headless widget refreshes. */
+export const WIDGET_AUTH_KEY = "suro.widgetAuth";
+
+export function widgetSnapshotKey(projectId: string): string {
+  return `suro.widgetSnapshot:${projectId}`;
+}
 
 /** Matches the Home dashboard look-ahead window. */
 export const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
