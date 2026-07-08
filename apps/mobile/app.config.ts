@@ -93,7 +93,14 @@ const applyVariant = (resolved: ExpoConfig): ExpoConfig => {
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const resolved = applyVariant({ ...(config as ExpoConfig), version });
+  const resolved = applyVariant({
+    ...(config as ExpoConfig),
+    version,
+    plugins: [
+      ...(config.plugins ?? []),
+      "./plugins/widget-configure-on-add.js",
+    ],
+  });
   // Only a local `expo run:ios` sim build strips entitlements it can't sign;
   // everything else (EAS builds and EAS's capability-sync introspection) keeps
   // them, so EAS enables and maintains the capabilities from app.json.

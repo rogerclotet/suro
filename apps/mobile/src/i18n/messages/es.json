@@ -790,7 +790,7 @@
       "description": "Próximos eventos y tus tareas asignadas",
       "signIn": "Abre Suro para iniciar sesión",
       "noGroup": "Abre Suro para elegir un grupo",
-      "configurePrompt": "Mantén pulsado el widget para elegir un grupo",
+      "configurePrompt": "Abre Suro para configurar este widget",
       "chooseGroup": "Elige un grupo",
       "chooseGroupHint": "Cada widget puede mostrar un grupo distinto. Elige uno para este widget.",
       "save": "Guardar",

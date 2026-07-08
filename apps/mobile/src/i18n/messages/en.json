@@ -790,7 +790,7 @@
       "description": "Upcoming events and your assigned tasks",
       "signIn": "Open Suro to sign in",
       "noGroup": "Open Suro to choose a group",
-      "configurePrompt": "Tap and hold the widget to choose a group",
+      "configurePrompt": "Open Suro to set up this widget",
       "chooseGroup": "Choose group",
       "chooseGroupHint": "Each widget can show a different group. Pick one for this widget.",
       "save": "Save",

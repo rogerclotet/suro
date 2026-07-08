@@ -1,1 +1,1 @@
-• Els suggeriments enviats des de l'app ara arriben correctament.
+• El widget d'inici d'Android mostra el logotip correctament i obre el selector de grup en afegir-lo.

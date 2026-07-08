@@ -1,1 +1,1 @@
-• Feedback sent from the mobile app is now delivered reliably.
+• The Android home-screen widget shows the logo correctly and opens the group picker when you add it.

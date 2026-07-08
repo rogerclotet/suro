@@ -790,7 +790,7 @@
       "description": "Propers esdeveniments i les teves tasques assignades",
       "signIn": "Obre Suro per iniciar sessió",
       "noGroup": "Obre Suro per triar un grup",
-      "configurePrompt": "Mantén premut el widget per triar un grup",
+      "configurePrompt": "Obre Suro per configurar aquest widget",
       "chooseGroup": "Tria un grup",
       "chooseGroupHint": "Cada widget pot mostrar un grup diferent. Tria'n un per a aquest widget.",
       "save": "Desa",
