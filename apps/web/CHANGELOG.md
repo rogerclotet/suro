@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.15.2] — 2026-07-08
+
+### ca
+
+- [fix] Els suggeriments enviats des de l'app ara arriben correctament.
+
+### es
+
+- [fix] Los comentarios enviados desde la app ahora llegan correctamente.
+
+### en
+
+- [fix] Feedback sent from the mobile app is now delivered reliably.
+
 ## [1.15.1] — 2026-07-08
 
 ### ca
