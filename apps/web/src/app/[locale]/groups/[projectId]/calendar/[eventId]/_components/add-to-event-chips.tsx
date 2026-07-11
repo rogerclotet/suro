@@ -20,6 +20,7 @@ import {
   ResponsiveMenuTrigger,
 } from "@/components/ui/responsive-menu";
 import type { LinkedNote, LinkedPot } from "@/lib/queries/use-events";
+import UploadButton from "../../../files/_components/upload-button";
 import CreateEventPotForm from "./create-event-pot-form";
 import LinkListForm from "./link-list-form";
 import LinkNoteForm from "./link-note-form";
@@ -34,21 +35,30 @@ const CHIP_CLASSES =
 /**
  * Low-prominence prompts surfacing the settings menu's add-to-event actions
  * for whichever kinds the event is still missing, so they're discoverable
- * without opening the menu. (No file chip: the always-visible Files section
- * already carries an upload button.)
+ * without opening the menu.
  */
 export default function AddToEventChips({
+  projectId,
+  eventId,
   event,
   list,
   note,
   pot,
   canCreatePot,
+  hasFiles,
+  hasLinkCandidates,
+  onUploadingChange,
 }: {
+  projectId: string;
+  eventId: string;
   event: Event;
   list: List | null;
   note: LinkedNote | null;
   pot: LinkedPot | null;
   canCreatePot: boolean;
+  hasFiles: boolean;
+  hasLinkCandidates: boolean;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const t = useTranslations("calendar");
   const { handleCreateLinkedList, handleCreateLinkedNote } =
@@ -57,7 +67,9 @@ export default function AddToEventChips({
   const missingList = list === null;
   const missingNote = note === null;
   const missingPot = pot === null && canCreatePot;
-  if (!missingList && !missingNote && !missingPot) {
+  const missingFiles = !hasFiles;
+
+  if (!missingList && !missingNote && !missingPot && !missingFiles) {
     return null;
   }
 
@@ -96,58 +108,68 @@ export default function AddToEventChips({
           }
         />
       )}
-      <ResponsiveMenu>
-        <ResponsiveMenuTrigger>
-          <Button variant="outline" size="sm" className={CHIP_CLASSES}>
-            <Link2 />
-            {t("linkExistingChip")}
-          </Button>
-        </ResponsiveMenuTrigger>
-        <ResponsiveMenuContent title={t("linkExistingChip")}>
-          {missingList && (
-            <LinkListForm
-              trigger={
-                <ResponsiveMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="cursor-pointer gap-2"
-                >
-                  <ListTodo />
-                  {t("linkExistingListMenuItem")}
-                </ResponsiveMenuItem>
-              }
-              event={event}
-            />
-          )}
-          {missingNote && (
-            <LinkNoteForm
-              trigger={
-                <ResponsiveMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="cursor-pointer gap-2"
-                >
-                  <NotebookText />
-                  {t("linkExistingNoteMenuItem")}
-                </ResponsiveMenuItem>
-              }
-              event={event}
-            />
-          )}
-          {missingPot && (
-            <LinkPotForm
-              trigger={
-                <ResponsiveMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="cursor-pointer gap-2"
-                >
-                  <Wallet />
-                  {t("linkExistingPotMenuItem")}
-                </ResponsiveMenuItem>
-              }
-              event={event}
-            />
-          )}
-        </ResponsiveMenuContent>
-      </ResponsiveMenu>
+      {missingFiles && (
+        <UploadButton
+          projectId={projectId}
+          eventId={eventId}
+          variant="chip"
+          onUploadingChange={onUploadingChange}
+        />
+      )}
+      {hasLinkCandidates && (
+        <ResponsiveMenu>
+          <ResponsiveMenuTrigger>
+            <Button variant="outline" size="sm" className={CHIP_CLASSES}>
+              <Link2 />
+              {t("linkExistingChip")}
+            </Button>
+          </ResponsiveMenuTrigger>
+          <ResponsiveMenuContent title={t("linkExistingChip")}>
+            {missingList && (
+              <LinkListForm
+                trigger={
+                  <ResponsiveMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <ListTodo />
+                    {t("linkExistingListMenuItem")}
+                  </ResponsiveMenuItem>
+                }
+                event={event}
+              />
+            )}
+            {missingNote && (
+              <LinkNoteForm
+                trigger={
+                  <ResponsiveMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <NotebookText />
+                    {t("linkExistingNoteMenuItem")}
+                  </ResponsiveMenuItem>
+                }
+                event={event}
+              />
+            )}
+            {missingPot && (
+              <LinkPotForm
+                trigger={
+                  <ResponsiveMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer gap-2"
+                  >
+                    <Wallet />
+                    {t("linkExistingPotMenuItem")}
+                  </ResponsiveMenuItem>
+                }
+                event={event}
+              />
+            )}
+          </ResponsiveMenuContent>
+        </ResponsiveMenu>
+      )}
     </div>
   );
 }

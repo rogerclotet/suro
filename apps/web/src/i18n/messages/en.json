@@ -591,6 +591,7 @@
   "files": {
     "empty": "No files yet",
     "shareTitle": "Share files",
+    "uploadFile": "Upload file",
     "shareSuccess": "File shared successfully",
     "shareError": "Could not share the file",
     "uploading": "Sharing files...",

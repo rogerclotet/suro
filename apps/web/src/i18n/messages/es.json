@@ -591,6 +591,7 @@
   "files": {
     "empty": "Aún no hay archivos",
     "shareTitle": "Compartir archivos",
+    "uploadFile": "Subir archivo",
     "shareSuccess": "Archivo compartido correctamente",
     "shareError": "No se ha podido compartir el archivo",
     "uploading": "Compartiendo archivos...",
