@@ -1,16 +1,16 @@
 "use client";
 
-import { ChevronDown, Info } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { useProjects } from "@/app/_state/project-state";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   type PotsOverview,
   useProjectPotsOverview,
 } from "@/lib/queries/use-expenses";
 import CreatePotButton from "./create-pot-button/create-pot-button";
 import PotPreview from "./pot-preview";
+import SoloExpensesView from "./solo-expenses-view";
 
 // Settled pots pile up once a trip is over: show the latest page and grow it in
 // place behind "show more". Mirrors the lists overview's completed pagination.
@@ -19,18 +19,11 @@ const SETTLED_PAGE_SIZE = 5;
 export default function PotsList({ projectId }: { projectId: string }) {
   const { project } = useProjects();
   const t = useTranslations("expenses");
-  const tCommon = useTranslations("common");
   const [settledLimit, setSettledLimit] = useState(SETTLED_PAGE_SIZE);
   const overview = useStable(useProjectPotsOverview(projectId, settledLimit));
 
   if (project && project.users.length === 1) {
-    return (
-      <Alert className="mx-auto max-w-lg">
-        <Info className="h-4 w-4" />
-        <AlertTitle>{tCommon("info")}</AlertTitle>
-        <AlertDescription>{t("infoDescription")}</AlertDescription>
-      </Alert>
-    );
+    return <SoloExpensesView projectId={projectId} />;
   }
 
   if (overview === undefined) {

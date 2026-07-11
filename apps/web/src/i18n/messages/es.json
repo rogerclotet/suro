@@ -689,7 +689,13 @@
     "spendingPaid": "ha pagado",
     "spendingReceived": "ha recibido",
     "spendingTo": "a",
-    "spendingFor": "por"
+    "spendingFor": "por",
+    "soloThisMonth": "Este mes",
+    "soloLastMonth": "Mes pasado",
+    "soloRecentSpendings": "Gastos recientes",
+    "soloNoSpendings": "Aún no hay gastos. Añade uno para empezar a registrar.",
+    "soloUntitledSpending": "Gasto",
+    "soloCreateSpendingDescription": "Registra un gasto personal"
   },
   "secretSanta": {
     "comingSoonTitle": "Próximamente",

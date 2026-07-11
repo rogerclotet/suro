@@ -27,6 +27,7 @@ import {
   Txt,
   useFabScroll,
 } from "@/ui";
+import SoloExpensesView from "./solo-expenses";
 
 const SETTLED_PAGE_SIZE = 5;
 
@@ -45,8 +46,7 @@ export default function ExpensesOverview() {
   const fab = useFabScroll();
   const tExp = useTranslations("mobile.expenses");
 
-  // Expenses are a group feature: a pot needs at least two members to split
-  // between. For a solo group, show an explainer instead — mirrors the PWA.
+  // Solo groups get a personal expense tracker instead of shared pots.
   const soloGroup = members !== undefined && members.length === 1;
   const isEmpty =
     overview !== undefined &&
@@ -68,12 +68,12 @@ export default function ExpensesOverview() {
           ),
         }}
       />
-      {overview === undefined || members === undefined ? (
+      {members === undefined ? (
         <Loading />
       ) : soloGroup ? (
-        <Txt muted style={{ padding: 24, textAlign: "center" }}>
-          {tExp("infoDescription")}
-        </Txt>
+        <SoloExpensesView projectId={pid} />
+      ) : overview === undefined ? (
+        <Loading />
       ) : isEmpty ? (
         <Txt muted style={{ padding: 24, textAlign: "center" }}>
           {tExp("empty")}

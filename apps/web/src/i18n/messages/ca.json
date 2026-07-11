@@ -689,7 +689,13 @@
     "spendingPaid": "ha pagat",
     "spendingReceived": "ha rebut",
     "spendingTo": "a",
-    "spendingFor": "per"
+    "spendingFor": "per",
+    "soloThisMonth": "Aquest mes",
+    "soloLastMonth": "Mes passat",
+    "soloRecentSpendings": "Despeses recents",
+    "soloNoSpendings": "Encara no hi ha despeses. Afegeix-ne una per començar a registrar.",
+    "soloUntitledSpending": "Despesa",
+    "soloCreateSpendingDescription": "Registra una despesa personal"
   },
   "secretSanta": {
     "comingSoonTitle": "Aviat disponible",

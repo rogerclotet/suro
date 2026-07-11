@@ -364,3 +364,57 @@ export function useOfflineGetPot(
     potId,
   ]);
 }
+
+type SoloExpenses = NonNullable<
+  FunctionReturnType<typeof api.expenses.getSoloExpenses>
+>;
+
+export function useOfflineSoloExpenses(
+  projectId: Id<"projects">,
+): SoloExpenses | null | undefined {
+  const base = usePersistentQuery(api.expenses.getSoloExpenses, { projectId });
+  const entries = useOutboxEntries();
+  const idmap = useIdmap();
+  const user = useCurrentUser();
+  return useMemo((): SoloExpenses | null | undefined => {
+    if (base === null || base === undefined) {
+      return base;
+    }
+    const resolve = resolver(idmap);
+    let potId = base.potId;
+    for (const entry of entries) {
+      if (
+        entry.functionName === "expenses:createPot" &&
+        String(entry.args.projectId) === projectId
+      ) {
+        const memberIds = Array.isArray(entry.args.memberIds)
+          ? entry.args.memberIds
+          : [];
+        if (memberIds.length === 1) {
+          const tempId = entry.tempIds[0];
+          if (tempId !== undefined) {
+            potId = tempId as Id<"pots">;
+          }
+        }
+      }
+    }
+    const resolvedPotId = potId ? (resolve(potId) as Id<"pots">) : null;
+    const spendings =
+      resolvedPotId === null
+        ? base.spendings
+        : overlaySpendings(base.spendings, resolvedPotId, entries, idmap, {
+            projectId,
+            createdBy: user?.id ?? base.memberId,
+            nameById: new Map(),
+          });
+    return {
+      ...base,
+      potId: resolvedPotId,
+      spendings: spendings.map((spending) => ({
+        ...spending,
+        fromName: null,
+        toName: null,
+      })),
+    } as SoloExpenses;
+  }, [base, entries, idmap, user, projectId]);
+}

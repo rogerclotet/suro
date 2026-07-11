@@ -3,6 +3,7 @@ import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
 import { AppleNative } from "./AppleNative";
+import { isAllowedWebOrigin } from "./model/allowedWebOrigins";
 import { track } from "./model/analytics";
 import { getRandomColor } from "./model/colors";
 import { ResendOTP } from "./ResendOTP";
@@ -25,45 +26,6 @@ type AppleFirstAuthUser = {
   name?: { firstName?: string; lastName?: string };
   email?: string;
 };
-
-/**
- * Whether an absolute web `redirectTo` may be returned to after an OAuth
- * round-trip. The web client sends its own origin, because a single deployment
- * can serve many origins — the dev backend is shared by localhost and every
- * `mr-*.suro.clotet.dev` preview, so SITE_URL alone can't validate them.
- *
- * Reads a comma-separated `ALLOWED_WEB_ORIGINS` (falling back to SITE_URL).
- * Each entry is an exact origin, or may use a leading `*.` to match any
- * subdomain, e.g. `https://*.suro.clotet.dev` matches `mr-12.suro.clotet.dev`.
- */
-function isAllowedWebOrigin(redirectTo: string): boolean {
-  let url: URL;
-  try {
-    url = new URL(redirectTo);
-  } catch {
-    return false;
-  }
-  const allowlist = (
-    process.env.ALLOWED_WEB_ORIGINS ??
-    process.env.SITE_URL ??
-    ""
-  )
-    .split(",")
-    .map((entry) => entry.trim().replace(/\/$/, ""))
-    .filter((entry) => entry.length > 0);
-
-  return allowlist.some((entry) => {
-    const wildcard = entry.match(/^(https?:\/\/)\*\.(.+)$/);
-    if (wildcard === null) {
-      return url.origin === entry;
-    }
-    const [, scheme, baseDomain] = wildcard;
-    return (
-      `${url.protocol}//` === scheme &&
-      (url.hostname === baseDomain || url.hostname.endsWith(`.${baseDomain}`))
-    );
-  });
-}
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
