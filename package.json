@@ -13,6 +13,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "biome:check": "biome check",
     "check:metadata": "node apps/mobile/store/check-metadata.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "biome:fix": "biome check --write",
     "changelog:generate": "pnpm --filter web changelog:generate",
     "prepare": "husky"

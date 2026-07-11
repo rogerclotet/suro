@@ -16,6 +16,7 @@ import * as v from "valibot";
 import SidebarLayout from "@/app/_components/navigation/navigation-layout/sidebar-layout";
 import ProjectsProvider from "@/app/_components/projects-provider/projects-provider";
 import UserIdentifier from "@/app/_components/user-identifier";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import { routing } from "@/i18n/routing";
 import ConvexClientProvider from "@/providers/convex-client-provider";
 
@@ -52,7 +53,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   const title = t("title");

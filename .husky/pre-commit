@@ -1,4 +1,5 @@
 pnpm lint-staged
 pnpm biome:check
+pnpm check:i18n
 pnpm typecheck
 pnpm test

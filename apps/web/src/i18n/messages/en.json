@@ -470,6 +470,7 @@
     "taskBucket_noDate": "No date"
   },
   "categories": {
+    "label": "Category",
     "searchPlaceholder": "Search categories",
     "createNamed": "Create \"{name}\"",
     "noResults": "No categories found"

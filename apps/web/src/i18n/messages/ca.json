@@ -470,6 +470,7 @@
     "taskBucket_noDate": "Sense data"
   },
   "categories": {
+    "label": "Categoria",
     "searchPlaceholder": "Cerca categories",
     "createNamed": "Crea \"{name}\"",
     "noResults": "No s'ha trobat cap categoria"

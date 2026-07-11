@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import { getAuthToken } from "@/lib/convex/server";
 import { pathnameHeader } from "@/proxy";
 import AcceptInviteButton from "./_components/accept-invite-button/accept-invite-button";
@@ -120,7 +121,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; projectId: string; inviteToken: string }>;
 }): Promise<Metadata> {
-  const { locale, projectId, inviteToken } = await params;
+  const { locale: localeParam, projectId, inviteToken } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "invitation" });
 
   // Unauthenticated on purpose: the link unfurler (WhatsApp/Telegram) is never

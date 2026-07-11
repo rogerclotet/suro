@@ -1,4 +1,5 @@
 import type { Spending } from "@/app/_data/spending";
+import type { InfoKey } from "@/i18n/message-keys";
 
 export type DemoMember = {
   id: string;
@@ -22,7 +23,7 @@ export type DemoListCategory = {
 
 export type DemoFile = {
   id: string;
-  name: string;
+  name: InfoKey;
   type: string;
   size: number;
   uploadedByName: string;
