@@ -23,6 +23,25 @@ import MonetaryAmount from "./monetary-amount";
 import SoloMonthChart from "./solo-month-chart";
 import SoloSpendingLine from "./solo-spending-line";
 
+function MonthCardHeading({
+  period,
+  month,
+}: {
+  period: string;
+  month: string;
+}) {
+  return (
+    <CardHeader className="gap-0.5 pb-2">
+      <CardDescription className="text-xs leading-tight">
+        {period}
+      </CardDescription>
+      <CardTitle className="font-medium text-sm leading-tight">
+        {month}
+      </CardTitle>
+    </CardHeader>
+  );
+}
+
 export default function SoloExpensesView({ projectId }: { projectId: string }) {
   const t = useTranslations("expenses");
   const locale = useLocale();
@@ -77,12 +96,10 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{t("soloThisMonth")}</CardDescription>
-            <CardTitle className="font-medium text-base text-muted-foreground">
-              {thisMonthLabel}
-            </CardTitle>
-          </CardHeader>
+          <MonthCardHeading
+            period={t("soloThisMonth")}
+            month={thisMonthLabel}
+          />
           <CardContent>
             <MonetaryAmount
               amount={thisMonthTotal}
@@ -92,12 +109,10 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{t("soloLastMonth")}</CardDescription>
-            <CardTitle className="font-medium text-base text-muted-foreground">
-              {lastMonthLabel}
-            </CardTitle>
-          </CardHeader>
+          <MonthCardHeading
+            period={t("soloLastMonth")}
+            month={lastMonthLabel}
+          />
           <CardContent>
             <MonetaryAmount
               amount={lastMonthTotal}
@@ -110,31 +125,21 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{t("soloThisMonth")}</CardDescription>
-            <CardTitle className="font-medium text-base text-muted-foreground">
-              {thisMonthLabel}
-            </CardTitle>
-          </CardHeader>
+          <MonthCardHeading
+            period={t("soloThisMonth")}
+            month={thisMonthLabel}
+          />
           <CardContent>
-            <SoloMonthChart
-              amounts={thisMonthDaily}
-              className="h-[4.5rem] w-full"
-            />
+            <SoloMonthChart amounts={thisMonthDaily} monthOffset={0} />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{t("soloLastMonth")}</CardDescription>
-            <CardTitle className="font-medium text-base text-muted-foreground">
-              {lastMonthLabel}
-            </CardTitle>
-          </CardHeader>
+          <MonthCardHeading
+            period={t("soloLastMonth")}
+            month={lastMonthLabel}
+          />
           <CardContent>
-            <SoloMonthChart
-              amounts={lastMonthDaily}
-              className="h-[4.5rem] w-full"
-            />
+            <SoloMonthChart amounts={lastMonthDaily} monthOffset={-1} />
           </CardContent>
         </Card>
       </div>

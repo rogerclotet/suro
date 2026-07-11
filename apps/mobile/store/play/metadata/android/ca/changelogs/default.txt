@@ -1,3 +1,1 @@
-• Afegir un element a una llista de tasques ja no fa que la pàgina es pengi en obrir el selector de categories.
-• Les pàgines d'esdeveniments amaguen la secció de fitxers buida i mostren accions per afegir o pujar fitxers, com al mòbil.
-• La barra lateral d'escriptori distingeix millor el hover de l'element actiu, ressalta només la ruta fill quan una secció està desplegada i obre el desplegable en clicar la fila pare.
+• Els grups d'un sol usuari poden registrar despeses personals amb totals mensuals, gràfics diaris i una llista d'expenses, a la web i al mòbil.

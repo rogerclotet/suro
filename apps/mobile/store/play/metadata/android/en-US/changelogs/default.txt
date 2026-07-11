@@ -1,3 +1,1 @@
-• Adding an item to a task list no longer crashes the page when you open the category picker.
-• Event pages hide the empty Files section and show add/upload chips instead, matching mobile.
-• The desktop sidebar uses distinct hover and active colors, highlights only the child route when a section is expanded, and toggles the dropdown when you click the parent row.
+• Single-user groups can track personal expenses with monthly totals, daily charts, and an expense list, on web and mobile.

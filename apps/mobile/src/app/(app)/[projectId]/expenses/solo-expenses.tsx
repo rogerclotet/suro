@@ -32,6 +32,25 @@ type SoloExpenses = NonNullable<
 >;
 type SoloSpending = SoloExpenses["spendings"][number];
 
+function MonthCardHeading({
+  period,
+  month,
+}: {
+  period: string;
+  month: string;
+}) {
+  return (
+    <View style={{ gap: 2 }}>
+      <Txt muted size={11}>
+        {period}
+      </Txt>
+      <Txt size={13} weight="700">
+        {month}
+      </Txt>
+    </View>
+  );
+}
+
 function SoloSpendingLine({ spending }: { spending: SoloSpending }) {
   const tExp = useTranslations("mobile.expenses");
   const timeAgo = useTimeAgo();
@@ -209,12 +228,10 @@ export default function SoloExpensesView({
           <View style={{ flex: 1 }}>
             <Card>
               <View style={{ gap: 8 }}>
-                <Txt muted size={13}>
-                  {tExp("soloThisMonth")}
-                </Txt>
-                <Txt muted size={13}>
-                  {thisMonthLabel}
-                </Txt>
+                <MonthCardHeading
+                  period={tExp("soloThisMonth")}
+                  month={thisMonthLabel}
+                />
                 <Txt size={28} weight="700">
                   {formatMoney(thisMonthTotal)}
                 </Txt>
@@ -224,12 +241,10 @@ export default function SoloExpensesView({
           <View style={{ flex: 1 }}>
             <Card>
               <View style={{ gap: 8 }}>
-                <Txt muted size={13}>
-                  {tExp("soloLastMonth")}
-                </Txt>
-                <Txt muted size={13}>
-                  {lastMonthLabel}
-                </Txt>
+                <MonthCardHeading
+                  period={tExp("soloLastMonth")}
+                  month={lastMonthLabel}
+                />
                 <Txt size={28} weight="700">
                   {formatMoney(lastMonthTotal)}
                 </Txt>
@@ -242,12 +257,10 @@ export default function SoloExpensesView({
           <View style={{ flex: 1 }}>
             <Card>
               <View style={{ gap: 8 }}>
-                <Txt muted size={13}>
-                  {tExp("soloThisMonth")}
-                </Txt>
-                <Txt muted size={13}>
-                  {thisMonthLabel}
-                </Txt>
+                <MonthCardHeading
+                  period={tExp("soloThisMonth")}
+                  month={thisMonthLabel}
+                />
                 <SoloMonthChart
                   amounts={thisMonthDaily}
                   color={t.primary}
@@ -259,12 +272,10 @@ export default function SoloExpensesView({
           <View style={{ flex: 1 }}>
             <Card>
               <View style={{ gap: 8 }}>
-                <Txt muted size={13}>
-                  {tExp("soloLastMonth")}
-                </Txt>
-                <Txt muted size={13}>
-                  {lastMonthLabel}
-                </Txt>
+                <MonthCardHeading
+                  period={tExp("soloLastMonth")}
+                  month={lastMonthLabel}
+                />
                 <SoloMonthChart
                   amounts={lastMonthDaily}
                   color={t.primary}
