@@ -1133,7 +1133,12 @@
       "everyoneSplit": "Everyone (split)",
       "addSpending": "Add spending",
       "adding": "Adding…",
-      "splitAmongAll": "split among all"
+      "splitAmongAll": "split among all",
+      "soloThisMonth": "This month",
+      "soloLastMonth": "Last month",
+      "soloRecentSpendings": "Recent expenses",
+      "soloNoSpendings": "No expenses yet. Tap + to add one.",
+      "soloUntitledSpending": "Expense"
     }
   }
 }

@@ -150,3 +150,79 @@ describe("expenses: deletePot", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("expenses: solo groups", () => {
+  async function seedSolo() {
+    return t.run(async (ctx) => {
+      const alice = await ctx.db.insert("users", {
+        name: "Alice",
+        email: "alice-solo@example.test",
+      });
+      const solo = await ctx.db.insert("projects", {
+        name: "Personal",
+        createdBy: alice,
+        inviteToken: "token-solo",
+        color: "blue",
+      });
+      await ctx.db.insert("projectMembers", {
+        projectId: solo,
+        userId: alice,
+      });
+      return { alice, solo };
+    });
+  }
+
+  it("creates an implicit solo pot and records spendings", async () => {
+    const { alice: aliceId, solo } = await seedSolo();
+    const soloAlice = t.withIdentity({ subject: `${aliceId}|session` });
+
+    const potId = await soloAlice.mutation(api.expenses.ensureSoloPot, {
+      projectId: solo,
+    });
+    const overview = await soloAlice.query(api.expenses.getSoloExpenses, {
+      projectId: solo,
+    });
+    expect(overview?.potId).toBe(potId);
+
+    await soloAlice.mutation(api.expenses.createSpending, {
+      potId,
+      amount: 2500,
+      from: aliceId,
+      description: "Groceries",
+    });
+
+    const after = await soloAlice.query(api.expenses.getSoloExpenses, {
+      projectId: solo,
+    });
+    expect(after?.spendings).toHaveLength(1);
+    expect(after?.spendings[0]?.amount).toBe(2500);
+    expect(after?.spendings[0]?.description).toBe("Groceries");
+  });
+
+  it("returns null for multi-member groups", async () => {
+    const result = await alice.query(api.expenses.getSoloExpenses, {
+      projectId: ids.family,
+    });
+    expect(result).toBeNull();
+  });
+
+  it("allows a one-member pot only in solo groups", async () => {
+    const { alice: aliceId, solo } = await seedSolo();
+    const soloAlice = t.withIdentity({ subject: `${aliceId}|session` });
+
+    const potId = await soloAlice.mutation(api.expenses.createPot, {
+      projectId: solo,
+      name: "Personal",
+      memberIds: [aliceId],
+    });
+    expect(await potMembers(potId)).toHaveLength(1);
+
+    await expect(
+      alice.mutation(api.expenses.createPot, {
+        projectId: ids.family,
+        name: "Invalid",
+        memberIds: [ids.alice],
+      }),
+    ).rejects.toThrow("at least two members");
+  });
+});

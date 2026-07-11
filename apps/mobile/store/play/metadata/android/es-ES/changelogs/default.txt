@@ -1,3 +1,1 @@
-• Añadir un elemento a una lista de tareas ya no bloquea la página al abrir el selector de categorías.
-• Las páginas de eventos ocultan la sección de archivos vacía y muestran acciones para añadir o subir archivos, como en el móvil.
-• La barra lateral del escritorio distingue mejor el hover del elemento activo, resalta solo la ruta hija cuando una sección está desplegada y abre el desplegable al pulsar la fila padre.
+• Los grupos de un solo usuario pueden registrar gastos personales con totales mensuales, gráficos diarios y una lista de gastos, en la web y en el móvil.

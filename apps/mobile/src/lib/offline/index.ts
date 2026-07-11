@@ -5,6 +5,7 @@ export {
   useOfflineListGet,
   useOfflineListPotsOverview,
   useOfflineListsOverview,
+  useOfflineSoloExpenses,
 } from "./queries";
 export { useAuthGate } from "./use-auth-gate";
 export { usePersistentQuery } from "./use-persistent-query";

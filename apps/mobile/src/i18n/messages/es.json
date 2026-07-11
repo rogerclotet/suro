@@ -1133,7 +1133,12 @@
       "everyoneSplit": "Todos (repartido)",
       "addSpending": "Añadir gasto",
       "adding": "Añadiendo…",
-      "splitAmongAll": "repartido entre todos"
+      "splitAmongAll": "repartido entre todos",
+      "soloThisMonth": "Este mes",
+      "soloLastMonth": "Mes pasado",
+      "soloRecentSpendings": "Gastos recientes",
+      "soloNoSpendings": "Aún no hay gastos. Toca + para añadir uno.",
+      "soloUntitledSpending": "Gasto"
     }
   }
 }

@@ -54,6 +54,24 @@
       "react": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/components/ui/chart.tsx"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useSortedClasses": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {

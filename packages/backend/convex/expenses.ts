@@ -1,7 +1,12 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation, type QueryCtx, query } from "./_generated/server";
+import {
+  type MutationCtx,
+  mutation,
+  type QueryCtx,
+  query,
+} from "./_generated/server";
 import { track } from "./model/analytics";
 import { calculateBalances, generateProposals } from "./model/expenses";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
@@ -16,13 +21,61 @@ function publicUser(user: Doc<"users"> | null) {
   };
 }
 
+type DbCtx = QueryCtx | MutationCtx;
+
 /** The user ids belonging to a pot. */
-async function potMemberIds(ctx: QueryCtx, potId: Id<"pots">) {
+async function potMemberIds(ctx: DbCtx, potId: Id<"pots">) {
   const members = await ctx.db
     .query("potMembers")
     .withIndex("by_pot", (q) => q.eq("potId", potId))
     .collect();
   return members.map((m) => m.userId);
+}
+
+/** The user ids belonging to a project. */
+async function projectMemberIds(ctx: DbCtx, projectId: Id<"projects">) {
+  const members = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project", (q) => q.eq("projectId", projectId))
+    .collect();
+  return members.map((m) => m.userId);
+}
+
+/** The solo user's implicit expense pot, if one exists. */
+async function findSoloPot(ctx: DbCtx, projectId: Id<"projects">) {
+  const memberIds = await projectMemberIds(ctx, projectId);
+  if (memberIds.length !== 1) {
+    return null;
+  }
+  const soloUserId = memberIds[0];
+  const pots = await ctx.db
+    .query("pots")
+    .withIndex("by_project", (q) => q.eq("projectId", projectId))
+    .collect();
+  // Prefer the active solo pot with the most spendings; fall back to any solo pot.
+  let best: { pot: Doc<"pots">; count: number } | null = null;
+  for (const pot of pots) {
+    const ids = await potMemberIds(ctx, pot._id);
+    if (ids.length !== 1 || ids[0] !== soloUserId) {
+      continue;
+    }
+    const count = (
+      await ctx.db
+        .query("spendings")
+        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+        .collect()
+    ).length;
+    if (
+      best === null ||
+      count > best.count ||
+      (count === best.count &&
+        (pot.createdAt ?? pot._creationTime) >
+          (best.pot.createdAt ?? best.pot._creationTime))
+    ) {
+      best = { pot, count };
+    }
+  }
+  return best?.pot ?? null;
 }
 
 /** All project pots, active first then settled, each with its members. */
@@ -170,6 +223,88 @@ export const getPot = query({
   },
 });
 
+/**
+ * Solo-group expense tracker: the implicit pot's spendings, newest first.
+ * Returns null when the project has more than one member.
+ */
+export const getSoloExpenses = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const memberIds = await projectMemberIds(ctx, projectId);
+    if (memberIds.length !== 1) {
+      return null;
+    }
+    const soloUserId = memberIds[0];
+    if (soloUserId === undefined) {
+      return null;
+    }
+    const pot = await findSoloPot(ctx, projectId);
+    if (pot === null) {
+      return { potId: null, memberId: soloUserId, spendings: [] };
+    }
+
+    const spendingDocs = (
+      await ctx.db
+        .query("spendings")
+        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+        .collect()
+    ).sort(
+      (a, b) =>
+        (b.createdAt ?? b._creationTime) - (a.createdAt ?? a._creationTime),
+    );
+
+    return {
+      potId: pot._id,
+      memberId: soloUserId,
+      spendings: spendingDocs.map((s) => ({
+        ...s,
+        fromName: null,
+        toName: null,
+      })),
+    };
+  },
+});
+
+/** Create the implicit solo expense pot when a single-user group opens Expenses. */
+export const ensureSoloPot = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const userId = await requireProjectMember(ctx, projectId);
+    const memberIds = await projectMemberIds(ctx, projectId);
+    if (memberIds.length !== 1) {
+      throw new Error(
+        "Solo expenses are only available for single-user groups",
+      );
+    }
+
+    const soloUserId = memberIds[0];
+    if (soloUserId === undefined) {
+      throw new Error(
+        "Solo expenses are only available for single-user groups",
+      );
+    }
+
+    const existing = await findSoloPot(ctx, projectId);
+    if (existing !== null) {
+      return existing._id;
+    }
+
+    const potId = await ctx.db.insert("pots", {
+      name: "Expenses",
+      projectId,
+      createdBy: userId,
+    });
+    await ctx.db.insert("potMembers", { potId, userId: soloUserId });
+    await track(ctx, userId, "pot_created", {
+      projectId,
+      memberCount: 1,
+      solo: true,
+    });
+    return potId;
+  },
+});
+
 export const createPot = mutation({
   args: {
     projectId: v.id("projects"),
@@ -184,8 +319,14 @@ export const createPot = mutation({
     }
     // De-dupe and require at least two members, all of them in the project.
     const unique = [...new Set(memberIds)];
-    if (unique.length < 2) {
-      throw new Error("A pot needs at least two members");
+    const projectMembers = await projectMemberIds(ctx, projectId);
+    const minMembers = projectMembers.length === 1 ? 1 : 2;
+    if (unique.length < minMembers) {
+      throw new Error(
+        minMembers === 1
+          ? "A pot needs at least one member"
+          : "A pot needs at least two members",
+      );
     }
     for (const memberId of unique) {
       const membership = await ctx.db

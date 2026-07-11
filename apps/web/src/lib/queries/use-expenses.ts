@@ -39,6 +39,13 @@ export function useProjectPotsOverview(
   };
 }
 
+/** Solo-group expense tracker with monthly totals. */
+export function useSoloExpenses(projectId: string) {
+  return useQuery(api.expenses.getSoloExpenses, {
+    projectId: projectId as Id<"projects">,
+  });
+}
+
 /** A single pot with members + spendings. `null` if it's gone. */
 export function usePot(potId: string): PotDetail | null | undefined {
   const data = useQuery(api.expenses.getPot, { potId: potId as Id<"pots"> });

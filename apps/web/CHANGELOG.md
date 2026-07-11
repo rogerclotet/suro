@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.16.0] — 2026-07-11
+
+### ca
+
+- [feature] Els grups d'un sol usuari poden registrar despeses personals amb totals mensuals, gràfics diaris i una llista d'expenses, a la web i al mòbil.
+
+### es
+
+- [feature] Los grupos de un solo usuario pueden registrar gastos personales con totales mensuales, gráficos diarios y una lista de gastos, en la web y en el móvil.
+
+### en
+
+- [feature] Single-user groups can track personal expenses with monthly totals, daily charts, and an expense list, on web and mobile.
+
 ## [1.15.4] — 2026-07-11
 
 ### ca

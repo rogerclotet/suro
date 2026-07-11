@@ -689,7 +689,13 @@
     "spendingPaid": "paid",
     "spendingReceived": "received",
     "spendingTo": "to",
-    "spendingFor": "for"
+    "spendingFor": "for",
+    "soloThisMonth": "This month",
+    "soloLastMonth": "Last month",
+    "soloRecentSpendings": "Recent expenses",
+    "soloNoSpendings": "No expenses yet. Add one to start tracking.",
+    "soloUntitledSpending": "Expense",
+    "soloCreateSpendingDescription": "Record a personal expense"
   },
   "secretSanta": {
     "comingSoonTitle": "Coming soon",

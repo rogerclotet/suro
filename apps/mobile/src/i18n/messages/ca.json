@@ -1133,7 +1133,12 @@
       "everyoneSplit": "Tothom (repartit)",
       "addSpending": "Afegir despesa",
       "adding": "Afegint…",
-      "splitAmongAll": "repartit entre tots"
+      "splitAmongAll": "repartit entre tots",
+      "soloThisMonth": "Aquest mes",
+      "soloLastMonth": "Mes passat",
+      "soloRecentSpendings": "Despeses recents",
+      "soloNoSpendings": "Encara no hi ha despeses. Toca + per afegir-ne una.",
+      "soloUntitledSpending": "Despesa"
     }
   }
 }

@@ -22,6 +22,7 @@ import type * as listItems from "../listItems.js";
 import type * as lists from "../lists.js";
 import type * as migrations from "../migrations.js";
 import type * as model_account from "../model/account.js";
+import type * as model_allowedWebOrigins from "../model/allowedWebOrigins.js";
 import type * as model_analytics from "../model/analytics.js";
 import type * as model_auth from "../model/auth.js";
 import type * as model_categories from "../model/categories.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   lists: typeof lists;
   migrations: typeof migrations;
   "model/account": typeof model_account;
+  "model/allowedWebOrigins": typeof model_allowedWebOrigins;
   "model/analytics": typeof model_analytics;
   "model/auth": typeof model_auth;
   "model/categories": typeof model_categories;
