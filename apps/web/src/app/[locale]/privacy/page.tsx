@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import LanguageSwitcher from "../_components/language-switcher";
 import PrivacyContent from "../_components/privacy-content";
 
@@ -11,7 +12,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "privacy" });
   return { title: t("title") };
 }
@@ -21,7 +23,8 @@ export default async function PrivacyPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   setRequestLocale(locale);
   const t = await getTranslations("privacy");
   const tErrors = await getTranslations("errors");

@@ -6,17 +6,24 @@ import { useMutation } from "convex/react";
 import { Loader2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/session";
+import { cn } from "@/lib/utils";
 
 export default function UploadButton({
   projectId,
   eventId,
+  variant = "default",
+  className,
+  onUploadingChange,
 }: {
   projectId: string;
   eventId?: string | undefined;
+  variant?: "default" | "chip";
+  className?: string;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const { data: session } = useSession();
   const t = useTranslations("files");
@@ -24,6 +31,10 @@ export default function UploadButton({
   const [uploading, setUploading] = useState(false);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveFile = useMutation(api.files.saveFile);
+
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) {
@@ -83,12 +94,19 @@ export default function UploadButton({
       />
       <Button
         type="button"
+        variant={variant === "chip" ? "outline" : "default"}
+        size={variant === "chip" ? "sm" : "default"}
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="w-full gap-2"
+        className={cn(
+          variant === "chip"
+            ? "h-7 gap-1.5 rounded-full border-dashed px-3 font-normal text-muted-foreground text-xs shadow-none hover:text-foreground"
+            : "w-full gap-2",
+          className,
+        )}
       >
         {uploading ? <Loader2 className="animate-spin" /> : <Upload />}
-        {t("shareTitle")}
+        {variant === "chip" ? t("uploadFile") : t("shareTitle")}
       </Button>
     </div>
   );

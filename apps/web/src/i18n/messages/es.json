@@ -470,6 +470,7 @@
     "taskBucket_noDate": "Sin fecha"
   },
   "categories": {
+    "label": "Categoría",
     "searchPlaceholder": "Buscar categorías",
     "createNamed": "Crear \"{name}\"",
     "noResults": "No se ha encontrado ninguna categoría"
@@ -590,6 +591,7 @@
   "files": {
     "empty": "Aún no hay archivos",
     "shareTitle": "Compartir archivos",
+    "uploadFile": "Subir archivo",
     "shareSuccess": "Archivo compartido correctamente",
     "shareError": "No se ha podido compartir el archivo",
     "uploading": "Compartiendo archivos...",

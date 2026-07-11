@@ -5,6 +5,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { fetchQuery } from "convex/nextjs";
 import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import {
   CATPPUCCIN_COLORS,
   type CatppuccinColor,
@@ -45,7 +46,8 @@ export default async function InviteOpengraphImage({
 }: {
   params: Promise<{ locale: string; projectId: string; inviteToken: string }>;
 }) {
-  const { locale, projectId, inviteToken } = await params;
+  const { locale: localeParam, projectId, inviteToken } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "invitation" });
 
   const preview = await fetchQuery(api.projects.getInvitePreview, {

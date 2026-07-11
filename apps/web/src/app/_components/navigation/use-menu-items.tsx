@@ -17,6 +17,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
+import type { NavKey } from "@/i18n/message-keys";
 import { usePathname } from "@/i18n/navigation";
 
 export type MenuItemHref =
@@ -39,7 +40,7 @@ export type MenuItem = {
 };
 
 type MenuItemPart = {
-  nameKey: string;
+  nameKey: NavKey;
   pathPart: string;
   icon: ReactNode;
   disabled?: boolean;

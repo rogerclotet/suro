@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import CalendarDemo from "./_components/calendar-demo";
 import ExpensesDemo from "./_components/expenses-demo";
 import FeatureSection from "./_components/feature-section";
@@ -32,7 +33,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "info" });
   return {
     title: t("heroTitle"),
@@ -46,7 +48,8 @@ export default async function InfoPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   setRequestLocale(locale);
   const t = await getTranslations("info");
   const tNav = await getTranslations("nav");

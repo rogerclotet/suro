@@ -2,6 +2,7 @@
 
 import { Folders, ListTodo, NotebookText, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useProjects } from "@/app/_state/project-state";
 import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
@@ -16,6 +17,7 @@ import TimeRange from "../../_components/event/time-range";
 import AddToEventChips from "./add-to-event-chips";
 import SettingsMenu from "./settings-menu";
 import TimeRemaining from "./time-remaining";
+import { useHasLinkCandidates } from "./use-link-candidates";
 
 export default function EventDetail({
   projectId,
@@ -29,6 +31,12 @@ export default function EventDetail({
   const { project } = useProjects();
   const data = useEvent(eventId);
   const files = useEventFiles(eventId);
+  const [uploading, setUploading] = useState(false);
+  const hasLinkCandidates = useHasLinkCandidates(projectId, {
+    list: Boolean(data?.list),
+    note: Boolean(data?.note),
+    pot: Boolean(data?.pot),
+  });
 
   // `null` means the event was deleted (here or by another member); the delete
   // flow navigates to the calendar, so render nothing rather than a deleted
@@ -39,6 +47,8 @@ export default function EventDetail({
 
   const { event, list, note, pot } = data;
   const canCreatePot = (project?.users.length ?? 0) >= 2;
+  const hasFiles = (files?.length ?? 0) > 0 || uploading;
+  const hasExtras = Boolean(list || note || pot || hasFiles);
 
   return (
     <div className="space-y-6">
@@ -86,81 +96,94 @@ export default function EventDetail({
         />
       )}
 
-      <div className="columns-1 gap-4 space-y-4 pt-6 md:columns-2">
-        {list !== null && (
-          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-            <h2 className="font-semibold text-xl">
-              <Link
-                href={{
-                  pathname: "/groups/[projectId]/lists/[listId]",
-                  params: { projectId, listId: list.id },
-                }}
-                className="flex items-center gap-2"
-              >
-                <ListTodo />
-                {list.name !== event.name ? list.name : tCommon("list")}
-              </Link>
-            </h2>
-            <CheckList list={list} />
-          </div>
-        )}
-
-        {pot !== null && (
-          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-            <h2 className="font-semibold text-xl">
-              <Link
-                href={{
-                  pathname: "/groups/[projectId]/expenses/[potId]",
-                  params: { projectId, potId: pot.id },
-                }}
-                className="flex items-center gap-2"
-              >
-                <Wallet />
-                {pot.name !== event.name ? pot.name : tCal("potSection")}
-              </Link>
-            </h2>
-          </div>
-        )}
-
-        <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-          <h2 className="flex items-start justify-between font-semibold text-xl">
-            <div className="flex items-center gap-2">
-              <Folders />
-              {tCal("filesSection")}
-            </div>
-
-            <UploadButton projectId={projectId} eventId={eventId} />
-          </h2>
-
-          {files && files.length > 0 && <Files files={files} />}
-        </div>
-
-        {note !== null && (
-          <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-            <h2 className="flex items-center gap-2 font-semibold text-xl">
-              <NotebookText />
-              {tCal("notesSection")}
-            </h2>
-            <Link
-              href={{
-                pathname: "/groups/[projectId]/notes/[noteId]",
-                params: { projectId, noteId: note.id },
-              }}
-              className="text-primary underline"
-            >
-              {note.name}
-            </Link>
-          </div>
-        )}
-      </div>
-
       <AddToEventChips
+        projectId={projectId}
+        eventId={eventId}
         event={event}
         list={list}
         note={note}
         pot={pot}
         canCreatePot={canCreatePot}
+        hasFiles={hasFiles}
+        hasLinkCandidates={hasLinkCandidates}
+        onUploadingChange={setUploading}
       />
+
+      {hasExtras && (
+        <div className="columns-1 gap-4 space-y-4 border-muted border-t pt-6 md:columns-2">
+          {list !== null && (
+            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="font-semibold text-xl">
+                <Link
+                  href={{
+                    pathname: "/groups/[projectId]/lists/[listId]",
+                    params: { projectId, listId: list.id },
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <ListTodo />
+                  {list.name !== event.name ? list.name : tCommon("list")}
+                </Link>
+              </h2>
+              <CheckList list={list} />
+            </div>
+          )}
+
+          {pot !== null && (
+            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="font-semibold text-xl">
+                <Link
+                  href={{
+                    pathname: "/groups/[projectId]/expenses/[potId]",
+                    params: { projectId, potId: pot.id },
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Wallet />
+                  {pot.name !== event.name ? pot.name : tCal("potSection")}
+                </Link>
+              </h2>
+            </div>
+          )}
+
+          {note !== null && (
+            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="flex items-center gap-2 font-semibold text-xl">
+                <NotebookText />
+                {tCal("notesSection")}
+              </h2>
+              <Link
+                href={{
+                  pathname: "/groups/[projectId]/notes/[noteId]",
+                  params: { projectId, noteId: note.id },
+                }}
+                className="text-primary underline"
+              >
+                {note.name}
+              </Link>
+            </div>
+          )}
+
+          {hasFiles && (
+            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="flex items-start justify-between font-semibold text-xl">
+                <div className="flex items-center gap-2">
+                  <Folders />
+                  {tCal("filesSection")}
+                </div>
+
+                <UploadButton
+                  projectId={projectId}
+                  eventId={eventId}
+                  onUploadingChange={setUploading}
+                />
+              </h2>
+
+              {files && files.length > 0 && <Files files={files} />}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

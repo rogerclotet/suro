@@ -470,6 +470,7 @@
     "taskBucket_noDate": "Sense data"
   },
   "categories": {
+    "label": "Categoria",
     "searchPlaceholder": "Cerca categories",
     "createNamed": "Crea \"{name}\"",
     "noResults": "No s'ha trobat cap categoria"
@@ -590,6 +591,7 @@
   "files": {
     "empty": "Encara no hi ha fitxers",
     "shareTitle": "Compartir fitxers",
+    "uploadFile": "Pujar fitxer",
     "shareSuccess": "Fitxer compartit correctament",
     "shareError": "No s'ha pogut compartir el fitxer",
     "uploading": "Compartint fitxers...",

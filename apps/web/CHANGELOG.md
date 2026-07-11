@@ -6,6 +6,26 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.15.4] — 2026-07-11
+
+### ca
+
+- [fix] Afegir un element a una llista de tasques ja no fa que la pàgina es pengi en obrir el selector de categories.
+- [improvement] Les pàgines d'esdeveniments amaguen la secció de fitxers buida i mostren accions per afegir o pujar fitxers, com al mòbil.
+- [improvement] La barra lateral d'escriptori distingeix millor el hover de l'element actiu, ressalta només la ruta fill quan una secció està desplegada i obre el desplegable en clicar la fila pare.
+
+### es
+
+- [fix] Añadir un elemento a una lista de tareas ya no bloquea la página al abrir el selector de categorías.
+- [improvement] Las páginas de eventos ocultan la sección de archivos vacía y muestran acciones para añadir o subir archivos, como en el móvil.
+- [improvement] La barra lateral del escritorio distingue mejor el hover del elemento activo, resalta solo la ruta hija cuando una sección está desplegada y abre el desplegable al pulsar la fila padre.
+
+### en
+
+- [fix] Adding an item to a task list no longer crashes the page when you open the category picker.
+- [improvement] Event pages hide the empty Files section and show add/upload chips instead, matching mobile.
+- [improvement] The desktop sidebar uses distinct hover and active colors, highlights only the child route when a section is expanded, and toggles the dropdown when you click the parent row.
+
 ## [1.15.3] — 2026-07-08
 
 ### ca

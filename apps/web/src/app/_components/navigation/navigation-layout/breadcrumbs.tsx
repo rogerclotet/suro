@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { NavKey } from "@/i18n/message-keys";
 import { Link, usePathname } from "@/i18n/navigation";
 import GroupSwitcherSheet from "../group-switcher-sheet";
 import { useMenuItems } from "../use-menu-items";
@@ -59,12 +60,12 @@ const breadcrumbHrefMap: Record<string, HrefFactory> = {
   }),
 } as Record<string, HrefFactory>;
 
-const standalonePages: Record<string, string> = {
+const standalonePages: Record<string, NavKey> = {
   "/profile": "profile",
   "/groups": "groups",
 };
 
-const breadcrumbToTranslationKey: Record<string, string> = {
+const breadcrumbToTranslationKey: Record<string, NavKey> = {
   groups: "groups",
   profile: "profile",
   home: "home",

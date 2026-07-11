@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { type ChangeType, changelog } from "@/data/changelog.generated";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import { type Locale, routing } from "@/i18n/routing";
 import { parseDateOnly } from "@/lib/date-locale";
 
@@ -9,7 +10,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "changelog" });
   return {
     title: t("pageTitle"),
@@ -37,7 +39,8 @@ export default async function ChangelogPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   setRequestLocale(locale);
   const t = await getTranslations("changelog");
 

@@ -1,6 +1,6 @@
 {
   "name": "suro",
-  "version": "1.15.3",
+  "version": "1.15.4",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -13,6 +13,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "biome:check": "biome check",
     "check:metadata": "node apps/mobile/store/check-metadata.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "biome:fix": "biome check --write",
     "changelog:generate": "pnpm --filter web changelog:generate",
     "prepare": "husky"

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
+import { parseLocaleParam } from "@/i18n/parse-locale";
 import { routing } from "@/i18n/routing";
 
 export const runtime = "nodejs";
@@ -18,7 +19,8 @@ export default async function OpengraphImage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = parseLocaleParam(localeParam);
   const t = await getTranslations({ locale, namespace: "metadata" });
   const title = t("title");
   const description = t("description");

@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRightIcon, SquircleIcon } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,7 +12,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -21,7 +20,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, usePathname } from "@/i18n/navigation";
-import { type MenuItemHref, useMenuItems } from "../../use-menu-items";
+import { cn } from "@/lib/utils";
+import {
+  type MenuItem,
+  type MenuItemHref,
+  useMenuItems,
+} from "../../use-menu-items";
 
 export default function NavApps() {
   const menuItems = useMenuItems();
@@ -31,12 +35,6 @@ export default function NavApps() {
   const shouldDisplayChildrenInSidebar = useMemo(() => {
     return !isMobile && state === "expanded";
   }, [isMobile, state]);
-
-  const activeParent = useMemo(() => {
-    return menuItems.find(
-      (item) => item.path !== "#" && pathname.startsWith(item.path),
-    );
-  }, [menuItems, pathname]);
 
   return (
     <SidebarGroup>
@@ -49,70 +47,11 @@ export default function NavApps() {
           return (
             <SidebarMenuItem key={`${item.name}-${item.path}`}>
               {item.children && shouldDisplayChildrenInSidebar ? (
-                <SidebarMenu>
-                  <Collapsible
-                    key={item.name}
-                    asChild
-                    defaultOpen={activeParent === item}
-                    className="group/collapsible"
-                  >
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        asChild
-                        tooltip={item.name}
-                        isActive={isItemActive}
-                      >
-                        <NavLink
-                          href={item.href}
-                          onClick={() => setOpenMobile(false)}
-                        >
-                          {item.icon}
-                          <span>{item.name}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuAction className="data-[state=open]:rotate-90">
-                          <ChevronRightIcon />
-                        </SidebarMenuAction>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={pathname === item.path}
-                            >
-                              <NavLink
-                                href={item.href}
-                                onClick={() => setOpenMobile(false)}
-                              >
-                                <SquircleIcon />
-                                <span>{item.name}</span>
-                              </NavLink>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-
-                          {item.children.map((child) => (
-                            <SidebarMenuSubItem key={child.name}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={pathname.startsWith(child.path)}
-                              >
-                                <NavLink
-                                  href={child.href}
-                                  onClick={() => setOpenMobile(false)}
-                                >
-                                  {child.icon}
-                                  <span>{child.name}</span>
-                                </NavLink>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                </SidebarMenu>
+                <CollapsibleNavItem
+                  item={item}
+                  pathname={pathname}
+                  onNavigate={() => setOpenMobile(false)}
+                />
               ) : (
                 <SidebarMenuButton
                   asChild
@@ -134,6 +73,90 @@ export default function NavApps() {
       </SidebarGroupContent>
     </SidebarGroup>
   );
+}
+
+function CollapsibleNavItem({
+  item,
+  pathname,
+  onNavigate,
+}: {
+  item: MenuItem;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  const inSection = item.path !== "#" && pathname.startsWith(item.path);
+  const [open, setOpen] = useState(inSection);
+
+  useEffect(() => {
+    if (inSection) {
+      setOpen(true);
+    }
+  }, [inSection]);
+
+  return (
+    <SidebarMenu>
+      <Collapsible
+        open={open}
+        onOpenChange={setOpen}
+        className="group/collapsible"
+      >
+        <SidebarMenuItem>
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton tooltip={item.name} isActive={false}>
+              {item.icon}
+              <span>{item.name}</span>
+              <ChevronRightIcon
+                className={cn(
+                  "ml-auto size-4 shrink-0 transition-transform",
+                  "group-data-[state=open]/collapsible:rotate-90",
+                )}
+              />
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isParentSubItemActive(pathname, item)}
+                >
+                  <NavLink href={item.href} onClick={onNavigate}>
+                    <SquircleIcon />
+                    <span>{item.name}</span>
+                  </NavLink>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+
+              {item.children?.map((child) => (
+                <SidebarMenuSubItem key={child.name}>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={pathname.startsWith(child.path)}
+                  >
+                    <NavLink href={child.href} onClick={onNavigate}>
+                      {child.icon}
+                      <span>{child.name}</span>
+                    </NavLink>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </SidebarMenuItem>
+      </Collapsible>
+    </SidebarMenu>
+  );
+}
+
+/** Highlights the section root child, not nested child routes like templates. */
+function isParentSubItemActive(pathname: string, item: MenuItem): boolean {
+  if (pathname === item.path) {
+    return true;
+  }
+  if (!pathname.startsWith(`${item.path}/`)) {
+    return false;
+  }
+  return !item.children?.some((child) => pathname.startsWith(child.path));
 }
 
 function NavLink({

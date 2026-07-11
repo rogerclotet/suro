@@ -4,10 +4,11 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { InfoKey } from "@/i18n/message-keys";
 import { cn } from "@/lib/utils";
 import type { DemoListCategory, DemoListItem } from "../_data/mock";
 
-function buildItems(t: (k: string) => string): DemoListItem[] {
+function buildItems(t: (key: InfoKey) => string): DemoListItem[] {
   return [
     {
       id: "i-1",
