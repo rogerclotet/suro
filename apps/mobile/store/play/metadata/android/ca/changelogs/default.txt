@@ -1,1 +1,3 @@
-• El widget d'inici d'Android mostra el logotip correctament i obre el selector de grup en afegir-lo.
+• Afegir un element a una llista de tasques ja no fa que la pàgina es pengi en obrir el selector de categories.
+• Les pàgines d'esdeveniments amaguen la secció de fitxers buida i mostren accions per afegir o pujar fitxers, com al mòbil.
+• La barra lateral d'escriptori distingeix millor el hover de l'element actiu, ressalta només la ruta fill quan una secció està desplegada i obre el desplegable en clicar la fila pare.
