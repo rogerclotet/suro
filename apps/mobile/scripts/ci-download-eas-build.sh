@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Wait for an EAS cloud build (triggered with --no-wait in CI) to finish,
-# verify its app version, and download the store artifact. Used by the manual
-# submit jobs — the build jobs exit as soon as EAS accepts the build.
+# verify its app version, and download the store artifact. Used by CI build
+# jobs and by the manual re-submit workflow when the binary is not in artifacts.
 #
 # Polls the Expo GraphQL API directly (not `eas build:view`) so the submit
 # jobs only need EXPO_TOKEN + curl + jq, without eas-cli project/VCS setup.

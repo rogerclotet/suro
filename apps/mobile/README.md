@@ -29,9 +29,9 @@ Native Google OAuth additionally needs the redirect wired to the `suro://` schem
 ## Builds (local)
 
 Build locally with the scripts below, or let CI do it: on `main`, native-code
-changes trigger EAS **cloud** builds that publish the `.aab`/`.ipa` as
-downloadable artifacts, plus manual fastlane submit jobs — see the root
-`AGENTS.md` → Deploys and `.github/workflows/ci.yml`. The local scripts are EAS **local**
+changes trigger parallel EAS **cloud** builds that wait for completion and
+submit to the stores automatically — see the root `AGENTS.md` → Deploys and
+`.github/workflows/ci.yml`. The local scripts are EAS **local**
 builds signed with the EAS-managed credentials; log in once with `eas login`
 (eas-cli is a devDependency, so the scripts resolve it from the workspace).
 

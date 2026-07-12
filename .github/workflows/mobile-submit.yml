@@ -1,8 +1,6 @@
-# Manual store submission after native EAS builds on main. Mirrors GitLab's
-# submit_android / submit_ios jobs (when: manual).
-#
-# Run from Actions → "Mobile submit" after the CI workflow finishes building
-# native binaries for a commit on main.
+# Manual store re-submission for a commit that already built on main. The main
+# CI workflow now waits for EAS builds and submits automatically; use this only
+# to re-submit a specific commit (e.g. after a transient store error).
 
 name: Mobile submit
 
@@ -83,8 +81,10 @@ jobs:
           bundle _4.0.11_ install
           mkdir -p credentials
           printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+          if [ ! -f build/suro-release.aab ]; then
+            EXPECTED_VERSION=$(jq -r .version ../../package.json)
+            bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+          fi
           bundle _4.0.11_ exec fastlane android release
 
   submit_ios:
@@ -123,6 +123,8 @@ jobs:
           export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
           export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
           export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+          if [ ! -f build/suro-release.ipa ]; then
+            EXPECTED_VERSION=$(jq -r .version ../../package.json)
+            bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+          fi
           EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
