@@ -1,6 +1,6 @@
 # Production web app (Next.js standalone) behind Pangolin/Traefik.
 #
-# The image is built and pushed by GitLab CI; this file just runs it. Pangolin
+# The image is built and pushed by GitHub Actions; this file just runs it. Pangolin
 # reaches the app two ways — point your route(s) for suro.clotet.dev and
 # suroapp.cat at either (see AGENTS.md):
 #   - a Pangolin local site -> 172.17.0.1:${WEB_PORT} (the host publish below), or
@@ -23,7 +23,7 @@
 
 services:
   web:
-    image: ${WEB_IMAGE:-registry.gitlab.com/rogerclotet/suro}:${IMAGE_TAG:-latest}
+    image: ${WEB_IMAGE:-ghcr.io/rogerclotet/suro}:${IMAGE_TAG:-latest}
     container_name: familia
     restart: unless-stopped
     env_file:

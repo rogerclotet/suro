@@ -1,0 +1,130 @@
+# Manual store submission after native EAS builds on main. Mirrors GitLab's
+# submit_android / submit_ios jobs (when: manual).
+#
+# Run from Actions → "Mobile submit" after the CI workflow finishes building
+# native binaries for a commit on main.
+
+name: Mobile submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Commit SHA on main (from the CI run that triggered EAS builds)
+        required: true
+        type: string
+      platform:
+        description: Platform to submit
+        required: true
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  find_ci_run:
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.find.outputs.run_id }}
+    steps:
+      - uses: actions/github-script@v7
+        id: find
+        with:
+          script: |
+            const sha = '${{ inputs.commit_sha }}';
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              head_sha: sha,
+              event: 'push',
+              per_page: 5,
+            });
+            const run = data.workflow_runs.find((r) => r.conclusion === 'success' || r.status === 'in_progress');
+            if (!run) {
+              core.setFailed(`No CI workflow run found for commit ${sha}`);
+              return;
+            }
+            core.setOutput('run_id', String(run.id));
+
+  submit_android:
+    needs: find_ci_run
+    if: inputs.platform == 'android' || inputs.platform == 'both'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: suro-android-${{ inputs.commit_sha }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ needs.find_ci_run.outputs.run_id }}
+          path: apps/mobile/build
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
+          gem install bundler -v 4.0.11 --no-document
+      - name: Submit Android to Play Store
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          bundle _4.0.11_ config set --local deployment true
+          bundle _4.0.11_ install
+          mkdir -p credentials
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+          bundle _4.0.11_ exec fastlane android release
+
+  submit_ios:
+    needs: find_ci_run
+    if: inputs.platform == 'ios' || inputs.platform == 'both'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: suro-ios-${{ inputs.commit_sha }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ needs.find_ci_run.outputs.run_id }}
+          path: apps/mobile/build
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "25.1"
+          cache: pnpm
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends git ca-certificates curl jq
+          pnpm install --frozen-lockfile --filter mobile...
+      - name: Submit iOS to App Store Connect
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+        run: |
+          mkdir -p credentials
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_KEY" | base64 -d > credentials/asc-api-key.p8
+          export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
+          export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
+          export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+          EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
