@@ -102,8 +102,6 @@ jobs:
           run-id: ${{ needs.find_ci_run.outputs.run_id }}
           path: apps/mobile/build
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: "25.1"
