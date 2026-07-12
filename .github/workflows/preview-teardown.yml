@@ -1,0 +1,36 @@
+# Tear down an ephemeral preview environment. Runs manually via workflow
+# dispatch, or automatically when a pull request is closed.
+
+name: Preview teardown
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number
+        required: true
+        type: number
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  stop_preview:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true || github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tear down preview environment
+        env:
+          CI_MERGE_REQUEST_IID: ${{ github.event.pull_request.number || inputs.pr_number }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_IP: ${{ secrets.SSH_IP }}
+          SSH_PROJECT_DIRECTORY: ${{ secrets.SSH_PROJECT_DIRECTORY }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends sshpass openssh-client
+          chmod +x apps/web/scripts/teardown-preview.sh
+          apps/web/scripts/teardown-preview.sh

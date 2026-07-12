@@ -4,7 +4,7 @@
 # prod container via docker compose. Routing now lives in Pangolin (see AGENTS.md);
 # this script no longer writes any Traefik config.
 #
-# Required env (from GitLab CI):
+# Required env (from GitHub Actions / legacy GitLab CI):
 #   CI_COMMIT_SHA
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY

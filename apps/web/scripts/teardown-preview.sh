@@ -1,9 +1,9 @@
 #!/bin/sh -e
 
-# Tear down the ephemeral preview environment for a GitLab merge request.
+# Tear down the ephemeral preview environment for a pull request.
 #
-# Required env (from GitLab CI):
-#   CI_MERGE_REQUEST_IID
+# Required env (from GitHub Actions / legacy GitLab CI):
+#   CI_MERGE_REQUEST_IID   — PR number (kept for deploy script compatibility)
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 
 : "${CI_MERGE_REQUEST_IID:?missing}"

@@ -1,11 +1,11 @@
 #!/bin/sh -e
 
-# Boot or update an ephemeral preview environment for a GitLab merge request.
+# Boot or update an ephemeral preview environment for a pull request.
 # Previews share the dev Convex deployment (baked into the image at build time
 # via NEXT_PUBLIC_CONVEX_URL_PREVIEW), so there's no per-MR database.
 #
-# Required env (from GitLab CI):
-#   CI_MERGE_REQUEST_IID
+# Required env (from GitHub Actions / legacy GitLab CI):
+#   CI_MERGE_REQUEST_IID   — PR number (kept for deploy script compatibility)
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
 #   SSH_USERNAME, SSH_PASSWORD, SSH_IP, SSH_PROJECT_DIRECTORY
 #
