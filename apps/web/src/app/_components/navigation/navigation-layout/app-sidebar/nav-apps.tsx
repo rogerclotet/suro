@@ -19,7 +19,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
   type MenuItem,
@@ -84,6 +84,7 @@ function CollapsibleNavItem({
   pathname: string;
   onNavigate: () => void;
 }) {
+  const router = useRouter();
   const inSection = item.path !== "#" && pathname.startsWith(item.path);
   const [open, setOpen] = useState(inSection);
 
@@ -93,11 +94,23 @@ function CollapsibleNavItem({
     }
   }, [inSection]);
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (
+      nextOpen &&
+      item.href !== "#" &&
+      !isParentSubItemActive(pathname, item)
+    ) {
+      router.push(item.href as never);
+      onNavigate();
+    }
+  };
+
   return (
     <SidebarMenu>
       <Collapsible
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
         className="group/collapsible"
       >
         <SidebarMenuItem>
