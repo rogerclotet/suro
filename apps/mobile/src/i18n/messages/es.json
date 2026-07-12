@@ -777,12 +777,13 @@
     "home": {
       "today": "Hoy",
       "upcoming": "Próximamente",
+      "myTasks": "Tus tareas",
+      "seeAll": "Ver todas",
       "goToCalendar": "Ir al calendario",
-      "showAllLists": "Ver todas",
-      "goToPots": "Ir a los botes",
+      "eventsToday": "eventos hoy",
+      "tasksAssigned": "tareas asignadas",
       "noUpcoming": "Ningún evento próximo",
-      "noActiveLists": "Ninguna lista activa",
-      "noActivePots": "Ningún bote activo",
+      "noTasks": "Nada pendiente",
       "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos"
     },
     "widget": {
@@ -801,7 +802,7 @@
       "welcomeTitle": "¡Bienvenido a Suro!",
       "welcomeBody": "Suro es un tablón compartido para la gente con la que compartes tu día a día. Vamos a hacer un recorrido rápido por lo que puedes hacer.",
       "homeTitle": "Inicio",
-      "homeBody": "Tu punto de partida: los planes de hoy, lo que viene, y tus listas y botes activos — tu grupo de un vistazo.",
+      "homeBody": "Tu punto de partida: los eventos de hoy, lo que viene, y tus tareas asignadas — tu grupo de un vistazo.",
       "listsTitle": "Listas",
       "listsBody": "Crea listas de la compra, tareas pendientes y listas de equipaje. Categoriza elementos, guarda plantillas reutilizables y marca cosas juntos en tiempo real.",
       "calendarTitle": "Calendario",

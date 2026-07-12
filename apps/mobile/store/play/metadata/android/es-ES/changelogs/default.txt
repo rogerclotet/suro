@@ -1,1 +1,1 @@
-• Los grupos de un solo usuario pueden registrar gastos personales con totales mensuales, gráficos diarios y una lista de gastos, en la web y en el móvil.
+• La pantalla de inicio se rediseña en torno a los próximos eventos y tus tareas asignadas, con un resumen más claro en la web y el móvil.

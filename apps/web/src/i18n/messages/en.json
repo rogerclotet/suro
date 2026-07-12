@@ -279,13 +279,14 @@
   },
   "home": {
     "today": "Today",
-    "upcoming": "Upcoming",
+    "upcoming": "Coming up",
+    "myTasks": "Your tasks",
+    "seeAll": "See all",
     "goToCalendar": "Go to calendar",
-    "showAllLists": "Show all",
-    "goToPots": "Go to pots",
+    "eventsToday": "events today",
+    "tasksAssigned": "tasks assigned",
     "noUpcoming": "No upcoming events",
-    "noActiveLists": "No active lists",
-    "noActivePots": "No active pots",
+    "noTasks": "Nothing on your plate",
     "linkedListA11y": "Event with checklist, {done} of {total} items done"
   },
   "feedback": {

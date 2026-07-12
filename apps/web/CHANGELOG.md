@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.17.0] — 2026-07-12
+
+### ca
+
+- [improvement] La pantalla d'inici es redissenya enfocat als propers esdeveniments i les tasques assignades, amb un resum més clar a la web i al mòbil.
+
+### es
+
+- [improvement] La pantalla de inicio se rediseña en torno a los próximos eventos y tus tareas asignadas, con un resumen más claro en la web y el móvil.
+
+### en
+
+- [improvement] The home screen is redesigned around your upcoming events and assigned tasks, with a clearer at-a-glance layout on web and mobile.
+
 ## [1.16.0] — 2026-07-11
 
 ### ca

@@ -280,12 +280,13 @@
   "home": {
     "today": "Avui",
     "upcoming": "Properament",
+    "myTasks": "Les teves tasques",
+    "seeAll": "Mostra-les totes",
     "goToCalendar": "Ves al calendari",
-    "showAllLists": "Mostra-les totes",
-    "goToPots": "Ves als pots",
+    "eventsToday": "esdeveniments avui",
+    "tasksAssigned": "tasques assignades",
     "noUpcoming": "Cap esdeveniment proper",
-    "noActiveLists": "Cap llista activa",
-    "noActivePots": "Cap pot actiu",
+    "noTasks": "Res pendent",
     "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
   },
   "feedback": {

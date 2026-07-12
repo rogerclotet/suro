@@ -777,12 +777,13 @@
     "home": {
       "today": "Avui",
       "upcoming": "Properament",
+      "myTasks": "Les teves tasques",
+      "seeAll": "Mostra-les totes",
       "goToCalendar": "Ves al calendari",
-      "showAllLists": "Mostra-les totes",
-      "goToPots": "Ves als pots",
+      "eventsToday": "esdeveniments avui",
+      "tasksAssigned": "tasques assignades",
       "noUpcoming": "Cap esdeveniment proper",
-      "noActiveLists": "Cap llista activa",
-      "noActivePots": "Cap pot actiu",
+      "noTasks": "Res pendent",
       "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
     },
     "widget": {
@@ -801,7 +802,7 @@
       "welcomeTitle": "Benvingut a Suro!",
       "welcomeBody": "Suro és un tauler compartit per a la gent amb qui comparteixes el dia a dia. Fem un recorregut ràpid per tot el que pots fer.",
       "homeTitle": "Inici",
-      "homeBody": "El teu punt de partida: els plans d'avui, el que ve, i les teves llistes i pots actius — el teu grup d'un cop d'ull.",
+      "homeBody": "El teu punt de partida: els esdeveniments d'avui, el que ve, i les teves tasques assignades — el teu grup d'un cop d'ull.",
       "listsTitle": "Llistes",
       "listsBody": "Crea llistes de la compra, tasques pendents i llistes d'equipatge. Categoritza elements, desa plantilles reutilitzables i marca coses junts en temps real.",
       "calendarTitle": "Calendari",

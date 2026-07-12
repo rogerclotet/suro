@@ -776,13 +776,14 @@
   "mobile": {
     "home": {
       "today": "Today",
-      "upcoming": "Upcoming",
+      "upcoming": "Coming up",
+      "myTasks": "Your tasks",
+      "seeAll": "See all",
       "goToCalendar": "Go to calendar",
-      "showAllLists": "Show all",
-      "goToPots": "Go to pots",
+      "eventsToday": "events today",
+      "tasksAssigned": "tasks assigned",
       "noUpcoming": "No upcoming events",
-      "noActiveLists": "No active lists",
-      "noActivePots": "No active pots",
+      "noTasks": "Nothing on your plate",
       "linkedListA11y": "Event with checklist, {done} of {total} items done"
     },
     "widget": {
@@ -801,7 +802,7 @@
       "welcomeTitle": "Welcome to Suro!",
       "welcomeBody": "Suro is a shared corkboard for the people you do life with. Let's take a quick tour of what you can do.",
       "homeTitle": "Home",
-      "homeBody": "Your starting point: today's plans, what's coming up, and your active lists and pots — your group at a glance.",
+      "homeBody": "Your starting point: today's events, what's coming up, and your assigned tasks — your group at a glance.",
       "listsTitle": "Lists",
       "listsBody": "Create shopping lists, to-dos, and packing lists. Categorize items, save reusable templates, and check things off together in real time.",
       "calendarTitle": "Calendar",
