@@ -1,8 +1,15 @@
-# Manually deploy an ephemeral preview for a pull request. Mirrors GitLab's
-# build_preview + deploy_preview jobs (opt-in, web-gated).
+# Deploy an ephemeral web preview for a pull request.
 #
-# Run from Actions → "Preview deploy" → provide the PR number. Preview URL:
-# https://mr-<pr>.suro.clotet.dev
+# Easiest triggers (no branch or PR number needed):
+#   - Add the "deploy-preview" label to the PR
+#   - Comment "/deploy-preview" on the PR
+#   - Push new commits while the label is on the PR (auto-redeploy)
+#
+# Fallback: Actions → "Preview deploy" → provide PR number (branch selection is
+# ignored; the workflow always builds the PR merge ref). Or from a git checkout:
+#   ./scripts/trigger-preview-deploy.sh
+#
+# Preview URL: https://mr-<pr>.suro.clotet.dev
 
 name: Preview deploy
 
@@ -10,27 +17,102 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: Pull request number
+        description: Pull request number (prefer the label or /deploy-preview comment instead)
         required: true
         type: number
+  pull_request:
+    types: [labeled, synchronize]
+    branches: [main]
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
   packages: write
-  pull-requests: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+  cancel-in-progress: true
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
+  PREVIEW_DOMAIN: suro.clotet.dev
+  PREVIEW_LABEL: deploy-preview
+  PREVIEW_COMMAND: /deploy-preview
 
 jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      deploy: ${{ steps.resolve.outputs.deploy }}
+      notify: ${{ steps.resolve.outputs.notify }}
+    steps:
+      - uses: actions/github-script@v7
+        id: resolve
+        with:
+          script: |
+            const label = process.env.PREVIEW_LABEL;
+            const command = process.env.PREVIEW_COMMAND;
+
+            if (context.eventName === 'workflow_dispatch') {
+              const prNumber = String('${{ inputs.pr_number }}');
+              core.setOutput('pr_number', prNumber);
+              core.setOutput('deploy', 'true');
+              core.setOutput('notify', 'true');
+              return;
+            }
+
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+              if (context.payload.action === 'labeled') {
+                if (context.payload.label?.name !== label) {
+                  core.setOutput('deploy', 'false');
+                  return;
+                }
+                core.setOutput('notify', 'true');
+              } else if (context.payload.action === 'synchronize') {
+                const hasLabel = pr.labels.some((entry) => entry.name === label);
+                if (!hasLabel) {
+                  core.setOutput('deploy', 'false');
+                  return;
+                }
+                core.setOutput('notify', 'on-failure');
+              }
+              core.setOutput('pr_number', String(pr.number));
+              core.setOutput('deploy', 'true');
+              return;
+            }
+
+            if (context.eventName === 'issue_comment') {
+              const body = (context.payload.comment?.body || '').trim();
+              if (!body.startsWith(command)) {
+                core.setOutput('deploy', 'false');
+                return;
+              }
+              if (!context.payload.issue?.pull_request) {
+                core.setOutput('deploy', 'false');
+                return;
+              }
+              core.setOutput('pr_number', String(context.payload.issue.number));
+              core.setOutput('deploy', 'true');
+              core.setOutput('notify', 'true');
+            }
+        env:
+          PREVIEW_LABEL: ${{ env.PREVIEW_LABEL }}
+          PREVIEW_COMMAND: ${{ env.PREVIEW_COMMAND }}
+
   changes:
+    needs: resolve
+    if: needs.resolve.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     outputs:
       web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ inputs.pr_number }}/merge
+          ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -48,13 +130,13 @@ jobs:
               - '.github/workflows/**'
 
   build_preview:
-    needs: changes
-    if: needs.changes.outputs.web == 'true'
+    needs: [resolve, changes]
+    if: needs.resolve.outputs.deploy == 'true' && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ inputs.pr_number }}/merge
+          ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -65,7 +147,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY_IMAGE }}:mr-${{ inputs.pr_number }}
+          tags: ${{ env.REGISTRY_IMAGE }}:mr-${{ needs.resolve.outputs.pr_number }}
           build-args: |
             SKIP_ENV_VALIDATION=1
             NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL_PREVIEW }}
@@ -73,13 +155,14 @@ jobs:
             NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
 
   deploy_preview:
-    needs: build_preview
+    needs: [resolve, changes, build_preview]
+    if: needs.resolve.outputs.deploy == 'true' && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Deploy preview environment
         env:
-          CI_MERGE_REQUEST_IID: ${{ inputs.pr_number }}
+          CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
           CI_REGISTRY: ghcr.io
           CI_REGISTRY_USER: ${{ github.repository_owner }}
           CI_REGISTRY_PASSWORD: ${{ secrets.GHCR_PULL_TOKEN }}
@@ -92,3 +175,47 @@ jobs:
           sudo apt-get update && sudo apt-get install -y --no-install-recommends sshpass openssh-client
           chmod +x apps/web/scripts/deploy-preview.sh
           apps/web/scripts/deploy-preview.sh
+
+  notify:
+    needs: [resolve, changes, build_preview, deploy_preview]
+    if: always() && needs.resolve.outputs.deploy == 'true' && needs.resolve.outputs.notify != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = '${{ needs.resolve.outputs.pr_number }}';
+            const previewUrl = `https://mr-${prNumber}.${process.env.PREVIEW_DOMAIN}`;
+            const hasWebChanges = '${{ needs.changes.outputs.web }}' === 'true';
+            const buildResult = '${{ needs.build_preview.result }}';
+            const deployResult = '${{ needs.deploy_preview.result }}';
+            const notifyMode = '${{ needs.resolve.outputs.notify }}';
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+
+            let body;
+            if (!hasWebChanges) {
+              body = `Preview deploy skipped for #${prNumber}: no web-affecting changes in this PR.`;
+            } else if (deployResult === 'success') {
+              body = `Preview deployed: ${previewUrl}`;
+            } else if (buildResult === 'failure' || deployResult === 'failure') {
+              body = `Preview deploy failed for #${prNumber}. See the [workflow run](${runUrl}).`;
+            } else {
+              body = `Preview deploy skipped for #${prNumber}.`;
+            }
+
+            const shouldNotify =
+              notifyMode === 'true' ||
+              (notifyMode === 'on-failure' && (buildResult === 'failure' || deployResult === 'failure' || !hasWebChanges));
+
+            if (!shouldNotify) {
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(prNumber),
+              body,
+            });
+        env:
+          PREVIEW_DOMAIN: ${{ env.PREVIEW_DOMAIN }}
