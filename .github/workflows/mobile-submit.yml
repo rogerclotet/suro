@@ -67,9 +67,15 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "25.1"
+          cache: pnpm
       - run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
+          pnpm install --frozen-lockfile
           gem install bundler -v 4.0.11 --no-document
       - name: Submit Android to Play Store
         working-directory: apps/mobile
@@ -85,6 +91,7 @@ jobs:
             EXPECTED_VERSION=$(jq -r .version ../../package.json)
             bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
           fi
+          pnpm -w changelog:generate
           bundle _4.0.11_ exec fastlane android release
 
   submit_ios:
@@ -109,7 +116,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends git ca-certificates curl jq
-          pnpm install --frozen-lockfile --filter mobile...
+          pnpm install --frozen-lockfile
       - name: Submit iOS to App Store Connect
         working-directory: apps/mobile
         env:
@@ -127,4 +134,6 @@ jobs:
             EXPECTED_VERSION=$(jq -r .version ../../package.json)
             bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
           fi
+          pnpm -w changelog:generate
           EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+          EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive

@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "First release of Suro: shared lists, calendar, notes, files and expenses for your groups.",
+        "releaseNotes": "• The home screen is redesigned around your upcoming events and assigned tasks, with a clearer at-a-glance layout on web and mobile.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "Primera versión de Suro: listas, calendario, notas, archivos y gastos compartidos para tus grupos.",
+        "releaseNotes": "• La pantalla de inicio se rediseña en torno a los próximos eventos y tus tareas asignadas, con un resumen más claro en la web y el móvil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "Primera versió de Suro: llistes, calendari, notes, fitxers i despeses compartides per als teus grups.",
+        "releaseNotes": "• La pantalla d'inici es redissenya centrada en els propers esdeveniments i les teves tasques assignades, amb un resum més clar a la web i al mòbil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

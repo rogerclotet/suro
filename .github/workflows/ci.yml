@@ -68,6 +68,9 @@ jobs:
               - 'apps/mobile/package.json'
               - 'apps/mobile/metro.config.js'
               - 'apps/mobile/google-services.json'
+              - 'apps/mobile/store/**'
+              - 'apps/mobile/store.config.json'
+              - 'apps/web/CHANGELOG.md'
               - 'packages/backend/**'
 
   check:
@@ -88,6 +91,7 @@ jobs:
           POSTHOG_ENV_ID: ""
         run: |
           pnpm biome:check
+          pnpm check:store-notes
           pnpm check:metadata
           pnpm check:i18n
           pnpm typecheck
@@ -289,6 +293,7 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
+          pnpm -w changelog:generate
           bundle _4.0.11_ config set --local deployment true
           bundle _4.0.11_ install
           mkdir -p credentials
@@ -313,7 +318,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends git ca-certificates curl jq
-          pnpm install --frozen-lockfile --filter mobile...
+          pnpm install --frozen-lockfile
       - name: Submit iOS to App Store Connect
         working-directory: apps/mobile
         env:
@@ -327,4 +332,6 @@ jobs:
           export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
           export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
           export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
+          pnpm -w changelog:generate
           EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+          EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive

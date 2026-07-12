@@ -75,11 +75,13 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
 node apps/mobile/store/check-metadata.mjs
 
 # 1. release notes:
-#    - add the new version entry to apps/web/CHANGELOG.md (per locale), then
-#      `pnpm changelog:generate` — it regenerates the Play
-#      store/play/metadata/android/<locale>/changelogs/default.txt from the
-#      latest entry automatically (≤500 chars, enforced).
-#    - Apple (manual): store.config.json -> apple.info.<locale>.releaseNotes
+#    - add the new version entry to apps/web/CHANGELOG.md (per locale).
+#      `submit:ios:metadata` and `submit:android:release` run
+#      `pnpm changelog:generate` automatically first, regenerating Play
+#      store/play/metadata/android/<locale>/changelogs/default.txt (≤500 chars)
+#      and App Store store.config.json -> apple.info.<locale>.releaseNotes
+#      (≤4000 chars) from the latest entry. Pre-commit also stages the
+#      generated store files when CHANGELOG.md is committed; CI fails if they drift.
 
 # 2. build (EAS local builds; commit first — EAS archives via git)
 pnpm --filter mobile build:android:release   # build/suro-release.aab
