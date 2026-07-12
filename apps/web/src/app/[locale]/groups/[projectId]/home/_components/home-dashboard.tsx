@@ -1,50 +1,61 @@
 "use client";
 
-import { Calendar, ChevronRight, ListTodo, Loader2, Star } from "lucide-react";
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import {
+  Calendar,
+  CalendarDays,
+  CheckSquare,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
-import type { Pot } from "@/app/_data/pot";
+import { adaptTask, type TaskWithList } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
-import UserAvatar from "@/components/user-avatar";
 import { Link } from "@/i18n/navigation";
 import { isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
-import { useProjectPotsOverview } from "@/lib/queries/use-expenses";
 import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { cn } from "@/lib/utils";
 import ProgressRing from "../../lists/_components/progress-ring";
+import { DueChip } from "../../lists/[listId]/_components/list-item/due-chip";
+import { PriorityBadge } from "../../lists/[listId]/_components/list-item/priority-badge";
 
-// How far ahead "Upcoming" looks, and how many items each widget previews
-// before deferring to its section's "See all". Mirrors the mobile Home tab.
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
-const PREVIEW_LIMIT = 3;
-const AVATAR_STACK = 3;
+const PREVIEW_LIMIT = 5;
 
 type WidgetHref = Parameters<typeof Link>[0]["href"];
+type TaskBucket = "overdue" | "today" | "upcoming" | "noDate";
 
-/**
- * A labelled dashboard block. With `seeAllHref` the header taps through to the
- * full section; without it (e.g. Today) the label is just a heading.
- */
-function Widget({
-  label,
+function Panel({
+  icon: Icon,
+  title,
   seeAllHref,
   seeAllLabel,
   children,
+  className,
 }: {
-  label: string;
+  icon: typeof Calendar;
+  title: string;
   seeAllHref?: WidgetHref;
   seeAllLabel?: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="space-y-2">
-      <div className="flex items-center gap-2 px-1">
-        <h2 className="flex-1 font-bold text-muted-foreground text-xs uppercase tracking-wider">
-          {label}
-        </h2>
+    <section
+      className={cn(
+        "flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-2 border-b bg-muted/30 px-4 py-3">
+        <Icon size={16} className="shrink-0 text-primary" aria-hidden />
+        <h2 className="flex-1 font-semibold text-sm">{title}</h2>
         {seeAllHref && (
           <Link
             href={seeAllHref}
@@ -55,36 +66,119 @@ function Widget({
           </Link>
         )}
       </div>
-      {children}
+      <div className="flex-1 p-2">{children}</div>
     </section>
   );
 }
 
-function WidgetLoading() {
+function PanelLoading() {
   return (
-    <div className="flex justify-center py-6 text-muted-foreground">
+    <div className="flex justify-center py-10 text-muted-foreground">
       <Loader2 className="animate-spin" size={20} />
     </div>
   );
 }
 
-function EmptyLine({ text }: { text: string }) {
-  return <p className="px-1 py-2 text-[13px] text-muted-foreground">{text}</p>;
+function EmptyState({ text }: { text: string }) {
+  return (
+    <p className="px-3 py-8 text-center text-[13px] text-muted-foreground">
+      {text}
+    </p>
+  );
 }
 
-const rowClassName =
-  "flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent";
+function HeroHeader({
+  dateLabel,
+  eventCount,
+  taskCount,
+  eventsLabel,
+  tasksLabel,
+}: {
+  dateLabel: string;
+  eventCount: number;
+  taskCount: number;
+  eventsLabel: string;
+  tasksLabel: string;
+}) {
+  return (
+    <header className="rounded-2xl border bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-5 shadow-sm">
+      <p className="font-bold text-2xl tracking-tight">{dateLabel}</p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <div className="flex items-center gap-2.5 rounded-xl border bg-card/80 px-3.5 py-2.5 shadow-sm backdrop-blur-sm">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+            <CalendarDays size={16} className="text-primary" aria-hidden />
+          </div>
+          <div>
+            <p className="font-bold text-lg leading-none tabular-nums">
+              {eventCount}
+            </p>
+            <p className="text-[11px] text-muted-foreground">{eventsLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl border bg-card/80 px-3.5 py-2.5 shadow-sm backdrop-blur-sm">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+            <CheckSquare size={16} className="text-primary" aria-hidden />
+          </div>
+          <div>
+            <p className="font-bold text-lg leading-none tabular-nums">
+              {taskCount}
+            </p>
+            <p className="text-[11px] text-muted-foreground">{tasksLabel}</p>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
 
-function EventRow({
+function EventDateBadge({
+  date,
+  isToday,
+  todayLabel,
+  locale,
+}: {
+  date: Date;
+  isToday: boolean;
+  todayLabel: string;
+  locale: string;
+}) {
+  if (isToday) {
+    return (
+      <div className="flex min-w-[2.75rem] flex-col items-center justify-center rounded-lg bg-primary px-2 py-1.5 text-primary-foreground">
+        <span className="font-bold text-[10px] uppercase leading-none tracking-wide">
+          {todayLabel}
+        </span>
+      </div>
+    );
+  }
+
+  const day = date.getDate();
+  const month = date.toLocaleDateString(locale, { month: "short" });
+
+  return (
+    <div className="flex min-w-[2.75rem] flex-col items-center justify-center rounded-lg bg-muted px-2 py-1.5">
+      <span className="font-bold text-lg leading-none tabular-nums">{day}</span>
+      <span className="font-semibold text-[10px] uppercase leading-none tracking-wide text-muted-foreground">
+        {month}
+      </span>
+    </div>
+  );
+}
+
+function EventCard({
   event,
   when,
+  isToday,
+  todayLabel,
+  locale,
   linkedList,
   linkedListA11y,
 }: {
   event: CalendarEvent;
-  // Preformatted by the caller: the full dated range for "Upcoming", time-only
-  // for "Today" (whose date is implied), so the date is never repeated.
   when: string;
+  isToday: boolean;
+  todayLabel: string;
+  locale: string;
   linkedList?: List;
   linkedListA11y?: (done: number, total: number) => string;
 }) {
@@ -98,15 +192,16 @@ function EventRow({
         pathname: "/groups/[projectId]/calendar/[eventId]",
         params: { projectId: event.projectId, eventId: event.id },
       }}
-      className={rowClassName}
+      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-accent"
       aria-label={
         linkedList && linkedListA11y ? linkedListA11y(done, total) : undefined
       }
     >
-      <Calendar
-        size={18}
-        className="ml-0.5 shrink-0 text-muted-foreground"
-        aria-hidden
+      <EventDateBadge
+        date={event.startAt}
+        isToday={isToday}
+        todayLabel={todayLabel}
+        locale={locale}
       />
       <div className="min-w-0 flex-1">
         <div className="truncate font-semibold">{event.name}</div>
@@ -119,73 +214,68 @@ function EventRow({
   );
 }
 
-function ListRow({ list }: { list: List }) {
-  const total = list.items.length;
-  const done = list.items.filter((item) => item.completed).length;
-  const pending = total - done;
-  const complete = total > 0 && pending === 0;
-  // A complete favourite is on Home because it's pinned, not because it's in
-  // progress — drop the progress ring and let the star say why it's here.
-  const showProgress = !(list.favorite && complete);
+function TaskCard({
+  task,
+  projectId,
+  bucket,
+  bucketLabel,
+  showBucketLabel,
+}: {
+  task: TaskWithList;
+  projectId: string;
+  bucket: TaskBucket;
+  bucketLabel: string;
+  showBucketLabel: boolean;
+}) {
+  const overdue = bucket === "overdue";
 
   return (
-    <Link
-      href={{
-        pathname: "/groups/[projectId]/lists/[listId]",
-        params: { projectId: list.projectId, listId: list.id },
-      }}
-      className={rowClassName}
-    >
-      <ListTodo
-        size={18}
-        className="shrink-0 text-muted-foreground"
-        aria-hidden
-      />
-      {list.favorite && (
-        <Star size={14} className="shrink-0 fill-yellow-400 text-yellow-400" />
+    <div>
+      {showBucketLabel && (
+        <p
+          className={cn(
+            "px-3 pt-2 pb-1 font-semibold text-[11px] uppercase tracking-wider",
+            overdue ? "text-destructive" : "text-muted-foreground",
+          )}
+        >
+          {bucketLabel}
+        </p>
       )}
-      <span
+      <Link
+        href={{
+          pathname: "/groups/[projectId]/lists/[listId]",
+          params: { projectId, listId: task.listId },
+        }}
         className={cn(
-          "min-w-0 flex-1 truncate font-semibold",
-          complete && "text-muted-foreground",
+          "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-accent",
+          overdue && "border-l-2 border-l-destructive",
         )}
       >
-        {list.name}
-      </span>
-      {showProgress && (
-        <ProgressRing done={done} pending={pending} total={total} />
-      )}
-    </Link>
-  );
-}
-
-function PotRow({ pot }: { pot: Pot }) {
-  const extra = pot.users.length - AVATAR_STACK;
-
-  return (
-    <Link
-      href={{
-        pathname: "/groups/[projectId]/expenses/[potId]",
-        params: { projectId: pot.projectId, potId: pot.id },
-      }}
-      className={rowClassName}
-    >
-      <span className="min-w-0 flex-1 truncate font-semibold">{pot.name}</span>
-      <div className="flex items-center">
-        {pot.users.slice(0, AVATAR_STACK).map((member, index) => (
-          <UserAvatar
-            key={member.user.id || index}
-            user={member.user}
-            className={cn("h-7 w-7 ring-2 ring-card", index > 0 && "-ml-2")}
-          />
-        ))}
-        {extra > 0 && (
-          <span className="ml-1.5 text-[13px] text-muted-foreground">
-            {`+${extra}`}
-          </span>
-        )}
-      </div>
-    </Link>
+        <span
+          className={cn(
+            "size-2 shrink-0 rounded-full",
+            overdue ? "bg-destructive" : "bg-muted-foreground",
+          )}
+          aria-hidden
+        />
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium">{task.name}</div>
+          <div className="truncate text-[12px] text-muted-foreground">
+            {task.listName}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {task.dueAt && (
+            <DueChip
+              dueAt={task.dueAt}
+              allDay={task.dueAllDay}
+              completed={false}
+            />
+          )}
+          {task.priority && <PriorityBadge priority={task.priority} />}
+        </div>
+      </Link>
+    </div>
   );
 }
 
@@ -200,7 +290,6 @@ function sameDay(a: Date, b: Date) {
   );
 }
 
-/** Full dated range (Upcoming), matching the calendar's TimeRange display. */
 function formatEventRange(event: CalendarEvent, locale: string): string {
   const { startAt, endAt, allDay } = event;
 
@@ -222,7 +311,6 @@ function formatEventRange(event: CalendarEvent, locale: string): string {
   return `${startAt.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })} - ${endAt.toLocaleString(locale, { ...DATE_OPTS, ...TIME_OPTS })}`;
 }
 
-/** Time-only label (Today), since the "Today" header already implies the date. */
 function formatEventTime(
   event: CalendarEvent,
   locale: string,
@@ -244,16 +332,42 @@ function formatEventTime(
   return formatEventRange(event, locale);
 }
 
+function localDayIndex(date: Date): number {
+  return Math.floor(
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() /
+      86_400_000,
+  );
+}
+
+function utcDayIndex(date: Date): number {
+  return Math.floor(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) /
+      86_400_000,
+  );
+}
+
+function bucketFor(task: TaskWithList, todayIndex: number): TaskBucket {
+  if (!task.dueAt) {
+    return "noDate";
+  }
+  const dayIndex = task.dueAllDay
+    ? utcDayIndex(task.dueAt)
+    : localDayIndex(task.dueAt);
+  if (dayIndex < todayIndex) {
+    return "overdue";
+  }
+  if (dayIndex === todayIndex) {
+    return "today";
+  }
+  return "upcoming";
+}
+
 export default function HomeDashboard({ projectId }: { projectId: string }) {
   const locale = useLocale();
   const t = useTranslations("home");
-  const tNav = useTranslations("nav");
+  const tLists = useTranslations("lists");
   const tCalendar = useTranslations("calendar");
-  const { project } = useProjects();
 
-  // Anchor "today" and the look-ahead window once on mount so the events query
-  // key stays stable. Query from the start of today so this morning's events —
-  // and still-running ones — land in the Today section.
   const [bounds] = useState(() => {
     const today = new Date();
     const from = new Date(today);
@@ -269,21 +383,17 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   });
 
   const events = useEventsInRange(projectId, bounds.from, bounds.to);
-  // Today: anything on today's date, including events already running. Upcoming:
-  // events that start on a later day, so the two sections never overlap.
-  const todayEvents = useMemo(
+  const upcomingEvents = useMemo(
     () =>
       events
-        ?.filter((event) => isEventOnDay(event, bounds.today))
+        ?.filter((event) => event.endAt.getTime() >= bounds.from.getTime())
         .slice(0, PREVIEW_LIMIT),
-    [events, bounds.today],
+    [events, bounds.from],
   );
-  const upcoming = useMemo(
+  const todayEventCount = useMemo(
     () =>
-      events
-        ?.filter((event) => event.startAt.getTime() > bounds.endOfToday)
-        .slice(0, PREVIEW_LIMIT),
-    [events, bounds.endOfToday],
+      events?.filter((event) => isEventOnDay(event, bounds.today)).length ?? 0,
+    [events, bounds.today],
   );
 
   const lists = useProjectLists(projectId);
@@ -296,136 +406,115 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
     }
     return map;
   }, [lists]);
-  const activeLists = useMemo(() => {
-    if (lists === undefined) {
+
+  const rawTasks = useQuery(api.tasks.myTasks, {
+    projectId: projectId as Id<"projects">,
+  });
+  const previewTasks = useMemo(() => {
+    if (!rawTasks) {
       return undefined;
     }
-    // Lists with at least one pending item (or none yet), favourites first —
-    // mirroring the Lists overview's active sectioning and ordering. Event-linked
-    // lists surface on their event card instead.
-    return lists
-      .filter((list) => !list.eventId)
-      .filter(
-        (list) =>
-          list.items.length === 0 || list.items.some((item) => !item.completed),
-      )
-      .sort(
-        (a, b) =>
-          Number(b.favorite) - Number(a.favorite) || compareByRecency(a, b),
-      )
-      .slice(0, PREVIEW_LIMIT);
-  }, [lists]);
+    const todayIndex = localDayIndex(bounds.today);
+    return rawTasks
+      .map(adaptTask)
+      .slice(0, PREVIEW_LIMIT)
+      .map((task) => ({
+        task,
+        bucket: bucketFor(task, todayIndex),
+      }));
+  }, [rawTasks, bounds.today]);
+  const taskCount = rawTasks?.length ?? 0;
 
-  const potsOverview = useProjectPotsOverview(projectId, 0);
-  const activePots = potsOverview?.active.slice(0, PREVIEW_LIMIT);
-  // Expenses are a split-between-people feature, so the section is only relevant
-  // once the group has more than one member (mirrors the Expenses tab's solo
-  // explainer). Hidden while the project is still loading.
-  const isSharedGroup = project !== null && project.users.length > 1;
+  const dateLabel = bounds.today.toLocaleDateString(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-8 py-2">
-      {/* Only when there's something on today — an empty "Today" reads as
-          broken, unlike "Upcoming" which always anchors the events area. */}
-      {todayEvents && todayEvents.length > 0 && (
-        <Widget label={t("today")}>
-          <div className="space-y-3">
-            {todayEvents.map((event) => (
-              <EventRow
-                key={event.id}
-                event={event}
-                when={formatEventTime(event, locale, tCalendar("allDay"))}
-                linkedList={listsByEventId.get(event.id)}
-                linkedListA11y={(done, total) =>
-                  t("linkedListA11y", { done, total })
-                }
-              />
-            ))}
-          </div>
-        </Widget>
-      )}
+    <div className="mx-auto w-full max-w-4xl space-y-6 py-2">
+      <HeroHeader
+        dateLabel={dateLabel}
+        eventCount={todayEventCount}
+        taskCount={taskCount}
+        eventsLabel={t("eventsToday")}
+        tasksLabel={t("tasksAssigned")}
+      />
 
-      <Widget
-        label={t("upcoming")}
-        seeAllHref={{
-          pathname: "/groups/[projectId]/calendar",
-          params: { projectId },
-        }}
-        seeAllLabel={t("goToCalendar")}
-      >
-        {upcoming === undefined ? (
-          <WidgetLoading />
-        ) : upcoming.length === 0 ? (
-          <EmptyLine text={t("noUpcoming")} />
-        ) : (
-          <div className="space-y-3">
-            {upcoming.map((event) => (
-              <EventRow
-                key={event.id}
-                event={event}
-                when={formatEventRange(event, locale)}
-                linkedList={listsByEventId.get(event.id)}
-                linkedListA11y={(done, total) =>
-                  t("linkedListA11y", { done, total })
-                }
-              />
-            ))}
-          </div>
-        )}
-      </Widget>
-
-      <Widget
-        label={tNav("lists")}
-        seeAllHref={{
-          pathname: "/groups/[projectId]/lists",
-          params: { projectId },
-        }}
-        seeAllLabel={t("showAllLists")}
-      >
-        {activeLists === undefined ? (
-          <WidgetLoading />
-        ) : activeLists.length === 0 ? (
-          <EmptyLine text={t("noActiveLists")} />
-        ) : (
-          <div className="space-y-3">
-            {activeLists.map((list) => (
-              <ListRow key={list.id} list={list} />
-            ))}
-          </div>
-        )}
-      </Widget>
-
-      {isSharedGroup && (
-        <Widget
-          label={tNav("expenses")}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Panel
+          icon={CheckSquare}
+          title={t("myTasks")}
           seeAllHref={{
-            pathname: "/groups/[projectId]/expenses",
+            pathname: "/groups/[projectId]/lists/tasks",
             params: { projectId },
           }}
-          seeAllLabel={t("goToPots")}
+          seeAllLabel={t("seeAll")}
         >
-          {activePots === undefined ? (
-            <WidgetLoading />
-          ) : activePots.length === 0 ? (
-            <EmptyLine text={t("noActivePots")} />
+          {previewTasks === undefined ? (
+            <PanelLoading />
+          ) : previewTasks.length === 0 ? (
+            <EmptyState text={t("noTasks")} />
           ) : (
-            <div className="space-y-3">
-              {activePots.map((pot) => (
-                <PotRow key={pot.id} pot={pot} />
-              ))}
+            <div className="divide-y divide-border/60">
+              {previewTasks.map(({ task, bucket }, index) => {
+                const prevBucket = previewTasks[index - 1]?.bucket;
+                const showBucketLabel = bucket !== prevBucket;
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    projectId={projectId}
+                    bucket={bucket}
+                    bucketLabel={tLists(`taskBucket_${bucket}`)}
+                    showBucketLabel={showBucketLabel}
+                  />
+                );
+              })}
             </div>
           )}
-        </Widget>
-      )}
+        </Panel>
+
+        <Panel
+          icon={Calendar}
+          title={t("upcoming")}
+          seeAllHref={{
+            pathname: "/groups/[projectId]/calendar",
+            params: { projectId },
+          }}
+          seeAllLabel={t("goToCalendar")}
+        >
+          {upcomingEvents === undefined ? (
+            <PanelLoading />
+          ) : upcomingEvents.length === 0 ? (
+            <EmptyState text={t("noUpcoming")} />
+          ) : (
+            <div className="divide-y divide-border/60">
+              {upcomingEvents.map((event) => {
+                const isToday = isEventOnDay(event, bounds.today);
+                return (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isToday={isToday}
+                    todayLabel={t("today")}
+                    locale={locale}
+                    when={
+                      isToday
+                        ? formatEventTime(event, locale, tCalendar("allDay"))
+                        : formatEventRange(event, locale)
+                    }
+                    linkedList={listsByEventId.get(event.id)}
+                    linkedListA11y={(done, total) =>
+                      t("linkedListA11y", { done, total })
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </Panel>
+      </div>
     </div>
   );
-}
-
-function compareByRecency(a: List, b: List) {
-  const recency = (list: List) =>
-    Math.max(
-      list.updatedAt?.getTime() ?? list.createdAt?.getTime() ?? 0,
-      ...list.items.map((item) => item.updatedAt?.getTime() ?? 0),
-    );
-  return recency(b) - recency(a) || a.name.localeCompare(b.name);
 }
