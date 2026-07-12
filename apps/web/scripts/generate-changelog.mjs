@@ -24,15 +24,17 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = resolve(REPO_ROOT, "CHANGELOG.md");
 const OUTPUT = resolve(REPO_ROOT, "src/data/changelog.generated.ts");
 
-// Play Store "what's new" notes derive from the latest CHANGELOG entry so they
-// never drift from the release. Maps source locale -> Play (fastlane-supply)
-// locale folder under apps/mobile/store/play/metadata/android/.
+// Store "what's new" notes derive from the latest CHANGELOG entry so they never
+// drift from the release.
 const PLAY_CHANGELOG_DIR = resolve(
   REPO_ROOT,
   "../mobile/store/play/metadata/android",
 );
 const PLAY_LOCALES = { ca: "ca", es: "es-ES", en: "en-US" };
 const PLAY_NOTE_MAX = 500; // Play per-language release-notes limit (see check-metadata.mjs)
+const APPLE_STORE_CONFIG = resolve(REPO_ROOT, "../mobile/store.config.json");
+const APPLE_LOCALES = { ca: "ca", es: "es-ES", en: "en-US" };
+const APPLE_NOTE_MAX = 4000; // App Store per-language release-notes limit (see check-metadata.mjs)
 
 const LOCALES = ["ca", "es", "en"];
 const CHANGE_TYPES = ["feature", "fix", "improvement"];
@@ -152,6 +154,13 @@ export const CURRENT_VERSION = ${JSON.stringify(currentVersion)};
 }
 
 /**
+ * @param {Array<{ type: string; text: string }>} changes
+ */
+function formatReleaseNotes(changes) {
+  return changes.map((change) => `• ${change.text}`).join("\n");
+}
+
+/**
  * Mirror the latest release's notes into the Play Store changelog files
  * (apps/mobile/store/play/metadata/android/<locale>/changelogs/default.txt),
  * one bullet per change, so Play "what's new" always matches the newest
@@ -175,7 +184,7 @@ async function writePlayChangelogs(entries) {
       );
       continue;
     }
-    const note = changes.map((change) => `• ${change.text}`).join("\n");
+    const note = formatReleaseNotes(changes);
     if (note.length > PLAY_NOTE_MAX) {
       fail(
         0,
@@ -196,6 +205,55 @@ async function writePlayChangelogs(entries) {
   }
 }
 
+/**
+ * Mirror the latest release's notes into store.config.json
+ * (apple.info.<locale>.releaseNotes) for EAS Metadata / App Store "What's New".
+ * Skipped when the mobile store config is absent (e.g. a web-only build context).
+ * @param {ReturnType<typeof parseChangelog>} entries
+ */
+async function writeAppleReleaseNotes(entries) {
+  if (!existsSync(APPLE_STORE_CONFIG)) {
+    console.warn(
+      `[changelog] App Store config not found; skipping Apple notes (${APPLE_STORE_CONFIG})`,
+    );
+    return;
+  }
+  const latest = entries[0];
+  const config = JSON.parse(await readFile(APPLE_STORE_CONFIG, "utf8"));
+  for (const [source, appleLocale] of Object.entries(APPLE_LOCALES)) {
+    const changes = latest.changes[source];
+    if (!changes || changes.length === 0) {
+      console.warn(
+        `[changelog] No "${source}" notes for ${latest.version}; left App Store ${appleLocale} unchanged`,
+      );
+      continue;
+    }
+    const note = formatReleaseNotes(changes);
+    if (note.length > APPLE_NOTE_MAX) {
+      fail(
+        0,
+        `App Store notes for ${appleLocale} (${latest.version}) are ${note.length} chars, over Apple's ${APPLE_NOTE_MAX} limit — shorten the CHANGELOG entry`,
+      );
+    }
+    const info = config.apple?.info?.[appleLocale];
+    if (!info) {
+      fail(
+        0,
+        `store.config.json missing apple.info.${appleLocale} — add the locale before generating release notes`,
+      );
+    }
+    info.releaseNotes = note;
+    console.log(
+      `[changelog] App Store notes -> apple.info.${appleLocale}.releaseNotes (${note.length}/${APPLE_NOTE_MAX} chars)`,
+    );
+  }
+  await writeFile(
+    APPLE_STORE_CONFIG,
+    `${JSON.stringify(config, null, 2)}\n`,
+    "utf8",
+  );
+}
+
 async function main() {
   const markdown = await readFile(SOURCE, "utf8");
   const entries = parseChangelog(markdown);
@@ -205,6 +263,7 @@ async function main() {
     `[changelog] Generated ${OUTPUT} (${entries.length} version(s)).`,
   );
   await writePlayChangelogs(entries);
+  await writeAppleReleaseNotes(entries);
 }
 
 main().catch((error) => {

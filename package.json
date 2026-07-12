@@ -16,6 +16,7 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "biome:fix": "biome check --write",
     "changelog:generate": "pnpm --filter web changelog:generate",
+    "check:store-notes": "pnpm changelog:generate && git diff --exit-code -- apps/mobile/store/play/metadata/android/ca/changelogs/default.txt apps/mobile/store/play/metadata/android/es-ES/changelogs/default.txt apps/mobile/store/play/metadata/android/en-US/changelogs/default.txt apps/mobile/store.config.json",
     "prepare": "husky"
   },
   "devDependencies": {
