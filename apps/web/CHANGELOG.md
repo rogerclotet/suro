@@ -10,7 +10,7 @@ with a type: `feature`, `fix`, or `improvement`.
 
 ### ca
 
-- [improvement] La pantalla d'inici es redissenya enfocat als propers esdeveniments i les tasques assignades, amb un resum més clar a la web i al mòbil.
+- [improvement] La pantalla d'inici es redissenya centrada en els propers esdeveniments i les teves tasques assignades, amb un resum més clar a la web i al mòbil.
 
 ### es
 
@@ -24,7 +24,7 @@ with a type: `feature`, `fix`, or `improvement`.
 
 ### ca
 
-- [feature] Els grups d'un sol usuari poden registrar despeses personals amb totals mensuals, gràfics diaris i una llista d'expenses, a la web i al mòbil.
+- [feature] Els grups d'un sol usuari poden registrar despeses personals amb totals mensuals, gràfics diaris i una llista de despeses, a la web i al mòbil.
 
 ### es
 
@@ -40,13 +40,13 @@ with a type: `feature`, `fix`, or `improvement`.
 
 - [fix] Afegir un element a una llista de tasques ja no fa que la pàgina es pengi en obrir el selector de categories.
 - [improvement] Les pàgines d'esdeveniments amaguen la secció de fitxers buida i mostren accions per afegir o pujar fitxers, com al mòbil.
-- [improvement] La barra lateral d'escriptori distingeix millor el hover de l'element actiu, ressalta només la ruta fill quan una secció està desplegada i obre el desplegable en clicar la fila pare.
+- [improvement] La barra lateral d'escriptori distingeix millor el hover de l'element actiu, ressalta només l'element fill quan una secció està desplegada i obre el desplegable en clicar la fila pare.
 
 ### es
 
 - [fix] Añadir un elemento a una lista de tareas ya no bloquea la página al abrir el selector de categorías.
 - [improvement] Las páginas de eventos ocultan la sección de archivos vacía y muestran acciones para añadir o subir archivos, como en el móvil.
-- [improvement] La barra lateral del escritorio distingue mejor el hover del elemento activo, resalta solo la ruta hija cuando una sección está desplegada y abre el desplegable al pulsar la fila padre.
+- [improvement] La barra lateral del escritorio distingue mejor el hover del elemento activo, resalta solo el elemento hijo cuando una sección está desplegada y abre el desplegable al pulsar la fila padre.
 
 ### en
 
@@ -72,11 +72,11 @@ with a type: `feature`, `fix`, or `improvement`.
 
 ### ca
 
-- [fix] Els suggeriments enviats des de l'app ara arriben correctament.
+- [fix] Els comentaris i suggeriments enviats des de l'app ara arriben de manera fiable.
 
 ### es
 
-- [fix] Los comentarios enviados desde la app ahora llegan correctamente.
+- [fix] Los comentarios y sugerencias enviados desde la app ahora llegan de forma fiable.
 
 ### en
 
@@ -160,7 +160,7 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [improvement] En tocar una notificació ara s'obre directament l'esdeveniment, la llista, la nota o la despesa a què fa referència, en comptes d'obrir només l'app.
-- [improvement] Les notificacions de l'Android ara mostren una icona pròpia de Suro.
+- [improvement] Les notificacions d'Android ara mostren una icona pròpia de Suro.
 
 ### es
 
@@ -176,8 +176,8 @@ with a type: `feature`, `fix`, or `improvement`.
 
 ### ca
 
-- [improvement] Les notificacions de l'Android ara es divideixen en categories (esdeveniments, llistes, notes, despeses i més), així pots desactivar des dels ajustos del telèfon les que no vulguis sense perdre la resta.
-- [fix] Les notificacions push ara arriben de manera fiable a l'Android, també si les actives més tard als ajustos o fas servir l'app en més d'un dispositiu.
+- [improvement] Les notificacions d'Android ara es divideixen en categories (esdeveniments, llistes, notes, despeses i més), així pots desactivar des dels ajustos del telèfon les que no vulguis sense perdre la resta.
+- [fix] Les notificacions push ara arriben de manera fiable a Android, també si les actives més tard als ajustos o fas servir l'app en més d'un dispositiu.
 
 ### es
 
@@ -194,9 +194,9 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [feature] Nova pestanya d'Inici: una vista general del grup amb els esdeveniments propers, les llistes i les despeses.
-- [fix] Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el tens obert ja no mostra cap error i simplement et fa enrere.
+- [fix] Esborrar un esdeveniment, una llista, una nota, una despesa o una plantilla mentre el consultes ja no mostra cap error i simplement et fa enrere.
 - [improvement] El calendari ara mostra els esdeveniments dels dies dels mesos veïns que es veuen a dalt i a baix del mes.
-- [feature] A l'aplicació mòbil, llisca cap a l'esquerra o la dreta al calendari per canviar de mes.
+- [feature] A l'aplicació mòbil, llisca cap a l'esquerra o cap a la dreta al calendari per canviar de mes.
 
 ### es
 
@@ -230,7 +230,7 @@ with a type: `feature`, `fix`, or `improvement`.
 
 ### ca
 
-- [feature] L'aplicació mòbil ara funciona sense connexió: tot el que hagis obert continua disponible sense xarxa, i els canvis que facis a llistes i despeses se sincronitzen automàticament quan tornes a tenir connexió.
+- [feature] L'aplicació mòbil ara funciona sense connexió: tot el que hagis obert continua disponible sense xarxa, i els canvis que facis a llistes i despeses es sincronitzen automàticament quan tornes a tenir connexió.
 
 ### es
 
@@ -453,7 +453,7 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [feature] Suro 1.0! Hem reconstruït l'aplicació de dalt a baix sobre una base nova, més ràpida i més fiable. És el canvi més gran des que Suro existeix, tot i que gairebé tot es veu igual: la diferència és tot el que ara és possible.
-- [feature] Tot se sincronitza a l'instant: quan algú del grup marca un element, puja una foto o canvia un pla, la resta ho veu immediatament, sense refrescar.
+- [feature] Tot es sincronitza a l'instant: quan algú del grup marca un element, puja una foto o canvia un pla, la resta ho veu immediatament, sense refrescar.
 - [feature] Aquesta nova base prepara el terreny per a les aplicacions natives de Suro per a iPhone i Android, que arribaran ben aviat.
 - [improvement] L'amic invisible i les notificacions queden en pausa temporalment mentre els traslladem a la nova base. Tornaran aviat.
 
