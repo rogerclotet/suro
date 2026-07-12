@@ -1,5 +1,9 @@
-# Tear down an ephemeral preview environment. Runs manually via workflow
-# dispatch, or automatically when a pull request is closed.
+# Tear down an ephemeral preview environment.
+#
+# Auto-runs when:
+#   - The "deploy-preview" label is removed from a PR
+#   - A PR with the label is merged to main
+# Manual fallback: Actions → "Preview teardown" → PR number.
 
 name: Preview teardown
 
@@ -11,21 +15,73 @@ on:
         required: true
         type: number
   pull_request:
-    types: [closed]
+    types: [closed, unlabeled]
     branches: [main]
 
 permissions:
   contents: read
 
+env:
+  PREVIEW_LABEL: deploy-preview
+
 jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      teardown: ${{ steps.resolve.outputs.teardown }}
+    steps:
+      - uses: actions/github-script@v7
+        id: resolve
+        with:
+          script: |
+            const label = process.env.PREVIEW_LABEL;
+
+            if (context.eventName === 'workflow_dispatch') {
+              core.setOutput('pr_number', String('${{ inputs.pr_number }}'));
+              core.setOutput('teardown', 'true');
+              return;
+            }
+
+            if (context.eventName === 'pull_request') {
+              const pr = context.payload.pull_request;
+
+              if (context.payload.action === 'unlabeled') {
+                if (context.payload.label?.name !== label) {
+                  core.setOutput('teardown', 'false');
+                  return;
+                }
+                core.setOutput('pr_number', String(pr.number));
+                core.setOutput('teardown', 'true');
+                return;
+              }
+
+              if (context.payload.action === 'closed') {
+                if (!pr.merged) {
+                  core.setOutput('teardown', 'false');
+                  return;
+                }
+                const hadLabel = pr.labels.some((entry) => entry.name === label);
+                if (!hadLabel) {
+                  core.setOutput('teardown', 'false');
+                  return;
+                }
+                core.setOutput('pr_number', String(pr.number));
+                core.setOutput('teardown', 'true');
+              }
+            }
+        env:
+          PREVIEW_LABEL: ${{ env.PREVIEW_LABEL }}
+
   stop_preview:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true || github.event.action == 'closed'
+    needs: resolve
+    if: needs.resolve.outputs.teardown == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Tear down preview environment
         env:
-          CI_MERGE_REQUEST_IID: ${{ github.event.pull_request.number || inputs.pr_number }}
+          CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           SSH_IP: ${{ secrets.SSH_IP }}
