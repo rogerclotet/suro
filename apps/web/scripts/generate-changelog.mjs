@@ -206,6 +206,47 @@ async function writePlayChangelogs(entries) {
 }
 
 /**
+ * Replace apple.info.<locale>.releaseNotes in store.config.json without
+ * reformatting the rest of the file (Biome keeps categories on one line).
+ * @param {string} text
+ * @param {string} locale
+ * @param {string} newNote
+ */
+function patchLocaleReleaseNotes(text, locale, newNote) {
+  const localeMarker = `"${locale}":`;
+  const localeIdx = text.indexOf(localeMarker);
+  if (localeIdx === -1) {
+    fail(0, `store.config.json missing locale ${locale}`);
+  }
+  const key = '"releaseNotes"';
+  const keyIdx = text.indexOf(key, localeIdx);
+  if (keyIdx === -1) {
+    fail(0, `store.config.json missing ${locale}.releaseNotes`);
+  }
+  const colonIdx = text.indexOf(":", keyIdx);
+  let valueStart = colonIdx + 1;
+  while (valueStart < text.length && /[\s]/.test(text[valueStart])) {
+    valueStart += 1;
+  }
+  if (text[valueStart] !== '"') {
+    fail(0, `store.config.json ${locale}.releaseNotes is not a string`);
+  }
+  let i = valueStart + 1;
+  while (i < text.length) {
+    if (text[i] === "\\") {
+      i += 2;
+      continue;
+    }
+    if (text[i] === '"') break;
+    i += 1;
+  }
+  const valueEnd = i + 1;
+  return (
+    text.slice(0, valueStart) + JSON.stringify(newNote) + text.slice(valueEnd)
+  );
+}
+
+/**
  * Mirror the latest release's notes into store.config.json
  * (apple.info.<locale>.releaseNotes) for EAS Metadata / App Store "What's New".
  * Skipped when the mobile store config is absent (e.g. a web-only build context).
@@ -219,7 +260,10 @@ async function writeAppleReleaseNotes(entries) {
     return;
   }
   const latest = entries[0];
-  const config = JSON.parse(await readFile(APPLE_STORE_CONFIG, "utf8"));
+  const original = await readFile(APPLE_STORE_CONFIG, "utf8");
+  const config = JSON.parse(original);
+  /** @type {Array<[string, string]>} */
+  const patches = [];
   for (const [source, appleLocale] of Object.entries(APPLE_LOCALES)) {
     const changes = latest.changes[source];
     if (!changes || changes.length === 0) {
@@ -242,16 +286,22 @@ async function writeAppleReleaseNotes(entries) {
         `store.config.json missing apple.info.${appleLocale} — add the locale before generating release notes`,
       );
     }
-    info.releaseNotes = note;
+    if (info.releaseNotes !== note) {
+      patches.push([appleLocale, note]);
+    }
+  }
+  if (patches.length === 0) {
+    console.log("[changelog] App Store releaseNotes already up to date");
+    return;
+  }
+  let updated = original;
+  for (const [locale, note] of patches) {
+    updated = patchLocaleReleaseNotes(updated, locale, note);
     console.log(
-      `[changelog] App Store notes -> apple.info.${appleLocale}.releaseNotes (${note.length}/${APPLE_NOTE_MAX} chars)`,
+      `[changelog] App Store notes -> apple.info.${locale}.releaseNotes (${note.length}/${APPLE_NOTE_MAX} chars)`,
     );
   }
-  await writeFile(
-    APPLE_STORE_CONFIG,
-    `${JSON.stringify(config, null, 2)}\n`,
-    "utf8",
-  );
+  await writeFile(APPLE_STORE_CONFIG, updated, "utf8");
 }
 
 async function main() {
