@@ -283,9 +283,15 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "25.1"
+          cache: pnpm
       - run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
+          pnpm install --frozen-lockfile
           gem install bundler -v 4.0.11 --no-document
       - name: Submit Android to Play Store
         working-directory: apps/mobile
