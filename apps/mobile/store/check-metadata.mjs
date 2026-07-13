@@ -14,12 +14,32 @@ const MOBILE_DIR = join(STORE_DIR, "..");
 
 const LOCALES = ["en-US", "es-ES", "ca"];
 
-// Apple: 6.9" (iPhone 16/17 Pro Max) and 6.7" (15 Pro Max era) portrait sizes
-// are accepted for the single required iPhone screenshot set.
-const APPLE_SCREENSHOT_SIZES = [
-  [1320, 2868],
-  [1290, 2796],
+// App Store Connect groups iPhone screenshots by display class. Each class
+// accepts only its own pixel sizes — uploading a 6.9" file to the 6.5" slot
+// (or vice versa) triggers "The dimensions of one or more screenshots are wrong".
+const APPLE_SCREENSHOT_CLASSES = [
+  {
+    label: "6.9-inch Display",
+    sizes: [
+      [1320, 2868],
+      [1290, 2796],
+      [1260, 2736],
+    ],
+  },
+  {
+    label: "6.5-inch Display",
+    sizes: [
+      [1284, 2778],
+      [1242, 2688],
+    ],
+  },
 ];
+
+function appleScreenshotClass(width, height) {
+  return APPLE_SCREENSHOT_CLASSES.find(({ sizes }) =>
+    sizes.some(([w, h]) => w === width && h === height),
+  );
+}
 
 let failures = 0;
 
@@ -97,6 +117,7 @@ function checkAppleConfig() {
 
 function checkAppleScreenshots() {
   console.log("\n== App Store screenshots (store/apple/screenshots) ==");
+  let uploadClass;
   for (const locale of LOCALES) {
     const dir = join(STORE_DIR, "apple", "screenshots", locale);
     const shots = existsSync(dir)
@@ -109,12 +130,26 @@ function checkAppleScreenshots() {
     );
     for (const shot of shots) {
       const [width, height] = pngSize(join(dir, shot));
+      const screenshotClass = appleScreenshotClass(width, height);
       check(
-        APPLE_SCREENSHOT_SIZES.some(([w, h]) => w === width && h === height),
-        `[${locale}] ${shot} ${width}x${height}`,
-        `[${locale}] ${shot} is ${width}x${height} (expected ${APPLE_SCREENSHOT_SIZES.map(([w, h]) => `${w}x${h}`).join(" or ")})`,
+        screenshotClass !== undefined,
+        `[${locale}] ${shot} ${width}x${height} (${screenshotClass.label})`,
+        `[${locale}] ${shot} is ${width}x${height} (expected one of: ${APPLE_SCREENSHOT_CLASSES.map(({ label, sizes }) => `${label}: ${sizes.map(([w, h]) => `${w}x${h}`).join(", ")}`).join("; ")})`,
       );
+      if (screenshotClass !== undefined) {
+        uploadClass ??= screenshotClass;
+        check(
+          screenshotClass === uploadClass,
+          `[${locale}] ${shot} matches ${uploadClass.label}`,
+          `[${locale}] ${shot} is ${screenshotClass.label} but other screenshots are ${uploadClass.label} — pick one display class and resize with generate-graphics.py`,
+        );
+      }
     }
+  }
+  if (uploadClass !== undefined) {
+    console.log(
+      `hint  Upload to App Store Connect → version → App Previews and Screenshots → iPhone → "${uploadClass.label}" (open "View All Sizes in Media Manager" if needed). Do not drop these files into the other iPhone display-size slot.`,
+    );
   }
 }
 
