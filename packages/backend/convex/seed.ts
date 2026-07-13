@@ -20,7 +20,14 @@ const DEMO_MEMBER_EMAILS = {
   marc: "marc@suro.demo",
 } as const;
 
-type DemoItem = { name: string; category?: string; completed?: boolean };
+type DemoItem = {
+  name: string;
+  category?: string;
+  completed?: boolean;
+  assignee?: "anna" | "julia" | "marc";
+  dueDaysFromNow?: number;
+  dueAllDay?: boolean;
+};
 
 type DemoContent = {
   groupName: string;
@@ -28,6 +35,7 @@ type DemoContent = {
   packing: { name: string; items: DemoItem[] };
   chores: { name: string; items: DemoItem[] };
   events: {
+    today: string;
     birthday: string;
     trip: { name: string; description: string };
     boiler: string;
@@ -76,13 +84,35 @@ const CONTENT: Record<"ca" | "es" | "en", DemoContent> = {
     chores: {
       name: "Tasques de casa",
       items: [
-        { name: "Treure el vidre", completed: true },
-        { name: "Regar les plantes" },
-        { name: "Comprar bombetes" },
-        { name: "Arreglar la persiana" },
+        {
+          name: "Treure el vidre",
+          completed: true,
+          assignee: "anna",
+          dueDaysFromNow: -2,
+          dueAllDay: true,
+        },
+        {
+          name: "Regar les plantes",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Comprar bombetes",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Arreglar la persiana",
+          assignee: "anna",
+          dueDaysFromNow: -1,
+          dueAllDay: true,
+        },
       ],
     },
     events: {
+      today: "Sopar al terrat",
       birthday: "Sopar d'aniversari de la Júlia",
       trip: {
         name: "Cap de setmana a la Cerdanya",
@@ -138,13 +168,35 @@ const CONTENT: Record<"ca" | "es" | "en", DemoContent> = {
     chores: {
       name: "Tareas de casa",
       items: [
-        { name: "Sacar el vidrio", completed: true },
-        { name: "Regar las plantas" },
-        { name: "Comprar bombillas" },
-        { name: "Arreglar la persiana" },
+        {
+          name: "Sacar el vidrio",
+          completed: true,
+          assignee: "anna",
+          dueDaysFromNow: -2,
+          dueAllDay: true,
+        },
+        {
+          name: "Regar las plantas",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Comprar bombillas",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Arreglar la persiana",
+          assignee: "anna",
+          dueDaysFromNow: -1,
+          dueAllDay: true,
+        },
       ],
     },
     events: {
+      today: "Cena en la terraza",
       birthday: "Cena de cumpleaños de Júlia",
       trip: {
         name: "Finde en la Cerdaña",
@@ -200,13 +252,35 @@ const CONTENT: Record<"ca" | "es" | "en", DemoContent> = {
     chores: {
       name: "House chores",
       items: [
-        { name: "Take out the glass", completed: true },
-        { name: "Water the plants" },
-        { name: "Buy light bulbs" },
-        { name: "Fix the blinds" },
+        {
+          name: "Take out the glass",
+          completed: true,
+          assignee: "anna",
+          dueDaysFromNow: -2,
+          dueAllDay: true,
+        },
+        {
+          name: "Water the plants",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Buy light bulbs",
+          assignee: "anna",
+          dueDaysFromNow: 0,
+          dueAllDay: true,
+        },
+        {
+          name: "Fix the blinds",
+          assignee: "anna",
+          dueDaysFromNow: -1,
+          dueAllDay: true,
+        },
       ],
     },
     events: {
+      today: "Rooftop dinner",
       birthday: "Júlia's birthday dinner",
       trip: {
         name: "Weekend in la Cerdanya",
@@ -253,6 +327,12 @@ function atLocalHour(daysFromNow: number, hour: number): number {
 /** Epoch ms for local midnight `daysFromNow` days ahead (all-day events). */
 function atLocalMidnight(daysFromNow: number): number {
   return atLocalHour(daysFromNow, 0);
+}
+
+/** UTC midnight for the local calendar day `daysFromNow` ahead — all-day task dues. */
+function atDueAllDay(daysFromNow: number): number {
+  const day = new Date(Date.now() + daysFromNow * DAY_MS);
+  return Date.UTC(day.getFullYear(), day.getMonth(), day.getDate());
 }
 
 async function deleteProjectCascade(
@@ -390,7 +470,16 @@ export const demoGroup = internalMutation({
 
     const now = Date.now();
 
-    // Calendar: a dinner, a linked all-day weekend trip, and a chore slot.
+    // Calendar: tonight's dinner, a dinner, a linked all-day weekend trip, and a chore slot.
+    await ctx.db.insert("events", {
+      name: content.events.today,
+      startAt: atLocalHour(0, 19),
+      endAt: atLocalHour(0, 21),
+      allDay: false,
+      projectId,
+      createdBy: user._id,
+      updatedAt: now,
+    });
     await ctx.db.insert("events", {
       name: content.events.birthday,
       startAt: atLocalHour(3, 21),
@@ -421,24 +510,45 @@ export const demoGroup = internalMutation({
       updatedAt: now,
     });
 
+    const assigneeFor = (who: DemoItem["assignee"]) => {
+      if (who === "anna") return user._id;
+      if (who === "julia") return julia;
+      if (who === "marc") return marc;
+      return undefined;
+    };
+
     const insertList = async (
       list: { name: string; items: DemoItem[] },
-      options: { favorite?: boolean; eventId?: Id<"events"> } = {},
+      options: {
+        favorite?: boolean;
+        eventId?: Id<"events">;
+        taskMode?: boolean;
+      } = {},
     ) => {
       const listId = await ctx.db.insert("lists", {
         name: list.name,
         projectId,
         favorite: options.favorite ?? false,
         eventId: options.eventId,
+        taskMode: options.taskMode ?? false,
         createdBy: user._id,
         updatedAt: now,
       });
       for (const item of list.items) {
+        const dueAt =
+          item.dueDaysFromNow !== undefined
+            ? item.dueAllDay
+              ? atDueAllDay(item.dueDaysFromNow)
+              : atLocalHour(item.dueDaysFromNow, 12)
+            : undefined;
         await ctx.db.insert("listItems", {
           name: item.name,
           completed: item.completed ?? false,
           listId,
           category: item.category,
+          assigneeId: assigneeFor(item.assignee),
+          dueAt,
+          dueAllDay: item.dueAllDay,
           createdBy: user._id,
           updatedAt: now,
         });
@@ -450,7 +560,7 @@ export const demoGroup = internalMutation({
       favorite: true,
     });
     await insertList(content.packing, { eventId: tripEventId });
-    await insertList(content.chores);
+    await insertList(content.chores, { taskMode: true });
 
     for (const note of [content.notes.menu, content.notes.wifi]) {
       await ctx.db.insert("notes", {
