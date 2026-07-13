@@ -14,8 +14,10 @@ Outputs (committed to the repo):
 
 The App Store screenshots are captured by hand; this never invents UI, it only
 resizes whatever is in apple/screenshots to the exact dimensions App Store
-Connect accepts (keeping store/check-metadata.mjs green). Capture on a 6.9"
-simulator (iPhone 16 Pro Max) for best quality, so resizing is a no-op.
+Connect accepts for the 6.9-inch Display slot (keeping check-metadata.mjs
+green). Capture on a 6.9" simulator (iPhone 16/17 Pro Max) for best quality,
+so resizing is usually a no-op. Upload the results to the matching 6.9-inch
+Display section in App Store Connect — not the 6.5-inch slot.
 """
 
 from pathlib import Path

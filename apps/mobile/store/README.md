@@ -46,7 +46,11 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
    commit the real code) — see `declarations.md` → Review notes.
 5. Fill the App Privacy labels + age rating from `declarations.md`.
 6. Upload screenshots from `apple/screenshots/<locale>/` (ASC → version →
-   App Previews and Screenshots; EAS Metadata does not push images).
+   App Previews and Screenshots → iPhone → **6.9-inch Display**; EAS Metadata
+   does not push images). The committed PNGs are 1320×2868 — if ASC shows
+   "dimensions are wrong" and lists 1242×2688 or 1284×2778, you are in the
+   **6.5-inch Display** slot by mistake; open "View All Sizes in Media Manager"
+   and switch to 6.9-inch.
 7. Push the listing text with `pnpm --filter mobile submit:ios:metadata`
    (`eas metadata:push`, sourced from `store.config.json`). The submit profile
    carries no ASC API key, so the first run authenticates with your Apple ID
@@ -154,8 +158,24 @@ adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/ph
 adb shell am broadcast -a com.android.systemui.demo -e command exit
 ```
 
-Repeat the seed + capture pass per locale (`ca`, `es`, `en`), then validate:
+Repeat the seed + capture pass per locale (`ca`, `es`, `en`), then normalize
+and validate (normalization is a no-op when captures already come from the 6.9"
+simulator, but it fixes wrong-device captures before commit):
 
 ```sh
-node apps/mobile/store/check-metadata.mjs
+uv run apps/mobile/store/generate-graphics.py   # resize apple/screenshots → 1320×2868
+node apps/mobile/store/check-metadata.mjs       # prints which ASC display slot to use
 ```
+
+### App Store Connect upload (iPhone screenshots)
+
+App Store Connect has separate upload areas per **display class**. A 1320×2868
+file is valid only in **6.9-inch Display**; uploading it to **6.5-inch
+Display** fails with:
+
+> Screenshots dimensions should be: 1242 × 2688px, 2688 × 1242px, 1284 × 2778px
+> or 2778 × 1284px
+
+Path: version → App Previews and Screenshots → iPhone → **6.9-inch Display**
+(use "View All Sizes in Media Manager" if the UI defaults to 6.5-inch). Upload
+one locale folder per language tab in ASC (`ca`, `es-ES`, `en-US`).
