@@ -60,7 +60,7 @@ describe("seed:demoGroup", () => {
         .query("events")
         .withIndex("by_project", (q) => q.eq("projectId", projectId))
         .collect();
-      expect(events).toHaveLength(3);
+      expect(events).toHaveLength(4);
 
       const notes = await ctx.db
         .query("notes")
@@ -73,6 +73,42 @@ describe("seed:demoGroup", () => {
         .withIndex("by_project", (q) => q.eq("projectId", projectId))
         .collect();
       expect(spendings).toHaveLength(3);
+    });
+  });
+
+  it("stages assigned tasks and a today event for the home dashboard", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await setupUser(t);
+
+    const { projectId } = await t.mutation(internal.seed.demoGroup, {
+      email: REVIEW_EMAIL,
+      locale: "ca",
+    });
+
+    await t.run(async (ctx) => {
+      const chores = await ctx.db
+        .query("lists")
+        .withIndex("by_project", (q) => q.eq("projectId", projectId))
+        .collect();
+      const choreList = chores.find((list) => list.name === "Tasques de casa");
+      expect(choreList?.taskMode).toBe(true);
+
+      const assigned = await ctx.db
+        .query("listItems")
+        .withIndex("by_list", (q) => q.eq("listId", choreList!._id))
+        .collect();
+      const annaTasks = assigned.filter(
+        (item) => item.assigneeId === userId && !item.completed,
+      );
+      expect(annaTasks).toHaveLength(3);
+
+      const events = await ctx.db
+        .query("events")
+        .withIndex("by_project", (q) => q.eq("projectId", projectId))
+        .collect();
+      expect(events.some((event) => event.name === "Sopar al terrat")).toBe(
+        true,
+      );
     });
   });
 
