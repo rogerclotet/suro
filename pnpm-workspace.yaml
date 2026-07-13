@@ -8,8 +8,8 @@ overrides:
   "@types/react": 19.2.17
   "@types/react-dom": 19.2.3
   # Single React version across web + mobile (duplicate React breaks native).
-  react: 19.2.3
-  react-dom: 19.2.3
+  react: 19.2.7
+  react-dom: 19.2.7
   # Security: pin patched transitive deps (API-compatible patch bumps).
   # ws<8.21.0 (via convex) memory-exhaustion DoS — GHSA-96hv-2xvq-fx4p.
   "ws@>=8.0.0 <8.21.0": ">=8.21.0"

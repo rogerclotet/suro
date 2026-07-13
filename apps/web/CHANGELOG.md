@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.17.1] — 2026-07-13
+
+### ca
+
+- [improvement] Actualitzacions internes per millorar l'estabilitat i la seguretat, a la web i al mòbil.
+
+### es
+
+- [improvement] Actualizaciones internas para mejorar la estabilidad y la seguridad, en la web y en el móvil.
+
+### en
+
+- [improvement] Under-the-hood updates for improved stability and security, on web and mobile.
+
 ## [1.17.0] — 2026-07-12
 
 ### ca

@@ -1,1 +1,1 @@
-• The home screen is redesigned around your upcoming events and assigned tasks, with a clearer at-a-glance layout on web and mobile.
+• Under-the-hood updates for improved stability and security, on web and mobile.
