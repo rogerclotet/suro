@@ -43,6 +43,7 @@
     "production": {
       "ios": {
         "ascAppId": "6780486033",
+        "appleTeamId": "2XUF926TS6",
         "metadataPath": "./store.config.json"
       },
       "android": {
