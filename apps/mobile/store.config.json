@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.17.0",
+    "version": "1.17.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The home screen is redesigned around your upcoming events and assigned tasks, with a clearer at-a-glance layout on web and mobile.",
+        "releaseNotes": "• Under-the-hood updates for improved stability and security, on web and mobile.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• La pantalla de inicio se rediseña en torno a los próximos eventos y tus tareas asignadas, con un resumen más claro en la web y el móvil.",
+        "releaseNotes": "• Actualizaciones internas para mejorar la estabilidad y la seguridad, en la web y en el móvil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• La pantalla d'inici es redissenya centrada en els propers esdeveniments i les teves tasques assignades, amb un resum més clar a la web i al mòbil.",
+        "releaseNotes": "• Actualitzacions internes per millorar l'estabilitat i la seguretat, a la web i al mòbil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

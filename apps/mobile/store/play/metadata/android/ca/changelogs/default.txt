@@ -1,1 +1,1 @@
-• La pantalla d'inici es redissenya centrada en els propers esdeveniments i les teves tasques assignades, amb un resum més clar a la web i al mòbil.
+• Actualitzacions internes per millorar l'estabilitat i la seguretat, a la web i al mòbil.

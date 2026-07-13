@@ -1,1 +1,1 @@
-• La pantalla de inicio se rediseña en torno a los próximos eventos y tus tareas asignadas, con un resumen más claro en la web y el móvil.
+• Actualizaciones internas para mejorar la estabilidad y la seguridad, en la web y en el móvil.
