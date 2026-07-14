@@ -22,7 +22,7 @@
     "release:android": "pnpm run build:android:release && pnpm run submit:android:release",
     "submit:ios:beta": "bundle exec fastlane ios beta",
     "presubmit:ios:metadata": "pnpm -w changelog:generate",
-    "submit:ios:metadata": "eas metadata:push --profile production",
+    "submit:ios:metadata": "EXPO_APPLE_TEAM_ID=2XUF926TS6 eas metadata:push --profile production",
     "submit:ios:release": "bundle exec fastlane ios release",
     "release:ios": "pnpm run build:ios:release && pnpm run submit:ios:release && pnpm run submit:ios:metadata",
     "typecheck": "tsc --noEmit",
