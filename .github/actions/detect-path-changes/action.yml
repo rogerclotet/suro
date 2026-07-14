@@ -1,0 +1,35 @@
+name: Detect path changes
+description: Shared dorny/paths-filter rules for web and backend areas
+outputs:
+  web:
+    description: Whether web-affecting paths changed
+    value: ${{ steps.filter.outputs.web }}
+  backend:
+    description: Whether backend-affecting paths changed
+    value: ${{ steps.filter.outputs.backend }}
+runs:
+  using: composite
+  steps:
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          web:
+            - 'apps/web/**'
+            - 'packages/backend/**'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'pnpm-workspace.yaml'
+            - 'biome.json'
+            - 'Dockerfile'
+            - '.dockerignore'
+            - 'compose.yaml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
+          backend:
+            - 'packages/backend/**'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'pnpm-workspace.yaml'
+            - '.github/workflows/**'
+            - '.github/actions/**'

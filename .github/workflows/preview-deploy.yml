@@ -1,5 +1,8 @@
 # Deploy an ephemeral web preview for a pull request.
 #
+# Previews deploy independently of Main CI/CD quality checks — a red lint/typecheck
+# run does not block preview deploy. Add a workflow_run gate here if that changes.
+#
 # Easiest triggers (no branch or PR number needed):
 #   - Add the "deploy-preview" label to the PR
 #   - Comment "/deploy-preview" on the PR
@@ -103,35 +106,23 @@ jobs:
           PREVIEW_LABEL: ${{ env.PREVIEW_LABEL }}
           PREVIEW_COMMAND: ${{ env.PREVIEW_COMMAND }}
 
-  changes:
+  detect_path_changes:
     needs: resolve
     if: needs.resolve.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     outputs:
-      web: ${{ steps.filter.outputs.web }}
+      web: ${{ steps.changes.outputs.web }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            web:
-              - 'apps/web/**'
-              - 'packages/backend/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'biome.json'
-              - 'Dockerfile'
-              - '.dockerignore'
-              - 'compose.yaml'
-              - '.github/workflows/**'
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
 
   build_preview:
-    needs: [resolve, changes]
-    if: needs.resolve.outputs.deploy == 'true' && needs.changes.outputs.web == 'true'
+    needs: [resolve, detect_path_changes]
+    if: needs.resolve.outputs.deploy == 'true' && needs.detect_path_changes.outputs.web == 'true'
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -155,8 +146,9 @@ jobs:
             NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
 
   deploy_preview:
-    needs: [resolve, changes, build_preview]
-    if: needs.resolve.outputs.deploy == 'true' && needs.changes.outputs.web == 'true'
+    needs: [resolve, detect_path_changes, build_preview]
+    if: needs.resolve.outputs.deploy == 'true' && needs.detect_path_changes.outputs.web == 'true'
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -177,7 +169,7 @@ jobs:
           apps/web/scripts/deploy-preview.sh
 
   notify:
-    needs: [resolve, changes, build_preview, deploy_preview]
+    needs: [resolve, detect_path_changes, build_preview, deploy_preview]
     if: always() && needs.resolve.outputs.deploy == 'true' && needs.resolve.outputs.notify != ''
     runs-on: ubuntu-latest
     steps:
@@ -186,7 +178,7 @@ jobs:
           script: |
             const prNumber = '${{ needs.resolve.outputs.pr_number }}';
             const previewUrl = `https://mr-${prNumber}.${process.env.PREVIEW_DOMAIN}`;
-            const hasWebChanges = '${{ needs.changes.outputs.web }}' === 'true';
+            const hasWebChanges = '${{ needs.detect_path_changes.outputs.web }}' === 'true';
             const buildResult = '${{ needs.build_preview.result }}';
             const deployResult = '${{ needs.deploy_preview.result }}';
             const notifyMode = '${{ needs.resolve.outputs.notify }}';

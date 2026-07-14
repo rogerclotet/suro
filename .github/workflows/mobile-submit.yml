@@ -24,6 +24,9 @@ permissions:
   contents: read
   actions: read
 
+env:
+  EXPO_APPLE_TEAM_ID: ${{ vars.EXPO_APPLE_TEAM_ID != '' && vars.EXPO_APPLE_TEAM_ID || '2XUF926TS6' }}
+
 jobs:
   find_ci_run:
     runs-on: ubuntu-latest
@@ -43,9 +46,9 @@ jobs:
               event: 'push',
               per_page: 5,
             });
-            const run = data.workflow_runs.find((r) => r.conclusion === 'success' || r.status === 'in_progress');
+            const run = data.workflow_runs.find((r) => r.conclusion === 'success');
             if (!run) {
-              core.setFailed(`No CI workflow run found for commit ${sha}`);
+              core.setFailed(`No successful Main CI/CD run found for commit ${sha}`);
               return;
             }
             core.setOutput('run_id', String(run.id));
@@ -54,6 +57,7 @@ jobs:
     needs: find_ci_run
     if: inputs.platform == 'android' || inputs.platform == 'both'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -64,40 +68,17 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ needs.find_ci_run.outputs.run_id }}
           path: apps/mobile/build
-      - uses: ruby/setup-ruby@v1
+      - uses: ./.github/actions/mobile-submit-android
         with:
-          ruby-version: "3.4"
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
-          pnpm install --frozen-lockfile
-          gem install bundler -v 4.0.11 --no-document
-      - name: Submit Android to Play Store
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-        run: |
-          bundle _4.0.11_ config set --local deployment true
-          bundle _4.0.11_ install
-          mkdir -p credentials
-          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
-          if [ ! -f build/suro-release.aab ]; then
-            EXPECTED_VERSION=$(jq -r .version ../../package.json)
-            bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
-          fi
-          pnpm -w changelog:generate
-          bundle _4.0.11_ exec fastlane android release
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          redownload-if-missing: "true"
 
   submit_ios:
     needs: find_ci_run
     if: inputs.platform == 'ios' || inputs.platform == 'both'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,33 +89,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ needs.find_ci_run.outputs.run_id }}
           path: apps/mobile/build
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/mobile-submit-ios
         with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git ca-certificates curl jq
-          pnpm install --frozen-lockfile
-      - name: Submit iOS to App Store Connect
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_APPLE_TEAM_ID: 2XUF926TS6
-          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-        run: |
-          mkdir -p credentials
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_KEY" | base64 -d > credentials/asc-api-key.p8
-          export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
-          export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
-          export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
-          if [ ! -f build/suro-release.ipa ]; then
-            EXPECTED_VERSION=$(jq -r .version ../../package.json)
-            bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
-          fi
-          pnpm -w changelog:generate
-          EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
-          EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          expo-apple-team-id: ${{ env.EXPO_APPLE_TEAM_ID }}
+          app-store-connect-api-key-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          app-store-connect-api-key-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          app-store-connect-api-key-issuer-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          redownload-if-missing: "true"

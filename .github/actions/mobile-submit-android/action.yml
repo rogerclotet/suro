@@ -1,0 +1,42 @@
+name: Submit Android to Play Store
+description: Prepare credentials and submit a Play Store release via fastlane
+inputs:
+  expo-token:
+    description: Expo access token
+    required: true
+  play-service-account-json:
+    description: Play Console service account JSON
+    required: true
+  redownload-if-missing:
+    description: Re-download the .aab from EAS when the artifact file is absent
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
+    - uses: ./.github/actions/setup-node-pnpm
+      with:
+        apt-packages: build-essential git ca-certificates curl jq
+    - shell: bash
+      run: gem install bundler -v 4.0.11 --no-document
+    - name: Submit Android to Play Store
+      shell: bash
+      working-directory: apps/mobile
+      env:
+        EXPO_TOKEN: ${{ inputs.expo-token }}
+        PLAY_SERVICE_ACCOUNT_JSON: ${{ inputs.play-service-account-json }}
+        REDOWNLOAD_IF_MISSING: ${{ inputs.redownload-if-missing }}
+      run: |
+        bundle _4.0.11_ config set --local deployment true
+        bundle _4.0.11_ install
+        mkdir -p credentials
+        printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
+        if [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.aab ]; then
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+        fi
+        pnpm -w changelog:generate
+        bundle _4.0.11_ exec fastlane android release
