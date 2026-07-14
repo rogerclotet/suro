@@ -1,7 +1,7 @@
-# CI/CD for Suro. Migrated from GitLab CI — path-gated jobs, PR checks, main
+# Main CI/CD for Suro. Migrated from GitLab CI — path-gated jobs, PR checks, main
 # deploys, and automatic mobile store submission after EAS builds finish.
 #
-# Per-area change sets (mirrors the old .gitlab-ci.yml anchors):
+# Per-area change sets (shared via .github/actions/detect-path-changes):
 #   web     — web image build, deploy, PR compile-check
 #   backend — Convex deploy
 #   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
@@ -10,7 +10,7 @@
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
 # do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
 
-name: CI
+name: Main CI/CD
 
 on:
   pull_request:
@@ -26,39 +26,16 @@ permissions:
   contents: read
   packages: write
 
-env:
-  REGISTRY: ghcr.io
-  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
-
 jobs:
-  changes:
+  detect_path_changes:
     runs-on: ubuntu-latest
     outputs:
-      web: ${{ steps.filter.outputs.web }}
-      backend: ${{ steps.filter.outputs.backend }}
+      web: ${{ steps.changes.outputs.web }}
+      backend: ${{ steps.changes.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            web:
-              - 'apps/web/**'
-              - 'packages/backend/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'biome.json'
-              - 'Dockerfile'
-              - '.dockerignore'
-              - 'compose.yaml'
-              - '.github/workflows/**'
-            backend:
-              - 'packages/backend/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - '.github/workflows/**'
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
 
   mobile_release_gate:
     if: github.event_name == 'push'
@@ -77,16 +54,11 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.sha }}
 
-  check:
+  repo_quality_checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: pnpm install
+      - uses: ./.github/actions/setup-node-pnpm
       - name: Lint, typecheck, test
         env:
           SKIP_ENV_VALIDATION: "1"
@@ -100,20 +72,17 @@ jobs:
           pnpm check:i18n
           pnpm typecheck
           pnpm test
-          node apps/mobile/store/check-metadata.mjs
 
-  web_build_check:
-    needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.web == 'true'
+  web_pr_build:
+    needs: detect_path_changes
+    if: github.event_name == 'pull_request' && needs.detect_path_changes.outputs.web == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: pnpm install
+          install-filter: web...
       - name: Next.js production build (compile check)
         env:
           SKIP_ENV_VALIDATION: "1"
@@ -122,227 +91,26 @@ jobs:
           POSTHOG_ENV_ID: ""
         run: pnpm run build
 
-  build:
-    needs: changes
-    if: github.event_name == 'push' && needs.changes.outputs.web == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
-            ${{ env.REGISTRY_IMAGE }}:latest
-          build-args: |
-            SKIP_ENV_VALIDATION=1
-            NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
-            NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-            NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-            POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
-            POSTHOG_ENV_ID=${{ secrets.POSTHOG_ENV_ID }}
-
-  convex_deploy:
-    needs: changes
-    if: github.event_name == 'push' && needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter backend...
-      - name: Deploy Convex backend
-        working-directory: packages/backend
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-        run: npx convex deploy
-
-  deploy:
-    needs: [changes, build, convex_deploy]
+  web_and_backend_deploy:
+    needs: [detect_path_changes, repo_quality_checks]
     if: |
-      always() &&
       github.event_name == 'push' &&
-      needs.changes.outputs.web == 'true' &&
-      needs.build.result == 'success' &&
-      (needs.convex_deploy.result == 'success' || needs.convex_deploy.result == 'skipped')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy production web
-        env:
-          CI_COMMIT_SHA: ${{ github.sha }}
-          CI_REGISTRY: ghcr.io
-          CI_REGISTRY_USER: ${{ github.repository_owner }}
-          CI_REGISTRY_PASSWORD: ${{ secrets.GHCR_PULL_TOKEN }}
-          CI_REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          SSH_IP: ${{ secrets.SSH_IP }}
-          SSH_PROJECT_DIRECTORY: ${{ secrets.SSH_PROJECT_DIRECTORY }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends sshpass openssh-client
-          chmod +x apps/web/scripts/deploy.sh
-          apps/web/scripts/deploy.sh
+      needs.repo_quality_checks.result == 'success' &&
+      (needs.detect_path_changes.outputs.web == 'true' || needs.detect_path_changes.outputs.backend == 'true')
+    uses: ./.github/workflows/reusable-web-deploy.yml
+    with:
+      web_changed: ${{ needs.detect_path_changes.outputs.web }}
+      backend_changed: ${{ needs.detect_path_changes.outputs.backend }}
+      commit_sha: ${{ github.sha }}
+    secrets: inherit
 
-  build_native_android:
-    needs: [mobile_release_gate, check]
-    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git jq curl ca-certificates
-          pnpm install --frozen-lockfile --filter mobile...
-      - name: Trigger EAS Android build
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          mkdir -p build
-          pnpm exec eas build --platform android --profile production --non-interactive --json --no-wait > build/eas-android.json
-          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-android.json)
-          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
-          echo "Triggered EAS android build $BUILD_ID"
-      - name: Wait for EAS Android build and download
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: suro-android-${{ github.sha }}
-          path: |
-            apps/mobile/build/eas-android.json
-            apps/mobile/build/suro-release.aab
-          retention-days: 14
-
-  build_native_ios:
-    needs: [mobile_release_gate, check]
-    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git jq curl ca-certificates
-          pnpm install --frozen-lockfile --filter mobile...
-      - name: Trigger EAS iOS build
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          mkdir -p build
-          pnpm exec eas build --platform ios --profile production --non-interactive --json --no-wait > build/eas-ios.json
-          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-ios.json)
-          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
-          echo "Triggered EAS ios build $BUILD_ID"
-      - name: Wait for EAS iOS build and download
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: suro-ios-${{ github.sha }}
-          path: |
-            apps/mobile/build/eas-ios.json
-            apps/mobile/build/suro-release.ipa
-          retention-days: 14
-
-  submit_android:
-    needs: [mobile_release_gate, build_native_android]
-    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: suro-android-${{ github.sha }}
-          path: apps/mobile/build
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential git ca-certificates curl jq
-          pnpm install --frozen-lockfile
-          gem install bundler -v 4.0.11 --no-document
-      - name: Submit Android to Play Store
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-        run: |
-          pnpm -w changelog:generate
-          bundle _4.0.11_ config set --local deployment true
-          bundle _4.0.11_ install
-          mkdir -p credentials
-          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
-          bundle _4.0.11_ exec fastlane android release
-
-  submit_ios:
-    needs: [mobile_release_gate, build_native_ios]
-    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: suro-ios-${{ github.sha }}
-          path: apps/mobile/build
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "25.1"
-          cache: pnpm
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git ca-certificates curl jq
-          pnpm install --frozen-lockfile
-      - name: Submit iOS to App Store Connect
-        working-directory: apps/mobile
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_APPLE_TEAM_ID: 2XUF926TS6
-          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-        run: |
-          mkdir -p credentials
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_KEY" | base64 -d > credentials/asc-api-key.p8
-          export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
-          export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
-          export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
-          pnpm -w changelog:generate
-          EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
-          EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive
+  mobile_release:
+    needs: [mobile_release_gate, repo_quality_checks]
+    if: |
+      github.event_name == 'push' &&
+      needs.repo_quality_checks.result == 'success' &&
+      needs.mobile_release_gate.outputs.should_build == 'true'
+    uses: ./.github/workflows/reusable-mobile-release.yml
+    with:
+      commit_sha: ${{ github.sha }}
+    secrets: inherit

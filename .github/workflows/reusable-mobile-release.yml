@@ -1,0 +1,131 @@
+# Reusable EAS native build + store submit jobs. Called from ci.yml on pushes to
+# main when mobile_release_gate approves a release.
+
+name: Mobile release
+
+on:
+  workflow_call:
+    inputs:
+      commit_sha:
+        description: Commit SHA to build and submit
+        required: true
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+      PLAY_SERVICE_ACCOUNT_JSON:
+        required: true
+      APP_STORE_CONNECT_API_KEY_KEY:
+        required: true
+      APP_STORE_CONNECT_API_KEY_KEY_ID:
+        required: true
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID:
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  EXPO_APPLE_TEAM_ID: ${{ vars.EXPO_APPLE_TEAM_ID != '' && vars.EXPO_APPLE_TEAM_ID || '2XUF926TS6' }}
+
+jobs:
+  mobile_eas_build_android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: mobile...
+          apt-packages: git jq curl ca-certificates
+      - name: Trigger EAS Android build
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          mkdir -p build
+          pnpm exec eas build --platform android --profile production --non-interactive --json --no-wait > build/eas-android.json
+          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-android.json)
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+          echo "Triggered EAS android build $BUILD_ID"
+      - name: Wait for EAS Android build and download
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suro-android-${{ inputs.commit_sha }}
+          path: |
+            apps/mobile/build/eas-android.json
+            apps/mobile/build/suro-release.aab
+          retention-days: 14
+
+  mobile_eas_build_ios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: mobile...
+          apt-packages: git jq curl ca-certificates
+      - name: Trigger EAS iOS build
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          mkdir -p build
+          pnpm exec eas build --platform ios --profile production --non-interactive --json --no-wait > build/eas-ios.json
+          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-ios.json)
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+          echo "Triggered EAS ios build $BUILD_ID"
+      - name: Wait for EAS iOS build and download
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suro-ios-${{ inputs.commit_sha }}
+          path: |
+            apps/mobile/build/eas-ios.json
+            apps/mobile/build/suro-release.ipa
+          retention-days: 14
+
+  mobile_play_store_submit:
+    needs: mobile_eas_build_android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: suro-android-${{ inputs.commit_sha }}
+          path: apps/mobile/build
+      - uses: ./.github/actions/mobile-submit-android
+        with:
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+  mobile_app_store_submit:
+    needs: mobile_eas_build_ios
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: suro-ios-${{ inputs.commit_sha }}
+          path: apps/mobile/build
+      - uses: ./.github/actions/mobile-submit-ios
+        with:
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          expo-apple-team-id: ${{ env.EXPO_APPLE_TEAM_ID }}
+          app-store-connect-api-key-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          app-store-connect-api-key-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          app-store-connect-api-key-issuer-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}

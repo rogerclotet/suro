@@ -1,0 +1,51 @@
+name: Submit iOS to App Store Connect
+description: Prepare credentials and submit an App Store release via EAS
+inputs:
+  expo-token:
+    description: Expo access token
+    required: true
+  expo-apple-team-id:
+    description: Apple Developer team ID
+    required: true
+  app-store-connect-api-key-key:
+    description: Base64-encoded App Store Connect API key (.p8)
+    required: true
+  app-store-connect-api-key-key-id:
+    description: App Store Connect API key ID
+    required: true
+  app-store-connect-api-key-issuer-id:
+    description: App Store Connect API key issuer ID
+    required: true
+  redownload-if-missing:
+    description: Re-download the .ipa from EAS when the artifact file is absent
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-node-pnpm
+      with:
+        apt-packages: git ca-certificates curl jq
+    - name: Submit iOS to App Store Connect
+      shell: bash
+      working-directory: apps/mobile
+      env:
+        EXPO_TOKEN: ${{ inputs.expo-token }}
+        EXPO_APPLE_TEAM_ID: ${{ inputs.expo-apple-team-id }}
+        APP_STORE_CONNECT_API_KEY_KEY: ${{ inputs.app-store-connect-api-key-key }}
+        APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ inputs.app-store-connect-api-key-key-id }}
+        APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ inputs.app-store-connect-api-key-issuer-id }}
+        REDOWNLOAD_IF_MISSING: ${{ inputs.redownload-if-missing }}
+      run: |
+        mkdir -p credentials
+        printf '%s' "$APP_STORE_CONNECT_API_KEY_KEY" | base64 -d > credentials/asc-api-key.p8
+        export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
+        export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
+        export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
+        if [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.ipa ]; then
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+        fi
+        pnpm -w changelog:generate
+        EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+        EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive
