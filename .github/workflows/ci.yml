@@ -4,7 +4,8 @@
 # Per-area change sets (mirrors the old .gitlab-ci.yml anchors):
 #   web     — web image build, deploy, PR compile-check
 #   backend — Convex deploy
-#   mobile  — EAS native builds + store submit (CI config edits excluded)
+#   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
+#             version bump + matching CHANGELOG entry + native file changes)
 #
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
 # do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
@@ -35,7 +36,6 @@ jobs:
     outputs:
       web: ${{ steps.filter.outputs.web }}
       backend: ${{ steps.filter.outputs.backend }}
-      mobile: ${{ steps.filter.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -59,19 +59,23 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - '.github/workflows/**'
-            mobile:
-              - 'apps/mobile/src/**'
-              - 'apps/mobile/assets/**'
-              - 'apps/mobile/app.json'
-              - 'apps/mobile/app.config.ts'
-              - 'apps/mobile/eas.json'
-              - 'apps/mobile/package.json'
-              - 'apps/mobile/metro.config.js'
-              - 'apps/mobile/google-services.json'
-              - 'apps/mobile/store/**'
-              - 'apps/mobile/store.config.json'
-              - 'apps/web/CHANGELOG.md'
-              - 'packages/backend/**'
+
+  mobile_release_gate:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.gate.outputs.should_build }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Decide whether to trigger EAS native builds
+        id: gate
+        run: node apps/mobile/scripts/should-build-native.mjs
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
 
   check:
     runs-on: ubuntu-latest
@@ -191,8 +195,8 @@ jobs:
           apps/web/scripts/deploy.sh
 
   build_native_android:
-    needs: [changes, check]
-    if: github.event_name == 'push' && needs.changes.outputs.mobile == 'true'
+    needs: [mobile_release_gate, check]
+    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -231,8 +235,8 @@ jobs:
           retention-days: 14
 
   build_native_ios:
-    needs: [changes, check]
-    if: github.event_name == 'push' && needs.changes.outputs.mobile == 'true'
+    needs: [mobile_release_gate, check]
+    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -271,8 +275,8 @@ jobs:
           retention-days: 14
 
   submit_android:
-    needs: [changes, build_native_android]
-    if: github.event_name == 'push' && needs.changes.outputs.mobile == 'true'
+    needs: [mobile_release_gate, build_native_android]
+    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -307,8 +311,8 @@ jobs:
           bundle _4.0.11_ exec fastlane android release
 
   submit_ios:
-    needs: [changes, build_native_ios]
-    if: github.event_name == 'push' && needs.changes.outputs.mobile == 'true'
+    needs: [mobile_release_gate, build_native_ios]
+    if: github.event_name == 'push' && needs.mobile_release_gate.outputs.should_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
