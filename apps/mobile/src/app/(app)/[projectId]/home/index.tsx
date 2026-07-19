@@ -15,8 +15,12 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { priorityColor, useFormatDue } from "@/components/task-fields";
-import { useTranslations } from "@/i18n";
-import { useFormatEventRange, useFormatEventTime } from "@/lib/datetime";
+import { useLocale, useTranslations } from "@/i18n";
+import {
+  useFormatEventRange,
+  useFormatEventTime,
+  useLongDate,
+} from "@/lib/datetime";
 import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
@@ -49,28 +53,15 @@ function Panel({
   const t = useTheme();
   const router = useRouter();
   return (
-    <View
-      style={{
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: t.border,
-        backgroundColor: t.card,
-        overflow: "hidden",
-      }}
-    >
+    <View style={{ gap: 8 }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           gap: 8,
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: t.border,
-          backgroundColor: t.muted + "18",
         }}
       >
-        <Icon color={t.primary} size={16} />
+        <Icon color={t.primary} size={15} />
         <Txt weight="700" size={14} style={{ flex: 1 }}>
           {title}
         </Txt>
@@ -92,7 +83,7 @@ function Panel({
           </Pressable>
         ) : null}
       </View>
-      <View style={{ padding: 8 }}>{children}</View>
+      <View style={{ gap: 0 }}>{children}</View>
     </View>
   );
 }
@@ -102,6 +93,39 @@ function EmptyState({ text }: { text: string }) {
     <Txt muted size={13} style={{ textAlign: "center", paddingVertical: 32 }}>
       {text}
     </Txt>
+  );
+}
+
+function RowDivider() {
+  const t = useTheme();
+  return <View style={{ height: 1, backgroundColor: t.border }} />;
+}
+
+function InlineStat({
+  icon: Icon,
+  count,
+  label,
+}: {
+  icon: LucideIcon;
+  count: number;
+  label: string;
+}) {
+  const t = useTheme();
+  return (
+    <View
+      accessibilityLabel={`${count} ${label}`}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        flexShrink: 0,
+      }}
+    >
+      <Icon color={t.primary} size={14} />
+      <Txt weight="700" size={14}>
+        {count}
+      </Txt>
+    </View>
   );
 }
 
@@ -122,68 +146,39 @@ function HeroHeader({
   return (
     <View
       style={{
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: t.border,
-        backgroundColor: t.card,
-        padding: 20,
-        gap: 16,
-      }}
-    >
-      <Txt weight="700" size={24}>
-        {dateLabel}
-      </Txt>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-        <StatPill icon={CalendarDays} count={eventCount} label={eventsLabel} />
-        <StatPill icon={CheckSquare} count={taskCount} label={tasksLabel} />
-      </View>
-    </View>
-  );
-}
-
-function StatPill({
-  icon: Icon,
-  count,
-  label,
-}: {
-  icon: LucideIcon;
-  count: number;
-  label: string;
-}) {
-  const t = useTheme();
-  return (
-    <View
-      style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: t.border,
-        backgroundColor: t.bg,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
+        gap: 12,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: t.border,
       }}
     >
+      <Txt
+        weight="700"
+        size={20}
+        numberOfLines={1}
+        style={{ flex: 1, flexShrink: 1 }}
+      >
+        {dateLabel}
+      </Txt>
       <View
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          backgroundColor: t.primary + "18",
+          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
+          gap: 8,
+          flexShrink: 0,
         }}
       >
-        <Icon color={t.primary} size={16} />
-      </View>
-      <View>
-        <Txt weight="700" size={18}>
-          {count}
+        <InlineStat
+          icon={CalendarDays}
+          count={eventCount}
+          label={eventsLabel}
+        />
+        <Txt muted size={14}>
+          ·
         </Txt>
-        <Txt muted size={11}>
-          {label}
-        </Txt>
+        <InlineStat icon={CheckSquare} count={taskCount} label={tasksLabel} />
       </View>
     </View>
   );
@@ -199,6 +194,7 @@ function EventDateBadge({
   todayLabel: string;
 }) {
   const t = useTheme();
+  const locale = useLocale();
   if (isToday) {
     return (
       <View
@@ -224,7 +220,7 @@ function EventDateBadge({
   }
 
   const day = date.getDate();
-  const month = date.toLocaleDateString(undefined, { month: "short" });
+  const month = date.toLocaleDateString(locale, { month: "short" });
 
   return (
     <View
@@ -281,9 +277,7 @@ function EventCard({
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 12,
+        paddingVertical: 12,
         opacity: pressed ? 0.7 : 1,
       })}
     >
@@ -376,7 +370,7 @@ function TaskCard({
           size={11}
           weight="700"
           style={{
-            paddingHorizontal: 12,
+            paddingHorizontal: 0,
             paddingTop: 8,
             paddingBottom: 4,
             letterSpacing: 0.5,
@@ -398,9 +392,8 @@ function TaskCard({
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          borderRadius: 12,
+          paddingVertical: 12,
+          paddingLeft: overdue ? 10 : 0,
           borderLeftWidth: overdue ? 2 : 0,
           borderLeftColor: overdue ? t.danger : undefined,
           opacity: pressed ? 0.7 : 1,
@@ -498,12 +491,9 @@ export default function HomeDashboard() {
   const formatEventTime = useFormatEventTime();
   const formatEventRange = useFormatEventRange();
   const formatDue = useFormatDue();
+  const longDate = useLongDate();
 
-  const dateLabel = bounds.today.toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const dateLabel = longDate(bounds.today);
 
   return (
     <Screen>
@@ -513,7 +503,7 @@ export default function HomeDashboard() {
           ...sectionHeaderBadges("home"),
         }}
       />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>
         <HeroHeader
           dateLabel={dateLabel}
           eventCount={todayEventCount}
@@ -533,20 +523,22 @@ export default function HomeDashboard() {
           ) : previewTasks.length === 0 ? (
             <EmptyState text={tHome("noTasks")} />
           ) : (
-            <View style={{ gap: 4 }}>
+            <>
               {previewTasks.map(({ task, bucket }, index) => {
                 const prevBucket = previewTasks[index - 1]?.bucket;
                 return (
-                  <TaskCard
-                    key={task._id}
-                    task={task}
-                    bucket={bucket}
-                    showBucketLabel={bucket !== prevBucket}
-                    formatDue={formatDue}
-                  />
+                  <View key={task._id}>
+                    {index > 0 ? <RowDivider /> : null}
+                    <TaskCard
+                      task={task}
+                      bucket={bucket}
+                      showBucketLabel={bucket !== prevBucket}
+                      formatDue={formatDue}
+                    />
+                  </View>
                 );
               })}
-            </View>
+            </>
           )}
         </Panel>
 
@@ -561,26 +553,30 @@ export default function HomeDashboard() {
           ) : upcomingEvents.length === 0 ? (
             <EmptyState text={tHome("noUpcoming")} />
           ) : (
-            <View style={{ gap: 4 }}>
-              {upcomingEvents.map((event) => {
+            <>
+              {upcomingEvents.map((event, index) => {
                 const isToday = isEventOnDay(event, bounds.today);
                 return (
-                  <EventCard
-                    key={event._id}
-                    event={event}
-                    isToday={isToday}
-                    todayLabel={tHome("today")}
-                    when={
-                      isToday ? formatEventTime(event) : formatEventRange(event)
-                    }
-                    linkedList={listsByEventId.get(event._id)}
-                    linkedListA11y={(done, total) =>
-                      tHome("linkedListA11y", { done, total })
-                    }
-                  />
+                  <View key={event._id}>
+                    {index > 0 ? <RowDivider /> : null}
+                    <EventCard
+                      event={event}
+                      isToday={isToday}
+                      todayLabel={tHome("today")}
+                      when={
+                        isToday
+                          ? formatEventTime(event)
+                          : formatEventRange(event)
+                      }
+                      linkedList={listsByEventId.get(event._id)}
+                      linkedListA11y={(done, total) =>
+                        tHome("linkedListA11y", { done, total })
+                      }
+                    />
+                  </View>
                 );
               })}
-            </View>
+            </>
           )}
         </Panel>
       </ScrollView>

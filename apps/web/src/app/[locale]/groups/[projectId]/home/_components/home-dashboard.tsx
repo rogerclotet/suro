@@ -47,15 +47,10 @@ function Panel({
   className?: string;
 }) {
   return (
-    <section
-      className={cn(
-        "flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm",
-        className,
-      )}
-    >
-      <div className="flex items-center gap-2 border-b bg-muted/30 px-4 py-3">
-        <Icon size={16} className="shrink-0 text-primary" aria-hidden />
-        <h2 className="flex-1 font-semibold text-sm">{title}</h2>
+    <section className={cn("flex flex-col", className)}>
+      <div className="mb-2 flex items-center gap-2">
+        <Icon size={15} className="shrink-0 text-primary" aria-hidden />
+        <h2 className="flex-1 font-semibold text-sm tracking-tight">{title}</h2>
         {seeAllHref && (
           <Link
             href={seeAllHref}
@@ -66,7 +61,7 @@ function Panel({
           </Link>
         )}
       </div>
-      <div className="flex-1 p-2">{children}</div>
+      <div className="flex-1 divide-y divide-border/60">{children}</div>
     </section>
   );
 }
@@ -87,6 +82,29 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
+function InlineStat({
+  icon: Icon,
+  count,
+  label,
+}: {
+  icon: typeof CalendarDays;
+  count: number;
+  label: string;
+}) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground"
+      title={label}
+    >
+      <Icon size={14} className="text-primary" aria-hidden />
+      <span className="font-semibold tabular-nums text-foreground">
+        {count}
+      </span>
+      <span className="hidden min-[420px]:inline">{label}</span>
+    </span>
+  );
+}
+
 function HeroHeader({
   dateLabel,
   eventCount,
@@ -101,31 +119,20 @@ function HeroHeader({
   tasksLabel: string;
 }) {
   return (
-    <header className="rounded-2xl border bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-5 shadow-sm">
-      <p className="font-bold text-2xl tracking-tight">{dateLabel}</p>
-      <div className="mt-4 flex flex-wrap gap-3">
-        <div className="flex items-center gap-2.5 rounded-xl border bg-card/80 px-3.5 py-2.5 shadow-sm backdrop-blur-sm">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-            <CalendarDays size={16} className="text-primary" aria-hidden />
-          </div>
-          <div>
-            <p className="font-bold text-lg leading-none tabular-nums">
-              {eventCount}
-            </p>
-            <p className="text-[11px] text-muted-foreground">{eventsLabel}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 rounded-xl border bg-card/80 px-3.5 py-2.5 shadow-sm backdrop-blur-sm">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-            <CheckSquare size={16} className="text-primary" aria-hidden />
-          </div>
-          <div>
-            <p className="font-bold text-lg leading-none tabular-nums">
-              {taskCount}
-            </p>
-            <p className="text-[11px] text-muted-foreground">{tasksLabel}</p>
-          </div>
-        </div>
+    <header className="flex flex-nowrap items-center gap-3 border-b border-border/60 pb-4">
+      <p className="min-w-0 flex-1 truncate font-bold text-xl tracking-tight">
+        {dateLabel}
+      </p>
+      <div className="flex shrink-0 flex-nowrap items-center gap-2.5">
+        <InlineStat
+          icon={CalendarDays}
+          count={eventCount}
+          label={eventsLabel}
+        />
+        <span className="text-border" aria-hidden>
+          ·
+        </span>
+        <InlineStat icon={CheckSquare} count={taskCount} label={tasksLabel} />
       </div>
     </header>
   );
@@ -192,7 +199,7 @@ function EventCard({
         pathname: "/groups/[projectId]/calendar/[eventId]",
         params: { projectId: event.projectId, eventId: event.id },
       }}
-      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-accent"
+      className="flex items-center gap-3 px-1 py-3 transition-colors hover:bg-accent/50"
       aria-label={
         linkedList && linkedListA11y ? linkedListA11y(done, total) : undefined
       }
@@ -234,7 +241,7 @@ function TaskCard({
       {showBucketLabel && (
         <p
           className={cn(
-            "px-3 pt-2 pb-1 font-semibold text-[11px] uppercase tracking-wider",
+            "px-1 pt-2 pb-1 font-semibold text-[11px] uppercase tracking-wider",
             overdue ? "text-destructive" : "text-muted-foreground",
           )}
         >
@@ -247,8 +254,8 @@ function TaskCard({
           params: { projectId, listId: task.listId },
         }}
         className={cn(
-          "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-accent",
-          overdue && "border-l-2 border-l-destructive",
+          "flex items-center gap-3 px-1 py-3 transition-colors hover:bg-accent/50",
+          overdue && "border-l-2 border-l-destructive pl-2",
         )}
       >
         <span
@@ -432,7 +439,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 py-2">
+    <div className="mx-auto w-full max-w-4xl space-y-8 py-2">
       <HeroHeader
         dateLabel={dateLabel}
         eventCount={todayEventCount}
@@ -441,7 +448,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
         tasksLabel={t("tasksAssigned")}
       />
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         <Panel
           icon={CheckSquare}
           title={t("myTasks")}
@@ -456,7 +463,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
           ) : previewTasks.length === 0 ? (
             <EmptyState text={t("noTasks")} />
           ) : (
-            <div className="divide-y divide-border/60">
+            <>
               {previewTasks.map(({ task, bucket }, index) => {
                 const prevBucket = previewTasks[index - 1]?.bucket;
                 const showBucketLabel = bucket !== prevBucket;
@@ -471,7 +478,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
                   />
                 );
               })}
-            </div>
+            </>
           )}
         </Panel>
 
@@ -489,7 +496,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
           ) : upcomingEvents.length === 0 ? (
             <EmptyState text={t("noUpcoming")} />
           ) : (
-            <div className="divide-y divide-border/60">
+            <>
               {upcomingEvents.map((event) => {
                 const isToday = isEventOnDay(event, bounds.today);
                 return (
@@ -511,7 +518,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
                   />
                 );
               })}
-            </div>
+            </>
           )}
         </Panel>
       </div>
