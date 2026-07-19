@@ -14,6 +14,8 @@ COPY apps/web/package.json ./apps/web/package.json
 # Convex client, so its manifest must be present for `--filter web...` to
 # install the backend package and its `convex` dependency.
 COPY packages/backend/package.json ./packages/backend/package.json
+# web prebuild runs `design-tokens generate` (needs `tsx` from this package).
+COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
 RUN \
     if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile --filter web...; \
     else echo "Lockfile not found." && exit 1; \
@@ -27,6 +29,7 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 # `backend/convex/_generated/api` resolves `convex/server` from here; without
 # the workspace's node_modules (the `convex` symlink) the build can't find it.
 COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
+COPY --from=deps /app/packages/design-tokens/node_modules ./packages/design-tokens/node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
