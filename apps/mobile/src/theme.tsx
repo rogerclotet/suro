@@ -1,3 +1,4 @@
+import { FONT_DISPLAY_NATIVE as FONT, nativePalette } from "design-tokens";
 import {
   DarkTheme,
   DefaultTheme,
@@ -17,75 +18,10 @@ import {
 } from "react";
 import { Appearance, useColorScheme } from "react-native";
 
-/** The web app's typeface (loaded via expo-font in app/_layout.tsx). */
-export const FONT = "Convergence_400Regular";
+export { FONT };
 
-// Per-event accent dots cycle through one of these two sets. The Latte set
-// (saturated) reads on a light surface; the Mocha set (pastel) reads on a dark
-// one. Each theme uses one for normal dots and the other (`eventOnPrimary`) for
-// dots sitting on the selected day's green fill — whose brightness is the
-// opposite of the page — so dots always contrast with whatever is behind them.
-const LATTE_EVENT = ["#1e66f5", "#fe640b", "#40a02b", "#8839ef", "#179299"];
-const MOCHA_EVENT = ["#89b4fa", "#fab387", "#a6e3a1", "#cba6f7", "#94e2d5"];
-
-// Loosely mapped from the web app's Catppuccin palette (green primary, warm bg).
-const palette = {
-  light: {
-    bg: "#f6f2ea",
-    card: "#ffffff",
-    // M3 `surfaceContainer`: a tonal step off `bg` so the Android nav bar reads
-    // as a slightly elevated surface rather than blending into the page.
-    navBar: "#efe8da",
-    text: "#1e1e2e",
-    muted: "#6c6f85",
-    // Catppuccin Latte "green", strongly desaturated and darkened
-    // (hsl 109/58%/40% → 109/28%/36%): a muted sage that reads calmer on the
-    // warm bg and clears WCAG AA contrast with the white `onPrimary`.
-    primary: "#4c7642",
-    onPrimary: "#ffffff",
-    border: "#e4ddd0",
-    inputBg: "#ffffff",
-    // A muted warm "cork" accent for neutral markers (the list bullet) — warm
-    // enough to fit the palette, soft enough not to pull focus like `primary`.
-    marker: "#c2a368",
-    // Catppuccin Latte "maroon" — destructive actions (delete, clear).
-    danger: "#e64553",
-    // The conventional PDF red, for the PDF file-type icon and badge.
-    pdf: "#e2574c",
-    // Saturated Latte accents for normal (light-surface) dots; the Mocha
-    // pastels read better on the selected day's green fill.
-    event: LATTE_EVENT,
-    eventOnPrimary: MOCHA_EVENT,
-  },
-  // Mapped from the web app's warm-brown dark theme (globals.css `.dark`),
-  // converted from its oklch values to sRGB hex.
-  dark: {
-    bg: "#211a16",
-    card: "#19120e",
-    // M3 `surfaceContainer`: in dark themes the elevated surface is *lighter*
-    // than `bg`, so the nav bar lifts off the page instead of merging with it.
-    navBar: "#2b231d",
-    text: "#ebe6de",
-    muted: "#a0968f",
-    primary: "#a7dc9a",
-    onPrimary: "#142310",
-    border: "#40362f",
-    inputBg: "#40362f",
-    // Lighter cork tan so the neutral marker stays legible on the dark surface.
-    marker: "#c9b07f",
-    // Catppuccin Mocha "maroon" — the dark counterpart of the light danger.
-    danger: "#eba0ac",
-    // A lighter PDF red so the icon and badge stay legible on the dark surface.
-    pdf: "#f0857b",
-    // Mocha pastels for normal (dark-surface) dots; the dark theme's `primary`
-    // is a light mint green, so its on-primary dots use the Latte accents.
-    event: MOCHA_EVENT,
-    eventOnPrimary: LATTE_EVENT,
-  },
-};
-
-export type Theme = (typeof palette)["light"];
-type Scheme = keyof typeof palette;
+export type Theme = (typeof nativePalette)[keyof typeof nativePalette];
+type Scheme = keyof typeof nativePalette;
 
 /** How the active color scheme is chosen: forced light/dark, or follow the OS. */
 export type ThemePreference = Scheme | "system";
@@ -148,7 +84,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // already covers this via the tab navigator's backgroundColor.) Also keeps
   // the root correct when the in-app preference diverges from the OS scheme.
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync(palette[scheme].bg).catch(() => {});
+    void SystemUI.setBackgroundColorAsync(nativePalette[scheme].bg).catch(
+      () => {},
+    );
   }, [scheme]);
 
   // Force native UIKit chrome (nav bar, header buttons, tab bar, system
@@ -174,7 +112,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Colors are mapped to our palette so the navigator's defaults match.
   const navigationTheme = useMemo(() => {
     const base = scheme === "dark" ? DarkTheme : DefaultTheme;
-    const pal = palette[scheme];
+    const pal = nativePalette[scheme];
     return {
       ...base,
       colors: {
@@ -203,7 +141,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 /** The resolved palette for the active scheme. */
 export function useTheme(): Theme {
   const ctx = useContext(ThemeContext);
-  return palette[ctx?.scheme ?? "light"];
+  return nativePalette[ctx?.scheme ?? "light"];
 }
 
 /** The theme preference and its setter, for the profile screen's selector. */

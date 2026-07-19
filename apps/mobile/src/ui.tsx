@@ -400,6 +400,7 @@ export function ProgressBar({
 
 export function Txt({
   muted,
+  display,
   size = 16,
   weight = "400",
   strike,
@@ -407,17 +408,20 @@ export function Txt({
   ...rest
 }: TextProps & {
   muted?: boolean;
+  /** Convergence for titles, tab labels, and other prominent UI copy. */
+  display?: boolean;
   size?: number;
   weight?: "400" | "700";
   strike?: boolean;
 }) {
   const t = useTheme();
+  const useDisplay = display ?? (size >= 18 && weight === "700");
   return (
     <Text
       {...rest}
       style={[
         {
-          fontFamily: FONT,
+          ...(useDisplay ? { fontFamily: FONT } : null),
           fontSize: size,
           fontWeight: weight,
           color: muted ? t.muted : t.text,
@@ -560,6 +564,7 @@ export function Segmented({ options }: { options: SegmentedOption[] }) {
             ) : null}
             <Txt
               size={14}
+              display
               weight={option.active ? "700" : "400"}
               style={{ color: option.active ? t.onPrimary : t.text }}
             >
@@ -584,7 +589,7 @@ export function Section({
 }) {
   return (
     <View style={{ gap: 8 }}>
-      <Txt size={16} weight="700">
+      <Txt size={16} display weight="700">
         {label}
       </Txt>
       {children}
@@ -618,7 +623,6 @@ export function Field({
           backgroundColor: t.inputBg,
           borderColor: t.border,
           color: t.text,
-          fontFamily: FONT,
         },
         style,
       ]}

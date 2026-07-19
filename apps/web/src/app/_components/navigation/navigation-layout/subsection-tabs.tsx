@@ -40,7 +40,7 @@ export default function SubsectionTabs() {
               key={item.path}
               href={item.href as never}
               className={cn(
-                "flex-1 rounded-[9px] px-3 py-[7px] text-center text-sm transition-all",
+                "flex-1 rounded-[9px] px-3 py-[7px] text-center font-display text-sm transition-all",
                 isActive
                   ? "bg-accent font-medium text-foreground"
                   : "text-muted-foreground",

@@ -37,6 +37,7 @@ const nextConfig = {
   // workspace-hoisted deps. Without this, Next guesses the app dir and the
   // standalone server is missing modules at runtime.
   outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
+  transpilePackages: ["design-tokens"],
   experimental: {
     // Restore pre-v15 Router Cache duration for dynamic routes.
     // Next.js 15+ defaults to 0 (every navigation refetches from server).

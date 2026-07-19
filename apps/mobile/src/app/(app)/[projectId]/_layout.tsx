@@ -53,7 +53,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
           padding: 24,
         }}
       >
-        <Txt size={18} weight="700">
+        <Txt size={18} display weight="700">
           {tc("error")}
         </Txt>
         <Txt muted style={{ textAlign: "center" }}>

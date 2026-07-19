@@ -6,6 +6,7 @@ import { UpdateToast } from "@/components/update-toast";
 import "@/styles/globals.css";
 import "@fontsource/convergence/index.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { themeColor } from "design-tokens";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -92,7 +93,7 @@ export const viewport: Viewport = {
   // Single default that matches `defaultTheme="dark"` for first paint / no-JS.
   // `ThemeColorMeta` then keeps this in sync with the user's resolved theme,
   // which can differ from the system `prefers-color-scheme`.
-  themeColor: "#17100c",
+  themeColor: themeColor.dark,
 };
 
 export default async function LocaleLayout({
