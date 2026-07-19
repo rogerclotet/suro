@@ -41,7 +41,7 @@ export default function AppSidebar() {
       <Link href="/" onClick={() => setOpenMobile(false)}>
         <SidebarHeader className="flex flex-row items-center gap-2 p-4 md:p-2">
           <Image src="/logo.png" alt="Suro" width={32} height={32} />
-          <span className="truncate font-bold text-xl">Suro</span>
+          <span className="truncate font-display font-bold text-xl">Suro</span>
         </SidebarHeader>
       </Link>
 

@@ -1,3 +1,4 @@
+import { FONT_DISPLAY_NATIVE as FONT, nativePalette } from "design-tokens";
 import * as Linking from "expo-linking";
 import type React from "react";
 import {
@@ -10,24 +11,23 @@ import { DEFAULT_LOCALE } from "@/i18n/config";
 import { unconfiguredWidgetSnapshot } from "./placeholders";
 import type { WidgetSnapshot } from "./types";
 
-const FONT = "Convergence_400Regular";
 const LOGO_SIZE = 22;
 const WIDGET_LOGO = require("../../assets/images/favicon.png") as number;
 
 const palette = {
   light: {
-    bg: "#f6f2ea",
-    card: "#ffffff",
-    text: "#1e1e2e",
-    muted: "#6c6f85",
-    danger: "#e64553",
+    bg: nativePalette.light.bg,
+    card: nativePalette.light.card,
+    text: nativePalette.light.text,
+    muted: nativePalette.light.muted,
+    danger: nativePalette.light.danger,
   },
   dark: {
-    bg: "#211a16",
-    card: "#19120e",
-    text: "#ebe6de",
-    muted: "#a0968f",
-    danger: "#eba0ac",
+    bg: nativePalette.dark.bg,
+    card: nativePalette.dark.card,
+    text: nativePalette.dark.text,
+    muted: nativePalette.dark.muted,
+    danger: nativePalette.dark.danger,
   },
 } as const;
 
@@ -127,7 +127,6 @@ function eventRow(
         truncate="END"
         style={{
           fontSize: 14,
-          fontFamily: FONT,
           fontWeight: "700",
           color: colors.text,
           marginBottom: 2,
@@ -139,7 +138,6 @@ function eventRow(
         truncate="END"
         style={{
           fontSize: 12,
-          fontFamily: FONT,
           color: colors.muted,
         }}
       />
@@ -173,7 +171,6 @@ function taskRow(
         truncate="END"
         style={{
           fontSize: 14,
-          fontFamily: FONT,
           color: colors.text,
           marginBottom: 2,
         }}
@@ -184,7 +181,6 @@ function taskRow(
         truncate="END"
         style={{
           fontSize: 12,
-          fontFamily: FONT,
           color: task.overdue ? colors.danger : colors.muted,
         }}
       />

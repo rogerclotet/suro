@@ -1,5 +1,6 @@
 "use client";
 
+import { themeColor } from "design-tokens";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
 
@@ -10,17 +11,12 @@ import { useEffect } from "react";
  * OS setting, which mismatches the app when the user picks a theme that differs
  * from their system preference.
  */
-const THEME_COLORS = {
-  light: "#f7e4d7",
-  dark: "#17100c",
-} as const;
-
 export function ThemeColorMeta() {
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const color =
-      resolvedTheme === "light" ? THEME_COLORS.light : THEME_COLORS.dark;
+      resolvedTheme === "light" ? themeColor.light : themeColor.dark;
 
     let meta = document.querySelector<HTMLMetaElement>(
       'meta[name="theme-color"]',

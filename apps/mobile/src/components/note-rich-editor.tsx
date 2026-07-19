@@ -380,13 +380,17 @@ function editorCss(t: Theme): string {
     .ProseMirror {
       background-color: ${t.bg};
       color: ${t.text};
-      font-family: "Convergence", -apple-system, system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       font-size: 16px;
       line-height: 1.5;
       caret-color: ${t.primary};
       padding: 12px 16px 24px 16px;
     }
     .ProseMirror a { color: ${t.primary}; }
+    .ProseMirror h2,
+    .ProseMirror h3 {
+      font-family: "Convergence", -apple-system, system-ui, sans-serif;
+    }
     .ProseMirror h2 { font-size: 1.4em; }
     .ProseMirror h3 { font-size: 1.2em; }
     .ProseMirror blockquote {

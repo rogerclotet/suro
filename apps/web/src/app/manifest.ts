@@ -1,3 +1,4 @@
+import { themeColor } from "design-tokens";
 import type { MetadataRoute } from "next";
 import { cookies, headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
@@ -36,8 +37,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    theme_color: "#17100c",
-    background_color: "#17100c",
+    theme_color: themeColor.dark,
+    background_color: themeColor.dark,
     lang: locale,
     icons: [
       {

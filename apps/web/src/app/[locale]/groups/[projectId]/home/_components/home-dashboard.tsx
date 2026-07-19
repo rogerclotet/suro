@@ -81,7 +81,7 @@ function PanelLoading() {
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <p className="px-3 py-8 text-center text-[13px] text-muted-foreground">
+    <p className="px-3 py-8 text-center font-display text-[13px] text-muted-foreground">
       {text}
     </p>
   );

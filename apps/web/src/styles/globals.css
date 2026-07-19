@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "design-tokens/tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -8,7 +9,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-sidebar text-sidebar-foreground;
+    @apply bg-sidebar font-sans text-sidebar-foreground;
 
     main {
       @apply bg-background text-foreground;
@@ -24,6 +25,15 @@
         @apply text-card-foreground;
       }
     }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display;
   }
 
   .rich-text {
@@ -83,55 +93,14 @@
   }
 
   :root {
-    /* Mirrors the native palette in apps/mobile/src/theme.tsx (light) — the
-       Android app is the design source of truth. Hex values are copied
-       verbatim from the mobile palette; oklch values are tonal steps derived
-       in the same warm cork hue family. */
-    --background: #f6f2ea;
-    --foreground: #1e1e2e;
-    --card: #ffffff;
-    --card-foreground: #1e1e2e;
-    --popover: #ffffff;
-    --popover-foreground: #1e1e2e;
-    /* Muted sage green (mobile `primary`): calmer on the warm bg and AA
-       against the white foreground. */
-    --primary: #4c7642;
-    --primary-foreground: #ffffff;
-    /* Warm "cork" tan (mobile `marker`) — neutral accents like list bullets
-       and inline links: warm enough to fit, soft enough not to pull focus. */
-    --secondary: #c2a368;
-    --secondary-foreground: #1e1e2e;
-    /* M3 `surfaceContainer` step (mobile `navBar`). */
-    --muted: #efe8da;
-    --muted-foreground: #6c6f85;
-    --accent: oklch(0.9 0.024 84.5);
-    --accent-foreground: oklch(0.38 0.07 139.7);
-    /* Catppuccin Latte "maroon" (mobile `danger`). */
-    --destructive: #e64553;
-    --destructive-foreground: #ffffff;
-    /* The conventional PDF red (mobile `pdf`) for PDF icons and badges. */
-    --pdf: #e2574c;
-    --border: #e4ddd0;
-    --input: #e4ddd0;
-    --ring: #4c7642;
-    --chart-1: oklch(0.8162 0.0727 250.607);
-    --chart-2: oklch(0.6268 0.1387 259.8836);
-    --chart-3: oklch(0.5599 0.1634 263.8535);
-    --chart-4: oklch(0.5011 0.1647 265.0426);
-    --chart-5: oklch(0.4338 0.135 268.3541);
-    /* M3 `surfaceContainer` (mobile `navBar`): the nav rail sits one tonal
-       step below the page, like the Android navigation bar. */
-    --sidebar: #efe8da;
-    --sidebar-foreground: #1e1e2e;
-    --sidebar-primary: #4c7642;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: oklch(0.48 0.04 84.5);
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-active: oklch(0.58 0.035 84.5);
-    --sidebar-active-foreground: #ffffff;
-    --sidebar-border: oklch(0.86 0.022 84.5);
-    --sidebar-ring: #4c7642;
-    --font-sans: Convergence, ui-sans-serif, sans-serif, system-ui;
+    --font-sans:
+      ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: Convergence, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
     --radius: 0.75rem;
     --shadow-x: 0px;
     --shadow-y: 2px;
@@ -152,7 +121,7 @@
       0px 2px 8px 0px oklch(0.3 0.045 50 / 0.1),
       0px 2px 4px -1px oklch(0.3 0.045 50 / 0.08);
     --shadow-lg:
-      0px 2px 8px 0px oklch(0.3 0.045 50 / 0.1),
+      0px 2px 8px 0px oklch(0.3 0.045 50 / 0.07),
       0px 4px 6px -1px oklch(0.3 0.045 50 / 0.09);
     --shadow-xl:
       0px 2px 8px 0px oklch(0.3 0.045 50 / 0.1),
@@ -160,108 +129,34 @@
     --shadow-2xl: 0px 4px 16px 0px oklch(0.3 0.045 50 / 0.18);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
-    /* Per-event accent dots (mobile `event`): the saturated Catppuccin Latte
-       set reads on light surfaces; dark mode swaps in the Mocha pastels.
-       Dots sitting on the selected day's primary fill use the on-primary set
-       — the opposite brightness — so they contrast with the green behind. */
-    --event-1: #1e66f5;
-    --event-2: #fe640b;
-    --event-3: #40a02b;
-    --event-4: #8839ef;
-    --event-5: #179299;
-    --event-on-primary-1: #89b4fa;
-    --event-on-primary-2: #fab387;
-    --event-on-primary-3: #a6e3a1;
-    --event-on-primary-4: #cba6f7;
-    --event-on-primary-5: #94e2d5;
-  }
-
-  .dark {
-    /* Mirrors the native palette in apps/mobile/src/theme.tsx (dark) — the
-       mobile dark theme was itself derived from this file's warm-brown dark
-       theme, so most hexes round-trip to the previous oklch values. */
-    --background: #211a16;
-    --foreground: #ebe6de;
-    --card: #19120e;
-    --card-foreground: #ebe6de;
-    /* M3 `surfaceContainer` (mobile `navBar`): elevated surfaces lift
-       *lighter* than the page in dark themes. */
-    --popover: #2b231d;
-    --popover-foreground: #ebe6de;
-    --primary: #a7dc9a;
-    --primary-foreground: #142310;
-    /* Lighter cork tan (mobile dark `marker`) for legibility on dark. */
-    --secondary: #c9b07f;
-    --secondary-foreground: #211a16;
-    --muted: oklch(0.27 0.014 55);
-    --muted-foreground: #a0968f;
-    --accent: oklch(0.38 0.022 55);
-    --accent-foreground: #ebe6de;
-    /* Catppuccin Mocha "maroon" (mobile dark `danger`). */
-    --destructive: #eba0ac;
-    --destructive-foreground: #19120e;
-    /* Lighter PDF red (mobile dark `pdf`) so icons stay legible on dark. */
-    --pdf: #f0857b;
-    --border: #40362f;
-    --input: #40362f;
-    --ring: #a7dc9a;
     --chart-1: oklch(0.8162 0.0727 250.607);
     --chart-2: oklch(0.6268 0.1387 259.8836);
     --chart-3: oklch(0.5599 0.1634 263.8535);
     --chart-4: oklch(0.5011 0.1647 265.0426);
     --chart-5: oklch(0.4338 0.135 268.3541);
-    /* M3 `surfaceContainer` (mobile `navBar`): in dark themes the nav rail
-       lifts *lighter* than the page instead of receding darker. */
-    --sidebar: #2b231d;
-    --sidebar-foreground: #ebe6de;
-    --sidebar-primary: #a7dc9a;
-    --sidebar-primary-foreground: #142310;
-    --sidebar-accent: #352e28;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-active: #40362f;
-    --sidebar-active-foreground: #ffffff;
-    --sidebar-border: #40362f;
-    --sidebar-ring: #a7dc9a;
-    /* Mocha pastels for dots on dark surfaces; the Latte set takes the
-       on-primary role — the dark theme's primary is a light mint green. */
-    --event-1: #89b4fa;
-    --event-2: #fab387;
-    --event-3: #a6e3a1;
-    --event-4: #cba6f7;
-    --event-5: #94e2d5;
-    --event-on-primary-1: #1e66f5;
-    --event-on-primary-2: #fe640b;
-    --event-on-primary-3: #40a02b;
-    --event-on-primary-4: #8839ef;
-    --event-on-primary-5: #179299;
-    --font-sans: Convergence, ui-sans-serif, sans-serif, system-ui;
-    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-    --font-mono: Source Code Pro, ui-monospace, monospace;
-    --radius: 0.75rem;
-    --shadow-x: 0px;
-    --shadow-y: 2px;
-    --shadow-blur: 8px;
-    --shadow-spread: 0px;
+  }
+
+  .dark {
     --shadow-opacity: 0.4;
-    --shadow-color: #1a0e08;
-    --shadow-2xs: 0px 2px 8px 0px hsl(20 35% 6% / 0.2);
-    --shadow-xs: 0px 2px 8px 0px hsl(20 35% 6% / 0.2);
+    --shadow-color: #14100c;
+    --shadow-2xs: 0px 2px 8px 0px hsl(25 20% 6% / 0.2);
+    --shadow-xs: 0px 2px 8px 0px hsl(25 20% 6% / 0.2);
     --shadow-sm:
-      0px 2px 8px 0px hsl(20 35% 6% / 0.4),
-      0px 1px 2px -1px hsl(20 35% 6% / 0.4);
+      0px 2px 8px 0px hsl(25 20% 6% / 0.4),
+      0px 1px 2px -1px hsl(25 20% 6% / 0.4);
     --shadow:
-      0px 2px 8px 0px hsl(20 35% 6% / 0.4),
-      0px 1px 2px -1px hsl(20 35% 6% / 0.4);
+      0px 2px 8px 0px hsl(25 20% 6% / 0.4),
+      0px 1px 2px -1px hsl(25 20% 6% / 0.4);
     --shadow-md:
-      0px 2px 8px 0px hsl(20 35% 6% / 0.4),
-      0px 2px 4px -1px hsl(20 35% 6% / 0.4);
+      0px 2px 8px 0px hsl(25 20% 6% / 0.4),
+      0px 2px 4px -1px hsl(25 20% 6% / 0.4);
     --shadow-lg:
-      0px 2px 8px 0px hsl(20 35% 6% / 0.4),
-      0px 4px 6px -1px hsl(20 35% 6% / 0.4);
+      0px 2px 8px 0px hsl(25 20% 6% / 0.4),
+      0px 4px 6px -1px hsl(25 20% 6% / 0.4);
     --shadow-xl:
-      0px 2px 8px 0px hsl(20 35% 6% / 0.4),
-      0px 8px 10px -1px hsl(20 35% 6% / 0.4);
-    --shadow-2xl: 0px 2px 8px 0px hsl(20 35% 6% / 1);
+      0px 2px 8px 0px hsl(25 20% 6% / 0.4),
+      0px 8px 10px -1px hsl(25 20% 6% / 0.4);
+    --shadow-2xl: 0px 2px 8px 0px hsl(25 20% 6% / 1);
   }
 }
 
@@ -274,6 +169,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -282,6 +178,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
   --color-pdf: var(--pdf);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -303,6 +200,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 

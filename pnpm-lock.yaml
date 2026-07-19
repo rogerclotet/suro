@@ -60,6 +60,9 @@ importers:
       convex:
         specifier: ^1.42.1
         version: 1.42.1(react@19.2.7)
+      design-tokens:
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       expo:
         specifier: ~57.0.4
         version: 57.0.4(@babel/core@7.29.7)(@expo/dom-webview@57.0.0)(@expo/metro-runtime@57.0.3)(expo-router@57.0.4)(react-dom@19.2.7(react@19.2.7))(react-native-web@0.21.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-native-webview@13.16.1(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7))(react-native-worklets@0.10.2(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7))(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
@@ -319,6 +322,9 @@ importers:
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
+      design-tokens:
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       ics:
         specifier: ^3.12.0
         version: 3.12.0
@@ -474,6 +480,15 @@ importers:
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.0)(@types/node@26.1.1)(jsdom@29.1.1)(vite@8.0.16(@types/node@26.1.1)(esbuild@0.27.3)(jiti@2.7.0)(terser@5.49.0)(tsx@4.21.0)(yaml@2.9.0))
+
+  packages/design-tokens:
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
 packages:
 
@@ -13816,7 +13831,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.3
       '@esbuild/win32-ia32': 0.27.3
       '@esbuild/win32-x64': 0.27.3
-    optional: true
 
   escalade@3.2.0: {}
 
@@ -17381,7 +17395,6 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
-    optional: true
 
   tunnel-agent@0.6.0:
     dependencies:

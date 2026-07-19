@@ -91,7 +91,7 @@ const DrawerTitle = forwardRef<
   <DrawerPrimitive.Title
     ref={ref}
     className={cn(
-      "font-semibold text-lg leading-none tracking-tight",
+      "font-display font-semibold text-lg leading-none tracking-tight",
       className,
     )}
     {...props}
