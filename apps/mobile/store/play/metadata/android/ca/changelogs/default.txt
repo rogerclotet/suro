@@ -1,1 +1,4 @@
-• Actualitzacions internes per millorar l'estabilitat i la seguretat, a la web i al mòbil.
+• Colors i tipografia renovats a la web i al mòbil, amb una paleta més càlida i un mode fosc actualitzat.
+• La pantalla d'inici fa servir un disseny més net amb seccions per separadors, i la capçalera de data al mòbil segueix l'idioma de l'app.
+• Fitxers i Notes són enllaços ràpids a la pantalla d'inici, i Grups té la seva pròpia pestanya en lloc del menú Més, a la web i al mòbil.
+• L'app d'iOS ja no falla en obrir-se quan redirigeix a un altre grup o a la pantalla d'inici de sessió.

@@ -1,1 +1,4 @@
-• Actualizaciones internas para mejorar la estabilidad y la seguridad, en la web y en el móvil.
+• Colores y tipografía renovados en la web y el móvil, con una paleta más cálida y un modo oscuro actualizado.
+• La pantalla de inicio usa un diseño más limpio con secciones por separadores, y la cabecera de fecha en el móvil sigue el idioma de la app.
+• Archivos y Notas son accesos rápidos en la pantalla de inicio, y Grupos tiene su propia pestaña en lugar del menú Más, en la web y el móvil.
+• La app de iOS ya no falla al abrirse cuando redirige a otro grupo o a la pantalla de inicio de sesión.
