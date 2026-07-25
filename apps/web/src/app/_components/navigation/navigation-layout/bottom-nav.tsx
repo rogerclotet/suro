@@ -1,27 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
-import MoreSheet from "./more-sheet";
 
 export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const bottomNavItems = useBottomNavItems();
-  const [moreOpen, setMoreOpen] = useState(false);
 
   const activeItem = useMemo(() => {
-    const activeItems = bottomNavItems.filter(
-      (item) => item.path !== "#more" && pathname.startsWith(item.path),
+    const activeItems = bottomNavItems.filter((item) =>
+      pathname.startsWith(item.path),
     );
     return activeItems.length > 0 ? activeItems[activeItems.length - 1] : null;
   }, [bottomNavItems, pathname]);
-
-  const overflowItems = useMemo(() => {
-    const moreItem = bottomNavItems.find((item) => item.path === "#more");
-    return (moreItem as BottomNavItem | undefined)?.overflow ?? [];
-  }, [bottomNavItems]);
 
   return (
     <div className="md:hidden">
@@ -36,42 +29,27 @@ export default function BottomNav({ className }: { className?: string }) {
       >
         <div className="pointer-events-none absolute inset-x-0 -top-3 h-3 bg-gradient-to-t from-background/70 to-transparent" />
         {bottomNavItems.map((item) => {
-          const isMore = item.path === "#more";
-          const isActive = !isMore && activeItem?.path === item.path;
-
-          if (isMore) {
-            return (
-              <button
-                key="more"
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                className="flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground transition-colors"
-              >
-                <div className="relative rounded-full px-4 py-1.5 [&_svg]:size-5">
-                  {item.icon}
-                </div>
-                <span className="text-xs">{item.name}</span>
-              </button>
-            );
-          }
+          const isActive = activeItem?.path === item.path;
 
           if (item.disabled || item.href === "#") {
             return (
               <div
-                key={item.name}
+                key={item.path}
                 className="flex flex-col items-center justify-center gap-0.5 py-2 text-muted-foreground/50"
               >
                 <div className="rounded-full px-4 py-1.5 [&_svg]:size-5">
                   {item.icon}
                 </div>
-                <span className="text-xs">{item.name}</span>
+                <span className="max-w-full truncate px-1 text-xs">
+                  {item.name}
+                </span>
               </div>
             );
           }
 
           return (
             <Link
-              key={item.name}
+              key={item.path}
               href={item.href as never}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 py-2 transition-colors",
@@ -86,17 +64,13 @@ export default function BottomNav({ className }: { className?: string }) {
               >
                 {item.icon}
               </div>
-              <span className="text-xs">{item.name}</span>
+              <span className="max-w-full truncate px-1 text-xs">
+                {item.name}
+              </span>
             </Link>
           );
         })}
       </nav>
-
-      <MoreSheet
-        open={moreOpen}
-        onOpenChange={setMoreOpen}
-        overflowItems={overflowItems}
-      />
     </div>
   );
 }

@@ -12,9 +12,6 @@
  */
 import { LOCALES, type Locale, normalizeLocale } from "../i18n/config";
 
-// Canonical (English, == mobile route) group-path segment -> its localized form
-// per locale. Segments absent here — IDs, tokens, and segments spelled the same
-// as English in a locale (e.g. "categories"/"notes" in Catalan) — pass through.
 const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   groups: { ca: "grups", es: "grupos" },
   lists: { ca: "llistes", es: "listas" },
@@ -27,7 +24,6 @@ const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   "secret-santa": { ca: "amic-invisible", es: "amigo-invisible" },
 };
 
-// Reverse index (localized segment -> canonical), built once from the map above.
 const CANONICAL_SEGMENTS: Record<string, string> = {};
 for (const [canonicalSegment, localized] of Object.entries(
   LOCALIZED_SEGMENTS,
@@ -41,20 +37,12 @@ for (const [canonicalSegment, localized] of Object.entries(
 
 const LOCALE_SET: ReadonlySet<string> = new Set(LOCALES);
 
-/** Whether a path segment is one of the supported locale prefixes. */
 export const isLocale = (segment: string): segment is Locale =>
   LOCALE_SET.has(segment);
 
-/** Map a localized path segment back to its canonical (mobile-route) form. */
 export const toCanonicalSegment = (segment: string): string =>
   CANONICAL_SEGMENTS[segment] ?? segment;
 
-/**
- * Localize a canonical group path (e.g. `/groups/<id>/invitation/<token>`) into
- * a locale-prefixed, localized web path (`/ca/grups/<id>/invitacio/<token>`) for
- * sharing — more readable, and group recipients usually share the sharer's
- * language. IDs and segments with no localized form pass through unchanged.
- */
 export function localizeGroupPath(path: string, locale: string): string {
   const target = normalizeLocale(locale);
   const localized = path
@@ -64,8 +52,6 @@ export function localizeGroupPath(path: string, locale: string): string {
   return `/${[target, ...localized].join("/")}`;
 }
 
-// In-app features under /[projectId]. A group link to anything else (no
-// feature, or one with no native screen like secret-santa) opens Home.
 const MOBILE_FEATURES = new Set([
   "lists",
   "calendar",
@@ -73,30 +59,6 @@ const MOBILE_FEATURES = new Set([
   "notes",
   "expenses",
 ]);
-
-// Features that live behind the "More" tab rather than the bottom bar, so their
-// in-app route is nested one level deeper (`/<pid>/more/<feature>`). Keep in
-// sync with the tab triggers in [projectId]/_layout.tsx and OVERFLOW_SECTIONS
-// in more/index.tsx.
-const OVERFLOW_FEATURES = new Set(["files", "notes"]);
-
-/**
- * Rewrite an in-app group route so overflow sections carry their `more/` prefix:
- * `/<pid>/notes/<x>` → `/<pid>/more/notes/<x>`. Primary sections and non-section
- * paths pass through unchanged. The single source of truth for the More-tab
- * nesting — shared by the universal-link resolver below and the
- * push-notification tap handler (lib/push.ts), whose payloads are built without
- * knowledge of the mobile tab layout.
- */
-export function withOverflowPrefix(route: string): string {
-  const segments = route.split("/").filter(Boolean); // [projectId, feature, ...]
-  const feature = segments[1];
-  if (!feature || !OVERFLOW_FEATURES.has(feature)) {
-    return route;
-  }
-  segments.splice(1, 0, "more");
-  return `/${segments.join("/")}`;
-}
 
 /**
  * Resolve an incoming Universal Link / App Link web path to the matching in-app
@@ -111,7 +73,6 @@ export function withOverflowPrefix(route: string): string {
 export function webPathToRoute(path: string): string {
   let pathname: string;
   try {
-    // Resolves bare paths against the base; absolute URLs ignore it.
     pathname = new URL(path, "https://suro.clotet.dev").pathname;
   } catch {
     return path;
@@ -119,7 +80,6 @@ export function webPathToRoute(path: string): string {
 
   const segments = pathname.split("/").filter(Boolean);
 
-  // Web links carry a locale prefix; app-shared canonical links don't.
   const first = segments[0];
   const rooted = first && isLocale(first) ? segments.slice(1) : segments;
 
@@ -128,22 +88,18 @@ export function webPathToRoute(path: string): string {
     return path;
   }
 
-  // Invites live on their own screen outside the (app) auth group.
   if (feature && toCanonicalSegment(feature) === "invitation") {
     const token = rest[0];
     return token ? `/invitation/${projectId}/${token}` : path;
   }
 
-  // No feature, or one with no native screen (e.g. secret-santa): open the
-  // group's Home tab rather than a dead route.
   const mappedFeature = feature ? toCanonicalSegment(feature) : undefined;
   if (!mappedFeature || !MOBILE_FEATURES.has(mappedFeature)) {
     return `/${projectId}/home`;
   }
 
   const tail = rest.map(toCanonicalSegment).join("/");
-  const route = tail
+  return tail
     ? `/${projectId}/${mappedFeature}/${tail}`
     : `/${projectId}/${mappedFeature}`;
-  return withOverflowPrefix(route);
 }
