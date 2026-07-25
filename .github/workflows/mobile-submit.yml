@@ -1,6 +1,11 @@
 # Manual store re-submission for a commit that already built on main. The main
 # CI workflow now waits for EAS builds and submits automatically; use this only
 # to re-submit a specific commit (e.g. after a transient store error).
+#
+# commit_sha — the push that produced the EAS build artifact (CI run lookup).
+# checkout_sha — optional ref for release notes / fastlane metadata (defaults to
+# commit_sha). Use current main when re-submitting an older binary after a
+# metadata-only fix (e.g. Play release notes length).
 
 name: Mobile submit
 
@@ -11,6 +16,11 @@ on:
         description: Commit SHA on main (from the CI run that triggered EAS builds)
         required: true
         type: string
+      checkout_sha:
+        description: Ref to check out for release notes (defaults to commit_sha; use main after a metadata fix)
+        required: false
+        type: string
+        default: ""
       platform:
         description: Platform to submit
         required: true
@@ -26,6 +36,7 @@ permissions:
 
 env:
   EXPO_APPLE_TEAM_ID: ${{ vars.EXPO_APPLE_TEAM_ID != '' && vars.EXPO_APPLE_TEAM_ID || '2XUF926TS6' }}
+  CHECKOUT_SHA: ${{ inputs.checkout_sha != '' && inputs.checkout_sha || inputs.commit_sha }}
 
 jobs:
   find_ci_run:
@@ -38,6 +49,17 @@ jobs:
         with:
           script: |
             const sha = '${{ inputs.commit_sha }}';
+            const platform = '${{ inputs.platform }}';
+            const buildJobNames =
+              platform === 'ios'
+                ? ['mobile_release / mobile_eas_build_ios']
+                : platform === 'android'
+                  ? ['mobile_release / mobile_eas_build_android']
+                  : [
+                      'mobile_release / mobile_eas_build_android',
+                      'mobile_release / mobile_eas_build_ios',
+                    ];
+
             const { data } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -46,12 +68,37 @@ jobs:
               event: 'push',
               per_page: 5,
             });
-            const run = data.workflow_runs.find((r) => r.conclusion === 'success');
-            if (!run) {
-              core.setFailed(`No successful Main CI/CD run found for commit ${sha}`);
-              return;
+
+            async function runHasSuccessfulBuild(runId) {
+              const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId,
+              });
+              return buildJobNames.every((jobName) =>
+                jobs.jobs.some(
+                  (job) => job.name === jobName && job.conclusion === 'success',
+                ),
+              );
             }
-            core.setOutput('run_id', String(run.id));
+
+            for (const run of data.workflow_runs) {
+              if (run.conclusion === 'success') {
+                core.setOutput('run_id', String(run.id));
+                return;
+              }
+              if (run.conclusion === 'failure' && (await runHasSuccessfulBuild(run.id))) {
+                core.info(
+                  `Using CI run ${run.id} for ${sha}: overall failure, but required build job(s) succeeded`,
+                );
+                core.setOutput('run_id', String(run.id));
+                return;
+              }
+            }
+
+            core.setFailed(
+              `No Main CI/CD run with a successful store build found for commit ${sha}`,
+            );
 
   submit_android:
     needs: find_ci_run
@@ -61,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.commit_sha }}
+          ref: ${{ env.CHECKOUT_SHA }}
       - uses: actions/download-artifact@v4
         with:
           name: suro-android-${{ inputs.commit_sha }}
@@ -82,7 +129,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.commit_sha }}
+          ref: ${{ env.CHECKOUT_SHA }}
       - uses: actions/download-artifact@v4
         with:
           name: suro-ios-${{ inputs.commit_sha }}
