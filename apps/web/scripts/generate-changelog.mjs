@@ -198,7 +198,8 @@ async function writePlayChangelogs(entries) {
       "default.txt",
     );
     await mkdir(dirname(dest), { recursive: true });
-    await writeFile(dest, `${note}\n`, "utf8");
+    // No trailing newline — Play counts the full file body toward the 500-char limit.
+    await writeFile(dest, note, "utf8");
     console.log(
       `[changelog] Play notes -> ${playLocale}/changelogs/default.txt (${note.length}/${PLAY_NOTE_MAX} chars)`,
     );
