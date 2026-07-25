@@ -276,16 +276,19 @@ describe("push.sendToProject", () => {
     ["file_uploaded", { name: "photo.jpg" }, "Archivo photo.jpg añadido"],
     ["member_joined", { userName: "Carol" }, "Carol se ha unido al grupo"],
     ["member_left", { userName: "Carol" }, "Carol ha dejado el grupo"],
-  ])("localizes %s for the recipient", async (bodyKey, bodyParams, expected) => {
-    const fetchMock = stubExpo();
-    await ctx.t.action(internal.push.sendToProject, {
-      projectId: ctx.family,
-      actorId: ctx.alice,
-      bodyKey,
-      bodyParams,
-      path: `/${ctx.family}/lists`,
-    });
-    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
-    expect(body[0]).toMatchObject({ to: "ExpoToken[bob]", body: expected });
-  });
+  ])(
+    "localizes %s for the recipient",
+    async (bodyKey, bodyParams, expected) => {
+      const fetchMock = stubExpo();
+      await ctx.t.action(internal.push.sendToProject, {
+        projectId: ctx.family,
+        actorId: ctx.alice,
+        bodyKey,
+        bodyParams,
+        path: `/${ctx.family}/lists`,
+      });
+      const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+      expect(body[0]).toMatchObject({ to: "ExpoToken[bob]", body: expected });
+    },
+  );
 });

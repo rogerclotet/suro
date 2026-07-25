@@ -6,6 +6,29 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.0] — 2026-07-25
+
+### ca
+
+- [improvement] Colors i tipografia renovats a la web i al mòbil, amb una paleta més càlida i un mode fosc actualitzat.
+- [improvement] La pantalla d'inici fa servir un disseny més net amb seccions per separadors, i la capçalera de data al mòbil segueix l'idioma de l'app.
+- [feature] Fitxers i Notes són enllaços ràpids a la pantalla d'inici, i Grups té la seva pròpia pestanya en lloc del menú Més, a la web i al mòbil.
+- [fix] L'app d'iOS ja no falla en obrir-se quan redirigeix a un altre grup o a la pantalla d'inici de sessió.
+
+### es
+
+- [improvement] Colores y tipografía renovados en la web y el móvil, con una paleta más cálida y un modo oscuro actualizado.
+- [improvement] La pantalla de inicio usa un diseño más limpio con secciones por separadores, y la cabecera de fecha en el móvil sigue el idioma de la app.
+- [feature] Archivos y Notas son accesos rápidos en la pantalla de inicio, y Grupos tiene su propia pestaña en lugar del menú Más, en la web y el móvil.
+- [fix] La app de iOS ya no falla al abrirse cuando redirige a otro grupo o a la pantalla de inicio de sesión.
+
+### en
+
+- [improvement] Refreshed colors and typography across web and mobile, with a warmer palette and updated dark mode.
+- [improvement] The home screen uses a cleaner, divider-based layout, and the mobile date header follows your app language.
+- [feature] Files and Notes are quick links on the home screen, and Groups has its own tab instead of the old More menu, on web and mobile.
+- [fix] The iOS app no longer crashes on startup when redirecting to another group or the login screen.
+
 ## [1.17.1] — 2026-07-13
 
 ### ca

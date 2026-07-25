@@ -81,7 +81,18 @@ export default function ProjectTabs() {
     return <Loading />;
   }
 
-  if (projects !== undefined && !projects.some((p) => p._id === projectId)) {
+  // Wait for `listMine` before mounting native tabs. iOS release builds crash when
+  // `NativeTabs` (a real UITabBarController) mounts and is torn down again during
+  // startup redirects — e.g. a stale deep link or vanished membership — while iOS
+  // is still configuring tab items (react-native-screens / iOS 26). Android uses a
+  // separate bottom-nav path and isn't affected, but gating here is harmless.
+  if (projects === undefined) {
+    return <Loading />;
+  }
+
+  // Membership gone while we're on this route: redirect before project-scoped
+  // queries mount and throw — the index route resumes another group or login.
+  if (!projects.some((p) => p._id === projectId)) {
     return <Redirect href="/" />;
   }
 
