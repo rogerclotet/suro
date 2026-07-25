@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import ProgressRing from "../../lists/_components/progress-ring";
 import { DueChip } from "../../lists/[listId]/_components/list-item/due-chip";
 import { PriorityBadge } from "../../lists/[listId]/_components/list-item/priority-badge";
+import { HomeSectionChips } from "./home-section-chips";
 
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 5;
@@ -440,13 +441,16 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 py-2">
-      <HeroHeader
-        dateLabel={dateLabel}
-        eventCount={todayEventCount}
-        taskCount={taskCount}
-        eventsLabel={t("eventsToday")}
-        tasksLabel={t("tasksAssigned")}
-      />
+      <div className="space-y-3">
+        <HeroHeader
+          dateLabel={dateLabel}
+          eventCount={todayEventCount}
+          taskCount={taskCount}
+          eventsLabel={t("eventsToday")}
+          tasksLabel={t("tasksAssigned")}
+        />
+        <HomeSectionChips projectId={projectId} />
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <Panel

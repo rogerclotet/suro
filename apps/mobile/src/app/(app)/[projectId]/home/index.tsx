@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { HomeSectionChips } from "@/components/home-section-chips";
 import { priorityColor, useFormatDue } from "@/components/task-fields";
 import { useLocale, useTranslations } from "@/i18n";
 import {
@@ -436,7 +437,6 @@ export default function HomeDashboard() {
   const pid = useProjectId();
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
-  const project = usePersistentQuery(api.projects.get, { projectId: pid });
 
   const [bounds] = useState(() => {
     const today = new Date();
@@ -499,18 +499,21 @@ export default function HomeDashboard() {
     <Screen>
       <Stack.Screen
         options={{
-          title: project?.name ?? tNav("home"),
+          title: tNav("home"),
           ...sectionHeaderBadges("home"),
         }}
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>
-        <HeroHeader
-          dateLabel={dateLabel}
-          eventCount={todayEventCount}
-          taskCount={taskCount}
-          eventsLabel={tHome("eventsToday")}
-          tasksLabel={tHome("tasksAssigned")}
-        />
+        <View style={{ gap: 12 }}>
+          <HeroHeader
+            dateLabel={dateLabel}
+            eventCount={todayEventCount}
+            taskCount={taskCount}
+            eventsLabel={tHome("eventsToday")}
+            tasksLabel={tHome("tasksAssigned")}
+          />
+          <HomeSectionChips />
+        </View>
 
         <Panel
           icon={CheckSquare}

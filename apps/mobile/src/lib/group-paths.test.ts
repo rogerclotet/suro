@@ -134,7 +134,7 @@ describe("webPathToRoute", () => {
   it("accepts a full absolute URL and strips the locale prefix", () => {
     expect(
       webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/files`),
-    ).toBe(`/${PID}/more/files`);
+    ).toBe(`/${PID}/files`);
   });
 
   it("routes a bare group link to the group home", () => {

@@ -2,7 +2,6 @@
 
 import {
   Calendar,
-  EllipsisIcon,
   FileTextIcon,
   FolderOpen,
   GiftIcon,
@@ -11,6 +10,7 @@ import {
   LayoutTemplateIcon,
   LightbulbIcon,
   ListTodo,
+  Users,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -227,34 +227,37 @@ export function useMenuItems(): MenuItem[] {
   return items;
 }
 
-// Four content tabs (Home / Lists / Calendar / Expenses) plus a trailing
-// "More", matching the native bottom bar — overflow sections (Files, Notes) live
-// under More.
 const MAX_BOTTOM_NAV_ITEMS = 4;
 
-export type BottomNavItem = MenuItem & {
-  overflow?: MenuItem[];
-};
+export type BottomNavItem = MenuItem;
 
 export function useBottomNavItems(): BottomNavItem[] {
   const menuItems = useMenuItems();
+  const { project } = useProjects();
   const t = useTranslations("nav");
 
   return useMemo(() => {
     const visible = menuItems.slice(0, MAX_BOTTOM_NAV_ITEMS);
-    const overflow = menuItems.slice(MAX_BOTTOM_NAV_ITEMS);
+    const truncatedName =
+      project && project.name.length > 10
+        ? `${project.name.slice(0, 9)}…`
+        : (project?.name ?? t("groups"));
 
-    const moreItem: BottomNavItem = {
-      name: t("more"),
-      href: "#",
-      path: "#more",
-      section: "more",
-      icon: <EllipsisIcon />,
-      overflow,
+    const groupsItem: BottomNavItem = {
+      name: truncatedName,
+      href: project
+        ? {
+            pathname: "/groups/[projectId]/groups",
+            params: { projectId: project.id },
+          }
+        : "#",
+      path: "/groups/[projectId]/groups",
+      section: "groups",
+      icon: <Users />,
     };
 
-    return [...visible, moreItem];
-  }, [menuItems, t]);
+    return [...visible, groupsItem];
+  }, [menuItems, project, t]);
 }
 
 export function useSubsectionItems(): MenuItem[] {
@@ -272,4 +275,38 @@ export function useSubsectionItems(): MenuItem[] {
 
     return [activeParent, ...activeParent.children];
   }, [menuItems, pathname]);
+}
+
+/** Map a project pathname to the mobile header section title key. */
+export function mobileHeaderSectionKey(pathname: string): NavKey | null {
+  if (pathname === "/profile") {
+    return "profile";
+  }
+  if (pathname === "/groups") {
+    return "groups";
+  }
+
+  const match = pathname.match(/^\/groups\/\[projectId\]\/([^/]+)/);
+  if (!match) {
+    return null;
+  }
+
+  const section = match[1];
+  if (!section) {
+    return null;
+  }
+
+  const keyMap: Record<string, NavKey> = {
+    home: "home",
+    lists: "lists",
+    calendar: "calendar",
+    expenses: "expenses",
+    files: "files",
+    notes: "notes",
+    groups: "groups",
+    "secret-santa": "secretSanta",
+    settings: "groups",
+  };
+
+  return keyMap[section] ?? null;
 }

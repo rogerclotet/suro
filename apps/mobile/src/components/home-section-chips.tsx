@@ -1,0 +1,65 @@
+import type { Href } from "expo-router";
+import { useRouter } from "expo-router";
+import type { LucideIcon } from "lucide-react-native";
+import { Pressable, View } from "react-native";
+import { useTranslations } from "@/i18n";
+import { HOME_SECTIONS } from "@/lib/home-sections";
+import { useProjectId } from "@/lib/project-id";
+import { useTheme } from "@/theme";
+import { Txt } from "@/ui";
+
+function SectionChip({
+  label,
+  icon: Icon,
+  onPress,
+}: {
+  label: string;
+  icon: LucideIcon;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: t.border,
+        backgroundColor: t.card,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Icon color={t.primary} size={14} />
+      <Txt weight="700" size={13} numberOfLines={1}>
+        {label}
+      </Txt>
+    </Pressable>
+  );
+}
+
+/** Compact section shortcuts below the home date header. Wraps to a second row. */
+export function HomeSectionChips() {
+  const pid = useProjectId();
+  const router = useRouter();
+  const tNav = useTranslations("nav");
+
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {HOME_SECTIONS.map((section) => (
+        <SectionChip
+          key={section.key}
+          label={tNav(section.key)}
+          icon={section.icon}
+          onPress={() => router.navigate(`/${pid}/${section.key}` as Href)}
+        />
+      ))}
+    </View>
+  );
+}

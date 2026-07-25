@@ -8,7 +8,6 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 import { useTranslations } from "@/i18n";
-import { withOverflowPrefix } from "@/lib/group-paths";
 
 // expo-notifications eagerly registers a device-push-token listener at *import*
 // time (its DevicePushTokenAutoRegistration.fx side-effect module), and that
@@ -237,10 +236,8 @@ export function usePushNotifications(): void {
       const path = response.notification.request.content.data?.path;
       if (typeof path === "string") {
         // Payloads are built server-side as `/<pid>/<section>` or
-        // `/<pid>/<section>/<id>` (the entity the push is about), with no
-        // knowledge of the mobile tab layout; nest overflow sections under the
-        // More tab.
-        router.push(withOverflowPrefix(path));
+        // `/<pid>/<section>/<id>` (the entity the push is about).
+        router.push(path);
       }
     }
     // Any of these can throw if expo-notifications' native side fails to init on
