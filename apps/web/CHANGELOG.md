@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.1] — 2026-07-26
+
+### ca
+
+- [fix] La pantalla d'inici ja no mostra esdeveniments d'ahir com a propers.
+- [fix] En afegir elements a una llista, el teclat ja no tapa els elements existents i pots desplaçar-te per veure'ls.
+
+### es
+
+- [fix] La pantalla de inicio ya no muestra eventos de ayer como próximos.
+- [fix] Al añadir elementos a una lista, el teclado ya no tapa los elementos existentes y puedes desplazarte para verlos.
+
+### en
+
+- [fix] The home screen no longer shows yesterday's events as upcoming.
+- [fix] When adding items to a list, the keyboard no longer covers existing items and you can scroll to see them.
+
 ## [1.18.0] — 2026-07-25
 
 ### ca
