@@ -1,4 +1,2 @@
-• Refreshed colors and typography across web and mobile, with a warmer palette and updated dark mode.
-• The home screen uses a cleaner, divider-based layout, and the mobile date header follows your app language.
-• Files and Notes are quick links on the home screen, and Groups has its own tab instead of the old More menu, on web and mobile.
-• The iOS app no longer crashes on startup when redirecting to another group or the login screen.
+• The home screen no longer shows yesterday's events as upcoming.
+• When adding items to a list, the keyboard no longer covers existing items and you can scroll to see them.

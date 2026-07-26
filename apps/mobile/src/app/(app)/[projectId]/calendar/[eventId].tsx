@@ -289,6 +289,7 @@ export default function EventDetail() {
         ref={scrollRef}
         contentContainerStyle={{ padding: 16, gap: 16 }}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
       >
         <View style={{ gap: 4 }}>
           <Txt size={26} weight="700">

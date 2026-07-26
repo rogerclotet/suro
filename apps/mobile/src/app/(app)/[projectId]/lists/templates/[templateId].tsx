@@ -284,6 +284,7 @@ export default function TemplateEditor() {
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         ListHeaderComponent={
           <View style={{ paddingBottom: 8 }}>
             {/* Blurb plus a clear "this is a template" cue, in the same spot the

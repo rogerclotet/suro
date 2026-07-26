@@ -11,7 +11,7 @@ import {
   Flag,
 } from "lucide-react-native";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { HomeSectionChips } from "@/components/home-section-chips";
@@ -22,9 +22,10 @@ import {
   useFormatEventTime,
   useLongDate,
 } from "@/lib/datetime";
-import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { isEventOnDay, pickUpcomingEvents } from "@/lib/event-dates";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { useTodayAnchor } from "@/lib/use-today-anchor";
 import { useTheme } from "@/theme";
 import { Loading, ProgressBar, Screen, Txt } from "@/ui";
 
@@ -438,16 +439,7 @@ export default function HomeDashboard() {
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
 
-  const [bounds] = useState(() => {
-    const today = new Date();
-    const from = startOfDay(today).getTime();
-    return {
-      today,
-      from,
-      endOfToday: endOfDay(today).getTime(),
-      to: from + UPCOMING_WINDOW_MS,
-    };
-  });
+  const bounds = useTodayAnchor(UPCOMING_WINDOW_MS);
 
   const events = usePersistentQuery(api.events.listByRange, {
     projectId: pid,
@@ -455,8 +447,8 @@ export default function HomeDashboard() {
     to: bounds.to,
   });
   const upcomingEvents = useMemo(
-    () => events?.slice(0, PREVIEW_LIMIT),
-    [events],
+    () => pickUpcomingEvents(events ?? [], bounds.today, PREVIEW_LIMIT),
+    [events, bounds.today],
   );
   const todayEventCount = useMemo(
     () =>

@@ -150,6 +150,49 @@ export type TimeRemaining =
   | { kind: "oneHourMinutes"; minutes: number }
   | { kind: "minutes"; minutes: number };
 
+/** Bounds for `api.events.listByRange`, anchored at the start of today. */
+export function eventWindowBounds(
+  now = new Date(),
+  windowMs = 30 * DAY_MS,
+): {
+  today: Date;
+  from: number;
+  endOfToday: number;
+  to: number;
+} {
+  const today = startOfDay(now);
+  const from = today.getTime();
+  return {
+    today,
+    from,
+    endOfToday: endOfDay(now).getTime(),
+    to: from + windowMs,
+  };
+}
+
+/**
+ * Pick events for "upcoming" previews: today's first, then future days.
+ * Excludes past events (including all-day events from yesterday that the
+ * backend overlap query still returns for timezones ahead of UTC).
+ */
+export function pickUpcomingEvents<T extends EventTimes>(
+  events: T[],
+  now = new Date(),
+  limit = 5,
+): T[] {
+  const endOfToday = endOfDay(now).getTime();
+  const today = events
+    .filter((event) => isEventOnDay(event, now))
+    .slice(0, limit);
+  if (today.length >= limit) {
+    return today;
+  }
+  const upcoming = events
+    .filter((event) => event.startAt > endOfToday)
+    .slice(0, limit - today.length);
+  return [...today, ...upcoming];
+}
+
 export function timeRemainingParts(
   event: EventTimes,
   now: number,

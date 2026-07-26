@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.18.0",
+    "version": "1.18.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Refreshed colors and typography across web and mobile, with a warmer palette and updated dark mode.\n• The home screen uses a cleaner, divider-based layout, and the mobile date header follows your app language.\n• Files and Notes are quick links on the home screen, and Groups has its own tab instead of the old More menu, on web and mobile.\n• The iOS app no longer crashes on startup when redirecting to another group or the login screen.",
+        "releaseNotes": "• The home screen no longer shows yesterday's events as upcoming.\n• When adding items to a list, the keyboard no longer covers existing items and you can scroll to see them.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Colores y tipografía renovados en la web y el móvil, con una paleta más cálida y un modo oscuro actualizado.\n• La pantalla de inicio usa un diseño más limpio con secciones por separadores, y la cabecera de fecha en el móvil sigue el idioma de la app.\n• Archivos y Notas son accesos rápidos en la pantalla de inicio, y Grupos tiene su propia pestaña en lugar del menú Más, en la web y el móvil.\n• La app de iOS ya no falla al abrirse cuando redirige a otro grupo o a la pantalla de inicio de sesión.",
+        "releaseNotes": "• La pantalla de inicio ya no muestra eventos de ayer como próximos.\n• Al añadir elementos a una lista, el teclado ya no tapa los elementos existentes y puedes desplazarte para verlos.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Colors i tipografia renovats a la web i al mòbil, amb una paleta més càlida i un mode fosc actualitzat.\n• La pantalla d'inici fa servir un disseny més net amb seccions per separadors, i la capçalera de data al mòbil segueix l'idioma de l'app.\n• Fitxers i Notes són enllaços ràpids a la pantalla d'inici, i Grups té la seva pròpia pestanya en lloc del menú Més, a la web i al mòbil.\n• L'app d'iOS ja no falla en obrir-se quan redirigeix a un altre grup o a la pantalla d'inici de sessió.",
+        "releaseNotes": "• La pantalla d'inici ja no mostra esdeveniments d'ahir com a propers.\n• En afegir elements a una llista, el teclat ja no tapa els elements existents i pots desplaçar-te per veure'ls.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

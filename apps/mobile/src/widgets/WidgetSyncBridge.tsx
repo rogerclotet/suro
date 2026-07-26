@@ -1,12 +1,13 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvex } from "convex/react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { normalizeLocale } from "@/i18n/config";
 import { useAuthGate, usePersistentQuery } from "@/lib/offline";
+import { useTodayAnchor } from "@/lib/use-today-anchor";
 import { writeWidgetAuth } from "./auth-state";
-import { buildWidgetSnapshot, widgetEventBounds } from "./build-snapshot";
+import { buildWidgetSnapshot } from "./build-snapshot";
 import { configuredProjectIds } from "./config";
 import { persistProjectSnapshot, refreshAllWidgets } from "./sync";
 
@@ -18,7 +19,7 @@ export function WidgetSyncBridge() {
   const { isAuthenticated } = useAuthGate();
   const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");
   const convex = useConvex();
-  const bounds = useMemo(() => widgetEventBounds(), []);
+  const bounds = useTodayAnchor();
   const locale = normalizeLocale(me?.locale);
   const lastSyncKey = useRef("");
 

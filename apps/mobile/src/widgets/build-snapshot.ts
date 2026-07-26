@@ -2,11 +2,11 @@ import type { Doc } from "backend/convex/_generated/dataModel";
 import { type Locale, normalizeLocale } from "@/i18n/config";
 import {
   type EventTimes,
-  endOfDay,
+  eventWindowBounds,
   formatTimeOfDay,
   formatTimeRange,
   isEventOnDay,
-  startOfDay,
+  pickUpcomingEvents,
 } from "@/lib/event-dates";
 import { PREVIEW_LIMIT, UPCOMING_WINDOW_MS } from "./constants";
 import { widgetLabels } from "./labels";
@@ -62,17 +62,7 @@ export function pickWidgetEvents(
   events: CalEvent[],
   now = new Date(),
 ): CalEvent[] {
-  const endOfToday = endOfDay(now).getTime();
-  const today = events
-    .filter((event) => isEventOnDay(event, now))
-    .slice(0, PREVIEW_LIMIT);
-  if (today.length >= PREVIEW_LIMIT) {
-    return today;
-  }
-  const upcoming = events
-    .filter((event) => event.startAt > endOfToday)
-    .slice(0, PREVIEW_LIMIT - today.length);
-  return [...today, ...upcoming];
+  return pickUpcomingEvents(events, now, PREVIEW_LIMIT);
 }
 
 /** Top incomplete assigned tasks, preserving the server sort order. */
@@ -159,6 +149,6 @@ export function widgetEventBounds(now = new Date()): {
   from: number;
   to: number;
 } {
-  const from = startOfDay(now).getTime();
-  return { from, to: from + UPCOMING_WINDOW_MS };
+  const { from, to } = eventWindowBounds(now, UPCOMING_WINDOW_MS);
+  return { from, to };
 }

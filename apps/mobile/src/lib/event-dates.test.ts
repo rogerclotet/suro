@@ -4,10 +4,12 @@ import {
   DAY_MS,
   type EventTimes,
   endOfDay,
+  eventWindowBounds,
   formatTimeOfDay,
   formatTimeRange,
   inclusiveDayCount,
   isEventOnDay,
+  pickUpcomingEvents,
   sameDay,
   startOfDay,
   timeRemainingParts,
@@ -331,5 +333,73 @@ describe("timeRemainingParts", () => {
       kind: "minutes",
       minutes: 45,
     });
+  });
+});
+
+describe("eventWindowBounds", () => {
+  it("queries from the start of today", () => {
+    const now = new Date("2026-07-05T15:30:00");
+    const { from, to } = eventWindowBounds(now);
+    expect(new Date(from).getHours()).toBe(0);
+    expect(to - from).toBe(30 * DAY_MS);
+  });
+});
+
+describe("pickUpcomingEvents", () => {
+  const today = new Date("2026-07-26T12:00:00");
+
+  it("prefers today's events before upcoming ones", () => {
+    const events = pickUpcomingEvents(
+      [
+        {
+          startAt: today.getTime() + DAY_MS,
+          endAt: today.getTime() + DAY_MS + HOUR_MS,
+          allDay: false,
+        },
+        {
+          startAt: today.getTime() + HOUR_MS,
+          endAt: today.getTime() + 2 * HOUR_MS,
+          allDay: false,
+        },
+      ],
+      today,
+    );
+    expect(events.map((event) => event.startAt)).toEqual([
+      today.getTime() + HOUR_MS,
+      today.getTime() + DAY_MS,
+    ]);
+  });
+
+  it("excludes past all-day events the overlap query still returns", () => {
+    const events = pickUpcomingEvents(
+      [
+        {
+          startAt: utcMidnight(2026, 6, 25),
+          endAt: utcMidnight(2026, 6, 26),
+          allDay: true,
+        },
+        {
+          startAt: today.getTime() + DAY_MS,
+          endAt: today.getTime() + DAY_MS + HOUR_MS,
+          allDay: false,
+        },
+      ],
+      today,
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]?.startAt).toBe(today.getTime() + DAY_MS);
+  });
+
+  it("caps at the preview limit", () => {
+    const events = pickUpcomingEvents(
+      Array.from({ length: 5 }, (_, index) => ({
+        startAt: today.getTime() + index * HOUR_MS,
+        endAt: today.getTime() + (index + 1) * HOUR_MS,
+        allDay: false,
+      })),
+      today,
+      3,
+    );
+    expect(events).toHaveLength(3);
   });
 });
