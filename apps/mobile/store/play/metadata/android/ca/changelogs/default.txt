@@ -1,2 +1,2 @@
-• Els enllaços d'exportació i subscripció del calendari fan servir ara suroapp.cat en lloc d'una adreça tècnica del servidor.
-• A Android, el teclat ja no tapa el contingut en editar esdeveniments, plantilles de llistes o en desplaçar-te per una llista.
+• En afegir elements a una llista, els elements existents es mantenen visibles sense deixar un espai buit gran sobre el teclat.
+• En copiar l'enllaç del calendari al porta-retalls, el missatge de confirmació ja es mostra en el teu idioma.
