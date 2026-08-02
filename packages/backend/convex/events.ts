@@ -421,8 +421,7 @@ export const getOrCreateCalendarToken = mutation({
 /**
  * Token-gated data for the `.ics` feed (internal — only the http.ts route calls
  * this, with the secret token as the gate; no session auth). Returns null for a
- * missing/mismatched token. Events, organizer-per-event, and member attendees
- * mirror the PWA's getEventsToExport.
+ * missing/mismatched token.
  */
 export const exportData = internalQuery({
   args: { projectId: v.id("projects"), token: v.string() },
@@ -443,42 +442,6 @@ export const exportData = internalQuery({
       .withIndex("by_project", (q) => q.eq("projectId", projectId))
       .collect();
 
-    const userCache = new Map<Id<"users">, Doc<"users"> | null>();
-    async function loadUser(id: Id<"users">) {
-      if (!userCache.has(id)) {
-        userCache.set(id, await ctx.db.get(id));
-      }
-      return userCache.get(id) ?? null;
-    }
-
-    const organizers: {
-      eventId: Id<"events">;
-      name?: string;
-      email: string;
-    }[] = [];
-    for (const event of events) {
-      const creator = await loadUser(event.createdBy);
-      if (creator?.email) {
-        organizers.push({
-          eventId: event._id,
-          name: creator.name,
-          email: creator.email,
-        });
-      }
-    }
-
-    const members = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    const attendees: { name?: string; email: string }[] = [];
-    for (const member of members) {
-      const user = await loadUser(member.userId);
-      if (user?.email) {
-        attendees.push({ name: user.name, email: user.email });
-      }
-    }
-
-    return { calendarName: project.name, events, organizers, attendees };
+    return { calendarName: project.name, events };
   },
 });

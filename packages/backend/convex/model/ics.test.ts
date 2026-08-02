@@ -22,8 +22,6 @@ function event(over: Partial<Doc<"events">>): Doc<"events"> {
 const baseArgs = {
   calendarName: "Family",
   eventUrl: (id: Id<"events">) => `https://example.test/e/${id}`,
-  organizerById: new Map(),
-  attendees: [],
   now: Date.UTC(2024, 0, 1, 0, 0, 0),
 };
 
@@ -79,16 +77,12 @@ describe("buildIcs", () => {
     expect(ics.trimEnd().endsWith("END:VCALENDAR")).toBe(true);
   });
 
-  it("emits organizer and attendee contact lines", () => {
+  it("does not emit organizer or attendee lines (subscription feed, not invites)", () => {
     const ics = buildIcs({
       ...baseArgs,
       events: [event({ _id: "evtZ" as Id<"events"> })],
-      organizerById: new Map([
-        ["evtZ" as Id<"events">, { name: "Alice", email: "alice@test" }],
-      ]),
-      attendees: [{ name: "Bob", email: "bob@test" }],
     });
-    expect(ics).toContain("ORGANIZER;CN=Alice:mailto:alice@test");
-    expect(ics).toContain("ATTENDEE;CN=Bob:mailto:bob@test");
+    expect(ics).not.toContain("ORGANIZER");
+    expect(ics).not.toContain("ATTENDEE");
   });
 });

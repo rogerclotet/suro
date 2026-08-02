@@ -6,17 +6,11 @@ import type { Doc, Id } from "../_generated/dataModel";
  * route: one VEVENT per event, all-day vs timed handled distinctly.
  */
 
-export type IcsAttendee = { name?: string; email: string };
-
 export type BuildIcsArgs = {
   calendarName: string;
   events: Doc<"events">[];
   /** Maps an event id to its public web URL (the VEVENT URL property). */
   eventUrl: (eventId: Id<"events">) => string;
-  /** Organizer (event creator) by event id. */
-  organizerById: Map<Id<"events">, IcsAttendee>;
-  /** Project members, listed as attendees on every event (PWA parity). */
-  attendees: IcsAttendee[];
   /** Epoch ms used for DTSTAMP. */
   now: number;
 };
@@ -68,11 +62,6 @@ function formatUtcDate(ms: number): string {
   return `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}`;
 }
 
-function contactLine(prop: string, contact: IcsAttendee): string {
-  const cn = contact.name ? `;CN=${escapeText(contact.name)}` : "";
-  return `${prop}${cn}:mailto:${contact.email}`;
-}
-
 function eventLines(event: Doc<"events">, args: BuildIcsArgs): string[] {
   const lines = ["BEGIN:VEVENT", `UID:${event._id}@suro`];
   lines.push(`DTSTAMP:${formatUtcDateTime(args.now)}`);
@@ -91,14 +80,6 @@ function eventLines(event: Doc<"events">, args: BuildIcsArgs): string[] {
     lines.push(`DESCRIPTION:${escapeText(event.description)}`);
   }
   lines.push(`URL:${args.eventUrl(event._id)}`);
-
-  const organizer = args.organizerById.get(event._id);
-  if (organizer) {
-    lines.push(contactLine("ORGANIZER", organizer));
-  }
-  for (const attendee of args.attendees) {
-    lines.push(contactLine("ATTENDEE", attendee));
-  }
 
   lines.push("END:VEVENT");
   return lines;
