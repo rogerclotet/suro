@@ -80,26 +80,24 @@ export function DownloadAppBanner() {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col gap-2 bg-secondary px-3 py-2 text-secondary-foreground sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:pr-12"
+      className="relative flex w-full shrink-0 flex-col gap-2 border-secondary-foreground/10 border-b bg-secondary px-3 py-2 text-secondary-foreground sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:pr-12 md:rounded-t-xl md:px-6 md:py-2.5"
       style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
     >
       {/* Reserve room on the first row for the corner dismiss on mobile. */}
-      <div className="flex min-w-0 items-center gap-2 pr-8 sm:flex-1 sm:pr-0">
-        <div className="shrink-0 rounded-lg bg-background p-1">
-          <Image
-            src="/logo.png"
-            alt="Suro"
-            width={28}
-            height={28}
-            className="size-7"
-          />
-        </div>
+      <div className="flex min-w-0 flex-1 items-center gap-2 pr-8 sm:pr-0">
+        <Image
+          src="/logo.png"
+          alt="Suro"
+          width={28}
+          height={28}
+          className="size-7 shrink-0 rounded-md"
+        />
         <p className="min-w-0 font-medium text-sm leading-tight">
           {t("message")}
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
         {(os === "ios" || os === "other") && (
           <StoreBadge store="app_store" imgClassName="h-9" />
         )}
@@ -115,7 +113,7 @@ export function DownloadAppBanner() {
         size="icon-sm"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="absolute top-1 right-1 shrink-0 sm:top-1/2 sm:right-2 sm:-translate-y-1/2"
+        className="absolute top-1 right-1 shrink-0 text-secondary-foreground hover:bg-secondary-foreground/10 hover:text-secondary-foreground sm:top-1/2 sm:right-2 sm:-translate-y-1/2"
       >
         <X />
       </Button>
