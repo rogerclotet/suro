@@ -1,2 +1,1 @@
-• Al añadir elementos a una lista, los elementos existentes se mantienen visibles sin dejar un espacio vacío grande sobre el teclado.
-• Al copiar el enlace del calendario al portapapeles, el mensaje de confirmación ya se muestra en tu idioma.
+• En las listas de Android, los elementos quedan ahora justo encima del teclado sin un gran espacio vacío, y se ha reducido el espacio sobrante al final de la lista.

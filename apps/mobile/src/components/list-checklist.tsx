@@ -772,7 +772,7 @@ export function ListChecklist({
         <KeyboardAwareView>
           <ScrollView
             ref={scrollRef}
-            contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+            contentContainerStyle={{ padding: 16 }}
             onScroll={handleScroll}
             scrollEventThrottle={16}
             onScrollEndDrag={refreshDropPositions}

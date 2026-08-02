@@ -749,7 +749,8 @@
       "templates": "Plantillas",
       "files": "Archivos",
       "members": "Miembros del grupo",
-      "expenses": "Gastos"
+      "expenses": "Gastos",
+      "tasks": "Tareas"
     }
   },
   "onboarding": {

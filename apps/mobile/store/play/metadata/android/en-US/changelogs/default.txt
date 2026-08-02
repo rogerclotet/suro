@@ -1,2 +1,1 @@
-• When adding items to a list, existing items stay visible above the keyboard without a large empty gap.
-• When copying the calendar link to the clipboard, the confirmation message is now shown in your language.
+• In Android lists, items now sit right above the keyboard without a large empty gap, and the extra space at the bottom of the list has been reduced.

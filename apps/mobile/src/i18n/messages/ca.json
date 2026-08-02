@@ -749,7 +749,8 @@
       "templates": "Plantilles",
       "files": "Fitxers",
       "members": "Membres del grup",
-      "expenses": "Despeses"
+      "expenses": "Despeses",
+      "tasks": "Tasques"
     }
   },
   "onboarding": {

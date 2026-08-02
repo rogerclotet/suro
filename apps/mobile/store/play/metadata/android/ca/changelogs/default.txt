@@ -1,2 +1,1 @@
-• En afegir elements a una llista, els elements existents es mantenen visibles sense deixar un espai buit gran sobre el teclat.
-• En copiar l'enllaç del calendari al porta-retalls, el missatge de confirmació ja es mostra en el teu idioma.
+• A les llistes d'Android, els elements queden ara just sobre el teclat sense un espai buit gran a sobre, i s'ha reduït l'espai sobrant al final de la llista.

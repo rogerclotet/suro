@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.4] — 2026-08-02
+
+### ca
+
+- [fix] A les llistes d'Android, els elements queden ara just sobre el teclat sense un espai buit gran a sobre, i s'ha reduït l'espai sobrant al final de la llista.
+
+### es
+
+- [fix] En las listas de Android, los elementos quedan ahora justo encima del teclado sin un gran espacio vacío, y se ha reducido el espacio sobrante al final de la lista.
+
+### en
+
+- [fix] In Android lists, items now sit right above the keyboard without a large empty gap, and the extra space at the bottom of the list has been reduced.
+
 ## [1.18.3] — 2026-08-02
 
 ### ca
