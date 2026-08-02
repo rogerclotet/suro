@@ -1,2 +1,2 @@
-• Calendar export and subscription links now use suroapp.cat instead of a technical backend address.
-• On Android, the keyboard no longer covers content when editing events, list templates, or scrolling through a list.
+• When adding items to a list, existing items stay visible above the keyboard without a large empty gap.
+• When copying the calendar link to the clipboard, the confirmation message is now shown in your language.

@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.3] — 2026-08-02
+
+### ca
+
+- [fix] En afegir elements a una llista, els elements existents es mantenen visibles sense deixar un espai buit gran sobre el teclat.
+- [fix] En copiar l'enllaç del calendari al porta-retalls, el missatge de confirmació ja es mostra en el teu idioma.
+
+### es
+
+- [fix] Al añadir elementos a una lista, los elementos existentes se mantienen visibles sin dejar un espacio vacío grande sobre el teclado.
+- [fix] Al copiar el enlace del calendario al portapapeles, el mensaje de confirmación ya se muestra en tu idioma.
+
+### en
+
+- [fix] When adding items to a list, existing items stay visible above the keyboard without a large empty gap.
+- [fix] When copying the calendar link to the clipboard, the confirmation message is now shown in your language.
+
 ## [1.18.2] — 2026-08-02
 
 ### ca

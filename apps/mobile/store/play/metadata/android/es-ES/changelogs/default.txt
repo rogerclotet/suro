@@ -1,2 +1,2 @@
-• Los enlaces de exportación y suscripción del calendario usan ahora suroapp.cat en lugar de una dirección técnica del servidor.
-• En Android, el teclado ya no tapa el contenido al editar eventos, plantillas de listas o al desplazarte por una lista.
+• Al añadir elementos a una lista, los elementos existentes se mantienen visibles sin dejar un espacio vacío grande sobre el teclado.
+• Al copiar el enlace del calendario al portapapeles, el mensaje de confirmación ya se muestra en tu idioma.

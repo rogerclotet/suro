@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.18.2",
+    "version": "1.18.3",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Calendar export and subscription links now use suroapp.cat instead of a technical backend address.\n• On Android, the keyboard no longer covers content when editing events, list templates, or scrolling through a list.",
+        "releaseNotes": "• When adding items to a list, existing items stay visible above the keyboard without a large empty gap.\n• When copying the calendar link to the clipboard, the confirmation message is now shown in your language.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los enlaces de exportación y suscripción del calendario usan ahora suroapp.cat en lugar de una dirección técnica del servidor.\n• En Android, el teclado ya no tapa el contenido al editar eventos, plantillas de listas o al desplazarte por una lista.",
+        "releaseNotes": "• Al añadir elementos a una lista, los elementos existentes se mantienen visibles sin dejar un espacio vacío grande sobre el teclado.\n• Al copiar el enlace del calendario al portapapeles, el mensaje de confirmación ya se muestra en tu idioma.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els enllaços d'exportació i subscripció del calendari fan servir ara suroapp.cat en lloc d'una adreça tècnica del servidor.\n• A Android, el teclat ja no tapa el contingut en editar esdeveniments, plantilles de llistes o en desplaçar-te per una llista.",
+        "releaseNotes": "• En afegir elements a una llista, els elements existents es mantenen visibles sense deixar un espai buit gran sobre el teclat.\n• En copiar l'enllaç del calendari al porta-retalls, el missatge de confirmació ja es mostra en el teu idioma.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

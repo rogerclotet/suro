@@ -838,7 +838,8 @@
       "timeAgoJustNow": "ahora mismo",
       "timeAgoMinutes": "hace {minutes, plural, =1 {# minuto} other {# minutos}}",
       "timeAgoHours": "hace {hours, plural, =1 {# hora} other {# horas}}",
-      "timeAgoDays": "hace {days, plural, =1 {# día} other {# días}}"
+      "timeAgoDays": "hace {days, plural, =1 {# día} other {# días}}",
+      "copiedToClipboard": "Copiado al portapapeles"
     },
     "auth": {
       "tagline": "Listas, calendario y más, compartido con tu gente.",
