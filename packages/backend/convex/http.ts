@@ -4,7 +4,7 @@ import type { Id } from "./_generated/dataModel";
 import { httpAction } from "./_generated/server";
 import { auth } from "./auth";
 import { verifyFileToken } from "./model/fileUrls";
-import { buildIcs, type IcsAttendee } from "./model/ics";
+import { buildIcs } from "./model/ics";
 
 const http = httpRouter();
 
@@ -36,16 +36,11 @@ const calendarIcs = httpAction(async (ctx, request) => {
   // Canonical origin for absolute links (calendar event URLs, etc.). Set SITE_URL
   // explicitly on the Convex deployment; this fallback is just the prod default.
   const siteUrl = process.env.SITE_URL ?? "https://suroapp.cat";
-  const organizerById = new Map<Id<"events">, IcsAttendee>(
-    data.organizers.map((o) => [o.eventId, { name: o.name, email: o.email }]),
-  );
 
   const ics = buildIcs({
     calendarName: data.calendarName,
     events: data.events,
     eventUrl: (eventId) => `${siteUrl}/groups/${projectId}/calendar/${eventId}`,
-    organizerById,
-    attendees: data.attendees,
     now: Date.now(),
   });
 
