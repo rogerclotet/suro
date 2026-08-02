@@ -1,2 +1,2 @@
-• La pantalla de inicio ya no muestra eventos de ayer como próximos.
-• Al añadir elementos a una lista, el teclado ya no tapa los elementos existentes y puedes desplazarte para verlos.
+• Los enlaces de exportación y suscripción del calendario usan ahora suroapp.cat en lugar de una dirección técnica del servidor.
+• En Android, el teclado ya no tapa el contenido al editar eventos, plantillas de listas o al desplazarte por una lista.
