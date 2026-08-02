@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.2] — 2026-08-02
+
+### ca
+
+- [improvement] Els enllaços d'exportació i subscripció del calendari fan servir ara suroapp.cat en lloc d'una adreça tècnica del servidor.
+- [fix] A Android, el teclat ja no tapa el contingut en editar esdeveniments, plantilles de llistes o en desplaçar-te per una llista.
+
+### es
+
+- [improvement] Los enlaces de exportación y suscripción del calendario usan ahora suroapp.cat en lugar de una dirección técnica del servidor.
+- [fix] En Android, el teclado ya no tapa el contenido al editar eventos, plantillas de listas o al desplazarte por una lista.
+
+### en
+
+- [improvement] Calendar export and subscription links now use suroapp.cat instead of a technical backend address.
+- [fix] On Android, the keyboard no longer covers content when editing events, list templates, or scrolling through a list.
+
 ## [1.18.1] — 2026-07-26
 
 ### ca

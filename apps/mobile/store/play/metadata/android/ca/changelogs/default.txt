@@ -1,2 +1,2 @@
-• La pantalla d'inici ja no mostra esdeveniments d'ahir com a propers.
-• En afegir elements a una llista, el teclat ja no tapa els elements existents i pots desplaçar-te per veure'ls.
+• Els enllaços d'exportació i subscripció del calendari fan servir ara suroapp.cat en lloc d'una adreça tècnica del servidor.
+• A Android, el teclat ja no tapa el contingut en editar esdeveniments, plantilles de llistes o en desplaçar-te per una llista.

@@ -22,3 +22,8 @@ export function convexSiteUrl(): string {
     ".convex.site",
   );
 }
+
+/** Branded calendar feed URL on our own domain (proxied to Convex by the web app). */
+export function calendarFeedUrl(projectId: string, token: string): string {
+  return webUrl(`/calendar.ics?projectId=${projectId}&token=${token}`);
+}

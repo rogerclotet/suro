@@ -1,2 +1,2 @@
-• The home screen no longer shows yesterday's events as upcoming.
-• When adding items to a list, the keyboard no longer covers existing items and you can scroll to see them.
+• Calendar export and subscription links now use suroapp.cat instead of a technical backend address.
+• On Android, the keyboard no longer covers content when editing events, list templates, or scrolling through a list.

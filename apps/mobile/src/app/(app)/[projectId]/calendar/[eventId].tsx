@@ -44,6 +44,7 @@ import {
   Button,
   Card,
   HEADER_BUTTON_INSET,
+  KeyboardAwareScrollView,
   Loading,
   Screen,
   Sheet,
@@ -285,11 +286,9 @@ export default function EventDetail() {
         }}
       />
 
-      <ScrollView
+      <KeyboardAwareScrollView
         ref={scrollRef}
         contentContainerStyle={{ padding: 16, gap: 16 }}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
       >
         <View style={{ gap: 4 }}>
           <Txt size={26} weight="700">
@@ -430,7 +429,7 @@ export default function EventDetail() {
             ) : null}
           </>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <EventForm
         visible={editing}

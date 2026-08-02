@@ -61,7 +61,14 @@ import { useProjectId } from "@/lib/project-id";
 import { advanceDueAt, presetForRecurrence } from "@/lib/recurrence";
 import { compareTaskItems } from "@/lib/task-order";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Sheet, Txt } from "@/ui";
+import {
+  Button,
+  Field,
+  KeyboardAwareScrollView,
+  Loading,
+  Sheet,
+  Txt,
+} from "@/ui";
 
 type ListResult = NonNullable<FunctionReturnType<typeof api.lists.get>>;
 type Item = ListResult["items"][number];
@@ -755,11 +762,9 @@ export function ListChecklist({
       {embedded ? (
         checklistBody
       ) : (
-        <ScrollView
+        <KeyboardAwareScrollView
           ref={scrollRef}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          keyboardShouldPersistTaps="handled"
-          automaticallyAdjustKeyboardInsets
           onScroll={handleScroll}
           scrollEventThrottle={16}
           onScrollEndDrag={refreshDropPositions}
@@ -774,7 +779,7 @@ export function ListChecklist({
           }}
         >
           {checklistBody}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       )}
 
       <ItemSheet
