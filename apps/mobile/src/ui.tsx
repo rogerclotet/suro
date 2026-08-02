@@ -1,6 +1,7 @@
 import { type LucideIcon, Plus } from "lucide-react-native";
 import {
   createContext,
+  forwardRef,
   type ReactNode,
   type Ref,
   useCallback,
@@ -22,12 +23,15 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewProps,
+  type StyleProp,
   StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
   type TextProps,
   View,
+  type ViewStyle,
 } from "react-native";
 import { AnimatedFAB } from "react-native-paper";
 import Reanimated, {
@@ -303,16 +307,94 @@ export function Screen({ children }: { children: ReactNode }) {
   return <View style={{ flex: 1, backgroundColor: t.bg }}>{children}</View>;
 }
 
+// The app is edge-to-edge (the RN 0.85 default), so the system bars are
+// translucent; tell Reanimated as much or it measures the keyboard height
+// against the wrong baseline on Android and under-lifts by the nav-bar inset.
+function useKeyboardLiftStyle() {
+  const keyboard = useAnimatedKeyboard({
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+  return useAnimatedStyle(() => ({
+    paddingBottom: keyboard.height.value,
+  }));
+}
+
+// Shrinks a scroll container when the keyboard opens so list content can scroll
+// above it. Reanimated's `useAnimatedKeyboard` tracks keyboard height on the UI
+// thread on both platforms — crucially including Android edge-to-edge, where the
+// window no longer resizes and `automaticallyAdjustKeyboardInsets` is iOS-only.
+export function KeyboardAwareView({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const liftStyle = useKeyboardLiftStyle();
+  return (
+    <Reanimated.View style={[{ flex: 1 }, liftStyle, style]}>
+      {children}
+    </Reanimated.View>
+  );
+}
+
+export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
+  function KeyboardAwareScrollView(props, forwardedRef) {
+    const liftStyle = useKeyboardLiftStyle();
+    const scrollRef = useRef<ScrollView>(null);
+
+    const setScrollRef = useCallback(
+      (node: ScrollView | null) => {
+        scrollRef.current = node;
+        if (typeof forwardedRef === "function") {
+          forwardedRef(node);
+        } else if (forwardedRef) {
+          forwardedRef.current = node;
+        }
+      },
+      [forwardedRef],
+    );
+
+    // After the keyboard opens, nudge the scroll view so the focused field sits
+    // above it — padding alone leaves the scroll offset unchanged.
+    useEffect(() => {
+      const showEvt =
+        Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+      const sub = Keyboard.addListener(showEvt, () => {
+        const focused = TextInput.State.currentlyFocusedInput();
+        if (focused && scrollRef.current) {
+          requestAnimationFrame(() => {
+            scrollRef.current?.scrollResponderScrollNativeHandleToKeyboard(
+              focused,
+              0,
+              true,
+            );
+          });
+        }
+      });
+      return () => sub.remove();
+    }, []);
+
+    return (
+      <Reanimated.View style={[{ flex: 1 }, liftStyle]}>
+        <ScrollView
+          ref={setScrollRef}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          {...props}
+        />
+      </Reanimated.View>
+    );
+  },
+);
+
 // Screen for full-screen forms: lifts content above the soft keyboard and wraps
 // it in a ScrollView so the action button stays reachable and taps land while
-// the keyboard is up (`keyboardShouldPersistTaps`). The lift is driven by
-// Reanimated's `useAnimatedKeyboard`, which tracks the keyboard height on the UI
-// thread on both platforms — crucially including Android edge-to-edge, where the
-// window no longer resizes, so `KeyboardAvoidingView`/`adjustResize` does nothing
-// and content stays pinned under the keyboard. Padding (not translate) shrinks
-// the ScrollView so centered content re-centers above the keyboard and taller
-// content scrolls instead of being clipped. `center` vertically centers the
-// content when the keyboard is down.
+// the keyboard is up (`keyboardShouldPersistTaps`). Padding (not translate)
+// shrinks the ScrollView so centered content re-centers above the keyboard and
+// taller content scrolls instead of being clipped. `center` vertically centers
+// the content when the keyboard is down.
 export function KeyboardAwareScreen({
   children,
   center,
@@ -321,30 +403,18 @@ export function KeyboardAwareScreen({
   center?: boolean;
 }) {
   const t = useTheme();
-  // The app is edge-to-edge (the RN 0.85 default), so the system bars are
-  // translucent; tell Reanimated as much or it measures the keyboard height
-  // against the wrong baseline on Android and under-lifts by the nav-bar inset.
-  const keyboard = useAnimatedKeyboard({
-    isStatusBarTranslucentAndroid: true,
-    isNavigationBarTranslucentAndroid: true,
-  });
-  const liftStyle = useAnimatedStyle(() => ({
-    paddingBottom: keyboard.height.value,
-  }));
   return (
-    <Reanimated.View style={[{ flex: 1, backgroundColor: t.bg }, liftStyle]}>
-      <ScrollView
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
           ...(center ? { justifyContent: "center" } : null),
         }}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
       >
         {children}
-      </ScrollView>
-    </Reanimated.View>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }
 

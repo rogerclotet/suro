@@ -19,6 +19,7 @@ import {
   HEADER_BUTTON_INSET,
   IconAction,
   IconActionBar,
+  KeyboardAwareView,
   Loading,
   Screen,
   Sheet,
@@ -278,93 +279,94 @@ export default function TemplateEditor() {
         }}
       />
 
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => String(item.index)}
-        contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
-        stickySectionHeadersEnabled={false}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
-        ListHeaderComponent={
-          <View style={{ paddingBottom: 8 }}>
-            {/* Blurb plus a clear "this is a template" cue, in the same spot the
+      <KeyboardAwareView>
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => String(item.index)}
+          contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+          stickySectionHeadersEnabled={false}
+          keyboardShouldPersistTaps="handled"
+          ListHeaderComponent={
+            <View style={{ paddingBottom: 8 }}>
+              {/* Blurb plus a clear "this is a template" cue, in the same spot the
                 list detail shows its description/provenance block. */}
-            <View style={{ gap: 6, paddingBottom: 12 }}>
-              {template.description ? (
-                <Txt muted size={14} style={{ lineHeight: 20 }}>
-                  {template.description}
-                </Txt>
-              ) : null}
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
-              >
-                <LayoutTemplate color={t.muted} size={14} />
-                <Txt muted size={13}>
-                  {`${tr("templateLabel")} · ${tr("itemCount", {
-                    count: template.items.length,
-                  })}`}
-                </Txt>
+              <View style={{ gap: 6, paddingBottom: 12 }}>
+                {template.description ? (
+                  <Txt muted size={14} style={{ lineHeight: 20 }}>
+                    {template.description}
+                  </Txt>
+                ) : null}
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
+                  <LayoutTemplate color={t.muted} size={14} />
+                  <Txt muted size={13}>
+                    {`${tr("templateLabel")} · ${tr("itemCount", {
+                      count: template.items.length,
+                    })}`}
+                  </Txt>
+                </View>
               </View>
-            </View>
-            {/* Always-visible no-category entry point with the quick category
+              {/* Always-visible no-category entry point with the quick category
                 chip; uncategorized items sort first, right below it. */}
-            <NewItemRow
-              projectId={pid}
-              categories={categories ?? []}
-              showTaskControls={false}
-              onSubmit={handleInlineAdd}
-            />
-          </View>
-        }
-        ListEmptyComponent={
-          <Txt muted style={{ padding: 16 }}>
-            {tr("noItems")}
-          </Txt>
-        }
-        renderSectionHeader={({ section }) =>
-          section.category !== null ? (
-            <Txt
-              muted
-              size={12}
-              style={{ paddingTop: 16, paddingBottom: 4, letterSpacing: 1 }}
-            >
-              {section.title.toUpperCase()}
-            </Txt>
-          ) : null
-        }
-        renderSectionFooter={({ section }) => {
-          const category = section.category;
-          // The no-category section's entry point is the always-visible row at
-          // the top; only categorized sections get their own inline add row.
-          if (category === null) {
-            return null;
+              <NewItemRow
+                projectId={pid}
+                categories={categories ?? []}
+                showTaskControls={false}
+                onSubmit={handleInlineAdd}
+              />
+            </View>
           }
-          return (
-            <InlineAddItemRow
-              active={activeAddCategory === category}
-              onActivate={() => setActiveAddCategory(category)}
-              onDeactivate={() =>
-                setActiveAddCategory((prev) =>
-                  prev === category ? null : prev,
-                )
-              }
-              onSubmit={(name) => handleInlineAdd(name, category)}
-            />
-          );
-        }}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => openEdit(item)}
-            style={{
-              paddingVertical: 10,
-              borderBottomWidth: 1,
-              borderColor: t.border,
-            }}
-          >
-            <Txt size={16}>{item.name}</Txt>
-          </Pressable>
-        )}
-      />
+          ListEmptyComponent={
+            <Txt muted style={{ padding: 16 }}>
+              {tr("noItems")}
+            </Txt>
+          }
+          renderSectionHeader={({ section }) =>
+            section.category !== null ? (
+              <Txt
+                muted
+                size={12}
+                style={{ paddingTop: 16, paddingBottom: 4, letterSpacing: 1 }}
+              >
+                {section.title.toUpperCase()}
+              </Txt>
+            ) : null
+          }
+          renderSectionFooter={({ section }) => {
+            const category = section.category;
+            // The no-category section's entry point is the always-visible row at
+            // the top; only categorized sections get their own inline add row.
+            if (category === null) {
+              return null;
+            }
+            return (
+              <InlineAddItemRow
+                active={activeAddCategory === category}
+                onActivate={() => setActiveAddCategory(category)}
+                onDeactivate={() =>
+                  setActiveAddCategory((prev) =>
+                    prev === category ? null : prev,
+                  )
+                }
+                onSubmit={(name) => handleInlineAdd(name, category)}
+              />
+            );
+          }}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => openEdit(item)}
+              style={{
+                paddingVertical: 10,
+                borderBottomWidth: 1,
+                borderColor: t.border,
+              }}
+            >
+              <Txt size={16}>{item.name}</Txt>
+            </Pressable>
+          )}
+        />
+      </KeyboardAwareView>
 
       <EditTemplateItemSheet
         visible={editingIndex !== null}
