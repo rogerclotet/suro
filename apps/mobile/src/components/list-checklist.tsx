@@ -533,10 +533,10 @@ export function ListChecklist({
 
   /**
    * Create an item from an inline add row. Returns false (keeping the row's
-   * text) when the name already exists in the target category. The mutation
-   * is fire-and-forget: the optimistic insert re-sections instantly, and
-   * awaiting would blur the input and close the keyboard between consecutive
-   * adds.
+   * text) when a pending item with the same name already exists in the target
+   * category; reopens a completed match instead of erroring. The mutation is
+   * fire-and-forget: the optimistic update re-sections instantly, and awaiting
+   * would blur the input and close the keyboard between consecutive adds.
    */
   function handleInlineAdd(
     name: string,
@@ -546,12 +546,26 @@ export function ListChecklist({
     if (!list) {
       return false;
     }
-    const duplicate = list.items.some(
+    const matches = list.items.filter(
       (item) => (item.category ?? null) === category && item.name === name,
     );
-    if (duplicate) {
+    const pending = matches.find((item) => !item.completed);
+    if (pending) {
       Alert.alert(tl("itemAlreadyExists"));
       return false;
+    }
+    const completed = matches.find((item) => item.completed);
+    if (completed) {
+      void updateItem({
+        itemId: completed._id,
+        name: completed.name,
+        details: completed.details ?? "",
+        completed: false,
+        category: completed.category ?? null,
+        ...itemTaskArgs(completed),
+      });
+      setActiveAddCategory(category);
+      return true;
     }
     void createItem({ listId: lid, name, category, ...task });
     // Focus follows the item: the used category's row becomes (or stays) the
