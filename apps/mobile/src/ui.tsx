@@ -37,6 +37,7 @@ import { AnimatedFAB } from "react-native-paper";
 import Reanimated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
+  useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
@@ -310,14 +311,46 @@ export function Screen({ children }: { children: ReactNode }) {
 // The app is edge-to-edge (the RN 0.85 default), so the system bars are
 // translucent; tell Reanimated as much or it measures the keyboard height
 // against the wrong baseline on Android and under-lifts by the nav-bar inset.
-function useKeyboardLiftStyle() {
+//
+// `useAnimatedKeyboard` reports the keyboard height from the *physical* screen
+// bottom, but a lift container nested above a bottom tab bar (every list screen)
+// ends well short of it. Padding by the full height there over-lifts by the
+// tab-bar + nav-bar strip, leaving a dead gap between the content and the
+// keyboard. Measuring the container's own distance to the window bottom and
+// subtracting it makes the lift correct in both cases: ~0 for a full-screen
+// container (login), the tab-bar height once nested inside the tabs.
+function useKeyboardLift() {
   const keyboard = useAnimatedKeyboard({
     isStatusBarTranslucentAndroid: true,
     isNavigationBarTranslucentAndroid: true,
   });
-  return useAnimatedStyle(() => ({
-    paddingBottom: keyboard.height.value,
+  const viewRef = useRef<View>(null);
+  const bottomInset = useSharedValue(0);
+
+  const measure = useCallback(() => {
+    viewRef.current?.measureInWindow((_x, y, _w, height) => {
+      // How far the container's bottom edge sits above the window bottom — the
+      // slice of keyboard height that never overlaps this container.
+      bottomInset.value = Math.max(
+        0,
+        Dimensions.get("window").height - (y + height),
+      );
+    });
+  }, [bottomInset]);
+
+  // Re-measure when the keyboard opens: the tab bar (and thus the container's
+  // bottom edge) may not be laid out yet at first `onLayout`.
+  useEffect(() => {
+    const evt = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const sub = Keyboard.addListener(evt, measure);
+    return () => sub.remove();
+  }, [measure]);
+
+  const style = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(0, keyboard.height.value - bottomInset.value),
   }));
+
+  return { viewRef, onLayout: measure, style };
 }
 
 // Shrinks a scroll container when the keyboard opens so list content can scroll
@@ -331,9 +364,13 @@ export function KeyboardAwareView({
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
-  const liftStyle = useKeyboardLiftStyle();
+  const { viewRef, onLayout, style: liftStyle } = useKeyboardLift();
   return (
-    <Reanimated.View style={[{ flex: 1 }, liftStyle, style]}>
+    <Reanimated.View
+      ref={viewRef}
+      onLayout={onLayout}
+      style={[{ flex: 1 }, liftStyle, style]}
+    >
       {children}
     </Reanimated.View>
   );
@@ -341,7 +378,7 @@ export function KeyboardAwareView({
 
 export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
   function KeyboardAwareScrollView(props, forwardedRef) {
-    const liftStyle = useKeyboardLiftStyle();
+    const { viewRef, onLayout, style: liftStyle } = useKeyboardLift();
     const scrollRef = useRef<ScrollView>(null);
 
     const setScrollRef = useCallback(
@@ -377,7 +414,11 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
     }, []);
 
     return (
-      <Reanimated.View style={[{ flex: 1 }, liftStyle]}>
+      <Reanimated.View
+        ref={viewRef}
+        onLayout={onLayout}
+        style={[{ flex: 1 }, liftStyle]}
+      >
         <ScrollView
           ref={setScrollRef}
           keyboardShouldPersistTaps="handled"
