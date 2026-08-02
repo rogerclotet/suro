@@ -8,13 +8,14 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import { useSession } from "@/lib/session";
-import type { TaskMutationArgs } from "./data";
+import { type TaskMutationArgs, taskArgsFromItem } from "./data";
 
 /**
- * Create-item logic shared by every inline add row: duplicate check, optimistic
- * insert, and fire-and-forget submission with error reporting. The optimistic
- * insert makes a brand-new category section mount in the same commit as the
- * caller's focus-follow state change, so its input can grab focus immediately.
+ * Create-item logic shared by every inline add row: duplicate check (reopening
+ * a completed match instead of erroring), optimistic insert, and fire-and-forget
+ * submission with error reporting. The optimistic insert makes a brand-new
+ * category section mount in the same commit as the caller's focus-follow state
+ * change, so its input can grab focus immediately.
  */
 export default function useCreateListItem(
   list: List,
@@ -84,14 +85,94 @@ export default function useCreateListItem(
     },
   );
 
+  const updateItem = useMutation(api.listItems.update).withOptimisticUpdate(
+    (store, args) => {
+      const projectId = list.projectId as Id<"projects">;
+      const lists = store.getQuery(api.lists.listByProject, { projectId });
+      if (lists) {
+        store.setQuery(
+          api.lists.listByProject,
+          { projectId },
+          lists.map((l) =>
+            l._id === list.id
+              ? {
+                  ...l,
+                  items: (l.items ?? []).map((item) =>
+                    item._id === args.itemId
+                      ? {
+                          ...item,
+                          completed: args.completed,
+                          updatedAt: Date.now(),
+                        }
+                      : item,
+                  ),
+                }
+              : l,
+          ),
+        );
+      }
+
+      if (list.eventId) {
+        const eventId = list.eventId as Id<"events">;
+        const event = store.getQuery(api.events.get, { eventId });
+        if (event?.list) {
+          store.setQuery(
+            api.events.get,
+            { eventId },
+            {
+              ...event,
+              list: {
+                ...event.list,
+                items: (event.list.items ?? []).map((item) =>
+                  item._id === args.itemId
+                    ? {
+                        ...item,
+                        completed: args.completed,
+                        updatedAt: Date.now(),
+                      }
+                    : item,
+                ),
+              },
+            },
+          );
+        }
+      }
+    },
+  );
+
   function submit(
     name: string,
     category: string | null,
     task?: TaskMutationArgs,
   ): boolean {
-    if (list.items.some((i) => i.category === category && i.name === name)) {
+    const matches = list.items.filter(
+      (i) => i.category === category && i.name === name,
+    );
+    const pending = matches.find((i) => !i.completed);
+    if (pending) {
       toast.error(t("itemAlreadyExists"));
       return false;
+    }
+    const completed = matches.find((i) => i.completed);
+    if (completed) {
+      updateItem({
+        itemId: completed.id as Id<"listItems">,
+        name: completed.name,
+        details: completed.details ?? "",
+        completed: false,
+        category: completed.category,
+        ...taskArgsFromItem(completed),
+      }).catch((e: unknown) => {
+        console.error("[use-create-list-item] reopen failed:", e);
+        posthog.captureException(e, {
+          distinctId: session?.user.id,
+          action: "reopen_list_item",
+          projectId: list.projectId,
+          listId: list.id,
+        });
+        toast.error(t("itemUpdateError"));
+      });
+      return true;
     }
 
     // Let the mutation race in the background: awaiting it would disable the
