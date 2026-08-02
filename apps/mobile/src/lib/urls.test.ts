@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { convexSiteUrl, webUrl } from "./urls";
+import { calendarFeedUrl, convexSiteUrl, webUrl } from "./urls";
 
 // These helpers read EXPO_PUBLIC_* from process.env at call time, so save and
 // restore the originals around each test rather than relying on build-time
@@ -53,5 +53,14 @@ describe("convexSiteUrl", () => {
   it("only rewrites the trailing .convex.cloud suffix", () => {
     process.env.EXPO_PUBLIC_CONVEX_URL = "https://self-hosted.example.com";
     expect(convexSiteUrl()).toBe("https://self-hosted.example.com");
+  });
+});
+
+describe("calendarFeedUrl", () => {
+  it("uses the configured site base", () => {
+    process.env.EXPO_PUBLIC_SITE_URL = "https://suroapp.cat";
+    expect(calendarFeedUrl("proj123", "tok456")).toBe(
+      "https://suroapp.cat/calendar.ics?projectId=proj123&token=tok456",
+    );
   });
 });

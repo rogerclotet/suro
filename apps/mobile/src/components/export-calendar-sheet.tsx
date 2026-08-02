@@ -13,7 +13,7 @@ import {
 } from "lucide-react-native";
 import { Alert, Linking, Platform, Share } from "react-native";
 import { useTranslations } from "@/i18n";
-import { convexSiteUrl } from "@/lib/urls";
+import { calendarFeedUrl } from "@/lib/urls";
 import { Button, IconAction, IconActionBar, Sheet, Txt } from "@/ui";
 
 /**
@@ -41,7 +41,7 @@ export function ExportCalendarSheet({
 
   async function feedUrls() {
     const token = await getCalendarToken({ projectId });
-    const httpsUrl = `${convexSiteUrl()}/calendar.ics?projectId=${projectId}&token=${token}`;
+    const httpsUrl = calendarFeedUrl(projectId, token);
     const webcalUrl = httpsUrl.replace(/^https?:\/\//, "webcal://");
     return { httpsUrl, webcalUrl };
   }

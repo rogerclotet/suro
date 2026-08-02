@@ -26,7 +26,7 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
         "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     },
@@ -34,7 +34,7 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
-        "EXPO_PUBLIC_SITE_URL": "https://suro.clotet.dev",
+        "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
         "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
       }
     }

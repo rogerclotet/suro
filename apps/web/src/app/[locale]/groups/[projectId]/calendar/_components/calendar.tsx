@@ -207,12 +207,7 @@ export default function Calendar({
     const token = await getCalendarToken({
       projectId: project.id as Id<"projects">,
     });
-    // The .ics feed is served by the Convex HTTP actions domain (.convex.site).
-    const siteUrl = (process.env.NEXT_PUBLIC_CONVEX_URL ?? "").replace(
-      ".convex.cloud",
-      ".convex.site",
-    );
-    const url = `${siteUrl}/calendar.ics?projectId=${project.id}&token=${token}`;
+    const url = `${window.location.origin}/calendar.ics?projectId=${project.id}&token=${token}`;
     await navigator.clipboard.writeText(url);
     toast.info(tCommon("copiedToClipboard"));
   }
