@@ -61,7 +61,7 @@ export default function ProjectSelector() {
           <ProjectAvatar project={project} />
           <div className="flex flex-col">
             <span>{project.name}</span>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs opacity-70">
               {project.users.length > 1
                 ? tGroups("memberCount", { count: project.users.length })
                 : session?.user.name}

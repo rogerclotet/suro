@@ -40,7 +40,7 @@ export default function Profile() {
           <UserAvatar user={session.data?.user ?? {}} />
           <div className="flex flex-col">
             <span>{session.data?.user.name}</span>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs opacity-70">
               {session.data?.user.email}
             </span>
           </div>
