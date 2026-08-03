@@ -1,1 +1,1 @@
-• En las listas de Android, los elementos quedan ahora justo encima del teclado sin un gran espacio vacío, y se ha reducido el espacio sobrante al final de la lista.
+• Se han pulido las traducciones al español y al catalán de toda la app: la página de información ya está completamente en español y se han corregido varios problemas de redacción y ortografía, incluida la pantalla de inicio de sesión con código por correo.

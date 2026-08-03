@@ -1,1 +1,1 @@
-• In Android lists, items now sit right above the keyboard without a large empty gap, and the extra space at the bottom of the list has been reduced.
+• Polished the Spanish and Catalan translations across the app: the info page is now fully translated into Spanish, and several wording and spelling issues have been fixed, including on the email-code sign-in screen.

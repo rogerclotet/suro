@@ -24,6 +24,15 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE = resolve(REPO_ROOT, "CHANGELOG.md");
 const OUTPUT = resolve(REPO_ROOT, "src/data/changelog.generated.ts");
 
+// The monorepo root package.json is the release version of record: mobile
+// app.config.ts reads it, and check-metadata.mjs pins store.config.json
+// apple.version to it. Keep it in lockstep with the newest CHANGELOG entry so
+// the in-app CURRENT_VERSION and the shipped store version can never drift.
+// apps/web/package.json is not a source of truth, but tracks the same version
+// so the version it reports stays correct.
+const ROOT_PACKAGE_JSON = resolve(REPO_ROOT, "../..", "package.json");
+const WEB_PACKAGE_JSON = resolve(REPO_ROOT, "package.json");
+
 // Store "what's new" notes derive from the latest CHANGELOG entry so they never
 // drift from the release.
 const PLAY_CHANGELOG_DIR = resolve(
@@ -248,23 +257,69 @@ function patchLocaleReleaseNotes(text, locale, newNote) {
 }
 
 /**
- * Mirror the latest release's notes into store.config.json
- * (apple.info.<locale>.releaseNotes) for EAS Metadata / App Store "What's New".
- * Skipped when the mobile store config is absent (e.g. a web-only build context).
+ * Replace apple.version in store.config.json without reformatting the file.
+ * EAS Metadata needs this to track the release version of record (root
+ * package.json); check-metadata.mjs enforces the match.
+ * @param {string} text
+ * @param {string} newVersion
+ */
+function patchAppleVersion(text, newVersion) {
+  const marker = '"apple"';
+  const markerIdx = text.indexOf(marker);
+  if (markerIdx === -1) {
+    fail(0, `store.config.json missing "apple" block`);
+  }
+  const key = '"version"';
+  const keyIdx = text.indexOf(key, markerIdx);
+  if (keyIdx === -1) {
+    fail(0, `store.config.json missing apple.version`);
+  }
+  const colonIdx = text.indexOf(":", keyIdx);
+  let valueStart = colonIdx + 1;
+  while (valueStart < text.length && /[\s]/.test(text[valueStart])) {
+    valueStart += 1;
+  }
+  if (text[valueStart] !== '"') {
+    fail(0, `store.config.json apple.version is not a string`);
+  }
+  let i = valueStart + 1;
+  while (i < text.length && text[i] !== '"') {
+    i += 1;
+  }
+  const valueEnd = i + 1;
+  return (
+    text.slice(0, valueStart) +
+    JSON.stringify(newVersion) +
+    text.slice(valueEnd)
+  );
+}
+
+/**
+ * Mirror the latest release into store.config.json: apple.version (the release
+ * version of record) and apple.info.<locale>.releaseNotes (App Store "What's
+ * New") for EAS Metadata. Skipped when the mobile store config is absent (e.g.
+ * a web-only build context).
  * @param {ReturnType<typeof parseChangelog>} entries
  */
-async function writeAppleReleaseNotes(entries) {
+async function writeAppleStoreConfig(entries) {
   if (!existsSync(APPLE_STORE_CONFIG)) {
     console.warn(
-      `[changelog] App Store config not found; skipping Apple notes (${APPLE_STORE_CONFIG})`,
+      `[changelog] App Store config not found; skipping Apple metadata (${APPLE_STORE_CONFIG})`,
     );
     return;
   }
   const latest = entries[0];
   const original = await readFile(APPLE_STORE_CONFIG, "utf8");
   const config = JSON.parse(original);
-  /** @type {Array<[string, string]>} */
-  const patches = [];
+  let updated = original;
+
+  if (config.apple?.version !== latest.version) {
+    updated = patchAppleVersion(updated, latest.version);
+    console.log(
+      `[changelog] store.config.json apple.version ${config.apple?.version} -> ${latest.version}`,
+    );
+  }
+
   for (const [source, appleLocale] of Object.entries(APPLE_LOCALES)) {
     const changes = latest.changes[source];
     if (!changes || changes.length === 0) {
@@ -288,21 +343,57 @@ async function writeAppleReleaseNotes(entries) {
       );
     }
     if (info.releaseNotes !== note) {
-      patches.push([appleLocale, note]);
+      updated = patchLocaleReleaseNotes(updated, appleLocale, note);
+      console.log(
+        `[changelog] App Store notes -> apple.info.${appleLocale}.releaseNotes (${note.length}/${APPLE_NOTE_MAX} chars)`,
+      );
     }
   }
-  if (patches.length === 0) {
-    console.log("[changelog] App Store releaseNotes already up to date");
+
+  if (updated === original) {
+    console.log("[changelog] App Store metadata already up to date");
     return;
   }
-  let updated = original;
-  for (const [locale, note] of patches) {
-    updated = patchLocaleReleaseNotes(updated, locale, note);
-    console.log(
-      `[changelog] App Store notes -> apple.info.${locale}.releaseNotes (${note.length}/${APPLE_NOTE_MAX} chars)`,
-    );
-  }
   await writeFile(APPLE_STORE_CONFIG, updated, "utf8");
+}
+
+/**
+ * Sync a package.json version to the newest CHANGELOG entry. Patches only the
+ * version string so the rest of the file is left untouched.
+ * @param {string} path
+ * @param {string} label
+ * @param {string} latest
+ */
+async function syncPackageVersion(path, label, latest) {
+  const original = await readFile(path, "utf8");
+  const match = original.match(/"version":\s*"([^"]+)"/);
+  if (!match) {
+    fail(0, `${label} package.json (${path}) has no "version" field`);
+  }
+  const current = match[1];
+  if (current === latest) {
+    console.log(`[changelog] ${label} package.json version already ${latest}`);
+    return;
+  }
+  const updated = original.replace(
+    match[0],
+    `"version": ${JSON.stringify(latest)}`,
+  );
+  await writeFile(path, updated, "utf8");
+  console.log(
+    `[changelog] ${label} package.json version ${current} -> ${latest}`,
+  );
+}
+
+/**
+ * Keep the release version of record (root package.json) and the tracking
+ * apps/web/package.json in lockstep with the newest CHANGELOG entry.
+ * @param {ReturnType<typeof parseChangelog>} entries
+ */
+async function writePackageVersions(entries) {
+  const latest = entries[0].version;
+  await syncPackageVersion(ROOT_PACKAGE_JSON, "Root", latest);
+  await syncPackageVersion(WEB_PACKAGE_JSON, "apps/web", latest);
 }
 
 async function main() {
@@ -313,8 +404,9 @@ async function main() {
   console.log(
     `[changelog] Generated ${OUTPUT} (${entries.length} version(s)).`,
   );
+  await writePackageVersions(entries);
   await writePlayChangelogs(entries);
-  await writeAppleReleaseNotes(entries);
+  await writeAppleStoreConfig(entries);
 }
 
 main().catch((error) => {

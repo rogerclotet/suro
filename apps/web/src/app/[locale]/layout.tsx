@@ -2,7 +2,6 @@ import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { ThemeColorMeta } from "@/components/theme-color-meta";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/touch-tooltip";
-import { UpdateToast } from "@/components/update-toast";
 import "@/styles/globals.css";
 import "@fontsource/convergence/index.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
@@ -127,7 +126,6 @@ export default async function LocaleLayout({
                     <ProjectsProvider>
                       {children}
                       <Toaster position="bottom-center" />
-                      <UpdateToast />
                     </ProjectsProvider>
                   </TooltipProvider>
                 </SidebarLayout>

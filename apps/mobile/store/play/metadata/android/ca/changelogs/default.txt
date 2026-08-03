@@ -1,1 +1,1 @@
-• A les llistes d'Android, els elements queden ara just sobre el teclat sense un espai buit gran a sobre, i s'ha reduït l'espai sobrant al final de la llista.
+• S'han polit les traduccions al castellà i al català de tota l'app: la pàgina d'informació ja està completament en castellà i s'han corregit diversos problemes de redacció i ortografia, inclosa la pantalla d'inici de sessió amb codi per correu.

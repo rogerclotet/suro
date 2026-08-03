@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.5] — 2026-08-03
+
+### ca
+
+- [improvement] S'han polit les traduccions al castellà i al català de tota l'app: la pàgina d'informació ja està completament en castellà i s'han corregit diversos problemes de redacció i ortografia, inclosa la pantalla d'inici de sessió amb codi per correu.
+
+### es
+
+- [improvement] Se han pulido las traducciones al español y al catalán de toda la app: la página de información ya está completamente en español y se han corregido varios problemas de redacción y ortografía, incluida la pantalla de inicio de sesión con código por correo.
+
+### en
+
+- [improvement] Polished the Spanish and Catalan translations across the app: the info page is now fully translated into Spanish, and several wording and spelling issues have been fixed, including on the email-code sign-in screen.
+
 ## [1.18.4] — 2026-08-02
 
 ### ca
