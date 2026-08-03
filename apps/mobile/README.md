@@ -20,7 +20,7 @@ React Native app (Expo Router) for the Lists slice, backed by Convex.
 
 ## Auth
 
-Sign-in uses Convex Auth (Google OAuth + Resend magic-link), mirroring the web
+Sign-in uses Convex Auth (Google OAuth + Resend email OTP), mirroring the web
 app. The Convex **deployment** needs these env vars set (`npx convex env set …`):
 `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_RESEND_KEY`, `AUTH_EMAIL_FROM`, and
 the `JWT_PRIVATE_KEY` + `JWKS` pair (generate with `npx @convex-dev/auth`).

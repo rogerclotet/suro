@@ -1,6 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "backend/convex/_generated/api";
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
 import * as Linking from "expo-linking";
@@ -9,7 +9,7 @@ import * as WebBrowser from "expo-web-browser";
 import { type ReactNode, useEffect, useState } from "react";
 import { Image, Platform, Pressable, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { useTranslations } from "@/i18n";
+import { useLocale, useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Button, Field, KeyboardAwareScreen, Txt } from "@/ui";
 
@@ -126,6 +126,8 @@ export default function Login() {
   // login screen — so it is deliberately not gated with "skip".
   const oauthProviders = useQuery(api.auth.oauthProviders);
   const t = useTranslations("mobile.auth");
+  const locale = useLocale();
+  const stageOtpLocale = useMutation(api.authOtpLocale.stage);
   const theme = useTheme();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -158,6 +160,7 @@ export default function Login() {
 
   const sendCode = () =>
     run(async () => {
+      await stageOtpLocale({ email, locale });
       await signIn("resend-otp", { email });
       setStep("code");
     });

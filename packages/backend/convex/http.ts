@@ -8,7 +8,7 @@ import { buildIcs } from "./model/ics";
 
 const http = httpRouter();
 
-// Registers the Convex Auth HTTP routes (OAuth callbacks, magic-link verify).
+// Registers the Convex Auth HTTP routes (OAuth callbacks, email OTP verify).
 auth.addHttpRoutes(http);
 
 /**

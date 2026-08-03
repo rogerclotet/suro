@@ -272,4 +272,11 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_token", ["token"]),
+
+  // Short-lived locale hint for OTP sign-in emails (see authOtpLocale.ts).
+  authOtpLocales: defineTable({
+    email: v.string(),
+    locale: v.string(),
+    expiresAt: v.number(),
+  }).index("by_email", ["email"]),
 });
