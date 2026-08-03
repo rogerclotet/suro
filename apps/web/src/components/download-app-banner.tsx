@@ -80,7 +80,7 @@ export function DownloadAppBanner() {
 
   return (
     <div
-      className="relative flex w-full shrink-0 flex-col gap-2 border-secondary-foreground/10 border-b bg-secondary px-3 py-2 text-secondary-foreground sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:pr-12 md:rounded-t-xl md:px-6 md:py-2.5"
+      className="relative flex w-full shrink-0 flex-col gap-2 border-secondary-foreground/10 border-b bg-secondary px-3 py-2 text-secondary-foreground sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:pr-12 md:rounded-t-xl md:py-2.5 md:pl-6 md:pr-12"
       style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
     >
       {/* Reserve room on the first row for the corner dismiss on mobile. */}
@@ -113,7 +113,7 @@ export function DownloadAppBanner() {
         size="icon-sm"
         onClick={dismiss}
         aria-label={t("dismiss")}
-        className="absolute top-1 right-1 shrink-0 text-secondary-foreground hover:bg-secondary-foreground/10 hover:text-secondary-foreground sm:top-1/2 sm:right-2 sm:-translate-y-1/2"
+        className="absolute top-1 right-1 shrink-0 text-secondary-foreground hover:bg-secondary-foreground/10 hover:text-secondary-foreground sm:top-1/2 sm:right-3 sm:-translate-y-1/2"
       >
         <X />
       </Button>
