@@ -41,6 +41,10 @@ function appleScreenshotClass(width, height) {
   );
 }
 
+const ROOT_PACKAGE_JSON = join(MOBILE_DIR, "..", "..", "package.json");
+const WEB_PACKAGE_JSON = join(MOBILE_DIR, "..", "web", "package.json");
+const WEB_CHANGELOG = join(MOBILE_DIR, "..", "web", "CHANGELOG.md");
+
 let failures = 0;
 
 function fail(message) {
@@ -77,6 +81,35 @@ function pngSize(path) {
   return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
 }
 
+function checkVersionSync() {
+  console.log("\n== Version sync ==");
+  const { version: appVersion } = JSON.parse(
+    readFileSync(ROOT_PACKAGE_JSON, "utf8"),
+  );
+  // Newest CHANGELOG entry drives CURRENT_VERSION and the store release notes;
+  // generate-changelog.mjs writes this version into root package.json. If they
+  // disagree, someone edited the CHANGELOG without regenerating.
+  const changelog = readFileSync(WEB_CHANGELOG, "utf8");
+  const match = changelog.match(/^##\s+\[([^\]]+)\]/m);
+  const changelogVersion = match?.[1];
+  check(
+    changelogVersion === appVersion,
+    `root package.json ${appVersion} matches newest CHANGELOG entry`,
+    `root package.json is ${appVersion} but the newest CHANGELOG.md entry is ${changelogVersion ?? "(none found)"} — run \`pnpm --filter web changelog:generate\` to sync them`,
+  );
+
+  // apps/web/package.json tracks the release version (it isn't the source of
+  // truth); generate-changelog.mjs keeps it aligned.
+  const { version: webVersion } = JSON.parse(
+    readFileSync(WEB_PACKAGE_JSON, "utf8"),
+  );
+  check(
+    webVersion === appVersion,
+    `apps/web package.json ${webVersion} matches root package.json`,
+    `apps/web package.json is ${webVersion}, expected ${appVersion} — run \`pnpm --filter web changelog:generate\` to sync them`,
+  );
+}
+
 function checkAppleConfig() {
   console.log("\n== App Store (store.config.json) ==");
   const config = JSON.parse(
@@ -89,7 +122,7 @@ function checkAppleConfig() {
   // package.json, the same source app.config.ts reads — or the push targets the
   // wrong version.
   const { version: appVersion } = JSON.parse(
-    readFileSync(join(MOBILE_DIR, "..", "..", "package.json"), "utf8"),
+    readFileSync(ROOT_PACKAGE_JSON, "utf8"),
   );
   const configVersion = config.apple?.version;
   check(
@@ -221,6 +254,7 @@ function checkPlay() {
   );
 }
 
+checkVersionSync();
 checkAppleConfig();
 checkAppleScreenshots();
 checkPlay();

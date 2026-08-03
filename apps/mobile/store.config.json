@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.18.4",
+    "version": "1.18.5",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• In Android lists, items now sit right above the keyboard without a large empty gap, and the extra space at the bottom of the list has been reduced.",
+        "releaseNotes": "• Polished the Spanish and Catalan translations across the app: the info page is now fully translated into Spanish, and several wording and spelling issues have been fixed, including on the email-code sign-in screen.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• En las listas de Android, los elementos quedan ahora justo encima del teclado sin un gran espacio vacío, y se ha reducido el espacio sobrante al final de la lista.",
+        "releaseNotes": "• Se han pulido las traducciones al español y al catalán de toda la app: la página de información ya está completamente en español y se han corregido varios problemas de redacción y ortografía, incluida la pantalla de inicio de sesión con código por correo.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• A les llistes d'Android, els elements queden ara just sobre el teclat sense un espai buit gran a sobre, i s'ha reduït l'espai sobrant al final de la llista.",
+        "releaseNotes": "• S'han polit les traduccions al castellà i al català de tota l'app: la pàgina d'informació ja està completament en castellà i s'han corregit diversos problemes de redacció i ortografia, inclosa la pantalla d'inici de sessió amb codi per correu.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
