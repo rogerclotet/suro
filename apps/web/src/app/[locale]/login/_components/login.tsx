@@ -3,11 +3,11 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { SiApple } from "@icons-pack/react-simple-icons";
 import { api } from "backend/convex/_generated/api";
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Info, Mail, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,9 @@ export default function Login({
   compact?: boolean;
 }) {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const { signIn } = useAuthActions();
+  const stageOtpLocale = useMutation(api.authOtpLocale.stage);
   const { isAuthenticated } = useConvexAuth();
   // Auth-free config query: it must fire while signed out — it feeds the
   // login screen — so it is deliberately not gated with "skip". Apple's
@@ -77,6 +79,7 @@ export default function Login({
     setSubmitting(true);
     setError(null);
     try {
+      await stageOtpLocale({ email: value, locale });
       await signIn("resend-otp", { email: value });
       setEmail(value);
       setStep("code");

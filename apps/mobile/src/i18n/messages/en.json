@@ -182,7 +182,7 @@
     "purposesHeading": "How we use your data",
     "purposesIntro": "We use your data to:",
     "purposesProvide": "Provide the service: store and sync your groups, lists, and shared content with the people you've invited.",
-    "purposesAuth": "Sign you in via Google or magic-link email.",
+    "purposesAuth": "Sign you in via Google or a one-time code sent by email.",
     "purposesNotify": "Send you in-app and push notifications about activity in your groups (only if you opt in).",
     "purposesImprove": "Understand how the app is used and fix bugs, via anonymous analytics.",
     "purposesLegalBasis": "The legal basis is your consent (when you sign up) and our legitimate interest in operating and improving the service.",
@@ -193,7 +193,7 @@
     "processorGoogleTitle": "Google",
     "processorGoogleBody": "Used only if you sign in with Google. Google handles the OAuth sign-in; we receive your name, email and profile picture from them.",
     "processorResendTitle": "Resend",
-    "processorResendBody": "Sends magic-link login emails. Receives only the email address you're trying to sign in with.",
+    "processorResendBody": "Sends sign-in code emails. Receives only the email address you're trying to sign in with.",
     "processorUploadthingTitle": "UploadThing",
     "processorUploadthingBody": "Stores files you upload to your groups (images and PDFs).",
     "processorPosthogTitle": "PostHog",
@@ -222,13 +222,12 @@
     "or": "or",
     "emailPlaceholder": "your@email.com",
     "emailSent": "Email sent",
-    "emailSentDescription": "We've sent you an email with a link to sign in. Check your inbox.",
     "signOut": "Sign out",
     "error": {
       "title": "Couldn't sign you in",
       "generic": "Something went wrong while signing you in. Please try again.",
       "accessDenied": "Sign-in was cancelled or access was denied. Please try again.",
-      "verification": "This sign-in link is no longer valid. Request a new one."
+      "verification": "This code is no longer valid. Request a new one."
     }
   },
   "nav": {

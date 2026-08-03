@@ -2,6 +2,7 @@ import Resend from "@auth/core/providers/resend";
 import type { GenericActionCtx } from "convex/server";
 import { internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
+import { localizeAuthEmail } from "./model/authI18n";
 import { reviewAccountConfig, sha256Hex } from "./reviewOtp";
 
 /**
@@ -42,6 +43,14 @@ export const ResendOTP = Resend({
       });
       return;
     }
+    if (ctx === undefined) {
+      throw new Error("OTP email requires the Convex Auth action ctx");
+    }
+    const locale = await ctx.runQuery(internal.authOtpLocale.resolveLocale, {
+      email,
+    });
+    const subject = localizeAuthEmail("subject", {}, locale);
+    const text = localizeAuthEmail("body", { code: token }, locale);
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -51,8 +60,8 @@ export const ResendOTP = Resend({
       body: JSON.stringify({
         from: process.env.AUTH_EMAIL_FROM ?? "Suro <onboarding@resend.dev>",
         to: [email],
-        subject: "Your Suro sign-in code",
-        text: `Your Suro sign-in code is ${token}\n\nIt expires in 15 minutes.`,
+        subject,
+        text,
       }),
     });
     if (!response.ok) {
@@ -60,5 +69,6 @@ export const ResendOTP = Resend({
         `Resend error ${response.status}: ${await response.text()}`,
       );
     }
+    await ctx.runMutation(internal.authOtpLocale.clearPending, { email });
   },
 });
