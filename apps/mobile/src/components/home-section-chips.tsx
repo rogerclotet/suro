@@ -57,7 +57,7 @@ export function HomeSectionChips() {
           key={section.key}
           label={tNav(section.key)}
           icon={section.icon}
-          onPress={() => router.navigate(`/${pid}/${section.key}` as Href)}
+          onPress={() => router.navigate(`/${pid}/home/${section.key}` as Href)}
         />
       ))}
     </View>

@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.7] — 2026-08-08
+
+### ca
+
+- [fix] Les dreceres de Fitxers i Notes de la pantalla d'Inici ja funcionen: abans no feien res en tocar-les.
+
+### es
+
+- [fix] Los accesos de Archivos y Notas de la pantalla de Inicio ya funcionan: antes no hacían nada al tocarlos.
+
+### en
+
+- [fix] The Files and Notes shortcuts on the Home screen now work — they used to do nothing when tapped.
+
 ## [1.18.6] — 2026-08-08
 
 ### ca

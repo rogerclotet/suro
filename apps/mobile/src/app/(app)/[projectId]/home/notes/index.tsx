@@ -158,7 +158,7 @@ function NoteCard({
     <Pressable
       onPress={() =>
         router.push({
-          pathname: `/${projectId}/notes/${note._id}`,
+          pathname: `/${projectId}/home/notes/${note._id}`,
           params: { name: note.name },
         })
       }
@@ -229,7 +229,7 @@ function CreateNoteSheet({
       setName("");
       onClose();
       router.push({
-        pathname: `/${projectId}/notes/${noteId}`,
+        pathname: `/${projectId}/home/notes/${noteId}`,
         params: { name: trimmed },
       });
     } finally {

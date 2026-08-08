@@ -1,1 +1,1 @@
-• Les tasques assignades a tu ja apareixen a l'inici, tant en llistes independents com en llistes d'esdeveniments, amb data límit o sense.
+• Les dreceres de Fitxers i Notes de la pantalla d'Inici ja funcionen: abans no feien res en tocar-les.
