@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.18.5",
+    "version": "1.18.6",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Polished the Spanish and Catalan translations across the app: the info page is now fully translated into Spanish, and several wording and spelling issues have been fixed, including on the email-code sign-in screen.",
+        "releaseNotes": "• Tasks assigned to you now show up on the home screen, in independent lists and event lists alike, with or without a due date.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Se han pulido las traducciones al español y al catalán de toda la app: la página de información ya está completamente en español y se han corregido varios problemas de redacción y ortografía, incluida la pantalla de inicio de sesión con código por correo.",
+        "releaseNotes": "• Las tareas asignadas a ti ya aparecen en el inicio, tanto en listas independientes como en listas de eventos, con fecha límite o sin ella.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• S'han polit les traduccions al castellà i al català de tota l'app: la pàgina d'informació ja està completament en castellà i s'han corregit diversos problemes de redacció i ortografia, inclosa la pantalla d'inici de sessió amb codi per correu.",
+        "releaseNotes": "• Les tasques assignades a tu ja apareixen a l'inici, tant en llistes independents com en llistes d'esdeveniments, amb data límit o sense.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

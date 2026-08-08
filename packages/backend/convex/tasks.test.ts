@@ -234,9 +234,11 @@ describe("assignee validation", () => {
 });
 
 describe("myTasks agenda", () => {
-  it("returns the caller's incomplete tasks across task lists, by due date", async () => {
+  it("returns the caller's incomplete tasks across all lists, by due date", async () => {
     const listA = await insertTaskList("Chores");
     const listB = await insertTaskList("Errands");
+    // taskMode is a vestige of the old task-list toggle; task fields (and thus
+    // myTasks) now apply to every list regardless of it.
     const plain = await insertTaskList("Shopping", false);
 
     await insertTaskItem(listA, "later", { assigneeId: ids.alice, dueAt: 200 });
@@ -249,14 +251,21 @@ describe("myTasks agenda", () => {
     });
     await insertTaskItem(listA, "unassigned", { dueAt: 5 });
     await insertTaskItem(listB, "mid", { assigneeId: ids.alice, dueAt: 150 });
-    // In a non-task list, so excluded even though assigned to alice.
-    await insertTaskItem(plain, "ignored", { assigneeId: ids.alice, dueAt: 1 });
+    await insertTaskItem(plain, "included", {
+      assigneeId: ids.alice,
+      dueAt: 1,
+    });
 
     const tasks = await alice.query(api.tasks.myTasks, {
       projectId: ids.family,
     });
-    expect(tasks.map((task) => task.name)).toEqual(["soon", "mid", "later"]);
-    expect(tasks[0]?.listName).toBe("Chores");
+    expect(tasks.map((task) => task.name)).toEqual([
+      "included",
+      "soon",
+      "mid",
+      "later",
+    ]);
+    expect(tasks[0]?.listName).toBe("Shopping");
   });
 
   it("can fetch another member's tasks", async () => {

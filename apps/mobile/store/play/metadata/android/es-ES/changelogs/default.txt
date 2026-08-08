@@ -1,1 +1,1 @@
-• Se han pulido las traducciones al español y al catalán de toda la app: la página de información ya está completamente en español y se han corregido varios problemas de redacción y ortografía, incluida la pantalla de inicio de sesión con código por correo.
+• Las tareas asignadas a ti ya aparecen en el inicio, tanto en listas independientes como en listas de eventos, con fecha límite o sin ella.
