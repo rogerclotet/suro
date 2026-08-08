@@ -1,1 +1,1 @@
-• Tasks assigned to you now show up on the home screen, in independent lists and event lists alike, with or without a due date.
+• The Files and Notes shortcuts on the Home screen now work — they used to do nothing when tapped.

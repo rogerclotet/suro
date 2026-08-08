@@ -1,1 +1,1 @@
-• Las tareas asignadas a ti ya aparecen en el inicio, tanto en listas independientes como en listas de eventos, con fecha límite o sin ella.
+• Los accesos de Archivos y Notas de la pantalla de Inicio ya funcionan: antes no hacían nada al tocarlos.
