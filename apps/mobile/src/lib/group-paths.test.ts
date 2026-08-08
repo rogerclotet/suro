@@ -4,6 +4,7 @@ import {
   localizeGroupPath,
   toCanonicalSegment,
   webPathToRoute,
+  withHomeTabPrefix,
 } from "./group-paths";
 
 const PID = "k1700000000000000000000000000000";
@@ -82,6 +83,23 @@ describe("toCanonicalSegment", () => {
   });
 });
 
+describe("withHomeTabPrefix", () => {
+  it("nests a files/notes route under the Home tab", () => {
+    expect(withHomeTabPrefix(`/${PID}/files`)).toBe(`/${PID}/home/files`);
+    expect(withHomeTabPrefix(`/${PID}/notes/abc`)).toBe(
+      `/${PID}/home/notes/abc`,
+    );
+  });
+
+  it("leaves other sections and push-payload paths unchanged", () => {
+    expect(withHomeTabPrefix(`/${PID}/lists`)).toBe(`/${PID}/lists`);
+    expect(withHomeTabPrefix(`/${PID}/calendar/e1`)).toBe(
+      `/${PID}/calendar/e1`,
+    );
+    expect(withHomeTabPrefix(`/${PID}/home`)).toBe(`/${PID}/home`);
+  });
+});
+
 describe("webPathToRoute", () => {
   it("maps the canonical app-shared invite path to the invite screen", () => {
     expect(webPathToRoute(`/groups/${PID}/invitation/${TOKEN}`)).toBe(
@@ -134,7 +152,14 @@ describe("webPathToRoute", () => {
   it("accepts a full absolute URL and strips the locale prefix", () => {
     expect(
       webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/files`),
-    ).toBe(`/${PID}/files`);
+    ).toBe(`/${PID}/home/files`);
+  });
+
+  it("nests notes and files under the Home tab's own stack", () => {
+    expect(webPathToRoute(`/groups/${PID}/notes/abc`)).toBe(
+      `/${PID}/home/notes/abc`,
+    );
+    expect(webPathToRoute(`/groups/${PID}/files`)).toBe(`/${PID}/home/files`);
   });
 
   it("routes a bare group link to the group home", () => {

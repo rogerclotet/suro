@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 import { useTranslations } from "@/i18n";
+import { withHomeTabPrefix } from "@/lib/group-paths";
 
 // expo-notifications eagerly registers a device-push-token listener at *import*
 // time (its DevicePushTokenAutoRegistration.fx side-effect module), and that
@@ -237,7 +238,9 @@ export function usePushNotifications(): void {
       if (typeof path === "string") {
         // Payloads are built server-side as `/<pid>/<section>` or
         // `/<pid>/<section>/<id>` (the entity the push is about).
-        router.push(path);
+        // withHomeTabPrefix nests Home-tab sections (files, notes) under
+        // `/<pid>/home/...` to match the mobile tab layout.
+        router.push(withHomeTabPrefix(path));
       }
     }
     // Any of these can throw if expo-notifications' native side fails to init on

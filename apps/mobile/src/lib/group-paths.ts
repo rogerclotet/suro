@@ -60,6 +60,34 @@ const MOBILE_FEATURES = new Set([
   "expenses",
 ]);
 
+// Features that live behind the Home tab rather than getting their own bottom
+// tab, so their in-app route is nested one level deeper (`/<pid>/home/<feature>`).
+// expo-router's NativeTabs only ever navigates to routes declared as a
+// `<Trigger>` in [projectId]/_layout.tsx — a sibling route like `/<pid>/files`
+// isn't part of the tab navigator's route table and silently fails to open.
+// Nesting the screen under the Home tab's own stack (and rewriting the
+// canonical path here) makes it reachable. Keep in sync with the routes under
+// [projectId]/home/ and HOME_SECTIONS in lib/home-sections.ts.
+const HOME_TAB_FEATURES = new Set(["files", "notes"]);
+
+/**
+ * Rewrite a canonical in-app group route so Home-tab sections carry their
+ * `home/` prefix: `/<pid>/notes/<x>` → `/<pid>/home/notes/<x>`. Other sections
+ * and non-section paths pass through unchanged. The single source of truth for
+ * this nesting — shared by the universal-link resolver below and the
+ * push-notification tap handler (lib/push.ts), whose payloads are built
+ * server-side without knowledge of the mobile tab layout.
+ */
+export function withHomeTabPrefix(route: string): string {
+  const segments = route.split("/").filter(Boolean); // [projectId, feature, ...]
+  const feature = segments[1];
+  if (!feature || !HOME_TAB_FEATURES.has(feature)) {
+    return route;
+  }
+  segments.splice(1, 0, "home");
+  return `/${segments.join("/")}`;
+}
+
 /**
  * Resolve an incoming Universal Link / App Link web path to the matching in-app
  * route. The web URL reaches the router without its origin, e.g.
@@ -99,7 +127,8 @@ export function webPathToRoute(path: string): string {
   }
 
   const tail = rest.map(toCanonicalSegment).join("/");
-  return tail
+  const route = tail
     ? `/${projectId}/${mappedFeature}/${tail}`
     : `/${projectId}/${mappedFeature}`;
+  return withHomeTabPrefix(route);
 }
