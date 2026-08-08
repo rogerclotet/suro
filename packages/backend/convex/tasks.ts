@@ -14,10 +14,11 @@ export type TaskWithList = Doc<"listItems"> & { listName: string };
 
 /**
  * The "My tasks" agenda: every incomplete task assigned to `assigneeId`
- * (defaulting to the current user) across the project's task-mode lists, sorted
+ * (defaulting to the current user) across all of the project's lists, sorted
  * by due date. Grouping into overdue/today/upcoming is left to the client so each
- * surface uses its own local-day boundary. Reads only task-mode lists' items —
- * fine at a group's scale.
+ * surface uses its own local-day boundary. Task fields (assignee, due date, etc.)
+ * are available on every list's items, not just a "task mode" subset, so this
+ * scans every list — `taskMode` no longer gates anything here.
  */
 export const myTasks = query({
   args: { projectId: v.id("projects"), assigneeId: v.optional(v.id("users")) },
@@ -30,9 +31,6 @@ export const myTasks = query({
       .collect();
     const result: TaskWithList[] = [];
     for (const list of lists) {
-      if (!list.taskMode) {
-        continue;
-      }
       const items = await ctx.db
         .query("listItems")
         .withIndex("by_list", (q) => q.eq("listId", list._id))

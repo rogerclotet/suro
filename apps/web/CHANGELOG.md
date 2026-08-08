@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.18.6] — 2026-08-08
+
+### ca
+
+- [fix] Les tasques assignades a tu ja apareixen a l'inici, tant en llistes independents com en llistes d'esdeveniments, amb data límit o sense.
+
+### es
+
+- [fix] Las tareas asignadas a ti ya aparecen en el inicio, tanto en listas independientes como en listas de eventos, con fecha límite o sin ella.
+
+### en
+
+- [fix] Tasks assigned to you now show up on the home screen, in independent lists and event lists alike, with or without a due date.
+
 ## [1.18.5] — 2026-08-03
 
 ### ca

@@ -1,1 +1,1 @@
-• Polished the Spanish and Catalan translations across the app: the info page is now fully translated into Spanish, and several wording and spelling issues have been fixed, including on the email-code sign-in screen.
+• Tasks assigned to you now show up on the home screen, in independent lists and event lists alike, with or without a due date.

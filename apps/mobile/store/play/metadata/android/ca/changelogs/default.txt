@@ -1,1 +1,1 @@
-• S'han polit les traduccions al castellà i al català de tota l'app: la pàgina d'informació ja està completament en castellà i s'han corregit diversos problemes de redacció i ortografia, inclosa la pantalla d'inici de sessió amb codi per correu.
+• Les tasques assignades a tu ja apareixen a l'inici, tant en llistes independents com en llistes d'esdeveniments, amb data límit o sense.
