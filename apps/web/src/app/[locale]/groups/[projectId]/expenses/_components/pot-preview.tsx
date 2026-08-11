@@ -1,4 +1,5 @@
 import { CheckIcon, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Pot } from "@/app/_data/pot";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import MonetaryAmount from "./monetary-amount";
 
 export default function PotPreview({
   pot,
@@ -18,7 +20,10 @@ export default function PotPreview({
   pot: Pot;
   projectId: string;
 }) {
+  const t = useTranslations("expenses");
   const isSettled = pot.settledAt !== null;
+  const average =
+    pot.users.length > 0 ? Math.round(pot.totalSpent / pot.users.length) : 0;
 
   return (
     <Link
@@ -45,6 +50,19 @@ export default function PotPreview({
               </Badge>
             )}
           </CardAction>
+
+          <CardDescription className="flex items-baseline gap-1.5">
+            <MonetaryAmount
+              amount={pot.totalSpent}
+              currency="EUR"
+              className="font-semibold text-foreground text-lg"
+            />
+            <span className="text-xs">
+              {t("averagePerPersonInline", {
+                amount: `${(average / 100).toFixed(2)}€`,
+              })}
+            </span>
+          </CardDescription>
 
           <CardDescription>
             <span className="flex items-center gap-1">

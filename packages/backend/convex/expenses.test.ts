@@ -151,6 +151,35 @@ describe("expenses: deletePot", () => {
   });
 });
 
+describe("expenses: listPotsOverview totalSpent", () => {
+  it("sums split spendings but excludes settle-up transfers", async () => {
+    const potId = await makePot();
+    // Alice pays 30€ split equally, so Bob owes her 15€.
+    await alice.mutation(api.expenses.createSpending, {
+      potId,
+      amount: 3000,
+      from: ids.alice,
+    });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
+    await alice.mutation(api.expenses.settlePayments, {
+      potId,
+      payments: pot.settlements.map((s) => ({
+        from: s.from,
+        to: s.to,
+        amount: s.amount,
+      })),
+    });
+
+    const overview = await alice.query(api.expenses.listPotsOverview, {
+      projectId: ids.family,
+      settledLimit: 5,
+    });
+    const [settledPot] = overview.settled;
+    // Total spent stays 30€: the 15€ settle-up transfer isn't new spend.
+    expect(settledPot?.totalSpent).toBe(3000);
+  });
+});
+
 describe("expenses: solo groups", () => {
   async function seedSolo() {
     return t.run(async (ctx) => {

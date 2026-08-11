@@ -246,6 +246,7 @@ export function useOfflineListPotsOverview(
           projectId,
           createdBy: user.id,
           members: memberIds.map((id) => toPublicUser(id, projectMembers)),
+          totalSpent: 0,
         },
         ...active,
       ];

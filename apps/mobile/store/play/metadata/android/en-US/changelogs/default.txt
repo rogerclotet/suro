@@ -1,1 +1,1 @@
-• The Files and Notes shortcuts on the Home screen now work — they used to do nothing when tapped.
+• Pot cards and the pot detail screen now show the total spent and the average per participant, right at the top.

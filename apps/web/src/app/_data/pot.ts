@@ -3,8 +3,8 @@ import type { FunctionReturnType } from "convex/server";
 import { adaptSpending, type Spending } from "./spending";
 
 type ConvexPotListItem = FunctionReturnType<
-  typeof api.expenses.listPots
->[number];
+  typeof api.expenses.listPotsOverview
+>["active"][number];
 type ConvexPotDetail = NonNullable<
   FunctionReturnType<typeof api.expenses.getPot>
 >;
@@ -28,9 +28,20 @@ export type Pot = {
   createdAt: Date | null;
   createdBy: string;
   users: PotMember[];
+  totalSpent: number;
 };
 
 export type PotDetail = Pot & { spendings: Spending[] };
+
+/**
+ * Sum of split spendings (`to` unset) — direct transfers (`to` set, used for
+ * both explicit single-recipient spendings and settle-up payments) move
+ * money between members rather than spending new money, so they're excluded.
+ * Ported from the backend's `packages/backend/convex/model/expenses.ts`.
+ */
+function sumSpendings(spendings: Spending[]): number {
+  return spendings.reduce((sum, s) => (s.to ? sum : sum + s.amount), 0);
+}
 
 function adaptMember(m: {
   _id: string | null;
@@ -50,7 +61,7 @@ function adaptMember(m: {
 
 function adaptPotFields(
   p: ConvexPotListItem | ConvexPotDetail,
-): Omit<Pot, "users"> {
+): Omit<Pot, "users" | "totalSpent"> {
   return {
     id: p._id,
     name: p.name,
@@ -63,13 +74,19 @@ function adaptPotFields(
 }
 
 export function adaptPot(p: ConvexPotListItem): Pot {
-  return { ...adaptPotFields(p), users: p.members.map(adaptMember) };
-}
-
-export function adaptPotDetail(p: ConvexPotDetail): PotDetail {
   return {
     ...adaptPotFields(p),
     users: p.members.map(adaptMember),
-    spendings: p.spendings.map(adaptSpending),
+    totalSpent: p.totalSpent,
+  };
+}
+
+export function adaptPotDetail(p: ConvexPotDetail): PotDetail {
+  const spendings = p.spendings.map(adaptSpending);
+  return {
+    ...adaptPotFields(p),
+    users: p.members.map(adaptMember),
+    spendings,
+    totalSpent: sumSpendings(spendings),
   };
 }

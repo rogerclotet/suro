@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.19.0] — 2026-08-11
+
+### ca
+
+- [feature] Les targetes de pot i la pantalla de detall del pot ara mostren el total gastat i la mitjana per participant, a la part superior.
+
+### es
+
+- [feature] Las tarjetas de bote y la pantalla de detalle del bote ahora muestran el total gastado y la media por participante, en la parte superior.
+
+### en
+
+- [feature] Pot cards and the pot detail screen now show the total spent and the average per participant, right at the top.
+
 ## [1.18.7] — 2026-08-08
 
 ### ca
