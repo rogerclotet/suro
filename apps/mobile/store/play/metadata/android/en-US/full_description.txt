@@ -4,7 +4,7 @@ LISTS
 Shopping lists, packing lists, to-dos. Organize items into categories, save reusable templates, and check things off together in real time.
 
 CALENDAR
-Plan trips, dinners and birthdays. Link a list or a note to an event so the packing or the shopping is right where you need it. Subscribe from Google Calendar or Apple Calendar.
+Plan trips, dinners and birthdays. Link a list or a note to an event so the packing or the shopping is right where you need it. Subscribe from third-party calendars.
 
 NOTES & FILES
 Share rich-text notes, photos and PDFs with the whole group. No more digging through chat history.
@@ -20,6 +20,6 @@ MADE FOR THE GROUPS IN YOUR LIFE
 • Families — from weekly meal planning to holiday packing, share what matters with the people at home.
 • Friend groups — plan the trip and split the costs without endless group-chat scrolling.
 
-Start your first group in under a minute: sign in with Google or your email, create a group, and invite your people with a link. No credit card, no setup.
+Start your first group in under a minute: sign in, create a group, and invite your people with a link. No credit card, no setup.
 
 Suro doesn't sell your data and runs no algorithmic feeds.

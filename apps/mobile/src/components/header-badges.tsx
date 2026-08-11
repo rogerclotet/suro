@@ -1,4 +1,4 @@
-import { type LucideIcon, Plus } from "lucide-react-native";
+import { ChevronLeft, type LucideIcon, Plus } from "lucide-react-native";
 import { Platform, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
 import { HEADER_BUTTON_INSET } from "@/ui";
@@ -100,6 +100,39 @@ export function headerCreateAction(
         : []),
     ],
   };
+}
+
+/**
+ * Header options for a screen that is the root of its own nested `Stack`
+ * (e.g. home/notes, home/files) and so never has its own back history —
+ * its parent Stack.Screen is hidden to avoid a duplicate header, which
+ * also drops the native back button. Renders an explicit one that calls
+ * `onBack` (typically `router.back()`).
+ */
+export function headerBackAction(onBack: () => void, label: string) {
+  return {
+    headerLeft: () => <HeaderBackButton onPress={onBack} label={label} />,
+  };
+}
+
+function HeaderBackButton({
+  onPress,
+  label,
+}: {
+  onPress: () => void;
+  label: string;
+}) {
+  const t = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <ChevronLeft color={t.primary} size={26} />
+    </Pressable>
+  );
 }
 
 /**
