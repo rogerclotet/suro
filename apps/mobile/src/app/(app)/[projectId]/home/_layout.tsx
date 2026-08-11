@@ -16,6 +16,11 @@ export default function HomeLayout() {
         headerTintColor: t.primary,
         contentStyle: { backgroundColor: t.bg },
       }}
-    />
+    >
+      {/* files/ and notes/ own their own header via a nested Stack — hide
+          this outer one so it doesn't double up with theirs. */}
+      <Stack.Screen name="files" options={{ headerShown: false }} />
+      <Stack.Screen name="notes" options={{ headerShown: false }} />
+    </Stack>
   );
 }

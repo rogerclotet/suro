@@ -18,6 +18,7 @@ import {
 import { useTheme } from "@/theme";
 import {
   Button,
+  Card,
   Fab,
   Field,
   Loading,
@@ -232,6 +233,15 @@ export default function PotDetail() {
     ...pot.balances.map((entry) => Math.abs(entry.amount)),
   );
 
+  // Direct transfers (`to` set — single-recipient spendings and settle-up
+  // payments) move money between members rather than spending new money.
+  const totalSpent = pot.spendings.reduce(
+    (sum, s) => (s.to ? sum : sum + s.amount),
+    0,
+  );
+  const averagePerPerson =
+    pot.members.length > 0 ? Math.round(totalSpent / pot.members.length) : 0;
+
   return (
     <Screen>
       <Stack.Screen
@@ -257,6 +267,33 @@ export default function PotDetail() {
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
       >
+        <View style={{ flexDirection: "row", gap: 12, marginBottom: 16 }}>
+          <View style={{ flex: 1 }}>
+            <Card>
+              <View style={{ gap: 8 }}>
+                <Txt muted size={12} style={{ letterSpacing: 1 }}>
+                  {tExp("totalSpent").toUpperCase()}
+                </Txt>
+                <Txt size={28} weight="700">
+                  {formatMoney(totalSpent)}
+                </Txt>
+              </View>
+            </Card>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Card>
+              <View style={{ gap: 8 }}>
+                <Txt muted size={12} style={{ letterSpacing: 1 }}>
+                  {tExp("averagePerPerson").toUpperCase()}
+                </Txt>
+                <Txt size={28} weight="700">
+                  {formatMoney(averagePerPerson)}
+                </Txt>
+              </View>
+            </Card>
+          </View>
+        </View>
+
         {pot.settledAt ? (
           <Txt
             size={13}

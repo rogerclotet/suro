@@ -8,6 +8,7 @@ import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
+import { formatMoney } from "@/lib/money";
 import {
   useOfflineListPotsOverview,
   usePersistentQuery,
@@ -158,11 +159,31 @@ function PotCard({
   muted?: boolean;
 }) {
   const tc = useTranslations("mobile.common");
+  const tExp = useTranslations("mobile.expenses");
+  const average =
+    pot.members.length > 0
+      ? Math.round(pot.totalSpent / pot.members.length)
+      : 0;
   return (
     <Card onPress={onPress} muted={muted}>
       <Txt size={17} weight="700" numberOfLines={1}>
         {pot.name}
       </Txt>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "baseline",
+          gap: 6,
+          marginTop: 6,
+        }}
+      >
+        <Txt size={20} weight="700">
+          {formatMoney(pot.totalSpent)}
+        </Txt>
+        <Txt muted size={13}>
+          {tExp("averagePerPersonInline", { amount: formatMoney(average) })}
+        </Txt>
+      </View>
       <View
         style={{
           flexDirection: "row",

@@ -67,6 +67,15 @@ export function calculateBalances(
 }
 
 /**
+ * Sum of split spendings (`to` unset) — direct transfers (`to` set, used for
+ * both explicit single-recipient spendings and settle-up payments) move
+ * money between members rather than spending new money, so they're excluded.
+ */
+export function totalSpent(spendings: SpendingInput[]): number {
+  return spendings.reduce((sum, s) => (s.to ? sum : sum + s.amount), 0);
+}
+
+/**
  * Greedy settle-up: repeatedly pay the largest debtor's debt to the largest
  * creditor until everyone is square. Not minimal, but matches the PWA.
  */

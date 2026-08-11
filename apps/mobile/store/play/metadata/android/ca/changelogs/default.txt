@@ -1,1 +1,1 @@
-• Les dreceres de Fitxers i Notes de la pantalla d'Inici ja funcionen: abans no feien res en tocar-les.
+• Les targetes de pot i la pantalla de detall del pot ara mostren el total gastat i la mitjana per participant, a la part superior.

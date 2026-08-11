@@ -5,7 +5,10 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
-import { headerCreateAction } from "@/components/header-badges";
+import {
+  headerBackAction,
+  headerCreateAction,
+} from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { notePreview } from "@/lib/note-content";
@@ -70,10 +73,12 @@ function packColumns(tiles: Tile[]): Tile[][] {
 
 export default function NotesOverview() {
   const pid = useProjectId();
+  const router = useRouter();
   const notes = usePersistentQuery(api.notes.listByProject, { projectId: pid });
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
   const tNotes = useTranslations("mobile.notes");
+  const tc = useTranslations("mobile.common");
 
   const columns = useMemo(() => {
     if (!notes) {
@@ -91,6 +96,7 @@ export default function NotesOverview() {
       <Stack.Screen
         options={{
           title: tNotes("title"),
+          ...headerBackAction(() => router.back(), tc("back")),
           ...headerCreateAction({
             onPress: () => setCreating(true),
             label: tNotes("newNote"),

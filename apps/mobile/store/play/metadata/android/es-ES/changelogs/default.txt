@@ -1,1 +1,1 @@
-• Los accesos de Archivos y Notas de la pantalla de Inicio ya funcionan: antes no hacían nada al tocarlos.
+• Las tarjetas de bote y la pantalla de detalle del bote ahora muestran el total gastado y la media por participante, en la parte superior.

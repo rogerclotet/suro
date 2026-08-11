@@ -8,7 +8,11 @@ import {
   query,
 } from "./_generated/server";
 import { track } from "./model/analytics";
-import { calculateBalances, generateProposals } from "./model/expenses";
+import {
+  calculateBalances,
+  generateProposals,
+  totalSpent,
+} from "./model/expenses";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
 
 /** The user fields the expenses UI needs (name + avatar). */
@@ -153,7 +157,15 @@ export const listPotsOverview = query({
     const withMembers = async (pot: Doc<"pots">) => {
       const ids = await potMemberIds(ctx, pot._id);
       const users = await Promise.all(ids.map((id) => ctx.db.get(id)));
-      return { ...pot, members: users.map(publicUser) };
+      const spendings = await ctx.db
+        .query("spendings")
+        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+        .collect();
+      return {
+        ...pot,
+        members: users.map(publicUser),
+        totalSpent: totalSpent(spendings),
+      };
     };
 
     return {

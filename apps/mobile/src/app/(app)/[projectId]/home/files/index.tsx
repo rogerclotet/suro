@@ -1,8 +1,11 @@
 import { api } from "backend/convex/_generated/api";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { FileGallery } from "@/components/file-gallery";
-import { headerCreateAction } from "@/components/header-badges";
+import {
+  headerBackAction,
+  headerCreateAction,
+} from "@/components/header-badges";
 import { chooseAndUpload } from "@/components/upload-button";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
@@ -12,6 +15,7 @@ import { Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 export default function Files() {
   const pid = useProjectId();
+  const router = useRouter();
   const files = usePersistentQuery(api.files.listByProject, { projectId: pid });
   const { pickImage, pickDocument, pending } = useUploadFile(pid);
   const tFiles = useTranslations("mobile.files");
@@ -34,6 +38,7 @@ export default function Files() {
       <Stack.Screen
         options={{
           title: tFiles("title"),
+          ...headerBackAction(() => router.back(), tc("back")),
           ...headerCreateAction({
             onPress: onCreate,
             label: tFiles("shareFiles"),
