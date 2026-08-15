@@ -19,6 +19,7 @@ const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   calendar: { ca: "calendari", es: "calendario" },
   files: { ca: "fitxers", es: "archivos" },
   notes: { es: "notas" },
+  edit: { ca: "edita", es: "editar" },
   expenses: { ca: "despeses", es: "gastos" },
   invitation: { ca: "invitacio", es: "invitacion" },
   "secret-santa": { ca: "amic-invisible", es: "amigo-invisible" },

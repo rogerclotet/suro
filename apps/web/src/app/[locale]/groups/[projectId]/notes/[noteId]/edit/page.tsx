@@ -1,5 +1,5 @@
 import { checkAuth } from "@/lib/check-auth";
-import NoteView from "./_components/note-view";
+import NoteEdit from "../_components/note-edit";
 
 export default async function Page({
   params,
@@ -10,5 +10,5 @@ export default async function Page({
 
   const { noteId } = await params;
 
-  return <NoteView noteId={noteId} />;
+  return <NoteEdit noteId={noteId} />;
 }

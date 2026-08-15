@@ -23,8 +23,8 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
-import { CONVERGENCE_400_DATA_URI } from "@/lib/convergence-font";
 import { isBlankHtml } from "@/lib/note-content";
+import { richTextCss } from "@/lib/note-css";
 import { type Theme, useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
 
@@ -371,33 +371,8 @@ function LinkSheet({
 /** CSS injected into the editor's WebView so it matches the active app theme. */
 function editorCss(t: Theme): string {
   return `
-    @font-face {
-      font-family: "Convergence";
-      font-style: normal;
-      font-weight: 400;
-      src: url("${CONVERGENCE_400_DATA_URI}") format("truetype");
-    }
-    .ProseMirror {
-      background-color: ${t.bg};
-      color: ${t.text};
-      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      font-size: 16px;
-      line-height: 1.5;
-      caret-color: ${t.primary};
-      padding: 12px 16px 24px 16px;
-    }
-    .ProseMirror a { color: ${t.primary}; }
-    .ProseMirror h2,
-    .ProseMirror h3 {
-      font-family: "Convergence", -apple-system, system-ui, sans-serif;
-    }
-    .ProseMirror h2 { font-size: 1.4em; }
-    .ProseMirror h3 { font-size: 1.2em; }
-    .ProseMirror blockquote {
-      border-left: 3px solid ${t.border};
-      padding-left: 12px;
-      color: ${t.muted};
-    }
+    ${richTextCss(t, ".ProseMirror")}
+    .ProseMirror { caret-color: ${t.primary}; }
     .ProseMirror p.is-editor-empty:first-child::before {
       color: ${t.muted};
       content: attr(data-placeholder);

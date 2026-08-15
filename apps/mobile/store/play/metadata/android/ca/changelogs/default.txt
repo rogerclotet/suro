@@ -1,1 +1,1 @@
-• Les targetes de pot i la pantalla de detall del pot ara mostren el total gastat i la mitjana per participant, a la part superior.
+• En obrir una nota ara la veus com una pàgina amb format a pantalla completa, amb els enllaços clicables. Per canviar-la, toca el botó d'edició.

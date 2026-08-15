@@ -1,1 +1,1 @@
-• Las tarjetas de bote y la pantalla de detalle del bote ahora muestran el total gastado y la media por participante, en la parte superior.
+• Al abrir una nota ahora la ves como una página con formato a pantalla completa, con los enlaces pulsables. Para cambiarla, toca el botón de editar.
