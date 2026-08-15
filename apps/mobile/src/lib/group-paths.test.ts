@@ -162,6 +162,12 @@ describe("webPathToRoute", () => {
     expect(webPathToRoute(`/groups/${PID}/files`)).toBe(`/${PID}/home/files`);
   });
 
+  it("translates the localized note editor segment", () => {
+    expect(webPathToRoute(`/es/grupos/${PID}/notas/abc/editar`)).toBe(
+      `/${PID}/home/notes/abc/edit`,
+    );
+  });
+
   it("routes a bare group link to the group home", () => {
     expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/home`);
   });

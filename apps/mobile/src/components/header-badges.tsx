@@ -3,8 +3,15 @@ import { Platform, Pressable, View } from "react-native";
 import { useTheme } from "@/theme";
 import { HEADER_BUTTON_INSET } from "@/ui";
 
-/** A screen's primary create action: what to do, and how to label it for a11y. */
-export type CreateAction = { onPress: () => void; label: string };
+/**
+ * A screen's primary action: what to do, how to label it for a11y, and its icon
+ * when it isn't the usual "+" (the note viewer's pencil, say).
+ */
+export type CreateAction = {
+  onPress: () => void;
+  label: string;
+  icon?: LucideIcon;
+};
 
 /** A secondary header action: its icon, what it does, and its a11y label. */
 export type HeaderAction = {
@@ -14,11 +21,15 @@ export type HeaderAction = {
 };
 
 /**
- * Glass "+" header item that triggers a screen's create action: a tinted lucide
+ * Glass "+" header item that triggers a screen's primary action: a tinted lucide
  * icon with no background, sitting in the native Liquid Glass capsule. iOS only;
- * on Android the create affordance is the `Fab`.
+ * on Android that affordance is the `Fab`.
  */
-function HeaderCreateButton({ onPress, label }: CreateAction) {
+function HeaderCreateButton({
+  onPress,
+  label,
+  icon: Icon = Plus,
+}: CreateAction) {
   const t = useTheme();
   return (
     <Pressable
@@ -27,7 +38,7 @@ function HeaderCreateButton({ onPress, label }: CreateAction) {
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Plus color={t.primary} size={22} />
+      <Icon color={t.primary} size={22} />
     </Pressable>
   );
 }

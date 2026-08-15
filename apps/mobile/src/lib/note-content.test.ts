@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isBlankHtml, notePreview, toEditorHtml } from "./note-content";
+import {
+  isBlankHtml,
+  notePreview,
+  sanitizeNoteHtml,
+  toEditorHtml,
+} from "./note-content";
 
 describe("notePreview", () => {
   it("tidies plain text and collapses blank-line runs", () => {
@@ -57,6 +62,56 @@ describe("toEditorHtml", () => {
   it("round-trips a plain note into HTML and back to a preview", () => {
     const html = toEditorHtml("shopping\nmilk", "plain");
     expect(notePreview(html, "html")).toBe("shopping\nmilk");
+  });
+});
+
+describe("sanitizeNoteHtml", () => {
+  it("keeps the tags the editors produce", () => {
+    const html =
+      "<h2>Title</h2><p><strong>bold</strong> <em>it</em> <s>gone</s><br>next</p><ul><li>one</li></ul><blockquote>q</blockquote>";
+    expect(sanitizeNoteHtml(html)).toBe(html);
+  });
+
+  it("drops disallowed tags but keeps their text", () => {
+    expect(sanitizeNoteHtml("<p><span class='x'>hi</span></p>")).toBe(
+      "<p>hi</p>",
+    );
+    expect(sanitizeNoteHtml('<p>a<img src="x" onerror="alert(1)">b</p>')).toBe(
+      "<p>ab</p>",
+    );
+  });
+
+  it("removes script and style blocks entirely", () => {
+    expect(sanitizeNoteHtml("<p>a</p><script>alert(1)</script><p>b</p>")).toBe(
+      "<p>a</p><p>b</p>",
+    );
+    expect(sanitizeNoteHtml("<style>body{}</style><p>a</p>")).toBe("<p>a</p>");
+    expect(sanitizeNoteHtml("<p>a</p><script>alert(1)")).toBe("<p>a</p>");
+  });
+
+  it("strips attributes from everything but a link's href", () => {
+    expect(sanitizeNoteHtml('<p class="x" onclick="steal()">hi</p>')).toBe(
+      "<p>hi</p>",
+    );
+    expect(
+      sanitizeNoteHtml(
+        '<a href="https://a.test?x=1&amp;y=2" onclick="steal()">l</a>',
+      ),
+    ).toBe('<a href="https://a.test?x=1&amp;y=2">l</a>');
+  });
+
+  it("unwraps links with an unsafe scheme, keeping their text", () => {
+    expect(sanitizeNoteHtml('<a href="javascript:alert(1)">tap</a>')).toBe(
+      "tap",
+    );
+    expect(sanitizeNoteHtml("<p>a<a>bare</a>b</p>")).toBe("<p>abareb</p>");
+    expect(sanitizeNoteHtml('<a href="mailto:a@b.test">mail</a>')).toBe(
+      '<a href="mailto:a@b.test">mail</a>',
+    );
+  });
+
+  it("escapes a stray angle bracket instead of emitting markup", () => {
+    expect(sanitizeNoteHtml("<p>2 < 3</p>")).toBe("<p>2 &lt; 3</p>");
   });
 });
 

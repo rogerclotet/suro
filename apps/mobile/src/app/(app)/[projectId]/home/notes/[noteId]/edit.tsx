@@ -2,18 +2,17 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Trash2 } from "lucide-react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Pressable, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
+import { NoteNotFound } from "@/components/note-not-found";
 import { NoteRichEditor } from "@/components/note-rich-editor";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { isBlankHtml, toEditorHtml } from "@/lib/note-content";
 import { usePersistentQuery } from "@/lib/offline";
-import { useProjectId } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
-import { Button, HEADER_BUTTON_INSET, Loading, Screen, Txt } from "@/ui";
+import { Loading, Screen, Txt } from "@/ui";
 
 type Note = NonNullable<FunctionReturnType<typeof api.notes.get>>;
 
@@ -38,7 +37,7 @@ export default function NoteEditor() {
     );
   }
   if (note === null) {
-    return <DeletedNote />;
+    return <NoteNotFound />;
   }
   // Mount the editor only once the note has loaded so its initial content is
   // correct at first render; key by id so reactive note updates never remount
@@ -46,34 +45,10 @@ export default function NoteEditor() {
   return <NoteEditorContent key={id} id={id} note={note} />;
 }
 
-function DeletedNote() {
-  const pid = useProjectId();
-  const router = useRouter();
-  const tNotes = useTranslations("mobile.notes");
-  return (
-    <Screen>
-      <Stack.Screen options={{ title: "" }} />
-      <View style={{ flex: 1, justifyContent: "center", padding: 24, gap: 16 }}>
-        <Txt muted style={{ textAlign: "center" }}>
-          {tNotes("notFound")}
-        </Txt>
-        <Button
-          title={tNotes("title")}
-          onPress={() => router.replace(`/${pid}/home/notes`)}
-        />
-      </View>
-    </Screen>
-  );
-}
-
 function NoteEditorContent({ id, note }: { id: Id<"notes">; note: Note }) {
-  const pid = useProjectId();
   const update = useMutation(api.notes.update);
-  const remove = useMutation(api.notes.remove);
-  const router = useRouter();
   const t = useTheme();
   const tNotes = useTranslations("mobile.notes");
-  const tc = useTranslations("mobile.common");
   const timeAgo = useTimeAgo();
 
   const [name, setName] = useState(note.name);
@@ -132,26 +107,6 @@ function NoteEditorContent({ id, note }: { id: Id<"notes">; note: Note }) {
     [id, update],
   );
 
-  function confirmDelete() {
-    Alert.alert(
-      tNotes("deleteTitle"),
-      tNotes("deleteMessage", { name: note.name || tNotes("thisNote") }),
-      [
-        { text: tc("cancel"), style: "cancel" },
-        {
-          text: tc("delete"),
-          style: "destructive",
-          onPress: () => {
-            pending.current = null;
-            void remove({ noteId: id }).then(() =>
-              router.replace(`/${pid}/home/notes`),
-            );
-          },
-        },
-      ],
-    );
-  }
-
   const statusLabel =
     status === "saving"
       ? tNotes("saving")
@@ -161,21 +116,7 @@ function NoteEditorContent({ id, note }: { id: Id<"notes">; note: Note }) {
 
   return (
     <Screen>
-      <Stack.Screen
-        options={{
-          title: name || note.name,
-          headerRight: () => (
-            <Pressable
-              onPress={confirmDelete}
-              hitSlop={8}
-              accessibilityLabel={tNotes("deleteTitle")}
-              style={{ paddingHorizontal: HEADER_BUTTON_INSET }}
-            >
-              <Trash2 color={t.primary} size={20} />
-            </Pressable>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ title: name || note.name }} />
       <View style={{ flex: 1 }}>
         <View
           style={{

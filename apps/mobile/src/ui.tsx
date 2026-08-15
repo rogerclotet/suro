@@ -267,10 +267,12 @@ export function Fab({
   onPress,
   label,
   extended = true,
+  icon: Icon = Plus,
 }: {
   onPress: () => void;
   label: string;
   extended?: boolean;
+  icon?: LucideIcon;
 }) {
   const t = useTheme();
   const { anyOpen } = useContext(SheetCountContext);
@@ -282,7 +284,7 @@ export function Fab({
 
   return (
     <AnimatedFAB
-      icon={({ size, color }) => <Plus color={color} size={size} />}
+      icon={({ size, color }) => <Icon color={color} size={size} />}
       label={label}
       extended={extended}
       onPress={onPress}

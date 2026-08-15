@@ -1,1 +1,1 @@
-• Pot cards and the pot detail screen now show the total spent and the average per participant, right at the top.
+• Opening a note now shows it as a full-screen formatted page with tappable links. To change it, tap the edit button.

@@ -624,6 +624,7 @@
     "emptyPreview": "Empty note",
     "saving": "Saving…",
     "saved": "Saved",
+    "doneEditing": "Done",
     "editor": {
       "bold": "Bold",
       "italic": "Italic",

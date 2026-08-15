@@ -5,13 +5,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useLocale, useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Note } from "@/app/_data/note";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
@@ -23,15 +17,7 @@ type SaveState = "idle" | "saving" | "saved";
 const AUTOSAVE_DELAY_MS = 800;
 const SAVED_INDICATOR_MS = 2000;
 
-export default function NoteEditor({
-  note,
-  actions,
-  backlink,
-}: {
-  note: Note;
-  actions?: ReactNode;
-  backlink?: ReactNode;
-}) {
+export default function NoteEditor({ note }: { note: Note }) {
   const { data: session } = useSession();
   const t = useTranslations("notes");
   const locale = useLocale();
@@ -166,11 +152,7 @@ export default function NoteEditor({
             </p>
           )}
         </div>
-
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-
-      {backlink}
 
       <RichTextEditor
         variant="inline"

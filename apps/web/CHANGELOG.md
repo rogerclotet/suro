@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.20.0] — 2026-08-15
+
+### ca
+
+- [feature] En obrir una nota ara la veus com una pàgina amb format a pantalla completa, amb els enllaços clicables. Per canviar-la, toca el botó d'edició.
+
+### es
+
+- [feature] Al abrir una nota ahora la ves como una página con formato a pantalla completa, con los enlaces pulsables. Para cambiarla, toca el botón de editar.
+
+### en
+
+- [feature] Opening a note now shows it as a full-screen formatted page with tappable links. To change it, tap the edit button.
+
 ## [1.19.0] — 2026-08-11
 
 ### ca
