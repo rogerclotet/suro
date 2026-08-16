@@ -35,7 +35,7 @@ export default function SidebarInsetContent({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header
-        className="z-10 flex min-h-[52px] shrink-0 items-center gap-2 bg-sidebar px-4 pb-2.5 text-sidebar-foreground transition-[width,height] duration-200 ease-linear md:h-16 md:bg-background md:px-6 md:pb-0 md:text-foreground group-has-data-[collapsible=icon]/sidebar-wrapper:md:h-12"
+        className="z-10 flex min-h-[52px] shrink-0 items-center gap-2 bg-background px-4 pb-2.5 text-foreground transition-[width,height] duration-200 ease-linear md:h-16 md:px-6 md:pb-0 group-has-data-[collapsible=icon]/sidebar-wrapper:md:h-12"
         style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top))" }}
       >
         <Breadcrumbs />
