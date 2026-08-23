@@ -1,1 +1,1 @@
-• En obrir una nota ara la veus com una pàgina amb format a pantalla completa, amb els enllaços clicables. Per canviar-la, toca el botó d'edició.
+• Suro ja té app per a rellotges Wear OS: marca elements de les llistes, consulta els propers esdeveniments amb la seva llista, i mira i afegeix despeses des del canell. Es vincula sola quan obris Suro al mòbil.

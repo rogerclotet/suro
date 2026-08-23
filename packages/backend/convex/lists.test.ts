@@ -136,7 +136,19 @@ function insertList(
 function insertItem(
   listId: Id<"lists">,
   name: string,
-  opts: { completed?: boolean; category?: string; updatedAt?: number } = {},
+  opts: {
+    completed?: boolean;
+    category?: string;
+    updatedAt?: number;
+    dueAt?: number;
+    dueAllDay?: boolean;
+    assigneeId?: Id<"users">;
+    priority?: "low" | "normal" | "high";
+    recurrence?: {
+      freq: "daily" | "weekly" | "monthly" | "yearly";
+      interval: number;
+    };
+  } = {},
 ) {
   return t.run((ctx) =>
     ctx.db.insert("listItems", {
@@ -146,6 +158,11 @@ function insertItem(
       category: opts.category,
       createdBy: ids.alice,
       updatedAt: opts.updatedAt ?? Date.now(),
+      dueAt: opts.dueAt,
+      dueAllDay: opts.dueAllDay,
+      assigneeId: opts.assigneeId,
+      priority: opts.priority,
+      recurrence: opts.recurrence,
     }),
   );
 }
@@ -392,6 +409,89 @@ describe("list items", () => {
     await alice.mutation(api.listItems.remove, { itemId: remove });
     const result = await getList(alice, list);
     expect(result.items.map((i) => i.name)).toEqual(["Keep"]);
+  });
+});
+
+// The thin-client toggle used by the Wear OS app. Its reason to exist is that
+// `update` wipes any task field the caller omits, which a watch has no way to
+// send back — so these tests are mostly about what *doesn't* change.
+describe("list items: setCompleted", () => {
+  const dueAt = Date.UTC(2026, 0, 15, 9, 0, 0);
+
+  it("ticks an item off without disturbing its task fields", async () => {
+    const list = await insertList("L");
+    const item = await insertItem(list, "Tent", {
+      category: "Camping",
+      dueAt,
+      dueAllDay: true,
+      assigneeId: ids.alice,
+      priority: "high",
+    });
+
+    await alice.mutation(api.listItems.setCompleted, {
+      itemId: item,
+      completed: true,
+    });
+
+    const updated = (await getList(alice, list)).items[0];
+    expect(updated?.completed).toBe(true);
+    expect(updated?.name).toBe("Tent");
+    expect(updated?.category).toBe("Camping");
+    expect(updated?.dueAt).toBe(dueAt);
+    expect(updated?.dueAllDay).toBe(true);
+    expect(updated?.assigneeId).toBe(ids.alice);
+    expect(updated?.priority).toBe("high");
+  });
+
+  it("unticks a completed item", async () => {
+    const list = await insertList("L");
+    const item = await insertItem(list, "Tent", { completed: true });
+    await alice.mutation(api.listItems.setCompleted, {
+      itemId: item,
+      completed: false,
+    });
+    expect((await getList(alice, list)).items[0]?.completed).toBe(false);
+  });
+
+  it("advances a recurring task instead of completing it", async () => {
+    const list = await insertList("L");
+    const item = await insertItem(list, "Water the plants", {
+      dueAt,
+      recurrence: { freq: "weekly", interval: 1 },
+    });
+
+    await alice.mutation(api.listItems.setCompleted, {
+      itemId: item,
+      completed: true,
+    });
+
+    const updated = (await getList(alice, list)).items[0];
+    expect(updated?.completed).toBe(false);
+    // `dueAt` is long past, so it rolls forward to the next future occurrence
+    // rather than re-opening overdue.
+    expect(updated?.dueAt).toBeGreaterThan(Date.now());
+    expect(((updated?.dueAt ?? 0) - dueAt) % (7 * 86_400_000)).toBe(0);
+  });
+
+  it("completes a task whose repeat rule was cleared", async () => {
+    const list = await insertList("L");
+    const item = await insertItem(list, "One-off", { dueAt });
+    await alice.mutation(api.listItems.setCompleted, {
+      itemId: item,
+      completed: true,
+    });
+    expect((await getList(alice, list)).items[0]?.completed).toBe(true);
+  });
+
+  it("rejects a caller outside the project", async () => {
+    const list = await insertList("L");
+    const item = await insertItem(list, "Tent");
+    await expect(
+      bob.mutation(api.listItems.setCompleted, {
+        itemId: item,
+        completed: true,
+      }),
+    ).rejects.toThrow();
   });
 });
 

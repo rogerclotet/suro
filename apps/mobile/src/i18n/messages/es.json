@@ -895,7 +895,13 @@
       "themeSystem": "Sistema",
       "language": "Idioma",
       "languageDescription": "Este idioma se utiliza para la interfaz y las notificaciones.",
-      "saveError": "No se pudo guardar"
+      "saveError": "No se pudo guardar",
+      "watch": "Reloj",
+      "watchDescription": "Suro en el reloj Wear OS se vincula solo mientras tengas la sesión iniciada aquí.",
+      "watchPaired": "El reloj está conectado",
+      "watchConnecting": "Configurando el reloj…",
+      "watchDisconnected": "No se ha encontrado ningún reloj",
+      "watchReconnect": "Volver a conectar el reloj"
     },
     "lists": {
       "title": "Listas",

@@ -13,4 +13,13 @@ crons.hourly(
   {},
 );
 
+// Pairing tickets expire within minutes and expiry is enforced at redemption;
+// this just keeps unredeemed rows from piling up.
+crons.daily(
+  "prune expired watch pairings",
+  { hourUTC: 3, minuteUTC: 30 },
+  internal.watchPairings.pruneExpired,
+  {},
+);
+
 export default crons;

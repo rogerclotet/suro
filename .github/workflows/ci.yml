@@ -6,6 +6,8 @@
 #   backend — Convex deploy
 #   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
 #             version bump + matching CHANGELOG entry + native file changes)
+#   wear    — Wear OS app unit tests + debug assemble (plain Gradle, no pnpm:
+#             apps/wear is a standalone Gradle build outside the workspace)
 #
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
 # do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
@@ -32,6 +34,7 @@ jobs:
     outputs:
       web: ${{ steps.changes.outputs.web }}
       backend: ${{ steps.changes.outputs.backend }}
+      wear: ${{ steps.changes.outputs.wear }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/detect-path-changes
@@ -72,6 +75,22 @@ jobs:
           pnpm check:i18n
           pnpm typecheck
           pnpm test
+
+  wear_build:
+    needs: detect_path_changes
+    if: needs.detect_path_changes.outputs.wear == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test and assemble the Wear OS app
+        working-directory: apps/wear
+        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug
 
   web_pr_build:
     needs: detect_path_changes

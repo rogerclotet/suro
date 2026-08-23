@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Compose draws everything; this only needs to keep the window black so the
+      launch transition doesn't flash a lighter frame before the first frame.
+    -->
+    <style name="SuroTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+    <style name="SuroTheme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_suro_mark</item>
+        <item name="postSplashScreenTheme">@style/SuroTheme</item>
+    </style>
+</resources>

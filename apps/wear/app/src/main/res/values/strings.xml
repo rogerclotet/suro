@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The watch's strings, hand-ported from apps/mobile/src/i18n/messages/*.json.
+  Deliberately not generated: the watch shows a small, differently-worded subset
+  (a wrist has no room for the phone's sentences), so a generator would mostly
+  emit strings nobody uses.
+-->
+<resources>
+    <string name="app_name">Suro</string>
+
+    <!-- Pairing -->
+    <string name="setup_title">Connect your watch</string>
+    <string name="setup_body">Open Suro on your phone to finish setting up.</string>
+    <string name="setup_waiting">Waiting for your phone…</string>
+    <string name="setup_failed">Could not connect. Open Suro on your phone and try again.</string>
+
+    <!-- Shell -->
+    <string name="nav_lists">Lists</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_expenses">Expenses</string>
+    <string name="nav_groups">Groups</string>
+    <string name="select_group">Select a group</string>
+    <string name="loading">Loading</string>
+    <string name="try_again">Try again</string>
+    <string name="refresh">Refresh</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_offline">No connection to Suro</string>
+
+    <!-- Lists -->
+    <string name="lists_empty">No lists yet</string>
+    <string name="lists_favorites">Favorites</string>
+    <string name="list_empty">No items</string>
+    <string name="list_items_remaining">%1$d of %2$d left</string>
+    <string name="list_all_done">All done</string>
+
+    <!-- Calendar -->
+    <string name="calendar_empty">Nothing coming up</string>
+    <string name="calendar_all_day">All day</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_tomorrow">Tomorrow</string>
+    <string name="event_no_list">No list linked to this event</string>
+
+    <!-- Expenses -->
+    <string name="expenses_empty">No pots yet</string>
+    <string name="expenses_settled">Settled</string>
+    <string name="expenses_total_spent">%1$s spent</string>
+    <string name="expenses_balance_owed">You are owed %1$s</string>
+    <string name="expenses_balance_owe">You owe %1$s</string>
+    <string name="expenses_balance_even">All square</string>
+    <string name="expenses_latest">Latest</string>
+    <string name="expenses_add">Add expense</string>
+    <string name="expenses_amount">Amount</string>
+    <string name="expenses_description">Description</string>
+    <string name="expenses_description_skip">Skip</string>
+    <string name="expenses_payer">Who paid?</string>
+    <string name="expenses_split">Split</string>
+    <string name="expenses_split_equally">Split equally</string>
+    <string name="expenses_split_to">Paid to one person</string>
+    <string name="expenses_save">Add</string>
+    <string name="expenses_saving">Adding…</string>
+    <string name="expenses_save_error">Could not add the expense</string>
+    <string name="expenses_saved">Expense added</string>
+    <string name="expenses_speak_description">Say the description</string>
+    <string name="expenses_no_members">This pot has no members</string>
+    <string name="expenses_unknown_member">Someone</string>
+</resources>

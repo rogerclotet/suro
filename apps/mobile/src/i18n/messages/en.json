@@ -895,7 +895,13 @@
       "themeSystem": "System",
       "language": "Language",
       "languageDescription": "This language is used for the interface and notifications.",
-      "saveError": "Couldn't save"
+      "saveError": "Couldn't save",
+      "watch": "Watch",
+      "watchDescription": "Suro on your Wear OS watch pairs automatically while you are signed in here.",
+      "watchPaired": "Your watch is connected",
+      "watchConnecting": "Setting up your watch…",
+      "watchDisconnected": "No watch found",
+      "watchReconnect": "Reconnect watch"
     },
     "lists": {
       "title": "Lists",

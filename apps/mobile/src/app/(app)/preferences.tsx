@@ -10,8 +10,10 @@ import {
   useLocale,
   useTranslations,
 } from "@/i18n";
+import { useWearBridge } from "@/lib/wear-bridge";
+import { isWearBridgeAvailable } from "@/modules/suro-wear";
 import { type ThemePreference, useThemePreference } from "@/theme";
-import { Screen, Section, Segmented } from "@/ui";
+import { Button, Screen, Section, Segmented, Txt } from "@/ui";
 
 /**
  * Device/app preferences (theme, language) — everything that isn't the user's
@@ -26,6 +28,7 @@ export default function Preferences() {
       <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>
         <ThemeSection />
         <LanguageSection />
+        <WatchSection />
       </ScrollView>
     </Screen>
   );
@@ -80,6 +83,41 @@ function LanguageSection() {
           active: locale === value,
           onPress: () => selectLocale(value),
         }))}
+      />
+    </Section>
+  );
+}
+
+/**
+ * Watch pairing status, and a way to force a fresh ticket.
+ *
+ * Pairing is automatic — the bridge pushes a ticket whenever a connected watch
+ * needs one — so this exists for the case where it silently didn't work, which
+ * is otherwise invisible from the phone. Hidden entirely on builds without the
+ * native module (iOS, Expo Go), where there is nothing to report.
+ */
+function WatchSection() {
+  const t = useTranslations("mobile.preferences");
+  const { connected, paired, reconnect } = useWearBridge();
+
+  if (!isWearBridgeAvailable) {
+    return null;
+  }
+
+  const status = !connected
+    ? t("watchDisconnected")
+    : paired
+      ? t("watchPaired")
+      : t("watchConnecting");
+
+  return (
+    <Section label={t("watch")} hint={t("watchDescription")}>
+      <Txt muted>{status}</Txt>
+      <Button
+        title={t("watchReconnect")}
+        variant="ghost"
+        onPress={reconnect}
+        disabled={!connected}
       />
     </Section>
   );

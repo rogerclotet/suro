@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_title">Connecta el rellotge</string>
+    <string name="setup_body">Obre Suro al mòbil per acabar la configuració.</string>
+    <string name="setup_waiting">Esperant el mòbil…</string>
+    <string name="setup_failed">No s\'ha pogut connectar. Obre Suro al mòbil i torna-ho a provar.</string>
+
+    <string name="nav_lists">Llistes</string>
+    <string name="nav_calendar">Calendari</string>
+    <string name="nav_expenses">Despeses</string>
+    <string name="nav_groups">Grups</string>
+    <string name="select_group">Selecciona un grup</string>
+    <string name="loading">Carregant</string>
+    <string name="try_again">Torna-ho a provar</string>
+    <string name="refresh">Actualitza</string>
+    <string name="error_generic">Alguna cosa ha fallat</string>
+    <string name="error_offline">Sense connexió amb Suro</string>
+
+    <string name="lists_empty">Encara no hi ha llistes</string>
+    <string name="lists_favorites">Preferides</string>
+    <string name="list_empty">No hi ha elements</string>
+    <string name="list_items_remaining">En queden %1$d de %2$d</string>
+    <string name="list_all_done">Tot fet</string>
+
+    <string name="calendar_empty">No hi ha res previst</string>
+    <string name="calendar_all_day">Tot el dia</string>
+    <string name="calendar_today">Avui</string>
+    <string name="calendar_tomorrow">Demà</string>
+    <string name="event_no_list">Aquest esdeveniment no té cap llista</string>
+
+    <string name="expenses_empty">No hi ha cap pot</string>
+    <string name="expenses_settled">Saldat</string>
+    <string name="expenses_total_spent">%1$s gastats</string>
+    <string name="expenses_balance_owed">Et deuen %1$s</string>
+    <string name="expenses_balance_owe">Deus %1$s</string>
+    <string name="expenses_balance_even">Esteu en paus</string>
+    <string name="expenses_latest">Últimes</string>
+    <string name="expenses_add">Afegeix despesa</string>
+    <string name="expenses_amount">Quantitat</string>
+    <string name="expenses_description">Descripció</string>
+    <string name="expenses_description_skip">Omet</string>
+    <string name="expenses_payer">Qui ha pagat?</string>
+    <string name="expenses_split">Repartit</string>
+    <string name="expenses_split_equally">A parts iguals</string>
+    <string name="expenses_split_to">Pagat a una persona</string>
+    <string name="expenses_save">Afegeix</string>
+    <string name="expenses_saving">Afegint…</string>
+    <string name="expenses_save_error">No s\'ha pogut afegir la despesa</string>
+    <string name="expenses_saved">Despesa afegida</string>
+    <string name="expenses_speak_description">Digues la descripció</string>
+    <string name="expenses_no_members">Aquest pot no té membres</string>
+    <string name="expenses_unknown_member">Algú</string>
+</resources>

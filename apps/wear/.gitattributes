@@ -1,0 +1,3 @@
+# Keep the Windows Gradle wrapper script CRLF; cmd.exe is picky about it.
+gradlew.bat text eol=crlf
+gradlew text eol=lf

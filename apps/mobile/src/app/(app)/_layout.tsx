@@ -1,6 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 import { useAuthGate } from "@/lib/offline";
 import { usePushNotifications } from "@/lib/push";
+import { useWearBridge } from "@/lib/wear-bridge";
 import { FONT, useTheme } from "@/theme";
 
 export default function AppLayout() {
@@ -9,6 +10,9 @@ export default function AppLayout() {
   // Registers the device's push token while signed in and routes notification
   // taps. No-ops when push is unavailable (Expo Go, simulator, pre-EAS).
   usePushNotifications();
+  // Hands the Wear OS app a pairing ticket whenever a watch is connected.
+  // No-ops on iOS and anywhere the native module isn't in the build.
+  useWearBridge();
 
   if (isLoading) {
     return null;

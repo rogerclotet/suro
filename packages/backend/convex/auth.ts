@@ -7,6 +7,7 @@ import { isAllowedWebOrigin } from "./model/allowedWebOrigins";
 import { track } from "./model/analytics";
 import { getRandomColor } from "./model/colors";
 import { ResendOTP } from "./ResendOTP";
+import { WatchPairing } from "./WatchPairing";
 
 /**
  * Convex Auth: Google + Apple OAuth + email one-time-code (Resend). Required
@@ -56,6 +57,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     // inside the app (Safari drops the state cookie on Apple's cross-site POST).
     AppleNative,
     ResendOTP,
+    // Not a way to sign in from scratch: it redeems a ticket the phone app
+    // minted while already authenticated (see WatchPairing.ts).
+    WatchPairing,
   ],
   callbacks: {
     // Validate the post-flow redirect. Overriding Convex Auth's default means we

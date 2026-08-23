@@ -279,4 +279,18 @@ export default defineSchema({
     locale: v.string(),
     expiresAt: v.number(),
   }).index("by_email", ["email"]),
+
+  // One-time tickets that let the Wear OS app claim its own Convex Auth session
+  // (see WatchPairing.ts). The phone app mints one while signed in and hands it
+  // to the watch over the Wear Data Layer; the watch redeems it for a *separate*
+  // session, so the phone's own rotating refresh token is never shared. Only the
+  // sha256 of the secret is stored, so a database read can't be replayed.
+  watchPairings: defineTable({
+    userId: v.id("users"),
+    secretHash: v.string(),
+    expiresAt: v.number(),
+  })
+    .index("by_secretHash", ["secretHash"])
+    .index("by_user", ["userId"])
+    .index("by_expiresAt", ["expiresAt"]),
 });

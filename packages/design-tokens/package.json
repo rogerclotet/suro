@@ -8,7 +8,7 @@
     "./tokens.css": "./src/tokens.css"
   },
   "scripts": {
-    "generate": "tsx scripts/generate-css.ts",
+    "generate": "tsx scripts/generate-css.ts && tsx scripts/generate-wear-colors.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

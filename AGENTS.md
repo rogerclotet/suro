@@ -4,11 +4,12 @@ Suro is a shared-corkboard app for groups (flatmates, family, friends): lists, c
 
 It's a pnpm monorepo:
 
-- `packages/backend` — the **Convex** backend (schema, queries/mutations, auth, file storage, the `.ics` feed). The single source of truth and the shared API for both clients.
+- `packages/backend` — the **Convex** backend (schema, queries/mutations, auth, file storage, the `.ics` feed). The single source of truth and the shared API for every client.
 - `apps/web` — the Next.js App Router PWA (the main focus of this file).
 - `apps/mobile` — the Expo (React Native) app.
+- `apps/wear` — the Wear OS companion (Kotlin + Compose). A **standalone Gradle build**, deliberately outside the pnpm workspace, so `pnpm -r test` never triggers an Android build; CI reaches it through its own path-gated job.
 
-Both clients talk to the same Convex deployment. There is no separate server or database.
+All three clients talk to the same Convex deployment. There is no separate server or database.
 
 ## Stack
 
@@ -34,6 +35,9 @@ Run from the repo root; most are workspace-filtered.
 | Convex deploy | `pnpm --filter backend exec convex deploy` |
 | Tests (all workspaces / one) | `pnpm test` / `pnpm --filter web test` |
 | Mobile builds (local, EAS) | `pnpm --filter mobile build:android:release` / `build:android:preview` / `build:ios:release` |
+| Wear OS tests / debug build | `cd apps/wear && ./gradlew :app:testDebugUnitTest` / `:app:assembleDebug` |
+| Wear OS on-device tests | `cd apps/wear && ./gradlew :app:connectedDebugAndroidTest` (needs a booted Wear AVD) |
+| Regenerate design tokens (CSS + Wear colors) | `pnpm --filter design-tokens generate` |
 | Lint + format check / fix | `pnpm biome:check` / `pnpm biome:fix` |
 | Typecheck (all workspaces) | `pnpm typecheck` |
 
@@ -58,6 +62,19 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 - `proxy.ts` — Next middleware composing `convexAuthNextjsMiddleware` with next-intl locale handling.
 - `providers/convex-client-provider.tsx` — the `ConvexReactClient` + `ConvexAuthNextjsProvider`. `app/_components/projects-provider/` populates the Zustand project store from `api.projects.listMineDetailed` (skipped while signed out).
 - `components/` — shared UI; Radix primitives in `components/ui/`. `env.js` — env validated via `@t3-oss/env-nextjs` (now just `NEXT_PUBLIC_CONVEX_URL` + PostHog).
+
+## Wear OS (`apps/wear`)
+
+Kotlin + Compose for Wear OS, covering the three things worth doing from a wrist: ticking list items off, seeing upcoming events (and ticking off an event's linked list), and viewing/adding expenses.
+
+- **Pairing, not sign-in.** A watch has no usable keyboard, so it never authenticates on its own. The phone app mints a one-time ticket (`watchPairings.createTicket`) and writes it to the Wear Data Layer via the local Expo module in `apps/mobile/modules/suro-wear`; the watch redeems it through the `watch-pairing` Convex Auth provider (`convex/WatchPairing.ts`) for a **session of its own**. It must be a separate session: Convex Auth refresh tokens are single-use and rotate, so sharing the phone's would sign the phone out. The path strings are duplicated in `WearDataLayer.kt` (watch) and `WearPaths.kt` (phone) — change both.
+- **The Data Layer only bridges apps signed with the same certificate.** A Play-installed phone app will not talk to a locally-built watch app. Locally this bites too: React Native's template ships its own `android/app/debug.keystore`, which is *not* AGP's default `~/.android/debug.keystore`, so `apps/wear/app/build.gradle.kts` points the watch's debug signing at the phone's keystore. It only exists after `expo prebuild`, so **prebuild the phone app before building the watch** — the build warns when it can't find it, because the symptom otherwise is a silent no-op.
+- **No reactive client.** The watch calls Convex's HTTP API (`/api/query`, `/api/mutation`, `/api/action`) over OkHttp and fetches on demand — on screen open, on resume once data is stale, after its own writes, and via the Refresh row. No websocket, no Rust `.so`; the release APK is ~3 MB. The tradeoff is that a phone-side change isn't visible on an already-open watch screen until the next fetch.
+- **Thin-client mutations.** `listItems.update` is non-sticky (it wipes any task field the caller omits), so the watch uses `listItems.setCompleted` instead. Add a narrow mutation rather than making the watch echo fields it never rendered.
+- Colors come from `packages/design-tokens` via `scripts/generate-wear-colors.ts` — **never hand-edit `ui/theme/Color.kt`**. Strings are hand-ported into `res/values{,-ca,-es}/strings.xml` (the watch shows a smaller, differently-worded subset than the phone).
+- Testing on an emulator: `system-images;android-34;android-wear;arm64-v8a` on Apple Silicon, `avdmanager create avd -d wearos_large_round`. `./gradlew :app:connectedDebugAndroidTest` runs the on-device auth tests (EncryptedSharedPreferences needs a real KeyStore). Pairing two emulators additionally needs the Wear OS companion app and a Google sign-in on the phone AVD, so a capture/QA run injects the session instead — see the Wear OS section of `apps/mobile/store/README.md`.
+- Store screenshots: `uv run apps/mobile/store/capture-wear-screenshots.py <locale>` drives a booted Wear AVD through the real app into `play/metadata/android/<locale>/images/wearScreenshots/`. Play will not publish the Wear form factor without at least one.
+- Same `applicationId` as the phone app so both ship in one Play listing under the Wear OS form factor; versionCodes must not collide, so the watch derives its code as `1_000_000 + major*10_000 + minor*100 + patch` from the root `package.json` version.
 
 ## Conventions
 

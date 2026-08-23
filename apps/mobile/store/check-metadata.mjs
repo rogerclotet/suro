@@ -235,6 +235,27 @@ function checkPlay() {
         `[${locale}] ${shot} is ${width}x${height} (each side must be 320-3840)`,
       );
     }
+
+    // Wear OS form factor. Play needs at least one screenshot to publish the
+    // watch app at all, and rejects anything that isn't square and >= 384px.
+    // Captured by store/capture-wear-screenshots.py off a running Wear AVD.
+    const wearDir = join(dir, "images", "wearScreenshots");
+    const wearShots = existsSync(wearDir)
+      ? readdirSync(wearDir).filter((name) => name.endsWith(".png"))
+      : [];
+    check(
+      wearShots.length >= 1 && wearShots.length <= 8,
+      `[${locale}] ${wearShots.length} Wear OS screenshot(s)`,
+      `[${locale}] has ${wearShots.length} Wear OS screenshots (Play needs 1-8)`,
+    );
+    for (const shot of wearShots) {
+      const [width, height] = pngSize(join(wearDir, shot));
+      check(
+        width === height && width >= 384 && width <= 3840,
+        `[${locale}] wear/${shot} ${width}x${height}`,
+        `[${locale}] wear/${shot} is ${width}x${height} (must be square, 384-3840)`,
+      );
+    }
   }
 
   const icon = join(

@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.21.0] — 2026-08-23
+
+### ca
+
+- [feature] Suro ja té app per a rellotges Wear OS: marca elements de les llistes, consulta els propers esdeveniments amb la seva llista, i mira i afegeix despeses des del canell. Es vincula sola quan obris Suro al mòbil.
+
+### es
+
+- [feature] Suro ya tiene app para relojes Wear OS: marca elementos de las listas, consulta los próximos eventos con su lista, y mira y añade gastos desde la muñeca. Se vincula sola al abrir Suro en el móvil.
+
+### en
+
+- [feature] Suro now has a Wear OS watch app: tick list items off, see upcoming events with their list, and view and add expenses from your wrist. It pairs itself when you open Suro on your phone.
+
 ## [1.20.0] — 2026-08-15
 
 ### ca

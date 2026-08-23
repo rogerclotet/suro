@@ -895,7 +895,13 @@
       "themeSystem": "Sistema",
       "language": "Idioma",
       "languageDescription": "Aquest idioma s'utilitza per a la interfície i les notificacions.",
-      "saveError": "No s'ha pogut desar"
+      "saveError": "No s'ha pogut desar",
+      "watch": "Rellotge",
+      "watchDescription": "Suro al rellotge Wear OS es vincula sol mentre hi tinguis la sessió iniciada.",
+      "watchPaired": "El rellotge està connectat",
+      "watchConnecting": "Configurant el rellotge…",
+      "watchDisconnected": "No s'ha trobat cap rellotge",
+      "watchReconnect": "Torna a connectar el rellotge"
     },
     "lists": {
       "title": "Llistes",

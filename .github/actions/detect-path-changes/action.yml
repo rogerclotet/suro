@@ -1,5 +1,5 @@
 name: Detect path changes
-description: Shared dorny/paths-filter rules for web and backend areas
+description: Shared dorny/paths-filter rules for the web, backend and wear areas
 outputs:
   web:
     description: Whether web-affecting paths changed
@@ -7,6 +7,9 @@ outputs:
   backend:
     description: Whether backend-affecting paths changed
     value: ${{ steps.filter.outputs.backend }}
+  wear:
+    description: Whether Wear OS app paths changed
+    value: ${{ steps.filter.outputs.wear }}
 runs:
   using: composite
   steps:
@@ -31,5 +34,12 @@ runs:
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'pnpm-workspace.yaml'
+            - '.github/workflows/**'
+            - '.github/actions/**'
+          wear:
+            - 'apps/wear/**'
+            # Color.kt is generated from the design tokens, so a palette change
+            # has to rebuild the watch even when apps/wear itself is untouched.
+            - 'packages/design-tokens/**'
             - '.github/workflows/**'
             - '.github/actions/**'

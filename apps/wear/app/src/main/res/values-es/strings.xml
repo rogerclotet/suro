@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_title">Conecta tu reloj</string>
+    <string name="setup_body">Abre Suro en el móvil para terminar la configuración.</string>
+    <string name="setup_waiting">Esperando al móvil…</string>
+    <string name="setup_failed">No se ha podido conectar. Abre Suro en el móvil y vuelve a intentarlo.</string>
+
+    <string name="nav_lists">Listas</string>
+    <string name="nav_calendar">Calendario</string>
+    <string name="nav_expenses">Gastos</string>
+    <string name="nav_groups">Grupos</string>
+    <string name="select_group">Selecciona un grupo</string>
+    <string name="loading">Cargando</string>
+    <string name="try_again">Volver a intentar</string>
+    <string name="refresh">Actualizar</string>
+    <string name="error_generic">Algo ha fallado</string>
+    <string name="error_offline">Sin conexión con Suro</string>
+
+    <string name="lists_empty">Aún no hay listas</string>
+    <string name="lists_favorites">Favoritas</string>
+    <string name="list_empty">No hay elementos</string>
+    <string name="list_items_remaining">Quedan %1$d de %2$d</string>
+    <string name="list_all_done">Todo hecho</string>
+
+    <string name="calendar_empty">No hay nada previsto</string>
+    <string name="calendar_all_day">Todo el día</string>
+    <string name="calendar_today">Hoy</string>
+    <string name="calendar_tomorrow">Mañana</string>
+    <string name="event_no_list">Este evento no tiene ninguna lista</string>
+
+    <string name="expenses_empty">No hay ningún bote</string>
+    <string name="expenses_settled">Saldado</string>
+    <string name="expenses_total_spent">%1$s gastados</string>
+    <string name="expenses_balance_owed">Te deben %1$s</string>
+    <string name="expenses_balance_owe">Debes %1$s</string>
+    <string name="expenses_balance_even">Estáis en paz</string>
+    <string name="expenses_latest">Últimos</string>
+    <string name="expenses_add">Añadir gasto</string>
+    <string name="expenses_amount">Cantidad</string>
+    <string name="expenses_description">Descripción</string>
+    <string name="expenses_description_skip">Omitir</string>
+    <string name="expenses_payer">¿Quién ha pagado?</string>
+    <string name="expenses_split">Repartido</string>
+    <string name="expenses_split_equally">A partes iguales</string>
+    <string name="expenses_split_to">Pagado a una persona</string>
+    <string name="expenses_save">Añadir</string>
+    <string name="expenses_saving">Añadiendo…</string>
+    <string name="expenses_save_error">No se ha podido añadir el gasto</string>
+    <string name="expenses_saved">Gasto añadido</string>
+    <string name="expenses_speak_description">Di la descripción</string>
+    <string name="expenses_no_members">Este bote no tiene miembros</string>
+    <string name="expenses_unknown_member">Alguien</string>
+</resources>

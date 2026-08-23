@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!--
+          Runs in the phone app's process whenever the watch talks to it, even if
+          no Activity is alive. That's how a watch sitting on the setup screen can
+          nudge a backgrounded phone app for a fresh pairing ticket.
+        -->
+        <service
+            android:name="expo.modules.surowear.SuroWearListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/suro"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

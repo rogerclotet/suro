@@ -10,6 +10,7 @@
 
 import type * as AppleNative from "../AppleNative.js";
 import type * as ResendOTP from "../ResendOTP.js";
+import type * as WatchPairing from "../WatchPairing.js";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as authOtpLocale from "../authOtpLocale.js";
@@ -47,6 +48,7 @@ import type * as seed from "../seed.js";
 import type * as tasks from "../tasks.js";
 import type * as templates from "../templates.js";
 import type * as users from "../users.js";
+import type * as watchPairings from "../watchPairings.js";
 
 import type {
   ApiFromModules,
@@ -57,6 +59,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   AppleNative: typeof AppleNative;
   ResendOTP: typeof ResendOTP;
+  WatchPairing: typeof WatchPairing;
   analytics: typeof analytics;
   auth: typeof auth;
   authOtpLocale: typeof authOtpLocale;
@@ -94,6 +97,7 @@ declare const fullApi: ApiFromModules<{
   tasks: typeof tasks;
   templates: typeof templates;
   users: typeof users;
+  watchPairings: typeof watchPairings;
 }>;
 
 /**

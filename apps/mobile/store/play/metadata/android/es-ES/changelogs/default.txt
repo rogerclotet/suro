@@ -1,1 +1,1 @@
-• Al abrir una nota ahora la ves como una página con formato a pantalla completa, con los enlaces pulsables. Para cambiarla, toca el botón de editar.
+• Suro ya tiene app para relojes Wear OS: marca elementos de las listas, consulta los próximos eventos con su lista, y mira y añade gastos desde la muñeca. Se vincula sola al abrir Suro en el móvil.

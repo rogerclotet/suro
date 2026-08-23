@@ -10,6 +10,7 @@ store/
   declarations.md            console questionnaire answers + review notes
   check-metadata.mjs         lints text limits + image dimensions
   generate-graphics.py       regenerates Play icon + feature graphics
+  capture-wear-screenshots.py  drives a Wear AVD to capture the watch screenshots
   apple/screenshots/<loc>/   committed App Store screenshots (1320x2868)
   play/metadata/android/     Play listing in fastlane-supply layout
     <loc>/{title,short_description,full_description}.txt
@@ -166,6 +167,50 @@ simulator, but it fixes wrong-device captures before commit):
 uv run apps/mobile/store/generate-graphics.py   # resize apple/screenshots → 1320×2868
 node apps/mobile/store/check-metadata.mjs       # prints which ASC display slot to use
 ```
+
+### Wear OS screenshots
+
+Play needs at least one Wear OS screenshot before it will let you publish to the
+Wear form factor, and they go in `wearScreenshots/` (fastlane supply uploads
+them from there alongside the phone set). `capture-wear-screenshots.py` drives a
+running Wear AVD through the real app, so these are never mocked up.
+
+The watch can't sign itself in — it takes its session from the phone over the
+Data Layer, and pairing two emulators needs a Google sign-in in the Wear OS
+companion app. So a capture run injects the session directly instead:
+
+```sh
+# 1. Wear AVD (Apple Silicon needs the arm64 image)
+sdkmanager "system-images;android-34;android-wear;arm64-v8a"
+avdmanager create avd -n Wear_Large_Round \
+  -k "system-images;android-34;android-wear;arm64-v8a" -d wearos_large_round
+emulator -avd Wear_Large_Round &
+
+# 2. Build + install. Prebuild the phone app FIRST: the watch's debug signing
+#    borrows apps/mobile/android/app/debug.keystore, and a mismatched
+#    certificate silently breaks Data Layer pairing later.
+pnpm --filter mobile exec expo prebuild --platform android
+(cd ../../wear && ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest)
+adb install -r ../../wear/app/build/outputs/apk/debug/app-debug.apk
+adb install -r ../../wear/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+
+# 3. Sign in as the review account and put that session on the watch. Use
+#    `am instrument`, not Gradle's connectedAndroidTest — that uninstalls the
+#    app afterwards and takes the seeded session with it.
+TOKENS=$(curl -s -X POST "$CONVEX_URL/api/action" -H 'Content-Type: application/json' \
+  -d '{"path":"auth:signIn","args":{"provider":"resend-otp","params":{"email":"review@suro.clotet.dev","code":"<AUTH_REVIEW_OTP>"}},"format":"json"}')
+adb shell "am instrument -w -e class dev.clotet.suro.wear.screenshots.SessionSeeder \
+  -e suroAccessToken '<token>' -e suroRefreshToken '<refreshToken>' \
+  dev.clotet.suro.test/androidx.test.runner.AndroidJUnitRunner"
+
+# 4. Seed + capture, once per locale
+npx convex run seed:demoGroup '{"email":"review@suro.clotet.dev","locale":"ca","dropPersonal":true}'
+uv run apps/mobile/store/capture-wear-screenshots.py ca
+```
+
+(The first `signIn` call with only `email` starts the flow; the second with
+`code` returns the tokens. `AUTH_REVIEW_OTP` is a fixed code on the deployment,
+so no email is sent — see `convex/reviewOtp.ts`.)
 
 ### App Store Connect upload (iPhone screenshots)
 

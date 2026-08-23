@@ -1,1 +1,1 @@
-• Opening a note now shows it as a full-screen formatted page with tappable links. To change it, tap the edit button.
+• Suro now has a Wear OS watch app: tick list items off, see upcoming events with their list, and view and add expenses from your wrist. It pairs itself when you open Suro on your phone.
