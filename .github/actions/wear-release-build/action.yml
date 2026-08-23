@@ -1,0 +1,45 @@
+name: Build signed Wear OS release AAB
+description: Decode the Play upload keystore and run Gradle bundleRelease for the Wear app
+inputs:
+  upload-keystore-base64:
+    description: Base64-encoded Android upload keystore (.jks)
+    required: true
+  upload-keystore-password:
+    description: Upload keystore password
+    required: true
+  upload-key-alias:
+    description: Upload key alias
+    required: true
+  upload-key-password:
+    description: Upload key password
+    required: true
+  convex-url:
+    description: Convex deployment URL baked into the Wear build
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+    - uses: gradle/actions/setup-gradle@v4
+    - name: Decode upload keystore
+      shell: bash
+      run: |
+        echo "${{ inputs.upload-keystore-base64 }}" | base64 -d > "${RUNNER_TEMP}/upload-keystore.jks"
+    - name: Build signed Wear AAB
+      shell: bash
+      working-directory: apps/wear
+      env:
+        SURO_WEAR_CONVEX_URL: ${{ inputs.convex-url }}
+        ANDROID_UPLOAD_KEYSTORE_PATH: ${{ runner.temp }}/upload-keystore.jks
+        ANDROID_UPLOAD_KEYSTORE_PASSWORD: ${{ inputs.upload-keystore-password }}
+        ANDROID_UPLOAD_KEY_ALIAS: ${{ inputs.upload-key-alias }}
+        ANDROID_UPLOAD_KEY_PASSWORD: ${{ inputs.upload-key-password }}
+      run: ./gradlew :app:bundleRelease :app:testReleaseUnitTest
+    - name: Stage Wear AAB for fastlane
+      shell: bash
+      run: |
+        mkdir -p apps/mobile/build
+        cp apps/wear/app/build/outputs/bundle/release/app-release.aab apps/mobile/build/suro-wear-release.aab

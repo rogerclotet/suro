@@ -1,0 +1,30 @@
+name: Submit Wear OS to Play Store
+description: Prepare credentials and submit a Wear OS release via fastlane
+inputs:
+  play-service-account-json:
+    description: Play Console service account JSON
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
+    - uses: ./.github/actions/setup-node-pnpm
+      with:
+        apt-packages: build-essential git ca-certificates curl jq
+    - shell: bash
+      run: gem install bundler -v 4.0.11 --no-document
+    - name: Submit Wear OS to Play Store
+      shell: bash
+      working-directory: apps/mobile
+      env:
+        PLAY_SERVICE_ACCOUNT_JSON: ${{ inputs.play-service-account-json }}
+      run: |
+        bundle _4.0.11_ config set --local deployment true
+        bundle _4.0.11_ install
+        mkdir -p credentials
+        printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
+        test -f build/suro-wear-release.aab
+        pnpm -w changelog:generate
+        bundle _4.0.11_ exec fastlane android wear_release

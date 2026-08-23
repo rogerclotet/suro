@@ -15,6 +15,7 @@
 
 MOBILE_ROOT = File.expand_path("..", __dir__)
 ANDROID_AAB = File.join(MOBILE_ROOT, "build/suro-release.aab")
+WEAR_AAB = File.join(MOBILE_ROOT, "build/suro-wear-release.aab")
 IOS_IPA = File.join(MOBILE_ROOT, "build/suro-release.ipa")
 # supply wants the dir that directly holds the locale folders (ca/, en-US/, …).
 PLAY_METADATA = File.join(MOBILE_ROOT, "store/play/metadata/android")
@@ -34,6 +35,22 @@ platform :android do
       skip_upload_metadata: true,    # listing text — see the `metadata` lane
       skip_upload_images: true,      # icon / feature graphic — `metadata` lane
       skip_upload_screenshots: true, # screenshots — `metadata` lane
+    )
+  end
+
+  desc "Upload the built Wear AAB + release notes to the wear:#{PLAY_TRACK} track"
+  lane :wear_release do
+    UI.user_error!("#{WEAR_AAB} not found — run `./gradlew :app:bundleRelease` in apps/wear first") unless File.exist?(WEAR_AAB)
+    upload_to_play_store(
+      track: "wear:#{PLAY_TRACK}",
+      aab: WEAR_AAB,
+      metadata_path: PLAY_METADATA,
+      release_status: "completed",
+      skip_upload_apk: true,
+      skip_upload_changelogs: false,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
     )
   end
 

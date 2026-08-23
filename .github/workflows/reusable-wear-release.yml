@@ -1,0 +1,62 @@
+# Reusable Wear OS build + Play submit jobs. Called from ci.yml on pushes to
+# main when mobile_release_gate approves a release and wear-relevant files changed.
+
+name: Wear release
+
+on:
+  workflow_call:
+    inputs:
+      commit_sha:
+        description: Commit SHA to build and submit
+        required: true
+        type: string
+    secrets:
+      ANDROID_UPLOAD_KEYSTORE_BASE64:
+        required: true
+      ANDROID_UPLOAD_KEYSTORE_PASSWORD:
+        required: true
+      ANDROID_UPLOAD_KEY_ALIAS:
+        required: true
+      ANDROID_UPLOAD_KEY_PASSWORD:
+        required: true
+      PLAY_SERVICE_ACCOUNT_JSON:
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  SURO_WEAR_CONVEX_URL: https://marvelous-lobster-518.convex.cloud
+
+jobs:
+  wear_release_build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/wear-release-build
+        with:
+          upload-keystore-base64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          upload-keystore-password: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          upload-key-alias: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          upload-key-password: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          convex-url: ${{ env.SURO_WEAR_CONVEX_URL }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: suro-wear-${{ inputs.commit_sha }}
+          path: apps/mobile/build/suro-wear-release.aab
+          retention-days: 14
+
+  wear_play_store_submit:
+    needs: wear_release_build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: suro-wear-${{ inputs.commit_sha }}
+          path: apps/mobile/build
+      - uses: ./.github/actions/mobile-submit-wear
+        with:
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}

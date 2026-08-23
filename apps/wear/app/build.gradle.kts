@@ -68,6 +68,25 @@ val convexUrl: String = run {
 val phoneDebugKeystore: File? =
     rootProject.file("../mobile/android/app/debug.keystore").takeIf { it.exists() }
 
+/**
+ * Play upload key for release builds.
+ *
+ * CI decodes `ANDROID_UPLOAD_KEYSTORE_BASE64` to a temp file and points
+ * `ANDROID_UPLOAD_KEYSTORE_PATH` at it; local release builds can set the same
+ * env vars or pass `-Pandroid.injected.signing.*` properties. When unset,
+ * release bundles are signed with the debug config so `./gradlew bundleRelease`
+ * still produces an installable artifact for smoke tests.
+ */
+val uploadKeystorePath: String? = System.getenv("ANDROID_UPLOAD_KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
+val uploadKeystorePassword: String? = System.getenv("ANDROID_UPLOAD_KEYSTORE_PASSWORD")?.takeIf { it.isNotBlank() }
+val uploadKeyAlias: String? = System.getenv("ANDROID_UPLOAD_KEY_ALIAS")?.takeIf { it.isNotBlank() }
+val uploadKeyPassword: String? = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
+val hasUploadKeystore: Boolean =
+    uploadKeystorePath != null &&
+        uploadKeystorePassword != null &&
+        uploadKeyAlias != null &&
+        uploadKeyPassword != null
+
 if (phoneDebugKeystore == null) {
     // Loud, because the symptom is silent: the watch installs and runs fine, and
     // the pairing just never happens, with nothing in either app's logs.
@@ -106,6 +125,14 @@ android {
                 keyPassword = "android"
             }
         }
+        if (hasUploadKeystore) {
+            create("release") {
+                storeFile = file(uploadKeystorePath!!)
+                storePassword = uploadKeystorePassword
+                keyAlias = uploadKeyAlias
+                keyPassword = uploadKeyPassword
+            }
+        }
     }
 
     buildTypes {
@@ -116,6 +143,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = when {
+                hasUploadKeystore -> signingConfigs.getByName("release")
+                phoneDebugKeystore != null -> signingConfigs.getByName("debug")
+                else -> signingConfigs.getByName("debug")
+            }
         }
     }
 

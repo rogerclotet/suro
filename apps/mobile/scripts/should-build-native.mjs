@@ -11,7 +11,8 @@
  *   node apps/mobile/scripts/should-build-native.mjs [before-sha] [after-sha]
  *
  * In GitHub Actions, set BEFORE_SHA / AFTER_SHA env vars instead. When
- * GITHUB_OUTPUT is set, writes `should_build` and `reason` outputs.
+ * GITHUB_OUTPUT is set, writes `should_build`, `should_publish_wear`, and
+ * `reason` outputs.
  */
 
 import { execFileSync } from "node:child_process";
@@ -32,30 +33,43 @@ const NATIVE_PATH_PREFIXES = [
   "apps/mobile/src/",
   "apps/mobile/assets/",
   "apps/mobile/plugins/",
+  "apps/mobile/modules/suro-wear/",
   "apps/mobile/app.json",
   "apps/mobile/app.config.ts",
   "apps/mobile/eas.json",
   "apps/mobile/package.json",
   "apps/mobile/metro.config.js",
   "apps/mobile/google-services.json",
+  "apps/wear/",
+];
+
+// Wear publish is gated separately so a phone-only release does not re-upload
+// the same versionCode to Play's Wear form factor.
+const WEAR_PUBLISH_PATH_PREFIXES = [
+  "apps/wear/",
+  // Color.kt is generated from the design tokens.
+  "packages/design-tokens/",
 ];
 
 const VERSION_HEADING = /^##\s+\[([^\]]+)\]\s*[—-]\s*(\d{4}-\d{2}-\d{2})\s*$/;
 
 /**
  * @param {boolean} shouldBuild
+ * @param {boolean} shouldPublishWear
  * @param {string} reason
  */
-function finish(shouldBuild, reason) {
+function finish(shouldBuild, shouldPublishWear, reason) {
   const value = shouldBuild ? "true" : "false";
+  const wearValue = shouldPublishWear ? "true" : "false";
   console.log(`should_build=${value}`);
+  console.log(`should_publish_wear=${wearValue}`);
   console.log(`reason=${reason}`);
 
   const outputPath = process.env.GITHUB_OUTPUT;
   if (outputPath) {
     appendFileSync(
       outputPath,
-      `should_build=${value}\nreason=${reason.replaceAll("\n", " ")}\n`,
+      `should_build=${value}\nshould_publish_wear=${wearValue}\nreason=${reason.replaceAll("\n", " ")}\n`,
     );
   }
 
@@ -199,20 +213,36 @@ function resolveAfterSha() {
  * @param {string[]} files
  * @returns {boolean}
  */
+function hasPathPrefixChanges(files, prefixes) {
+  for (const file of files) {
+    if (prefixes.some((prefix) => file.startsWith(prefix))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {string[]} files
+ * @returns {boolean}
+ */
 function hasNativeRelevantChanges(files) {
   const mobilePackageChanged = files.includes(MOBILE_PACKAGE_JSON);
   const lockfileChanged = files.includes(LOCKFILE);
 
-  for (const file of files) {
-    if (file === LOCKFILE) {
-      continue;
-    }
-    if (NATIVE_PATH_PREFIXES.some((prefix) => file.startsWith(prefix))) {
-      return true;
-    }
+  if (hasPathPrefixChanges(files, NATIVE_PATH_PREFIXES)) {
+    return true;
   }
 
   return mobilePackageChanged && lockfileChanged;
+}
+
+/**
+ * @param {string[]} files
+ * @returns {boolean}
+ */
+function hasWearPublishChanges(files) {
+  return hasPathPrefixChanges(files, WEAR_PUBLISH_PATH_PREFIXES);
 }
 
 const afterSha = resolveCommit(resolveAfterSha());
@@ -224,17 +254,19 @@ const currentVersion = readVersionAtRef(afterSha);
 if (previousVersion === currentVersion) {
   finish(
     false,
+    false,
     `Skip: no version bump (${currentVersion} unchanged since ${shortSha(beforeSha)})`,
   );
 }
 
 const changelogVersion = readChangelogTopVersionAtRef(afterSha);
 if (!changelogVersion) {
-  finish(false, "Skip: no version entry found in apps/web/CHANGELOG.md");
+  finish(false, false, "Skip: no version entry found in apps/web/CHANGELOG.md");
 }
 
 if (changelogVersion !== currentVersion) {
   finish(
+    false,
     false,
     `Skip: CHANGELOG top version ${changelogVersion} does not match package.json ${currentVersion}`,
   );
@@ -244,11 +276,16 @@ const files = changedFiles(beforeSha, afterSha);
 if (!hasNativeRelevantChanges(files)) {
   finish(
     false,
+    false,
     `Skip: version ${currentVersion} bumped but no native-relevant file changes between ${shortSha(beforeSha)} and ${shortSha(afterSha)}`,
   );
 }
 
+const shouldPublishWear = hasWearPublishChanges(files);
 finish(
   true,
-  `Build: release ${currentVersion} with native-relevant changes (${shortSha(beforeSha)}..${shortSha(afterSha)})`,
+  shouldPublishWear,
+  shouldPublishWear
+    ? `Build: release ${currentVersion} with native + wear changes (${shortSha(beforeSha)}..${shortSha(afterSha)})`
+    : `Build: release ${currentVersion} with native changes only; skip wear publish (${shortSha(beforeSha)}..${shortSha(afterSha)})`,
 );

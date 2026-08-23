@@ -6,8 +6,9 @@
 #   backend — Convex deploy
 #   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
 #             version bump + matching CHANGELOG entry + native file changes)
-#   wear    — Wear OS app unit tests + debug assemble (plain Gradle, no pnpm:
-#             apps/wear is a standalone Gradle build outside the workspace)
+#   wear    — Wear OS release build + Play submit on the same release gate when
+#             wear-relevant files changed; PR/push checks run unit tests + debug
+#             assemble (plain Gradle, no pnpm: apps/wear is standalone)
 #
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
 # do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
@@ -45,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.gate.outputs.should_build }}
+      should_publish_wear: ${{ steps.gate.outputs.should_publish_wear }}
       reason: ${{ steps.gate.outputs.reason }}
     steps:
       - uses: actions/checkout@v4
@@ -130,6 +132,18 @@ jobs:
       needs.repo_quality_checks.result == 'success' &&
       needs.mobile_release_gate.outputs.should_build == 'true'
     uses: ./.github/workflows/reusable-mobile-release.yml
+    with:
+      commit_sha: ${{ github.sha }}
+    secrets: inherit
+
+  wear_release:
+    needs: [mobile_release_gate, repo_quality_checks]
+    if: |
+      github.event_name == 'push' &&
+      needs.repo_quality_checks.result == 'success' &&
+      needs.mobile_release_gate.outputs.should_build == 'true' &&
+      needs.mobile_release_gate.outputs.should_publish_wear == 'true'
+    uses: ./.github/workflows/reusable-wear-release.yml
     with:
       commit_sha: ${{ github.sha }}
     secrets: inherit
