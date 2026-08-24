@@ -6,6 +6,11 @@
 #   backend — Convex deploy
 #   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
 #             version bump + matching CHANGELOG entry + native file changes)
+#   store   — Play listing push (play_metadata), App Store screenshot re-upload
+#             (apple_screenshots, folded into the mobile release)
+#
+# A version bump on main also tags the commit and publishes a GitHub release
+# (release_tag), independently of which areas deployed.
 #
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
 # do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
@@ -32,6 +37,8 @@ jobs:
     outputs:
       web: ${{ steps.changes.outputs.web }}
       backend: ${{ steps.changes.outputs.backend }}
+      play_metadata: ${{ steps.changes.outputs.play_metadata }}
+      apple_screenshots: ${{ steps.changes.outputs.apple_screenshots }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/detect-path-changes
@@ -105,7 +112,7 @@ jobs:
     secrets: inherit
 
   mobile_release:
-    needs: [mobile_release_gate, repo_quality_checks]
+    needs: [mobile_release_gate, repo_quality_checks, detect_path_changes]
     if: |
       github.event_name == 'push' &&
       needs.repo_quality_checks.result == 'success' &&
@@ -113,4 +120,42 @@ jobs:
     uses: ./.github/workflows/reusable-mobile-release.yml
     with:
       commit_sha: ${{ github.sha }}
+      push_screenshots: ${{ needs.detect_path_changes.outputs.apple_screenshots }}
     secrets: inherit
+
+  # Play listing text/images, which can change without a release. Runs after
+  # mobile_release (when there is one) so two fastlane edits never collide.
+  play_listing_push:
+    needs: [detect_path_changes, repo_quality_checks, mobile_release]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      needs.repo_quality_checks.result == 'success' &&
+      needs.mobile_release.result != 'failure' &&
+      needs.mobile_release.result != 'cancelled' &&
+      needs.detect_path_changes.outputs.play_metadata == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/mobile-submit-android
+        with:
+          lane: metadata
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+  release_tag:
+    needs: repo_quality_checks
+    if: github.event_name == 'push' && needs.repo_quality_checks.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag and publish a GitHub release when the version changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: node scripts/publish-release.mjs

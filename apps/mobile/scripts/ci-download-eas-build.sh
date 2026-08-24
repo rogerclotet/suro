@@ -31,7 +31,7 @@ fetch_build() {
       -H "Content-Type: application/json" \
       -d "$(
         jq -nc --arg buildId "$BUILD_ID" '{
-          query: "query($buildId: ID!) { builds { byId(buildId: $buildId) { id status appVersion artifacts { applicationArchiveUrl buildUrl } error { message } } } }",
+          query: "query($buildId: ID!) { builds { byId(buildId: $buildId) { id status appVersion appBuildVersion artifacts { applicationArchiveUrl buildUrl } error { message } } } }",
           variables: { buildId: $buildId }
         }'
       )"
@@ -107,3 +107,12 @@ fi
 mkdir -p "$(dirname "$OUTPUT")"
 curl -fL "$URL" -o "$OUTPUT"
 ls -lh "$OUTPUT"
+
+# The store-side build number (versionCode / CFBundleVersion), assigned by EAS
+# remote versioning. The iOS submit job passes it to fastlane so the review
+# submission attaches this exact build instead of whatever is newest.
+BUILD_NUMBER="$(echo "$BUILD" | jq -r '.appBuildVersion // empty')"
+if [ -n "$BUILD_NUMBER" ]; then
+  echo "$BUILD_NUMBER" > "$(dirname "$OUTPUT")/${PLATFORM}-build-number.txt"
+  echo "Build number: $BUILD_NUMBER"
+fi

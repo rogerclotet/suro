@@ -1,24 +1,29 @@
-# Store submission + metadata. EAS builds the binaries (`pnpm build:android:release`
-# / `build:ios:release`) — these lanes upload those artifacts and push store
-# metadata. fastlane's working dir is the fastlane/ folder, so paths are anchored
-# to apps/mobile (its parent) via MOBILE_ROOT.
+# Store submission + metadata. EAS builds the binaries and uploads them (Android:
+# the .aab handed to `supply` below; iOS: `eas submit`) — these lanes push the
+# store-side release: Play track + release notes, App Store screenshots and the
+# review submission. fastlane's working dir is the fastlane/ folder, so paths are
+# anchored to apps/mobile (its parent) via MOBILE_ROOT.
 #
-#   android release   upload the built AAB + release notes -> internal track
-#   android metadata  push the full Play listing (text, images, screenshots)
-#   android promote   promote the internal release to a higher track
-#   ios beta/release   SCAFFOLD — inert until the Apple account + ASC key exist
+#   android release           upload the built AAB + release notes -> production
+#   android metadata          push the full Play listing (text, images, screenshots)
+#   android promote           promote a release from one track to another
+#   ios submit_for_review     attach the processed build, push screenshots, submit
+#   ios beta                  upload an IPA to TestFlight (local/macOS only)
 #
 # App Store *listing text* is NOT handled here — it's pushed from
 # store.config.json by EAS Metadata (`pnpm submit:ios:metadata` ->
-# `eas metadata:push`). The iOS lanes below only move the binary, so they keep
-# `skip_metadata`/`skip_screenshots` set; screenshots stay a manual ASC upload.
+# `eas metadata:push`). `ios submit_for_review` deliberately runs with
+# `skip_binary_upload` so it only talks to the App Store Connect API and needs no
+# iTMSTransporter, which is what lets it run on a Linux CI runner.
 
 MOBILE_ROOT = File.expand_path("..", __dir__)
 ANDROID_AAB = File.join(MOBILE_ROOT, "build/suro-release.aab")
 IOS_IPA = File.join(MOBILE_ROOT, "build/suro-release.ipa")
 # supply wants the dir that directly holds the locale folders (ca/, en-US/, …).
 PLAY_METADATA = File.join(MOBILE_ROOT, "store/play/metadata/android")
-PLAY_TRACK = "internal"
+# deliver wants the same shape for screenshots (ca/, en-US/, es-ES/).
+APPLE_SCREENSHOTS = File.join(MOBILE_ROOT, "store/apple/screenshots")
+PLAY_TRACK = "production"
 
 platform :android do
   desc "Upload the built AAB + release notes to the #{PLAY_TRACK} track"
@@ -28,7 +33,7 @@ platform :android do
       track: PLAY_TRACK,
       aab: ANDROID_AAB,
       metadata_path: PLAY_METADATA,
-      release_status: "completed",
+      release_status: "completed", # full rollout, no staged percentage
       skip_upload_apk: true,
       skip_upload_changelogs: false, # release notes — the point of this lane
       skip_upload_metadata: true,    # listing text — see the `metadata` lane
@@ -48,10 +53,10 @@ platform :android do
     )
   end
 
-  desc "Promote the latest internal release to a higher track (default: production)"
+  desc "Promote an existing release between tracks (default: internal -> production)"
   lane :promote do |options|
     upload_to_play_store(
-      track: PLAY_TRACK,
+      track: options[:from] || "internal",
       track_promote_to: options[:track] || "production",
       skip_upload_aab: true,
       skip_upload_apk: true,
@@ -63,17 +68,53 @@ platform :android do
   end
 end
 
+# Polls App Store Connect until the uploaded build has finished processing, and
+# returns its build number. `eas submit` returns as soon as the binary is
+# uploaded, but Apple needs a few more minutes before the build can be attached
+# to a version — and deliver's `build_number` path errors instead of waiting.
+# Assumes `asc_api_key` already authorized Spaceship.
+def wait_for_processed_build(app_identifier:, version:, build_number: nil, timeout: 3600)
+  app = Spaceship::ConnectAPI::App.find(app_identifier)
+  UI.user_error!("App #{app_identifier} not found in App Store Connect") if app.nil?
+
+  label = build_number ? "#{version} (#{build_number})" : version
+  deadline = Time.now + timeout
+
+  loop do
+    build = Spaceship::ConnectAPI::Build.all(
+      app_id: app.id,
+      version: version,
+      build_number: build_number,
+      sort: "-uploadedDate",
+      limit: 1,
+    ).first
+
+    if build.nil?
+      UI.message("Build #{label} has not reached App Store Connect yet…")
+    else
+      case build.processing_state
+      when "VALID"
+        UI.success("Build #{version} (#{build.version}) finished processing")
+        return build.version
+      when "PROCESSING"
+        UI.message("Build #{version} (#{build.version}) is still processing…")
+      else
+        UI.user_error!("Build #{version} (#{build.version}) is #{build.processing_state} — Apple rejected the binary")
+      end
+    end
+
+    UI.user_error!("Timed out after #{timeout}s waiting for build #{label} to process") if Time.now >= deadline
+    sleep(60)
+  end
+end
+
 platform :ios do
-  # SCAFFOLD. Inert until the Apple Developer Program membership exists. To enable:
-  #   1. Create an App Store Connect API key (Users and Access -> Integrations).
-  #   2. Export APP_STORE_CONNECT_API_KEY_KEY_ID / _ISSUER_ID / _KEY (the base64
-  #      .p8 contents) — e.g. in a gitignored fastlane/.env.
-  #   3. Set submit.production.ios.ascAppId in eas.json (done: 6780486033).
-  # Listing text is owned by EAS Metadata (`pnpm submit:ios:metadata`), so these
-  # lanes intentionally keep skip_metadata: true and only ship the binary.
+  # Auth is an App Store Connect API key (Users and Access -> Integrations),
+  # passed as APP_STORE_CONNECT_API_KEY_* env vars — repo secrets in CI, a
+  # gitignored fastlane/.env locally.
   private_lane :asc_api_key do
     unless ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
-      UI.user_error!("Apple account pending — set APP_STORE_CONNECT_API_KEY_* env vars first")
+      UI.user_error!("Set the APP_STORE_CONNECT_API_KEY_* env vars first")
     end
     app_store_connect_api_key(
       key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
@@ -83,23 +124,50 @@ platform :ios do
     )
   end
 
-  desc "Upload the built IPA to TestFlight (inert until the Apple account exists)"
+  desc "Attach the processed build, optionally push screenshots, and submit the version for review"
+  lane :submit_for_review do |options|
+    key = asc_api_key
+
+    version = options[:version] || ENV["APP_VERSION"]
+    UI.user_error!("APP_VERSION is required (marketing version, e.g. 1.20.0)") if version.to_s.empty?
+
+    requested_build = options[:build_number] || ENV["IOS_BUILD_NUMBER"]
+    requested_build = nil if requested_build.to_s.empty?
+
+    build_number = wait_for_processed_build(
+      app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      version: version,
+      build_number: requested_build,
+    )
+
+    # Screenshots are slow to push and App Store Connect carries the previous
+    # version's over, so only re-upload them when they actually changed.
+    push_screenshots = (options[:screenshots] || ENV["PUSH_SCREENSHOTS"]).to_s == "true"
+
+    upload_to_app_store(
+      api_key: key,
+      app_version: version,
+      build_number: build_number,
+      skip_binary_upload: true, # `eas submit` already uploaded the .ipa
+      skip_metadata: true,      # listing text -> EAS Metadata (store.config.json)
+      skip_screenshots: !push_screenshots,
+      screenshots_path: APPLE_SCREENSHOTS,
+      overwrite_screenshots: push_screenshots,
+      submit_for_review: true,
+      automatic_release: true, # ship as soon as Apple approves
+      submission_information: {
+        export_compliance_uses_encryption: false, # ITSAppUsesNonExemptEncryption in app.json
+        add_id_info_uses_idfa: false,
+      },
+      run_precheck_before_submit: false,
+      force: true, # no interactive HTML preview in CI
+    )
+  end
+
+  desc "Upload the built IPA to TestFlight (local/macOS only — needs iTMSTransporter)"
   lane :beta do
     key = asc_api_key
     UI.user_error!("#{IOS_IPA} not found — run `pnpm build:ios:release` first") unless File.exist?(IOS_IPA)
     upload_to_testflight(api_key: key, ipa: IOS_IPA, skip_waiting_for_build_processing: true)
-  end
-
-  desc "Upload the IPA + submit for App Store review (inert until the Apple account exists)"
-  lane :release do
-    key = asc_api_key
-    UI.user_error!("#{IOS_IPA} not found — run `pnpm build:ios:release` first") unless File.exist?(IOS_IPA)
-    upload_to_app_store(
-      api_key: key,
-      ipa: IOS_IPA,
-      skip_metadata: true,    # listing text -> EAS Metadata (`pnpm submit:ios:metadata`)
-      skip_screenshots: true, # screenshots -> manual ASC upload from store/apple/screenshots/
-      precheck_include_in_app_purchases: false,
-    )
   end
 end

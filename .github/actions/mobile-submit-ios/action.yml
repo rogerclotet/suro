@@ -1,5 +1,5 @@
 name: Submit iOS to App Store Connect
-description: Prepare credentials and submit an App Store release via EAS
+description: Upload the build via EAS, push listing metadata, and submit the version for App Store review
 inputs:
   expo-token:
     description: Expo access token
@@ -16,6 +16,14 @@ inputs:
   app-store-connect-api-key-issuer-id:
     description: App Store Connect API key issuer ID
     required: true
+  skip-upload:
+    description: Binary is already on App Store Connect — only push metadata and submit for review
+    required: false
+    default: "false"
+  push-screenshots:
+    description: Re-upload the committed App Store screenshots (slow; only when they changed)
+    required: false
+    default: "false"
   redownload-if-missing:
     description: Re-download the .ipa from EAS when the artifact file is absent
     required: false
@@ -23,9 +31,14 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
     - uses: ./.github/actions/setup-node-pnpm
       with:
-        apt-packages: git ca-certificates curl jq
+        apt-packages: build-essential git ca-certificates curl jq
+    - shell: bash
+      run: gem install bundler -v 4.0.11 --no-document
     - name: Submit iOS to App Store Connect
       shell: bash
       working-directory: apps/mobile
@@ -35,17 +48,32 @@ runs:
         APP_STORE_CONNECT_API_KEY_KEY: ${{ inputs.app-store-connect-api-key-key }}
         APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ inputs.app-store-connect-api-key-key-id }}
         APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ inputs.app-store-connect-api-key-issuer-id }}
+        SKIP_UPLOAD: ${{ inputs.skip-upload }}
+        PUSH_SCREENSHOTS: ${{ inputs.push-screenshots }}
         REDOWNLOAD_IF_MISSING: ${{ inputs.redownload-if-missing }}
       run: |
+        bundle _4.0.11_ config set --local deployment true
+        bundle _4.0.11_ install
         mkdir -p credentials
         printf '%s' "$APP_STORE_CONNECT_API_KEY_KEY" | base64 -d > credentials/asc-api-key.p8
         export EXPO_ASC_API_KEY_PATH="$PWD/credentials/asc-api-key.p8"
         export EXPO_ASC_KEY_ID="$APP_STORE_CONNECT_API_KEY_KEY_ID"
         export EXPO_ASC_ISSUER_ID="$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
-        if [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.ipa ]; then
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+        APP_VERSION=$(jq -r .version ../../package.json)
+        export APP_VERSION
+        if [ "$SKIP_UPLOAD" != "true" ] && [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.ipa ]; then
+          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$APP_VERSION"
+        fi
+        # Written by ci-download-eas-build.sh. Absent for artifacts built before
+        # it recorded the build number — fastlane then takes the newest build of
+        # this version instead.
+        if [ -f build/ios-build-number.txt ]; then
+          IOS_BUILD_NUMBER=$(cat build/ios-build-number.txt)
+          export IOS_BUILD_NUMBER
         fi
         pnpm -w changelog:generate
-        EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+        if [ "$SKIP_UPLOAD" != "true" ]; then
+          EAS_NO_VCS=1 pnpm exec eas submit --platform ios --profile production --path build/suro-release.ipa --non-interactive
+        fi
         EAS_NO_VCS=1 pnpm exec eas metadata:push --profile production --non-interactive
+        bundle _4.0.11_ exec fastlane ios submit_for_review

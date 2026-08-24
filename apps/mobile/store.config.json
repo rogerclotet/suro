@@ -24,7 +24,7 @@
       "kidsAgeBand": null
     },
     "release": {
-      "automaticRelease": false
+      "automaticRelease": true
     },
     "review": {
       "firstName": "Roger",
