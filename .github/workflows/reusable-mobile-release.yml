@@ -1,5 +1,10 @@
 # Reusable EAS native build + store submit jobs. Called from ci.yml on pushes to
 # main when mobile_release_gate approves a release.
+#
+# End to end, no console visit needed: EAS builds both binaries, Android goes
+# straight to the Play production track at 100%, and iOS uploads the build,
+# pushes the listing text, then submits the version for review with automatic
+# release on approval.
 
 name: Mobile release
 
@@ -9,6 +14,11 @@ on:
       commit_sha:
         description: Commit SHA to build and submit
         required: true
+        type: string
+      push_screenshots:
+        description: Re-upload the App Store screenshots (only when they changed in this push)
+        required: false
+        default: "false"
         type: string
     secrets:
       EXPO_TOKEN:
@@ -94,6 +104,7 @@ jobs:
           name: suro-ios-${{ inputs.commit_sha }}
           path: |
             apps/mobile/build/eas-ios.json
+            apps/mobile/build/ios-build-number.txt
             apps/mobile/build/suro-release.ipa
           retention-days: 14
 
@@ -115,7 +126,9 @@ jobs:
   mobile_app_store_submit:
     needs: mobile_eas_build_ios
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Submitting for review waits for Apple to finish processing the binary,
+    # which usually takes 5-20 minutes after the upload.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -129,3 +142,4 @@ jobs:
           app-store-connect-api-key-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
           app-store-connect-api-key-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           app-store-connect-api-key-issuer-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          push-screenshots: ${{ inputs.push_screenshots }}

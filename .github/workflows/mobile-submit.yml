@@ -3,6 +3,8 @@
 # to re-submit a specific commit (e.g. after a transient store error).
 #
 # commit_sha — the push that produced the EAS build artifact (CI run lookup).
+# ios_skip_upload — the binary already reached App Store Connect and only the
+# metadata push / review submission needs retrying.
 # checkout_sha — optional ref for release notes / fastlane metadata (defaults to
 # commit_sha). Use current main when re-submitting an older binary after a
 # metadata-only fix (e.g. Play release notes length).
@@ -29,6 +31,16 @@ on:
           - android
           - ios
           - both
+      push_screenshots:
+        description: Re-upload the committed App Store screenshots (iOS, slow)
+        required: false
+        type: boolean
+        default: false
+      ios_skip_upload:
+        description: "iOS: binary is already on App Store Connect — only push metadata + submit for review"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -125,7 +137,8 @@ jobs:
     needs: find_ci_run
     if: inputs.platform == 'ios' || inputs.platform == 'both'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Includes waiting for Apple to process the build before submitting it.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
@@ -143,4 +156,6 @@ jobs:
           app-store-connect-api-key-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
           app-store-connect-api-key-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           app-store-connect-api-key-issuer-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          push-screenshots: ${{ inputs.push_screenshots }}
+          skip-upload: ${{ inputs.ios_skip_upload }}
           redownload-if-missing: "true"

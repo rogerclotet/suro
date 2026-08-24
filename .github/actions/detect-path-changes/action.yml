@@ -1,5 +1,5 @@
 name: Detect path changes
-description: Shared dorny/paths-filter rules for web and backend areas
+description: Shared dorny/paths-filter rules for web, backend and store-listing areas
 outputs:
   web:
     description: Whether web-affecting paths changed
@@ -7,6 +7,12 @@ outputs:
   backend:
     description: Whether backend-affecting paths changed
     value: ${{ steps.filter.outputs.backend }}
+  play_metadata:
+    description: Whether the Play listing (text, images, screenshots) changed
+    value: ${{ steps.filter.outputs.play_metadata }}
+  apple_screenshots:
+    description: Whether the committed App Store screenshots changed
+    value: ${{ steps.filter.outputs.apple_screenshots }}
 runs:
   using: composite
   steps:
@@ -26,6 +32,14 @@ runs:
             - 'compose.yaml'
             - '.github/workflows/**'
             - '.github/actions/**'
+          play_metadata:
+            # Listing text + images only. Patterns are OR-ed, so the release
+            # notes under <locale>/changelogs/ are excluded by listing what the
+            # `metadata` lane actually uploads — they ride with the binary.
+            - 'apps/mobile/store/play/metadata/android/*/*.txt'
+            - 'apps/mobile/store/play/metadata/android/*/images/**'
+          apple_screenshots:
+            - 'apps/mobile/store/apple/screenshots/**'
           backend:
             - 'packages/backend/**'
             - 'package.json'

@@ -1,7 +1,8 @@
 # Store publishing kit
 
-Everything needed to publish Suro to the App Store and Google Play lives here,
-so a release is mostly mechanical. Layout:
+Everything needed to publish Suro to the App Store and Google Play lives here.
+Releases are **fully automated from `main`** — see [Per-release flow](#per-release-flow);
+the files below are the source of truth CI pushes from. Layout:
 
 ```
 store.config.json            EAS Metadata (App Store listing text, ../)
@@ -45,17 +46,15 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
    mirror them into `apple.review.demo*` in `store.config.json` locally (don't
    commit the real code) — see `declarations.md` → Review notes.
 5. Fill the App Privacy labels + age rating from `declarations.md`.
-6. Upload screenshots from `apple/screenshots/<locale>/` (ASC → version →
-   App Previews and Screenshots → iPhone → **6.9-inch Display**; EAS Metadata
-   does not push images). The committed PNGs are 1320×2868 — if ASC shows
-   "dimensions are wrong" and lists 1242×2688 or 1284×2778, you are in the
-   **6.5-inch Display** slot by mistake; open "View All Sizes in Media Manager"
-   and switch to 6.9-inch.
-7. Push the listing text with `pnpm --filter mobile submit:ios:metadata`
-   (`eas metadata:push`, sourced from `store.config.json`). The submit profile
-   carries no ASC API key, so the first run authenticates with your Apple ID
-   interactively (App Store Connect access required); set
-   `EXPO_APPLE_APP_SPECIFIC_PASSWORD` to skip the 2FA prompt on later runs.
+6. Screenshots are pushed by fastlane `deliver` from `apple/screenshots/<locale>/`,
+   but only when those files change in the release push (App Store Connect
+   carries the previous version's screenshots over otherwise). To force a
+   re-upload, run the **Mobile submit** workflow with `push_screenshots`.
+7. Listing text is pushed by `eas metadata:push` from `store.config.json`
+   (CI does this on every release; locally: `pnpm --filter mobile submit:ios:metadata`).
+   The submit profile carries no ASC API key, so a local run authenticates with
+   your Apple ID interactively; set `EXPO_APPLE_APP_SPECIFIC_PASSWORD` to skip
+   the 2FA prompt.
 
 ### Google Play
 
@@ -64,45 +63,56 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
    ([EAS docs](https://docs.expo.dev/submit/android/)), download its JSON key
    to `../credentials/play-service-account.json` (gitignored).
 3. The **first** AAB must be uploaded manually in the Console (Play
-   requirement); later uploads go through fastlane (`pnpm --filter mobile
-   submit:android:release`).
+   requirement); later uploads go through fastlane (CI, or `pnpm --filter
+   mobile submit:android:release` locally) and land straight on the
+   **production** track at 100%.
 4. Fill Data safety, content rating, app access (review credentials) and
    target audience from `declarations.md`.
-5. Paste the listing texts and upload `images/*` from
-   `play/metadata/android/<locale>/` (Main store listing → add the three
-   languages).
+5. The listing texts and `images/*` under `play/metadata/android/<locale>/` are
+   pushed by CI whenever those files change on `main` (the `play_listing_push`
+   job); no Console editing needed.
 
 ## Per-release flow
 
+A release is a normal PR to `main`. Everything after the merge is CI.
+
+1. Add the version's entry to `apps/web/CHANGELOG.md` (one section per locale)
+   and bump the root `package.json` version to match. The pre-commit hook runs
+   `changelog:generate`, which writes the Play `changelogs/default.txt` files and
+   `store.config.json`'s `apple.version` + `releaseNotes`; CI fails if they drift.
+2. Merge. On `main`, `mobile_release_gate` (version bump + matching CHANGELOG
+   entry + native paths touched) triggers `reusable-mobile-release.yml`, which:
+   - builds both binaries on EAS and waits for them;
+   - **Android** → `fastlane android release`: AAB + release notes to the Play
+     **production** track, full rollout;
+   - **iOS** → `eas submit` (binary) → `eas metadata:push` (listing text) →
+     `fastlane ios submit_for_review`: waits for Apple to finish processing the
+     build, attaches it, uploads screenshots if they changed, and submits the
+     version for review with `automatic_release` so it ships on approval.
+3. `release_tag` tags the commit `v<version>` and publishes a GitHub release
+   with the CHANGELOG entry as its notes.
+
+Both stores still gate on **their** review; nothing else needs a console visit.
+
+Checks and manual fallbacks:
+
 ```sh
-# 0. copy & screenshots still accurate? lints lengths + dimensions:
+# copy & screenshots still within store limits (also runs in CI):
 node apps/mobile/store/check-metadata.mjs
 
-# 1. release notes:
-#    - add the new version entry to apps/web/CHANGELOG.md (per locale).
-#      `submit:ios:metadata` and `submit:android:release` run
-#      `pnpm changelog:generate` automatically first, regenerating Play
-#      store/play/metadata/android/<locale>/changelogs/default.txt (≤500 chars)
-#      and App Store store.config.json -> apple.info.<locale>.releaseNotes
-#      (≤4000 chars) from the latest entry. Pre-commit also stages the
-#      generated store files when CHANGELOG.md is committed; CI fails if they drift.
+# re-submit a commit that already built (transient store error), or force a
+# screenshot re-upload: Actions -> "Mobile submit" -> commit sha + platform.
+# ios_skip_upload=true when the binary already reached ASC and only the
+# metadata push / review submission needs retrying — e.g. after the one App
+# Store failure mode that needs a human: submitting while the previous version
+# is still in review ("a review submission is already in progress"). Wait for
+# it to clear (or cancel it in ASC), then re-run with ios_skip_upload.
 
-# 2. build (EAS local builds; commit first — EAS archives via git)
-pnpm --filter mobile build:android:release   # build/suro-release.aab
-pnpm --filter mobile build:ios:release       # build/suro-release.ipa
-
-# 3. submit (fastlane uploads the binary + release notes). build + submit in one:
-pnpm --filter mobile release:android    # = build:android:release, then fastlane android release
-pnpm --filter mobile release:ios        # = build:ios:release, then fastlane ios release
-
-# 4. Play/App Store listing changed (text, images, screenshots)? push it explicitly:
-pnpm --filter mobile submit:android:metadata
-pnpm --filter mobile submit:ios:metadata   # `eas metadata:push` from store.config.json
-#    (iOS screenshots are not pushed by EAS Metadata — upload them manually in ASC)
-
-# 5. promote internal -> production when ready:
-pnpm --filter mobile submit:android:promote   # defaults to production (or use the Console)
-#    iOS: submit for review in App Store Connect.
+# local equivalents (EAS local builds; commit first — EAS archives via git):
+pnpm --filter mobile release:android   # build + fastlane android release
+pnpm --filter mobile release:ios       # build + eas submit + metadata + submit for review
+pnpm --filter mobile submit:android:metadata   # Play listing (CI does this on change)
+pnpm --filter mobile submit:android:promote    # move a release between tracks
 ```
 
 Versioning: the Android version code / iOS build number bump automatically
@@ -113,11 +123,11 @@ bump the root `package.json` version (in lockstep with the matching
 `CHANGELOG.md` entry) and the store version follows. No need to touch
 `app.json`.
 
-One exception: `store.config.json`'s `apple.version` is plain JSON and can't
-read `package.json`, so bump it to the same value each release — it tells EAS
-Metadata which App Store version to write the listing to (without it, the push
-sends an empty `versionString` and fails before a build exists).
-`check-metadata.mjs` fails if it drifts from the root `package.json`.
+`store.config.json`'s `apple.version` is plain JSON and can't read
+`package.json`, so `changelog:generate` writes it (it tells EAS Metadata which
+App Store version to push the listing to — without it the push sends an empty
+`versionString` and fails). `check-metadata.mjs` fails if it drifts from the
+root `package.json`.
 
 ## Screenshot capture
 
@@ -168,6 +178,9 @@ node apps/mobile/store/check-metadata.mjs       # prints which ASC display slot 
 ```
 
 ### App Store Connect upload (iPhone screenshots)
+
+CI uploads these via fastlane `deliver`, which picks the display class from the
+image dimensions. The rest of this section only matters for a manual upload.
 
 App Store Connect has separate upload areas per **display class**. A 1320×2868
 file is valid only in **6.9-inch Display**; uploading it to **6.5-inch

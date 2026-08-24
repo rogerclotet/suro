@@ -1,9 +1,14 @@
 name: Submit Android to Play Store
-description: Prepare credentials and submit a Play Store release via fastlane
+description: Prepare credentials and run a Play Store fastlane lane (binary release or listing metadata)
 inputs:
+  lane:
+    description: fastlane android lane to run (release = binary + notes, metadata = listing)
+    required: false
+    default: release
   expo-token:
-    description: Expo access token
-    required: true
+    description: Expo access token (only needed by the release lane's re-download)
+    required: false
+    default: ""
   play-service-account-json:
     description: Play Console service account JSON
     required: true
@@ -22,10 +27,11 @@ runs:
         apt-packages: build-essential git ca-certificates curl jq
     - shell: bash
       run: gem install bundler -v 4.0.11 --no-document
-    - name: Submit Android to Play Store
+    - name: Run fastlane android ${{ inputs.lane }}
       shell: bash
       working-directory: apps/mobile
       env:
+        LANE: ${{ inputs.lane }}
         EXPO_TOKEN: ${{ inputs.expo-token }}
         PLAY_SERVICE_ACCOUNT_JSON: ${{ inputs.play-service-account-json }}
         REDOWNLOAD_IF_MISSING: ${{ inputs.redownload-if-missing }}
@@ -34,9 +40,12 @@ runs:
         bundle _4.0.11_ install
         mkdir -p credentials
         printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > credentials/play-service-account.json
-        if [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.aab ]; then
-          EXPECTED_VERSION=$(jq -r .version ../../package.json)
-          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+        if [ "$LANE" = "release" ]; then
+          if [ "$REDOWNLOAD_IF_MISSING" = "true" ] && [ ! -f build/suro-release.aab ]; then
+            EXPECTED_VERSION=$(jq -r .version ../../package.json)
+            bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+          fi
+          # Release notes ride with the binary; the metadata lane skips them.
+          pnpm -w changelog:generate
         fi
-        pnpm -w changelog:generate
-        bundle _4.0.11_ exec fastlane android release
+        bundle _4.0.11_ exec fastlane android "$LANE"
