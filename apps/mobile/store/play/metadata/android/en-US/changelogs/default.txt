@@ -1,1 +1,1 @@
-• Opening a note now shows it as a full-screen formatted page with tappable links. To change it, tap the edit button.
+• The calendar is easier to use on phones: larger day buttons, cleaner event previews, and when creating or editing an event the default length is 1 hour, start cannot be after end, and the form stays scrollable with the keyboard open.

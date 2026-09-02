@@ -103,17 +103,19 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent className="flex max-h-[92dvh] flex-col">
+        <DrawerHeader className="shrink-0">
           <DrawerTitle className="wrap-anywhere text-wrap">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        <div className="px-4">
+        {/* Scrollable body so the create/save button and date picker stay
+            reachable when the mobile keyboard covers the lower half. */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-2">
           <ModalFormContext.Provider value={{ close }}>
             {children}
           </ModalFormContext.Provider>
         </div>
-        <DrawerFooter className="pt-2">
+        <DrawerFooter className="shrink-0 pt-2">
           <DrawerClose asChild>
             <Button variant="outline">{tCommon("cancel")}</Button>
           </DrawerClose>

@@ -325,7 +325,7 @@ export function webThemeToCssBlock(
   lines.push(eventCssVars("event", theme.event));
   lines.push(eventCssVars("event-on-primary", theme.eventOnPrimary));
 
-  return `${selector} {\n${lines.join("\n")}\n  }`;
+  return `  ${selector} {\n${lines.join("\n")}\n  }`;
 }
 
 export function generateTokensCss(): string {

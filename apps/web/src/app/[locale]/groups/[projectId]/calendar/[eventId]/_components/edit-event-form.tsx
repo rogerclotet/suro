@@ -68,8 +68,10 @@ export default function EditEventForm({
         defaultEndAt.setHours(0, 0, 0, 0);
       } else {
         const now = new Date();
-        defaultStartAt.setHours(now.getHours() + 1, 0, 0, 0);
-        defaultEndAt.setHours(now.getHours() + 2, 0, 0, 0);
+        // Cap start at 22 so the default 1h duration stays valid same-day.
+        const startHour = Math.min(now.getHours() + 1, 22);
+        defaultStartAt.setHours(startHour, 0, 0, 0);
+        defaultEndAt.setHours(startHour + 1, 0, 0, 0);
       }
 
       form.setValue("dates", {
@@ -90,39 +92,45 @@ export default function EditEventForm({
   function handleStartTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
-    const newDates = form.getValues("dates");
-    if (!newDates.from || !hour || !minute) {
+    const current = form.getValues("dates");
+    if (!current.from || !hour || !minute) {
       return;
     }
 
-    newDates.from.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    if (!newDates.to || newDates.from > newDates.to) {
-      newDates.to?.setHours(
-        newDates.from.getHours() + 1,
-        newDates.from.getMinutes(),
-      );
+    const newFrom = new Date(current.from.getTime());
+    newFrom.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+    let newTo = current.to
+      ? new Date(current.to.getTime())
+      : new Date(newFrom.getTime());
+
+    if (newFrom.getTime() >= newTo.getTime()) {
+      newTo = new Date(newFrom.getTime());
+      newTo.setHours(newFrom.getHours() + 1, newFrom.getMinutes(), 0, 0);
     }
 
-    form.setValue("dates", newDates);
+    form.setValue("dates", { from: newFrom, to: newTo });
   }
 
   function handleEndTimeChange(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     const [hour, minute] = value.split(":");
-    const newDates = form.getValues("dates");
-    if (!newDates.to || !hour || !minute) {
+    const current = form.getValues("dates");
+    if (!current.to || !hour || !minute) {
       return;
     }
 
-    newDates.to.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    if (!newDates.from || newDates.from > newDates.to) {
-      newDates.from?.setHours(
-        newDates.to.getHours() - 1,
-        newDates.to.getMinutes(),
-      );
+    const newTo = new Date(current.to.getTime());
+    newTo.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+    let newFrom = current.from
+      ? new Date(current.from.getTime())
+      : new Date(newTo.getTime());
+
+    if (newFrom.getTime() >= newTo.getTime()) {
+      newFrom = new Date(newTo.getTime());
+      newFrom.setHours(newTo.getHours() - 1, newTo.getMinutes(), 0, 0);
     }
 
-    form.setValue("dates", newDates);
+    form.setValue("dates", { from: newFrom, to: newTo });
   }
 
   function handleAllDayChange(checked: CheckedState) {

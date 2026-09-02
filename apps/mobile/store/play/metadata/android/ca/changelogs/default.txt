@@ -1,1 +1,1 @@
-• En obrir una nota ara la veus com una pàgina amb format a pantalla completa, amb els enllaços clicables. Per canviar-la, toca el botó d'edició.
+• El calendari al mòbil és més còmode: els dies són més grans, les previsualitzacions d'esdeveniments són més netes, i en crear o editar un esdeveniment la durada per defecte és d'1 hora, l'hora d'inici no pot passar de la de finalització, i el formulari es pot desplaçar amb el teclat obert.

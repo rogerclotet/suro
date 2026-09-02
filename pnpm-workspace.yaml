@@ -5,16 +5,37 @@ packages:
 # Moved here from the root package.json "pnpm" field — pnpm 10.26+ reads these
 # from the workspace manifest, not package.json.
 overrides:
-  "@types/react": 19.2.17
-  "@types/react-dom": 19.2.3
+  "@types/react": 19.2.18
+  "@types/react-dom": 19.2.5
   # Single React version across web + mobile (duplicate React breaks native).
-  react: 19.2.7
-  react-dom: 19.2.7
+  react: 19.2.8
+  react-dom: 19.2.8
   # Security: pin patched transitive deps (API-compatible patch bumps).
   # ws<8.21.0 (via convex) memory-exhaustion DoS — GHSA-96hv-2xvq-fx4p.
   "ws@>=8.0.0 <8.21.0": ">=8.21.0"
   # postcss<8.5.10 (via next) XSS in CSS processing — GHSA-qx2v-qp2m-jg93.
   "postcss@<8.5.10": ">=8.5.10"
+  # dompurify<=3.4.12 XSS via IN_PLACE hook — GHSA-55q2-fjhq-7xh7.
+  # Stay on isomorphic-dompurify 3.19 (Node 25); 3.20+/4.x exclude odd Node.
+  dompurify: ">=3.4.13"
+  # fast-uri host confusion / SSRF — GHSA-7p8r-x3mc-p8w7, GHSA-5jgf-p345-68v8.
+  "fast-uri@>=3.0.0 <3.1.6": ">=3.1.6"
+  # brace-expansion DoS — GHSA-rgw5-rvv9-x895.
+  "brace-expansion@>=4.0.0 <5.0.9": ">=5.0.9"
+  # js-yaml quadratic CPU — GHSA-5p4m-2wfm-xmqj.
+  "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1"
+  # nanoid infinite loop when size is zero — GHSA-2v37-7h3g-55p8.
+  "nanoid@<3.3.18": ">=3.3.18"
+  # @xmldom/xmldom XML fragment injection — GHSA-6gmq-8vp8-gcm6.
+  "@xmldom/xmldom@>=0.9.0 <0.9.12": ">=0.9.12"
+  "@xmldom/xmldom@>=0.7.0 <0.8.15": ">=0.8.15"
+  # sharp libvips CVEs via next's transitive sharp — GHSA-f88m-g3jw-g9cj.
+  "sharp@<0.35.0": ">=0.35.0"
+  # @tiptap/core mergeAttributes prototype pollution — GHSA-cp6q-959q-f8rh
+  # (pulled via @10play/tentap-editor on mobile).
+  "@tiptap/core@>=2.0.0 <3.30.4": ">=3.30.4"
+  # decode-uri-component DoS — GHSA-vcc3-ghjq-m6fr (via expo-router).
+  "decode-uri-component@<=0.4.2": ">=0.5.0"
 
 onlyBuiltDependencies:
   - "@napi-rs/canvas"

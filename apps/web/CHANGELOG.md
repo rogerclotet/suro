@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.21.0] — 2026-09-02
+
+### ca
+
+- [improvement] El calendari al mòbil és més còmode: els dies són més grans, les previsualitzacions d'esdeveniments són més netes, i en crear o editar un esdeveniment la durada per defecte és d'1 hora, l'hora d'inici no pot passar de la de finalització, i el formulari es pot desplaçar amb el teclat obert.
+
+### es
+
+- [improvement] El calendario en el móvil es más cómodo: los días son más grandes, las vistas previas de eventos son más limpias, y al crear o editar un evento la duración por defecto es de 1 hora, la hora de inicio no puede superar la de fin, y el formulario se puede desplazar con el teclado abierto.
+
+### en
+
+- [improvement] The calendar is easier to use on phones: larger day buttons, cleaner event previews, and when creating or editing an event the default length is 1 hour, start cannot be after end, and the form stays scrollable with the keyboard open.
+
 ## [1.20.0] — 2026-08-15
 
 ### ca

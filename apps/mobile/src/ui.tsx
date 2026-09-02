@@ -89,14 +89,12 @@ export function Sheet({
   const insets = useSafeAreaInsets();
   const { acquire, release } = useContext(SheetCountContext);
   const [mounted, setMounted] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const anim = useMemo(() => new Animated.Value(0), []);
   // Lifts the panel above the keyboard. RN's Modal doesn't resize its own
   // window for the keyboard on Android, so without this the keyboard covers any
   // focused TextInput inside a drawer.
   const liftAnim = useMemo(() => new Animated.Value(0), []);
-  // The panel's measured height, used to clamp the lift so a tall form's top
-  // (where its text inputs live) is never pushed off the top of the screen.
-  const panelHeight = useRef(0);
   const shownRef = useRef(false);
   const onClosedRef = useRef(onClosed);
   useEffect(() => {
@@ -132,6 +130,7 @@ export function Sheet({
       }).start(({ finished }) => {
         if (finished) {
           setMounted(false);
+          setKeyboardHeight(0);
           if (shownRef.current) {
             shownRef.current = false;
             onClosedRef.current?.();
@@ -142,8 +141,9 @@ export function Sheet({
   }, [visible, anim]);
 
   // iOS reports the keyboard before it animates in (smoother); Android only
-  // fires the "did" events. Animate the panel up to keep the focused input
-  // visible, but clamp the rise so a tall panel's top stays on screen.
+  // fires the "did" events. Shrink the panel to fit above the keyboard and
+  // lift it by the keyboard height so ScrollView children can reach every
+  // field (including a trailing submit button).
   useEffect(() => {
     const showEvt =
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
@@ -157,21 +157,21 @@ export function Sheet({
         useNativeDriver: true,
       }).start();
     const onShow = Keyboard.addListener(showEvt, (e) => {
-      // Never lift so far that the panel's top crosses the safe-area inset.
-      const headroom = Math.max(
-        0,
-        SCREEN_HEIGHT - panelHeight.current - insets.top,
-      );
-      animateTo(Math.min(e.endCoordinates.height, headroom), e.duration);
+      const kb = e.endCoordinates.height;
+      setKeyboardHeight(kb);
+      // Lift by the full keyboard height; maxHeight below keeps the panel
+      // within the safe area so the form can scroll above the keyboard.
+      animateTo(kb, e.duration);
     });
-    const onHide = Keyboard.addListener(hideEvt, (e) =>
-      animateTo(0, e.duration),
-    );
+    const onHide = Keyboard.addListener(hideEvt, (e) => {
+      setKeyboardHeight(0);
+      animateTo(0, e.duration);
+    });
     return () => {
       onShow.remove();
       onHide.remove();
     };
-  }, [liftAnim, insets.top]);
+  }, [liftAnim]);
 
   if (!mounted) {
     return null;
@@ -185,6 +185,13 @@ export function Sheet({
     outputRange: [SCREEN_HEIGHT, 0],
   });
   const keyboardLift = Animated.multiply(liftAnim, -1);
+  // Cap height so the sheet + keyboard fit on screen; content scrolls inside.
+  // An explicit height while the keyboard is open gives ScrollView children a
+  // definite bound (percentage/flex) so the create button stays reachable.
+  const maxPanelHeight =
+    keyboardHeight > 0
+      ? SCREEN_HEIGHT - keyboardHeight - insets.top
+      : SCREEN_HEIGHT * 0.92;
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
@@ -194,19 +201,18 @@ export function Sheet({
         <Pressable style={{ flex: 1 }} onPress={onClose} />
       </Animated.View>
       <Animated.View
-        onLayout={(e) => {
-          panelHeight.current = e.nativeEvent.layout.height;
-        }}
         style={{
           position: "absolute",
           left: 0,
           right: 0,
           bottom: 0,
+          maxHeight: maxPanelHeight,
+          height: keyboardHeight > 0 ? maxPanelHeight : undefined,
           backgroundColor: t.bg,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           padding: 20,
-          paddingBottom: 36,
+          paddingBottom: Math.max(insets.bottom, 20),
           gap: 12,
           transform: [{ translateY }, { translateY: keyboardLift }],
         }}
