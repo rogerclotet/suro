@@ -49,15 +49,12 @@ function isBetween(day: Date, start: Date, end: Date): boolean {
   return d >= lo && d <= hi;
 }
 
-// Day tile size — large enough to hold the number with the event dots row
-// tucked inside its bottom edge.
-const DAY_TILE = 38;
-// Height of the connecting range bar; matches the day tile so the highlight
-// reads as one continuous band flowing through the endpoint squares.
-const RANGE_BAR = DAY_TILE;
+// Inset between neighbouring day tiles. Tiles fill the flex cell minus this
+// padding so they grow with screen width instead of staying a fixed ~38px.
+const DAY_INSET = 3;
 // Corner radius of the selected-day tile (and the range bar's outer ends), so
 // selected days read as rounded squares rather than circles.
-const DAY_RADIUS = 10;
+const DAY_RADIUS = 12;
 // Minimum horizontal travel (px) for a swipe to page the month, so a vertical
 // scroll's drift or a day tap never flips the month.
 const SWIPE_THRESHOLD = 48;
@@ -204,6 +201,7 @@ export function MonthGrid({
                   aspectRatio: 1,
                   alignItems: "center",
                   justifyContent: "center",
+                  padding: DAY_INSET,
                 }}
               >
                 {inRange ? (
@@ -215,9 +213,10 @@ export function MonthGrid({
                     pointerEvents="none"
                     style={{
                       position: "absolute",
-                      top: "50%",
-                      marginTop: -RANGE_BAR / 2,
-                      height: RANGE_BAR,
+                      // Match the tile's inset so the bar height tracks the
+                      // flex-sized day button instead of a fixed pixel size.
+                      top: DAY_INSET,
+                      bottom: DAY_INSET,
                       // Endpoints fill from their own centre so the bar tucks
                       // under the tile; middle days span the whole cell, so
                       // neighbouring segments butt together into one bar.
@@ -238,8 +237,8 @@ export function MonthGrid({
                   // fill remounts it instead, applying the radius at creation.
                   key={isEndpoint ? "selected" : isToday ? "today" : "plain"}
                   style={{
-                    width: DAY_TILE,
-                    height: DAY_TILE,
+                    width: "100%",
+                    aspectRatio: 1,
                     borderRadius: DAY_RADIUS,
                     alignItems: "center",
                     justifyContent: "center",

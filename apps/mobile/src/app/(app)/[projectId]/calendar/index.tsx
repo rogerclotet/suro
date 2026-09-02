@@ -5,7 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { ExportCalendarSheet } from "@/components/export-calendar-sheet";
@@ -17,7 +17,7 @@ import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
-import { Card, Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
+import { Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
@@ -118,7 +118,13 @@ export default function CalendarScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        contentContainerStyle={{
+          // Slightly tighter horizontal padding so the month grid's day tiles
+          // can grow — they fill their flex cells.
+          paddingHorizontal: 10,
+          paddingTop: 12,
+          paddingBottom: 96,
+        }}
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
       >
@@ -142,7 +148,7 @@ export default function CalendarScreen() {
             {tCal("noEventsForDay")}
           </Txt>
         ) : (
-          <View style={{ gap: 12 }}>
+          <View style={{ gap: 0 }}>
             {selectedEvents.map((event) => (
               <EventCard
                 key={event._id}
@@ -187,30 +193,43 @@ function EventCard({
   color: string;
   onPress: () => void;
 }) {
+  const t = useTheme();
   const formatTime = useFormatEventTime();
   return (
-    <Card onPress={onPress}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: color,
-          }}
-        />
-        <Txt size={16} weight="700" style={{ flex: 1 }}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "stretch",
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 2,
+        borderBottomWidth: 1,
+        borderBottomColor: t.border,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 4,
+          borderRadius: 2,
+          backgroundColor: color,
+        }}
+      />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Txt size={16} weight="700" numberOfLines={1}>
           {event.name}
         </Txt>
-      </View>
-      <Txt muted size={13} style={{ marginTop: 2 }}>
-        {formatTime(event)}
-      </Txt>
-      {event.description ? (
-        <Txt size={14} style={{ marginTop: 6 }} numberOfLines={2}>
-          {event.description}
+        <Txt muted size={13}>
+          {formatTime(event)}
         </Txt>
-      ) : null}
-    </Card>
+        {event.description ? (
+          <Txt muted size={14} style={{ marginTop: 2 }} numberOfLines={2}>
+            {event.description}
+          </Txt>
+        ) : null}
+      </View>
+    </Pressable>
   );
 }

@@ -24,6 +24,43 @@ export type EventFormValues = {
   allDay: boolean;
 };
 
+function timeToMinutes(t: Time): number {
+  return t.hour * 60 + t.minute;
+}
+
+/** Default timed window: next full hour, 1h long (start capped so end fits today). */
+function defaultTimedWindow(): { start: Time; end: Time } {
+  const hour = Math.min(new Date().getHours() + 1, 22);
+  return {
+    start: { hour, minute: 0 },
+    end: { hour: hour + 1, minute: 0 },
+  };
+}
+
+/**
+ * When start moves past end on the same calendar day, push end to start+1h.
+ * Minutes wrap; hours past 23 spill by bumping `toDay` via the caller.
+ */
+function endAtLeastOneHourAfter(start: Time): Time {
+  const endMinutes = timeToMinutes(start) + 60;
+  return {
+    hour: Math.floor(endMinutes / 60) % 24,
+    minute: endMinutes % 60,
+  };
+}
+
+function startAtLeastOneHourBefore(end: Time): Time {
+  const startMinutes = timeToMinutes(end) - 60;
+  if (startMinutes >= 0) {
+    return {
+      hour: Math.floor(startMinutes / 60),
+      minute: startMinutes % 60,
+    };
+  }
+  // End is before 01:00 — clamp start to 00:00 and let the caller keep dates.
+  return { hour: 0, minute: 0 };
+}
+
 export function EventForm({
   visible,
   initial,
@@ -84,18 +121,22 @@ export function EventForm({
       if (!init.allDay) {
         setStartTime(timeOf(init.startAt));
         setEndTime(timeOf(init.endAt));
+      } else {
+        const { start: s, end: e } = defaultTimedWindow();
+        setStartTime(s);
+        setEndTime(e);
       }
     } else {
       const base = startOfDay(defaultDateRef.current ?? new Date());
-      const hour = Math.min(new Date().getHours() + 1, 23);
+      const { start, end } = defaultTimedWindow();
       setName("");
       setDescription("");
       setAllDay(true);
       setFromDay(base);
       setToDay(base);
       setPickerMonth(base);
-      setStartTime({ hour, minute: 0 });
-      setEndTime({ hour: Math.min(hour + 1, 23), minute: 0 });
+      setStartTime(start);
+      setEndTime(end);
     }
   }, [visible]);
 
@@ -117,6 +158,33 @@ export function EventForm({
         setFromDay(day);
       }
       setTarget("start");
+    }
+  }
+
+  function handleStartTimeChange(value: Time) {
+    setStartTime(value);
+    if (!sameDay(fromDay, toDay)) {
+      return;
+    }
+    if (timeToMinutes(value) >= timeToMinutes(endTime)) {
+      const next = endAtLeastOneHourAfter(value);
+      // If +1h wraps past midnight on a same-day event, bump the end day.
+      if (timeToMinutes(next) <= timeToMinutes(value)) {
+        const nextDay = new Date(fromDay);
+        nextDay.setDate(nextDay.getDate() + 1);
+        setToDay(startOfDay(nextDay));
+      }
+      setEndTime(next);
+    }
+  }
+
+  function handleEndTimeChange(value: Time) {
+    setEndTime(value);
+    if (!sameDay(fromDay, toDay)) {
+      return;
+    }
+    if (timeToMinutes(startTime) >= timeToMinutes(value)) {
+      setStartTime(startAtLeastOneHourBefore(value));
     }
   }
 
@@ -153,6 +221,10 @@ export function EventForm({
         endTime.hour,
         endTime.minute,
       ).getTime();
+      // Final guard: never submit a zero/negative duration.
+      if (endAt <= startAt) {
+        endAt = startAt + 60 * 60 * 1000;
+      }
     }
     onSubmit({ name: trimmed, description, startAt, endAt, allDay });
   }
@@ -163,9 +235,12 @@ export function EventForm({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <ScrollView
-        style={{ maxHeight: SCREEN_HEIGHT * 0.72 }}
+        // Fill the sheet when it has an explicit height (keyboard open) so the
+        // month grid and save button stay reachable by scrolling.
+        style={{ flex: 1, maxHeight: SCREEN_HEIGHT * 0.85 }}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ gap: 12 }}
+        keyboardDismissMode="interactive"
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 }}
         showsVerticalScrollIndicator={false}
       >
         <Txt size={18} weight="700">
@@ -213,7 +288,7 @@ export function EventForm({
             active={target === "start"}
             allDay={allDay}
             time={startTime}
-            onChangeTime={setStartTime}
+            onChangeTime={handleStartTimeChange}
             onPress={() => setTarget("start")}
           />
           <View style={{ height: 1, backgroundColor: t.border }} />
@@ -223,7 +298,7 @@ export function EventForm({
             active={target === "end"}
             allDay={allDay}
             time={endTime}
-            onChangeTime={setEndTime}
+            onChangeTime={handleEndTimeChange}
             onPress={() => setTarget("end")}
             trailing={
               multiDay ? (

@@ -20,17 +20,16 @@ type UseEventDatesOptions = {
 
 function getNextFullHour(): { hour: number; minute: number } {
   const now = new Date();
-  const hour = now.getHours() + 1;
-  // Cap at 23:00 if past midnight
-  return { hour: Math.min(hour, 23), minute: 0 };
+  // Cap at 22 so a default 1h duration still fits in the same day.
+  const hour = Math.min(now.getHours() + 1, 22);
+  return { hour, minute: 0 };
 }
 
-function isSameDay(d1: Date, d2: Date): boolean {
-  return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
-  );
+/** Push `to` forward so it is at least 1 hour after `from` (may cross midnight). */
+function ensureMinimumDuration(from: Date, to: Date): Date {
+  const minEnd = new Date(from.getTime());
+  minEnd.setHours(from.getHours() + 1, from.getMinutes(), 0, 0);
+  return to.getTime() < minEnd.getTime() ? minEnd : to;
 }
 
 export function useEventDates({
@@ -64,7 +63,7 @@ export function useEventDates({
         // Create mode: next full hour for 1h duration
         const { hour, minute } = getNextFullHour();
         newFrom.setHours(hour, minute, 0, 0);
-        newTo.setHours(Math.min(hour + 1, 23), minute, 0, 0);
+        newTo.setHours(hour + 1, minute, 0, 0);
       }
 
       return { from: newFrom, to: newTo };
@@ -126,13 +125,13 @@ export function useEventDates({
       const newFrom = new Date(currentDates.from.getTime());
       newFrom.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
 
-      const newTo = currentDates.to
+      let newTo = currentDates.to
         ? new Date(currentDates.to.getTime())
         : new Date(newFrom.getTime());
 
-      // If start > end on the same day, push end forward
-      if (isSameDay(newFrom, newTo) && newFrom > newTo) {
-        newTo.setHours(newFrom.getHours() + 1, newFrom.getMinutes(), 0, 0);
+      // Keep end at least 1h after start (same day or spilling to next).
+      if (newFrom.getTime() >= newTo.getTime()) {
+        newTo = ensureMinimumDuration(newFrom, newTo);
       }
 
       form.setValue("dates", { from: newFrom, to: newTo });
@@ -152,12 +151,13 @@ export function useEventDates({
       const newTo = new Date(currentDates.to.getTime());
       newTo.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
 
-      const newFrom = currentDates.from
+      let newFrom = currentDates.from
         ? new Date(currentDates.from.getTime())
         : new Date(newTo.getTime());
 
-      // If end < start on the same day, push start backward
-      if (isSameDay(newFrom, newTo) && newFrom > newTo) {
+      // If end is not after start, pull start back by 1h.
+      if (newFrom.getTime() >= newTo.getTime()) {
+        newFrom = new Date(newTo.getTime());
         newFrom.setHours(newTo.getHours() - 1, newTo.getMinutes(), 0, 0);
       }
 

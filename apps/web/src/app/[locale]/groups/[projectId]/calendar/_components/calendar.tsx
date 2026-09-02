@@ -52,9 +52,11 @@ const EVENT_DOT_ON_PRIMARY_CLASSES = [
 function Events({
   isLoading,
   currentEvents,
+  eventColors,
 }: {
   isLoading: boolean;
   currentEvents: CalendarEvent[] | undefined;
+  eventColors: Map<string, number>;
 }) {
   const t = useTranslations("calendar");
 
@@ -71,9 +73,16 @@ function Events({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-0 divide-y divide-border">
       {currentEvents.map((event) => (
-        <EventPreview key={event.id} event={event} />
+        <EventPreview
+          key={event.id}
+          event={event}
+          accentClass={
+            EVENT_DOT_CLASSES[eventColors.get(event.id) ?? 0] ??
+            EVENT_DOT_CLASSES[0]
+          }
+        />
       ))}
     </div>
   );
@@ -155,7 +164,7 @@ export default function Calendar({
       .slice(0, 3);
 
     return (
-      <div className="relative h-9 w-9 overflow-visible">
+      <div className="relative aspect-square w-full overflow-visible">
         <CalendarDayButton
           className="text-sm"
           day={day}
@@ -215,7 +224,7 @@ export default function Calendar({
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:gap-8">
-        <div className="flex flex-col items-center">
+        <div className="flex w-full flex-col items-stretch md:w-auto md:min-w-[20rem] md:max-w-sm">
           <CalendarComponent
             mode="single"
             month={currentMonth}
@@ -224,9 +233,10 @@ export default function Calendar({
             onMonthChange={setCurrentMonth}
             locale={dfLocale}
             dateLocale={dateLocale}
-            className="mx-auto"
+            className="w-full"
             classNames={{
               caption_label: "text-md",
+              root: "w-full",
             }}
             components={{
               DayButton: CustomDayButton,
@@ -256,6 +266,7 @@ export default function Calendar({
             <Events
               isLoading={events === undefined}
               currentEvents={currentEvents}
+              eventColors={eventColors}
             />
           </div>
         )}
