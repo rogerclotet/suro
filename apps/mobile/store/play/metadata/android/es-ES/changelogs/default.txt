@@ -1,1 +1,1 @@
-• Al abrir una nota ahora la ves como una página con formato a pantalla completa, con los enlaces pulsables. Para cambiarla, toca el botón de editar.
+• El calendario en el móvil es más cómodo: los días son más grandes, las vistas previas de eventos son más limpias, y al crear o editar un evento la duración por defecto es de 1 hora, la hora de inicio no puede superar la de fin, y el formulario se puede desplazar con el teclado abierto.

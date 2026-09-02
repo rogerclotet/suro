@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.20.0",
+    "version": "1.21.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Opening a note now shows it as a full-screen formatted page with tappable links. To change it, tap the edit button.",
+        "releaseNotes": "• The calendar is easier to use on phones: larger day buttons, cleaner event previews, and when creating or editing an event the default length is 1 hour, start cannot be after end, and the form stays scrollable with the keyboard open.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Al abrir una nota ahora la ves como una página con formato a pantalla completa, con los enlaces pulsables. Para cambiarla, toca el botón de editar.",
+        "releaseNotes": "• El calendario en el móvil es más cómodo: los días son más grandes, las vistas previas de eventos son más limpias, y al crear o editar un evento la duración por defecto es de 1 hora, la hora de inicio no puede superar la de fin, y el formulario se puede desplazar con el teclado abierto.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• En obrir una nota ara la veus com una pàgina amb format a pantalla completa, amb els enllaços clicables. Per canviar-la, toca el botó d'edició.",
+        "releaseNotes": "• El calendari al mòbil és més còmode: els dies són més grans, les previsualitzacions d'esdeveniments són més netes, i en crear o editar un esdeveniment la durada per defecte és d'1 hora, l'hora d'inici no pot passar de la de finalització, i el formulari es pot desplaçar amb el teclat obert.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
