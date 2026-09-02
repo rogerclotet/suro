@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.21.0",
+    "version": "1.21.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The calendar is easier to use on phones: larger day buttons, cleaner event previews, and when creating or editing an event the default length is 1 hour, start cannot be after end, and the form stays scrollable with the keyboard open.",
+        "releaseNotes": "• Fixed a bug that prevented the iOS app build from completing.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• El calendario en el móvil es más cómodo: los días son más grandes, las vistas previas de eventos son más limpias, y al crear o editar un evento la duración por defecto es de 1 hora, la hora de inicio no puede superar la de fin, y el formulario se puede desplazar con el teclado abierto.",
+        "releaseNotes": "• Se ha corregido un error que impedía generar la versión de iOS de la app.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• El calendari al mòbil és més còmode: els dies són més grans, les previsualitzacions d'esdeveniments són més netes, i en crear o editar un esdeveniment la durada per defecte és d'1 hora, l'hora d'inici no pot passar de la de finalització, i el formulari es pot desplaçar amb el teclat obert.",
+        "releaseNotes": "• S'ha corregit un error que impedia generar la versió d'iOS de l'app.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
