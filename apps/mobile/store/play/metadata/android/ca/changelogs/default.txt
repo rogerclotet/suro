@@ -1,1 +1,1 @@
-• El calendari al mòbil és més còmode: els dies són més grans, les previsualitzacions d'esdeveniments són més netes, i en crear o editar un esdeveniment la durada per defecte és d'1 hora, l'hora d'inici no pot passar de la de finalització, i el formulari es pot desplaçar amb el teclat obert.
+• S'ha corregit un error que impedia generar la versió d'iOS de l'app.

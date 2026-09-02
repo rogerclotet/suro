@@ -1,1 +1,1 @@
-• The calendar is easier to use on phones: larger day buttons, cleaner event previews, and when creating or editing an event the default length is 1 hour, start cannot be after end, and the form stays scrollable with the keyboard open.
+• Fixed a bug that prevented the iOS app build from completing.

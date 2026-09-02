@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.21.1] — 2026-09-03
+
+### ca
+
+- [fix] S'ha corregit un error que impedia generar la versió d'iOS de l'app.
+
+### es
+
+- [fix] Se ha corregido un error que impedía generar la versión de iOS de la app.
+
+### en
+
+- [fix] Fixed a bug that prevented the iOS app build from completing.
+
 ## [1.21.0] — 2026-09-02
 
 ### ca
