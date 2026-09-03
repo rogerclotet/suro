@@ -1,7 +1,7 @@
 # Shared lint / typecheck / test gate. Called from CI and from deploy workflows
 # so production ships never skip the same checks as PRs.
 
-name: Quality checks
+name: Quality checks (reusable)
 
 on:
   workflow_call:

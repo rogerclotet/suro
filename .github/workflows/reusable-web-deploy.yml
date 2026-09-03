@@ -2,7 +2,7 @@
 # pushes to main when web and/or backend paths change and repo quality checks
 # passed.
 
-name: Web and backend deploy
+name: Web and backend deploy (reusable)
 
 on:
   workflow_call:

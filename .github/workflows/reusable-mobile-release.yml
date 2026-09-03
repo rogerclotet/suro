@@ -6,7 +6,7 @@
 # pushes the listing text, then submits the version for review with automatic
 # release on approval.
 
-name: Mobile release
+name: Mobile release (reusable)
 
 on:
   workflow_call:
