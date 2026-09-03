@@ -31,7 +31,7 @@ jobs:
       pr_number: ${{ steps.resolve.outputs.pr_number }}
       teardown: ${{ steps.resolve.outputs.teardown }}
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v9
         id: resolve
         with:
           script: |
@@ -78,7 +78,7 @@ jobs:
     if: needs.resolve.outputs.teardown == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tear down preview environment
         env:
           CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
