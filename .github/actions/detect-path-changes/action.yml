@@ -30,8 +30,6 @@ runs:
             - 'Dockerfile'
             - '.dockerignore'
             - 'compose.yaml'
-            - '.github/workflows/**'
-            - '.github/actions/**'
           play_metadata:
             # Listing text + images only. Patterns are OR-ed, so the release
             # notes under <locale>/changelogs/ are excluded by listing what the
@@ -45,5 +43,4 @@ runs:
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'pnpm-workspace.yaml'
-            - '.github/workflows/**'
-            - '.github/actions/**'
+

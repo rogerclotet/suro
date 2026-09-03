@@ -1,0 +1,35 @@
+# Play Store listing text/images push (no binary). Runs on main when listing
+# metadata paths change. Shares the play-console concurrency group with the
+# mobile release Play submit so two fastlane edits never collide.
+
+name: Play listing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/store/play/metadata/android/*/*.txt"
+      - "apps/mobile/store/play/metadata/android/*/images/**"
+
+concurrency:
+  group: play-console
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    uses: ./.github/workflows/reusable-quality-checks.yml
+
+  play_listing_push:
+    needs: quality
+    if: needs.quality.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/mobile-submit-android
+        with:
+          lane: metadata
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}

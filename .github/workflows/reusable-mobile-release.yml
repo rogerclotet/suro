@@ -1,5 +1,5 @@
-# Reusable EAS native build + store submit jobs. Called from ci.yml on pushes to
-# main when mobile_release_gate approves a release.
+# Reusable EAS native build + store submit jobs. Called from mobile-release.yml
+# on pushes to main when mobile_release_gate approves a release.
 #
 # End to end, no console visit needed: EAS builds both binaries, Android goes
 # straight to the Play production track at 100%, and iOS uploads the build,
@@ -110,6 +110,10 @@ jobs:
 
   mobile_play_store_submit:
     needs: mobile_eas_build_android
+    # Shared with play-listing.yml so listing and binary submits never collide.
+    concurrency:
+      group: play-console
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -1,6 +1,6 @@
 # Deploy an ephemeral web preview for a pull request.
 #
-# Previews deploy independently of Main CI/CD quality checks — a red lint/typecheck
+# Previews deploy independently of CI quality checks — a red lint/typecheck
 # run does not block preview deploy. Add a workflow_run gate here if that changes.
 #
 # Easiest triggers (no branch or PR number needed):

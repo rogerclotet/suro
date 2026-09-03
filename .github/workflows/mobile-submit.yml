@@ -1,8 +1,9 @@
-# Manual store re-submission for a commit that already built on main. The main
-# CI workflow now waits for EAS builds and submits automatically; use this only
-# to re-submit a specific commit (e.g. after a transient store error).
+# Manual store re-submission for a commit that already built on main. The
+# Mobile release workflow waits for EAS builds and submits automatically; use
+# this only to re-submit a specific commit (e.g. after a transient store error).
 #
-# commit_sha — the push that produced the EAS build artifact (CI run lookup).
+# commit_sha — the push that produced the EAS build artifact (Mobile release
+# run lookup).
 # ios_skip_upload — the binary already reached App Store Connect and only the
 # metadata push / review submission needs retrying.
 # checkout_sha — optional ref for release notes / fastlane metadata (defaults to
@@ -15,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Commit SHA on main (from the CI run that triggered EAS builds)
+        description: Commit SHA on main (from the Mobile release run that triggered EAS builds)
         required: true
         type: string
       checkout_sha:
@@ -75,7 +76,7 @@ jobs:
             const { data } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'ci.yml',
+              workflow_id: 'mobile-release.yml',
               head_sha: sha,
               event: 'push',
               per_page: 5,
@@ -109,7 +110,7 @@ jobs:
             }
 
             core.setFailed(
-              `No Main CI/CD run with a successful store build found for commit ${sha}`,
+              `No Mobile release run with a successful store build found for commit ${sha}`,
             );
 
   submit_android:

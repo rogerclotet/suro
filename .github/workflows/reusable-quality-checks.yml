@@ -1,0 +1,30 @@
+# Shared lint / typecheck / test gate. Called from CI and from deploy workflows
+# so production ships never skip the same checks as PRs.
+
+name: Quality checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  repo_quality_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      - name: Lint, typecheck, test
+        env:
+          SKIP_ENV_VALIDATION: "1"
+          NEXT_TELEMETRY_DISABLED: "1"
+          POSTHOG_API_KEY: ""
+          POSTHOG_ENV_ID: ""
+        run: |
+          pnpm biome:check
+          pnpm check:store-notes
+          pnpm check:metadata
+          pnpm check:i18n
+          pnpm typecheck
+          pnpm test

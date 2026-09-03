@@ -1,0 +1,66 @@
+# Mobile release on pushes to main when the native release gate passes
+# (version bump + matching CHANGELOG entry + native file changes).
+#
+# EAS builds both platforms, then submits to Play (100% production) and App
+# Store (upload + metadata + submit for review). Apple screenshot re-upload
+# runs only when store/apple/screenshots changed in the same push.
+#
+# Play listing text/images ship separately via play-listing.yml; both share the
+# play-console concurrency group so fastlane never overlaps.
+
+name: Mobile release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: mobile-release-${{ github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mobile_release_gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.gate.outputs.should_build }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Decide whether to trigger EAS native builds
+        id: gate
+        run: node apps/mobile/scripts/should-build-native.mjs
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+
+  detect_path_changes:
+    needs: mobile_release_gate
+    if: needs.mobile_release_gate.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      apple_screenshots: ${{ steps.changes.outputs.apple_screenshots }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
+
+  quality:
+    needs: mobile_release_gate
+    if: needs.mobile_release_gate.outputs.should_build == 'true'
+    uses: ./.github/workflows/reusable-quality-checks.yml
+
+  mobile_release:
+    needs: [mobile_release_gate, detect_path_changes, quality]
+    if: |
+      needs.mobile_release_gate.outputs.should_build == 'true' &&
+      needs.quality.result == 'success'
+    uses: ./.github/workflows/reusable-mobile-release.yml
+    with:
+      commit_sha: ${{ github.sha }}
+      push_screenshots: ${{ needs.detect_path_changes.outputs.apple_screenshots }}
+    secrets: inherit
