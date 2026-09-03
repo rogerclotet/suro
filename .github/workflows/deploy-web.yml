@@ -1,0 +1,55 @@
+# Production web + Convex deploy on pushes to main when web and/or backend
+# paths change. Quality checks run here so deploys stay self-contained.
+#
+# Web image build + SSH deploy, and Convex deploy, live in
+# reusable-web-deploy.yml (backend finishes before web when both change).
+
+name: Web and backend deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/backend/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "biome.json"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "compose.yaml"
+
+concurrency:
+  group: deploy-web-${{ github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  detect_path_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.changes.outputs.web }}
+      backend: ${{ steps.changes.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
+
+  quality:
+    uses: ./.github/workflows/reusable-quality-checks.yml
+
+  web_and_backend_deploy:
+    needs: [detect_path_changes, quality]
+    if: |
+      needs.quality.result == 'success' &&
+      (needs.detect_path_changes.outputs.web == 'true' || needs.detect_path_changes.outputs.backend == 'true')
+    uses: ./.github/workflows/reusable-web-deploy.yml
+    with:
+      web_changed: ${{ needs.detect_path_changes.outputs.web }}
+      backend_changed: ${{ needs.detect_path_changes.outputs.backend }}
+      commit_sha: ${{ github.sha }}
+    secrets: inherit

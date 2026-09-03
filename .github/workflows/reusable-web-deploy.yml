@@ -1,5 +1,6 @@
-# Reusable web + backend production deploy jobs. Called from ci.yml on pushes to
-# main when web and/or backend paths change and repo quality checks passed.
+# Reusable web + backend production deploy jobs. Called from deploy-web.yml on
+# pushes to main when web and/or backend paths change and repo quality checks
+# passed.
 
 name: Web and backend deploy
 

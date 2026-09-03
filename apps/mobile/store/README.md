@@ -69,8 +69,8 @@ use the App Store Connect API key (`APP_STORE_CONNECT_API_KEY_*` in a gitignored
 4. Fill Data safety, content rating, app access (review credentials) and
    target audience from `declarations.md`.
 5. The listing texts and `images/*` under `play/metadata/android/<locale>/` are
-   pushed by CI whenever those files change on `main` (the `play_listing_push`
-   job); no Console editing needed.
+   pushed by the **Play listing** workflow whenever those files change on `main`;
+   no Console editing needed.
 
 ## Per-release flow
 
@@ -81,7 +81,7 @@ A release is a normal PR to `main`. Everything after the merge is CI.
    `changelog:generate`, which writes the Play `changelogs/default.txt` files and
    `store.config.json`'s `apple.version` + `releaseNotes`; CI fails if they drift.
 2. Merge. On `main`, `mobile_release_gate` (version bump + matching CHANGELOG
-   entry + native paths touched) triggers `reusable-mobile-release.yml`, which:
+   entry + native paths touched) triggers the **Mobile release** workflow, which:
    - builds both binaries on EAS and waits for them;
    - **Android** → `fastlane android release`: AAB + release notes to the Play
      **production** track, full rollout;
@@ -89,7 +89,7 @@ A release is a normal PR to `main`. Everything after the merge is CI.
      `fastlane ios submit_for_review`: waits for Apple to finish processing the
      build, attaches it, uploads screenshots if they changed, and submits the
      version for review with `automatic_release` so it ships on approval.
-3. `release_tag` tags the commit `v<version>` and publishes a GitHub release
+3. CI's `release_tag` tags the commit `v<version>` and publishes a GitHub release
    with the CHANGELOG entry as its notes.
 
 Both stores still gate on **their** review; nothing else needs a console visit.
@@ -99,6 +99,9 @@ Checks and manual fallbacks:
 ```sh
 # copy & screenshots still within store limits (also runs in CI):
 node apps/mobile/store/check-metadata.mjs
+
+# force a full EAS build + store submit (skips the release gate; main only):
+# Actions -> "Mobile release" -> Run workflow (optional push_screenshots).
 
 # re-submit a commit that already built (transient store error), or force a
 # screenshot re-upload: Actions -> "Mobile submit" -> commit sha + platform.

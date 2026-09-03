@@ -1,21 +1,18 @@
-# Main CI/CD for Suro. Migrated from GitLab CI — path-gated jobs, PR checks, main
-# deploys, and automatic mobile store submission after EAS builds finish.
+# CI checks for Suro: lint/typecheck/test on every PR and main push, a Next.js
+# compile-check on web-affecting PRs, and GitHub release tagging when the root
+# version bumps on main.
 #
-# Per-area change sets (shared via .github/actions/detect-path-changes):
-#   web     — web image build, deploy, PR compile-check
-#   backend — Convex deploy
-#   mobile  — EAS native builds + store submit (gated by mobile_release_gate:
-#             version bump + matching CHANGELOG entry + native file changes)
-#   store   — Play listing push (play_metadata), App Store screenshot re-upload
-#             (apple_screenshots, folded into the mobile release)
-#
-# A version bump on main also tags the commit and publishes a GitHub release
-# (release_tag), independently of which areas deployed.
+# Production deploys live in sibling workflows:
+#   deploy-web.yml      — web image + Convex (path-gated)
+#   mobile-release.yml  — EAS builds + store submit (release-gated)
+#   play-listing.yml    — Play Store listing text/images
+#   preview-deploy.yml / preview-teardown.yml — ephemeral PR previews
+#   mobile-submit.yml   — manual store re-submit
 #
 # Triggers: pull requests to main, pushes to main. Feature-branch pushes alone
-# do not run CI — open a PR to get checks (same as the old GitLab workflow rules).
+# do not run CI — open a PR to get checks.
 
-name: Main CI/CD
+name: CI
 
 on:
   pull_request:
@@ -29,56 +26,19 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   detect_path_changes:
     runs-on: ubuntu-latest
     outputs:
       web: ${{ steps.changes.outputs.web }}
-      backend: ${{ steps.changes.outputs.backend }}
-      play_metadata: ${{ steps.changes.outputs.play_metadata }}
-      apple_screenshots: ${{ steps.changes.outputs.apple_screenshots }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/detect-path-changes
         id: changes
 
-  mobile_release_gate:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    outputs:
-      should_build: ${{ steps.gate.outputs.should_build }}
-      reason: ${{ steps.gate.outputs.reason }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Decide whether to trigger EAS native builds
-        id: gate
-        run: node apps/mobile/scripts/should-build-native.mjs
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          AFTER_SHA: ${{ github.sha }}
-
-  repo_quality_checks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-pnpm
-      - name: Lint, typecheck, test
-        env:
-          SKIP_ENV_VALIDATION: "1"
-          NEXT_TELEMETRY_DISABLED: "1"
-          POSTHOG_API_KEY: ""
-          POSTHOG_ENV_ID: ""
-        run: |
-          pnpm biome:check
-          pnpm check:store-notes
-          pnpm check:metadata
-          pnpm check:i18n
-          pnpm typecheck
-          pnpm test
+  quality:
+    uses: ./.github/workflows/reusable-quality-checks.yml
 
   web_pr_build:
     needs: detect_path_changes
@@ -98,54 +58,9 @@ jobs:
           POSTHOG_ENV_ID: ""
         run: pnpm run build
 
-  web_and_backend_deploy:
-    needs: [detect_path_changes, repo_quality_checks]
-    if: |
-      github.event_name == 'push' &&
-      needs.repo_quality_checks.result == 'success' &&
-      (needs.detect_path_changes.outputs.web == 'true' || needs.detect_path_changes.outputs.backend == 'true')
-    uses: ./.github/workflows/reusable-web-deploy.yml
-    with:
-      web_changed: ${{ needs.detect_path_changes.outputs.web }}
-      backend_changed: ${{ needs.detect_path_changes.outputs.backend }}
-      commit_sha: ${{ github.sha }}
-    secrets: inherit
-
-  mobile_release:
-    needs: [mobile_release_gate, repo_quality_checks, detect_path_changes]
-    if: |
-      github.event_name == 'push' &&
-      needs.repo_quality_checks.result == 'success' &&
-      needs.mobile_release_gate.outputs.should_build == 'true'
-    uses: ./.github/workflows/reusable-mobile-release.yml
-    with:
-      commit_sha: ${{ github.sha }}
-      push_screenshots: ${{ needs.detect_path_changes.outputs.apple_screenshots }}
-    secrets: inherit
-
-  # Play listing text/images, which can change without a release. Runs after
-  # mobile_release (when there is one) so two fastlane edits never collide.
-  play_listing_push:
-    needs: [detect_path_changes, repo_quality_checks, mobile_release]
-    if: |
-      always() &&
-      github.event_name == 'push' &&
-      needs.repo_quality_checks.result == 'success' &&
-      needs.mobile_release.result != 'failure' &&
-      needs.mobile_release.result != 'cancelled' &&
-      needs.detect_path_changes.outputs.play_metadata == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/mobile-submit-android
-        with:
-          lane: metadata
-          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-
   release_tag:
-    needs: repo_quality_checks
-    if: github.event_name == 'push' && needs.repo_quality_checks.result == 'success'
+    needs: quality
+    if: github.event_name == 'push' && needs.quality.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
