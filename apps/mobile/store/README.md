@@ -100,6 +100,9 @@ Checks and manual fallbacks:
 # copy & screenshots still within store limits (also runs in CI):
 node apps/mobile/store/check-metadata.mjs
 
+# force a full EAS build + store submit (skips the release gate; main only):
+# Actions -> "Mobile release" -> Run workflow (optional push_screenshots).
+
 # re-submit a commit that already built (transient store error), or force a
 # screenshot re-upload: Actions -> "Mobile submit" -> commit sha + platform.
 # ios_skip_upload=true when the binary already reached ASC and only the
