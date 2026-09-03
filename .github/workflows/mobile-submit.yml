@@ -57,7 +57,7 @@ jobs:
     outputs:
       run_id: ${{ steps.find.outputs.run_id }}
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v9
         id: find
         with:
           script: |
@@ -119,10 +119,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.CHECKOUT_SHA }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: suro-android-${{ inputs.commit_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -141,10 +141,10 @@ jobs:
     # Includes waiting for Apple to process the build before submitting it.
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.CHECKOUT_SHA }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: suro-ios-${{ inputs.commit_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

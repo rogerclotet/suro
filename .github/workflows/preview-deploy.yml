@@ -52,7 +52,7 @@ jobs:
       deploy: ${{ steps.resolve.outputs.deploy }}
       notify: ${{ steps.resolve.outputs.notify }}
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v9
         id: resolve
         with:
           script: |
@@ -113,7 +113,7 @@ jobs:
     outputs:
       web: ${{ steps.changes.outputs.web }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
       - uses: ./.github/actions/detect-path-changes
@@ -125,16 +125,16 @@ jobs:
     timeout-minutes: 45
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -151,7 +151,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Deploy preview environment
         env:
           CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
@@ -173,7 +173,7 @@ jobs:
     if: always() && needs.resolve.outputs.deploy == 'true' && needs.resolve.outputs.notify != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v9
         with:
           script: |
             const prNumber = '${{ needs.resolve.outputs.pr_number }}';
