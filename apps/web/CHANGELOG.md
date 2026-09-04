@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.21.2] — 2026-09-04
+
+### ca
+
+- [fix] Els formularis per crear esdeveniments i despeses ara enfoquen automàticament el primer camp, tant a l'app com al web.
+
+### es
+
+- [fix] Los formularios para crear eventos y gastos ahora enfocan automáticamente el primer campo, tanto en la app como en la web.
+
+### en
+
+- [fix] Event and expense creation forms now focus the first field automatically in both the app and the web version.
+
 ## [1.21.1] — 2026-09-03
 
 ### ca

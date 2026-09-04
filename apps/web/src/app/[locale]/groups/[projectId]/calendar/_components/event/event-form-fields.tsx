@@ -45,7 +45,7 @@ export default function EventFormFields({
           <FormItem>
             <FormLabel>{tCommon("name")}</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input autoFocus {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

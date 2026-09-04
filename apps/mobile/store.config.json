@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.21.1",
+    "version": "1.21.2",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Fixed a bug that prevented the iOS app build from completing.",
+        "releaseNotes": "• Event and expense creation forms now focus the first field automatically in both the app and the web version.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Se ha corregido un error que impedía generar la versión de iOS de la app.",
+        "releaseNotes": "• Los formularios para crear eventos y gastos ahora enfocan automáticamente el primer campo, tanto en la app como en la web.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• S'ha corregit un error que impedia generar la versió d'iOS de l'app.",
+        "releaseNotes": "• Els formularis per crear esdeveniments i despeses ara enfoquen automàticament el primer camp, tant a l'app com al web.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

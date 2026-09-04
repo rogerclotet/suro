@@ -105,6 +105,7 @@ function CreateSoloSpendingFormContent({
                 <FormControl>
                   <Input
                     {...field}
+                    autoFocus
                     type="number"
                     step="0.01"
                     disabled={form.formState.isSubmitting}

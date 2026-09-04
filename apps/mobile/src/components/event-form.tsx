@@ -250,6 +250,7 @@ export function EventForm({
           placeholder={tForm("namePlaceholder")}
           value={name}
           onChangeText={setName}
+          autoFocus={!initial}
         />
         <Field
           placeholder={tForm("descriptionPlaceholder")}
