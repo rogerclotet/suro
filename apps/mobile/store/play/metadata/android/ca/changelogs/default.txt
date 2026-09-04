@@ -1,1 +1,1 @@
-• S'ha corregit un error que impedia generar la versió d'iOS de l'app.
+• Els formularis per crear esdeveniments i despeses ara enfoquen automàticament el primer camp, tant a l'app com al web.

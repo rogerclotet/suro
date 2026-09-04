@@ -1,1 +1,1 @@
-• Se ha corregido un error que impedía generar la versión de iOS de la app.
+• Los formularios para crear eventos y gastos ahora enfocan automáticamente el primer campo, tanto en la app como en la web.
