@@ -1015,6 +1015,7 @@ function TaskRowMeta({
       {assignee ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
           <Avatar
+            kind="user"
             name={assignee.name}
             image={assignee.image}
             color={assignee.avatarColor}

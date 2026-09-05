@@ -23,7 +23,14 @@ const useProjectsStore = create<ProjectState>()(
       projects: [],
       project: null,
       projectId: null,
-      setProjects: (projects) => set({ projects }),
+      setProjects: (projects) =>
+        set((state) => {
+          const project =
+            projects.find((p) => p.id === state.project?.id) ??
+            projects[0] ??
+            null;
+          return { projects, project, projectId: project?.id ?? null };
+        }),
       selectProject: (project) => set({ project }),
       selectProjectId: (projectId) => set({ projectId: projectId }),
     }),

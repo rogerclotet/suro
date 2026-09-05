@@ -352,7 +352,22 @@
     "share": "Compartir",
     "switchGroup": "Cambia de grupo",
     "memberCount": "{count, plural, =1 {1 miembro} other {# miembros}}",
-    "joinShareText": "Únete a {names}"
+    "joinShareText": "Únete a {names}",
+    "manageTitle": "Ajustes del grupo",
+    "membersTitle": "Miembros",
+    "administrator": "Administrador",
+    "unnamedMember": "Miembro",
+    "removeMember": "Eliminar miembro",
+    "removeMemberLabel": "Eliminar a {name}",
+    "removeMemberDescription": "¿Quieres eliminar a {name} del grupo? Perderá el acceso. Se conservarán su contenido compartido y su historial de gastos.",
+    "removeMemberError": "No se ha podido eliminar a este miembro. Vuelve a intentarlo.",
+    "removeMemberSuccess": "Se ha eliminado a {name} del grupo.",
+    "deleteNameLabel": "Nombre completo del grupo",
+    "deleteNameInstruction": "Escribe exactamente {name} para confirmar la eliminación.",
+    "deleteDataWarning": "Eliminar el grupo borra permanentemente todas sus listas, eventos, archivos, notas y gastos para todos los miembros. Esta acción no se puede deshacer.",
+    "groupUnavailable": "Este grupo ya no está disponible.",
+    "backToGroups": "Volver a los grupos",
+    "working": "Espera un momento…"
   },
   "groupSettings": {
     "title": "Configuración del grupo",
@@ -859,7 +874,10 @@
     },
     "groups": {
       "switchGroup": "Cambiar de grupo",
-      "manageGroup": "Gestionar grupo"
+      "manageGroup": "Gestionar grupo",
+      "empty": "Todavía no tienes grupos. Crea uno para empezar.",
+      "unnamedMember": "Miembro",
+      "unreadCount": "{count, plural, one {# notificación no leída} other {# notificaciones no leídas}}"
     },
     "profile": {
       "title": "Perfil",

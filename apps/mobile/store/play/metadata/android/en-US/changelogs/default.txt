@@ -1,2 +1,5 @@
-• When creating items in the app, the keyboard now opens automatically when the first field receives focus.
-• You can now drag down the handle on create and edit sheets to dismiss them.
+• The app opens with groups, member previews and unread counts. Return to groups from any section.
+• Badges open the latest update, including its calendar month, and clear on visiting the section.
+• Cleaner group list, profile in the header, preferences in profile and settings on group home.
+• Round user avatars and rounded-square group avatars.
+• Admins can remove members with confirmation and delete groups by typing their full name.

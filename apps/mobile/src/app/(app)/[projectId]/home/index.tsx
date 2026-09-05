@@ -9,6 +9,7 @@ import {
   CheckSquare,
   ChevronRight,
   Flag,
+  Settings,
 } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
@@ -23,6 +24,11 @@ import {
   useLongDate,
 } from "@/lib/datetime";
 import { isEventOnDay, pickUpcomingEvents } from "@/lib/event-dates";
+import { unreadCount } from "@/lib/notification-routing";
+import {
+  useOpenNotificationSection,
+  useUnreadNotifications,
+} from "@/lib/notifications";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTodayAnchor } from "@/lib/use-today-anchor";
@@ -436,8 +442,12 @@ function TaskCard({
 
 export default function HomeDashboard() {
   const pid = useProjectId();
+  const unread = useUnreadNotifications();
+  const openSection = useOpenNotificationSection(pid);
+  const group = usePersistentQuery(api.projects.get, { projectId: pid });
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
+  const tGroups = useTranslations("mobile.groups");
 
   const bounds = useTodayAnchor(UPCOMING_WINDOW_MS);
 
@@ -491,8 +501,16 @@ export default function HomeDashboard() {
     <Screen>
       <Stack.Screen
         options={{
-          title: tNav("home"),
-          ...sectionHeaderBadges("home"),
+          title: group?.name ?? tNav("home"),
+          ...sectionHeaderBadges("home", undefined, [
+            {
+              icon: Settings,
+              label: tGroups("manageGroup"),
+              count: unreadCount(unread, pid, "members"),
+              onPress: () =>
+                openSection("members", `/group-settings?projectId=${pid}`),
+            },
+          ]),
         }}
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>

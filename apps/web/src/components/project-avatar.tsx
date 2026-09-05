@@ -25,7 +25,7 @@ export default function ProjectAvatar({
   return (
     <Avatar
       key={project.image ?? "no-image"}
-      className={cn("h-8 w-8", className)}
+      className={cn("h-8 w-8 rounded-[30%]", className)}
     >
       {project.image && <AvatarImage src={project.image} alt={project.name} />}
       <AvatarFallback

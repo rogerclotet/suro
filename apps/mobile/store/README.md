@@ -135,8 +135,8 @@ root `package.json`.
 ## Screenshot capture
 
 Committed screenshots are captured from the real app with seeded demo data —
-6 per platform per locale: home dashboard, lists overview, list detail,
-calendar month, expenses pot, notes. Naming: `01-home.png` … `06-notes.png`
+7 per platform per locale: groups, home dashboard, lists overview, list detail,
+calendar month, expenses pot, notes. Naming: `01-groups.png` … `07-notes.png`
 (order = store order; supply uploads alphabetically).
 
 Prep (once per capture session):
@@ -148,15 +148,22 @@ Prep (once per capture session):
 3. Sign in once in the app with the review email + fixed code.
 4. Stage content for the pass's locale (also switches the account's UI
    locale):
-   `npx convex run seed:demoGroup '{"email": "review@suro.clotet.dev", "locale": "ca"}'`
+   `npx convex run seed:demoGroup '{"email":"review@suro.clotet.dev","locale":"ca","screenshots":true}'`
+   Keep the returned `screenshotProjectIds`. For subsequent locale/platform
+   passes, provide those IDs in `replaceScreenshotProjectIds` to replace only
+   the fixtures from this capture session. Screenshot mode preserves Personal
+   and every unlisted group. It creates three groups with member previews and
+   unread activity without sending push notifications.
+5. Capture the groups screen first, before visiting sections clears their
+   badges. Use a release-mode simulator build to exclude developer overlays.
 
 iOS — needs a native build (NativeTabs don't render in Expo Go); the
 6.9" simulator produces store-ready 1320x2868 PNGs directly:
 
 ```sh
-pnpm --filter mobile exec npx expo run:ios --device "iPhone 17 Pro Max"
+pnpm --filter mobile ios --device "iPhone 17 Pro Max" --configuration Release
 xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
-xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-home.png
+xcrun simctl io booted screenshot apps/mobile/store/apple/screenshots/ca/01-groups.png
 ```
 
 Android — Pixel 9 AVD (1080x2424; reuse a running emulator if there is one):
@@ -167,7 +174,7 @@ adb shell settings put global sysui_demo_allowed 1
 adb shell am broadcast -a com.android.systemui.demo -e command enter
 adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
 adb shell am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false
-adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-home.png
+adb exec-out screencap -p > apps/mobile/store/play/metadata/android/ca/images/phoneScreenshots/01-groups.png
 adb shell am broadcast -a com.android.systemui.demo -e command exit
 ```
 

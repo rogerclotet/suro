@@ -4,8 +4,7 @@ import type { MutationCtx } from "../_generated/server";
 /**
  * Delete a project and everything scoped to it — lists + items, pots + members,
  * files (incl. their stored blobs and thumbnails), the flat project-scoped
- * tables, every membership, and the group image blob. Mirrors `projects.remove`'s
- * cascade but performs no ownership/last-member checks: callers gate access.
+ * tables, every membership, and the group image blob. Callers gate access.
  */
 export async function deleteProjectCascade(
   ctx: MutationCtx,
@@ -54,6 +53,7 @@ export async function deleteProjectCascade(
   }
 
   for (const table of [
+    "notifications",
     "spendings",
     "events",
     "notes",
@@ -123,6 +123,12 @@ export async function deleteUserAccount(
   for (const member of potMembers) {
     await ctx.db.delete(member._id);
   }
+
+  const unread = await ctx.db
+    .query("notifications")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const receipt of unread) await ctx.db.delete(receipt._id);
 
   const pushTokens = await ctx.db
     .query("pushTokens")

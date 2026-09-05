@@ -1,23 +1,29 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import type { ErrorBoundaryProps } from "expo-router";
-import { Redirect, useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import type {
   NativeTabsProps,
   NativeTabTriggerProps,
 } from "expo-router/unstable-native-tabs";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import type { FC, PropsWithChildren } from "react";
-import { useEffect } from "react";
 import { Platform, View } from "react-native";
-import { useGroupTabLabel } from "@/components/group-tab-trigger";
 import { useTranslations } from "@/i18n";
-import { FeedbackProvider } from "@/lib/feedback-state";
-import { setLastProjectId } from "@/lib/last-project";
+import {
+  type NotificationSection,
+  notificationHref,
+  unreadCount,
+} from "@/lib/notification-routing";
+import {
+  useCaptureNotificationVisit,
+  useUnreadNotifications,
+} from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { ProjectIdProvider } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
-import { Button, Loading, Screen, SheetHost, Txt } from "@/ui";
+import { Button, Loading, Screen, Txt } from "@/ui";
 
 const VANISHED_RESOURCE_ERRORS = new Set([
   "Project not found",
@@ -62,20 +68,36 @@ const Tabs = NativeTabs as unknown as FC<PropsWithChildren<NativeTabsProps>>;
 const Trigger = NativeTabs.Trigger as unknown as FC<
   PropsWithChildren<NativeTabTriggerProps>
 >;
-const { Icon, Label } = NativeTabs.Trigger;
+const { Icon, Label, Badge } = NativeTabs.Trigger;
 
 export default function ProjectTabs() {
   const t = useTheme();
   const tNav = useTranslations("nav");
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const projects = usePersistentQuery(api.projects.listMine);
-  const groupTabLabel = useGroupTabLabel();
-
-  useEffect(() => {
-    if (projectId) {
-      void setLastProjectId(projectId);
-    }
-  }, [projectId]);
+  const liveProjects = useQuery(api.projects.listMine);
+  const unread = useUnreadNotifications();
+  const captureVisit = useCaptureNotificationVisit();
+  const router = useRouter();
+  function openUnread(section: NotificationSection) {
+    const receipt = unread.find(
+      (row) => row.projectId === projectId && row.section === section,
+    );
+    if (!receipt) return;
+    captureVisit(receipt);
+    // NativeTabs emits tabPress before its own JUMP_TO. Navigate after that
+    // selection, using the captured receipt even if the root clears its badge.
+    setTimeout(
+      () => router.navigate(notificationHref(receipt), { withAnchor: true }),
+      0,
+    );
+  }
+  function badge(section: NotificationSection | "home") {
+    const count = unreadCount(unread, projectId, section);
+    return count
+      ? String(Math.min(count, 99)) + (count > 99 ? "+" : "")
+      : undefined;
+  }
 
   if (!projectId) {
     return <Loading />;
@@ -91,51 +113,64 @@ export default function ProjectTabs() {
   }
 
   // Membership gone while we're on this route: redirect before project-scoped
-  // queries mount and throw — the index route resumes another group or login.
+  // queries mount and throw. Return to the groups list.
   if (!projects.some((p) => p._id === projectId)) {
+    // A cached list can predate a newly created or joined group. Keep this
+    // query mounted until the server confirms membership before redirecting.
+    if (liveProjects === undefined) return <Loading />;
     return <Redirect href="/" />;
   }
 
   return (
     <ProjectIdProvider projectId={projectId as Id<"projects">}>
-      <SheetHost>
-        <FeedbackProvider>
-          <Tabs
-            minimizeBehavior="onScrollDown"
-            tintColor={t.primary}
-            iconColor={{ default: t.muted, selected: t.primary }}
-            labelStyle={{
-              default: { fontFamily: FONT, color: t.muted },
-              selected: { fontFamily: FONT, color: t.primary },
-            }}
-            indicatorColor={`${t.primary}33`}
-            rippleColor={`${t.primary}33`}
-            labelVisibilityMode="labeled"
-            backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
-          >
-            <Trigger name="home">
-              <Label>{tNav("home")}</Label>
-              <Icon sf="house" md="home" />
-            </Trigger>
-            <Trigger name="lists">
-              <Label>{tNav("lists")}</Label>
-              <Icon sf="checklist" md="checklist" />
-            </Trigger>
-            <Trigger name="calendar">
-              <Label>{tNav("calendar")}</Label>
-              <Icon sf="calendar" md="calendar_month" />
-            </Trigger>
-            <Trigger name="expenses">
-              <Label>{tNav("expenses")}</Label>
-              <Icon sf="creditcard" md="payments" />
-            </Trigger>
-            <Trigger name="groups">
-              <Label>{groupTabLabel}</Label>
-              <Icon sf="person.2" md="group" />
-            </Trigger>
-          </Tabs>
-        </FeedbackProvider>
-      </SheetHost>
+      <Tabs
+        backBehavior="none"
+        minimizeBehavior="onScrollDown"
+        tintColor={t.primary}
+        iconColor={{ default: t.muted, selected: t.primary }}
+        labelStyle={{
+          default: { fontFamily: FONT, color: t.muted },
+          selected: { fontFamily: FONT, color: t.primary },
+        }}
+        indicatorColor={`${t.primary}33`}
+        rippleColor={`${t.primary}33`}
+        labelVisibilityMode="labeled"
+        backgroundColor={Platform.OS === "android" ? t.navBar : undefined}
+      >
+        <Trigger name="home">
+          <Label>{tNav("home")}</Label>
+          <Badge hidden={badge("home") === undefined}>{badge("home")}</Badge>
+          <Icon sf="house" md="home" />
+        </Trigger>
+        <Trigger
+          name="lists"
+          listeners={{ tabPress: () => openUnread("lists") }}
+        >
+          <Label>{tNav("lists")}</Label>
+          <Badge hidden={badge("lists") === undefined}>{badge("lists")}</Badge>
+          <Icon sf="checklist" md="checklist" />
+        </Trigger>
+        <Trigger
+          name="calendar"
+          listeners={{ tabPress: () => openUnread("calendar") }}
+        >
+          <Label>{tNav("calendar")}</Label>
+          <Badge hidden={badge("calendar") === undefined}>
+            {badge("calendar")}
+          </Badge>
+          <Icon sf="calendar" md="calendar_month" />
+        </Trigger>
+        <Trigger
+          name="expenses"
+          listeners={{ tabPress: () => openUnread("expenses") }}
+        >
+          <Label>{tNav("expenses")}</Label>
+          <Badge hidden={badge("expenses") === undefined}>
+            {badge("expenses")}
+          </Badge>
+          <Icon sf="creditcard" md="payments" />
+        </Trigger>
+      </Tabs>
     </ProjectIdProvider>
   );
 }

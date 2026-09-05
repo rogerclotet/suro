@@ -9,6 +9,7 @@ import { Camera, Check, RotateCcw, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
+import { ProfilePreferences } from "@/components/profile-preferences";
 import { useTranslations } from "@/i18n";
 import {
   CATPPUCCIN_COLOR_KEYS,
@@ -157,6 +158,8 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
         </View>
       </Section>
 
+      <ProfilePreferences />
+
       <Button
         title={t("signOut")}
         variant="ghost"
@@ -244,6 +247,7 @@ function AvatarSection({ user }: { user: Doc<"users"> }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Avatar
+        kind="user"
         name={user.name}
         image={displayImage}
         color={user.avatarColor}

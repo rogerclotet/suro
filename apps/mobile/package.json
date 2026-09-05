@@ -91,9 +91,11 @@
     "@babel/core": "^7.29.7",
     "@react-native/metro-config": "0.86.3",
     "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
     "eas-cli": "^21.8.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
+    "jsdom": "^29.1.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"
   }

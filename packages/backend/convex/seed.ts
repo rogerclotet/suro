@@ -312,6 +312,13 @@ const DEMO_GROUP_NAMES = new Set(
   Object.values(CONTENT).map((content) => content.groupName),
 );
 
+const SCREENSHOT_GROUPS = {
+  ca: ["Família", "Escapada al Pirineu"],
+  es: ["Familia", "Escapada al Pirineo"],
+  en: ["Family", "Pyrenees getaway"],
+};
+const SCREENSHOT_GROUP_NAMES = new Set(Object.values(SCREENSHOT_GROUPS).flat());
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 // The seed stages screenshot fixtures for devices set to Europe/Madrid (CEST);
 // event times are stored shifted so they *display* at the intended local hour.
@@ -369,6 +376,7 @@ async function deleteProjectCascade(
   }
   for (const table of [
     "spendings",
+    "notifications",
     "events",
     "notes",
     "categories",
@@ -408,10 +416,15 @@ export const demoGroup = internalMutation({
     email: v.string(),
     locale: v.union(v.literal("ca"), v.literal("es"), v.literal("en")),
     // Also remove the auto-created "Personal" group, so the demo group is the
-    // account's only group — reviewers (and screenshot runs) land straight in it.
+    // account's only group in the reviewer launcher. Screenshot mode ignores it.
     dropPersonal: v.optional(v.boolean()),
+    screenshots: v.optional(v.boolean()),
+    replaceScreenshotProjectIds: v.optional(v.array(v.id("projects"))),
   },
-  handler: async (ctx, { email, locale, dropPersonal }) => {
+  handler: async (
+    ctx,
+    { email, locale, dropPersonal, screenshots, replaceScreenshotProjectIds },
+  ) => {
     const user = await ctx.db
       .query("users")
       .withIndex("email", (q) => q.eq("email", email.toLowerCase()))
@@ -429,10 +442,14 @@ export const demoGroup = internalMutation({
       .withIndex("by_createdBy", (q) => q.eq("createdBy", user._id))
       .collect();
     for (const project of owned) {
-      if (
+      const isFixture =
         DEMO_GROUP_NAMES.has(project.name) ||
-        (dropPersonal === true && project.name === "Personal")
-      ) {
+        SCREENSHOT_GROUP_NAMES.has(project.name);
+      const shouldReplace = screenshots
+        ? isFixture && replaceScreenshotProjectIds?.includes(project._id)
+        : DEMO_GROUP_NAMES.has(project.name) ||
+          (dropPersonal === true && project.name === "Personal");
+      if (shouldReplace) {
         await deleteProjectCascade(ctx, project._id);
       }
     }
@@ -480,7 +497,7 @@ export const demoGroup = internalMutation({
       createdBy: user._id,
       updatedAt: now,
     });
-    await ctx.db.insert("events", {
+    const birthdayEventId = await ctx.db.insert("events", {
       name: content.events.birthday,
       startAt: atLocalHour(3, 21),
       endAt: atLocalHour(3, 23),
@@ -562,8 +579,9 @@ export const demoGroup = internalMutation({
     await insertList(content.packing, { eventId: tripEventId });
     await insertList(content.chores, { taskMode: true });
 
+    const noteIds: Id<"notes">[] = [];
     for (const note of [content.notes.menu, content.notes.wifi]) {
-      await ctx.db.insert("notes", {
+      const noteId = await ctx.db.insert("notes", {
         name: note.name,
         contents: note.html,
         format: "html",
@@ -571,6 +589,7 @@ export const demoGroup = internalMutation({
         createdBy: user._id,
         updatedAt: now,
       });
+      noteIds.push(noteId);
     }
 
     // Expenses: an active pot with one split per member, so balances and a
@@ -604,6 +623,55 @@ export const demoGroup = internalMutation({
       });
     }
 
-    return { projectId, locale, favoriteListId, potId };
+    const screenshotProjectIds = [projectId];
+    if (screenshots) {
+      await ctx.db.patch(projectId, { lastActivityAt: now });
+      const targets = [
+        {
+          section: "calendar",
+          target: { kind: "calendar", eventId: birthdayEventId },
+        },
+        { section: "lists", target: { kind: "lists", listId: favoriteListId } },
+        { section: "expenses", target: { kind: "expenses", potId } },
+        { section: "members", target: { kind: "members" } },
+      ] as const;
+      for (const receipt of targets) {
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          projectId,
+          ...receipt,
+        });
+      }
+      for (const noteId of noteIds) {
+        await ctx.db.insert("notifications", {
+          userId: user._id,
+          projectId,
+          section: "notes",
+          target: { kind: "notes", noteId },
+        });
+      }
+      for (const [index, name] of SCREENSHOT_GROUPS[locale].entries()) {
+        const groupId = await ctx.db.insert("projects", {
+          name,
+          createdBy: user._id,
+          inviteToken: crypto.randomUUID(),
+          color: index === 0 ? "mauve" : "teal",
+          lastActivityAt: now - (index + 1) * 3_600_000,
+        });
+        screenshotProjectIds.push(groupId);
+        const memberIds =
+          index === 0 ? [user._id, julia] : [user._id, julia, marc];
+        for (const userId of memberIds)
+          await ctx.db.insert("projectMembers", { projectId: groupId, userId });
+        if (index === 0)
+          await ctx.db.insert("notifications", {
+            userId: user._id,
+            projectId: groupId,
+            section: "members",
+            target: { kind: "members" },
+          });
+      }
+    }
+    return { projectId, locale, favoriteListId, potId, screenshotProjectIds };
   },
 });

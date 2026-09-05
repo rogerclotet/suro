@@ -1,9 +1,9 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
 import { loadListWithItems } from "./model/lists";
+import { notifyProject } from "./model/notify";
 import {
   requireEventAccess,
   requireListAccess,
@@ -114,12 +114,12 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "event_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/calendar/${eventId}`,
+      target: { kind: "calendar", eventId },
     });
     await track(ctx, userId, "event_created", { projectId, allDay });
     return eventId;

@@ -230,7 +230,7 @@ export function usePushNotifications(): void {
   }, [isAuthenticated, register]);
 
   useEffect(() => {
-    if (!PUSH_AVAILABLE) {
+    if (!PUSH_AVAILABLE || !isAuthenticated) {
       return;
     }
     function open(response: Notifications.NotificationResponse) {
@@ -240,7 +240,17 @@ export function usePushNotifications(): void {
         // `/<pid>/<section>/<id>` (the entity the push is about).
         // withHomeTabPrefix nests Home-tab sections (files, notes) under
         // `/<pid>/home/...` to match the mobile tab layout.
-        router.push(withHomeTabPrefix(path));
+        const route = withHomeTabPrefix(path);
+        const separator = route.includes("?") ? "&" : "?";
+        const visit = encodeURIComponent(
+          response.notification.request.identifier,
+        );
+        router.navigate(`${route}${separator}notification=&visit=${visit}`, {
+          withAnchor: true,
+        });
+        void notifications()
+          .clearLastNotificationResponseAsync()
+          .catch(() => {});
       }
     }
     // Any of these can throw if expo-notifications' native side fails to init on
@@ -262,5 +272,5 @@ export function usePushNotifications(): void {
     } catch {
       return;
     }
-  }, [router]);
+  }, [router, isAuthenticated]);
 }

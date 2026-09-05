@@ -1,2 +1,5 @@
-• En crear elements a l'app, el teclat ara s'obre automàticament quan s'enfoca el primer camp.
-• Ara pots arrossegar cap avall la nansa dels fulls de creació i edició per tancar-los.
+• L'app s'obre amb els grups, els membres i els avisos pendents. Torna als grups des de qualsevol secció.
+• Els avisos obren l'última novetat, inclòs el mes del calendari, i es netegen en visitar la secció.
+• Llista de grups més neta, perfil a la capçalera, preferències al perfil i ajustos a l'inici del grup.
+• Avatars rodons per a persones i quadrats arrodonits per a grups.
+• L'administrador pot eliminar membres amb confirmació i grups escrivint-ne el nom complet.

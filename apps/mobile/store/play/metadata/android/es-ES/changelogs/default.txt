@@ -1,2 +1,5 @@
-• Al crear elementos en la app, el teclado ahora se abre automáticamente cuando se enfoca el primer campo.
-• Ahora puedes arrastrar hacia abajo el tirador de los paneles de creación y edición para cerrarlos.
+• La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.
+• Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.
+• Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.
+• Avatares redondos para personas y cuadrados redondeados para grupos.
+• El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.

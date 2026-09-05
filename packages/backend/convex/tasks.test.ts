@@ -50,6 +50,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 function insertTaskList(name: string, taskMode = true) {
@@ -350,6 +351,7 @@ describe("due reminders", () => {
   });
 
   it("pushes due reminders to the assignee, then dedupes", async () => {
+    vi.useFakeTimers();
     const list = await insertTaskList("Chores");
     const item = await insertTaskItem(list, "Trash", {
       assigneeId: ids.alice,
@@ -364,6 +366,7 @@ describe("due reminders", () => {
 
     const fetchMock = stubExpo();
     await t.action(internal.tasks.sendDueReminders, {});
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
     expect(body[0]).toMatchObject({
@@ -377,6 +380,7 @@ describe("due reminders", () => {
 
     // Second run: already reminded, so no further push.
     await t.action(internal.tasks.sendDueReminders, {});
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

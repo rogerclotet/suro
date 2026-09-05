@@ -25,6 +25,20 @@ export async function requireProjectMember(
   return userId;
 }
 
+/** Group administration belongs to its creator. */
+export async function requireProjectAdmin(
+  ctx: QueryCtx,
+  projectId: Id<"projects">,
+) {
+  const userId = await requireProjectMember(ctx, projectId);
+  const project = await ctx.db.get(projectId);
+  if (!project) throw new Error("Project not found");
+  if (project.createdBy !== userId) {
+    throw new Error("Only the administrator can manage this group");
+  }
+  return { project, userId };
+}
+
 /**
  * Throw unless `userId` belongs to the project — for validating that a chosen
  * task assignee is actually a group member. Mirrors createLinkedPot's check.

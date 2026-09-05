@@ -1,9 +1,13 @@
-import type { Href } from "expo-router";
-import { useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import { Pressable, View } from "react-native";
+import { UnreadBadge } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
 import { HOME_SECTIONS } from "@/lib/home-sections";
+import { unreadCount } from "@/lib/notification-routing";
+import {
+  useOpenNotificationSection,
+  useUnreadNotifications,
+} from "@/lib/notifications";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Txt } from "@/ui";
@@ -12,10 +16,12 @@ function SectionChip({
   label,
   icon: Icon,
   onPress,
+  count,
 }: {
   label: string;
   icon: LucideIcon;
   onPress: () => void;
+  count: number;
 }) {
   const t = useTheme();
   return (
@@ -40,6 +46,7 @@ function SectionChip({
       <Txt weight="700" size={13} numberOfLines={1}>
         {label}
       </Txt>
+      <UnreadBadge count={count} />
     </Pressable>
   );
 }
@@ -47,7 +54,8 @@ function SectionChip({
 /** Compact section shortcuts below the home date header. Wraps to a second row. */
 export function HomeSectionChips() {
   const pid = useProjectId();
-  const router = useRouter();
+  const openSection = useOpenNotificationSection(pid);
+  const unread = useUnreadNotifications();
   const tNav = useTranslations("nav");
 
   return (
@@ -57,7 +65,10 @@ export function HomeSectionChips() {
           key={section.key}
           label={tNav(section.key)}
           icon={section.icon}
-          onPress={() => router.navigate(`/${pid}/home/${section.key}` as Href)}
+          count={unreadCount(unread, pid, section.key)}
+          onPress={() =>
+            openSection(section.key, `/${pid}/home/${section.key}`)
+          }
         />
       ))}
     </View>

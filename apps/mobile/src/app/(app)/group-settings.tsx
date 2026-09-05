@@ -1,9 +1,10 @@
 import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { File, UploadType } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Camera, Check, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Share, View } from "react-native";
@@ -17,25 +18,18 @@ import { localizeGroupPath } from "@/lib/group-paths";
 import { usePersistentQuery } from "@/lib/offline";
 import { webUrl } from "@/lib/urls";
 import { useTheme } from "@/theme";
-import { Button, Field, Loading, Screen, Txt } from "@/ui";
+import { Button, Field, Loading, Screen, Sheet, Txt } from "@/ui";
 
-/**
- * Per-group manage page, reached from each row in the group switcher. Editing
- * the name + color is creator-only (the only fields `projects.update` accepts);
- * inviting is open to every member; leaving is shown to non-creators (the
- * creator would orphan the group). A pushed stack screen rather than a tab, so
- * it takes the target group's id as a route param.
- */
+/** Group settings, with administration reserved for the group's creator. */
 export default function GroupSettings() {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const tr = useTranslations("mobile.groups");
-  const project = usePersistentQuery(api.projects.get, {
-    projectId: projectId as Id<"projects">,
-  });
+  const projects = usePersistentQuery(api.projects.listMineDetailed);
+  const project = projects?.find((p) => p._id === projectId);
   const me = usePersistentQuery(api.users.me);
-
-  const loading = project === undefined || me === undefined;
+  const loading = projects === undefined || me === undefined;
   const isCreator = !!project && !!me && project.createdBy === me._id;
+  if (!loading && !project) return <Redirect href="/groups" />;
 
   return (
     <Screen>
@@ -43,7 +37,11 @@ export default function GroupSettings() {
       {loading ? (
         <Loading />
       ) : !project ? null : (
-        <ManageGroup project={project} isCreator={isCreator} />
+        <ManageGroup
+          project={project}
+          isCreator={isCreator}
+          members={project.members}
+        />
       )}
     </Screen>
   );
@@ -52,9 +50,11 @@ export default function GroupSettings() {
 function ManageGroup({
   project,
   isCreator,
+  members,
 }: {
   project: Doc<"projects">;
   isCreator: boolean;
+  members: GroupMember[];
 }) {
   const t = useTranslations("groups");
   const tc = useTranslations("mobile.common");
@@ -83,9 +83,8 @@ function ManageGroup({
   async function leaveGroup() {
     try {
       await leave({ projectId: project._id });
-      // The group we were viewing is gone; let the index route re-route us into
-      // a remaining group.
-      router.replace("/");
+      // The group we were viewing is gone. Return to the groups list.
+      router.dismissTo("/groups");
     } catch {
       Alert.alert(t("leaveError"));
     }
@@ -118,7 +117,10 @@ function ManageGroup({
         <Button title={t("share")} onPress={shareInvite} />
       </View>
 
-      {isCreator ? null : (
+      <GroupMembers project={project} members={members} isCreator={isCreator} />
+      {isCreator ? (
+        <DeleteGroup project={project} />
+      ) : (
         <View style={{ gap: 8 }}>
           <Button
             title={t("leaveConfirmTitle")}
@@ -128,6 +130,170 @@ function ManageGroup({
         </View>
       )}
     </ScrollView>
+  );
+}
+
+type GroupMember = FunctionReturnType<typeof api.projects.members>[number];
+
+function GroupMembers({
+  project,
+  members,
+  isCreator,
+}: {
+  project: Doc<"projects">;
+  members: GroupMember[];
+  isCreator: boolean;
+}) {
+  const t = useTranslations("groups");
+  const tc = useTranslations("mobile.common");
+  const theme = useTheme();
+  const remove = useMutation(api.projects.removeMember);
+  const [busy, setBusy] = useState(false);
+  async function removeMember(userId: Id<"users">) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await remove({ projectId: project._id, userId });
+    } catch {
+      Alert.alert(t("removeMemberError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+  function confirm(member: GroupMember) {
+    Alert.alert(
+      t("removeMember"),
+      t("removeMemberDescription", { name: member.name ?? t("unnamedMember") }),
+      [
+        { text: tc("cancel"), style: "cancel" },
+        {
+          text: t("removeMember"),
+          style: "destructive",
+          onPress: () => void removeMember(member._id),
+        },
+      ],
+    );
+  }
+  return (
+    <View style={{ gap: 8 }}>
+      <Txt size={16} weight="700">
+        {t("membersTitle")}
+      </Txt>
+      {members.map((member) => (
+        <View
+          key={member._id}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderColor: theme.border,
+          }}
+        >
+          <Avatar
+            kind="user"
+            name={member.name}
+            image={member.image}
+            color={member.avatarColor}
+            size={34}
+          />
+          <Txt style={{ flex: 1 }}>{member.name ?? t("unnamedMember")}</Txt>
+          {member._id === project.createdBy ? (
+            <Txt muted size={12}>
+              {t("administrator")}
+            </Txt>
+          ) : isCreator ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("removeMemberLabel", {
+                name: member.name ?? t("unnamedMember"),
+              })}
+              disabled={busy}
+              onPress={() => confirm(member)}
+              style={{ padding: 10, opacity: busy ? 0.5 : 1 }}
+            >
+              <Trash2 size={20} color={theme.danger} />
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function DeleteGroup({ project }: { project: Doc<"projects"> }) {
+  const t = useTranslations("groups");
+  const tc = useTranslations("mobile.common");
+  const router = useRouter();
+  const remove = useMutation(api.projects.remove);
+  const [open, setOpen] = useState(false);
+  const [confirmationName, setConfirmationName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+  async function confirm() {
+    if (busy || confirmationName !== project.name) return;
+    setBusy(true);
+    try {
+      await remove({ projectId: project._id, confirmationName });
+      setDeleted(true);
+      setOpen(false);
+    } catch {
+      Alert.alert(t("deleteError"));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <Button
+        title={t("deleteConfirmTitle")}
+        variant="danger"
+        onPress={() => {
+          setConfirmationName("");
+          setOpen(true);
+        }}
+      />
+      <Sheet
+        visible={open}
+        onClose={() => {
+          if (!busy) setOpen(false);
+        }}
+        onClosed={() => {
+          if (deleted) router.dismissTo("/groups");
+        }}
+      >
+        <View style={{ padding: 20, gap: 16 }}>
+          <Txt size={22} weight="700">
+            {t("deleteConfirmTitle")}
+          </Txt>
+          <Txt muted>{t("deleteDataWarning")}</Txt>
+          <Txt>{t("deleteNameInstruction", { name: project.name })}</Txt>
+          <Field
+            accessibilityLabel={t("deleteNameLabel")}
+            value={confirmationName}
+            onChangeText={setConfirmationName}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoFocus
+            editable={!busy}
+            onSubmitEditing={() => void confirm()}
+          />
+          <Button
+            title={busy ? t("working") : t("deleteConfirmTitle")}
+            variant="danger"
+            disabled={busy || confirmationName !== project.name}
+            onPress={() => void confirm()}
+          />
+          <Button
+            title={tc("cancel")}
+            variant="ghost"
+            disabled={busy}
+            onPress={() => setOpen(false)}
+          />
+        </View>
+      </Sheet>
+    </>
   );
 }
 
@@ -301,6 +467,7 @@ function GroupImage({ project }: { project: Doc<"projects"> }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Avatar
+        kind="group"
         name={project.name}
         image={project.image}
         color={project.color}

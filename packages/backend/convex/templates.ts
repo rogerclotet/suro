@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { type MutationCtx, mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
@@ -7,6 +6,7 @@ import {
   ensureCategorySuggestions,
   normalizeCategoryName,
 } from "./model/categories";
+import { notifyProject } from "./model/notify";
 import {
   requireProjectMember,
   requireTemplateAccess,
@@ -88,12 +88,12 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "template_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/lists/templates/${templateId}`,
+      target: { kind: "templates", templateId },
     });
     await track(ctx, userId, "template_created", {
       projectId,

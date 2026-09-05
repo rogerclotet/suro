@@ -630,6 +630,7 @@ function AssigneePicker({
             }}
           >
             <Avatar
+              kind="user"
               name={member.name}
               image={member.image}
               color={member.avatarColor}

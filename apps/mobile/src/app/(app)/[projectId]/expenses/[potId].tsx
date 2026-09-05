@@ -344,6 +344,7 @@ export default function PotDetail() {
             }}
           >
             <Avatar
+              kind="user"
               name={entry.user.name}
               image={entry.user.image}
               color={entry.user.avatarColor}
@@ -464,6 +465,7 @@ function MemberChip({
     >
       {member ? (
         <Avatar
+          kind="user"
           name={member.name}
           image={member.image}
           color={member.avatarColor}

@@ -6,6 +6,32 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.23.0] — 2026-09-05
+
+### ca
+
+- [feature] L'app s'obre amb els grups, els membres i els avisos pendents. Torna als grups des de qualsevol secció.
+- [feature] Els avisos obren l'última novetat, inclòs el mes del calendari, i es netegen en visitar la secció.
+- [improvement] Llista de grups més neta, perfil a la capçalera, preferències al perfil i ajustos a l'inici del grup.
+- [fix] Avatars rodons per a persones i quadrats arrodonits per a grups.
+- [feature] L'administrador pot eliminar membres amb confirmació i grups escrivint-ne el nom complet.
+
+### es
+
+- [feature] La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.
+- [feature] Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.
+- [improvement] Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.
+- [fix] Avatares redondos para personas y cuadrados redondeados para grupos.
+- [feature] El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.
+
+### en
+
+- [feature] The app opens with groups, member previews and unread counts. Return to groups from any section.
+- [feature] Badges open the latest update, including its calendar month, and clear on visiting the section.
+- [improvement] Cleaner group list, profile in the header, preferences in profile and settings on group home.
+- [fix] Round user avatars and rounded-square group avatars.
+- [feature] Admins can remove members with confirmation and delete groups by typing their full name.
+
 ## [1.22.0] — 2026-09-05
 
 ### ca
