@@ -1,1 +1,1 @@
-• Els avatars de les persones ara són rodons i els dels grups mantenen la forma quadrada amb cantonades arrodonides, tant a l'app com al web.
+• Els ajustos del grup mostren els membres i permeten a l'administrador eliminar-ne amb confirmació, tant al web com a l'app. També pot eliminar el grup escrivint-ne el nom complet.

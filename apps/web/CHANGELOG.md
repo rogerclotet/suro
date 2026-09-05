@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.24.0] — 2026-09-05
+
+### ca
+
+- [feature] Els ajustos del grup mostren els membres i permeten a l'administrador eliminar-ne amb confirmació, tant al web com a l'app. També pot eliminar el grup escrivint-ne el nom complet.
+
+### es
+
+- [feature] Los ajustes del grupo muestran sus miembros y permiten al administrador eliminarlos con confirmación, tanto en la web como en la app. También puede eliminar el grupo escribiendo su nombre completo.
+
+### en
+
+- [feature] Group settings list members and let administrators remove them with confirmation on web and native. Administrators can also delete a group by typing its full name.
+
 ## [1.23.2] — 2026-09-05
 
 ### ca

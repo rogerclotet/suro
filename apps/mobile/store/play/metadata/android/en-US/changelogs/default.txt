@@ -1,1 +1,1 @@
-• User avatars are now round and group avatars use rounded squares consistently across the native and web apps.
+• Group settings list members and let administrators remove them with confirmation on web and native. Administrators can also delete a group by typing its full name.

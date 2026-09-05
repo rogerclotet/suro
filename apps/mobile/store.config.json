@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.23.2",
+    "version": "1.24.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• User avatars are now round and group avatars use rounded squares consistently across the native and web apps.",
+        "releaseNotes": "• Group settings list members and let administrators remove them with confirmation on web and native. Administrators can also delete a group by typing its full name.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los avatares de las personas ahora son redondos y los de los grupos mantienen la forma cuadrada con esquinas redondeadas, tanto en la app como en la web.",
+        "releaseNotes": "• Los ajustes del grupo muestran sus miembros y permiten al administrador eliminarlos con confirmación, tanto en la web como en la app. También puede eliminar el grupo escribiendo su nombre completo.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els avatars de les persones ara són rodons i els dels grups mantenen la forma quadrada amb cantonades arrodonides, tant a l'app com al web.",
+        "releaseNotes": "• Els ajustos del grup mostren els membres i permeten a l'administrador eliminar-ne amb confirmació, tant al web com a l'app. També pot eliminar el grup escrivint-ne el nom complet.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

@@ -1,1 +1,1 @@
-• Los avatares de las personas ahora son redondos y los de los grupos mantienen la forma cuadrada con esquinas redondeadas, tanto en la app como en la web.
+• Los ajustes del grupo muestran sus miembros y permiten al administrador eliminarlos con confirmación, tanto en la web como en la app. También puede eliminar el grupo escribiendo su nombre completo.
