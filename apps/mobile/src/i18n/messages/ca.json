@@ -352,7 +352,22 @@
     "share": "Compartir",
     "switchGroup": "Canvia de grup",
     "memberCount": "{count, plural, =1 {1 membre} other {# membres}}",
-    "joinShareText": "Uneix-te a {names}"
+    "joinShareText": "Uneix-te a {names}",
+    "manageTitle": "Ajustos del grup",
+    "membersTitle": "Membres",
+    "administrator": "Administrador",
+    "unnamedMember": "Membre",
+    "removeMember": "Elimina el membre",
+    "removeMemberLabel": "Elimina {name}",
+    "removeMemberDescription": "Vols eliminar {name} del grup? Perdrà l’accés. Es conservaran el contingut compartit i l’historial de despeses.",
+    "removeMemberError": "No s’ha pogut eliminar aquest membre. Torna-ho a provar.",
+    "removeMemberSuccess": "S’ha eliminat {name} del grup.",
+    "deleteNameLabel": "Nom complet del grup",
+    "deleteNameInstruction": "Escriu exactament {name} per confirmar l’eliminació.",
+    "deleteDataWarning": "Eliminar el grup esborra permanentment totes les llistes, els esdeveniments, els fitxers, les notes i les despeses per a tots els membres. Aquesta acció no es pot desfer.",
+    "groupUnavailable": "Aquest grup ja no està disponible.",
+    "backToGroups": "Torna als grups",
+    "working": "Espera un moment…"
   },
   "groupSettings": {
     "title": "Configuració del grup",

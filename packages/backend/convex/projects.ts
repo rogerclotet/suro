@@ -1,11 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { deleteProjectCascade } from "./model/account";
 import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
 import { notifyProject } from "./model/notify";
-import { requireProjectMember } from "./model/permissions";
+import { requireProjectAdmin, requireProjectMember } from "./model/permissions";
 
 /** Projects (groups) the current user belongs to. Ported from getProjects. */
 export const listMine = query({
@@ -285,7 +286,7 @@ export const update = mutation({
 
 /**
  * Leave a group. Any member except the creator may leave — the creator would
- * orphan the group, so they delete it instead (not yet ported). Removes only the
+ * orphan the group, so they delete it instead. Removes only the
  * caller's own membership row, mirroring the PWA's leaveProject; the user's pot
  * memberships and spendings are intentionally left intact (parity, and dropping
  * them would orphan expense splits). Throws if the caller isn't a member so the
@@ -407,128 +408,42 @@ export const removeImage = mutation({
   },
 });
 
-/**
- * Delete a group and all its data. Creator-only, and only once they are the
- * sole remaining member (mirrors the PWA's deleteProject — a shared group must
- * be emptied first). Convex has no FK ON DELETE CASCADE, so every project-scoped
- * table is cleared manually, including child rows (listItems, potMembers) and
- * stored file/image blobs.
- */
-export const remove = mutation({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, { projectId }) => {
-    const userId = await requireUserId(ctx);
-    const project = await ctx.db.get(projectId);
-    if (project === null) {
-      throw new Error("Project not found");
+/** Remove a member while preserving shared content and expense history. */
+export const removeMember = mutation({
+  args: { projectId: v.id("projects"), userId: v.id("users") },
+  handler: async (ctx, { projectId, userId }) => {
+    const { project } = await requireProjectAdmin(ctx, projectId);
+    if (userId === project.createdBy) {
+      throw new Error("The administrator cannot be removed from the group");
     }
-    if (project.createdBy !== userId) {
-      throw new Error("Only the creator can delete this group");
-    }
-    const members = await ctx.db
+    const membership = await ctx.db
       .query("projectMembers")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    if (members.length > 1) {
-      throw new Error("Cannot delete a group with other members");
-    }
-
-    // Lists + their items.
-    const lists = await ctx.db
-      .query("lists")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const list of lists) {
-      const items = await ctx.db
-        .query("listItems")
-        .withIndex("by_list", (q) => q.eq("listId", list._id))
-        .collect();
-      for (const item of items) {
-        await ctx.db.delete(item._id);
-      }
-      await ctx.db.delete(list._id);
-    }
-
-    // Pots + their members.
-    const pots = await ctx.db
-      .query("pots")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const pot of pots) {
-      const potMembers = await ctx.db
-        .query("potMembers")
-        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
-        .collect();
-      for (const member of potMembers) {
-        await ctx.db.delete(member._id);
-      }
-      await ctx.db.delete(pot._id);
-    }
-
-    // Files (+ their stored blobs and thumbnails).
-    const files = await ctx.db
-      .query("files")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const file of files) {
-      await ctx.storage.delete(file.storageId);
-      if (file.thumbnailStorageId) {
-        await ctx.storage.delete(file.thumbnailStorageId);
-      }
-      await ctx.db.delete(file._id);
-    }
-
-    // Flat project-scoped tables.
-    const spendings = await ctx.db
-      .query("spendings")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const spending of spendings) {
-      await ctx.db.delete(spending._id);
-    }
-    const categories = await ctx.db
-      .query("categories")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const category of categories) {
-      await ctx.db.delete(category._id);
-    }
-    const events = await ctx.db
-      .query("events")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const event of events) {
-      await ctx.db.delete(event._id);
-    }
-    const templates = await ctx.db
-      .query("listTemplates")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const template of templates) {
-      await ctx.db.delete(template._id);
-    }
-    const notes = await ctx.db
-      .query("notes")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
-      .collect();
-    for (const note of notes) {
-      await ctx.db.delete(note._id);
-    }
-
+      .withIndex("by_project_user", (q) =>
+        q.eq("projectId", projectId).eq("userId", userId),
+      )
+      .unique();
+    if (!membership) throw new Error("Not a member of this group");
     const unread = await ctx.db
       .query("notifications")
-      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .withIndex("by_user_project", (q) =>
+        q.eq("userId", userId).eq("projectId", projectId),
+      )
       .collect();
     for (const receipt of unread) await ctx.db.delete(receipt._id);
+    await ctx.db.delete(membership._id);
+    return null;
+  },
+});
 
-    // Memberships, the group image blob, then the project itself.
-    for (const member of members) {
-      await ctx.db.delete(member._id);
+/** Delete all group data only after the administrator confirms its current full name. */
+export const remove = mutation({
+  args: { projectId: v.id("projects"), confirmationName: v.string() },
+  handler: async (ctx, { projectId, confirmationName }) => {
+    const { project, userId } = await requireProjectAdmin(ctx, projectId);
+    if (confirmationName !== project.name) {
+      throw new Error("Group name does not match");
     }
-    if (project.imageStorageId) {
-      await ctx.storage.delete(project.imageStorageId);
-    }
-    await ctx.db.delete(projectId);
+    await deleteProjectCascade(ctx, projectId);
     await track(ctx, userId, "group_deleted", { projectId });
     return null;
   },

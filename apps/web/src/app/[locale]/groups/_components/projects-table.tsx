@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Settings, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
@@ -31,10 +31,6 @@ export default function ProjectsTable() {
   const { data: session } = useSession();
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
-  const ownProjects = projects.filter(
-    (p) => p.createdBy === session?.user.id,
-  ).length;
-
   function deleteButton(project: Project) {
     if (project.createdBy !== session?.user.id) {
       return (
@@ -53,50 +49,6 @@ export default function ProjectsTable() {
           </TooltipTrigger>
           <TooltipContent>
             <p>{t("deleteRestrictionCreatorOnly")}</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    if (project.users.length > 1) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                aria-label={tCommon("delete")}
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t("deleteRestrictionEmptyOnly")}</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    if (ownProjects <= 1) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                aria-label={tCommon("delete")}
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t("deleteRestrictionOnlyOwn")}</p>
           </TooltipContent>
         </Tooltip>
       );
@@ -161,6 +113,17 @@ export default function ProjectsTable() {
             </TableCell>
             <TableCell className="align-middle">
               <div className="flex flex-row items-center justify-end gap-1">
+                <Button variant="ghost" size="icon" asChild>
+                  <Link
+                    href={{
+                      pathname: "/groups/[projectId]/settings",
+                      params: { projectId: project.id },
+                    }}
+                    aria-label={t("manageTitle")}
+                  >
+                    <Settings />
+                  </Link>
+                </Button>
                 <InviteButton project={project} />
                 <LeaveButton project={project} />
                 {editButton(project)}

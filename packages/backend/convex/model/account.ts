@@ -4,8 +4,7 @@ import type { MutationCtx } from "../_generated/server";
 /**
  * Delete a project and everything scoped to it — lists + items, pots + members,
  * files (incl. their stored blobs and thumbnails), the flat project-scoped
- * tables, every membership, and the group image blob. Mirrors `projects.remove`'s
- * cascade but performs no ownership/last-member checks: callers gate access.
+ * tables, every membership, and the group image blob. Callers gate access.
  */
 export async function deleteProjectCascade(
   ctx: MutationCtx,

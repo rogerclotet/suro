@@ -352,7 +352,22 @@
     "share": "Share",
     "switchGroup": "Switch group",
     "memberCount": "{count, plural, =1 {1 member} other {# members}}",
-    "joinShareText": "Join {names}"
+    "joinShareText": "Join {names}",
+    "manageTitle": "Group settings",
+    "membersTitle": "Members",
+    "administrator": "Administrator",
+    "unnamedMember": "Member",
+    "removeMember": "Remove member",
+    "removeMemberLabel": "Remove {name}",
+    "removeMemberDescription": "Remove {name} from this group? They will lose access. Their shared content and expense history will remain.",
+    "removeMemberError": "Could not remove this member. Please try again.",
+    "removeMemberSuccess": "{name} has been removed from the group.",
+    "deleteNameLabel": "Full group name",
+    "deleteNameInstruction": "Type {name} exactly to confirm deletion.",
+    "deleteDataWarning": "Deleting this group permanently removes all its lists, calendar events, files, notes and expenses for every member. This cannot be undone.",
+    "groupUnavailable": "This group is no longer available.",
+    "backToGroups": "Back to groups",
+    "working": "Please wait…"
   },
   "groupSettings": {
     "title": "Group settings",

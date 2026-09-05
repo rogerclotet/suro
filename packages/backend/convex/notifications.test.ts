@@ -317,7 +317,10 @@ describe("unread activity", () => {
         target: { kind: "files" },
       }),
     );
-    await ctx.alice.mutation(api.projects.remove, { projectId: ctx.ids.group });
+    await ctx.alice.mutation(api.projects.remove, {
+      projectId: ctx.ids.group,
+      confirmationName: "Family",
+    });
     expect(
       await ctx.t.run((c) => c.db.query("notifications").collect()),
     ).toEqual([]);
