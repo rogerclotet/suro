@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.23.0",
+    "version": "1.23.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The app opens with groups, member previews and unread counts. Return to groups from any section.\n• Badges open the latest update, including its calendar month, and clear on visiting the section.\n• Cleaner group list, profile in the header, preferences in profile and settings on group home.\n• Round user avatars and rounded-square group avatars.\n• Admins can remove members with confirmation and delete groups by typing their full name.",
+        "releaseNotes": "• The app shows an error when feedback cannot be sent and keeps your message so you can try again.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.\n• Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.\n• Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.\n• Avatares redondos para personas y cuadrados redondeados para grupos.\n• El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.",
+        "releaseNotes": "• La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• L'app s'obre amb els grups, els membres i els avisos pendents. Torna als grups des de qualsevol secció.\n• Els avisos obren l'última novetat, inclòs el mes del calendari, i es netegen en visitar la secció.\n• Llista de grups més neta, perfil a la capçalera, preferències al perfil i ajustos a l'inici del grup.\n• Avatars rodons per a persones i quadrats arrodonits per a grups.\n• L'administrador pot eliminar membres amb confirmació i grups escrivint-ne el nom complet.",
+        "releaseNotes": "• L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

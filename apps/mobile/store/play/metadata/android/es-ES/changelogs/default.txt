@@ -1,5 +1,1 @@
-• La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.
-• Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.
-• Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.
-• Avatares redondos para personas y cuadrados redondeados para grupos.
-• El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.
+• La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.

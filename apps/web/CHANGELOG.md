@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.23.1] — 2026-09-05
+
+### ca
+
+- [fix] L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
+
+### es
+
+- [fix] La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.
+
+### en
+
+- [fix] The app shows an error when feedback cannot be sent and keeps your message so you can try again.
+
 ## [1.23.0] — 2026-09-05
 
 ### ca
