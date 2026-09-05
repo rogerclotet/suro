@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.22.0] — 2026-09-05
+
+### ca
+
+- [fix] En crear elements a l'app, el teclat ara s'obre automàticament quan s'enfoca el primer camp.
+- [improvement] Ara pots arrossegar cap avall la nansa dels fulls de creació i edició per tancar-los.
+
+### es
+
+- [fix] Al crear elementos en la app, el teclado ahora se abre automáticamente cuando se enfoca el primer campo.
+- [improvement] Ahora puedes arrastrar hacia abajo el tirador de los paneles de creación y edición para cerrarlos.
+
+### en
+
+- [fix] When creating items in the app, the keyboard now opens automatically when the first field receives focus.
+- [improvement] You can now drag down the handle on create and edit sheets to dismiss them.
+
 ## [1.21.2] — 2026-09-04
 
 ### ca
