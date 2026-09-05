@@ -1,8 +1,13 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { UnreadBadge } from "@/components/unread-badge";
@@ -11,7 +16,7 @@ import { unreadCount } from "@/lib/notification-routing";
 import { useUnreadNotifications } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { useTheme } from "@/theme";
-import { Loading, Txt } from "@/ui";
+import { Fab, Loading, Txt, useFabScroll } from "@/ui";
 
 const ROW_AVATAR_SIZE = 52;
 
@@ -26,6 +31,7 @@ export function GroupsScreenContent() {
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
   const ti = useTranslations("groups");
+  const fab = useFabScroll();
 
   function selectGroup(id: Id<"projects">) {
     router.push(`/${id}/home`);
@@ -40,8 +46,13 @@ export function GroupsScreenContent() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: Math.max(insets.bottom, 16),
+          paddingBottom:
+            Platform.OS === "android"
+              ? insets.bottom + 96
+              : Math.max(insets.bottom, 16),
         }}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
       >
         {groups === undefined ? (
           <View style={{ paddingVertical: 24 }}>
@@ -145,25 +156,13 @@ export function GroupsScreenContent() {
               })}
           </View>
         )}
-        <Pressable
-          onPress={createGroup}
-          accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.row,
-            styles.createRow,
-            {
-              borderTopWidth: StyleSheet.hairlineWidth,
-              borderColor: t.border,
-              opacity: pressed ? 0.6 : 1,
-            },
-          ]}
-        >
-          <View style={styles.createBadge}>
-            <Plus color={t.primary} size={20} />
-          </View>
-          <Txt style={{ color: t.primary }}>{ti("createTitle")}</Txt>
-        </Pressable>
       </ScrollView>
+      <Fab
+        onPress={createGroup}
+        label={ti("createTitle")}
+        extended={fab.extended}
+        bottomInset={insets.bottom}
+      />
     </View>
   );
 }
@@ -179,13 +178,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     paddingVertical: 17,
-  },
-  createRow: { gap: 12, paddingVertical: 10 },
-  createBadge: {
-    width: ROW_AVATAR_SIZE,
-    height: ROW_AVATAR_SIZE,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

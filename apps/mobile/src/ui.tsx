@@ -377,11 +377,13 @@ export function Fab({
   label,
   extended = true,
   icon: Icon = Plus,
+  bottomInset = 0,
 }: {
   onPress: () => void;
   label: string;
   extended?: boolean;
   icon?: LucideIcon;
+  bottomInset?: number;
 }) {
   const t = useTheme();
   const { anyOpen } = useContext(SheetCountContext);
@@ -395,6 +397,7 @@ export function Fab({
     <AnimatedFAB
       icon={({ size, color }) => <Icon color={color} size={size} />}
       label={label}
+      accessibilityLabel={label}
       extended={extended}
       onPress={onPress}
       color={t.onPrimary}
@@ -405,9 +408,9 @@ export function Fab({
       style={{
         position: "absolute",
         right: 16,
-        // Screen content is already inset above the M3 navigation bar (the
-        // native tab bar applies the bottom inset), so the spec's 16dp clears it.
-        bottom: 16,
+        // Tab screens already clear the system navigation bar. Screens without
+        // tabs pass their safe-area inset to keep the same 16dp gap.
+        bottom: bottomInset + 16,
         backgroundColor: t.primary,
       }}
     />
