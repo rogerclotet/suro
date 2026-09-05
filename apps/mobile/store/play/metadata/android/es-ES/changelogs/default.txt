@@ -1,1 +1,2 @@
-• Los formularios para crear eventos y gastos ahora enfocan automáticamente el primer campo, tanto en la app como en la web.
+• Al crear elementos en la app, el teclado ahora se abre automáticamente cuando se enfoca el primer campo.
+• Ahora puedes arrastrar hacia abajo el tirador de los paneles de creación y edición para cerrarlos.

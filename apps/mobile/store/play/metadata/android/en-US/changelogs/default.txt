@@ -1,1 +1,2 @@
-• Event and expense creation forms now focus the first field automatically in both the app and the web version.
+• When creating items in the app, the keyboard now opens automatically when the first field receives focus.
+• You can now drag down the handle on create and edit sheets to dismiss them.

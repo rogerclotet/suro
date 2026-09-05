@@ -20,6 +20,7 @@ import {
   Modal,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -43,6 +44,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FONT, useTheme } from "./theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SHEET_DISMISS_DISTANCE = 96;
+const SHEET_DISMISS_VELOCITY = 0.8;
+
+// `autoFocus` runs while a native Modal is still being presented, which can
+// focus a field without opening the soft keyboard. Fields inside a sheet wait
+// for the Modal's native `onShow` event before requesting focus.
+const SheetPresentationContext = createContext<boolean | null>(null);
 
 // Tracks how many sheets are currently open so chrome like the FAB can step
 // aside while a drawer is on screen — otherwise the FAB's bright shadow bleeds
@@ -89,15 +97,20 @@ export function Sheet({
   const insets = useSafeAreaInsets();
   const { acquire, release } = useContext(SheetCountContext);
   const [mounted, setMounted] = useState(false);
+  const [presented, setPresented] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const anim = useMemo(() => new Animated.Value(0), []);
+  const dragY = useMemo(() => new Animated.Value(0), []);
   // Lifts the panel above the keyboard. RN's Modal doesn't resize its own
   // window for the keyboard on Android, so without this the keyboard covers any
   // focused TextInput inside a drawer.
   const liftAnim = useMemo(() => new Animated.Value(0), []);
   const shownRef = useRef(false);
+  const dragStartRef = useRef(0);
+  const onCloseRef = useRef(onClose);
   const onClosedRef = useRef(onClosed);
   useEffect(() => {
+    onCloseRef.current = onClose;
     onClosedRef.current = onClosed;
   });
 
@@ -114,6 +127,8 @@ export function Sheet({
   useEffect(() => {
     if (visible) {
       shownRef.current = true;
+      setPresented(false);
+      dragY.setValue(0);
       setMounted(true);
       Animated.timing(anim, {
         toValue: 1,
@@ -130,7 +145,9 @@ export function Sheet({
       }).start(({ finished }) => {
         if (finished) {
           setMounted(false);
+          setPresented(false);
           setKeyboardHeight(0);
+          dragY.setValue(0);
           if (shownRef.current) {
             shownRef.current = false;
             onClosedRef.current?.();
@@ -138,7 +155,56 @@ export function Sheet({
         }
       });
     }
-  }, [visible, anim]);
+  }, [visible, anim, dragY]);
+
+  const restoreAfterDrag = useCallback(() => {
+    Animated.spring(dragY, {
+      toValue: 0,
+      speed: 24,
+      bounciness: 0,
+      useNativeDriver: true,
+    }).start();
+  }, [dragY]);
+
+  const finishDrag = useCallback(
+    (distance: number, velocity: number) => {
+      if (
+        distance >= SHEET_DISMISS_DISTANCE ||
+        velocity >= SHEET_DISMISS_VELOCITY
+      ) {
+        Keyboard.dismiss();
+        onCloseRef.current();
+        return;
+      }
+      restoreAfterDrag();
+    },
+    [restoreAfterDrag],
+  );
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_event, gesture) =>
+          gesture.dy > 4 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
+        onPanResponderGrant: () => {
+          dragY.stopAnimation((value) => {
+            dragStartRef.current = value;
+          });
+        },
+        onPanResponderMove: (_event, gesture) => {
+          dragY.setValue(Math.max(0, dragStartRef.current + gesture.dy));
+        },
+        onPanResponderRelease: (_event, gesture) => {
+          finishDrag(
+            Math.max(0, dragStartRef.current + gesture.dy),
+            gesture.vy,
+          );
+        },
+        onPanResponderTerminate: restoreAfterDrag,
+      }),
+    [dragY, finishDrag, restoreAfterDrag],
+  );
 
   // iOS reports the keyboard before it animates in (smoother); Android only
   // fires the "did" events. Shrink the panel to fit above the keyboard and
@@ -184,6 +250,13 @@ export function Sheet({
     inputRange: [0, 1],
     outputRange: [SCREEN_HEIGHT, 0],
   });
+  const draggedTranslateY = Animated.add(translateY, dragY);
+  const dragBackdropOpacity = dragY.interpolate({
+    inputRange: [0, SCREEN_HEIGHT],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+  const backdropOpacity = Animated.multiply(anim, dragBackdropOpacity);
   const keyboardLift = Animated.multiply(liftAnim, -1);
   // Cap height so the sheet + keyboard fit on screen; content scrolls inside.
   // An explicit height while the keyboard is open gives ScrollView children a
@@ -194,9 +267,19 @@ export function Sheet({
       : SCREEN_HEIGHT * 0.92;
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={onClose}>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      onShow={() => setPresented(true)}
+      onRequestClose={onClose}
+    >
       <Animated.View
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)", opacity: anim }}
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.4)",
+          opacity: backdropOpacity,
+        }}
       >
         <Pressable style={{ flex: 1 }} onPress={onClose} />
       </Animated.View>
@@ -211,13 +294,33 @@ export function Sheet({
           backgroundColor: t.bg,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          padding: 20,
+          paddingHorizontal: 20,
+          paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 20),
           gap: 12,
-          transform: [{ translateY }, { translateY: keyboardLift }],
+          transform: [
+            { translateY: draggedTranslateY },
+            { translateY: keyboardLift },
+          ],
         }}
       >
-        {children}
+        <View
+          {...panResponder.panHandlers}
+          style={{ height: 20, alignItems: "center", justifyContent: "center" }}
+        >
+          <View
+            style={{
+              width: 36,
+              height: 5,
+              borderRadius: 999,
+              backgroundColor: t.muted,
+              opacity: 0.45,
+            }}
+          />
+        </View>
+        <SheetPresentationContext.Provider value={presented}>
+          {children}
+        </SheetPresentationContext.Provider>
       </Animated.View>
     </Modal>
   );
@@ -729,12 +832,38 @@ export const HEADER_BUTTON_INSET = 16;
 // for hosts that need to refocus the input imperatively.
 export function Field({
   style,
+  autoFocus,
+  ref: forwardedRef,
   ...props
 }: TextInputProps & { ref?: Ref<TextInput> }) {
   const t = useTheme();
+  const sheetPresented = useContext(SheetPresentationContext);
+  const inputRef = useRef<TextInput>(null);
+  const setInputRef = useCallback(
+    (node: TextInput | null) => {
+      inputRef.current = node;
+      if (typeof forwardedRef === "function") {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    },
+    [forwardedRef],
+  );
+
+  useEffect(() => {
+    if (!autoFocus || sheetPresented !== true) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [autoFocus, sheetPresented]);
+
   return (
     <TextInput
+      ref={setInputRef}
       placeholderTextColor={t.muted}
+      autoFocus={sheetPresented === null ? autoFocus : false}
       {...props}
       style={[
         styles.field,
