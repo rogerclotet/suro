@@ -1,2 +1,1 @@
-• En crear elements a l'app, el teclat ara s'obre automàticament quan s'enfoca el primer camp.
-• Ara pots arrossegar cap avall la nansa dels fulls de creació i edició per tancar-los.
+• La pantalla inicial de Suro integra els grups en una llista més neta, amb el perfil a la capçalera i les preferències dins del perfil. Els ajustos de cada grup són a la seva pantalla d'inici. Els indicadors de notificació desapareixen en llegir-les.

@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.22.0",
+    "version": "1.23.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• When creating items in the app, the keyboard now opens automatically when the first field receives focus.\n• You can now drag down the handle on create and edit sheets to dismiss them.",
+        "releaseNotes": "• Suro's opening screen has a cleaner group list, a profile avatar in the header and preferences within your profile. Each group's settings are on its home screen. Notification badges disappear once read.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Al crear elementos en la app, el teclado ahora se abre automáticamente cuando se enfoca el primer campo.\n• Ahora puedes arrastrar hacia abajo el tirador de los paneles de creación y edición para cerrarlos.",
+        "releaseNotes": "• La pantalla inicial de Suro integra los grupos en una lista más limpia, con el perfil en la cabecera y las preferencias dentro del perfil. Los ajustes de cada grupo están en su pantalla de inicio. Los indicadores de notificación desaparecen al leerlas.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• En crear elements a l'app, el teclat ara s'obre automàticament quan s'enfoca el primer camp.\n• Ara pots arrossegar cap avall la nansa dels fulls de creació i edició per tancar-los.",
+        "releaseNotes": "• La pantalla inicial de Suro integra els grups en una llista més neta, amb el perfil a la capçalera i les preferències dins del perfil. Els ajustos de cada grup són a la seva pantalla d'inici. Els indicadors de notificació desapareixen en llegir-les.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

@@ -9,6 +9,7 @@ import {
 } from "./_generated/server";
 import { track } from "./model/analytics";
 import { serveFileUrl } from "./model/fileUrls";
+import { notifyProject } from "./model/notify";
 import { requireFileOwner, requireProjectMember } from "./model/permissions";
 
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
@@ -80,12 +81,12 @@ export const saveFile = mutation({
         storageId: args.storageId,
       });
     }
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId: args.projectId,
       actorId: userId,
       bodyKey: "file_uploaded",
       bodyParams: { name },
-      path: `/${args.projectId}/files`,
+      target: { kind: "files" },
     });
     await track(ctx, userId, "file_uploaded", {
       projectId: args.projectId,

@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
 import { ensureCategorySuggestions } from "./model/categories";
@@ -8,6 +7,7 @@ import {
   type ListWithItems,
   loadListWithItems,
 } from "./model/lists";
+import { notifyProject } from "./model/notify";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
 
 export const listByProject = query({
@@ -129,12 +129,12 @@ export const create = mutation({
       }
     }
 
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "list_created",
       bodyParams: { name: trimmedName },
-      path: `/${projectId}/lists/${listId}`,
+      target: { kind: "lists", listId },
     });
     await track(ctx, userId, "list_created", {
       projectId,

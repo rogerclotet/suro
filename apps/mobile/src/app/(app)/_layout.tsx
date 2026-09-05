@@ -1,7 +1,12 @@
 import { Redirect, Stack } from "expo-router";
+import { FeedbackProvider } from "@/lib/feedback-state";
+import { NotificationsProvider } from "@/lib/notifications";
 import { useAuthGate } from "@/lib/offline";
 import { usePushNotifications } from "@/lib/push";
 import { FONT, useTheme } from "@/theme";
+import { SheetHost } from "@/ui";
+
+export const unstable_settings = { initialRouteName: "groups" };
 
 export default function AppLayout() {
   const { isLoading, isAuthenticated } = useAuthGate();
@@ -18,25 +23,24 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: t.bg },
-        headerTitleStyle: { fontFamily: FONT, color: t.text },
-        headerTintColor: t.primary,
-        // Pushed pages (Manage group, Create group, Profile) show a bare
-        // chevron, not the stale "[projectId]" previous-route label.
-        headerBackButtonDisplayMode: "minimal",
-        contentStyle: { backgroundColor: t.bg },
-      }}
-    >
-      {/* The project route is a Tabs navigator; it owns its own headers.
-          Switching groups `replace`s this route in place, so cross-fade rather
-          than the default forward slide — a slide reads as "pushed a sub-page"
-          (implying a back target), a fade reads as switching the active group. */}
-      <Stack.Screen
-        name="[projectId]"
-        options={{ headerShown: false, animation: "fade" }}
-      />
-    </Stack>
+    <NotificationsProvider>
+      <SheetHost>
+        <FeedbackProvider>
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: t.bg },
+              headerTitleStyle: { fontFamily: FONT, color: t.text },
+              headerTintColor: t.primary,
+              // Pushed pages (Manage group, Create group, Profile) show a bare
+              // chevron, not the stale "[projectId]" previous-route label.
+              headerBackButtonDisplayMode: "minimal",
+              contentStyle: { backgroundColor: t.bg },
+            }}
+          >
+            <Stack.Screen name="[projectId]" options={{ headerShown: false }} />
+          </Stack>
+        </FeedbackProvider>
+      </SheetHost>
+    </NotificationsProvider>
   );
 }

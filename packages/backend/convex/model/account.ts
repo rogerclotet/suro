@@ -54,6 +54,7 @@ export async function deleteProjectCascade(
   }
 
   for (const table of [
+    "notifications",
     "spendings",
     "events",
     "notes",
@@ -123,6 +124,12 @@ export async function deleteUserAccount(
   for (const member of potMembers) {
     await ctx.db.delete(member._id);
   }
+
+  const unread = await ctx.db
+    .query("notifications")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const receipt of unread) await ctx.db.delete(receipt._id);
 
   const pushTokens = await ctx.db
     .query("pushTokens")

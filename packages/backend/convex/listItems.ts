@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { track } from "./model/analytics";
 import { ensureCategorySuggestion } from "./model/categories";
+import { notifyUsers } from "./model/notify";
 import {
   assertProjectMembership,
   requireItemAccess,
@@ -57,12 +57,12 @@ export const create = mutation({
       recurrence: args.recurrence,
     });
     if (args.assigneeId !== undefined && args.assigneeId !== userId) {
-      await ctx.scheduler.runAfter(0, internal.push.sendToUsers, {
+      await notifyUsers(ctx, {
         userIds: [args.assigneeId],
         projectId: list.projectId,
         bodyKey: "task_assigned",
         bodyParams: { name },
-        path: `/${list.projectId}/lists/${list._id}`,
+        target: { kind: "lists", listId: list._id },
       });
     }
     await track(ctx, userId, "list_item_created", {
@@ -142,12 +142,12 @@ export const update = mutation({
       args.assigneeId !== item.assigneeId &&
       args.assigneeId !== userId
     ) {
-      await ctx.scheduler.runAfter(0, internal.push.sendToUsers, {
+      await notifyUsers(ctx, {
         userIds: [args.assigneeId],
         projectId: list.projectId,
         bodyKey: "task_assigned",
         bodyParams: { name },
-        path: `/${list.projectId}/lists/${list._id}`,
+        target: { kind: "lists", listId: list._id },
       });
     }
     // Only the false->true transition is a meaningful "completed" action; plain

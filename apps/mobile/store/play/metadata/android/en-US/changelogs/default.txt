@@ -1,2 +1,1 @@
-• When creating items in the app, the keyboard now opens automatically when the first field receives focus.
-• You can now drag down the handle on create and edit sheets to dismiss them.
+• Suro's opening screen has a cleaner group list, a profile avatar in the header and preferences within your profile. Each group's settings are on its home screen. Notification badges disappear once read.

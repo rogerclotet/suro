@@ -83,9 +83,8 @@ function ManageGroup({
   async function leaveGroup() {
     try {
       await leave({ projectId: project._id });
-      // The group we were viewing is gone; let the index route re-route us into
-      // a remaining group.
-      router.replace("/");
+      // The group we were viewing is gone. Return to the groups list.
+      router.dismissTo("/groups");
     } catch {
       Alert.alert(t("leaveError"));
     }

@@ -76,6 +76,13 @@ export const recipientsForUsers = internalQuery({
     const project = await ctx.db.get(projectId);
     const recipients: Recipient[] = [];
     for (const userId of [...new Set(userIds)]) {
+      const membership = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project_user", (q) =>
+          q.eq("projectId", projectId).eq("userId", userId),
+        )
+        .unique();
+      if (!membership) continue;
       const user = await ctx.db.get(userId);
       const locale = user?.locale ?? "ca";
       const tokens = await ctx.db

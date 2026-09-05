@@ -1,2 +1,1 @@
-• Al crear elementos en la app, el teclado ahora se abre automáticamente cuando se enfoca el primer campo.
-• Ahora puedes arrastrar hacia abajo el tirador de los paneles de creación y edición para cerrarlos.
+• La pantalla inicial de Suro integra los grupos en una lista más limpia, con el perfil en la cabecera y las preferencias dentro del perfil. Los ajustes de cada grupo están en su pantalla de inicio. Los indicadores de notificación desaparecen al leerlas.

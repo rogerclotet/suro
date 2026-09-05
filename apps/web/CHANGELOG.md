@@ -6,6 +6,37 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.23.1] — 2026-09-05
+
+### ca
+
+- [improvement] La pantalla inicial de Suro integra els grups en una llista més neta, amb el perfil a la capçalera i les preferències dins del perfil. Els ajustos de cada grup són a la seva pantalla d'inici. Els indicadors de notificació desapareixen en llegir-les.
+
+### es
+
+- [improvement] La pantalla inicial de Suro integra los grupos en una lista más limpia, con el perfil en la cabecera y las preferencias dentro del perfil. Los ajustes de cada grupo están en su pantalla de inicio. Los indicadores de notificación desaparecen al leerlas.
+
+### en
+
+- [improvement] Suro's opening screen has a cleaner group list, a profile avatar in the header and preferences within your profile. Each group's settings are on its home screen. Notification badges disappear once read.
+
+## [1.23.0] — 2026-09-05
+
+### ca
+
+- [feature] L'app ara s'obre amb la llista de grups, amb una vista prèvia dels membres i les notificacions pendents. Pots tornar-hi des de qualsevol secció.
+- [feature] Les seccions mostren les notificacions no llegides i obren l'actualització més recent, inclòs el mes corresponent del calendari. Es marquen com a llegides en visitar la secció.
+
+### es
+
+- [feature] La app ahora se abre con la lista de grupos, con una vista previa de los miembros y las notificaciones pendientes. Puedes volver a ella desde cualquier sección.
+- [feature] Las secciones muestran las notificaciones no leídas y abren la actualización más reciente, incluido el mes correspondiente del calendario. Se marcan como leídas al visitar la sección.
+
+### en
+
+- [feature] The app now opens with your groups, member previews and unread counts. Return to the groups list from any section.
+- [feature] Section badges show unread updates and open the latest one, including the correct calendar month. Visiting a section marks its notifications as read.
+
 ## [1.22.0] — 2026-09-05
 
 ### ca

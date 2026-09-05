@@ -859,7 +859,10 @@
     },
     "groups": {
       "switchGroup": "Cambiar de grupo",
-      "manageGroup": "Gestionar grupo"
+      "manageGroup": "Gestionar grupo",
+      "empty": "Todavía no tienes grupos. Crea uno para empezar.",
+      "unnamedMember": "Miembro",
+      "unreadCount": "{count, plural, one {# notificación no leída} other {# notificaciones no leídas}}"
     },
     "profile": {
       "title": "Perfil",

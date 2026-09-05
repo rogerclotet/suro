@@ -8,7 +8,7 @@ import { Button, Field, Screen, Txt } from "@/ui";
 
 /**
  * Create a new group. Reached from the group switcher's create action, and the
- * landing fallback when a user somehow has no group to resume into. On success
+ * entry from the groups list, including its empty state. On success
  * we replace into the new group so it never lingers in the back stack.
  */
 export default function CreateGroup() {

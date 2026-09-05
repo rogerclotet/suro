@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
 import { track } from "./model/analytics";
+import { notifyProject } from "./model/notify";
 import { requireNoteAccess, requireProjectMember } from "./model/permissions";
 
 /** Attach the creator's and last-editor's display names to a note row. */
@@ -69,12 +69,12 @@ export const create = mutation({
       createdBy: userId,
       updatedAt: Date.now(),
     });
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "note_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/notes/${noteId}`,
+      target: { kind: "notes", noteId },
     });
     await track(ctx, userId, "note_created", {
       projectId,

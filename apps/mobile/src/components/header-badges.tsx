@@ -1,5 +1,6 @@
 import { ChevronLeft, type LucideIcon, Plus } from "lucide-react-native";
 import { Platform, Pressable, View } from "react-native";
+import { UnreadBadge } from "@/components/unread-badge";
 import { useTheme } from "@/theme";
 import { HEADER_BUTTON_INSET } from "@/ui";
 
@@ -18,6 +19,7 @@ export type HeaderAction = {
   icon: LucideIcon;
   onPress: () => void;
   label: string;
+  count?: number;
 };
 
 /**
@@ -48,7 +50,12 @@ function HeaderCreateButton({
  * `HeaderCreateButton` (e.g. calendar export). Sits in the iOS Liquid Glass
  * capsule or the Android header bar.
  */
-function HeaderActionButton({ icon: Icon, onPress, label }: HeaderAction) {
+function HeaderActionButton({
+  icon: Icon,
+  onPress,
+  label,
+  count = 0,
+}: HeaderAction) {
   const t = useTheme();
   return (
     <Pressable
@@ -56,8 +63,10 @@ function HeaderActionButton({ icon: Icon, onPress, label }: HeaderAction) {
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={label}
+      style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
     >
       <Icon color={t.primary} size={22} />
+      <UnreadBadge count={count} />
     </Pressable>
   );
 }

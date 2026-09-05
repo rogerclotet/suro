@@ -9,6 +9,7 @@ import { Camera, Check, RotateCcw, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
+import { ProfilePreferences } from "@/components/profile-preferences";
 import { useTranslations } from "@/i18n";
 import {
   CATPPUCCIN_COLOR_KEYS,
@@ -156,6 +157,8 @@ function ProfileForm({ user }: { user: Doc<"users"> }) {
           })}
         </View>
       </Section>
+
+      <ProfilePreferences />
 
       <Button
         title={t("signOut")}

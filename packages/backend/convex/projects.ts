@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
+import { notifyProject } from "./model/notify";
 import { requireProjectMember } from "./model/permissions";
 
 /** Projects (groups) the current user belongs to. Ported from getProjects. */
@@ -34,7 +34,8 @@ export const get = query({
 /**
  * Projects the current user belongs to, each with its categories and members
  * embedded. Powers the PWA's project store (which needs member avatars and
- * categories for every group up-front); native uses the lean `listMine`.
+ * categories for every group up-front) and native groups-list member previews.
+ * Native membership gates still use the lean `listMine`.
  */
 export const listMineDetailed = query({
   args: {},
@@ -231,12 +232,12 @@ export const acceptInvite = mutation({
     if (existing === null) {
       await ctx.db.insert("projectMembers", { projectId, userId });
       const user = await ctx.db.get(userId);
-      await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+      await notifyProject(ctx, {
         projectId,
         actorId: userId,
         bodyKey: "member_joined",
         bodyParams: { userName: user?.name ?? "" },
-        path: `/group-settings?projectId=${projectId}`,
+        target: { kind: "members" },
       });
       await track(ctx, userId, "group_joined", { projectId });
     }
@@ -311,13 +312,20 @@ export const leave = mutation({
       throw new Error("Not a member of this group");
     }
     const user = await ctx.db.get(userId);
+    const unread = await ctx.db
+      .query("notifications")
+      .withIndex("by_user_project", (q) =>
+        q.eq("userId", userId).eq("projectId", projectId),
+      )
+      .collect();
+    for (const receipt of unread) await ctx.db.delete(receipt._id);
     await ctx.db.delete(membership._id);
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "member_left",
       bodyParams: { userName: user?.name ?? "" },
-      path: `/group-settings?projectId=${projectId}`,
+      target: { kind: "members" },
     });
     await track(ctx, userId, "group_left", { projectId });
     return null;
@@ -506,6 +514,12 @@ export const remove = mutation({
     for (const note of notes) {
       await ctx.db.delete(note._id);
     }
+
+    const unread = await ctx.db
+      .query("notifications")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    for (const receipt of unread) await ctx.db.delete(receipt._id);
 
     // Memberships, the group image blob, then the project itself.
     for (const member of members) {

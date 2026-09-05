@@ -70,6 +70,18 @@ Notes:
 - **Data**: all reads/writes go through `backend`'s Convex functions via
   `useQuery`/`useMutation` (reactive — no offline/sync layer). The complete-item
   toggle uses a Convex optimistic update.
+- **Navigation**: a fresh launch opens `/groups`. Selecting a group pushes its
+  Home screen, titled with the group name. Home, Lists, Calendar, and Expenses
+  are native tabs. Back from a section root returns to the groups list; nested
+  screens keep their own stack history. Push links anchor the groups list beneath
+  their destination.
+- **Unread activity**: `model/notify.ts` records per-user receipts in Convex in
+  the same transaction that schedules each existing push trigger. The groups
+  list and tabs share `notifications.unread`. Section visits delete only their
+  observed receipts, preserving later arrivals. Files, Notes, and Members each
+  clear independently and contribute to Home's badge. New tracking starts at
+  rollout; historical activity is not backfilled. Deploy the backend before
+  releasing the native client that consumes this API.
 - **Push notifications**: delivery runs through the Expo Push API → APNs (iOS) /
   FCM (Android). The client registers in `src/lib/push.ts` (`usePushNotifications`,
   mounted in the authed `(app)/_layout.tsx`); the backend sends from

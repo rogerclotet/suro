@@ -2,9 +2,9 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
@@ -23,6 +23,10 @@ type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
 export default function CalendarScreen() {
   const pid = useProjectId();
+  const { date, notification } = useLocalSearchParams<{
+    date?: string;
+    notification?: string;
+  }>();
   const router = useRouter();
   const t = useTheme();
   const tCal = useTranslations("mobile.calendar");
@@ -33,6 +37,13 @@ export default function CalendarScreen() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
+  useEffect(() => {
+    if (!date || !notification) return;
+    const day = new Date(Number(date));
+    if (!Number.isFinite(day.getTime())) return;
+    setMonth(new Date(day.getFullYear(), day.getMonth(), 1));
+    setSelectedDay(startOfDay(day));
+  }, [date, notification]);
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
   const [exporting, setExporting] = useState(false);

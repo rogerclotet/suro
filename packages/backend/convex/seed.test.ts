@@ -14,6 +14,54 @@ async function setupUser(t: ReturnType<typeof convexTest>) {
 }
 
 describe("seed:demoGroup", () => {
+  it("replaces only explicitly selected screenshot fixtures and preserves existing groups", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await setupUser(t);
+    const personalId = await t.run((ctx) =>
+      ctx.db.insert("projects", {
+        name: "Personal",
+        color: "sage",
+        createdBy: userId,
+        inviteToken: "personal",
+      }),
+    );
+    const existing = await t.mutation(internal.seed.demoGroup, {
+      email: REVIEW_EMAIL,
+      locale: "en",
+    });
+    const first = await t.mutation(internal.seed.demoGroup, {
+      email: REVIEW_EMAIL,
+      locale: "en",
+      screenshots: true,
+    });
+    const second = await t.mutation(internal.seed.demoGroup, {
+      email: REVIEW_EMAIL,
+      locale: "ca",
+      screenshots: true,
+      replaceScreenshotProjectIds: first.screenshotProjectIds,
+    });
+    await t.run(async (ctx) => {
+      expect(await ctx.db.get(personalId)).not.toBeNull();
+      expect(await ctx.db.get(existing.projectId)).not.toBeNull();
+      for (const id of first.screenshotProjectIds) {
+        expect(await ctx.db.get(id)).toBeNull();
+        expect(
+          await ctx.db
+            .query("notifications")
+            .withIndex("by_project", (q) => q.eq("projectId", id))
+            .collect(),
+        ).toHaveLength(0);
+      }
+      expect(second.screenshotProjectIds).toHaveLength(3);
+      expect(
+        await ctx.db
+          .query("notifications")
+          .withIndex("by_project", (q) => q.eq("projectId", second.projectId))
+          .collect(),
+      ).toHaveLength(6);
+    });
+  });
+
   it("requires the review user to exist", async () => {
     const t = convexTest(schema, modules);
     await expect(

@@ -859,7 +859,10 @@
     },
     "groups": {
       "switchGroup": "Canviar de grup",
-      "manageGroup": "Gestionar grup"
+      "manageGroup": "Gestionar grup",
+      "empty": "Encara no tens grups. Crea’n un per començar.",
+      "unnamedMember": "Membre",
+      "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}"
     },
     "profile": {
       "title": "Perfil",

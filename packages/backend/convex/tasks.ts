@@ -7,6 +7,7 @@ import {
   internalQuery,
   query,
 } from "./_generated/server";
+import { notifyUsers } from "./model/notify";
 import { requireProjectMember } from "./model/permissions";
 import { compareTaskItems } from "./model/tasks";
 
@@ -129,26 +130,44 @@ export const markReminded = internalMutation({
   },
 });
 
-/** Hourly cron entry point: push a due reminder to each task's assignee, once. */
+/** Claim and notify atomically, including when cron executions overlap. */
+export const remind = internalMutation({
+  args: { itemId: v.id("listItems"), dueAt: v.number() },
+  handler: async (ctx, { itemId, dueAt }) => {
+    const item = await ctx.db.get(itemId);
+    if (
+      !item ||
+      item.completed ||
+      item.assigneeId === undefined ||
+      item.dueAt !== dueAt ||
+      item.reminderSentForDueAt === dueAt ||
+      !reminderIsDue(item, Date.now())
+    )
+      return;
+    const list = await ctx.db.get(item.listId);
+    if (!list) return;
+    await notifyUsers(ctx, {
+      projectId: list.projectId,
+      userIds: [item.assigneeId],
+      bodyKey: "task_due",
+      bodyParams: { name: item.name },
+      target: { kind: "lists", listId: list._id },
+    });
+    await ctx.db.patch(itemId, { reminderSentForDueAt: dueAt });
+  },
+});
+
+/** Hourly cron entry point: notify each task's assignee once per due moment. */
 export const sendDueReminders = internalAction({
   args: {},
   handler: async (ctx) => {
-    const now = Date.now();
     const due = await ctx.runQuery(internal.tasks.dueRemindersDue, {
-      before: now,
+      before: Date.now(),
     });
     for (const task of due) {
-      await ctx.runAction(internal.push.sendToUsers, {
-        userIds: [task.assigneeId],
-        projectId: task.projectId,
-        bodyKey: "task_due",
-        bodyParams: { name: task.name },
-        path: `/${task.projectId}/lists/${task.listId}`,
-      });
-    }
-    if (due.length > 0) {
-      await ctx.runMutation(internal.tasks.markReminded, {
-        items: due.map((task) => ({ itemId: task.itemId, dueAt: task.dueAt })),
+      await ctx.runMutation(internal.tasks.remind, {
+        itemId: task.itemId,
+        dueAt: task.dueAt,
       });
     }
     return null;

@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   type MutationCtx,
@@ -13,6 +12,7 @@ import {
   generateProposals,
   totalSpent,
 } from "./model/expenses";
+import { notifyProject } from "./model/notify";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
 
 /** The user fields the expenses UI needs (name + avatar). */
@@ -360,12 +360,12 @@ export const createPot = mutation({
     for (const memberId of unique) {
       await ctx.db.insert("potMembers", { potId, userId: memberId });
     }
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId,
       actorId: userId,
       bodyKey: "pot_created",
       bodyParams: { name: trimmed },
-      path: `/${projectId}/expenses/${potId}`,
+      target: { kind: "expenses", potId },
     });
     await track(ctx, userId, "pot_created", {
       projectId,
@@ -451,7 +451,7 @@ export const createSpending = mutation({
       await ctx.db.patch(pot._id, { settledAt: undefined });
     }
     const cleanDescription = description?.trim();
-    await ctx.scheduler.runAfter(0, internal.push.sendToProject, {
+    await notifyProject(ctx, {
       projectId: pot.projectId,
       actorId: userId,
       bodyKey: cleanDescription
@@ -462,7 +462,7 @@ export const createSpending = mutation({
         : { amount: (amount / 100).toFixed(2) },
       // A spending has no screen of its own; open the pot it belongs to, where
       // the expense list lives.
-      path: `/${pot.projectId}/expenses/${potId}`,
+      target: { kind: "expenses", potId },
     });
     await track(ctx, userId, "spending_created", {
       projectId: pot.projectId,

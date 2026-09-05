@@ -1,6 +1,10 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  notificationSection,
+  notificationTarget,
+} from "./model/notificationTarget";
 import { priorityValidator, recurrenceValidator } from "./model/tasks";
 
 /**
@@ -54,6 +58,7 @@ export default defineSchema({
     // Secret that gates the public .ics calendar feed (lazily generated).
     // Distinct from inviteToken (which joins the group) — never conflate them.
     calendarToken: v.optional(v.string()),
+    lastActivityAt: v.optional(v.number()),
     legacyId: v.optional(v.string()),
   })
     .index("by_inviteToken", ["inviteToken"])
@@ -69,6 +74,17 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_project", ["projectId"])
     .index("by_project_user", ["projectId", "userId"]),
+
+  // Only unread receipts are stored. A visit deletes the exact snapshot it saw.
+  notifications: defineTable({
+    userId: v.id("users"),
+    projectId: v.id("projects"),
+    section: notificationSection,
+    target: notificationTarget,
+  })
+    .index("by_user", ["userId"])
+    .index("by_project", ["projectId"])
+    .index("by_user_project", ["userId", "projectId"]),
 
   // Per-project autocomplete suggestion store for category names. Items carry
   // their category as a plain name string (see listItems.category); this table
