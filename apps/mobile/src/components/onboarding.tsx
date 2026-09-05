@@ -384,7 +384,7 @@ function ProfileStep({
   const t = useTheme();
   return (
     <View style={{ alignItems: "center", gap: 16, paddingVertical: 8 }}>
-      <Avatar name={name} image={image} color={color} size={72} />
+      <Avatar kind="user" name={name} image={image} color={color} size={72} />
       <View style={{ gap: 8 }}>
         <Txt size={22} weight="700" style={{ textAlign: "center" }}>
           {title}

@@ -19,6 +19,7 @@ export default function GroupsScreen() {
           headerBackVisible: false,
           headerRight: () => (
             <Avatar
+              kind="user"
               name={me?.name}
               image={me?.customImage ?? me?.image}
               color={me?.avatarColor}

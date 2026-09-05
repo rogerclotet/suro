@@ -114,7 +114,7 @@ export default async function InviteOpengraphImage({
             justifyContent: "center",
             width: 156,
             height: 156,
-            borderRadius: 156,
+            borderRadius: 47,
             backgroundColor: groupSwatch.bg,
             color: groupSwatch.fg,
             fontSize: 78,

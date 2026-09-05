@@ -247,6 +247,7 @@ function AvatarSection({ user }: { user: Doc<"users"> }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Avatar
+        kind="user"
         name={user.name}
         image={displayImage}
         color={user.avatarColor}

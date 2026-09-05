@@ -194,6 +194,7 @@ function PotCard({
       >
         {pot.members.slice(0, 6).map((member, index) => (
           <Avatar
+            kind="user"
             key={member._id ?? index}
             name={member.name}
             image={member.image}
@@ -301,6 +302,7 @@ function CreatePotSheet({
                 }}
               >
                 <Avatar
+                  kind="user"
                   name={member.name}
                   image={member.image}
                   color={member.avatarColor}

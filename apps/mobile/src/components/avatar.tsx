@@ -16,11 +16,12 @@ export const HEADER_AVATAR_SIZE = 34;
 export { initials } from "@/lib/initials";
 
 /**
- * Rounded-square avatar shared by group and profile badges: the picture if set,
+ * Circular user avatars and rounded-square group avatars: the picture if set,
  * otherwise initials on the entity's Catppuccin color. When `onPress` is given
  * the avatar itself is the button — there's no wrapping container.
  */
 export function Avatar({
+  kind,
   name,
   image,
   color,
@@ -29,6 +30,7 @@ export function Avatar({
   accessibilityLabel,
   style,
 }: {
+  kind: "user" | "group";
   name?: string | null;
   image?: string | null;
   color?: string | null;
@@ -42,7 +44,7 @@ export function Avatar({
   const base: ViewStyle = {
     width: size,
     height: size,
-    borderRadius: Math.round(size * 0.3),
+    borderRadius: kind === "user" ? size / 2 : Math.round(size * 0.3),
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",

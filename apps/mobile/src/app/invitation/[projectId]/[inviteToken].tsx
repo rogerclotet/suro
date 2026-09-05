@@ -103,6 +103,7 @@ function Invite({
       <View style={{ flex: 1, padding: 24, gap: 24 }}>
         <View style={{ alignItems: "center", gap: 12, paddingTop: 24 }}>
           <Avatar
+            kind="group"
             name={preview.name}
             image={preview.image}
             color={preview.color}
@@ -120,6 +121,7 @@ function Invite({
               style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
             >
               <Avatar
+                kind="user"
                 name={member.name}
                 image={member.image}
                 color={member.avatarColor}

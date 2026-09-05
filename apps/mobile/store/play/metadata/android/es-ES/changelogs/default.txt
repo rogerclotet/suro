@@ -1,1 +1,1 @@
-• La pantalla inicial de Suro integra los grupos en una lista más limpia, con el perfil en la cabecera y las preferencias dentro del perfil. Los ajustes de cada grupo están en su pantalla de inicio. Los indicadores de notificación desaparecen al leerlas.
+• Los avatares de las personas ahora son redondos y los de los grupos mantienen la forma cuadrada con esquinas redondeadas, tanto en la app como en la web.

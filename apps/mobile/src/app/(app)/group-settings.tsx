@@ -300,6 +300,7 @@ function GroupImage({ project }: { project: Doc<"projects"> }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Avatar
+        kind="group"
         name={project.name}
         image={project.image}
         color={project.color}

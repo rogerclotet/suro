@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.23.2] — 2026-09-05
+
+### ca
+
+- [fix] Els avatars de les persones ara són rodons i els dels grups mantenen la forma quadrada amb cantonades arrodonides, tant a l'app com al web.
+
+### es
+
+- [fix] Los avatares de las personas ahora son redondos y los de los grupos mantienen la forma cuadrada con esquinas redondeadas, tanto en la app como en la web.
+
+### en
+
+- [fix] User avatars are now round and group avatars use rounded squares consistently across the native and web apps.
+
 ## [1.23.1] — 2026-09-05
 
 ### ca

@@ -208,6 +208,7 @@ function GroupRow({
       })}
     >
       <Avatar
+        kind="group"
         name={project.name}
         image={project.image}
         color={project.color}

@@ -230,6 +230,7 @@ function TaskRow({
       </View>
       {assignee ? (
         <Avatar
+          kind="user"
           name={assignee.name}
           image={assignee.image}
           color={assignee.avatarColor}

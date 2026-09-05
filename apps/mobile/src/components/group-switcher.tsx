@@ -81,6 +81,7 @@ export function GroupsScreenContent() {
                       ]}
                     >
                       <Avatar
+                        kind="group"
                         name={group.name}
                         image={group.image}
                         color={group.color}
@@ -106,6 +107,7 @@ export function GroupsScreenContent() {
                               .slice(0, 3)
                               .map((member, memberIndex) => (
                                 <Avatar
+                                  kind="user"
                                   key={member._id}
                                   name={member.name}
                                   image={member.image}
