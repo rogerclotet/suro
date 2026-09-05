@@ -1,8 +1,10 @@
 "use client";
 
+import { MessageSquarePlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
+import { useFeedback } from "@/app/_state/feedback-state";
 import { useProjects } from "@/app/_state/project-state";
 import {
   Breadcrumb,
@@ -12,9 +14,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import UserAvatar from "@/components/user-avatar";
 import type { NavKey } from "@/i18n/message-keys";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useSession } from "@/lib/session";
 import { mobileHeaderSectionKey, useMenuItems } from "../use-menu-items";
 
 const standaloneBreadcrumbs = ["groups", "profile"];
@@ -82,6 +87,8 @@ const breadcrumbToTranslationKey: Record<string, NavKey> = {
 
 function MobileHeader() {
   const { project } = useProjects();
+  const { openFeedback } = useFeedback();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
 
@@ -99,10 +106,28 @@ function MobileHeader() {
   const titleKey = standaloneTitleKey ?? sectionKey ?? "home";
 
   return (
-    <div className="flex w-full items-center justify-between">
-      <span className="font-semibold text-lg leading-tight">
+    <div className="flex w-full items-center justify-between gap-2">
+      <span className="min-w-0 font-semibold text-lg leading-tight">
         {tNav(titleKey)}
       </span>
+      {titleKey === "groups" && (
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={openFeedback}
+            className="min-h-11 gap-1.5 rounded-xl px-2.5 font-normal text-muted-foreground text-xs shadow-none"
+          >
+            <MessageSquarePlusIcon className="size-[18px]" aria-hidden="true" />
+            {tNav("feedback")}
+          </Button>
+          <Button asChild variant="ghost" className="size-11 rounded-full p-0">
+            <Link href="/profile" aria-label={tNav("profile")}>
+              <UserAvatar user={session?.user ?? {}} />
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

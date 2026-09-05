@@ -11,14 +11,17 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [fix] L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
+- [improvement] Els suggeriments passen a la capçalera dels grups per deixar més espai a la llista.
 
 ### es
 
 - [fix] La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.
+- [improvement] Los comentarios pasan a la cabecera de los grupos para dejar más espacio a la lista.
 
 ### en
 
 - [fix] The app shows an error when feedback cannot be sent and keeps your message so you can try again.
+- [improvement] Feedback moves to the groups header to leave more room for the list.
 
 ## [1.23.0] — 2026-09-05
 

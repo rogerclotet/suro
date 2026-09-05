@@ -1,1 +1,2 @@
 • The app shows an error when feedback cannot be sent and keeps your message so you can try again.
+• Feedback moves to the groups header to leave more room for the list.

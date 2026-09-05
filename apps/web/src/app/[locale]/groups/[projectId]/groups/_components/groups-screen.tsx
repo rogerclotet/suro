@@ -4,14 +4,12 @@ import {
   CheckIcon,
   ChevronRightIcon,
   LayoutGridIcon,
-  MessageSquarePlusIcon,
   PlusIcon,
   Settings2Icon,
   SettingsIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Project } from "@/app/_data/project";
-import { useFeedback } from "@/app/_state/feedback-state";
 import { useProjects } from "@/app/_state/project-state";
 import CreateProjectForm from "@/app/[locale]/groups/_components/create-project/create-project-form";
 import ProjectAvatar from "@/components/project-avatar";
@@ -22,13 +20,12 @@ import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 /**
- * Full-screen group switcher plus account utilities (feedback, profile, changelog).
+ * Full-screen group switcher plus account utilities (profile, changelog).
  * Selecting a group opens its home tab.
  */
 export default function GroupsScreen() {
   const { projects, project, selectProject } = useProjects();
   const router = useRouter();
-  const { openFeedback } = useFeedback();
   const { data: session } = useSession();
   const tGroups = useTranslations("groups");
   const tNav = useTranslations("nav");
@@ -115,16 +112,6 @@ export default function GroupsScreen() {
         <span className="flex-1 font-bold">{tNav("manageGroups")}</span>
         <ChevronRightIcon className="size-[18px] text-muted-foreground" />
       </Link>
-
-      <button
-        type="button"
-        onClick={openFeedback}
-        className="flex items-center gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-left transition-colors hover:bg-accent"
-      >
-        <MessageSquarePlusIcon className="size-[22px] shrink-0 text-primary" />
-        <span className="flex-1 font-bold">{tNav("feedback")}</span>
-        <ChevronRightIcon className="size-[18px] text-muted-foreground" />
-      </button>
 
       <div className="flex items-stretch gap-3">
         <Link

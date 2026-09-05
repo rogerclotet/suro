@@ -1,1 +1,2 @@
 • La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.
+• Los comentarios pasan a la cabecera de los grupos para dejar más espacio a la lista.

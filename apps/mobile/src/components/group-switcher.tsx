@@ -1,13 +1,12 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
-import { ChevronRight, MessageSquarePlus, Plus } from "lucide-react-native";
+import { Plus } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { UnreadBadge } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
-import { useFeedback } from "@/lib/feedback-state";
 import { unreadCount } from "@/lib/notification-routing";
 import { useUnreadNotifications } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
@@ -17,7 +16,6 @@ import { Loading, Txt } from "@/ui";
 const ROW_AVATAR_SIZE = 52;
 
 /**
- * Groups open their home tab; feedback stays at the bottom of the launcher.
  * Selecting a group opens its home tab.
  */
 export function GroupsScreenContent() {
@@ -27,9 +25,7 @@ export function GroupsScreenContent() {
   const router = useRouter();
   const t = useTheme();
   const tr = useTranslations("mobile.groups");
-  const tNav = useTranslations("nav");
   const ti = useTranslations("groups");
-  const { openFeedback } = useFeedback();
 
   function selectGroup(id: Id<"projects">) {
     router.push(`/${id}/home`);
@@ -42,7 +38,10 @@ export function GroupsScreenContent() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: Math.max(insets.bottom, 16),
+        }}
       >
         {groups === undefined ? (
           <View style={{ paddingVertical: 24 }}>
@@ -165,25 +164,6 @@ export function GroupsScreenContent() {
           <Txt style={{ color: t.primary }}>{ti("createTitle")}</Txt>
         </Pressable>
       </ScrollView>
-      <Pressable
-        onPress={openFeedback}
-        accessibilityRole="button"
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          marginHorizontal: 16,
-          paddingTop: 18,
-          paddingBottom: Math.max(insets.bottom, 16),
-          borderTopWidth: StyleSheet.hairlineWidth,
-          borderTopColor: t.border,
-          opacity: pressed ? 0.6 : 1,
-        })}
-      >
-        <MessageSquarePlus color={t.primary} size={20} />
-        <Txt style={{ flex: 1, color: t.primary }}>{tNav("feedback")}</Txt>
-        <ChevronRight color={t.muted} size={18} />
-      </Pressable>
     </View>
   );
 }

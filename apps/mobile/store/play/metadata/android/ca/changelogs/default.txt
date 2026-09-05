@@ -1,1 +1,2 @@
 • L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
+• Els suggeriments passen a la capçalera dels grups per deixar més espai a la llista.
