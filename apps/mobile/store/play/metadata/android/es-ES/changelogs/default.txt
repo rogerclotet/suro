@@ -1,5 +1,3 @@
-• La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.
-• Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.
-• Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.
-• Avatares redondos para personas y cuadrados redondeados para grupos.
-• El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.
+• La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.
+• Los comentarios pasan a la cabecera de los grupos para dejar más espacio a la lista.
+• Crea grupos con el botón flotante en Android o el botón + de la cabecera en iOS, sin ocupar espacio en la lista.

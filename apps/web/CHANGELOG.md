@@ -6,6 +6,26 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.23.1] — 2026-09-05
+
+### ca
+
+- [fix] L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
+- [improvement] Els suggeriments passen a la capçalera dels grups per deixar més espai a la llista.
+- [improvement] Crea grups amb el botó flotant a Android o el botó + de la capçalera a iOS, sense ocupar espai a la llista.
+
+### es
+
+- [fix] La app muestra un error si no puede enviar los comentarios y conserva el mensaje para volver a intentarlo.
+- [improvement] Los comentarios pasan a la cabecera de los grupos para dejar más espacio a la lista.
+- [improvement] Crea grupos con el botón flotante en Android o el botón + de la cabecera en iOS, sin ocupar espacio en la lista.
+
+### en
+
+- [fix] The app shows an error when feedback cannot be sent and keeps your message so you can try again.
+- [improvement] Feedback moves to the groups header to leave more room for the list.
+- [improvement] Create groups with the floating button on Android or the + button in the iOS header, without taking up space in the list.
+
 ## [1.23.0] — 2026-09-05
 
 ### ca

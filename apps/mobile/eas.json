@@ -13,7 +13,8 @@
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud",
         "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
-      }
+      },
+      "environment": "preview"
     },
     "dev": {
       "extends": "preview",
@@ -28,7 +29,8 @@
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
         "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
         "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
-      }
+      },
+      "environment": "production"
     },
     "production": {
       "autoIncrement": true,
@@ -36,7 +38,8 @@
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
         "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
         "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
-      }
+      },
+      "environment": "production"
     }
   },
   "submit": {

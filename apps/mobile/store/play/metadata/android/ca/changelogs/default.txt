@@ -1,5 +1,3 @@
-• L'app s'obre amb els grups, els membres i els avisos pendents. Torna als grups des de qualsevol secció.
-• Els avisos obren l'última novetat, inclòs el mes del calendari, i es netegen en visitar la secció.
-• Llista de grups més neta, perfil a la capçalera, preferències al perfil i ajustos a l'inici del grup.
-• Avatars rodons per a persones i quadrats arrodonits per a grups.
-• L'administrador pot eliminar membres amb confirmació i grups escrivint-ne el nom complet.
+• L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
+• Els suggeriments passen a la capçalera dels grups per deixar més espai a la llista.
+• Crea grups amb el botó flotant a Android o el botó + de la capçalera a iOS, sense ocupar espai a la llista.

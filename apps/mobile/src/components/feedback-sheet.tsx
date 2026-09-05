@@ -5,10 +5,8 @@ import { usePostHog } from "posthog-react-native";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslations } from "@/i18n";
+import { reportFeedbackError, submitFeedback } from "@/lib/feedback-submission";
 import {
-  FEEDBACK_QUESTION_MESSAGE_ID,
-  FEEDBACK_QUESTION_SECTION_ID,
-  FEEDBACK_QUESTION_TYPE_ID,
   FEEDBACK_SECTION_LABELS,
   FEEDBACK_SECTIONS,
   FEEDBACK_SURVEY_ID,
@@ -21,23 +19,6 @@ import { Button, Field, Section, Segmented, Sheet, Txt } from "@/ui";
 
 const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY;
 const MAX_MESSAGE_LENGTH = 1000;
-
-function reportFeedbackError(
-  posthog: ReturnType<typeof usePostHog> | undefined,
-  error: unknown,
-) {
-  console.error("[feedback] submit failed:", error);
-  if (!POSTHOG_KEY || !posthog) {
-    return;
-  }
-  posthog.captureException(error, { action: "submit_feedback" });
-  posthog.captureLog({
-    body: `feedback submit failed: ${error instanceof Error ? error.message : String(error)}`,
-    level: "error",
-    attributes: { action: "submit_feedback" },
-  });
-  void posthog.flush();
-}
 
 /**
  * In-app feedback drawer. Submits to the same PostHog survey as the web app's
@@ -112,28 +93,17 @@ function FeedbackSheetForm({
     }
     setSubmitting(true);
     try {
-      if (POSTHOG_KEY && posthog) {
-        posthog.capture("survey sent", {
-          $survey_id: FEEDBACK_SURVEY_ID,
-          $survey_questions: [
-            FEEDBACK_QUESTION_TYPE_ID,
-            FEEDBACK_QUESTION_SECTION_ID,
-            FEEDBACK_QUESTION_MESSAGE_ID,
-          ],
-          [`$survey_response_${FEEDBACK_QUESTION_TYPE_ID}`]:
-            FEEDBACK_TYPE_LABELS[type],
-          [`$survey_response_${FEEDBACK_QUESTION_SECTION_ID}`]:
-            FEEDBACK_SECTION_LABELS[section],
-          [`$survey_response_${FEEDBACK_QUESTION_MESSAGE_ID}`]: trimmedMessage,
-          feedback_path: segments.join("/") || "index",
-          feedback_app_version: Constants.expoConfig?.version ?? "unknown",
-        });
-        await posthog.flush();
-      }
+      await submitFeedback(posthog, {
+        type,
+        section,
+        message: trimmedMessage,
+        path: segments.join("/") || "index",
+        appVersion: Constants.expoConfig?.version ?? "unknown",
+      });
       onClose();
       Alert.alert(tf("success"));
     } catch (e) {
-      reportFeedbackError(posthog, e);
+      void reportFeedbackError(posthog, e);
       Alert.alert(tf("error"));
     } finally {
       setSubmitting(false);
