@@ -87,8 +87,9 @@ A release is a normal PR to `main`. Everything after the merge is CI.
      **production** track, full rollout;
    - **iOS** → `eas submit` (binary) → `eas metadata:push` (listing text) →
      `fastlane ios submit_for_review`: waits for Apple to finish processing the
-     build, attaches it, uploads screenshots if they changed, and submits the
-     version for review with `automatic_release` so it ships on approval.
+     build, cancels an older in-review version if needed, attaches the new
+     build, uploads screenshots if they changed, and submits for review with
+     `automatic_release` so it ships on approval.
 3. CI's `release_tag` tags the commit `v<version>` and publishes a GitHub release
    with the CHANGELOG entry as its notes.
 
@@ -106,10 +107,9 @@ node apps/mobile/store/check-metadata.mjs
 # re-submit a commit that already built (transient store error), or force a
 # screenshot re-upload: Actions -> "Mobile submit" -> commit sha + platform.
 # ios_skip_upload=true when the binary already reached ASC and only the
-# metadata push / review submission needs retrying — e.g. after the one App
-# Store failure mode that needs a human: submitting while the previous version
-# is still in review ("a review submission is already in progress"). Wait for
-# it to clear (or cancel it in ASC), then re-run with ios_skip_upload.
+# metadata push / review submission needs retrying. If a previous version is
+# still in review, `ios submit_for_review` cancels that submission and replaces
+# it with the new build (a retry of the same version+build is a no-op).
 
 # local equivalents (EAS local builds; commit first — EAS archives via git):
 pnpm --filter mobile release:android   # build + fastlane android release

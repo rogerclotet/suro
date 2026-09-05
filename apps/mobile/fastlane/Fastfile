@@ -8,6 +8,7 @@
 #   android metadata          push the full Play listing (text, images, screenshots)
 #   android promote           promote a release from one track to another
 #   ios submit_for_review     attach the processed build, push screenshots, submit
+#                             (cancels an in-review older version first)
 #   ios beta                  upload an IPA to TestFlight (local/macOS only)
 #
 # App Store *listing text* is NOT handled here — it's pushed from
@@ -68,6 +69,15 @@ platform :android do
   end
 end
 
+# Apple will not let a build be attached (or a new version created) while another
+# version is already sitting in these states. Deliver still treats
+# WAITING_FOR_REVIEW as "editable" and then dies on select_build with
+# "The specified pre-release build could not be added".
+REVIEW_LOCKED_STATES = %w[
+  WAITING_FOR_REVIEW
+  IN_REVIEW
+].freeze
+
 # Polls App Store Connect until the uploaded build has finished processing, and
 # returns its build number. `eas submit` returns as soon as the binary is
 # uploaded, but Apple needs a few more minutes before the build can be attached
@@ -108,6 +118,75 @@ def wait_for_processed_build(app_identifier:, version:, build_number: nil, timeo
   end
 end
 
+def latest_store_version(app)
+  app.get_latest_app_store_version(
+    platform: Spaceship::ConnectAPI::Platform::IOS,
+    includes: Spaceship::ConnectAPI::AppStoreVersion::ESSENTIAL_INCLUDES,
+  )
+end
+
+def store_version_state(store_version)
+  store_version.app_version_state || store_version.app_store_state
+end
+
+def attached_build_number(store_version)
+  store_version.build&.version
+end
+
+# Returns :already_submitted when this version+build is already in review (a
+# retry of a successful submit), or :ready after cancelling a stale review so
+# deliver can attach the new build. We don't set deliver's reject_if_possible
+# because that cancels even when the current submission is the one we want,
+# which would bounce the app to the back of Apple's review queue on every retry.
+def prepare_version_for_submit(app_identifier:, version:, build_number:)
+  app = Spaceship::ConnectAPI::App.find(app_identifier)
+  UI.user_error!("App #{app_identifier} not found in App Store Connect") if app.nil?
+
+  store_version = latest_store_version(app)
+  return :ready if store_version.nil?
+
+  state = store_version_state(store_version)
+  return :ready unless REVIEW_LOCKED_STATES.include?(state)
+
+  current_build = attached_build_number(store_version)
+  same_version = store_version.version_string.to_s == version.to_s
+  same_build = current_build.to_s == build_number.to_s && !current_build.to_s.empty?
+
+  if same_version && same_build
+    UI.success("Version #{version} (#{build_number}) is already #{state} — skipping submit")
+    return :already_submitted
+  end
+
+  UI.important(
+    "App Store version #{store_version.version_string} is #{state} " \
+    "(build #{current_build || 'none'}); cancelling so #{version} (#{build_number}) can be submitted",
+  )
+
+  platform = Spaceship::ConnectAPI::Platform::IOS
+  submission = app.get_in_progress_review_submission(platform: platform)
+  if submission.nil?
+    UI.user_error!(
+      "Version #{store_version.version_string} is #{state} but no in-progress review submission was found to cancel. " \
+      "Cancel it in App Store Connect, then re-run Mobile submit with ios_skip_upload.",
+    )
+  end
+
+  submission.cancel_submission
+  deadline = Time.now + 600
+  loop do
+    in_progress = app.get_in_progress_review_submission(platform: platform)
+    unlocked = latest_store_version(app)
+    unlocked_state = unlocked && store_version_state(unlocked)
+    break if in_progress.nil? && !REVIEW_LOCKED_STATES.include?(unlocked_state)
+
+    UI.user_error!("Timed out waiting for the previous App Store review submission to cancel") if Time.now >= deadline
+    UI.message("Waiting for cancellation to take effect...")
+    sleep(15)
+  end
+  UI.success("Previous review submission cancelled")
+  :ready
+end
+
 platform :ios do
   # Auth is an App Store Connect API key (Users and Access -> Integrations),
   # passed as APP_STORE_CONNECT_API_KEY_* env vars — repo secrets in CI, a
@@ -134,11 +213,19 @@ platform :ios do
     requested_build = options[:build_number] || ENV["IOS_BUILD_NUMBER"]
     requested_build = nil if requested_build.to_s.empty?
 
+    app_identifier = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
     build_number = wait_for_processed_build(
-      app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      app_identifier: app_identifier,
       version: version,
       build_number: requested_build,
     )
+
+    outcome = prepare_version_for_submit(
+      app_identifier: app_identifier,
+      version: version,
+      build_number: build_number,
+    )
+    next if outcome == :already_submitted
 
     # Screenshots are slow to push and App Store Connect carries the previous
     # version's over, so only re-upload them when they actually changed.
