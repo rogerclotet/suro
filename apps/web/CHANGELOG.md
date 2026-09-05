@@ -6,64 +6,31 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
-## [1.24.0] — 2026-09-05
-
-### ca
-
-- [feature] Els ajustos del grup mostren els membres i permeten a l'administrador eliminar-ne amb confirmació, tant al web com a l'app. També pot eliminar el grup escrivint-ne el nom complet.
-
-### es
-
-- [feature] Los ajustes del grupo muestran sus miembros y permiten al administrador eliminarlos con confirmación, tanto en la web como en la app. También puede eliminar el grupo escribiendo su nombre completo.
-
-### en
-
-- [feature] Group settings list members and let administrators remove them with confirmation on web and native. Administrators can also delete a group by typing its full name.
-
-## [1.23.2] — 2026-09-05
-
-### ca
-
-- [fix] Els avatars de les persones ara són rodons i els dels grups mantenen la forma quadrada amb cantonades arrodonides, tant a l'app com al web.
-
-### es
-
-- [fix] Los avatares de las personas ahora son redondos y los de los grupos mantienen la forma cuadrada con esquinas redondeadas, tanto en la app como en la web.
-
-### en
-
-- [fix] User avatars are now round and group avatars use rounded squares consistently across the native and web apps.
-
-## [1.23.1] — 2026-09-05
-
-### ca
-
-- [improvement] La pantalla inicial de Suro integra els grups en una llista més neta, amb el perfil a la capçalera i les preferències dins del perfil. Els ajustos de cada grup són a la seva pantalla d'inici. Els indicadors de notificació desapareixen en llegir-les.
-
-### es
-
-- [improvement] La pantalla inicial de Suro integra los grupos en una lista más limpia, con el perfil en la cabecera y las preferencias dentro del perfil. Los ajustes de cada grupo están en su pantalla de inicio. Los indicadores de notificación desaparecen al leerlas.
-
-### en
-
-- [improvement] Suro's opening screen has a cleaner group list, a profile avatar in the header and preferences within your profile. Each group's settings are on its home screen. Notification badges disappear once read.
-
 ## [1.23.0] — 2026-09-05
 
 ### ca
 
-- [feature] L'app ara s'obre amb la llista de grups, amb una vista prèvia dels membres i les notificacions pendents. Pots tornar-hi des de qualsevol secció.
-- [feature] Les seccions mostren les notificacions no llegides i obren l'actualització més recent, inclòs el mes corresponent del calendari. Es marquen com a llegides en visitar la secció.
+- [feature] L'app s'obre amb els grups, els membres i els avisos pendents. Torna als grups des de qualsevol secció.
+- [feature] Els avisos obren l'última novetat, inclòs el mes del calendari, i es netegen en visitar la secció.
+- [improvement] Llista de grups més neta, perfil a la capçalera, preferències al perfil i ajustos a l'inici del grup.
+- [fix] Avatars rodons per a persones i quadrats arrodonits per a grups.
+- [feature] L'administrador pot eliminar membres amb confirmació i grups escrivint-ne el nom complet.
 
 ### es
 
-- [feature] La app ahora se abre con la lista de grupos, con una vista previa de los miembros y las notificaciones pendientes. Puedes volver a ella desde cualquier sección.
-- [feature] Las secciones muestran las notificaciones no leídas y abren la actualización más reciente, incluido el mes correspondiente del calendario. Se marcan como leídas al visitar la sección.
+- [feature] La app se abre con grupos, miembros y avisos pendientes. Vuelve a los grupos desde cualquier sección.
+- [feature] Los avisos abren la última novedad, incluido el mes del calendario, y se borran al visitar la sección.
+- [improvement] Lista de grupos más limpia, perfil en la cabecera, preferencias en el perfil y ajustes al inicio del grupo.
+- [fix] Avatares redondos para personas y cuadrados redondeados para grupos.
+- [feature] El administrador puede eliminar miembros con confirmación y grupos escribiendo su nombre completo.
 
 ### en
 
-- [feature] The app now opens with your groups, member previews and unread counts. Return to the groups list from any section.
-- [feature] Section badges show unread updates and open the latest one, including the correct calendar month. Visiting a section marks its notifications as read.
+- [feature] The app opens with groups, member previews and unread counts. Return to groups from any section.
+- [feature] Badges open the latest update, including its calendar month, and clear on visiting the section.
+- [improvement] Cleaner group list, profile in the header, preferences in profile and settings on group home.
+- [fix] Round user avatars and rounded-square group avatars.
+- [feature] Admins can remove members with confirmation and delete groups by typing their full name.
 
 ## [1.22.0] — 2026-09-05
 

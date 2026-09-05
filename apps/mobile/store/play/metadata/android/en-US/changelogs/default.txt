@@ -1,1 +1,5 @@
-• Group settings list members and let administrators remove them with confirmation on web and native. Administrators can also delete a group by typing its full name.
+• The app opens with groups, member previews and unread counts. Return to groups from any section.
+• Badges open the latest update, including its calendar month, and clear on visiting the section.
+• Cleaner group list, profile in the header, preferences in profile and settings on group home.
+• Round user avatars and rounded-square group avatars.
+• Admins can remove members with confirmation and delete groups by typing their full name.
