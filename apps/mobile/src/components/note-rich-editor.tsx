@@ -23,34 +23,30 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useTranslations } from "@/i18n";
-import { isBlankHtml } from "@/lib/note-content";
 import { richTextCss } from "@/lib/note-css";
 import { type Theme, useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
 
 type BridgeState = ReturnType<typeof useBridgeState>;
 
-/** Treat Tiptap's empty document (`<p></p>`) as equal to the empty string. */
-function normalizeHtml(html: string): string {
-  return isBlankHtml(html) ? "" : html;
-}
-
 /**
  * The notes rich-text editing surface: a themed formatting toolbar above a
  * Tiptap WebView (via tentap, so it emits the same HTML as the web app).
- * Convex-agnostic — the owning screen passes the latest server HTML as `content`
- * and receives local edits through `onChangeHtml`. While the user isn't actively
- * editing, remote changes to `content` are reflected live, like the lists view.
+ * The owning screen passes the HTML captured when it acquired the editing lock
+ * as `content` and receives local edits through `onChangeHtml`. The draft stays
+ * local for this editing session, including after a lost lock.
  * Expects a flex parent so the editor fills the space below the toolbar.
  */
 export function NoteRichEditor({
   content,
   placeholder,
   onChangeHtml,
+  editable = true,
 }: {
   content: string;
   placeholder: string;
   onChangeHtml?: (html: string) => void;
+  editable?: boolean;
 }) {
   const t = useTheme();
   const editor = useEditorBridge({
@@ -70,6 +66,9 @@ export function NoteRichEditor({
   });
   const editorState = useBridgeState(editor);
   const html = useEditorContent(editor, { type: "html" });
+  useEffect(() => {
+    if (editorState.isReady) editor.setEditable(editable);
+  }, [editorState.isReady, editor, editable]);
 
   // Re-skin the in-webview document to the app's warm theme once it's ready and
   // whenever the scheme flips.
@@ -80,47 +79,15 @@ export function NoteRichEditor({
     }
   }, [editorState.isReady, editor, t, placeholder]);
 
-  // `applied` is the normalized HTML the editor currently reflects; `suppress`
-  // marks the echo from a programmatic live-refresh so it isn't reported back as
-  // a local edit (which would save the remote content straight back).
-  const applied = useRef<string | null>(null);
   const onChangeRef = useRef(onChangeHtml);
   onChangeRef.current = onChangeHtml;
-  const suppress = useRef(false);
   useEffect(() => {
-    if (html === undefined) {
-      return;
-    }
-    const next = normalizeHtml(html);
-    if (suppress.current) {
-      suppress.current = false;
-      if (next === applied.current) {
-        return; // expected echo of a live-refresh, not a user edit
-      }
-    }
-    applied.current = next;
-    onChangeRef.current?.(html);
+    if (html !== undefined) onChangeRef.current?.(html);
   }, [html]);
-
-  // Reflect remote edits while the user isn't typing, so an open note stays live
-  // like the lists view. Skipped while focused so it never fights the cursor.
-  useEffect(() => {
-    if (
-      !editorState.isReady ||
-      editorState.isFocused ||
-      applied.current === null ||
-      normalizeHtml(content) === applied.current
-    ) {
-      return;
-    }
-    suppress.current = true;
-    applied.current = normalizeHtml(content);
-    editor.setContent(content);
-  }, [content, editorState.isReady, editorState.isFocused, editor]);
 
   return (
     <>
-      <EditorToolbar editor={editor} state={editorState} />
+      {editable && <EditorToolbar editor={editor} state={editorState} />}
       <RichText editor={editor} style={{ flex: 1, backgroundColor: t.bg }} />
     </>
   );

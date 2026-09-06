@@ -4,6 +4,7 @@ import { mutation, type QueryCtx, query } from "./_generated/server";
 import { track } from "./model/analytics";
 import { notifyProject } from "./model/notify";
 import { requireNoteAccess, requireProjectMember } from "./model/permissions";
+import { requireEditingLock } from "./noteEditLocks";
 
 /** Attach the creator's and last-editor's display names to a note row. */
 async function loadNote(ctx: QueryCtx, note: Doc<"notes">) {
@@ -89,13 +90,15 @@ export const update = mutation({
     noteId: v.id("notes"),
     name: v.string(),
     contents: v.string(),
+    editLockId: v.optional(v.id("noteEditLocks")),
     // The mobile editor now saves Tiptap HTML (matching the web app), so it
     // sends `format: "html"`. Omitted by older/plain-text callers, which leaves
     // the stored format untouched.
     format: v.optional(v.string()),
   },
-  handler: async (ctx, { noteId, name, contents, format }) => {
+  handler: async (ctx, { noteId, name, contents, format, editLockId }) => {
     const { note, userId } = await requireNoteAccess(ctx, noteId);
+    await requireEditingLock(ctx, noteId, userId, editLockId);
     const trimmed = name.trim();
     if (trimmed === "") {
       throw new Error("Note name is required");

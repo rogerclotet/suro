@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
+import { useConvexAuth, useQuery } from "convex/react";
 import { PencilIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -22,6 +25,15 @@ import SettingsMenu from "./settings-menu";
  */
 export default function NoteView({ noteId }: { noteId: string }) {
   const note = useNote(noteId);
+  const { isAuthenticated } = useConvexAuth();
+  const lock = useQuery(
+    api.noteEditLocks.get,
+    isAuthenticated
+      ? {
+          noteId: noteId as Id<"notes">,
+        }
+      : "skip",
+  );
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("notes");
@@ -29,12 +41,12 @@ export default function NoteView({ noteId }: { noteId: string }) {
 
   const projectId = note?.projectId;
   const edit = useCallback(() => {
-    if (!projectId) return;
+    if (!projectId || lock !== null) return;
     router.push({
       pathname: "/groups/[projectId]/notes/[noteId]/edit",
       params: { projectId, noteId },
     });
-  }, [router, projectId, noteId]);
+  }, [router, projectId, noteId, lock]);
 
   if (note === undefined || note === null) {
     return null;
@@ -70,6 +82,13 @@ export default function NoteView({ noteId }: { noteId: string }) {
         </div>
       </div>
 
+      {lock && (
+        <p role="status" className="text-muted-foreground text-sm">
+          {lock.editorName
+            ? t("editingBy", { name: lock.editorName })
+            : t("editingBySomeone")}
+        </p>
+      )}
       {isEmpty ? (
         <p className="text-muted-foreground/50 italic">{t("emptyPreview")}</p>
       ) : (
@@ -80,7 +99,12 @@ export default function NoteView({ noteId }: { noteId: string }) {
         />
       )}
 
-      <Action label={tCommon("edit")} icon={PencilIcon} onClick={edit} />
+      <Action
+        label={tCommon("edit")}
+        icon={PencilIcon}
+        onClick={edit}
+        disabled={lock !== null}
+      />
     </div>
   );
 }

@@ -230,6 +230,12 @@ export default defineSchema({
     .index("by_event", ["eventId"])
     .index("by_legacyId", ["legacyId"]),
 
+  noteEditLocks: defineTable({
+    noteId: v.id("notes"),
+    userId: v.id("users"),
+    expiresAt: v.number(),
+  }).index("by_note", ["noteId"]),
+
   // Expense "pots" (shared tabs). `settledAt` (epoch ms) marks a settled pot;
   // undefined = active. Optional event backlink (ON DELETE SET NULL).
   pots: defineTable({

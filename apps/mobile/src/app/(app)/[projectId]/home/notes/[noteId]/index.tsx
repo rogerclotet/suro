@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import {
   Stack,
@@ -55,6 +55,11 @@ export default function NoteScreen() {
 }
 
 function NoteContent({ id, note }: { id: Id<"notes">; note: Note }) {
+  const { isAuthenticated } = useConvexAuth();
+  const lock = useQuery(
+    api.noteEditLocks.get,
+    isAuthenticated ? { noteId: id } : "skip",
+  );
   const pid = useProjectId();
   const pathname = usePathname();
   const router = useRouter();
@@ -67,7 +72,7 @@ function NoteContent({ id, note }: { id: Id<"notes">; note: Note }) {
   // (see calendar/note/[noteId]), so derive the editor route from where we are
   // rather than hard-coding one of the two paths.
   function edit() {
-    router.push(`${pathname}/edit`);
+    if (lock === null) router.push(`${pathname}/edit`);
   }
 
   function confirmDelete() {
@@ -108,7 +113,12 @@ function NoteContent({ id, note }: { id: Id<"notes">; note: Note }) {
           title: note.name,
           // iOS gets the pencil in the header capsule; on Android it's the Fab.
           ...headerCreateAction(
-            { onPress: edit, label: tc("edit"), icon: Pencil },
+            {
+              onPress: edit,
+              label: tc("edit"),
+              icon: Pencil,
+              disabled: lock !== null,
+            },
             [deleteAction],
           ),
         }}
@@ -128,6 +138,15 @@ function NoteContent({ id, note }: { id: Id<"notes">; note: Note }) {
           {tNotes("updatedAt", { time: timeAgo(note.updatedAt) })}
         </Txt>
       </View>
+      {lock && (
+        <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+          <Txt muted accessibilityLiveRegion="polite">
+            {lock.editorName
+              ? tNotes("editingBy", { name: lock.editorName })
+              : tNotes("editingBySomeone")}
+          </Txt>
+        </View>
+      )}
       {isEmpty ? (
         <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
           <Txt muted>{tNotes("emptyNote")}</Txt>
@@ -135,7 +154,12 @@ function NoteContent({ id, note }: { id: Id<"notes">; note: Note }) {
       ) : (
         <NoteHtmlView contents={note.contents} format={note.format} />
       )}
-      <Fab onPress={edit} icon={Pencil} label={tc("edit")} />
+      <Fab
+        disabled={lock !== null}
+        onPress={edit}
+        icon={Pencil}
+        label={tc("edit")}
+      />
     </Screen>
   );
 }

@@ -655,7 +655,12 @@
       "unlink": "Remove link",
       "undo": "Undo",
       "redo": "Redo"
-    }
+    },
+    "editingBy": "{name} is editing this note.",
+    "editingBySomeone": "Someone is editing this note.",
+    "startingEdit": "Opening the editor…",
+    "lockError": "Could not start editing. Go back and try again.",
+    "lockLost": "Editing is paused because the editing lock was lost. Your draft is still visible. Copy any unsaved text before leaving, then reopen the editor."
   },
   "expenses": {
     "header": "Expenses",

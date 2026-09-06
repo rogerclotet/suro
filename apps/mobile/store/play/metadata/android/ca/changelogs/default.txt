@@ -1,3 +1,1 @@
-• L'app mostra un error si no pot enviar els comentaris i conserva el missatge per tornar-ho a provar.
-• Els suggeriments passen a la capçalera dels grups per deixar més espai a la llista.
-• Crea grups amb el botó flotant a Android o el botó + de la capçalera a iOS, sense ocupar espai a la llista.
+• Les notes mostren qui les està editant en temps real i impedeixen que dues persones les editin alhora, tant al web com al mòbil.
