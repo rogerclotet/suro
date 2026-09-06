@@ -39,7 +39,9 @@ export type ListEvent = {
   allDay: boolean;
 };
 
-export type List = {
+export type ListSummary = { id: string; projectId: string; name: string };
+
+export type ListDetail = {
   id: string;
   projectId: string;
   name: string;
@@ -57,6 +59,15 @@ export type List = {
   items: ListItem[];
   event: ListEvent | null;
 };
+
+/** Existing item-bearing list cards use the same complete shape. */
+export type List = ListDetail;
+
+export function adaptListSummary(
+  list: FunctionReturnType<typeof api.lists.summariesByProject>[number],
+): ListSummary {
+  return { id: list._id, projectId: list.projectId, name: list.name };
+}
 
 export type TemplateItem = { name: string; category: string | null };
 
@@ -133,7 +144,7 @@ export function adaptList(
     updatedBy: l.updatedBy ?? null,
     updatedAt: l.updatedAt ? new Date(l.updatedAt) : null,
     createdAt: new Date(l._creationTime),
-    items: (l.items ?? []).map(adaptItem),
+    items: l.items.map(adaptItem),
     event: event ? adaptEvent(event) : null,
   };
 }

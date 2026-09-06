@@ -1,1 +1,1 @@
-• Mobile shows changes waiting to sync and lets you retry or discard failed changes.
+• Lists linked to an event show its name, dates and link again.

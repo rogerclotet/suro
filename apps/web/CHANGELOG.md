@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.1] — 2026-09-06
+
+### ca
+
+- [fix] Les llistes vinculades a un esdeveniment tornen a mostrar-ne el nom, les dates i l’enllaç.
+
+### es
+
+- [fix] Las listas vinculadas a un evento vuelven a mostrar su nombre, fechas y enlace.
+
+### en
+
+- [fix] Lists linked to an event show its name, dates and link again.
+
 ## [1.25.0] — 2026-09-06
 
 ### ca

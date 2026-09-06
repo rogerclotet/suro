@@ -1,1 +1,1 @@
-• El mòbil mostra els canvis pendents de sincronitzar i permet reintentar o descartar els que han fallat.
+• Les llistes vinculades a un esdeveniment tornen a mostrar-ne el nom, les dates i l’enllaç.

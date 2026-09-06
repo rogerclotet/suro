@@ -1,1 +1,1 @@
-• El móvil muestra los cambios pendientes de sincronizar y permite reintentar o descartar los que han fallado.
+• Las listas vinculadas a un evento vuelven a mostrar su nombre, fechas y enlace.

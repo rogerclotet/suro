@@ -493,3 +493,72 @@ describe("category suggestions", () => {
     expect(suggestions.map((c) => c.name)).toEqual(["Groceries"]);
   });
 });
+
+it("keeps navigation payload independent of item history and loads the selected list's event", async () => {
+  const t = convexTest(schema, modules);
+  const { user, outsider, project, event } = await t.run(async (ctx) => {
+    const user = await ctx.db.insert("users", { name: "Alice" });
+    const outsider = await ctx.db.insert("users", { name: "Bob" });
+    const project = await ctx.db.insert("projects", {
+      name: "Home",
+      createdBy: user,
+      inviteToken: "invite",
+      color: "blue",
+    });
+    await ctx.db.insert("projectMembers", { projectId: project, userId: user });
+    const event = await ctx.db.insert("events", {
+      projectId: project,
+      name: "Dinner",
+      startAt: 1,
+      endAt: 2,
+      allDay: false,
+      createdBy: user,
+      updatedAt: 1,
+    });
+    // A household's accumulated weekly lists: 120 lists × 20 items.
+    for (let i = 0; i < 120; i++) {
+      const listId = await ctx.db.insert("lists", {
+        projectId: project,
+        name: `Week ${i}`,
+        favorite: false,
+        createdBy: user,
+        updatedAt: i,
+        eventId: event,
+      });
+      for (let j = 0; j < 20; j++)
+        await ctx.db.insert("listItems", {
+          listId,
+          name: `Item ${j}`,
+          completed: i < 119,
+          createdBy: user,
+          updatedAt: i,
+        });
+    }
+    return { user, outsider, project, event };
+  });
+  const client = t.withIdentity({ subject: `${user}|session` });
+  const summaries = await client.query(api.lists.summariesByProject, {
+    projectId: project,
+  });
+  const first = summaries[0];
+  if (!first) throw new Error("Fixture missing");
+  expect(summaries).toHaveLength(120);
+  expect(Object.keys(first).sort()).toEqual(["_id", "name", "projectId"]);
+  const detail = await client.query(api.lists.get, { listId: first._id });
+  expect(detail?.items).toHaveLength(20);
+  expect(detail?.event?._id).toBe(event);
+  const oldPayload = await client.query(api.lists.listByProject, {
+    projectId: project,
+  });
+  const before = JSON.stringify(oldPayload).length;
+  const after = JSON.stringify({ summaries, detail }).length;
+  expect(after).toBeLessThan(before / 10);
+  console.info(
+    `List payload fixture: ${before} → ${after} JSON characters (120 lists, 2400 items)`,
+  );
+  await expect(
+    t
+      .withIdentity({ subject: `${outsider}|session` })
+      .query(api.lists.summariesByProject, { projectId: project }),
+  ).rejects.toThrow("Project not found");
+});
