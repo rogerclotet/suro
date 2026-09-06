@@ -8,7 +8,7 @@ import { useProjects } from "../_state/project-state";
 import OnboardingWalkthrough from "./onboarding/onboarding-walkthrough";
 
 export default function Redirect({ projectId }: { projectId?: string }) {
-  const { projects, project: selectedProject, selectProject } = useProjects();
+  const { projects, project: selectedProject } = useProjects();
   const router = useRouter();
   const { data: session, status } = useSession();
   const [onboardingSkipped, setOnboardingSkipped] = useState(false);
@@ -18,17 +18,6 @@ export default function Redirect({ projectId }: { projectId?: string }) {
     !onboardingSkipped &&
     sessionReady &&
     session?.user.onboardingCompleted === false;
-
-  useEffect(() => {
-    if (projectId) {
-      const target = projects.find((p) => p.id === projectId);
-      if (target) {
-        selectProject(target);
-      }
-    } else if (!selectedProject && projects && projects.length > 0) {
-      selectProject(undefined);
-    }
-  }, [projectId, projects, selectedProject, selectProject]);
 
   const targetProjectId = projectId ?? selectedProject?.id;
 

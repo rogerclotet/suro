@@ -1,1 +1,1 @@
-• Les llistes vinculades a un esdeveniment tornen a mostrar-ne el nom, les dates i l’enllaç.
+• La selecció del grup segueix l’enllaç obert i conserva la preferència de cada compte.

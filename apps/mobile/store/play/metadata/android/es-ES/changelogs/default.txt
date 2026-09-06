@@ -1,1 +1,1 @@
-• Las listas vinculadas a un evento vuelven a mostrar su nombre, fechas y enlace.
+• La selección del grupo sigue el enlace abierto y conserva la preferencia de cada cuenta.

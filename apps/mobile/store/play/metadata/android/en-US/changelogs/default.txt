@@ -1,1 +1,1 @@
-• Lists linked to an event show its name, dates and link again.
+• Group selection follows the open link and remembers each account’s preference.

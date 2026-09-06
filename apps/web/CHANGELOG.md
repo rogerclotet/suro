@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.2] — 2026-09-06
+
+### ca
+
+- [fix] La selecció del grup segueix l’enllaç obert i conserva la preferència de cada compte.
+
+### es
+
+- [fix] La selección del grupo sigue el enlace abierto y conserva la preferencia de cada cuenta.
+
+### en
+
+- [fix] Group selection follows the open link and remembers each account’s preference.
+
 ## [1.25.1] — 2026-09-06
 
 ### ca
