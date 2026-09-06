@@ -3,8 +3,7 @@ import type { File } from "./file";
 
 /**
  * Calendar event shape consumed across the app. Backed by Convex via
- * `adaptEvent`, kept field-compatible with the former Drizzle shape. `files`
- * (attachments) are deferred to the files/storage migration (Phase 5).
+ * `adaptEvent`. Attachments are loaded separately by `useEventFiles`.
  */
 export type Event = {
   id: string;

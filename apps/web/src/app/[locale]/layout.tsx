@@ -37,9 +37,9 @@ export async function generateStaticParams() {
 }
 
 function getSiteUrl(): URL | undefined {
-  const fromEnv =
-    process.env.NEXTAUTH_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+  const fromEnv = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "https://suroapp.cat";
   if (!fromEnv) return undefined;
   try {
     return new URL(fromEnv);
