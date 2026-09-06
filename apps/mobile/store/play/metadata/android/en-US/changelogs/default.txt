@@ -1,1 +1,1 @@
-• Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.
+• Fixed an error that prevented the web app from opening when signed in.

@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.25.4",
+    "version": "1.25.5",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.",
+        "releaseNotes": "• Fixed an error that prevented the web app from opening when signed in.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.",
+        "releaseNotes": "• Corregido un error que impedía abrir la web con la sesión iniciada.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Les llistes i despeses creades sense connexió continuen obertes després de sincronitzar-se, i els canvis nous es sincronitzen sense esperar una altra reconnexió.",
+        "releaseNotes": "• Corregit un error que impedia obrir el web amb la sessió iniciada.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

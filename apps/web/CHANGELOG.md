@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.5] — 2026-09-06
+
+### ca
+
+- [fix] Corregit un error que impedia obrir el web amb la sessió iniciada.
+
+### es
+
+- [fix] Corregido un error que impedía abrir la web con la sesión iniciada.
+
+### en
+
+- [fix] Fixed an error that prevented the web app from opening when signed in.
+
 ## [1.25.4] — 2026-09-06
 
 ### ca

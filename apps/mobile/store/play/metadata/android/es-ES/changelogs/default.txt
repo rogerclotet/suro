@@ -1,1 +1,1 @@
-• Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.
+• Corregido un error que impedía abrir la web con la sesión iniciada.

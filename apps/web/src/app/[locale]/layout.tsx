@@ -121,14 +121,14 @@ export default async function LocaleLayout({
 
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                 <ThemeColorMeta />
-                <SidebarLayout>
-                  <TooltipProvider>
-                    <ProjectsProvider>
+                <ProjectsProvider>
+                  <SidebarLayout>
+                    <TooltipProvider>
                       {children}
                       <Toaster position="bottom-center" />
-                    </ProjectsProvider>
-                  </TooltipProvider>
-                </SidebarLayout>
+                    </TooltipProvider>
+                  </SidebarLayout>
+                </ProjectsProvider>
               </ThemeProvider>
             </ConvexClientProvider>
           </NextIntlClientProvider>
