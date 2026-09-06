@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { Id } from "../_generated/dataModel";
 import {
   calculateBalances,
   generateProposals,
   type SpendingInput,
 } from "./expenses";
 
-const u1 = "u1" as Id<"users">;
-const u2 = "u2" as Id<"users">;
-const u3 = "u3" as Id<"users">;
+const u1 = "u1";
+const u2 = "u2";
+const u3 = "u3";
 
-function balances(memberIds: Id<"users">[], spendings: SpendingInput[]) {
+function balances(memberIds: string[], spendings: SpendingInput[]) {
   return Object.fromEntries(calculateBalances(memberIds, spendings).entries());
 }
 

@@ -73,6 +73,9 @@ importers:
       design-tokens:
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      domain:
+        specifier: workspace:*
+        version: link:../../packages/domain
       expo:
         specifier: ~57.0.19
         version: 57.0.19(@babel/core@7.29.7)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.15)(expo-router@57.0.18)(react-dom@19.2.8(react@19.2.8))(react-native-web@0.21.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-native-webview@13.16.1(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react-native-worklets@0.10.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
@@ -341,6 +344,9 @@ importers:
       design-tokens:
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      domain:
+        specifier: workspace:*
+        version: link:../../packages/domain
       fflate:
         specifier: ^0.8.3
         version: 0.8.3
@@ -477,6 +483,9 @@ importers:
       convex:
         specifier: ^1.45.0
         version: 1.45.0(react@19.2.8)
+      domain:
+        specifier: workspace:*
+        version: link:../domain
       jose:
         specifier: ^6.2.10
         version: 6.2.10
@@ -508,6 +517,15 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+
+  packages/domain:
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@edge-runtime/vm@5.0.0)(@opentelemetry/api@1.9.0)(@types/node@26.4.1)(jsdom@29.1.1)(vite@8.0.16(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0))
 
 packages:
 
@@ -1501,7 +1519,7 @@ packages:
 
   '@expo/bunyan@4.0.1':
     resolution: {integrity: sha512-+Lla7nYSiHZirgK+U/uYzsLv/X+HaJienbD5AKX1UQZHYfWaP+9uuQluRB4GrEVWF0GZ7vEVp/jzaOT9k/SQlg==}
-    engines: {node: '>=0.10.0'}
+    engines: {'0': node >=0.10.0}
 
   '@expo/cli@57.0.21':
     resolution: {integrity: sha512-CkcgAOsp1KkNRENXWfyr/esIwgFtiHosKECWZ0QQl2nFOUEQlyjWXAZ6uTCMnbHLonVnPMZpXTkHZNw3gtanFw==}

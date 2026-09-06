@@ -14,6 +14,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import { compareTasks } from "domain/tasks";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -221,27 +222,11 @@ function compareItems(a: ListItem, b: ListItem) {
   return nameCompare !== 0 ? nameCompare : a.id.localeCompare(b.id);
 }
 
-/** High first, so it sorts ahead of normal/low on a due-date tie. */
-const PRIORITY_RANK: Record<NonNullable<ListItem["priority"]>, number> = {
-  high: 0,
-  normal: 1,
-  low: 2,
-};
-
-/**
- * Task-mode order, mirroring the backend's `compareTaskItems`: open first, then
- * due date (no due date last), then priority (high first), then name.
- */
 function compareTaskItems(a: ListItem, b: ListItem) {
-  if (a.completed !== b.completed) return a.completed ? 1 : -1;
-  const aDue = a.dueAt?.getTime() ?? Number.POSITIVE_INFINITY;
-  const bDue = b.dueAt?.getTime() ?? Number.POSITIVE_INFINITY;
-  if (aDue !== bDue) return aDue - bDue;
-  const aRank = PRIORITY_RANK[a.priority ?? "normal"];
-  const bRank = PRIORITY_RANK[b.priority ?? "normal"];
-  if (aRank !== bRank) return aRank - bRank;
-  const byName = a.name.localeCompare(b.name);
-  return byName !== 0 ? byName : a.id.localeCompare(b.id);
+  return compareTasks(
+    { ...a, completed: a.completed ?? false, dueAt: a.dueAt?.getTime() },
+    { ...b, completed: b.completed ?? false, dueAt: b.dueAt?.getTime() },
+  );
 }
 
 /**

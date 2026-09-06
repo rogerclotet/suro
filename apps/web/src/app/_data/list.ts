@@ -2,14 +2,8 @@ import type { api } from "backend/convex/_generated/api";
 import type { Doc } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 
-/** Task priority; only meaningful on task-mode lists. */
-export type ItemPriority = "low" | "normal" | "high";
-
-/** Repeat rule; only meaningful on task-mode lists. */
-export type ItemRecurrence = {
-  freq: "daily" | "weekly" | "monthly" | "yearly";
-  interval: number;
-};
+export type ItemPriority = NonNullable<Doc<"listItems">["priority"]>;
+export type ItemRecurrence = NonNullable<Doc<"listItems">["recurrence"]>;
 
 /**
  * List / item / template shapes consumed across the app. Backed by Convex via

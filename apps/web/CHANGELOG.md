@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.24.1] — 2026-09-06
+
+### ca
+
+- [fix] Els saldos i les propostes per saldar despeses reparteixen els cèntims d'arrodoniment igual al web i al mòbil.
+
+### es
+
+- [fix] Los saldos y las propuestas para saldar gastos reparten los céntimos de redondeo igual en la web y en el móvil.
+
+### en
+
+- [fix] Expense balances and settlement proposals distribute rounding cents consistently on web and mobile.
+
 ## [1.24.0] — 2026-09-06
 
 ### ca

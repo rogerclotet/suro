@@ -1,0 +1,19 @@
+{
+  "name": "domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./expenses": "./src/expenses.ts",
+    "./tasks": "./src/tasks.ts",
+    "./month-totals": "./src/month-totals.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

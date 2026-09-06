@@ -11,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import UserAvatar from "@/components/user-avatar";
-import { calculateBalances } from "./settle-button/calculate-balances";
 import UserBalance from "./user-balance";
 
 type Member = {
@@ -21,19 +20,20 @@ type Member = {
 export default function SpendingsTable({
   spendings,
   members,
+  balances,
 }: {
   spendings: Spending[];
   members: Member[];
+  balances: Record<string, number>;
 }) {
-  const { balances, currency, maxAbsBalance } = useMemo(() => {
-    const balances = calculateBalances(members, spendings);
+  const { currency, maxAbsBalance } = useMemo(() => {
     const maxAbsBalance = Math.max(
       ...Object.values(balances).map((balance) => Math.abs(balance)),
     );
     const currency = spendings[0]?.currency ?? "EUR";
 
-    return { balances, currency, maxAbsBalance };
-  }, [spendings, members]);
+    return { currency, maxAbsBalance };
+  }, [spendings, balances]);
 
   return (
     <Table className="mx-auto max-w-2xl">

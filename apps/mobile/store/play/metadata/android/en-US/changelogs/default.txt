@@ -1,2 +1,1 @@
-• Notes show who is editing in real time and prevent simultaneous edits on web and mobile.
-• Download all photos from an event or all group files as a ZIP in the web app.
+• Expense balances and settlement proposals distribute rounding cents consistently on web and mobile.
