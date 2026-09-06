@@ -54,10 +54,10 @@ export function ListDetailScreen({
   const router = useRouter();
 
   const list = useOfflineListGet(lid);
-  const toggleFavorite = useQueuedMutation(api.lists.toggleFavorite);
-  const updateList = useQueuedMutation(api.lists.update);
-  const removeList = useQueuedMutation(api.lists.remove);
-  const clearCompleted = useQueuedMutation(api.lists.clearCompleted);
+  const toggleFavorite = useQueuedMutation("lists:toggleFavorite");
+  const updateList = useQueuedMutation("lists:update");
+  const removeList = useQueuedMutation("lists:remove");
+  const clearCompleted = useQueuedMutation("lists:clearCompleted");
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -291,7 +291,7 @@ function ImportTemplatesSheet({
   const templates = usePersistentQuery(api.templates.listByProject, {
     projectId,
   });
-  const importTemplates = useQueuedMutation(api.lists.importTemplates);
+  const importTemplates = useQueuedMutation("lists:importTemplates");
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
   const [selected, setSelected] = useState<Id<"listTemplates">[]>([]);

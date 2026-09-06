@@ -28,7 +28,8 @@
     "convex": "^1.45.0",
     "jose": "^6.2.10",
     "mupdf": "^1.28.0",
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "domain": "workspace:*"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",

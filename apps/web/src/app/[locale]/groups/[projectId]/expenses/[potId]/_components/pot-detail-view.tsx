@@ -82,7 +82,7 @@ export default function PotDetailView({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <SettleButton
-            spendings={pot.spendings}
+            pending={pot.settlements}
             members={pot.users}
             potId={pot.id}
           />
@@ -105,7 +105,11 @@ export default function PotDetailView({
         </div>
       </div>
 
-      <SpendingsTable spendings={pot.spendings} members={pot.users} />
+      <SpendingsTable
+        spendings={pot.spendings}
+        members={pot.users}
+        balances={pot.balances}
+      />
 
       <h2 className="font-semibold text-lg">{t("lastTransactions")}</h2>
       <SpendingsList spendings={pot.spendings} />

@@ -3,9 +3,10 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { useMemo } from "react";
 import { calculateBalances, generateProposals } from "./balances";
+import { resolveOfflineId } from "./outbox-logic";
 import { useIdmap, useOutboxEntries } from "./outbox-store";
 import { overlayItems, overlaySpendings, type SpendingRow } from "./overlay";
-import type { IdMap, OutboxEntry } from "./types";
+import { type IdMap, isTempId, type OutboxEntry } from "./types";
 import { usePersistentQuery } from "./use-persistent-query";
 
 /**
@@ -14,9 +15,8 @@ import { usePersistentQuery } from "./use-persistent-query";
  * top so the UI reflects offline writes — including writes made before an app
  * kill — and reconciles automatically once the server value catches up.
  *
- * The online experience is unchanged: while online the outbox is empty (writes
- * go straight to Convex with their optimistic update), so every overlay is a
- * no-op and these return the live value verbatim.
+ * Once the outbox is drained, new writes use Convex optimistic updates directly.
+ * Temporary route IDs resolve through the persisted acknowledgement map.
  */
 
 type ListGet = NonNullable<FunctionReturnType<typeof api.lists.get>>;
@@ -43,7 +43,7 @@ const resolver = (idmap: IdMap) => (id: string) => idmap[id] ?? id;
 /** Build a list shell for a list that exists only as a pending offline create. */
 function buildListBase(
   listId: Id<"lists">,
-  create: OutboxEntry,
+  create: Extract<OutboxEntry, { functionName: "lists:create" }>,
   user: CurrentUser,
 ): ListWithItems {
   const args = create.args;
@@ -71,9 +71,9 @@ function patchListFields(
   const resolve = resolver(idmap);
   let patched = list;
   for (const entry of entries) {
-    const args = entry.args;
+    const { functionName, args } = entry;
     if (
-      entry.functionName === "lists:update" &&
+      functionName === "lists:update" &&
       resolve(String(args.listId)) === listId
     ) {
       patched = {
@@ -83,7 +83,7 @@ function patchListFields(
           typeof args.description === "string" ? args.description : undefined,
       };
     } else if (
-      entry.functionName === "lists:toggleFavorite" &&
+      functionName === "lists:toggleFavorite" &&
       resolve(String(args.listId)) === listId
     ) {
       patched = { ...patched, favorite: !patched.favorite };
@@ -93,11 +93,15 @@ function patchListFields(
 }
 
 export function useOfflineListGet(
-  listId: Id<"lists">,
+  routeListId: Id<"lists">,
 ): ListGet | null | undefined {
-  const base = usePersistentQuery(api.lists.get, { listId });
-  const entries = useOutboxEntries();
   const idmap = useIdmap();
+  const listId = resolveOfflineId(routeListId, idmap);
+  const base = usePersistentQuery(
+    api.lists.get,
+    isTempId(listId) ? "skip" : { listId },
+  );
+  const entries = useOutboxEntries();
   const user = useCurrentUser();
   return useMemo(() => {
     let listBase: ListWithItems | null = base ?? null;
@@ -105,10 +109,10 @@ export function useOfflineListGet(
       const create = entries.find(
         (e) => e.functionName === "lists:create" && e.tempIds[0] === listId,
       );
-      if (create && user) {
+      if (create?.functionName === "lists:create" && user) {
         listBase = buildListBase(listId, create, user);
       } else {
-        return undefined;
+        return isTempId(listId) ? null : undefined;
       }
     }
     if (listBase === null) {
@@ -256,11 +260,15 @@ export function useOfflineListPotsOverview(
 }
 
 export function useOfflineGetPot(
-  potId: Id<"pots">,
+  routePotId: Id<"pots">,
 ): PotDetail | null | undefined {
-  const base = usePersistentQuery(api.expenses.getPot, { potId });
-  const entries = useOutboxEntries();
   const idmap = useIdmap();
+  const potId = resolveOfflineId(routePotId, idmap);
+  const base = usePersistentQuery(
+    api.expenses.getPot,
+    isTempId(potId) ? "skip" : { potId },
+  );
+  const entries = useOutboxEntries();
   const user = useCurrentUser();
   // Synthesize a pot that exists only as a pending offline create — needs the
   // project's members to resolve names; skipped (no fetch) for already-real pots.
@@ -271,7 +279,10 @@ export function useOfflineGetPot(
             e.functionName === "expenses:createPot" && e.tempIds[0] === potId,
         )
       : undefined;
-  const synthProjectId = create ? String(create.args.projectId) : null;
+  const synthProjectId =
+    create?.functionName === "expenses:createPot"
+      ? create.args.projectId
+      : null;
   const projectMembers = usePersistentQuery(
     api.projects.members,
     synthProjectId ? { projectId: synthProjectId as Id<"projects"> } : "skip",
@@ -284,7 +295,12 @@ export function useOfflineGetPot(
     }
     let potBase: PotDetail | undefined = base;
     if (base === undefined) {
-      if (!create || !user || projectMembers === undefined) {
+      if (isTempId(potId) && !create) return null;
+      if (
+        create?.functionName !== "expenses:createPot" ||
+        !user ||
+        projectMembers === undefined
+      ) {
         return undefined;
       }
       const memberIds = (
@@ -344,7 +360,11 @@ export function useOfflineGetPot(
     for (const entry of [...entries].sort(
       (a, b) => a.createdAt - b.createdAt,
     )) {
-      if (resolve(String(entry.args.potId)) !== potId) {
+      if (
+        (entry.functionName !== "expenses:createSpending" &&
+          entry.functionName !== "expenses:settlePayments") ||
+        resolve(entry.args.potId) !== potId
+      ) {
         continue;
       }
       if (entry.functionName === "expenses:createSpending") {
@@ -399,15 +419,20 @@ export function useOfflineSoloExpenses(
         }
       }
     }
-    const resolvedPotId = potId ? (resolve(potId) as Id<"pots">) : null;
-    const spendings =
-      resolvedPotId === null
-        ? base.spendings
-        : overlaySpendings(base.spendings, resolvedPotId, entries, idmap, {
-            projectId,
-            createdBy: user?.id ?? base.memberId,
-            nameById: new Map(),
-          });
+    if (potId === null)
+      return { potId: null, memberId: base.memberId, spendings: [] };
+    const resolvedPotId = resolve(potId) as Id<"pots">;
+    const spendings = overlaySpendings(
+      base.spendings,
+      resolvedPotId,
+      entries,
+      idmap,
+      {
+        projectId,
+        createdBy: user?.id ?? base.memberId,
+        nameById: new Map(),
+      },
+    );
     return {
       ...base,
       potId: resolvedPotId,
@@ -416,6 +441,6 @@ export function useOfflineSoloExpenses(
         fromName: null,
         toName: null,
       })),
-    } as SoloExpenses;
+    };
   }, [base, entries, idmap, user, projectId]);
 }

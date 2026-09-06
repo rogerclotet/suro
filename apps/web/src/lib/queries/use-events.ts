@@ -25,9 +25,9 @@ export function useEventsInRange(
   return data?.map(adaptEvent);
 }
 
-/** Minimal linked-note shape for the event detail (notes domain not yet migrated). */
+/** Linked-note identity used by event detail navigation. */
 export type LinkedNote = { id: string; name: string; projectId: string };
-/** Minimal linked-pot shape (expenses domain not yet migrated). */
+/** Linked-pot identity used by event detail navigation. */
 export type LinkedPot = { id: string; name: string; memberCount: number };
 
 export type EventWithLinks = {

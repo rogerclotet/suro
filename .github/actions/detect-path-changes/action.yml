@@ -21,8 +21,10 @@ runs:
       with:
         filters: |
           web:
+            - 'packages/design-tokens/**'
             - 'apps/web/**'
             - 'packages/backend/**'
+            - 'packages/domain/**'
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'pnpm-workspace.yaml'
@@ -40,6 +42,7 @@ runs:
             - 'apps/mobile/store/apple/screenshots/**'
           backend:
             - 'packages/backend/**'
+            - 'packages/domain/**'
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'pnpm-workspace.yaml'

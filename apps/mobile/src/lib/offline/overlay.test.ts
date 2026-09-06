@@ -1,22 +1,7 @@
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { describe, expect, it } from "vitest";
 import { overlayItems, overlaySpendings } from "./overlay";
-import type { OutboxEntry } from "./types";
-
-function entry(
-  over: Partial<OutboxEntry> & Pick<OutboxEntry, "functionName">,
-): OutboxEntry {
-  return {
-    id: over.id ?? "e",
-    functionName: over.functionName,
-    args: over.args ?? {},
-    tempIds: over.tempIds ?? [],
-    dependsOn: over.dependsOn ?? [],
-    createdAt: over.createdAt ?? 0,
-    status: over.status ?? "pending",
-    attempts: over.attempts ?? 0,
-  };
-}
+import { entry } from "./test-fixtures";
 
 function item(over: {
   _id: string;
@@ -55,6 +40,44 @@ function item(over: {
 const ME = { createdBy: "u1" as Id<"users"> };
 
 describe("overlayItems", () => {
+  it("replays checkbox and category commands without replacing unrelated fields", () => {
+    const base = [
+      item({
+        _id: "i1",
+        name: "Teammate edit",
+        details: "Keep",
+        priority: "high",
+        dueAt: 50,
+      }),
+    ];
+    const result = overlayItems(
+      base,
+      "list-1",
+      [
+        entry({
+          id: "check",
+          functionName: "listItems:setCompleted",
+          args: { itemId: "i1", completed: true, expectedDueAt: null },
+        }),
+        entry({
+          id: "move",
+          functionName: "listItems:setCategory",
+          args: { itemId: "i1", category: "Kitchen" },
+        }),
+      ],
+      {},
+      ME,
+    );
+    expect(result[0]).toMatchObject({
+      name: "Teammate edit",
+      details: "Keep",
+      priority: "high",
+      dueAt: 50,
+      completed: true,
+      category: "Kitchen",
+    });
+  });
+
   it("appends a pending create to its own list", () => {
     const out = overlayItems(
       [item({ _id: "i1", name: "eggs" })],

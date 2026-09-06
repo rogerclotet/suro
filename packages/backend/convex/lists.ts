@@ -10,6 +10,20 @@ import {
 import { notifyProject } from "./model/notify";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
 
+/** Navigation needs list identity and name, without subscribing to every item. */
+export const summariesByProject = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const lists = await ctx.db
+      .query("lists")
+      .withIndex("by_project_updatedAt", (q) => q.eq("projectId", projectId))
+      .order("desc")
+      .collect();
+    return lists.map(({ _id, projectId, name }) => ({ _id, projectId, name }));
+  },
+});
+
 export const listByProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {

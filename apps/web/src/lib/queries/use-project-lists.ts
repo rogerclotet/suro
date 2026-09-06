@@ -5,8 +5,11 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
   adaptList,
+  adaptListSummary,
   adaptTemplate,
   type List,
+  type ListDetail,
+  type ListSummary,
   type Template,
 } from "@/app/_data/list";
 
@@ -21,8 +24,15 @@ export function useProjectLists(
   return data?.map((l) => adaptList(l));
 }
 
+export function useListSummaries(projectId: string): ListSummary[] | undefined {
+  const data = useQuery(api.lists.summariesByProject, {
+    projectId: projectId as Id<"projects">,
+  });
+  return data?.map(adaptListSummary);
+}
+
 /** A single reactive list with its items + linked event. `null` if it's gone. */
-export function useList(listId: string): List | null | undefined {
+export function useList(listId: string): ListDetail | null | undefined {
   const data = useQuery(api.lists.get, { listId: listId as Id<"lists"> });
   if (data === undefined) {
     return undefined;

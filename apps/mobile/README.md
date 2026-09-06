@@ -1,6 +1,6 @@
 # Suro mobile (Expo)
 
-React Native app (Expo Router) for the Lists slice, backed by Convex.
+React Native app (Expo Router) for groups, lists/tasks, calendar, files, notes, expenses, and activity, backed by Convex.
 
 ## Run
 
@@ -20,16 +20,16 @@ React Native app (Expo Router) for the Lists slice, backed by Convex.
 
 ## Auth
 
-Sign-in uses Convex Auth (Google OAuth + Resend email OTP), mirroring the web
+Sign-in uses Convex Auth (Google OAuth, Apple sign-in, and Resend email OTP), mirroring the web
 app. The Convex **deployment** needs these env vars set (`npx convex env set …`):
 `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_RESEND_KEY`, `AUTH_EMAIL_FROM`, and
 the `JWT_PRIVATE_KEY` + `JWKS` pair (generate with `npx @convex-dev/auth`).
-Native Google OAuth additionally needs the redirect wired to the `suro://` scheme.
+Native OAuth redirects use the `suro://` scheme. iOS Apple sign-in uses `AppleNative.ts`; web/Android use optional Apple OAuth. Provider configuration is owned by `packages/backend/convex/auth.ts`.
 
 ## Builds (local)
 
 Build locally with the scripts below, or let CI do it: on `main`, a version bump
-plus native-code changes trigger parallel EAS **cloud** builds that wait for
+plus native or shared-domain/design-token changes trigger parallel EAS **cloud** builds that wait for
 completion and submit to the stores automatically — see the root `AGENTS.md` →
 Deploys and `.github/workflows/mobile-release.yml`. The local scripts are EAS **local**
 builds signed with the EAS-managed credentials; log in once with `eas login`
@@ -61,15 +61,9 @@ Notes:
 
 ## Notes
 
-- **Styling**: built with React Native core + a small theme (`src/theme.ts`,
-  `src/ui.tsx`) and native stack navigation, using the **Convergence** font (the
-  web app's typeface). Tamagui v2 was attempted but has unresolved type/JSX
-  incompatibilities with this Expo SDK (56) / React 19.2; it can be layered in
-  on-device once that settles. The screens are deliberately thin so swapping the
-  component layer is low-effort.
-- **Data**: all reads/writes go through `backend`'s Convex functions via
-  `useQuery`/`useMutation` (reactive — no offline/sync layer). The complete-item
-  toggle uses a Convex optimistic update.
+- **Styling**: React Native core, Reanimated and the shared theme (`src/theme.ts`, `src/ui.tsx`, `packages/design-tokens`). List feature modules under `src/features/lists` own row rendering, edit drafts, commands, and drag scrolling.
+- **Data**: Convex reactive queries with persisted last-seen query results. `src/lib/offline/operations.ts` defines the supported queued writes for lists and expenses. Pending changes overlay cached data; replay waits for connectivity and confirmed account identity. The sync status sheet exposes failed changes with retry/discard actions. Unknown saved records are retained for recovery.
+- **Shared rules**: expense math, recurrence and task ordering live in `packages/domain`. Online optimistic list changes and offline replay use the same item projection. See `../../docs/architecture.md` before adding a queued operation or changing persisted shapes.
 - **Navigation**: a fresh launch opens `/groups`. Selecting a group pushes its
   Home screen, titled with the group name. Home, Lists, Calendar, and Expenses
   are native tabs. Back from a section root returns to the groups list; nested

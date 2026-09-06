@@ -93,7 +93,7 @@ function AddSoloSpendingSheet({
   memberId: Id<"users">;
   onClose: () => void;
 }) {
-  const createSpending = useQueuedMutation(api.expenses.createSpending);
+  const createSpending = useQueuedMutation("expenses:createSpending");
   const tExp = useTranslations("mobile.expenses");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");

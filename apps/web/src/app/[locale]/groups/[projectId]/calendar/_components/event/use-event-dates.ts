@@ -4,6 +4,7 @@ import type { DateRange } from "react-day-picker";
 import type { UseFormReturn } from "react-hook-form";
 import type * as v from "valibot";
 import type { eventSchema } from "./data";
+import { selectEventDays } from "./date-values";
 
 type EventFormValues = v.InferInput<typeof eventSchema>;
 
@@ -17,13 +18,6 @@ type UseEventDatesOptions = {
     to: Date;
   };
 };
-
-function getNextFullHour(): { hour: number; minute: number } {
-  const now = new Date();
-  // Cap at 22 so a default 1h duration still fits in the same day.
-  const hour = Math.min(now.getHours() + 1, 22);
-  return { hour, minute: 0 };
-}
 
 /** Push `to` forward so it is at least 1 hour after `from` (may cross midnight). */
 function ensureMinimumDuration(from: Date, to: Date): Date {
@@ -39,34 +33,12 @@ export function useEventDates({
 }: UseEventDatesOptions) {
   const applyDefaultTimes = useCallback(
     (from: Date, to: Date, allDay: boolean): { from: Date; to: Date } => {
-      const newFrom = new Date(from.getTime());
-      const newTo = new Date(to.getTime());
-
-      if (allDay) {
-        newFrom.setHours(0, 0, 0, 0);
-        newTo.setHours(0, 0, 0, 0);
-      } else if (preserveTimes && originalTimes) {
-        // In edit mode, restore original times
-        newFrom.setHours(
-          originalTimes.from.getHours(),
-          originalTimes.from.getMinutes(),
-          0,
-          0,
-        );
-        newTo.setHours(
-          originalTimes.to.getHours(),
-          originalTimes.to.getMinutes(),
-          0,
-          0,
-        );
-      } else {
-        // Create mode: next full hour for 1h duration
-        const { hour, minute } = getNextFullHour();
-        newFrom.setHours(hour, minute, 0, 0);
-        newTo.setHours(hour + 1, minute, 0, 0);
-      }
-
-      return { from: newFrom, to: newTo };
+      return selectEventDays(
+        from,
+        to,
+        allDay,
+        preserveTimes ? originalTimes : undefined,
+      );
     },
     [preserveTimes, originalTimes],
   );
@@ -78,29 +50,12 @@ export function useEventDates({
       const currentAllDay = form.getValues("allDay");
 
       if (preserveTimes && !currentAllDay) {
-        // In edit mode with specific times: keep hours, change only date portion
         const currentDates = form.getValues("dates");
-        const newFrom = new Date(from.getTime());
-        const newTo = new Date(to.getTime());
-
-        if (currentDates.from) {
-          newFrom.setHours(
-            currentDates.from.getHours(),
-            currentDates.from.getMinutes(),
-            0,
-            0,
-          );
-        }
-        if (currentDates.to) {
-          newTo.setHours(
-            currentDates.to.getHours(),
-            currentDates.to.getMinutes(),
-            0,
-            0,
-          );
-        }
-
-        form.setValue("dates", { from: newFrom, to: newTo });
+        const times =
+          currentDates.from && currentDates.to
+            ? { from: currentDates.from, to: currentDates.to }
+            : undefined;
+        form.setValue("dates", selectEventDays(from, to, false, times));
       } else {
         const { from: newFrom, to: newTo } = applyDefaultTimes(
           from,

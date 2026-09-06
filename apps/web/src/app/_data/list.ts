@@ -2,14 +2,8 @@ import type { api } from "backend/convex/_generated/api";
 import type { Doc } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 
-/** Task priority; only meaningful on task-mode lists. */
-export type ItemPriority = "low" | "normal" | "high";
-
-/** Repeat rule; only meaningful on task-mode lists. */
-export type ItemRecurrence = {
-  freq: "daily" | "weekly" | "monthly" | "yearly";
-  interval: number;
-};
+export type ItemPriority = NonNullable<Doc<"listItems">["priority"]>;
+export type ItemRecurrence = NonNullable<Doc<"listItems">["recurrence"]>;
 
 /**
  * List / item / template shapes consumed across the app. Backed by Convex via
@@ -45,7 +39,9 @@ export type ListEvent = {
   allDay: boolean;
 };
 
-export type List = {
+export type ListSummary = { id: string; projectId: string; name: string };
+
+export type ListDetail = {
   id: string;
   projectId: string;
   name: string;
@@ -63,6 +59,15 @@ export type List = {
   items: ListItem[];
   event: ListEvent | null;
 };
+
+/** Existing item-bearing list cards use the same complete shape. */
+export type List = ListDetail;
+
+export function adaptListSummary(
+  list: FunctionReturnType<typeof api.lists.summariesByProject>[number],
+): ListSummary {
+  return { id: list._id, projectId: list.projectId, name: list.name };
+}
 
 export type TemplateItem = { name: string; category: string | null };
 
@@ -139,7 +144,7 @@ export function adaptList(
     updatedBy: l.updatedBy ?? null,
     updatedAt: l.updatedAt ? new Date(l.updatedAt) : null,
     createdAt: new Date(l._creationTime),
-    items: (l.items ?? []).map(adaptItem),
+    items: l.items.map(adaptItem),
     event: event ? adaptEvent(event) : null,
   };
 }

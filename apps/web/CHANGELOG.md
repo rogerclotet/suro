@@ -6,6 +6,104 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.4] — 2026-09-06
+
+### ca
+
+- [fix] Les llistes i despeses creades sense connexió continuen obertes després de sincronitzar-se, i els canvis nous es sincronitzen sense esperar una altra reconnexió.
+
+### es
+
+- [fix] Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.
+
+### en
+
+- [fix] Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.
+
+## [1.25.3] — 2026-09-06
+
+### ca
+
+- [fix] Editar les dates d’un esdeveniment conserva les hores. Al mòbil, una categoria amb el nom de la secció sense categoria es manté separada.
+
+### es
+
+- [fix] Editar las fechas de un evento conserva las horas. En el móvil, una categoría con el nombre de la sección sin categoría se mantiene separada.
+
+### en
+
+- [fix] Editing an event’s dates preserves its times. On mobile, a category named like the uncategorized section stays separate.
+
+## [1.25.2] — 2026-09-06
+
+### ca
+
+- [fix] La selecció del grup segueix l’enllaç obert i conserva la preferència de cada compte.
+
+### es
+
+- [fix] La selección del grupo sigue el enlace abierto y conserva la preferencia de cada cuenta.
+
+### en
+
+- [fix] Group selection follows the open link and remembers each account’s preference.
+
+## [1.25.1] — 2026-09-06
+
+### ca
+
+- [fix] Les llistes vinculades a un esdeveniment tornen a mostrar-ne el nom, les dates i l’enllaç.
+
+### es
+
+- [fix] Las listas vinculadas a un evento vuelven a mostrar su nombre, fechas y enlace.
+
+### en
+
+- [fix] Lists linked to an event show its name, dates and link again.
+
+## [1.25.0] — 2026-09-06
+
+### ca
+
+- [feature] El mòbil mostra els canvis pendents de sincronitzar i permet reintentar o descartar els que han fallat.
+
+### es
+
+- [feature] El móvil muestra los cambios pendientes de sincronizar y permite reintentar o descartar los que han fallado.
+
+### en
+
+- [feature] Mobile shows changes waiting to sync and lets you retry or discard failed changes.
+
+## [1.24.2] — 2026-09-06
+
+### ca
+
+- [fix] Marcar tasques i moure elements entre categories conserva els canvis dels altres membres, també en sincronitzar accions fetes sense connexió.
+
+### es
+
+- [fix] Marcar tareas y mover elementos entre categorías conserva los cambios de otros miembros, también al sincronizar acciones hechas sin conexión.
+
+### en
+
+- [fix] Checking off tasks and moving items between categories preserves teammates' edits, including when syncing actions made offline.
+
+## [1.24.1] — 2026-09-06
+
+### ca
+
+- [fix] Els saldos i les propostes per saldar despeses reparteixen els cèntims d'arrodoniment igual al web i al mòbil.
+
+### es
+
+- [fix] Los saldos y las propuestas para saldar gastos reparten los céntimos de redondeo igual en la web y en el móvil.
+
+### en
+
+- [fix] Expense balances and settlement proposals distribute rounding cents consistently on web and mobile.
+
 ## [1.24.0] — 2026-09-06
 
 ### ca

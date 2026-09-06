@@ -1,71 +1,105 @@
-import {
-  DELETE_FUNCTIONS,
-  type IdMap,
-  isTempId,
-  type OutboxEntry,
-} from "./types";
+import { OPERATIONS } from "./operations";
+import { type IdMap, isTempId, type OutboxEntry } from "./types";
 
-/** Temp-id values that appear at the top level of an entry's args. */
-function tempArgValues(args: Record<string, unknown>): string[] {
-  return Object.values(args).filter(isTempId);
+// Reference fields follow the API's Id/Ids convention; expense transfers use from/to.
+// Free text such as a list named "temp-shopping" must never become a dependency.
+function isReferenceKey(key: string) {
+  return (
+    key.endsWith("Id") || key.endsWith("Ids") || key === "from" || key === "to"
+  );
+}
+export function tempIdsIn(value: unknown, reference = false): string[] {
+  if (isTempId(value)) return reference ? [value] : [];
+  if (Array.isArray(value))
+    return value.flatMap((child) => tempIdsIn(child, reference));
+  if (value !== null && typeof value === "object")
+    return Object.entries(value).flatMap(([key, child]) =>
+      tempIdsIn(child, isReferenceKey(key)),
+    );
+  return [];
 }
 
-/**
- * Collapse create→…→delete chains that never need to touch the server.
- *
- * If an entity is created offline (a create entry owns its temp id) and then
- * deleted while still offline (a delete-type entry targets that temp id), the
- * whole chain — the create, the delete, and any updates or child ops that
- * reference the temp id — is dropped. This both avoids round-trips and sidesteps
- * the "create then delete a thing the server never saw" race. Pure.
- */
-export function compact(entries: OutboxEntry[]): OutboxEntry[] {
-  const created = new Set(entries.flatMap((entry) => entry.tempIds));
-  const cancelled = new Set<string>();
-  for (const entry of entries) {
-    if (!DELETE_FUNCTIONS.has(entry.functionName)) {
-      continue;
-    }
-    for (const value of tempArgValues(entry.args)) {
-      if (created.has(value)) {
-        cancelled.add(value);
+/** Include all descendants so recovery never leaves orphaned child writes. */
+export function dependentEntryIds(
+  entries: OutboxEntry[],
+  entryId: string,
+): Set<string> {
+  const removed = new Set([entryId]);
+  const temps = new Set<string>();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const entry of entries) {
+      if (removed.has(entry.id)) {
+        for (const id of entry.tempIds) {
+          if (!temps.has(id)) {
+            temps.add(id);
+            changed = true;
+          }
+        }
+      } else if (
+        [...entry.dependsOn, ...tempIdsIn(entry.args)].some((id) =>
+          temps.has(id),
+        )
+      ) {
+        removed.add(entry.id);
+        changed = true;
       }
     }
   }
-  if (cancelled.size === 0) {
-    return entries;
-  }
-  return entries.filter((entry) => {
-    if (entry.tempIds.some((id) => cancelled.has(id))) {
-      return false;
-    }
-    if (entry.dependsOn.some((id) => cancelled.has(id))) {
-      return false;
-    }
-    if (tempArgValues(entry.args).some((id) => cancelled.has(id))) {
-      return false;
-    }
-    return true;
-  });
+  return removed;
 }
 
-/**
- * Replace any temp-id arg value with its resolved server id. Mutation args are
- * flat (the only nested field, settlePayments' `payments`, carries real user ids
- * only), so a top-level pass suffices.
- */
-export function remapArgs(
-  args: Record<string, unknown>,
+export function compact(entries: OutboxEntry[]): OutboxEntry[] {
+  const created = new Map(
+    entries.flatMap((entry) =>
+      entry.tempIds.map((id) => [id, entry.id] as const),
+    ),
+  );
+  const removed = new Set<string>();
+  for (const entry of entries) {
+    if (OPERATIONS[entry.functionName].kind !== "delete") continue;
+    for (const temp of tempIdsIn(entry.args)) {
+      const parent = created.get(temp);
+      if (parent) {
+        for (const id of dependentEntryIds(entries, parent)) removed.add(id);
+      }
+    }
+  }
+  return entries.filter((entry) => !removed.has(entry.id));
+}
+
+/** Shape-preserving reference substitution at the storage/API boundary. */
+export function remapArgs<Args extends Record<string, unknown>>(
+  args: Args,
   idmap: IdMap,
-): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(args)) {
-    out[key] = isTempId(value) && idmap[value] ? idmap[value] : value;
-  }
-  return out;
+): Args {
+  const remap = (value: unknown, reference: boolean): unknown => {
+    if (isTempId(value)) return reference ? (idmap[value] ?? value) : value;
+    if (Array.isArray(value))
+      return value.map((child) => remap(child, reference));
+    if (value !== null && typeof value === "object")
+      return Object.fromEntries(
+        Object.entries(value).map(([key, child]) => [
+          key,
+          remap(child, isReferenceKey(key)),
+        ]),
+      );
+    return value;
+  };
+  // Only ID string values change; object keys, arrays and all other values retain their types.
+  return Object.fromEntries(
+    Object.entries(args).map(([key, value]) => [
+      key,
+      remap(value, isReferenceKey(key)),
+    ]),
+  ) as Args;
 }
 
-/** True if any arg is still an unresolved temp id (parent not yet created). */
+/** A mapped Convex ID retains its table brand at this persistence boundary. */
+export function resolveOfflineId<Id extends string>(id: Id, idmap: IdMap): Id {
+  return (idmap[id] ?? id) as Id;
+}
 export function hasUnresolvedTemp(args: Record<string, unknown>): boolean {
-  return tempArgValues(args).length > 0;
+  return tempIdsIn(args).length > 0;
 }

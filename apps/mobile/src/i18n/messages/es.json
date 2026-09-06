@@ -1175,5 +1175,19 @@
       "soloNoSpendings": "Aún no hay gastos. Toca + para añadir uno.",
       "soloUntitledSpending": "Gasto"
     }
+  },
+  "offline": {
+    "title": "Cambios guardados",
+    "waiting": "{count} cambios pendientes de sincronizar",
+    "needsAttention": "{count} cambios necesitan atención",
+    "pending": "Esperando conexión",
+    "failed": "No se ha podido sincronizar. Comprueba la conexión y el acceso al grupo e inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "discard": "Descartar",
+    "discardDescription": "También se descartarán los cambios que dependen de estos. Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "expenseChange": "Cambio de gastos",
+    "listChange": "Cambio de listas",
+    "unsupported": "Esta versión de la app no puede leer {count} cambios guardados. Se han conservado en este dispositivo."
   }
 }

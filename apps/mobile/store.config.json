@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.24.0",
+    "version": "1.25.4",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Notes show who is editing in real time and prevent simultaneous edits on web and mobile.\n• Download all photos from an event or all group files as a ZIP in the web app.",
+        "releaseNotes": "• Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Las notas muestran quién las está editando en tiempo real e impiden que dos personas las editen a la vez, tanto en la web como en el móvil.\n• Descarga todas las fotos de un evento o todos los archivos del grupo en un ZIP desde la web.",
+        "releaseNotes": "• Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Les notes mostren qui les està editant en temps real i impedeixen que dues persones les editin alhora, tant al web com al mòbil.\n• Descarrega totes les fotos d'un esdeveniment o tots els fitxers del grup en un ZIP des del web.",
+        "releaseNotes": "• Les llistes i despeses creades sense connexió continuen obertes després de sincronitzar-se, i els canvis nous es sincronitzen sense esperar una altra reconnexió.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

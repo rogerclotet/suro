@@ -7,23 +7,21 @@ import { Check, Handshake } from "lucide-react";
 import posthog from "posthog-js";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { Spending } from "@/app/_data/spending";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { useSession } from "@/lib/session";
 import SettleProposal from "./_components/settle-proposal";
 import type { SettlingPayment } from "./data";
-import { generateProposals } from "./generate-proposals";
 
 type Member = { user: { id: string; name: string | null } };
 
 export default function SettleButton({
-  spendings,
+  pending,
   members,
   potId,
 }: {
-  spendings: Spending[];
+  pending: SettlingPayment[];
   members: Member[];
   potId: string;
 }) {
@@ -31,11 +29,6 @@ export default function SettleButton({
   // the opt-outs are tracked, so the default stays "settle everything".
   const [excluded, setExcluded] = useState<ReadonlySet<number>>(new Set());
   const { data: session } = useSession();
-
-  const pending = useMemo(
-    () => generateProposals(members, spendings),
-    [spendings, members],
-  );
 
   const selected = useMemo(
     () => (pending ?? []).filter((_, index) => !excluded.has(index)),

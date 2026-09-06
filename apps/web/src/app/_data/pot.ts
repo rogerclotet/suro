@@ -1,5 +1,6 @@
 import type { api } from "backend/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
+import { totalSpent } from "domain/expenses";
 import { adaptSpending, type Spending } from "./spending";
 
 type ConvexPotListItem = FunctionReturnType<
@@ -31,17 +32,11 @@ export type Pot = {
   totalSpent: number;
 };
 
-export type PotDetail = Pot & { spendings: Spending[] };
-
-/**
- * Sum of split spendings (`to` unset) — direct transfers (`to` set, used for
- * both explicit single-recipient spendings and settle-up payments) move
- * money between members rather than spending new money, so they're excluded.
- * Ported from the backend's `packages/backend/convex/model/expenses.ts`.
- */
-function sumSpendings(spendings: Spending[]): number {
-  return spendings.reduce((sum, s) => (s.to ? sum : sum + s.amount), 0);
-}
+export type PotDetail = Pot & {
+  spendings: Spending[];
+  balances: Record<string, number>;
+  settlements: { from: string; to: string; amount: number; currency: string }[];
+};
 
 function adaptMember(m: {
   _id: string | null;
@@ -87,6 +82,15 @@ export function adaptPotDetail(p: ConvexPotDetail): PotDetail {
     ...adaptPotFields(p),
     users: p.members.map(adaptMember),
     spendings,
-    totalSpent: sumSpendings(spendings),
+    totalSpent: totalSpent(p.spendings),
+    balances: Object.fromEntries(
+      p.balances.flatMap(({ user, amount }) =>
+        user._id ? [[user._id, amount]] : [],
+      ),
+    ),
+    settlements: p.settlements.map((payment) => ({
+      ...payment,
+      currency: p.spendings[0]?.currency ?? "EUR",
+    })),
   };
 }

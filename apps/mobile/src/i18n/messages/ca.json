@@ -1175,5 +1175,19 @@
       "soloNoSpendings": "Encara no hi ha despeses. Toca + per afegir-ne una.",
       "soloUntitledSpending": "Despesa"
     }
+  },
+  "offline": {
+    "title": "Canvis desats",
+    "waiting": "{count} canvis pendents de sincronitzar",
+    "needsAttention": "{count} canvis necessiten atenció",
+    "pending": "Esperant connexió",
+    "failed": "No s’ha pogut sincronitzar. Comprova la connexió i l’accés al grup i torna-ho a provar.",
+    "retry": "Torna-ho a provar",
+    "discard": "Descarta",
+    "discardDescription": "També es descartaran els canvis que en depenen. Aquesta acció no es pot desfer.",
+    "cancel": "Cancel·la",
+    "expenseChange": "Canvi de despeses",
+    "listChange": "Canvi de llistes",
+    "unsupported": "Aquesta versió de l’app no pot llegir {count} canvis desats. S’han conservat en aquest dispositiu."
   }
 }

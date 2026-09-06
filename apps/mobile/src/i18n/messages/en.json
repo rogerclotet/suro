@@ -1175,5 +1175,19 @@
       "soloNoSpendings": "No expenses yet. Tap + to add one.",
       "soloUntitledSpending": "Expense"
     }
+  },
+  "offline": {
+    "title": "Saved changes",
+    "waiting": "{count} changes waiting to sync",
+    "needsAttention": "{count} changes need attention",
+    "pending": "Waiting for connection",
+    "failed": "Could not sync. Check your connection and group access, then retry.",
+    "retry": "Retry",
+    "discard": "Discard",
+    "discardDescription": "This also discards changes that depend on these changes. This cannot be undone.",
+    "cancel": "Cancel",
+    "expenseChange": "Expense change",
+    "listChange": "List change",
+    "unsupported": "{count} saved changes cannot be read by this app version. They have been kept on this device."
   }
 }

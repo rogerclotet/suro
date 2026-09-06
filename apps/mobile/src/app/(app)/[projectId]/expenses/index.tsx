@@ -221,7 +221,7 @@ function CreatePotSheet({
 }) {
   const members = usePersistentQuery(api.projects.members, { projectId });
   const me = usePersistentQuery(api.users.me);
-  const createPot = useQueuedMutation(api.expenses.createPot);
+  const createPot = useQueuedMutation("expenses:createPot");
   const router = useRouter();
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
@@ -250,13 +250,15 @@ function CreatePotSheet({
     }
     setBusy(true);
     try {
-      const potId = await createPot({
+      const outcome = await createPot({
         projectId,
         name: trimmed,
         memberIds: [...chosen],
       });
       setName("");
       setSelected(null);
+      const potId = outcome.kind === "synced" ? outcome.value : outcome.localId;
+      if (!potId) return;
       onClose();
       router.push(`/${projectId}/expenses/${potId}`);
     } finally {

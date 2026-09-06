@@ -7,6 +7,10 @@ It's a pnpm monorepo:
 - `packages/backend` — the **Convex** backend (schema, queries/mutations, auth, file storage, the `.ics` feed). The single source of truth and the shared API for both clients.
 - `apps/web` — the Next.js App Router PWA (the main focus of this file).
 - `apps/mobile` — the Expo (React Native) app.
+- `packages/domain` — pure expense, recurrence, ordering, and aggregation rules shared by the backend and clients.
+- `packages/design-tokens` — shared colors and typography.
+
+See `docs/architecture.md` for feature placement, offline protocol changes, and query scaling.
 
 Both clients talk to the same Convex deployment. There is no separate server or database.
 
@@ -19,7 +23,7 @@ Both clients talk to the same Convex deployment. There is no separate server or 
 - **Tooling**: pnpm workspaces, Biome (format + lint), Vitest (jsdom for web, `convex-test` for backend), Husky + lint-staged.
 - **Analytics**: PostHog (product analytics + error tracking).
 
-Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadthing, Web Push, the Dexie offline layer. Secret Santa and in-app notifications are temporarily disabled, to be rebuilt on Convex.
+Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadthing, Web Push, the Dexie offline layer. Secret Santa remains disabled. In-app unread activity and native push notifications run on Convex.
 
 ## Commands
 
@@ -45,18 +49,18 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 - `auth.ts` / `auth.config.ts` — Convex Auth (Google + Apple + Resend OTP); `afterUserCreatedOrUpdated` provisions the personal project on sign-up. `oauthProviders` tells the clients which optional providers are configured. `AppleNative.ts` is the iOS native Sign in with Apple provider (verifies the `expo-apple-authentication` identity token; the web redirect flow can't run in the app because Safari drops the OAuth state cookie on Apple's cross-site POST).
 - One file per domain (`lists.ts`, `events.ts`, `expenses.ts`, `files.ts`, `projects.ts`, `users.ts`, …) exporting public `query`/`mutation` functions — these **are** the API. Shared helpers live under `convex/model/` (`auth` → `requireUserId`, `permissions` → `requireProjectMember`, …); gate every project-scoped function with one of them.
 - `http.ts` — the public `.ics` calendar feed, gated by `projects.calendarToken` (distinct from `inviteToken`).
-- `migrations.ts` — one-off Postgres→Convex upserts driven by `scripts/migrate.mjs`, gated by the `MIGRATION_SECRET` deployment env var (remove this file + `legacyId` after cutover).
+- `migrations.ts` — one-off Postgres→Convex upserts driven by `packages/backend/scripts/migrate.mjs`, gated by the `MIGRATION_SECRET` deployment env var (retain until operational cutover is confirmed, then remove together with `legacyId`, indexes, and the migration-only `postgres` dependency).
 - After changing a function signature or the schema, run `pnpm --filter backend codegen` so the clients' generated `api`/`dataModel` types update. Never hand-edit `convex/_generated/`.
 
 ## Web layout (`apps/web/src/`)
 
 - `app/[locale]/…` — App Router pages (the i18n segment is required). `app/api/` has only `health` now.
-- `app/_data/*` — stable view types fed by `adaptX()` from Convex query results, so components consume one shape and the id-space stays consistent.
+- `app/_data/*` — view types fed by `adaptX()` from Convex query results. List navigation uses `ListSummary`; item-bearing views use `ListDetail`.
 - `lib/queries/*` — reactive hooks (`useProjectLists`, `useEvent`, `useEventFiles`, …) wrapping `useQuery` + the adapters.
 - `lib/convex/server.ts` — RSC helpers: `getAuthToken`, `fetchMe`, server-side `fetchQuery`.
 - `auth.ts` — `auth()` = cached `fetchMe()` → `toSession()`. `lib/session.ts` — the client `useSession()` shim over `useConvexAuth()` + `useMe()`.
 - `proxy.ts` — Next middleware composing `convexAuthNextjsMiddleware` with next-intl locale handling.
-- `providers/convex-client-provider.tsx` — the `ConvexReactClient` + `ConvexAuthNextjsProvider`. `app/_components/projects-provider/` populates the Zustand project store from `api.projects.listMineDetailed` (skipped while signed out).
+- `providers/convex-client-provider.tsx` — the `ConvexReactClient` + `ConvexAuthNextjsProvider`. `app/_components/projects-provider/` owns the reactive `api.projects.listMineDetailed` subscription (skipped while signed out). Its selection context derives the current group from route identity, with an account-scoped saved preference off-route. `useProjects()` only reads that context.
 - `components/` — shared UI; Radix primitives in `components/ui/`. `env.js` — env validated via `@t3-oss/env-nextjs` (now just `NEXT_PUBLIC_CONVEX_URL` + PostHog).
 
 ## Conventions
@@ -98,7 +102,7 @@ CI is split across focused workflows (so each Actions run stays a small graph):
 | `preview-deploy.yml` / `preview-teardown.yml` | Ephemeral PR previews (label / `/deploy-preview`) |
 | `mobile-submit.yml` | Manual store re-submit for a prior build (no new EAS build) |
 
-Path filters live in `.github/actions/detect-path-changes` (and matching `on.push.paths` on deploy workflows): web image / `web_deploy_production` on `apps/web` + `packages/backend` + root config; `backend_convex_deploy` on `packages/backend`. Native mobile builds are **not** path-filtered — `mobile_release_gate` (`apps/mobile/scripts/should-build-native.mjs`) requires a root version bump, a matching top entry in `apps/web/CHANGELOG.md`, and native-relevant file changes under `apps/mobile`. `repo_quality_checks` (lint/typecheck/test) runs in CI and again inside each deploy workflow before shipping; the Next.js compile-check is `web_pr_build`, only on web-affecting PRs.
+Path filters live in `.github/actions/detect-path-changes` (and matching `on.push.paths` on deploy workflows): web image / `web_deploy_production` on `apps/web` + `packages/backend` + `packages/domain` + `packages/design-tokens` + root config; `backend_convex_deploy` on `packages/backend` + `packages/domain`. Native mobile builds are **not** path-filtered — `mobile_release_gate` (`apps/mobile/scripts/should-build-native.mjs`) requires a root version bump, a matching top entry in `apps/web/CHANGELOG.md`, and native-relevant changes under `apps/mobile`, `packages/domain`, or `packages/design-tokens`. `repo_quality_checks` (lint/typecheck/test) runs in CI and again inside each deploy workflow before shipping; the Next.js compile-check is `web_pr_build`, only on web-affecting PRs.
 
 - **Convex backend**: pushes to `main` that touch backend paths run `backend_convex_deploy` (`packages/backend` → `npx convex deploy`, authed by the `CONVEX_DEPLOY_KEY` CI variable). It runs **before** the web deploy (`web_deploy_production` hard-needs `web_docker_build_push` and optionally-needs `backend_convex_deploy`) so the new frontend always lands on an up-to-date backend. The Convex deployment's own env (Google/Apple/Resend/JWT, plus `MIGRATION_SECRET` during cutover) is set on Convex via `convex env set --prod`, not in CI. Two of those vars govern the web domains: `SITE_URL` (canonical origin for OAuth redirects and email/calendar links — set to `https://suroapp.cat`) and `ALLOWED_WEB_ORIGINS` (comma-separated allowlist of origins valid as OAuth redirect targets — set to `https://suroapp.cat,https://suro.clotet.dev,https://*.suro.clotet.dev` so login works on both domains and on previews).
 - **Prod web**: `apps/web/scripts/deploy.sh` SSHes into the host, pulls the CI-built image, and runs it via `docker compose` (root `compose.yaml`) as the `familia` container on the shared `familia-previews` network. Pangolin/Traefik reaches it by name at `http://familia:3000`; the deploy no longer writes any proxy config (routing is a one-time Pangolin setup — see below). The image bakes `NEXT_PUBLIC_CONVEX_URL` (prod) at build time. Manage it from SSH with bare `docker compose` commands (`ps`, `logs -f`, `pull && up -d`) — see the header of `compose.yaml`.

@@ -1,6 +1,6 @@
 # Suro
 
-A shared corkboard for the people you do life with. Suro keeps your group's lists, calendar, files, notes, shared expenses and Secret Santa in one place. Built for flatmates, family and friend groups.
+A shared corkboard for the people you do life with. Suro keeps your group's lists, calendar, files, notes, shared expenses in one place. Built for flatmates, family and friend groups.
 
 ## What's inside
 
@@ -8,42 +8,34 @@ A shared corkboard for the people you do life with. Suro keeps your group's list
 - **Calendar**: shared events with the option to link a list to an event (so the packing list lives next to the trip).
 - **Files & notes**: share photos, PDFs and rich-text notes with the whole group.
 - **Expenses**: track who paid for what, split fairly, and let Suro suggest the simplest way to settle up.
-- **Secret Santa**: private gift exchange with custom exclusions and a hidden ideas list only your match can see.
 - **Notifications**: in-app and push, only when something actually changes in your group.
 
 The interface is available in Catalan, Spanish and English.
 
-## How to develop
+## Development
 
-### Install pnpm to your system
+This is a pnpm monorepo. `packages/backend` owns the Convex API, auth and storage; `apps/web` is the Next.js PWA and `apps/mobile` is the Expo app. `packages/domain` contains shared pure rules and `packages/design-tokens` contains shared styling values. Secret Santa is currently disabled.
 
-[Follow the official guide](https://pnpm.io/installation)
-
-### Create a `.env` file
-
-Copy `.env.example` to `.env`. Make sure you change the `NEXTAUTH_SECRET` value.
-
-You may need to fill in some values using your accounts. All services used have free tiers, you just have to create an account and get your credentials.
-
-### Install dependencies
-
-```bash
+```sh
 pnpm install
+pnpm --filter backend dev
 ```
 
-### Run linter and tests
+In another terminal, copy `apps/web/.env.example` to `apps/web/.env` and fill in the Convex deployment URL and PostHog settings, then run `pnpm dev`. Auth provider credentials and JWT keys belong in the Convex deployment environment, not the web `.env`.
 
-```bash
-pnpm biome:check
+For mobile setup and local builds, see [apps/mobile/README.md](apps/mobile/README.md).
+
+After edits:
+
+```sh
+pnpm biome:fix
 pnpm typecheck
 pnpm test
 ```
 
-### Run the app locally
+Run `pnpm --filter backend codegen` after API/schema changes. Tests use Vitest and `convex-test`; no separate database is needed. The pre-commit hook runs the repository checks too.
 
-```bash
-pnpm dev
-```
+[Architecture and feature guide](docs/architecture.md) explains ownership, the offline protocol and query scaling. [AGENTS.md](AGENTS.md) covers conventions, CI, releases and deployments.
 
 ## License
 

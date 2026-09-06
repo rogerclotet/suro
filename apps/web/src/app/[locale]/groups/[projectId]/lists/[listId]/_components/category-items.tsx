@@ -22,6 +22,10 @@ export default memo(function CategoryItems(props: {
     category: string | null,
     task: TaskMutationArgs,
   ) => Promise<void>;
+  handleCompleted: (
+    item: List["items"][number],
+    completed: boolean,
+  ) => Promise<void>;
   handleDelete: (item: List["items"][number]) => Promise<void>;
   addActive: boolean;
   onAddActivate: (category: string | null) => void;
@@ -71,6 +75,9 @@ export default memo(function CategoryItems(props: {
                 )
               }
               onDelete={() => props.handleDelete(item)}
+              onCompleted={(completed) =>
+                props.handleCompleted(item, completed)
+              }
             />
           ))
         ) : (

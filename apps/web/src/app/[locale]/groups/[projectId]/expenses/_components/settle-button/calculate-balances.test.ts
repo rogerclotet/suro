@@ -10,6 +10,17 @@ describe("calculateBalances", () => {
     { user: { id: "user2" } },
   ];
 
+  it("allocates rounding cents independently of member insertion order", () => {
+    const members = ["payer", "z", "a"].map((id) => ({ user: { id } }));
+    expect(
+      calculateBalances(members, [createSpending(5, "EUR", "payer", null)]),
+    ).toEqual({
+      payer: 3,
+      z: -1,
+      a: -2,
+    });
+  });
+
   it("should calculate balances for a single spending", () => {
     const spendings = [createSpending(1234, "EUR", "user1", "user2")];
 

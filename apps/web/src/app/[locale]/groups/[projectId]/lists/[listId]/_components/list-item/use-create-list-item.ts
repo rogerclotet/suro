@@ -7,8 +7,9 @@ import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
+import { updateListItems } from "@/lib/queries/update-list-items";
 import { useSession } from "@/lib/session";
-import { type TaskMutationArgs, taskArgsFromItem } from "./data";
+import type { TaskMutationArgs } from "./data";
 
 /**
  * Create-item logic shared by every inline add row: duplicate check (reopening
@@ -49,96 +50,21 @@ export default function useCreateListItem(
         recurrence: args.recurrence,
       };
 
-      // CheckList is fed by `listByProject` on the lists page and by
-      // `events.get` on the event page; patch whichever is subscribed.
-      const projectId = list.projectId as Id<"projects">;
-      const lists = store.getQuery(api.lists.listByProject, { projectId });
-      if (lists) {
-        store.setQuery(
-          api.lists.listByProject,
-          { projectId },
-          lists.map((l) =>
-            l._id === args.listId
-              ? { ...l, items: [...(l.items ?? []), tempItem] }
-              : l,
-          ),
-        );
-      }
-
-      if (list.eventId) {
-        const eventId = list.eventId as Id<"events">;
-        const event = store.getQuery(api.events.get, { eventId });
-        if (event?.list) {
-          store.setQuery(
-            api.events.get,
-            { eventId },
-            {
-              ...event,
-              list: {
-                ...event.list,
-                items: [...(event.list.items ?? []), tempItem],
-              },
-            },
-          );
-        }
-      }
+      updateListItems(store, list, (items) => [...items, tempItem]);
     },
   );
 
-  const updateItem = useMutation(api.listItems.update).withOptimisticUpdate(
-    (store, args) => {
-      const projectId = list.projectId as Id<"projects">;
-      const lists = store.getQuery(api.lists.listByProject, { projectId });
-      if (lists) {
-        store.setQuery(
-          api.lists.listByProject,
-          { projectId },
-          lists.map((l) =>
-            l._id === list.id
-              ? {
-                  ...l,
-                  items: (l.items ?? []).map((item) =>
-                    item._id === args.itemId
-                      ? {
-                          ...item,
-                          completed: args.completed,
-                          updatedAt: Date.now(),
-                        }
-                      : item,
-                  ),
-                }
-              : l,
-          ),
-        );
-      }
-
-      if (list.eventId) {
-        const eventId = list.eventId as Id<"events">;
-        const event = store.getQuery(api.events.get, { eventId });
-        if (event?.list) {
-          store.setQuery(
-            api.events.get,
-            { eventId },
-            {
-              ...event,
-              list: {
-                ...event.list,
-                items: (event.list.items ?? []).map((item) =>
-                  item._id === args.itemId
-                    ? {
-                        ...item,
-                        completed: args.completed,
-                        updatedAt: Date.now(),
-                      }
-                    : item,
-                ),
-              },
-            },
-          );
-        }
-      }
-    },
-  );
+  const updateItem = useMutation(
+    api.listItems.setCompleted,
+  ).withOptimisticUpdate((store, args) => {
+    updateListItems(store, list, (items) =>
+      items.map((item) =>
+        item._id === args.itemId
+          ? { ...item, completed: args.completed, updatedAt: Date.now() }
+          : item,
+      ),
+    );
+  });
 
   function submit(
     name: string,
@@ -157,11 +83,8 @@ export default function useCreateListItem(
     if (completed) {
       updateItem({
         itemId: completed.id as Id<"listItems">,
-        name: completed.name,
-        details: completed.details ?? "",
         completed: false,
-        category: completed.category,
-        ...taskArgsFromItem(completed),
+        expectedDueAt: completed.dueAt?.getTime() ?? null,
       }).catch((e: unknown) => {
         console.error("[use-create-list-item] reopen failed:", e);
         posthog.captureException(e, {

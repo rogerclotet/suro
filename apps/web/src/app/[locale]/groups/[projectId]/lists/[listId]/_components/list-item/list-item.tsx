@@ -8,11 +8,7 @@ import { useProjects } from "@/app/_state/project-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import UserAvatar from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
-import {
-  presetFromRecurrence,
-  type TaskMutationArgs,
-  taskArgsFromItem,
-} from "./data";
+import { presetFromRecurrence, type TaskMutationArgs } from "./data";
 import { DueChip } from "./due-chip";
 import EditListItemForm from "./edit-list-item-form";
 import { PriorityBadge } from "./priority-badge";
@@ -27,6 +23,7 @@ export default function ListItem(props: {
     category: string | null,
     task: TaskMutationArgs,
   ) => Promise<void>;
+  onCompleted: (completed: boolean) => Promise<void>;
   onDelete?: () => Promise<void>;
 }) {
   const { list, item } = props;
@@ -42,18 +39,6 @@ export default function ListItem(props: {
         transform: `translate3d(0, ${transform.y}px, 0)`,
       }
     : undefined;
-
-  async function handleCheckedChange(checked: boolean) {
-    // Forward the item's current task fields: the backend clears any omitted
-    // field, so a bare toggle would otherwise wipe due date/assignee/etc.
-    await props.onChange(
-      item.name,
-      item.details ?? "",
-      checked,
-      item.category,
-      taskArgsFromItem(item),
-    );
-  }
 
   const assignee = item.assigneeId
     ? project?.users.find((u) => u.user.id === item.assigneeId)?.user
@@ -85,7 +70,7 @@ export default function ListItem(props: {
       <div className="flex flex-row items-center">
         <Checkbox
           checked={item.completed ?? false}
-          onCheckedChange={handleCheckedChange}
+          onCheckedChange={(checked) => props.onCompleted(checked === true)}
           className="h-6 w-6 transition-all"
           onClick={(e) => e.stopPropagation()}
         />

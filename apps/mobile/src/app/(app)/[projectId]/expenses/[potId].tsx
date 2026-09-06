@@ -178,7 +178,7 @@ export default function PotDetail() {
   const { potId } = useLocalSearchParams<{ potId: string }>();
   const id = potId as Id<"pots">;
   const pot = useOfflineGetPot(id);
-  const deletePot = useQueuedMutation(api.expenses.deletePot);
+  const deletePot = useQueuedMutation("expenses:deletePot");
   const router = useRouter();
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
@@ -489,7 +489,7 @@ function AddSpendingSheet({
   onClose: () => void;
 }) {
   const me = usePersistentQuery(api.users.me);
-  const createSpending = useQueuedMutation(api.expenses.createSpending);
+  const createSpending = useQueuedMutation("expenses:createSpending");
   const members = useMemo(() => loadedMembers(pot.members), [pot.members]);
   const tExp = useTranslations("mobile.expenses");
 
@@ -608,7 +608,7 @@ function SettleSheet({
   pot: Pot;
   onClose: () => void;
 }) {
-  const settlePayments = useQueuedMutation(api.expenses.settlePayments);
+  const settlePayments = useQueuedMutation("expenses:settlePayments");
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");

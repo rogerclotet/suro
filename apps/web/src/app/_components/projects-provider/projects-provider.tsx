@@ -2,9 +2,11 @@
 
 import { api } from "backend/convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
+import { useParams } from "next/navigation";
 import { type ReactNode, useMemo } from "react";
 import { adaptProject } from "@/app/_data/project";
-import ProjectsUpdater from "./projects-updater";
+import { useSession } from "@/lib/session";
+import { ProjectSelectionProvider } from "./project-selection-provider";
 
 export default function ProjectsProvider({
   children,
@@ -19,7 +21,19 @@ export default function ProjectsProvider({
     api.projects.listMineDetailed,
     isAuthenticated ? {} : "skip",
   );
+  const { data: session } = useSession();
+  const { projectId } = useParams<{ projectId?: string }>();
+  const userId = isAuthenticated ? (session?.user.id ?? null) : null;
   const projects = useMemo(() => (data ?? []).map(adaptProject), [data]);
 
-  return <ProjectsUpdater projects={projects}>{children}</ProjectsUpdater>;
+  return (
+    <ProjectSelectionProvider
+      key={userId ?? "signed-out"}
+      projects={userId ? projects : []}
+      userId={userId}
+      routeProjectId={projectId}
+    >
+      {children}
+    </ProjectSelectionProvider>
+  );
 }

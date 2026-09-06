@@ -1,12 +1,12 @@
 import { api } from "backend/convex/_generated/api";
+import { useConvexAuth, useQuery } from "convex/react";
 import { type ReactNode, useEffect, useRef } from "react";
 import { AppState } from "react-native";
-import { flush } from "./flush";
+import { flush, setFlushingUserId } from "./flush";
 import { isOnlineNow, subscribeOnline } from "./network";
 import { outbox } from "./outbox-store";
 import { clearQueryCache } from "./storage";
 import { useAuthGate } from "./use-auth-gate";
-import { usePersistentQuery } from "./use-persistent-query";
 
 /**
  * Drives the offline write queue: flushes it on reconnect, on app foreground,
@@ -16,13 +16,15 @@ import { usePersistentQuery } from "./use-persistent-query";
  */
 export function OfflineProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuthGate();
-  const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");
+  const auth = useConvexAuth();
+  const me = useQuery(api.users.me, auth.isAuthenticated ? {} : "skip");
   const wasAuthenticated = useRef(false);
 
   // Stamp the queue's owner; if a different user signs in, discard the previous
   // user's queued writes + cache so nothing leaks across accounts.
   useEffect(() => {
-    if (!isAuthenticated || !me) {
+    if (!auth.isAuthenticated || !me) {
+      setFlushingUserId(null);
       return;
     }
     const owner = outbox.getUserId();
@@ -31,7 +33,10 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       clearQueryCache();
     }
     outbox.setUserId(me._id);
-  }, [isAuthenticated, me]);
+    setFlushingUserId(me._id);
+    void flush();
+    return () => setFlushingUserId(null);
+  }, [auth.isAuthenticated, me]);
 
   // On sign-out, drop cached data so the next account starts clean. The outbox
   // is kept: a same-user re-login flushes it; a different user clears it above.

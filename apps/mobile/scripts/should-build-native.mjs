@@ -18,28 +18,12 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { hasNativeRelevantChanges } from "./native-release-paths.ts";
 
 const REPO_ROOT = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
   "../../..",
 );
-const MOBILE_PACKAGE_JSON = "apps/mobile/package.json";
-const LOCKFILE = "pnpm-lock.yaml";
-
-// Paths whose changes can require a new native binary. Store listing assets and
-// auto-generated release notes are intentionally excluded.
-const NATIVE_PATH_PREFIXES = [
-  "apps/mobile/src/",
-  "apps/mobile/assets/",
-  "apps/mobile/plugins/",
-  "apps/mobile/app.json",
-  "apps/mobile/app.config.ts",
-  "apps/mobile/eas.json",
-  "apps/mobile/package.json",
-  "apps/mobile/metro.config.js",
-  "apps/mobile/google-services.json",
-];
-
 const VERSION_HEADING = /^##\s+\[([^\]]+)\]\s*[—-]\s*(\d{4}-\d{2}-\d{2})\s*$/;
 
 /**
@@ -193,26 +177,6 @@ function resolveAfterSha() {
       encoding: "utf8",
     }).trim()
   );
-}
-
-/**
- * @param {string[]} files
- * @returns {boolean}
- */
-function hasNativeRelevantChanges(files) {
-  const mobilePackageChanged = files.includes(MOBILE_PACKAGE_JSON);
-  const lockfileChanged = files.includes(LOCKFILE);
-
-  for (const file of files) {
-    if (file === LOCKFILE) {
-      continue;
-    }
-    if (NATIVE_PATH_PREFIXES.some((prefix) => file.startsWith(prefix))) {
-      return true;
-    }
-  }
-
-  return mobilePackageChanged && lockfileChanged;
 }
 
 const afterSha = resolveCommit(resolveAfterSha());

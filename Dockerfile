@@ -14,6 +14,7 @@ COPY apps/web/package.json ./apps/web/package.json
 # Convex client, so its manifest must be present for `--filter web...` to
 # install the backend package and its `convex` dependency.
 COPY packages/backend/package.json ./packages/backend/package.json
+COPY packages/domain/package.json ./packages/domain/package.json
 # web prebuild runs `design-tokens generate` (needs `tsx` from this package).
 COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
 RUN \

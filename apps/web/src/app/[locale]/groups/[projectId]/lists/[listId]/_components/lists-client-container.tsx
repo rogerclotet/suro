@@ -2,15 +2,15 @@
 
 import { CalendarFold } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { ClientOnly } from "@/components/client-only";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ShareButton from "@/components/ui/share-button";
-import { getPathname, Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { formatRelative } from "@/lib/format-relative";
 import {
-  useProjectLists,
+  useList,
+  useListSummaries,
   useProjectTemplates,
 } from "@/lib/queries/use-project-lists";
 import { textToHtml } from "@/lib/utils";
@@ -26,55 +26,31 @@ export default function ListsClientContainer({
   initialListId: string;
   projectId: string;
 }) {
-  const [currentListId, setCurrentListId] = useState(initialListId);
+  const currentListId = initialListId;
+  const router = useRouter();
   const locale = useLocale();
   const tLists = useTranslations("lists");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
 
   // Lists + templates come reactively from Convex.
-  const lists = useProjectLists(projectId);
+  const lists = useListSummaries(projectId);
+  const currentList = useList(currentListId);
   const templates = useProjectTemplates(projectId) ?? [];
 
   function handleListChange(newListId: string) {
-    setCurrentListId(newListId);
-    const newPath = getPathname({
-      href: {
+    router.push(
+      {
         pathname: "/groups/[projectId]/lists/[listId]",
         params: { projectId, listId: newListId },
       },
-      locale,
-    });
-    window.history.pushState({ listId: newListId }, "", newPath);
+      { scroll: false },
+    );
   }
 
-  // Sync currentListId with browser back/forward
-  useEffect(() => {
-    function handlePopState(event: PopStateEvent) {
-      const available = lists ?? [];
-      const listId: string | undefined = event.state?.listId;
-      if (listId && available.some((l) => l.id === listId)) {
-        setCurrentListId(listId);
-      } else {
-        const segments = window.location.pathname.split("/").filter(Boolean);
-        const urlListId = segments.at(-1);
-        if (urlListId && available.some((l) => l.id === urlListId)) {
-          setCurrentListId(urlListId);
-        }
-      }
-    }
+  if (lists === undefined || currentList === undefined) return null;
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [lists]);
-
-  if (lists === undefined) {
-    return null;
-  }
-
-  const currentList = lists.find((l) => l.id === currentListId) ?? null;
-
-  if (!currentList) {
+  if (!currentList || currentList.projectId !== projectId) {
     return (
       <div className="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center">
         <Alert variant="destructive" className="max-w-lg">

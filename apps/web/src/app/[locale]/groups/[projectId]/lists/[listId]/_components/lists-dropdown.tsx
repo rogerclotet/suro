@@ -1,6 +1,6 @@
 "use client";
 
-import type { List } from "@/app/_data/list";
+import type { ListSummary } from "@/app/_data/list";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ export default function ListsDropdown({
   onListChange,
 }: {
   listId: string;
-  lists: List[];
+  lists: ListSummary[];
   onListChange: (listId: string) => void;
 }) {
   return (
