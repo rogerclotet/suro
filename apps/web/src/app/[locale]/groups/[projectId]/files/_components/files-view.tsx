@@ -4,6 +4,7 @@ import { InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { useProjectFiles } from "@/lib/queries/use-files";
+import DownloadFilesButton from "./download-files-button";
 import Files from "./files";
 import UploadButton from "./upload-button";
 import ViewSelector from "./view-selector";
@@ -14,8 +15,14 @@ export default function FilesView({ projectId }: { projectId: string }) {
 
   return (
     <div>
-      <div className="mb-4 flex items-start justify-end gap-4">
+      <div className="mb-4 flex flex-wrap items-start justify-end gap-2">
         {files && files.length > 0 && <ViewSelector />}
+        {files && (
+          <DownloadFilesButton
+            files={files}
+            archiveName={`suro-${projectId}`}
+          />
+        )}
         <UploadButton projectId={projectId} />
       </div>
 

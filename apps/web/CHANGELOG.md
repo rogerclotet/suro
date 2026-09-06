@@ -11,14 +11,17 @@ with a type: `feature`, `fix`, or `improvement`.
 ### ca
 
 - [feature] Les notes mostren qui les està editant en temps real i impedeixen que dues persones les editin alhora, tant al web com al mòbil.
+- [feature] Descarrega totes les fotos d'un esdeveniment o tots els fitxers del grup en un ZIP des del web.
 
 ### es
 
 - [feature] Las notas muestran quién las está editando en tiempo real e impiden que dos personas las editen a la vez, tanto en la web como en el móvil.
+- [feature] Descarga todas las fotos de un evento o todos los archivos del grupo en un ZIP desde la web.
 
 ### en
 
 - [feature] Notes show who is editing in real time and prevent simultaneous edits on web and mobile.
+- [feature] Download all photos from an event or all group files as a ZIP in the web app.
 
 ## [1.23.1] — 2026-09-05
 

@@ -1,1 +1,2 @@
 • Les notes mostren qui les està editant en temps real i impedeixen que dues persones les editin alhora, tant al web com al mòbil.
+• Descarrega totes les fotos d'un esdeveniment o tots els fitxers del grup en un ZIP des del web.

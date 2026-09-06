@@ -1,1 +1,2 @@
 • Las notas muestran quién las está editando en tiempo real e impiden que dos personas las editen a la vez, tanto en la web como en el móvil.
+• Descarga todas las fotos de un evento o todos los archivos del grupo en un ZIP desde la web.

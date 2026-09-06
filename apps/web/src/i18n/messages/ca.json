@@ -616,7 +616,11 @@
     "editTitle": "Editar fitxer",
     "editDescription": "Edita el nom del fitxer",
     "deleteTitle": "Eliminar fitxer",
-    "eventFiles": "Fitxers d'esdeveniments"
+    "eventFiles": "Fitxers d'esdeveniments",
+    "downloadAll": "Descarrega tots els fitxers",
+    "downloadPhotos": "Descarrega totes les fotos",
+    "downloading": "Descarregant {completed}/{total}…",
+    "downloadError": "No s’han pogut descarregar tots els fitxers. Torna-ho a provar."
   },
   "notes": {
     "empty": "Encara no hi ha notes",
