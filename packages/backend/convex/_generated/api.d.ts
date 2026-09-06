@@ -39,6 +39,7 @@ import type * as model_pdfThumbnail from "../model/pdfThumbnail.js";
 import type * as model_permissions from "../model/permissions.js";
 import type * as model_pushI18n from "../model/pushI18n.js";
 import type * as model_tasks from "../model/tasks.js";
+import type * as noteEditLocks from "../noteEditLocks.js";
 import type * as notes from "../notes.js";
 import type * as notifications from "../notifications.js";
 import type * as pdfThumbnails from "../pdfThumbnails.js";
@@ -89,6 +90,7 @@ declare const fullApi: ApiFromModules<{
   "model/permissions": typeof model_permissions;
   "model/pushI18n": typeof model_pushI18n;
   "model/tasks": typeof model_tasks;
+  noteEditLocks: typeof noteEditLocks;
   notes: typeof notes;
   notifications: typeof notifications;
   pdfThumbnails: typeof pdfThumbnails;

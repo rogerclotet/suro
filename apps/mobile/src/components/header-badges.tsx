@@ -12,6 +12,7 @@ export type CreateAction = {
   onPress: () => void;
   label: string;
   icon?: LucideIcon;
+  disabled?: boolean;
 };
 
 /** A secondary header action: its icon, what it does, and its a11y label. */
@@ -31,11 +32,15 @@ function HeaderCreateButton({
   onPress,
   label,
   icon: Icon = Plus,
+  disabled,
 }: CreateAction) {
   const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
+      accessibilityState={{ disabled }}
+      style={{ opacity: disabled ? 0.4 : 1 }}
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={label}

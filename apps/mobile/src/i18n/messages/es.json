@@ -603,7 +603,12 @@
       "unlink": "Quitar enlace",
       "undo": "Deshacer",
       "redo": "Rehacer"
-    }
+    },
+    "editingBy": "{name} está editando esta nota.",
+    "editingBySomeone": "Alguien está editando esta nota.",
+    "startingEdit": "Abriendo el editor…",
+    "lockError": "No se ha podido iniciar la edición. Vuelve atrás e inténtalo de nuevo.",
+    "lockLost": "La edición está en pausa porque se ha perdido el bloqueo. El borrador sigue visible. Copia el texto sin guardar antes de salir y vuelve a abrir el editor."
   },
   "expenses": {
     "header": "Gastos",
@@ -1099,7 +1104,12 @@
         "unlink": "Quitar enlace",
         "undo": "Deshacer",
         "redo": "Rehacer"
-      }
+      },
+      "editingBy": "{name} está editando esta nota.",
+      "editingBySomeone": "Alguien está editando esta nota.",
+      "startingEdit": "Abriendo el editor…",
+      "lockError": "No se ha podido iniciar la edición. Vuelve atrás e inténtalo de nuevo.",
+      "lockLost": "La edición está en pausa porque se ha perdido el bloqueo. El borrador sigue visible. Copia el texto sin guardar antes de salir y vuelve a abrir el editor."
     },
     "files": {
       "title": "Archivos",

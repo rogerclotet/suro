@@ -1,3 +1,1 @@
-• The app shows an error when feedback cannot be sent and keeps your message so you can try again.
-• Feedback moves to the groups header to leave more room for the list.
-• Create groups with the floating button on Android or the + button in the iOS header, without taking up space in the list.
+• Notes show who is editing in real time and prevent simultaneous edits on web and mobile.

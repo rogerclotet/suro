@@ -18,7 +18,7 @@ import {
   Unlink,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +37,7 @@ interface RichTextEditorProps {
   className?: string;
   ariaLabel?: string;
   variant?: RichTextEditorVariant;
+  editable?: boolean;
 }
 
 export function RichTextEditor({
@@ -46,6 +47,7 @@ export function RichTextEditor({
   className,
   ariaLabel,
   variant = "boxed",
+  editable = true,
 }: RichTextEditorProps) {
   const isInline = variant === "inline";
   const editor = useEditor({
@@ -81,6 +83,10 @@ export function RichTextEditor({
     },
   });
 
+  useEffect(() => {
+    editor?.setEditable(editable);
+  }, [editor, editable]);
+
   return (
     <div
       className={cn(
@@ -91,7 +97,7 @@ export function RichTextEditor({
         className,
       )}
     >
-      <EditorToolbar editor={editor} inline={isInline} />
+      {editable && <EditorToolbar editor={editor} inline={isInline} />}
       <EditorContent
         editor={editor}
         className={cn(isInline && "flex min-h-0 flex-1 flex-col")}

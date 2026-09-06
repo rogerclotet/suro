@@ -378,12 +378,14 @@ export function Fab({
   extended = true,
   icon: Icon = Plus,
   bottomInset = 0,
+  disabled,
 }: {
   onPress: () => void;
   label: string;
   extended?: boolean;
   icon?: LucideIcon;
   bottomInset?: number;
+  disabled?: boolean;
 }) {
   const t = useTheme();
   const { anyOpen } = useContext(SheetCountContext);
@@ -395,6 +397,8 @@ export function Fab({
 
   return (
     <AnimatedFAB
+      disabled={disabled}
+      accessibilityState={{ disabled }}
       icon={({ size, color }) => <Icon color={color} size={size} />}
       label={label}
       accessibilityLabel={label}

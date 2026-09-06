@@ -58,6 +58,7 @@ export default function SidebarInsetContent({
               label={action.label}
               icon={action.icon}
               onClick={action.onClick ?? undefined}
+              disabled={action.disabled}
               elevation="high"
             />
           </div>

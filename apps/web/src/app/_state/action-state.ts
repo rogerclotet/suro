@@ -7,6 +7,7 @@ export interface Action {
   icon: LucideIcon;
   pathParts?: string[];
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface ActionState {

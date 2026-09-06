@@ -655,7 +655,12 @@
       "unlink": "Treure enllaç",
       "undo": "Desfer",
       "redo": "Refer"
-    }
+    },
+    "editingBy": "{name} està editant aquesta nota.",
+    "editingBySomeone": "Algú està editant aquesta nota.",
+    "startingEdit": "S’està obrint l’editor…",
+    "lockError": "No s’ha pogut iniciar l’edició. Torna enrere i prova-ho de nou.",
+    "lockLost": "L’edició està en pausa perquè s’ha perdut el bloqueig. L’esborrany continua visible. Copia el text que no s’hagi desat abans de sortir i torna a obrir l’editor."
   },
   "expenses": {
     "header": "Despeses",

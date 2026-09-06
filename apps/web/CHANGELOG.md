@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.24.0] — 2026-09-06
+
+### ca
+
+- [feature] Les notes mostren qui les està editant en temps real i impedeixen que dues persones les editin alhora, tant al web com al mòbil.
+
+### es
+
+- [feature] Las notas muestran quién las está editando en tiempo real e impiden que dos personas las editen a la vez, tanto en la web como en el móvil.
+
+### en
+
+- [feature] Notes show who is editing in real time and prevent simultaneous edits on web and mobile.
+
 ## [1.23.1] — 2026-09-05
 
 ### ca

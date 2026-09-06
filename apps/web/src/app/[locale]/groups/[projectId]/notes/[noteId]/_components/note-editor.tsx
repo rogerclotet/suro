@@ -17,7 +17,15 @@ type SaveState = "idle" | "saving" | "saved";
 const AUTOSAVE_DELAY_MS = 800;
 const SAVED_INDICATOR_MS = 2000;
 
-export default function NoteEditor({ note }: { note: Note }) {
+export default function NoteEditor({
+  note,
+  editLockId,
+  canEdit,
+}: {
+  note: Note;
+  editLockId: Id<"noteEditLocks">;
+  canEdit: boolean;
+}) {
   const { data: session } = useSession();
   const t = useTranslations("notes");
   const locale = useLocale();
@@ -60,6 +68,7 @@ export default function NoteEditor({ note }: { note: Note }) {
     try {
       await updateNote({
         noteId: noteRef.current.id as Id<"notes">,
+        editLockId,
         name: trimmedName,
         contents,
         format: "html",
@@ -82,7 +91,7 @@ export default function NoteEditor({ note }: { note: Note }) {
       toast.error(tRef.current("editError"));
       setSaveState("idle");
     }
-  }, [updateNote]);
+  }, [updateNote, editLockId]);
 
   const scheduleSave = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -140,6 +149,7 @@ export default function NoteEditor({ note }: { note: Note }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <input
+            readOnly={!canEdit}
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("titlePlaceholder")}
@@ -155,6 +165,7 @@ export default function NoteEditor({ note }: { note: Note }) {
       </div>
 
       <RichTextEditor
+        editable={canEdit}
         variant="inline"
         className="min-h-0 flex-1"
         value={note.contents}
