@@ -12,6 +12,8 @@ on:
     paths:
       - "apps/web/**"
       - "packages/backend/**"
+      - "packages/design-tokens/**"
+      - "packages/domain/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
