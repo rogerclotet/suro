@@ -4,6 +4,7 @@ import { Folders, ListTodo, NotebookText, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useProjects } from "@/app/_state/project-state";
+import DownloadFilesButton from "@/app/[locale]/groups/[projectId]/files/_components/download-files-button";
 import { ClientOnly } from "@/components/client-only";
 import ShareButton from "@/components/ui/share-button";
 import { Link } from "@/i18n/navigation";
@@ -166,18 +167,27 @@ export default function EventDetail({
 
           {hasFiles && (
             <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-              <h2 className="flex items-start justify-between font-semibold text-xl">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <h2 className="flex items-center gap-2 font-semibold text-xl">
                   <Folders />
                   {tCal("filesSection")}
-                </div>
+                </h2>
 
-                <UploadButton
-                  projectId={projectId}
-                  eventId={eventId}
-                  onUploadingChange={setUploading}
-                />
-              </h2>
+                <div className="flex flex-wrap gap-2">
+                  {files && (
+                    <DownloadFilesButton
+                      files={files}
+                      archiveName={event.name}
+                      photosOnly
+                    />
+                  )}
+                  <UploadButton
+                    projectId={projectId}
+                    eventId={eventId}
+                    onUploadingChange={setUploading}
+                  />
+                </div>
+              </div>
 
               {files && files.length > 0 && <Files files={files} />}
             </div>

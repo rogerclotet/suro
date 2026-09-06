@@ -12,7 +12,7 @@ const cspReportOnly = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com https://*.convex.cloud https://*.suroapp.cat https://*.convex.site",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud",
+  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud https://*.suroapp.cat https://*.convex.site",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

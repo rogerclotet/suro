@@ -84,6 +84,9 @@ const serveFile = httpAction(async (ctx, request) => {
   }
 
   const headers: Record<string, string> = {
+    // The signed URL grants access, not cookies. Allow clients to read bytes
+    // across origins when collecting files into a download archive.
+    "Access-Control-Allow-Origin": "*",
     // Immutable: a storage id always maps to the same bytes.
     "Cache-Control": "private, max-age=31536000, immutable",
   };

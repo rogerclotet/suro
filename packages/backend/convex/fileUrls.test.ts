@@ -31,6 +31,7 @@ describe("file URLs: branded token-gated serving", () => {
 
     const ok = await t.fetch(`${pathname}${search}`);
     expect(ok.status).toBe(200);
+    expect(ok.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(await ok.text()).toBe("hello");
 
     const forged = await t.fetch(`/f?id=${storageId}&token=tampered`);

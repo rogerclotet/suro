@@ -616,7 +616,11 @@
     "editTitle": "Editar archivo",
     "editDescription": "Edita el nombre del archivo",
     "deleteTitle": "Eliminar archivo",
-    "eventFiles": "Archivos de eventos"
+    "eventFiles": "Archivos de eventos",
+    "downloadAll": "Descargar todos los archivos",
+    "downloadPhotos": "Descargar todas las fotos",
+    "downloading": "Descargando {completed}/{total}…",
+    "downloadError": "No se han podido descargar todos los archivos. Vuelve a intentarlo."
   },
   "notes": {
     "empty": "Aún no hay notas",

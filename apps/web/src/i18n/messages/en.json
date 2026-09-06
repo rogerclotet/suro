@@ -616,7 +616,11 @@
     "editTitle": "Edit file",
     "editDescription": "Edit the file name",
     "deleteTitle": "Delete file",
-    "eventFiles": "Event files"
+    "eventFiles": "Event files",
+    "downloadAll": "Download all files",
+    "downloadPhotos": "Download all photos",
+    "downloading": "Downloading {completed}/{total}…",
+    "downloadError": "Could not download all files. Please try again."
   },
   "notes": {
     "empty": "No notes yet",
