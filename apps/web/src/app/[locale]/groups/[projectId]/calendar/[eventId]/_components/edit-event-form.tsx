@@ -1,37 +1,28 @@
 "use client";
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import type { CheckedState } from "@radix-ui/react-checkbox";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { type ChangeEvent, type FormEvent, useCallback } from "react";
-import type { DateRange } from "react-day-picker";
+import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import type { Project } from "@/app/_data/project";
-import { useProjects } from "@/app/_state/project-state";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+  eventDatesForForm,
+  eventDatesForMutation,
+} from "@/app/[locale]/groups/[projectId]/calendar/_components/event/date-values";
+import EventFormFields from "@/app/[locale]/groups/[projectId]/calendar/_components/event/event-form-fields";
+import { useEventDates } from "@/app/[locale]/groups/[projectId]/calendar/_components/event/use-event-dates";
+import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/lib/session";
 import { eventSchema } from "../../_components/event/data";
-import { getTimeString } from "../../get-time-string";
 
 export default function EditEventForm({
   event,
@@ -41,110 +32,22 @@ export default function EditEventForm({
   trigger: React.ReactNode;
 }) {
   const { data: session } = useSession();
-  const { project } = useProjects();
   const t = useTranslations("calendar");
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
       name: event.name,
       description: event.description ?? "",
-      dates: {
-        from: event.startAt,
-        to: event.allDay
-          ? new Date(event.endAt.getTime() - 86400000)
-          : event.endAt,
-      },
+      dates: eventDatesForForm(event),
       allDay: event.allDay,
     },
     resolver: valibotResolver(eventSchema),
   });
 
-  const selectDefaultTime = useCallback(
-    (fromDate: Date, toDate: Date, allDay?: boolean) => {
-      const defaultStartAt = new Date(fromDate.getTime());
-      const defaultEndAt = new Date(toDate.getTime());
-
-      if (allDay) {
-        defaultStartAt.setHours(0, 0, 0, 0);
-        defaultEndAt.setHours(0, 0, 0, 0);
-      } else {
-        const now = new Date();
-        // Cap start at 22 so the default 1h duration stays valid same-day.
-        const startHour = Math.min(now.getHours() + 1, 22);
-        defaultStartAt.setHours(startHour, 0, 0, 0);
-        defaultEndAt.setHours(startHour + 1, 0, 0, 0);
-      }
-
-      form.setValue("dates", {
-        from: defaultStartAt,
-        to: defaultEndAt,
-      });
-    },
-    [form],
-  );
-
-  function handleDatesChange(dates: DateRange | undefined) {
-    const from = dates?.from ?? new Date();
-    const to = dates?.to ?? from;
-
-    selectDefaultTime(from, to, form.getValues("allDay"));
-  }
-
-  function handleStartTimeChange(e: ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    const [hour, minute] = value.split(":");
-    const current = form.getValues("dates");
-    if (!current.from || !hour || !minute) {
-      return;
-    }
-
-    const newFrom = new Date(current.from.getTime());
-    newFrom.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    let newTo = current.to
-      ? new Date(current.to.getTime())
-      : new Date(newFrom.getTime());
-
-    if (newFrom.getTime() >= newTo.getTime()) {
-      newTo = new Date(newFrom.getTime());
-      newTo.setHours(newFrom.getHours() + 1, newFrom.getMinutes(), 0, 0);
-    }
-
-    form.setValue("dates", { from: newFrom, to: newTo });
-  }
-
-  function handleEndTimeChange(e: ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    const [hour, minute] = value.split(":");
-    const current = form.getValues("dates");
-    if (!current.to || !hour || !minute) {
-      return;
-    }
-
-    const newTo = new Date(current.to.getTime());
-    newTo.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-    let newFrom = current.from
-      ? new Date(current.from.getTime())
-      : new Date(newTo.getTime());
-
-    if (newFrom.getTime() >= newTo.getTime()) {
-      newFrom = new Date(newTo.getTime());
-      newFrom.setHours(newTo.getHours() - 1, newTo.getMinutes(), 0, 0);
-    }
-
-    form.setValue("dates", { from: newFrom, to: newTo });
-  }
-
-  function handleAllDayChange(checked: CheckedState) {
-    if (checked === "indeterminate") {
-      return;
-    }
-
-    const newDates = form.getValues("dates");
-    const fromDate = newDates.from ?? newDates.to ?? new Date();
-    const toDate = newDates.to ?? newDates.from ?? new Date();
-    selectDefaultTime(fromDate, toDate, checked);
-
-    form.setValue("allDay", checked);
-  }
+  const handlers = useEventDates({
+    form,
+    preserveTimes: true,
+    originalTimes: { from: event.startAt, to: event.endAt },
+  });
 
   return (
     <ModalForm
@@ -155,12 +58,8 @@ export default function EditEventForm({
       <EditEventFormContent
         form={form}
         event={event}
-        project={project}
         sessionId={session?.user.id}
-        handleDatesChange={handleDatesChange}
-        handleStartTimeChange={handleStartTimeChange}
-        handleEndTimeChange={handleEndTimeChange}
-        handleAllDayChange={handleAllDayChange}
+        {...handlers}
       />
     </ModalForm>
   );
@@ -169,7 +68,6 @@ export default function EditEventForm({
 function EditEventFormContent({
   form,
   event,
-  project,
   sessionId,
   handleDatesChange,
   handleStartTimeChange,
@@ -178,57 +76,34 @@ function EditEventFormContent({
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
   event: Event;
-  project: Project | null;
   sessionId?: string;
-  handleDatesChange: (dates: DateRange | undefined) => void;
-  handleStartTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleEndTimeChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleAllDayChange: (checked: CheckedState) => void;
+  handleDatesChange: Parameters<typeof EventFormFields>[0]["handleDatesChange"];
+  handleStartTimeChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleStartTimeChange"];
+  handleEndTimeChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleEndTimeChange"];
+  handleAllDayChange: Parameters<
+    typeof EventFormFields
+  >[0]["handleAllDayChange"];
 }) {
   const { close } = useModalForm();
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");
-  const tLists = useTranslations("lists");
   const updateEvent = useMutation(api.events.update);
 
   const onSubmit = useCallback(
     async (data: v.InferInput<typeof eventSchema>) => {
-      if (!project) {
-        toast.error(tLists("noProjectSelected"));
-        return;
-      }
-
-      const dataToEdit = window.structuredClone(data);
-      if (dataToEdit.allDay) {
-        dataToEdit.dates.from = new Date(
-          Date.UTC(
-            data.dates.from?.getFullYear() ?? 0,
-            data.dates.from?.getMonth() ?? 0,
-            data.dates.from?.getDate() ?? 0,
-          ),
-        );
-        dataToEdit.dates.to = new Date(
-          Date.UTC(
-            data.dates.to?.getFullYear() ?? 0,
-            data.dates.to?.getMonth() ?? 0,
-            data.dates.to?.getDate() ?? 0,
-          ),
-        );
-      }
-
-      const { from, to } = dataToEdit.dates;
-      if (!from || !to) {
-        return;
-      }
+      const dates = eventDatesForMutation(data);
+      if (!dates) return;
 
       try {
         await updateEvent({
           eventId: event.id as Id<"events">,
-          name: dataToEdit.name,
-          description: dataToEdit.description,
-          startAt: from.getTime(),
-          endAt: to.getTime(),
-          allDay: dataToEdit.allDay,
+          name: data.name,
+          description: data.description,
+          ...dates,
         });
         toast.success(t("editSuccess"));
         form.reset({
@@ -248,7 +123,7 @@ function EditEventFormContent({
         toast.error(t("editError"));
       }
     },
-    [project, event, form, sessionId, close, t, tLists, updateEvent],
+    [event, form, sessionId, close, t, updateEvent],
   );
 
   const handleFormSubmit = useCallback(
@@ -262,93 +137,12 @@ function EditEventFormContent({
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{tCommon("name")}</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{tCommon("description")}</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dates"
-          render={({ field }) => (
-            <div className="flex flex-row flex-wrap gap-2">
-              <FormItem className="grow">
-                <FormLabel>{t("dates")}</FormLabel>
-                <DatePicker
-                  dates={field.value as DateRange}
-                  onDatesChange={handleDatesChange}
-                />
-              </FormItem>
-              <div className="flex grow flex-row gap-2">
-                <FormItem className="w-auto grow">
-                  <FormLabel>{t("startTime")}</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.from)
-                    }
-                    onChange={handleStartTimeChange}
-                    className="justify-center"
-                  />
-                </FormItem>
-                <FormItem className="w-auto grow">
-                  <FormLabel>{t("endTime")}</FormLabel>
-                  <Input
-                    type="time"
-                    disabled={form.getValues().allDay}
-                    value={
-                      form.getValues().allDay
-                        ? ""
-                        : getTimeString(field.value?.to)
-                    }
-                    onChange={handleEndTimeChange}
-                    className="justify-center"
-                  />
-                </FormItem>
-              </div>
-            </div>
-          )}
-        />
-
-        <FormField
-          name="allDay"
-          render={({ field }) => (
-            <FormItem className="flex grow flex-row items-center gap-2 space-y-0">
-              <FormControl>
-                <Switch
-                  checked={field.value as boolean}
-                  onCheckedChange={handleAllDayChange}
-                />
-              </FormControl>
-              <FormLabel>{t("allDay")}</FormLabel>
-            </FormItem>
-          )}
+        <EventFormFields
+          form={form}
+          handleDatesChange={handleDatesChange}
+          handleStartTimeChange={handleStartTimeChange}
+          handleEndTimeChange={handleEndTimeChange}
+          handleAllDayChange={handleAllDayChange}
         />
 
         <SubmitButton

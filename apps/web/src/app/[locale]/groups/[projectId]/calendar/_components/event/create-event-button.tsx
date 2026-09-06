@@ -19,6 +19,7 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
 import { eventSchema } from "./data";
+import { eventDatesForMutation } from "./date-values";
 import EventFormFields from "./event-form-fields";
 import { useEventDates } from "./use-event-dates";
 
@@ -114,37 +115,15 @@ function CreateEventFormContent({
         return;
       }
 
-      const dataToCreate = window.structuredClone(data);
-      if (dataToCreate.allDay) {
-        dataToCreate.dates.from = new Date(
-          Date.UTC(
-            data.dates.from?.getFullYear() ?? 0,
-            data.dates.from?.getMonth() ?? 0,
-            data.dates.from?.getDate() ?? 0,
-          ),
-        );
-        dataToCreate.dates.to = new Date(
-          Date.UTC(
-            data.dates.to?.getFullYear() ?? 0,
-            data.dates.to?.getMonth() ?? 0,
-            data.dates.to?.getDate() ?? 0,
-          ),
-        );
-      }
-
-      const { from, to } = dataToCreate.dates;
-      if (!from || !to) {
-        return;
-      }
+      const dates = eventDatesForMutation(data);
+      if (!dates) return;
 
       try {
         await createEvent({
           projectId: project.id as Id<"projects">,
-          name: dataToCreate.name,
-          description: dataToCreate.description,
-          startAt: from.getTime(),
-          endAt: to.getTime(),
-          allDay: dataToCreate.allDay,
+          name: data.name,
+          description: data.description,
+          ...dates,
         });
         toast.success(t("createSuccess", { name: data.name }));
         onCreate?.(data.dates.from, data.dates.to);

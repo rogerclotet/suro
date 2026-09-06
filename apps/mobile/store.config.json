@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.25.2",
+    "version": "1.25.3",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Group selection follows the open link and remembers each account’s preference.",
+        "releaseNotes": "• Editing an event’s dates preserves its times. On mobile, a category named like the uncategorized section stays separate.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• La selección del grupo sigue el enlace abierto y conserva la preferencia de cada cuenta.",
+        "releaseNotes": "• Editar las fechas de un evento conserva las horas. En el móvil, una categoría con el nombre de la sección sin categoría se mantiene separada.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• La selecció del grup segueix l’enllaç obert i conserva la preferència de cada compte.",
+        "releaseNotes": "• Editar les dates d’un esdeveniment conserva les hores. Al mòbil, una categoria amb el nom de la secció sense categoria es manté separada.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

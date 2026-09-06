@@ -1,1 +1,1 @@
-• Group selection follows the open link and remembers each account’s preference.
+• Editing an event’s dates preserves its times. On mobile, a category named like the uncategorized section stays separate.

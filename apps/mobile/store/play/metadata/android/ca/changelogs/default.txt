@@ -1,1 +1,1 @@
-• La selecció del grup segueix l’enllaç obert i conserva la preferència de cada compte.
+• Editar les dates d’un esdeveniment conserva les hores. Al mòbil, una categoria amb el nom de la secció sense categoria es manté separada.

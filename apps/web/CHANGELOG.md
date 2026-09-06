@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.3] — 2026-09-06
+
+### ca
+
+- [fix] Editar les dates d’un esdeveniment conserva les hores. Al mòbil, una categoria amb el nom de la secció sense categoria es manté separada.
+
+### es
+
+- [fix] Editar las fechas de un evento conserva las horas. En el móvil, una categoría con el nombre de la sección sin categoría se mantiene separada.
+
+### en
+
+- [fix] Editing an event’s dates preserves its times. On mobile, a category named like the uncategorized section stays separate.
+
 ## [1.25.2] — 2026-09-06
 
 ### ca
