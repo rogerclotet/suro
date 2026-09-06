@@ -1,1 +1,1 @@
-• Checking off tasks and moving items between categories preserves teammates' edits, including when syncing actions made offline.
+• Mobile shows changes waiting to sync and lets you retry or discard failed changes.

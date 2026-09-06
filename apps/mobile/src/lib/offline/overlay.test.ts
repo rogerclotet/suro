@@ -1,22 +1,7 @@
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { describe, expect, it } from "vitest";
 import { overlayItems, overlaySpendings } from "./overlay";
-import type { OutboxEntry } from "./types";
-
-function entry(
-  over: Partial<OutboxEntry> & Pick<OutboxEntry, "functionName">,
-): OutboxEntry {
-  return {
-    id: over.id ?? "e",
-    functionName: over.functionName,
-    args: over.args ?? {},
-    tempIds: over.tempIds ?? [],
-    dependsOn: over.dependsOn ?? [],
-    createdAt: over.createdAt ?? 0,
-    status: over.status ?? "pending",
-    attempts: over.attempts ?? 0,
-  };
-}
+import { entry } from "./test-fixtures";
 
 function item(over: {
   _id: string;

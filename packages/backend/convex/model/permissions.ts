@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { requireUserId } from "./auth";
@@ -63,7 +64,7 @@ export async function assertProjectMembership(
 export async function requireListAccess(ctx: QueryCtx, listId: Id<"lists">) {
   const list = await ctx.db.get(listId);
   if (list === null) {
-    throw new Error("List not found");
+    throw new ConvexError({ code: "NOT_FOUND", message: "List not found" });
   }
   const userId = await requireProjectMember(ctx, list.projectId);
   return { list, userId };
@@ -75,7 +76,10 @@ export async function requireItemAccess(
 ) {
   const item = await ctx.db.get(itemId);
   if (item === null) {
-    throw new Error("List item not found");
+    throw new ConvexError({
+      code: "NOT_FOUND",
+      message: "List item not found",
+    });
   }
   const { list, userId } = await requireListAccess(ctx, item.listId);
   return { item, list, userId };
@@ -114,7 +118,7 @@ export async function requireNoteAccess(ctx: QueryCtx, noteId: Id<"notes">) {
 export async function requirePotAccess(ctx: QueryCtx, potId: Id<"pots">) {
   const pot = await ctx.db.get(potId);
   if (pot === null) {
-    throw new Error("Pot not found");
+    throw new ConvexError({ code: "NOT_FOUND", message: "Pot not found" });
   }
   const userId = await requireProjectMember(ctx, pot.projectId);
   return { pot, userId };

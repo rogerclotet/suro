@@ -1,1 +1,1 @@
-• Marcar tasques i moure elements entre categories conserva els canvis dels altres membres, també en sincronitzar accions fetes sense connexió.
+• El mòbil mostra els canvis pendents de sincronitzar i permet reintentar o descartar els que han fallat.

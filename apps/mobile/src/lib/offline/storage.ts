@@ -56,6 +56,17 @@ function kv(): KVStore {
   return store;
 }
 
+// Bump when cached query shapes change. Outbox migration is independent.
+const CACHE_VERSION = "1";
+let cacheVersionChecked = false;
+function ensureCacheVersion() {
+  if (cacheVersionChecked) return;
+  if (kv().getString("cache:version") !== CACHE_VERSION) {
+    clearQueryCache();
+    kv().set("cache:version", CACHE_VERSION);
+  }
+  cacheVersionChecked = true;
+}
 const QUERY_PREFIX = "q:";
 const INDEX_KEY = "q:__index__";
 /** Cap on distinct cached query keys; oldest-inserted are evicted past this. */
@@ -67,7 +78,12 @@ function loadIndex(): string[] {
   if (knownKeys === null) {
     const raw = kv().getString(INDEX_KEY);
     try {
-      knownKeys = raw ? (JSON.parse(raw) as string[]) : [];
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      knownKeys =
+        Array.isArray(parsed) &&
+        parsed.every((key): key is string => typeof key === "string")
+          ? parsed
+          : [];
     } catch {
       knownKeys = [];
     }
@@ -81,6 +97,7 @@ function persistIndex(): void {
 
 /** Read a cached query result, or `undefined` on miss / corrupt entry. */
 export function cacheGet(key: string): unknown {
+  ensureCacheVersion();
   const raw = kv().getString(key);
   if (raw === undefined) {
     return undefined;
@@ -98,6 +115,7 @@ export function cacheGet(key: string): unknown {
  * the value — so index churn stays low. Oldest-inserted keys evict past the cap.
  */
 export function cacheSet(key: string, value: unknown): void {
+  ensureCacheVersion();
   let serialized: string;
   try {
     serialized = serialize(value as Value);

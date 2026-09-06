@@ -1,7 +1,9 @@
 import { Redirect, Stack } from "expo-router";
+import { View } from "react-native";
 import { FeedbackProvider } from "@/lib/feedback-state";
 import { NotificationsProvider } from "@/lib/notifications";
 import { useAuthGate } from "@/lib/offline";
+import { SyncStatus } from "@/lib/offline/SyncStatus";
 import { usePushNotifications } from "@/lib/push";
 import { FONT, useTheme } from "@/theme";
 import { SheetHost } from "@/ui";
@@ -26,19 +28,25 @@ export default function AppLayout() {
     <NotificationsProvider>
       <SheetHost>
         <FeedbackProvider>
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: t.bg },
-              headerTitleStyle: { fontFamily: FONT, color: t.text },
-              headerTintColor: t.primary,
-              // Pushed pages (Manage group, Create group, Profile) show a bare
-              // chevron, not the stale "[projectId]" previous-route label.
-              headerBackButtonDisplayMode: "minimal",
-              contentStyle: { backgroundColor: t.bg },
-            }}
-          >
-            <Stack.Screen name="[projectId]" options={{ headerShown: false }} />
-          </Stack>
+          <View style={{ flex: 1 }}>
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: t.bg },
+                headerTitleStyle: { fontFamily: FONT, color: t.text },
+                headerTintColor: t.primary,
+                // Pushed pages (Manage group, Create group, Profile) show a bare
+                // chevron, not the stale "[projectId]" previous-route label.
+                headerBackButtonDisplayMode: "minimal",
+                contentStyle: { backgroundColor: t.bg },
+              }}
+            >
+              <Stack.Screen
+                name="[projectId]"
+                options={{ headerShown: false }}
+              />
+            </Stack>
+            <SyncStatus />
+          </View>
         </FeedbackProvider>
       </SheetHost>
     </NotificationsProvider>

@@ -1,21 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compact, hasUnresolvedTemp, remapArgs } from "./outbox-logic";
-import type { OutboxEntry } from "./types";
-
-function entry(
-  over: Partial<OutboxEntry> & Pick<OutboxEntry, "functionName">,
-): OutboxEntry {
-  return {
-    id: over.id ?? Math.random().toString(),
-    functionName: over.functionName,
-    args: over.args ?? {},
-    tempIds: over.tempIds ?? [],
-    dependsOn: over.dependsOn ?? [],
-    createdAt: over.createdAt ?? 0,
-    status: over.status ?? "pending",
-    attempts: over.attempts ?? 0,
-  };
-}
+import { entry } from "./test-fixtures";
 
 describe("compact", () => {
   it("drops a create→child→delete chain for an offline-only entity", () => {

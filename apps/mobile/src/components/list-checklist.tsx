@@ -191,7 +191,7 @@ export function ListChecklist({
   // Optimistic so the new row (and a brand-new category section) mounts in the
   // same commit as the focus-follow state change — the inline input can grab
   // focus without waiting a server round-trip or bouncing the keyboard.
-  const createItem = useQueuedMutation(api.listItems.create, (store, args) => {
+  const createItem = useQueuedMutation("listItems:create", (store, args) => {
     const current = store.getQuery(api.lists.get, { listId: lid });
     if (!current) {
       return;
@@ -227,10 +227,10 @@ export function ListChecklist({
       },
     );
   });
-  const removeItem = useQueuedMutation(api.listItems.remove);
+  const removeItem = useQueuedMutation("listItems:remove");
   // Optimistic so checkbox toggles and drag-drops re-section instantly instead
   // of waiting a server round-trip.
-  const updateItem = useQueuedMutation(api.listItems.update, (store, args) => {
+  const updateItem = useQueuedMutation("listItems:update", (store, args) => {
     const current = store.getQuery(api.lists.get, { listId: lid });
     if (!current) {
       return;
@@ -272,7 +272,7 @@ export function ListChecklist({
   });
 
   const setCompleted = useQueuedMutation(
-    api.listItems.setCompleted,
+    "listItems:setCompleted",
     (store, args) => {
       const current = store.getQuery(api.lists.get, { listId: lid });
       if (!current) return;
@@ -292,7 +292,7 @@ export function ListChecklist({
     },
   );
   const setCategory = useQueuedMutation(
-    api.listItems.setCategory,
+    "listItems:setCategory",
     (store, args) => {
       const current = store.getQuery(api.lists.get, { listId: lid });
       if (!current) return;

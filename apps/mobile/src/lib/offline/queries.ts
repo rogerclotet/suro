@@ -43,7 +43,7 @@ const resolver = (idmap: IdMap) => (id: string) => idmap[id] ?? id;
 /** Build a list shell for a list that exists only as a pending offline create. */
 function buildListBase(
   listId: Id<"lists">,
-  create: OutboxEntry,
+  create: Extract<OutboxEntry, { functionName: "lists:create" }>,
   user: CurrentUser,
 ): ListWithItems {
   const args = create.args;
@@ -71,9 +71,9 @@ function patchListFields(
   const resolve = resolver(idmap);
   let patched = list;
   for (const entry of entries) {
-    const args = entry.args;
+    const { functionName, args } = entry;
     if (
-      entry.functionName === "lists:update" &&
+      functionName === "lists:update" &&
       resolve(String(args.listId)) === listId
     ) {
       patched = {
@@ -83,7 +83,7 @@ function patchListFields(
           typeof args.description === "string" ? args.description : undefined,
       };
     } else if (
-      entry.functionName === "lists:toggleFavorite" &&
+      functionName === "lists:toggleFavorite" &&
       resolve(String(args.listId)) === listId
     ) {
       patched = { ...patched, favorite: !patched.favorite };
@@ -105,7 +105,7 @@ export function useOfflineListGet(
       const create = entries.find(
         (e) => e.functionName === "lists:create" && e.tempIds[0] === listId,
       );
-      if (create && user) {
+      if (create?.functionName === "lists:create" && user) {
         listBase = buildListBase(listId, create, user);
       } else {
         return undefined;
@@ -271,7 +271,10 @@ export function useOfflineGetPot(
             e.functionName === "expenses:createPot" && e.tempIds[0] === potId,
         )
       : undefined;
-  const synthProjectId = create ? String(create.args.projectId) : null;
+  const synthProjectId =
+    create?.functionName === "expenses:createPot"
+      ? create.args.projectId
+      : null;
   const projectMembers = usePersistentQuery(
     api.projects.members,
     synthProjectId ? { projectId: synthProjectId as Id<"projects"> } : "skip",
@@ -284,7 +287,11 @@ export function useOfflineGetPot(
     }
     let potBase: PotDetail | undefined = base;
     if (base === undefined) {
-      if (!create || !user || projectMembers === undefined) {
+      if (
+        create?.functionName !== "expenses:createPot" ||
+        !user ||
+        projectMembers === undefined
+      ) {
         return undefined;
       }
       const memberIds = (
@@ -344,7 +351,11 @@ export function useOfflineGetPot(
     for (const entry of [...entries].sort(
       (a, b) => a.createdAt - b.createdAt,
     )) {
-      if (resolve(String(entry.args.potId)) !== potId) {
+      if (
+        (entry.functionName !== "expenses:createSpending" &&
+          entry.functionName !== "expenses:settlePayments") ||
+        resolve(entry.args.potId) !== potId
+      ) {
         continue;
       }
       if (entry.functionName === "expenses:createSpending") {
@@ -399,15 +410,20 @@ export function useOfflineSoloExpenses(
         }
       }
     }
-    const resolvedPotId = potId ? (resolve(potId) as Id<"pots">) : null;
-    const spendings =
-      resolvedPotId === null
-        ? base.spendings
-        : overlaySpendings(base.spendings, resolvedPotId, entries, idmap, {
-            projectId,
-            createdBy: user?.id ?? base.memberId,
-            nameById: new Map(),
-          });
+    if (potId === null)
+      return { potId: null, memberId: base.memberId, spendings: [] };
+    const resolvedPotId = resolve(potId) as Id<"pots">;
+    const spendings = overlaySpendings(
+      base.spendings,
+      resolvedPotId,
+      entries,
+      idmap,
+      {
+        projectId,
+        createdBy: user?.id ?? base.memberId,
+        nameById: new Map(),
+      },
+    );
     return {
       ...base,
       potId: resolvedPotId,
@@ -416,6 +432,6 @@ export function useOfflineSoloExpenses(
         fromName: null,
         toName: null,
       })),
-    } as SoloExpenses;
+    };
   }, [base, entries, idmap, user, projectId]);
 }

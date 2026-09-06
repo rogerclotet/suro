@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.0] — 2026-09-06
+
+### ca
+
+- [feature] El mòbil mostra els canvis pendents de sincronitzar i permet reintentar o descartar els que han fallat.
+
+### es
+
+- [feature] El móvil muestra los cambios pendientes de sincronizar y permite reintentar o descartar los que han fallado.
+
+### en
+
+- [feature] Mobile shows changes waiting to sync and lets you retry or discard failed changes.
+
 ## [1.24.2] — 2026-09-06
 
 ### ca

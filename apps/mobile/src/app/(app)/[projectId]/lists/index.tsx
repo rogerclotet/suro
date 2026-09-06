@@ -360,7 +360,7 @@ function CreateListSheet({
   const templates = usePersistentQuery(api.templates.listByProject, {
     projectId,
   });
-  const createList = useQueuedMutation(api.lists.create);
+  const createList = useQueuedMutation("lists:create");
   const router = useRouter();
   const t = useTheme();
   const tl = useTranslations("mobile.lists");
@@ -383,7 +383,7 @@ function CreateListSheet({
     }
     setBusy(true);
     try {
-      const listId = await createList({
+      const outcome = await createList({
         projectId,
         name: trimmed,
         description: description.trim() || undefined,
@@ -393,6 +393,9 @@ function CreateListSheet({
       setName("");
       setDescription("");
       setSelected([]);
+      const listId =
+        outcome.kind === "synced" ? outcome.value : outcome.localId;
+      if (!listId) return;
       onClose();
       router.push({
         pathname: `/${projectId}/lists/${listId}`,

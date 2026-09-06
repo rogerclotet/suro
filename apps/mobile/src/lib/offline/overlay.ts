@@ -1,115 +1,14 @@
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
-import { completionPatch } from "domain/tasks";
-import { advanceDueAt, type Recurrence } from "../recurrence";
+import { advanceDueAt, completionPatch } from "domain/tasks";
 import type { IdMap, OutboxEntry } from "./types";
-
-/**
- * Pure overlay helpers: apply pending outbox mutations on top of a cached query
- * result so a relaunched-while-offline app shows writes that haven't synced yet.
- * Only array-level transforms live here (items, spendings) — the higher-level
- * assembly (list field patches, balance recompute) is done in the hooks, typed
- * against the real query return shapes. Pure + Doc-typed → unit-testable.
- */
 
 export type SpendingRow = Doc<"spendings"> & {
   fromName: string | null;
   toName: string | null;
 };
-
-type Args = Record<string, unknown>;
-
-function str(args: Args, key: string): string {
-  const value = args[key];
-  return typeof value === "string" ? value : "";
-}
-
-function optStr(args: Args, key: string): string | undefined {
-  const value = args[key];
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined;
-}
-
-function num(args: Args, key: string): number {
-  const value = args[key];
-  return typeof value === "number" ? value : 0;
-}
-
-/** A number arg that may be absent (e.g. an optional `dueAt`). */
-function optNum(args: Args, key: string): number | undefined {
-  const value = args[key];
-  return typeof value === "number" ? value : undefined;
-}
-
-/** A boolean arg that may be absent (e.g. an optional `dueAllDay`). */
-function optBool(args: Args, key: string): boolean | undefined {
-  const value = args[key];
-  return typeof value === "boolean" ? value : undefined;
-}
-
-/** An optional user-id arg (`assigneeId`), kept as the raw id when present. */
-function optUserId(args: Args, key: string): Id<"users"> | undefined {
-  const value = args[key];
-  return typeof value === "string" && value !== ""
-    ? (value as Id<"users">)
-    : undefined;
-}
-
-const PRIORITIES: ReadonlySet<string> = new Set(["low", "normal", "high"]);
-const FREQS: ReadonlySet<string> = new Set([
-  "daily",
-  "weekly",
-  "monthly",
-  "yearly",
-]);
-
-/** An optional `priority` arg, validated against the allowed literals. */
-function optPriority(args: Args, key: string): Doc<"listItems">["priority"] {
-  const value = args[key];
-  return typeof value === "string" && PRIORITIES.has(value)
-    ? (value as Doc<"listItems">["priority"])
-    : undefined;
-}
-
-/** An optional `recurrence` arg, shape-validated so a bad payload reads as none. */
-function optRecurrence(args: Args, key: string): Recurrence | undefined {
-  const value = args[key];
-  if (value === null || typeof value !== "object") {
-    return undefined;
-  }
-  const rule = value as Record<string, unknown>;
-  if (typeof rule.freq !== "string" || !FREQS.has(rule.freq)) {
-    return undefined;
-  }
-  if (typeof rule.interval !== "number") {
-    return undefined;
-  }
-  return { freq: rule.freq as Recurrence["freq"], interval: rule.interval };
-}
-
-/** The five optional task fields, read from an outbox entry's args together. */
-function taskFields(
-  args: Args,
-): Pick<
-  Doc<"listItems">,
-  "dueAt" | "dueAllDay" | "assigneeId" | "priority" | "recurrence"
-> {
-  return {
-    dueAt: optNum(args, "dueAt"),
-    dueAllDay: optBool(args, "dueAllDay"),
-    assigneeId: optUserId(args, "assigneeId"),
-    priority: optPriority(args, "priority"),
-    recurrence: optRecurrence(args, "recurrence"),
-  };
-}
-
 const resolver = (idmap: IdMap) => (id: string) => idmap[id] ?? id;
 
-/**
- * Apply pending list-item mutations to one list's items. Updates and removes
- * scope themselves implicitly: they only match ids already present in `items`
- * (this list's base rows plus rows added by create entries for this list).
- */
+/** Inputs have already been parsed at the outbox boundary. */
 export function overlayItems(
   base: Doc<"listItems">[],
   listId: string,
@@ -120,151 +19,101 @@ export function overlayItems(
   const resolve = resolver(idmap);
   let items = [...base];
   for (const entry of entries) {
-    const args = entry.args;
-    switch (entry.functionName) {
+    const { functionName, args } = entry;
+    switch (functionName) {
       case "listItems:create": {
-        if (resolve(str(args, "listId")) !== listId) {
-          break;
-        }
+        if (resolve(args.listId) !== listId) break;
         const tempId = entry.tempIds[0];
-        if (tempId === undefined) {
+        if (
+          !tempId ||
+          items.some((item) => item._id === (idmap[tempId] ?? tempId))
+        )
           break;
-        }
-        const realId = idmap[tempId];
-        if (realId !== undefined && items.some((it) => it._id === realId)) {
-          break; // already synced; the real row is in `base`
-        }
-        if (items.some((it) => it._id === tempId)) {
-          break;
-        }
         items.push({
+          ...args,
           _id: tempId as Id<"listItems">,
           _creationTime: entry.createdAt,
-          name: str(args, "name"),
+          listId: resolve(args.listId) as Id<"lists">,
           completed: false,
-          listId: resolve(str(args, "listId")) as Id<"lists">,
-          category: optStr(args, "category"),
-          details: optStr(args, "details"),
+          category: args.category?.trim() || undefined,
+          details: args.details?.trim() || undefined,
           createdBy: ctx.createdBy,
           updatedAt: entry.createdAt,
-          ...taskFields(args),
         });
         break;
       }
       case "listItems:update": {
-        const target = resolve(str(args, "itemId"));
-        const fields = taskFields(args);
-        const completed = args.completed === true;
-        items = items.map((it) => {
-          if (it._id !== target) {
-            return it;
-          }
-          // Mirror the server's reschedule-on-complete: checking off a still-open
-          // recurring task doesn't complete it — it advances to the next
-          // occurrence and stays open. Keyed off the *incoming* recurrence so
-          // clearing the repeat in the same edit lets it complete normally.
-          if (fields.recurrence !== undefined && completed && !it.completed) {
-            return {
-              ...it,
-              name: str(args, "name"),
-              details: optStr(args, "details"),
-              completed: false,
-              category: optStr(args, "category"),
-              ...fields,
-              dueAt: advanceDueAt(
-                fields.dueAt ?? entry.createdAt,
-                fields.recurrence,
-                entry.createdAt,
-              ),
-              updatedAt: entry.createdAt,
-            };
-          }
+        const { itemId, ...fields } = args;
+        items = items.map((item) => {
+          if (item._id !== resolve(itemId)) return item;
+          const rescheduled =
+            fields.recurrence && fields.completed && !item.completed;
           return {
-            ...it,
-            name: str(args, "name"),
-            details: optStr(args, "details"),
-            completed,
-            category: optStr(args, "category"),
+            ...item,
             ...fields,
+            category: fields.category?.trim() || undefined,
+            details: fields.details?.trim() || undefined,
+            dueAllDay: fields.dueAllDay,
+            assigneeId: fields.assigneeId,
+            priority: fields.priority,
+            recurrence: fields.recurrence,
+            dueAt:
+              rescheduled && fields.recurrence
+                ? advanceDueAt(
+                    fields.dueAt ?? entry.createdAt,
+                    fields.recurrence,
+                    entry.createdAt,
+                  )
+                : fields.dueAt,
+            completed: rescheduled ? false : fields.completed,
             updatedAt: entry.createdAt,
           };
         });
         break;
       }
-      case "listItems:setCompleted": {
-        const target = resolve(str(args, "itemId"));
+      case "listItems:setCompleted":
         items = items.map((item) =>
-          item._id === target
+          item._id === resolve(args.itemId)
             ? {
                 ...item,
-                ...completionPatch(item, {
-                  completed: args.completed === true,
-                  expectedDueAt: optNum(args, "expectedDueAt") ?? null,
-                  now: entry.createdAt,
-                }),
+                ...completionPatch(item, { ...args, now: entry.createdAt }),
               }
             : item,
         );
         break;
-      }
-      case "listItems:setCategory": {
-        const target = resolve(str(args, "itemId"));
+      case "listItems:setCategory":
         items = items.map((item) =>
-          item._id === target
-            ? { ...item, category: optStr(args, "category") }
+          item._id === resolve(args.itemId)
+            ? { ...item, category: args.category?.trim() || undefined }
             : item,
         );
         break;
-      }
-      case "listItems:remove": {
-        const target = resolve(str(args, "itemId"));
-        items = items.filter((it) => it._id !== target);
+      case "listItems:remove":
+        items = items.filter((item) => item._id !== resolve(args.itemId));
         break;
-      }
-      case "lists:clearCompleted": {
-        if (resolve(str(args, "listId")) === listId) {
-          items = items.filter((it) => !it.completed);
-        }
+      case "lists:clearCompleted":
+        if (resolve(args.listId) === listId)
+          items = items.filter((item) => !item.completed);
         break;
-      }
-      default:
+      case "lists:create":
+      case "lists:update":
+      case "lists:toggleFavorite":
+      case "lists:remove":
+      case "lists:importTemplates":
+      case "expenses:createPot":
+      case "expenses:createSpending":
+      case "expenses:settlePayments":
+      case "expenses:deletePot":
         break;
+      default: {
+        const exhaustive: never = functionName;
+        return exhaustive;
+      }
     }
   }
   return items;
 }
 
-function parsePayments(
-  value: unknown,
-): { from: Id<"users">; to: Id<"users">; amount: number }[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  const out: { from: Id<"users">; to: Id<"users">; amount: number }[] = [];
-  for (const raw of value) {
-    if (raw === null || typeof raw !== "object") {
-      continue;
-    }
-    const p = raw as Record<string, unknown>;
-    if (
-      typeof p.from === "string" &&
-      typeof p.to === "string" &&
-      typeof p.amount === "number"
-    ) {
-      out.push({
-        from: p.from as Id<"users">,
-        to: p.to as Id<"users">,
-        amount: p.amount,
-      });
-    }
-  }
-  return out;
-}
-
-/**
- * Prepend pending spendings (and settle-up rows) for one pot to its cached,
- * newest-first spendings list. The caller recomputes balances from the result.
- */
 export function overlaySpendings(
   base: SpendingRow[],
   potId: string,
@@ -279,88 +128,46 @@ export function overlaySpendings(
   const resolve = resolver(idmap);
   const pending: SpendingRow[] = [];
   for (const entry of entries) {
-    const args = entry.args;
-    if (entry.functionName === "expenses:createSpending") {
-      if (resolve(str(args, "potId")) !== potId) {
-        continue;
-      }
+    const { functionName, args } = entry;
+    if (functionName === "expenses:createSpending") {
+      if (resolve(args.potId) !== potId) continue;
       const tempId = entry.tempIds[0];
-      if (tempId === undefined) {
+      if (!tempId || base.some((row) => row._id === (idmap[tempId] ?? tempId)))
         continue;
-      }
-      const realId = idmap[tempId];
-      if (realId !== undefined && base.some((row) => row._id === realId)) {
-        continue; // already synced
-      }
-      const from = str(args, "from") as Id<"users">;
-      const toRaw = args.to;
-      const to = typeof toRaw === "string" ? (toRaw as Id<"users">) : undefined;
       pending.push({
+        ...args,
         _id: tempId as Id<"spendings">,
         _creationTime: entry.createdAt,
-        amount: num(args, "amount"),
         currency: "EUR",
-        description: optStr(args, "description"),
-        from,
-        to,
+        description: args.description?.trim() || undefined,
         projectId: ctx.projectId,
         potId: potId as Id<"pots">,
         createdBy: ctx.createdBy,
         createdAt: entry.createdAt,
-        fromName: ctx.nameById.get(from) ?? null,
-        toName: to ? (ctx.nameById.get(to) ?? null) : null,
+        fromName: ctx.nameById.get(args.from) ?? null,
+        toName: args.to ? (ctx.nameById.get(args.to) ?? null) : null,
       });
-    } else if (entry.functionName === "expenses:settlePayments") {
-      if (resolve(str(args, "potId")) !== potId) {
-        continue;
-      }
-      parsePayments(args.payments).forEach((p, index) => {
+    } else if (
+      functionName === "expenses:settlePayments" &&
+      resolve(args.potId) === potId
+    ) {
+      for (const [index, payment] of args.payments.entries()) {
         pending.push({
+          ...payment,
           _id: `${entry.id}-settle-${index}` as Id<"spendings">,
           _creationTime: entry.createdAt,
-          amount: p.amount,
           currency: "EUR",
           description: "Settle up",
-          from: p.from,
-          to: p.to,
           projectId: ctx.projectId,
           potId: potId as Id<"pots">,
           createdBy: ctx.createdBy,
           createdAt: entry.createdAt,
-          fromName: ctx.nameById.get(p.from) ?? null,
-          toName: ctx.nameById.get(p.to) ?? null,
+          fromName: ctx.nameById.get(payment.from) ?? null,
+          toName: ctx.nameById.get(payment.to) ?? null,
         });
-      });
+      }
     }
   }
   pending.sort((a, b) => b._creationTime - a._creationTime);
   return [...pending, ...base];
-}
-
-/** True if any pending entry settles this pot (offline settle → settledAt set). */
-export function hasPendingSettle(
-  potId: string,
-  entries: OutboxEntry[],
-  idmap: IdMap,
-): boolean {
-  const resolve = resolver(idmap);
-  return entries.some(
-    (entry) =>
-      entry.functionName === "expenses:settlePayments" &&
-      resolve(str(entry.args, "potId")) === potId,
-  );
-}
-
-/** True if a pending spending targets this pot (reopens a settled pot offline). */
-export function hasPendingSpending(
-  potId: string,
-  entries: OutboxEntry[],
-  idmap: IdMap,
-): boolean {
-  const resolve = resolver(idmap);
-  return entries.some(
-    (entry) =>
-      entry.functionName === "expenses:createSpending" &&
-      resolve(str(entry.args, "potId")) === potId,
-  );
 }

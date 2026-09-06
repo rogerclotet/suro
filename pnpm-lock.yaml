@@ -205,6 +205,9 @@ importers:
       use-intl:
         specifier: ^4.14.2
         version: 4.14.2(react@19.2.8)
+      valibot:
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7

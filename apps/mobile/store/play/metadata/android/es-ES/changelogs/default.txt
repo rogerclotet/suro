@@ -1,1 +1,1 @@
-• Marcar tareas y mover elementos entre categorías conserva los cambios de otros miembros, también al sincronizar acciones hechas sin conexión.
+• El móvil muestra los cambios pendientes de sincronizar y permite reintentar o descartar los que han fallado.
