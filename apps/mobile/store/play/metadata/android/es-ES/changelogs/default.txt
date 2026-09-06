@@ -1,1 +1,1 @@
-• Editar las fechas de un evento conserva las horas. En el móvil, una categoría con el nombre de la sección sin categoría se mantiene separada.
+• Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.

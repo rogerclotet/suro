@@ -36,20 +36,23 @@ export function createFlusher({
       queue.getUserId() !== owner
     )
       return;
+    const accountEpoch = queue.getAccountEpoch();
     const active = () =>
-      isOnline() && currentUserId() === owner && queue.getUserId() === owner;
+      isOnline() &&
+      currentUserId() === owner &&
+      queue.getUserId() === owner &&
+      queue.getAccountEpoch() === accountEpoch;
     flushing = true;
     try {
       const entries = compact(queue.getEntries());
       if (entries.length !== queue.getEntries().length)
         queue.replaceEntries(entries);
-      for (const snapshot of entries) {
-        if (!active()) break;
-        // Recovery/account changes may have removed an entry while another was in flight.
+      while (active()) {
+        // Include writes enqueued while a preceding send was in flight.
         const entry = queue
           .getEntries()
-          .find((candidate) => candidate.id === snapshot.id);
-        if (!entry || entry.status === "failed") continue;
+          .find((candidate) => candidate.status === "pending");
+        if (!entry) break;
         try {
           const args = remapArgs(entry.args, queue.getIdmap());
           if (hasUnresolvedTemp(args))

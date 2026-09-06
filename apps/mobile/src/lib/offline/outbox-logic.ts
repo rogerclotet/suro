@@ -1,12 +1,21 @@
 import { OPERATIONS } from "./operations";
 import { type IdMap, isTempId, type OutboxEntry } from "./types";
 
-/** Dependencies can occur inside arrays as well as top-level arguments. */
-export function tempIdsIn(value: unknown): string[] {
-  if (isTempId(value)) return [value];
-  if (Array.isArray(value)) return value.flatMap(tempIdsIn);
+// Reference fields follow the API's Id/Ids convention; expense transfers use from/to.
+// Free text such as a list named "temp-shopping" must never become a dependency.
+function isReferenceKey(key: string) {
+  return (
+    key.endsWith("Id") || key.endsWith("Ids") || key === "from" || key === "to"
+  );
+}
+export function tempIdsIn(value: unknown, reference = false): string[] {
+  if (isTempId(value)) return reference ? [value] : [];
+  if (Array.isArray(value))
+    return value.flatMap((child) => tempIdsIn(child, reference));
   if (value !== null && typeof value === "object")
-    return Object.values(value).flatMap(tempIdsIn);
+    return Object.entries(value).flatMap(([key, child]) =>
+      tempIdsIn(child, isReferenceKey(key)),
+    );
   return [];
 }
 
@@ -60,22 +69,36 @@ export function compact(entries: OutboxEntry[]): OutboxEntry[] {
   return entries.filter((entry) => !removed.has(entry.id));
 }
 
-export function remapArgs(
-  args: Record<string, unknown>,
+/** Shape-preserving reference substitution at the storage/API boundary. */
+export function remapArgs<Args extends Record<string, unknown>>(
+  args: Args,
   idmap: IdMap,
-): Record<string, unknown> {
-  const remap = (value: unknown): unknown => {
-    if (isTempId(value)) return idmap[value] ?? value;
-    if (Array.isArray(value)) return value.map(remap);
+): Args {
+  const remap = (value: unknown, reference: boolean): unknown => {
+    if (isTempId(value)) return reference ? (idmap[value] ?? value) : value;
+    if (Array.isArray(value))
+      return value.map((child) => remap(child, reference));
     if (value !== null && typeof value === "object")
       return Object.fromEntries(
-        Object.entries(value).map(([key, child]) => [key, remap(child)]),
+        Object.entries(value).map(([key, child]) => [
+          key,
+          remap(child, isReferenceKey(key)),
+        ]),
       );
     return value;
   };
+  // Only ID string values change; object keys, arrays and all other values retain their types.
   return Object.fromEntries(
-    Object.entries(args).map(([key, value]) => [key, remap(value)]),
-  );
+    Object.entries(args).map(([key, value]) => [
+      key,
+      remap(value, isReferenceKey(key)),
+    ]),
+  ) as Args;
+}
+
+/** A mapped Convex ID retains its table brand at this persistence boundary. */
+export function resolveOfflineId<Id extends string>(id: Id, idmap: IdMap): Id {
+  return (idmap[id] ?? id) as Id;
 }
 export function hasUnresolvedTemp(args: Record<string, unknown>): boolean {
   return tempIdsIn(args).length > 0;

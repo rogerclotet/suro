@@ -18,18 +18,24 @@ const KEY = "outbox:v1";
 /** One atomic persisted snapshot owns entries, acknowledgements and account identity. */
 export function createOutboxStore(storage: RawStorage) {
   let state: SavedOutbox | undefined;
+  let accountEpoch = 0;
   const listeners = new Set<() => void>();
   function getState(): SavedOutbox {
     if (state) return state;
     const raw = storage.read(KEY);
     if (raw !== undefined) state = decodeOutbox(readJson(raw));
-    else if (storage.read("outbox") !== undefined) {
-      state = migrateLegacy(
+    else if (
+      ["outbox", "outbox:idmap", "outbox:meta"].some(
+        (key) => storage.read(key) !== undefined,
+      )
+    ) {
+      const migrated = migrateLegacy(
         readJson(storage.read("outbox")),
         readJson(storage.read("outbox:idmap")),
         readJson(storage.read("outbox:meta")),
       );
-      storage.write(KEY, JSON.stringify(state));
+      storage.write(KEY, JSON.stringify(migrated));
+      state = migrated;
       for (const key of ["outbox", "outbox:idmap", "outbox:meta"])
         storage.remove(key);
     } else state = emptyOutbox();
@@ -75,6 +81,7 @@ export function createOutboxStore(storage: RawStorage) {
     const current = getState();
     if (current.userId === userId) return;
     save({ ...(current.userId === null ? current : emptyOutbox()), userId });
+    accountEpoch++;
   }
   function allocTempId(table: string): TempId {
     const current = getState();
@@ -85,6 +92,7 @@ export function createOutboxStore(storage: RawStorage) {
   return {
     getEntries,
     getState,
+    getAccountEpoch: () => accountEpoch,
     getIdmap: () => getState().idmap,
     getUserId: () => getState().userId,
     getQuarantined: () => getState().quarantined,
@@ -105,6 +113,7 @@ export function createOutboxStore(storage: RawStorage) {
     allocTempId,
     clearOutbox() {
       save(emptyOutbox());
+      accountEpoch++;
     },
     discardQuarantined() {
       save({ ...getState(), quarantined: [] });

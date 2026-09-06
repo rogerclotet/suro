@@ -96,7 +96,7 @@ export function migrateLegacy(
   if (!owner.success) {
     return {
       ...emptyOutbox(),
-      quarantined: entries === undefined ? [] : [{ entries, idmap, meta }],
+      quarantined: [{ entries, idmap, meta }],
     };
   }
   return decodeOutbox({

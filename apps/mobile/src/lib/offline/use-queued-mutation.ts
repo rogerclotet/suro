@@ -10,7 +10,7 @@ import {
   type OperationReference,
   parseOperation,
 } from "./operations";
-import { tempIdsIn } from "./outbox-logic";
+import { hasUnresolvedTemp, remapArgs, tempIdsIn } from "./outbox-logic";
 import { outbox } from "./outbox-store";
 
 export type MutationOutcome<T> =
@@ -31,11 +31,16 @@ export function useQueuedMutation<K extends OperationName>(
     : base;
   return useCallback(
     async (args: FunctionArgs<OperationReference<K>>) => {
-      if (isOnlineNow() && !outbox.getEntries().length) {
-        return { kind: "synced", value: await online(args) };
+      const resolvedArgs = remapArgs(args, outbox.getIdmap());
+      if (
+        isOnlineNow() &&
+        !outbox.getEntries().length &&
+        !hasUnresolvedTemp(resolvedArgs)
+      ) {
+        return { kind: "synced", value: await online(resolvedArgs) };
       }
       // Queue new changes behind existing ones even after reconnection.
-      const parsed = parseOperation(name, args);
+      const parsed = parseOperation(name, resolvedArgs);
       const tempIds =
         operation.kind === "create"
           ? [outbox.allocTempId(operation.table)]
@@ -46,7 +51,7 @@ export function useQueuedMutation<K extends OperationName>(
         ...parsed,
         id,
         tempIds,
-        dependsOn: [...new Set(tempIdsIn(args))],
+        dependsOn: [...new Set(tempIdsIn(resolvedArgs))],
         createdAt,
         status: "pending",
         attempts: 0,

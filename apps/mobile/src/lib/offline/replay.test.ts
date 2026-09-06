@@ -206,3 +206,92 @@ describe("durable replay", () => {
     expect(queue.getEntries()).toEqual([]);
   });
 });
+
+it("drains changes enqueued while a previous request is in flight", async () => {
+  const { queue } = memory();
+  queue.enqueue(
+    entry({
+      id: "first",
+      functionName: "lists:update",
+      args: { listId: "list", name: "First" },
+    }),
+  );
+  let finish: (() => void) | undefined;
+  const sent: string[] = [];
+  const flush = createFlusher({
+    queue,
+    currentUserId: () => "u1",
+    isOnline: () => true,
+    send: async (operation) => {
+      if (operation.functionName !== "lists:update")
+        throw new Error("Unexpected command");
+      sent.push(operation.args.name);
+      if (sent.length === 1)
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      return null;
+    },
+  });
+  const running = flush();
+  queue.enqueue(
+    entry({
+      id: "second",
+      functionName: "lists:update",
+      args: { listId: "list", name: "Second" },
+    }),
+  );
+  await flush();
+  finish?.();
+  await running;
+  expect(sent).toEqual(["First", "Second"]);
+  expect(queue.getEntries()).toEqual([]);
+});
+
+it("rejects an obsolete acknowledgement after switching accounts away and back", async () => {
+  const { queue } = memory();
+  queue.enqueue(
+    entry({
+      id: "same-id",
+      functionName: "lists:create",
+      args: { name: "Old" },
+      tempIds: ["temp-list"],
+    }),
+  );
+  let finish: ((value: string) => void) | undefined;
+  const flush = createFlusher({
+    queue,
+    currentUserId: () => "u1",
+    isOnline: () => true,
+    send: () =>
+      new Promise<string>((resolve) => {
+        finish = resolve;
+      }),
+  });
+  const running = flush();
+  queue.setUserId("u2");
+  queue.setUserId("u1");
+  queue.enqueue(
+    entry({
+      id: "same-id",
+      functionName: "lists:create",
+      args: { name: "New" },
+      tempIds: ["temp-list"],
+    }),
+  );
+  finish?.("obsolete-real-id");
+  await running;
+  expect(queue.getEntries()).toHaveLength(1);
+  expect(queue.getIdmap()).toEqual({});
+});
+
+it("retains legacy ID mappings even when its entries slot is absent", () => {
+  const { data, storage } = memory();
+  data.delete("outbox:v1");
+  data.set("outbox:idmap", JSON.stringify({ "temp-list": "real-list" }));
+  data.set("outbox:meta", JSON.stringify({ counter: 12, userId: "u1" }));
+  expect(createOutboxStore(storage).getIdmap()).toEqual({
+    "temp-list": "real-list",
+  });
+  expect(createOutboxStore(storage).allocTempId("lists")).toBe("temp-lists-13");
+});

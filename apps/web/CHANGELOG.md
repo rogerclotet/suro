@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.4] — 2026-09-06
+
+### ca
+
+- [fix] Les llistes i despeses creades sense connexió continuen obertes després de sincronitzar-se, i els canvis nous es sincronitzen sense esperar una altra reconnexió.
+
+### es
+
+- [fix] Las listas y gastos creados sin conexión siguen abiertos después de sincronizarse, y los cambios nuevos se sincronizan sin esperar otra reconexión.
+
+### en
+
+- [fix] Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.
+
 ## [1.25.3] — 2026-09-06
 
 ### ca

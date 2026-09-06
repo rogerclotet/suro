@@ -91,3 +91,24 @@ describe("hasUnresolvedTemp", () => {
     expect(hasUnresolvedTemp({ potId: "real-pot", from: "u1" })).toBe(false);
   });
 });
+
+it("resolves nested references without treating user text as temporary IDs", () => {
+  const args = {
+    listId: "temp-list",
+    name: "temp-list",
+    details: "temp-draft",
+    payments: [{ from: "temp-user", to: "real-user", amount: 10 }],
+    memberIds: ["temp-user"],
+  };
+  const mapped = remapArgs(args, {
+    "temp-list": "real-list",
+    "temp-user": "real-user",
+  });
+  expect(mapped).toEqual({
+    ...args,
+    listId: "real-list",
+    payments: [{ from: "real-user", to: "real-user", amount: 10 }],
+    memberIds: ["real-user"],
+  });
+  expect(hasUnresolvedTemp(mapped)).toBe(false);
+});

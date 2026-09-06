@@ -7,6 +7,8 @@ import {
   type Operation,
   parseOperation,
 } from "@/lib/offline/operations";
+import { resolveOfflineId } from "@/lib/offline/outbox-logic";
+import { useIdmap } from "@/lib/offline/outbox-store";
 import { overlayItems } from "@/lib/offline/overlay";
 
 let optimisticCounter = 0;
@@ -42,7 +44,9 @@ function projectCommand(
   store.setQuery(api.lists.get, { listId }, { ...current, items });
 }
 
-export function useChecklistCommands(listId: Id<"lists">) {
+export function useChecklistCommands(routeListId: Id<"lists">) {
+  const idmap = useIdmap();
+  const listId = resolveOfflineId(routeListId, idmap);
   const createItem = useQueuedMutation("listItems:create", (store, args) =>
     projectCommand(store, listId, parseOperation("listItems:create", args)),
   );

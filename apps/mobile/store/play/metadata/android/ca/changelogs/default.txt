@@ -1,1 +1,1 @@
-• Editar les dates d’un esdeveniment conserva les hores. Al mòbil, una categoria amb el nom de la secció sense categoria es manté separada.
+• Les llistes i despeses creades sense connexió continuen obertes després de sincronitzar-se, i els canvis nous es sincronitzen sense esperar una altra reconnexió.

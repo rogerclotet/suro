@@ -1,1 +1,1 @@
-• Editing an event’s dates preserves its times. On mobile, a category named like the uncategorized section stays separate.
+• Lists and expenses created offline stay accessible after syncing, and new changes sync without waiting for another reconnect.

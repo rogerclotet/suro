@@ -3,9 +3,10 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { useMemo } from "react";
 import { calculateBalances, generateProposals } from "./balances";
+import { resolveOfflineId } from "./outbox-logic";
 import { useIdmap, useOutboxEntries } from "./outbox-store";
 import { overlayItems, overlaySpendings, type SpendingRow } from "./overlay";
-import type { IdMap, OutboxEntry } from "./types";
+import { type IdMap, isTempId, type OutboxEntry } from "./types";
 import { usePersistentQuery } from "./use-persistent-query";
 
 /**
@@ -14,9 +15,8 @@ import { usePersistentQuery } from "./use-persistent-query";
  * top so the UI reflects offline writes — including writes made before an app
  * kill — and reconciles automatically once the server value catches up.
  *
- * The online experience is unchanged: while online the outbox is empty (writes
- * go straight to Convex with their optimistic update), so every overlay is a
- * no-op and these return the live value verbatim.
+ * Once the outbox is drained, new writes use Convex optimistic updates directly.
+ * Temporary route IDs resolve through the persisted acknowledgement map.
  */
 
 type ListGet = NonNullable<FunctionReturnType<typeof api.lists.get>>;
@@ -93,11 +93,15 @@ function patchListFields(
 }
 
 export function useOfflineListGet(
-  listId: Id<"lists">,
+  routeListId: Id<"lists">,
 ): ListGet | null | undefined {
-  const base = usePersistentQuery(api.lists.get, { listId });
-  const entries = useOutboxEntries();
   const idmap = useIdmap();
+  const listId = resolveOfflineId(routeListId, idmap);
+  const base = usePersistentQuery(
+    api.lists.get,
+    isTempId(listId) ? "skip" : { listId },
+  );
+  const entries = useOutboxEntries();
   const user = useCurrentUser();
   return useMemo(() => {
     let listBase: ListWithItems | null = base ?? null;
@@ -108,7 +112,7 @@ export function useOfflineListGet(
       if (create?.functionName === "lists:create" && user) {
         listBase = buildListBase(listId, create, user);
       } else {
-        return undefined;
+        return isTempId(listId) ? null : undefined;
       }
     }
     if (listBase === null) {
@@ -256,11 +260,15 @@ export function useOfflineListPotsOverview(
 }
 
 export function useOfflineGetPot(
-  potId: Id<"pots">,
+  routePotId: Id<"pots">,
 ): PotDetail | null | undefined {
-  const base = usePersistentQuery(api.expenses.getPot, { potId });
-  const entries = useOutboxEntries();
   const idmap = useIdmap();
+  const potId = resolveOfflineId(routePotId, idmap);
+  const base = usePersistentQuery(
+    api.expenses.getPot,
+    isTempId(potId) ? "skip" : { potId },
+  );
+  const entries = useOutboxEntries();
   const user = useCurrentUser();
   // Synthesize a pot that exists only as a pending offline create — needs the
   // project's members to resolve names; skipped (no fetch) for already-real pots.
@@ -287,6 +295,7 @@ export function useOfflineGetPot(
     }
     let potBase: PotDetail | undefined = base;
     if (base === undefined) {
+      if (isTempId(potId) && !create) return null;
       if (
         create?.functionName !== "expenses:createPot" ||
         !user ||
