@@ -74,6 +74,28 @@ export type TaskOrderItem = {
   dueAt?: number | null;
   priority?: Priority | null;
 };
+
+/** Apply an absolute checkbox command to the current occurrence and fields. */
+export function completionPatch(
+  item: { completed: boolean; dueAt?: number; recurrence?: Recurrence },
+  command: { completed: boolean; expectedDueAt: number | null; now: number },
+) {
+  if (item.completed === command.completed) return null;
+  if (command.completed && item.recurrence) {
+    // A replay or another member may already have advanced/rescheduled it.
+    if ((item.dueAt ?? null) !== command.expectedDueAt) return null;
+    return {
+      completed: false,
+      dueAt: advanceDueAt(
+        item.dueAt ?? command.now,
+        item.recurrence,
+        command.now,
+      ),
+      reminderSentForDueAt: undefined,
+    };
+  }
+  return { completed: command.completed };
+}
 const PRIORITY_RANK: Record<Priority, number> = { high: 0, normal: 1, low: 2 };
 
 export function compareTasks(a: TaskOrderItem, b: TaskOrderItem): number {

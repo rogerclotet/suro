@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.24.1",
+    "version": "1.24.2",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Expense balances and settlement proposals distribute rounding cents consistently on web and mobile.",
+        "releaseNotes": "• Checking off tasks and moving items between categories preserves teammates' edits, including when syncing actions made offline.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los saldos y las propuestas para saldar gastos reparten los céntimos de redondeo igual en la web y en el móvil.",
+        "releaseNotes": "• Marcar tareas y mover elementos entre categorías conserva los cambios de otros miembros, también al sincronizar acciones hechas sin conexión.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els saldos i les propostes per saldar despeses reparteixen els cèntims d'arrodoniment igual al web i al mòbil.",
+        "releaseNotes": "• Marcar tasques i moure elements entre categories conserva els canvis dels altres membres, també en sincronitzar accions fetes sense connexió.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

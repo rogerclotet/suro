@@ -1,1 +1,1 @@
-• Expense balances and settlement proposals distribute rounding cents consistently on web and mobile.
+• Checking off tasks and moving items between categories preserves teammates' edits, including when syncing actions made offline.

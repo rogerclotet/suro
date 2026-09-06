@@ -18,6 +18,8 @@ export const MUTATION_REGISTRY: Record<
   "lists:importTemplates": api.lists.importTemplates,
   "listItems:create": api.listItems.create,
   "listItems:update": api.listItems.update,
+  "listItems:setCompleted": api.listItems.setCompleted,
+  "listItems:setCategory": api.listItems.setCategory,
   "listItems:remove": api.listItems.remove,
   "expenses:createPot": api.expenses.createPot,
   "expenses:createSpending": api.expenses.createSpending,

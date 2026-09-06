@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { completionPatch } from "domain/tasks";
 import { mutation } from "./_generated/server";
 import { track } from "./model/analytics";
 import { ensureCategorySuggestion } from "./model/categories";
@@ -73,6 +74,7 @@ export const create = mutation({
   },
 });
 
+/** Legacy full replacement, retained for installed clients and persisted writes. */
 export const update = mutation({
   args: {
     itemId: v.id("listItems"),
@@ -159,6 +161,52 @@ export const update = mutation({
     } else if (item.completed && !completed) {
       await track(ctx, userId, "list_item_uncompleted", {
         projectId: list.projectId,
+      });
+    }
+    return null;
+  },
+});
+
+export const setCompleted = mutation({
+  args: {
+    itemId: v.id("listItems"),
+    completed: v.boolean(),
+    expectedDueAt: v.union(v.number(), v.null()),
+  },
+  handler: async (ctx, { itemId, completed, expectedDueAt }) => {
+    const { item, list, userId } = await requireItemAccess(ctx, itemId);
+    const now = Date.now();
+    const patch = completionPatch(item, { completed, expectedDueAt, now });
+    if (!patch) return null;
+    await ctx.db.patch(itemId, { ...patch, updatedBy: userId, updatedAt: now });
+    await track(
+      ctx,
+      userId,
+      "dueAt" in patch
+        ? "task_rescheduled"
+        : completed
+          ? "list_item_completed"
+          : "list_item_uncompleted",
+      { projectId: list.projectId },
+    );
+    return null;
+  },
+});
+
+export const setCategory = mutation({
+  args: { itemId: v.id("listItems"), category: v.union(v.string(), v.null()) },
+  handler: async (ctx, { itemId, category }) => {
+    const { item, list, userId } = await requireItemAccess(ctx, itemId);
+    const normalized = await ensureCategorySuggestion(
+      ctx,
+      list.projectId,
+      category,
+    );
+    if (item.category !== normalized) {
+      await ctx.db.patch(itemId, {
+        category: normalized,
+        updatedBy: userId,
+        updatedAt: Date.now(),
       });
     }
     return null;

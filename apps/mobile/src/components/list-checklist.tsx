@@ -1,6 +1,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
+import { completionPatch } from "domain/tasks";
 import {
   CalendarClock,
   Check,
@@ -125,26 +126,6 @@ function compareItems(a: Item, b: Item): number {
   }
   const byName = a.name.localeCompare(b.name);
   return byName !== 0 ? byName : a._id.localeCompare(b._id);
-}
-
-/**
- * The item's current task fields, in the shape `listItems.update` expects. Every
- * `updateItem` call (toggle, drag-recategorize, edit save) must forward these:
- * the mutation is non-sticky, so any omitted task field is wiped server-side.
- */
-function itemTaskArgs(
-  item: Item,
-): Pick<
-  Item,
-  "dueAt" | "dueAllDay" | "assigneeId" | "priority" | "recurrence"
-> {
-  return {
-    dueAt: item.dueAt,
-    dueAllDay: item.dueAllDay,
-    assigneeId: item.assigneeId,
-    priority: item.priority,
-    recurrence: item.recurrence,
-  };
 }
 
 function groupByCategory(
@@ -290,6 +271,46 @@ export function ListChecklist({
     );
   });
 
+  const setCompleted = useQueuedMutation(
+    api.listItems.setCompleted,
+    (store, args) => {
+      const current = store.getQuery(api.lists.get, { listId: lid });
+      if (!current) return;
+      const now = Date.now();
+      store.setQuery(
+        api.lists.get,
+        { listId: lid },
+        {
+          ...current,
+          items: current.items.map((item) =>
+            item._id === args.itemId
+              ? { ...item, ...completionPatch(item, { ...args, now }) }
+              : item,
+          ),
+        },
+      );
+    },
+  );
+  const setCategory = useQueuedMutation(
+    api.listItems.setCategory,
+    (store, args) => {
+      const current = store.getQuery(api.lists.get, { listId: lid });
+      if (!current) return;
+      store.setQuery(
+        api.lists.get,
+        { listId: lid },
+        {
+          ...current,
+          items: current.items.map((item) =>
+            item._id === args.itemId
+              ? { ...item, category: args.category?.trim() || undefined }
+              : item,
+          ),
+        },
+      );
+    },
+  );
+
   // Editing happens in a drawer (`ItemSheet`); the target and drafts persist
   // while the sheet slides out so its content doesn't flicker during the close
   // animation. Creation is inline: `activeAddCategory` tracks which category
@@ -366,16 +387,10 @@ export function ListChecklist({
   );
 
   function toggle(item: Item) {
-    void updateItem({
+    void setCompleted({
       itemId: item._id,
-      name: item.name,
-      details: item.details ?? "",
       completed: !item.completed,
-      category: item.category ?? null,
-      // The update mutation clears any omitted task field, so a checkbox toggle
-      // must forward the item's current ones (and recurrence drives the
-      // reschedule-on-complete on a recurring task).
-      ...itemTaskArgs(item),
+      expectedDueAt: item.dueAt ?? null,
     });
   }
 
@@ -405,15 +420,7 @@ export function ListChecklist({
       Alert.alert(tl("itemAlreadyExistsInCategory"));
       return;
     }
-    void updateItem({
-      itemId: item._id,
-      name: item.name,
-      details: item.details ?? "",
-      completed: item.completed,
-      category,
-      // Re-categorizing must preserve the item's task fields (omitted = cleared).
-      ...itemTaskArgs(item),
-    });
+    void setCategory({ itemId: item._id, category });
   }
 
   function handleNewCategoryDrop(itemId: Id<"listItems">) {
@@ -556,13 +563,10 @@ export function ListChecklist({
     }
     const completed = matches.find((item) => item.completed);
     if (completed) {
-      void updateItem({
+      void setCompleted({
         itemId: completed._id,
-        name: completed.name,
-        details: completed.details ?? "",
         completed: false,
-        category: completed.category ?? null,
-        ...itemTaskArgs(completed),
+        expectedDueAt: completed.dueAt ?? null,
       });
       setActiveAddCategory(category);
       return true;

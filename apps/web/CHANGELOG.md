@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.24.2] — 2026-09-06
+
+### ca
+
+- [fix] Marcar tasques i moure elements entre categories conserva els canvis dels altres membres, també en sincronitzar accions fetes sense connexió.
+
+### es
+
+- [fix] Marcar tareas y mover elementos entre categorías conserva los cambios de otros miembros, también al sincronizar acciones hechas sin conexión.
+
+### en
+
+- [fix] Checking off tasks and moving items between categories preserves teammates' edits, including when syncing actions made offline.
+
 ## [1.24.1] — 2026-09-06
 
 ### ca

@@ -1,1 +1,1 @@
-• Els saldos i les propostes per saldar despeses reparteixen els cèntims d'arrodoniment igual al web i al mòbil.
+• Marcar tasques i moure elements entre categories conserva els canvis dels altres membres, també en sincronitzar accions fetes sense connexió.

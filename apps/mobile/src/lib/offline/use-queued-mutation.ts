@@ -23,6 +23,8 @@ const QUEUE_CONFIG: Record<string, QueueConfig> = {
   "lists:importTemplates": { parentArg: "listId" },
   "listItems:create": { createsTable: "listItems", parentArg: "listId" },
   "listItems:update": { parentArg: "itemId" },
+  "listItems:setCompleted": { parentArg: "itemId" },
+  "listItems:setCategory": { parentArg: "itemId" },
   "listItems:remove": { parentArg: "itemId" },
   "expenses:createPot": { createsTable: "pots" },
   "expenses:createSpending": { createsTable: "spendings", parentArg: "potId" },

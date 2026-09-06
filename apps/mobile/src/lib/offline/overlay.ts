@@ -1,4 +1,5 @@
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
+import { completionPatch } from "domain/tasks";
 import { advanceDueAt, type Recurrence } from "../recurrence";
 import type { IdMap, OutboxEntry } from "./types";
 
@@ -188,6 +189,31 @@ export function overlayItems(
             updatedAt: entry.createdAt,
           };
         });
+        break;
+      }
+      case "listItems:setCompleted": {
+        const target = resolve(str(args, "itemId"));
+        items = items.map((item) =>
+          item._id === target
+            ? {
+                ...item,
+                ...completionPatch(item, {
+                  completed: args.completed === true,
+                  expectedDueAt: optNum(args, "expectedDueAt") ?? null,
+                  now: entry.createdAt,
+                }),
+              }
+            : item,
+        );
+        break;
+      }
+      case "listItems:setCategory": {
+        const target = resolve(str(args, "itemId"));
+        items = items.map((item) =>
+          item._id === target
+            ? { ...item, category: optStr(args, "category") }
+            : item,
+        );
         break;
       }
       case "listItems:remove": {

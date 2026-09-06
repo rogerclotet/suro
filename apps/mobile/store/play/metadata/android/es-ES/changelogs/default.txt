@@ -1,1 +1,1 @@
-• Los saldos y las propuestas para saldar gastos reparten los céntimos de redondeo igual en la web y en el móvil.
+• Marcar tareas y mover elementos entre categorías conserva los cambios de otros miembros, también al sincronizar acciones hechas sin conexión.

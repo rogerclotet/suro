@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
 import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
 import CategoryItems from "./category-items";
-import { type TaskMutationArgs, taskArgsFromItem } from "./list-item/data";
+import type { TaskMutationArgs } from "./list-item/data";
 import NewListItem from "./list-item/new-list-item";
 
 export default function CheckList(props: { list: List }) {
@@ -47,6 +47,8 @@ export default function CheckList(props: { list: List }) {
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
   const updateItem = useMutation(api.listItems.update);
+  const setCompleted = useMutation(api.listItems.setCompleted);
+  const setCategory = useMutation(api.listItems.setCategory);
   const removeItem = useMutation(api.listItems.remove);
 
   // Keep a ref to the latest list so stable callbacks can read current state.
@@ -66,8 +68,7 @@ export default function CheckList(props: { list: List }) {
       details: string,
       completed: boolean,
       category: string | null,
-      // Task fields forwarded verbatim: the backend clears any omitted field, so
-      // the checkbox toggle and edit form alike must pass the full set.
+      // Full edits explicitly replace the editable task fields.
       task: TaskMutationArgs,
     ) => {
       if (name === "") {
@@ -88,6 +89,22 @@ export default function CheckList(props: { list: List }) {
       }
     },
     [updateItem, t],
+  );
+
+  const handleCompleted = useCallback(
+    async (item: ListItem, completed: boolean) => {
+      try {
+        await setCompleted({
+          itemId: item.id as Id<"listItems">,
+          completed,
+          expectedDueAt: item.dueAt?.getTime() ?? null,
+        });
+      } catch (error) {
+        toast.error(t("itemUpdateError"));
+        throw error;
+      }
+    },
+    [setCompleted, t],
   );
 
   const handleDelete = useCallback(
@@ -149,16 +166,7 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
-    await updateItem({
-      itemId: item.id as Id<"listItems">,
-      name: item.name,
-      details: item.details ?? "",
-      completed: item.completed ?? false,
-      category,
-      // Recategorizing must preserve the item's task fields (the backend clears
-      // any omitted field), so forward them unchanged.
-      ...taskArgsFromItem(item),
-    });
+    await setCategory({ itemId: item.id as Id<"listItems">, category });
   }
 
   const doneCount = list.items.filter((i) => i.completed).length;
@@ -203,6 +211,7 @@ export default function CheckList(props: { list: List }) {
             list={list}
             isDragging={dragging}
             handleChange={handleChange}
+            handleCompleted={handleCompleted}
             handleDelete={handleDelete}
             addActive={activeAdd === category}
             onAddActivate={handleAddActivate}
