@@ -1,1 +1,1 @@
-• Fixed an error that prevented the web app from opening when signed in.
+• Web group lists now show the most recently active groups first, matching the mobile app.

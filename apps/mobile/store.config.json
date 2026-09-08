@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.25.5",
+    "version": "1.25.6",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Fixed an error that prevented the web app from opening when signed in.",
+        "releaseNotes": "• Web group lists now show the most recently active groups first, matching the mobile app.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Corregido un error que impedía abrir la web con la sesión iniciada.",
+        "releaseNotes": "• En la web, los grupos se ordenan por actividad reciente, con los más activos primero, igual que en la app móvil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Corregit un error que impedia obrir el web amb la sessió iniciada.",
+        "releaseNotes": "• Al web, els grups s'ordenen per activitat recent, amb els més actius primer, igual que a l'app mòbil.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

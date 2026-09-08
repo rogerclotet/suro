@@ -33,7 +33,7 @@ export const get = query({
 });
 
 /**
- * Projects the current user belongs to, each with its categories and members
+ * Projects the current user belongs to, newest activity first, with categories and members
  * embedded. Powers the PWA's project store (which needs member avatars and
  * categories for every group up-front) and native groups-list member previews.
  * Native membership gates still use the lean `listMine`.
@@ -52,6 +52,11 @@ export const listMineDetailed = query({
     return Promise.all(
       projects
         .filter((p) => p !== null)
+        .sort(
+          (a, b) =>
+            (b.lastActivityAt ?? b._creationTime) -
+            (a.lastActivityAt ?? a._creationTime),
+        )
         .map(async (project) => {
           const categories = await ctx.db
             .query("categories")
