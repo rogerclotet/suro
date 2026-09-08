@@ -14,6 +14,7 @@ import {
 } from "./model/expenses";
 import { notifyProject } from "./model/notify";
 import { requirePotAccess, requireProjectMember } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 
 /** The user fields the expenses UI needs (name + avatar). */
 function publicUser(user: Doc<"users"> | null) {
@@ -405,6 +406,7 @@ export const deletePot = mutation({
     }
     await ctx.db.delete(potId);
     await track(ctx, userId, "pot_deleted", { projectId: pot.projectId });
+    await recordProjectActivity(ctx, pot.projectId);
     return null;
   },
 });
@@ -513,6 +515,7 @@ export const settlePayments = mutation({
       projectId: pot.projectId,
       paymentCount: payments.length,
     });
+    await recordProjectActivity(ctx, pot.projectId);
     return null;
   },
 });

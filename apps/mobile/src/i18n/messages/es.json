@@ -882,7 +882,10 @@
       "manageGroup": "Gestionar grupo",
       "empty": "Todavía no tienes grupos. Crea uno para empezar.",
       "unnamedMember": "Miembro",
-      "unreadCount": "{count, plural, one {# notificación no leída} other {# notificaciones no leídas}}"
+      "unreadCount": "{count, plural, one {# notificación no leída} other {# notificaciones no leídas}}",
+      "searchPlaceholder": "Buscar grupos o personas",
+      "clearSearch": "Borrar la búsqueda",
+      "noSearchResults": "Ningún grupo coincide con la búsqueda."
     },
     "profile": {
       "title": "Perfil",

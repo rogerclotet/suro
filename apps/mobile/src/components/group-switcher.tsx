@@ -1,6 +1,8 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useRouter } from "expo-router";
+import { Search, X } from "lucide-react-native";
+import { useState } from "react";
 import {
   Platform,
   Pressable,
@@ -12,11 +14,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { UnreadBadge } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
+import { matchesGroupSearch } from "@/lib/group-search";
 import { unreadCount } from "@/lib/notification-routing";
 import { useUnreadNotifications } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { useTheme } from "@/theme";
-import { Fab, Loading, Txt, useFabScroll } from "@/ui";
+import { Fab, Field, Loading, Txt, useFabScroll } from "@/ui";
 
 const ROW_AVATAR_SIZE = 52;
 
@@ -32,6 +35,10 @@ export function GroupsScreenContent() {
   const tr = useTranslations("mobile.groups");
   const ti = useTranslations("groups");
   const fab = useFabScroll();
+  const [search, setSearch] = useState("");
+  const filteredGroups = groups?.filter((group) =>
+    matchesGroupSearch(group, search),
+  );
 
   function selectGroup(id: Id<"projects">) {
     router.push(`/${id}/home`);
@@ -43,6 +50,38 @@ export function GroupsScreenContent() {
 
   return (
     <View style={{ flex: 1 }}>
+      <View
+        style={[
+          styles.search,
+          { backgroundColor: t.inputBg, borderColor: t.border },
+        ]}
+      >
+        <Search size={19} color={t.muted} />
+        <Field
+          value={search}
+          onChangeText={setSearch}
+          placeholder={tr("searchPlaceholder")}
+          accessibilityLabel={tr("searchPlaceholder")}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          style={styles.searchInput}
+        />
+        {search.length > 0 ? (
+          <Pressable
+            onPress={() => setSearch("")}
+            accessibilityRole="button"
+            accessibilityLabel={tr("clearSearch")}
+            hitSlop={4}
+            style={({ pressed }) => [
+              styles.clearSearch,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <X size={18} color={t.muted} />
+          </Pressable>
+        ) : null}
+      </View>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -53,6 +92,8 @@ export function GroupsScreenContent() {
         }}
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
         {groups === undefined ? (
           <View style={{ paddingVertical: 24 }}>
@@ -65,7 +106,16 @@ export function GroupsScreenContent() {
                 {tr("empty")}
               </Txt>
             ) : null}
-            {[...groups]
+            {groups.length > 0 && filteredGroups?.length === 0 ? (
+              <Txt
+                muted
+                style={{ paddingVertical: 24, textAlign: "center" }}
+                accessibilityLiveRegion="polite"
+              >
+                {tr("noSearchResults")}
+              </Txt>
+            ) : null}
+            {[...(filteredGroups ?? [])]
               .sort(
                 (a, b) =>
                   (b.lastActivityAt ?? b._creationTime) -
@@ -168,6 +218,32 @@ export function GroupsScreenContent() {
 }
 
 const styles = StyleSheet.create({
+  search: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingLeft: 12,
+    paddingRight: 4,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  searchInput: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 48,
+    paddingHorizontal: 0,
+    borderWidth: 0,
+    backgroundColor: "transparent",
+  },
+  clearSearch: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",

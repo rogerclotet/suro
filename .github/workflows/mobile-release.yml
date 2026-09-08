@@ -1,5 +1,5 @@
 # Mobile release on pushes to main when the native release gate passes
-# (version bump + matching CHANGELOG entry + native file changes), or via
+# (version bump + matching CHANGELOG entry, regardless of changed paths), or via
 # Actions → Mobile release → Run workflow (skips the gate; main only).
 #
 # EAS builds both platforms, then submits to Play (100% production) and App

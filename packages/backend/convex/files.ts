@@ -11,6 +11,7 @@ import { track } from "./model/analytics";
 import { serveFileUrl } from "./model/fileUrls";
 import { notifyProject } from "./model/notify";
 import { requireFileOwner, requireProjectMember } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 
 /** Attach download URLs (file + any PDF thumbnail), uploader, and event name. */
 async function loadFile(ctx: QueryCtx, file: Doc<"files">) {
@@ -164,6 +165,7 @@ export const rename = mutation({
       throw new Error("File name is required");
     }
     await ctx.db.patch(file._id, { name: trimmed });
+    await recordProjectActivity(ctx, file.projectId);
     return null;
   },
 });
@@ -178,6 +180,7 @@ export const remove = mutation({
     }
     await ctx.db.delete(file._id);
     await track(ctx, userId, "file_deleted", { projectId: file.projectId });
+    await recordProjectActivity(ctx, file.projectId);
     return null;
   },
 });

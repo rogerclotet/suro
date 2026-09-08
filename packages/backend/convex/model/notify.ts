@@ -6,6 +6,7 @@ import {
   notificationPath,
   sectionForTarget,
 } from "./notificationTarget";
+import { recordProjectActivity } from "./projectActivity";
 
 type Activity = {
   projectId: Id<"projects">;
@@ -39,7 +40,7 @@ export async function notifyUsers(
       target,
     });
   }
-  await ctx.db.patch(projectId, { lastActivityAt: Date.now() });
+  await recordProjectActivity(ctx, projectId);
   if (userIds.length) {
     await ctx.scheduler.runAfter(0, internal.push.sendToUsers, {
       userIds,

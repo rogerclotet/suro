@@ -882,7 +882,10 @@
       "manageGroup": "Gestionar grup",
       "empty": "Encara no tens grups. Crea’n un per començar.",
       "unnamedMember": "Membre",
-      "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}"
+      "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}",
+      "searchPlaceholder": "Cerca grups o persones",
+      "clearSearch": "Esborra la cerca",
+      "noSearchResults": "Cap grup coincideix amb la cerca."
     },
     "profile": {
       "title": "Perfil",

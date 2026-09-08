@@ -1,1 +1,2 @@
-• Al web, els grups s'ordenen per activitat recent, amb els més actius primer, igual que a l'app mòbil.
+• A l'app mòbil, cerca grups pel nom o per les persones que en formen part.
+• Els canvis en llistes, notes, calendari, fitxers i despeses actualitzen l'ordre dels grups per activitat recent, encara que no generin notificacions.

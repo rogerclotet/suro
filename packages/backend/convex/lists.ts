@@ -9,6 +9,7 @@ import {
 } from "./model/lists";
 import { notifyProject } from "./model/notify";
 import { requireListAccess, requireProjectMember } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 
 /** Navigation needs list identity and name, without subscribing to every item. */
 export const summariesByProject = query({
@@ -193,6 +194,7 @@ export const importTemplates = mutation({
         updatedAt: now,
       });
     }
+    if (items.length) await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -219,6 +221,7 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -237,6 +240,7 @@ export const remove = mutation({
     }
     await ctx.db.delete(list._id);
     await track(ctx, userId, "list_deleted", { projectId: list.projectId });
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -254,6 +258,7 @@ export const toggleFavorite = mutation({
       projectId: list.projectId,
       favorite: !list.favorite,
     });
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -270,6 +275,9 @@ export const clearCompleted = mutation({
       if (item.completed) {
         await ctx.db.delete(item._id);
       }
+    }
+    if (items.some((item) => item.completed)) {
+      await recordProjectActivity(ctx, list.projectId);
     }
     await track(ctx, userId, "list_cleared_completed", {
       projectId: list.projectId,

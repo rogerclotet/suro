@@ -1,1 +1,2 @@
-• Web group lists now show the most recently active groups first, matching the mobile app.
+• In the mobile app, search groups by name or by the people in them.
+• Changes to lists, notes, calendar events, files, and expenses now update group activity ordering, even when they don't send notifications.
