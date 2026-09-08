@@ -112,6 +112,45 @@ describe("projects.listMine", () => {
   });
 });
 
+describe("projects.listMineDetailed", () => {
+  it("orders groups by latest activity, using creation time when there is none", async () => {
+    const { t, alice, family } = await seedInvite();
+    const { recent, fresh } = await t.run(async (ctx) => {
+      await ctx.db.patch(family, { lastActivityAt: 1 });
+      const recent = await ctx.db.insert("projects", {
+        name: "Recently active",
+        createdBy: alice,
+        inviteToken: "recent",
+        color: "blue",
+        lastActivityAt: Date.now() + 60_000,
+      });
+      const fresh = await ctx.db.insert("projects", {
+        name: "New group",
+        createdBy: alice,
+        inviteToken: "fresh",
+        color: "blue",
+      });
+      for (const projectId of [recent, fresh]) {
+        await ctx.db.insert("projectMembers", { projectId, userId: alice });
+      }
+      return { recent, fresh };
+    });
+    const asAlice = t.withIdentity({ subject: `${alice}|session` });
+    const projects = await asAlice.query(api.projects.listMineDetailed, {});
+    expect(projects.map((p) => p._id)).toEqual([recent, fresh, family]);
+
+    // A new activity changes the order on the next reactive query result.
+    await t.run((ctx) =>
+      ctx.db.patch(family, { lastActivityAt: Date.now() + 120_000 }),
+    );
+    expect(
+      (await asAlice.query(api.projects.listMineDetailed, {})).map(
+        (p) => p._id,
+      ),
+    ).toEqual([family, recent, fresh]);
+  });
+});
+
 describe("projects.acceptInvite", () => {
   it("adds the caller with a valid token and is idempotent", async () => {
     const { t, bob, family } = await seedInvite();

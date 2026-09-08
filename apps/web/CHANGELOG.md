@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.25.6] — 2026-09-08
+
+### ca
+
+- [improvement] Al web, els grups s'ordenen per activitat recent, amb els més actius primer, igual que a l'app mòbil.
+
+### es
+
+- [improvement] En la web, los grupos se ordenan por actividad reciente, con los más activos primero, igual que en la app móvil.
+
+### en
+
+- [improvement] Web group lists now show the most recently active groups first, matching the mobile app.
+
 ## [1.25.5] — 2026-09-06
 
 ### ca
