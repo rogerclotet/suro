@@ -9,6 +9,7 @@ import {
   requireItemAccess,
   requireListAccess,
 } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 import {
   advanceDueAt,
   priorityValidator,
@@ -70,6 +71,7 @@ export const create = mutation({
       projectId: list.projectId,
       hasCategory: categoryName != null,
     });
+    await recordProjectActivity(ctx, list.projectId);
     return itemId;
   },
 });
@@ -118,6 +120,7 @@ export const update = mutation({
       await track(ctx, userId, "task_rescheduled", {
         projectId: list.projectId,
       });
+      await recordProjectActivity(ctx, list.projectId);
       return null;
     }
 
@@ -163,6 +166,7 @@ export const update = mutation({
         projectId: list.projectId,
       });
     }
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -189,6 +193,7 @@ export const setCompleted = mutation({
           : "list_item_uncompleted",
       { projectId: list.projectId },
     );
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });
@@ -208,6 +213,7 @@ export const setCategory = mutation({
         updatedBy: userId,
         updatedAt: Date.now(),
       });
+      await recordProjectActivity(ctx, list.projectId);
     }
     return null;
   },
@@ -216,8 +222,9 @@ export const setCategory = mutation({
 export const remove = mutation({
   args: { itemId: v.id("listItems") },
   handler: async (ctx, { itemId }) => {
-    const { item } = await requireItemAccess(ctx, itemId);
+    const { item, list } = await requireItemAccess(ctx, itemId);
     await ctx.db.delete(item._id);
+    await recordProjectActivity(ctx, list.projectId);
     return null;
   },
 });

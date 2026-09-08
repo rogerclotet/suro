@@ -31,6 +31,8 @@ The web project provider is the only owner of project selection effects. It deri
 
 The native checklist composes row and sheet components, a draft editor hook, a scroll lifecycle hook and typed command hooks. Online optimistic commands and offline queue projections both use `overlayItems`. Keep focus-follow state in the checklist: asynchronous submission must not unmount the active add input between entries.
 
+Group ordering uses `projects.lastActivityAt`, with creation time as the fallback for groups without recorded activity. Content mutations call `recordProjectActivity` in the same transaction after authorization, including quiet list-item, note, calendar, file and expense edits. Recording activity does not create unread notifications. Opening a group does not change its activity timestamp. Mobile search filters the ordered groups locally by group name and all member names, including cached groups while offline.
+
 ## Offline protocol changes
 
 `operations.ts` is the catalog of queueable mutations. Each entry owns its API reference, runtime argument schema and create/update/delete behavior. The generated argument types constrain the schema output. `Operation` and `OutboxEntry` are discriminated unions; reducers narrow on `functionName`.
@@ -51,7 +53,7 @@ The backend list test includes 120 weekly lists with 20 items each. Fetching sum
 
 This fixture measures payload shape, not production latency or Convex billing. `overviewByProject` still scans list items to determine completion, and expense views still aggregate spending history. Before adding counters or denormalized completion fields, measure document reads, result sizes and latency for real groups. If those scans become costly, introduce transactional counters and paginated history with explicit consistency tests. A response limit alone does not reduce the current scan.
 
-Shared package changes must reach their consumers: `domain` affects web, backend and native releases; `design-tokens` affects web and native builds. Path filters, the native release gate, Docker workspace manifests and Next's transpilation configuration include those packages. A native release still requires a version bump and matching changelog entry.
+Shared package changes must reach their consumers: `domain` affects web, backend and native releases; `design-tokens` affects web and native builds. Web/backend path filters, Docker workspace manifests and Next's transpilation configuration include those packages. Every root version bump with a matching top changelog entry triggers a native release, regardless of changed paths, including backend-only and web-only releases.
 
 ## Migration retirement
 

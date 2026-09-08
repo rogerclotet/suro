@@ -11,6 +11,7 @@ import {
   requireProjectMember,
   requireTemplateAccess,
 } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 
 // `category` is the section name shown in the template, or null.
 const templateItem = v.object({
@@ -123,6 +124,7 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await recordProjectActivity(ctx, template.projectId);
     return null;
   },
 });
@@ -132,6 +134,7 @@ export const remove = mutation({
   handler: async (ctx, { templateId }) => {
     const { template } = await requireTemplateAccess(ctx, templateId);
     await ctx.db.delete(template._id);
+    await recordProjectActivity(ctx, template.projectId);
     return null;
   },
 });
@@ -149,6 +152,7 @@ export const exportToProject = mutation({
   handler: async (ctx, { templateId, targetProjectId }) => {
     const { template, userId } = await requireTemplateAccess(ctx, templateId);
     await requireProjectMember(ctx, targetProjectId);
+    await recordProjectActivity(ctx, targetProjectId);
     return ctx.db.insert("listTemplates", {
       name: template.name,
       description: template.description,

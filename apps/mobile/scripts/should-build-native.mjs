@@ -3,9 +3,9 @@
  * Decides whether CI should trigger EAS native builds for a push to main.
  *
  * Builds only when all of the following are true:
- *   1. Root package.json version bumped vs the parent commit
+ *   1. Root package.json version bumped over the push's commit range
  *   2. Top CHANGELOG.md entry matches that version
- *   3. Native-relevant files changed (app code, config, or mobile deps)
+ * Every versioned changelog release ships to mobile, regardless of changed paths.
  *
  * Usage:
  *   node apps/mobile/scripts/should-build-native.mjs [before-sha] [after-sha]
@@ -18,7 +18,6 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { hasNativeRelevantChanges } from "./native-release-paths.ts";
 
 const REPO_ROOT = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
@@ -87,23 +86,6 @@ function readChangelogTopVersionAtRef(ref) {
   return changelogTopVersionFromMarkdown(
     readFileAtRef(ref, "apps/web/CHANGELOG.md"),
   );
-}
-
-/**
- * @param {string} beforeSha
- * @param {string} afterSha
- * @returns {string[]}
- */
-function changedFiles(beforeSha, afterSha) {
-  const output = execFileSync(
-    "git",
-    ["diff", "--name-only", `${beforeSha}..${afterSha}`],
-    { cwd: REPO_ROOT, encoding: "utf8" },
-  );
-  return output
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
 }
 
 /**
@@ -204,15 +186,7 @@ if (changelogVersion !== currentVersion) {
   );
 }
 
-const files = changedFiles(beforeSha, afterSha);
-if (!hasNativeRelevantChanges(files)) {
-  finish(
-    false,
-    `Skip: version ${currentVersion} bumped but no native-relevant file changes between ${shortSha(beforeSha)} and ${shortSha(afterSha)}`,
-  );
-}
-
 finish(
   true,
-  `Build: release ${currentVersion} with native-relevant changes (${shortSha(beforeSha)}..${shortSha(afterSha)})`,
+  `Build: release ${currentVersion} with matching changelog (${shortSha(beforeSha)}..${shortSha(afterSha)})`,
 );

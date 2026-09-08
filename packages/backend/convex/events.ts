@@ -11,6 +11,7 @@ import {
   requirePotAccess,
   requireProjectMember,
 } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 
 /** Adds a UTC day to an all-day event's end so the half-open range still
  * overlaps the final day — mirrors the Drizzle app's createEvent/editEvent. */
@@ -155,6 +156,7 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -195,6 +197,7 @@ export const remove = mutation({
     }
     await ctx.db.delete(event._id);
     await track(ctx, userId, "event_deleted", { projectId: event.projectId });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -236,6 +239,7 @@ export const createLinkedList = mutation({
       projectId: event.projectId,
       type: "list",
     });
+    await recordProjectActivity(ctx, event.projectId);
     return listId;
   },
 });
@@ -250,6 +254,7 @@ export const linkList = mutation({
       throw new Error("List and event are not in the same project");
     }
     await ctx.db.patch(list._id, { eventId: event._id, updatedBy: userId });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -263,6 +268,7 @@ export const unlinkList = mutation({
       throw new Error("List is not linked to the event");
     }
     await ctx.db.patch(list._id, { eventId: undefined });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -285,6 +291,7 @@ export const createLinkedNote = mutation({
       projectId: event.projectId,
       type: "note",
     });
+    await recordProjectActivity(ctx, event.projectId);
     return noteId;
   },
 });
@@ -298,6 +305,7 @@ export const linkNote = mutation({
       throw new Error("Note and event are not in the same project");
     }
     await ctx.db.patch(note._id, { eventId: event._id, updatedBy: userId });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -311,6 +319,7 @@ export const unlinkNote = mutation({
       throw new Error("Note is not linked to the event");
     }
     await ctx.db.patch(note._id, { eventId: undefined });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -367,6 +376,7 @@ export const createLinkedPot = mutation({
       projectId: event.projectId,
       type: "pot",
     });
+    await recordProjectActivity(ctx, event.projectId);
     return potId;
   },
 });
@@ -380,6 +390,7 @@ export const linkPot = mutation({
       throw new Error("Pot and event are not in the same project");
     }
     await ctx.db.patch(pot._id, { eventId: event._id });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });
@@ -393,6 +404,7 @@ export const unlinkPot = mutation({
       throw new Error("Pot is not linked to the event");
     }
     await ctx.db.patch(pot._id, { eventId: undefined });
+    await recordProjectActivity(ctx, event.projectId);
     return null;
   },
 });

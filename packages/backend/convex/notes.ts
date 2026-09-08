@@ -4,6 +4,7 @@ import { mutation, type QueryCtx, query } from "./_generated/server";
 import { track } from "./model/analytics";
 import { notifyProject } from "./model/notify";
 import { requireNoteAccess, requireProjectMember } from "./model/permissions";
+import { recordProjectActivity } from "./model/projectActivity";
 import { requireEditingLock } from "./noteEditLocks";
 
 /** Attach the creator's and last-editor's display names to a note row. */
@@ -110,6 +111,7 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    await recordProjectActivity(ctx, note.projectId);
     return null;
   },
 });
@@ -120,6 +122,7 @@ export const remove = mutation({
     const { note, userId } = await requireNoteAccess(ctx, noteId);
     await ctx.db.delete(note._id);
     await track(ctx, userId, "note_deleted", { projectId: note.projectId });
+    await recordProjectActivity(ctx, note.projectId);
     return null;
   },
 });

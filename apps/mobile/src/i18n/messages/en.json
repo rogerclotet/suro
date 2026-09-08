@@ -882,7 +882,10 @@
       "manageGroup": "Manage group",
       "empty": "No groups yet. Create one to get started.",
       "unnamedMember": "Member",
-      "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}"
+      "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
+      "searchPlaceholder": "Search groups or people",
+      "clearSearch": "Clear search",
+      "noSearchResults": "No groups match your search."
     },
     "profile": {
       "title": "Profile",

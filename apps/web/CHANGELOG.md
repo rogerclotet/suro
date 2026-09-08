@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.26.0] — 2026-09-08
+
+### ca
+
+- [feature] A l'app mòbil, cerca grups pel nom o per les persones que en formen part.
+- [fix] Els canvis en llistes, notes, calendari, fitxers i despeses actualitzen l'ordre dels grups per activitat recent, encara que no generin notificacions.
+
+### es
+
+- [feature] En la app móvil, busca grupos por su nombre o por las personas que forman parte de ellos.
+- [fix] Los cambios en listas, notas, calendario, archivos y gastos actualizan el orden de los grupos por actividad reciente, aunque no generen notificaciones.
+
+### en
+
+- [feature] In the mobile app, search groups by name or by the people in them.
+- [fix] Changes to lists, notes, calendar events, files, and expenses now update group activity ordering, even when they don't send notifications.
+
 ## [1.25.6] — 2026-09-08
 
 ### ca

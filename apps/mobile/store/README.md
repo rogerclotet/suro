@@ -81,7 +81,7 @@ A release is a normal PR to `main`. Everything after the merge is CI.
    `changelog:generate`, which writes the Play `changelogs/default.txt` files and
    `store.config.json`'s `apple.version` + `releaseNotes`; CI fails if they drift.
 2. Merge. On `main`, `mobile_release_gate` (version bump + matching CHANGELOG
-   entry + native paths touched) triggers the **Mobile release** workflow, which:
+   entry, regardless of changed paths) triggers the **Mobile release** workflow, which:
    - builds both binaries on EAS and waits for them;
    - **Android** → `fastlane android release`: AAB + release notes to the Play
      **production** track, full rollout;
