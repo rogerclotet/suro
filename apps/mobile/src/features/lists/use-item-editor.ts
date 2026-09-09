@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { usePostHog } from "posthog-react-native";
+import { useRef, useState } from "react";
+import { Alert } from "react-native";
 import {
   EMPTY_TASK_DRAFT,
   type TaskDraft,
   taskDraftFromItem,
   taskDraftToArgs,
 } from "@/components/task-fields";
+import { useTranslations } from "@/i18n";
 import type { Item } from "./types";
 import type { useChecklistCommands } from "./use-checklist-commands";
 
@@ -12,6 +15,10 @@ export function useItemEditor({
   updateItem,
   removeItem,
 }: Pick<ReturnType<typeof useChecklistCommands>, "updateItem" | "removeItem">) {
+  const t = useTranslations("lists");
+  const posthog = usePostHog();
+  const pending = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [draftName, setDraftName] = useState("");
@@ -22,6 +29,7 @@ export function useItemEditor({
   const [draftTask, setDraftTask] = useState<TaskDraft>(EMPTY_TASK_DRAFT);
 
   function openEdit(item: Item) {
+    if (pending.current) return;
     setEditingItem(item);
     setDraftName(item.name);
     setDraftDetails(item.details ?? "");
@@ -31,35 +39,70 @@ export function useItemEditor({
   }
 
   async function submitItem() {
-    if (!editingItem) {
+    if (!editingItem || pending.current) {
       return;
     }
     const target = editingItem;
-    setItemSheetOpen(false);
-    await updateItem({
-      itemId: target._id,
-      name: draftName.trim() || target.name,
-      details: draftDetails,
-      completed: target.completed,
-      category: draftCategory,
-      // Task lists send the edited metadata; plain lists send the item's current
-      // fields untouched (which for a checklist are all undefined).
-      ...taskDraftToArgs(draftTask),
-    });
+    pending.current = true;
+    setSubmitting(true);
+    try {
+      await updateItem({
+        itemId: target._id,
+        name: draftName.trim() || target.name,
+        details: draftDetails,
+        completed: target.completed,
+        category: draftCategory,
+        ...taskDraftToArgs(draftTask),
+      });
+      setItemSheetOpen(false);
+    } catch (error) {
+      Alert.alert(t("itemUpdateError"));
+      reportError(error, "update_list_item", target);
+    } finally {
+      pending.current = false;
+      setSubmitting(false);
+    }
   }
 
   async function deleteCurrentItem() {
-    if (!editingItem) {
+    if (!editingItem || pending.current) {
       return;
     }
     const target = editingItem;
-    setItemSheetOpen(false);
-    await removeItem({ itemId: target._id });
+    pending.current = true;
+    setSubmitting(true);
+    try {
+      await removeItem({ itemId: target._id });
+      setItemSheetOpen(false);
+    } catch (error) {
+      Alert.alert(t("deleteItemError"));
+      reportError(error, "delete_list_item", target);
+    } finally {
+      pending.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  function reportError(
+    error: unknown,
+    action: "update_list_item" | "delete_list_item",
+    target: Item,
+  ) {
+    try {
+      posthog?.captureException(error, {
+        action,
+        listId: target.listId,
+        itemId: target._id,
+      });
+    } catch {
+      // Reporting must not prevent retrying the preserved draft.
+    }
   }
 
   return {
     openEdit,
     visible: itemSheetOpen,
+    submitting,
     name: draftName,
     details: draftDetails,
     category: draftCategory,
@@ -70,6 +113,8 @@ export function useItemEditor({
     onChangeTask: setDraftTask,
     onSubmit: submitItem,
     onDelete: deleteCurrentItem,
-    onClose: () => setItemSheetOpen(false),
+    onClose: () => {
+      if (!pending.current) setItemSheetOpen(false);
+    },
   };
 }

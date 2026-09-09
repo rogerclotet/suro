@@ -1,2 +1,1 @@
-• A l'app mòbil, cerca grups pel nom o per les persones que en formen part.
-• Els canvis en llistes, notes, calendari, fitxers i despeses actualitzen l'ordre dels grups per activitat recent, encara que no generin notificacions.
+• A l'app mòbil, si no es pot desar o eliminar un element d'una llista, l'editor mostra l'error i conserva els canvis perquè ho puguis tornar a provar.

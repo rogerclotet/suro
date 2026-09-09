@@ -47,6 +47,7 @@ export function NewCategorySheet({
 // this remains the surface for renaming, details, re-categorizing and delete.
 export function ItemSheet({
   visible,
+  submitting,
   projectId,
   taskMode: _taskMode,
   name,
@@ -63,6 +64,7 @@ export function ItemSheet({
   onClose,
 }: {
   visible: boolean;
+  submitting: boolean;
   projectId: Id<"projects">;
   taskMode: boolean;
   name: string;
@@ -84,6 +86,7 @@ export function ItemSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <ScrollView
+        pointerEvents={submitting ? "none" : "auto"}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         // A task editor is much taller than a checklist's; cap it so a long form
@@ -97,11 +100,13 @@ export function ItemSheet({
         <Field
           placeholder={tl("namePlaceholder")}
           value={name}
+          editable={!submitting}
           onChangeText={onChangeName}
         />
         <Field
           placeholder={tl("detailsPlaceholder")}
           value={details}
+          editable={!submitting}
           onChangeText={onChangeDetails}
           multiline
           textAlignVertical="top"
@@ -117,8 +122,12 @@ export function ItemSheet({
           value={category}
           onChange={onChangeCategory}
         />
-        <Button title={tc("save")} onPress={onSubmit} />
-        <Pressable onPress={onDelete} style={{ padding: 10 }}>
+        <Button title={tc("save")} onPress={onSubmit} disabled={submitting} />
+        <Pressable
+          onPress={onDelete}
+          disabled={submitting}
+          style={{ padding: 10 }}
+        >
           <Txt style={{ textAlign: "center", color: t.danger }}>
             {tl("deleteItem")}
           </Txt>

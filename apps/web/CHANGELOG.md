@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.26.1] — 2026-09-09
+
+### ca
+
+- [fix] A l'app mòbil, si no es pot desar o eliminar un element d'una llista, l'editor mostra l'error i conserva els canvis perquè ho puguis tornar a provar.
+
+### es
+
+- [fix] En la app móvil, si no se puede guardar o eliminar un elemento de una lista, el editor muestra el error y conserva los cambios para que puedas volver a intentarlo.
+
+### en
+
+- [fix] In the mobile app, failed list item saves or deletions now show an error and keep the editor open with your changes ready to retry.
+
 ## [1.26.0] — 2026-09-08
 
 ### ca

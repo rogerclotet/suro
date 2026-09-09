@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.26.0",
+    "version": "1.26.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• In the mobile app, search groups by name or by the people in them.\n• Changes to lists, notes, calendar events, files, and expenses now update group activity ordering, even when they don't send notifications.",
+        "releaseNotes": "• In the mobile app, failed list item saves or deletions now show an error and keep the editor open with your changes ready to retry.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• En la app móvil, busca grupos por su nombre o por las personas que forman parte de ellos.\n• Los cambios en listas, notas, calendario, archivos y gastos actualizan el orden de los grupos por actividad reciente, aunque no generen notificaciones.",
+        "releaseNotes": "• En la app móvil, si no se puede guardar o eliminar un elemento de una lista, el editor muestra el error y conserva los cambios para que puedas volver a intentarlo.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• A l'app mòbil, cerca grups pel nom o per les persones que en formen part.\n• Els canvis en llistes, notes, calendari, fitxers i despeses actualitzen l'ordre dels grups per activitat recent, encara que no generin notificacions.",
+        "releaseNotes": "• A l'app mòbil, si no es pot desar o eliminar un element d'una llista, l'editor mostra l'error i conserva els canvis perquè ho puguis tornar a provar.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

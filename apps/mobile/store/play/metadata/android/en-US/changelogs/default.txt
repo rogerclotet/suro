@@ -1,2 +1,1 @@
-• In the mobile app, search groups by name or by the people in them.
-• Changes to lists, notes, calendar events, files, and expenses now update group activity ordering, even when they don't send notifications.
+• In the mobile app, failed list item saves or deletions now show an error and keep the editor open with your changes ready to retry.
