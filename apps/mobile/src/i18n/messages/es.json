@@ -411,6 +411,7 @@
     "itemUpdated": "Elemento actualizado",
     "itemCreateError": "No se ha podido crear el elemento, vuelve a intentarlo más tarde",
     "itemUpdateError": "No se ha podido actualizar el elemento, vuelve a intentarlo más tarde",
+    "deleteItemError": "No se ha podido eliminar el elemento, vuelve a intentarlo más tarde",
     "noProjectSelected": "No se ha seleccionado ningún proyecto",
     "listsDropdownPlaceholder": "Lista",
     "editItemLabel": "Editar",

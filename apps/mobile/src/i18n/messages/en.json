@@ -411,6 +411,7 @@
     "itemUpdated": "Item updated",
     "itemCreateError": "Could not create the item, please try again later",
     "itemUpdateError": "Could not update the item, please try again later",
+    "deleteItemError": "Could not delete the item, please try again later",
     "noProjectSelected": "No project selected",
     "listsDropdownPlaceholder": "List",
     "editItemLabel": "Edit",

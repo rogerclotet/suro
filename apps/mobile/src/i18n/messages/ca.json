@@ -411,6 +411,7 @@
     "itemUpdated": "Element actualitzat",
     "itemCreateError": "No s'ha pogut crear l'element, torna-ho a provar més tard",
     "itemUpdateError": "No s'ha pogut actualitzar l'element, torna-ho a provar més tard",
+    "deleteItemError": "No s'ha pogut eliminar l'element, torna-ho a provar més tard",
     "noProjectSelected": "No s'ha seleccionat cap projecte",
     "listsDropdownPlaceholder": "Llista",
     "editItemLabel": "Editar",
