@@ -279,13 +279,13 @@
   "home": {
     "today": "Today",
     "upcoming": "Coming up",
-    "myTasks": "Your tasks",
+    "featuredLists": "Featured lists",
     "seeAll": "See all",
     "goToCalendar": "Go to calendar",
     "eventsToday": "events today",
     "tasksAssigned": "tasks assigned",
     "noUpcoming": "No upcoming events",
-    "noTasks": "Nothing on your plate",
+    "noFeaturedLists": "No featured lists yet. Star a list to show it here.",
     "linkedListA11y": "Event with checklist, {done} of {total} items done"
   },
   "feedback": {
@@ -409,7 +409,7 @@
   },
   "lists": {
     "empty": "No lists yet",
-    "favorites": "Favorites",
+    "favorites": "Featured",
     "sectionLists": "Lists",
     "completed": "Completed",
     "showMoreCompleted": "Show more",
@@ -453,8 +453,8 @@
     "detailsLabel": "Details",
     "categoryLabel": "Category",
     "templateItemsCount": "{count} items",
-    "addToFavorites": "Add to favorites",
-    "removeFromFavorites": "Remove from favorites",
+    "addToFavorites": "Feature list",
+    "removeFromFavorites": "Unfeature list",
     "listTypeLabel": "List type",
     "listTypeRegular": "Regular list",
     "listTypeRegularDescription": "A simple list, like a grocery list or a quick to-do.",

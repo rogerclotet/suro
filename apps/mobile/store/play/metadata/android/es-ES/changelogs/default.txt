@@ -1,1 +1,1 @@
-• Los enlaces a las apps nativas pasan del banner superior a la barra lateral de escritorio, sin texto adicional y con la opción de ocultarlos.
+• Las listas favoritas ahora se llaman destacadas en la web y en la app móvil. Conservan la estrella y las listas que ya tenías marcadas, y aparecen en el inicio en lugar de las tareas asignadas.

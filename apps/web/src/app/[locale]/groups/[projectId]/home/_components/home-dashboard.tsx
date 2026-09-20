@@ -9,28 +9,26 @@ import {
   CheckSquare,
   ChevronRight,
   Loader2,
+  Star,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/_data/event";
 import type { List } from "@/app/_data/list";
-import { adaptTask, type TaskWithList } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import ListPreview from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
+import ProgressRing from "@/app/[locale]/groups/[projectId]/lists/_components/progress-ring";
 import { Link } from "@/i18n/navigation";
 import { isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
 import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { cn } from "@/lib/utils";
-import ProgressRing from "../../lists/_components/progress-ring";
-import { DueChip } from "../../lists/[listId]/_components/list-item/due-chip";
-import { PriorityBadge } from "../../lists/[listId]/_components/list-item/priority-badge";
 import { HomeSectionChips } from "./home-section-chips";
 
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 5;
 
 type WidgetHref = Parameters<typeof Link>[0]["href"];
-type TaskBucket = "overdue" | "today" | "upcoming" | "noDate";
 
 function Panel({
   icon: Icon,
@@ -222,71 +220,6 @@ function EventCard({
   );
 }
 
-function TaskCard({
-  task,
-  projectId,
-  bucket,
-  bucketLabel,
-  showBucketLabel,
-}: {
-  task: TaskWithList;
-  projectId: string;
-  bucket: TaskBucket;
-  bucketLabel: string;
-  showBucketLabel: boolean;
-}) {
-  const overdue = bucket === "overdue";
-
-  return (
-    <div>
-      {showBucketLabel && (
-        <p
-          className={cn(
-            "px-1 pt-2 pb-1 font-semibold text-[11px] uppercase tracking-wider",
-            overdue ? "text-destructive" : "text-muted-foreground",
-          )}
-        >
-          {bucketLabel}
-        </p>
-      )}
-      <Link
-        href={{
-          pathname: "/groups/[projectId]/lists/[listId]",
-          params: { projectId, listId: task.listId },
-        }}
-        className={cn(
-          "flex items-center gap-3 px-1 py-3 transition-colors hover:bg-accent/50",
-          overdue && "border-l-2 border-l-destructive pl-2",
-        )}
-      >
-        <span
-          className={cn(
-            "size-2 shrink-0 rounded-full",
-            overdue ? "bg-destructive" : "bg-muted-foreground",
-          )}
-          aria-hidden
-        />
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-medium">{task.name}</div>
-          <div className="truncate text-[12px] text-muted-foreground">
-            {task.listName}
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          {task.dueAt && (
-            <DueChip
-              dueAt={task.dueAt}
-              allDay={task.dueAllDay}
-              completed={false}
-            />
-          )}
-          {task.priority && <PriorityBadge priority={task.priority} />}
-        </div>
-      </Link>
-    </div>
-  );
-}
-
 const DATE_OPTS: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
 const TIME_OPTS: Intl.DateTimeFormatOptions = { timeStyle: "short" };
 
@@ -340,40 +273,9 @@ function formatEventTime(
   return formatEventRange(event, locale);
 }
 
-function localDayIndex(date: Date): number {
-  return Math.floor(
-    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() /
-      86_400_000,
-  );
-}
-
-function utcDayIndex(date: Date): number {
-  return Math.floor(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) /
-      86_400_000,
-  );
-}
-
-function bucketFor(task: TaskWithList, todayIndex: number): TaskBucket {
-  if (!task.dueAt) {
-    return "noDate";
-  }
-  const dayIndex = task.dueAllDay
-    ? utcDayIndex(task.dueAt)
-    : localDayIndex(task.dueAt);
-  if (dayIndex < todayIndex) {
-    return "overdue";
-  }
-  if (dayIndex === todayIndex) {
-    return "today";
-  }
-  return "upcoming";
-}
-
 export default function HomeDashboard({ projectId }: { projectId: string }) {
   const locale = useLocale();
   const t = useTranslations("home");
-  const tLists = useTranslations("lists");
   const tCalendar = useTranslations("calendar");
 
   const [bounds] = useState(() => {
@@ -418,19 +320,9 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   const rawTasks = useQuery(api.tasks.myTasks, {
     projectId: projectId as Id<"projects">,
   });
-  const previewTasks = useMemo(() => {
-    if (!rawTasks) {
-      return undefined;
-    }
-    const todayIndex = localDayIndex(bounds.today);
-    return rawTasks
-      .map(adaptTask)
-      .slice(0, PREVIEW_LIMIT)
-      .map((task) => ({
-        task,
-        bucket: bucketFor(task, todayIndex),
-      }));
-  }, [rawTasks, bounds.today]);
+  const featuredLists = lists
+    ?.filter((list) => list.favorite)
+    .slice(0, PREVIEW_LIMIT);
   const taskCount = rawTasks?.length ?? 0;
 
   const dateLabel = bounds.today.toLocaleDateString(locale, {
@@ -454,35 +346,22 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <Panel
-          icon={CheckSquare}
-          title={t("myTasks")}
+          icon={Star}
+          title={t("featuredLists")}
           seeAllHref={{
-            pathname: "/groups/[projectId]/lists/tasks",
+            pathname: "/groups/[projectId]/lists",
             params: { projectId },
           }}
           seeAllLabel={t("seeAll")}
         >
-          {previewTasks === undefined ? (
+          {featuredLists === undefined ? (
             <PanelLoading />
-          ) : previewTasks.length === 0 ? (
-            <EmptyState text={t("noTasks")} />
+          ) : featuredLists.length === 0 ? (
+            <EmptyState text={t("noFeaturedLists")} />
           ) : (
-            <>
-              {previewTasks.map(({ task, bucket }, index) => {
-                const prevBucket = previewTasks[index - 1]?.bucket;
-                const showBucketLabel = bucket !== prevBucket;
-                return (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    projectId={projectId}
-                    bucket={bucket}
-                    bucketLabel={tLists(`taskBucket_${bucket}`)}
-                    showBucketLabel={showBucketLabel}
-                  />
-                );
-              })}
-            </>
+            featuredLists.map((list) => (
+              <ListPreview key={list.id} list={list} />
+            ))
           )}
         </Panel>
 

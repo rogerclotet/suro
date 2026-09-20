@@ -279,13 +279,13 @@
   "home": {
     "today": "Avui",
     "upcoming": "Properament",
-    "myTasks": "Les teves tasques",
+    "featuredLists": "Llistes destacades",
     "seeAll": "Mostra-les totes",
     "goToCalendar": "Ves al calendari",
     "eventsToday": "esdeveniments avui",
     "tasksAssigned": "tasques assignades",
     "noUpcoming": "Cap esdeveniment proper",
-    "noTasks": "Res pendent",
+    "noFeaturedLists": "Encara no hi ha llistes destacades. Marca una llista amb l'estrella perquè aparegui aquí.",
     "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
   },
   "feedback": {
@@ -409,7 +409,7 @@
   },
   "lists": {
     "empty": "Encara no hi ha llistes",
-    "favorites": "Preferides",
+    "favorites": "Destacades",
     "sectionLists": "Llistes",
     "completed": "Completades",
     "showMoreCompleted": "Mostra'n més",
@@ -453,8 +453,8 @@
     "detailsLabel": "Detalls",
     "categoryLabel": "Categoria",
     "templateItemsCount": "{count} elements",
-    "addToFavorites": "Afegir a preferides",
-    "removeFromFavorites": "Treure de preferides",
+    "addToFavorites": "Afegir a destacades",
+    "removeFromFavorites": "Treure de destacades",
     "listTypeLabel": "Tipus de llista",
     "listTypeRegular": "Llista normal",
     "listTypeRegularDescription": "Una llista senzilla, com la llista de la compra o una llista de coses a fer.",

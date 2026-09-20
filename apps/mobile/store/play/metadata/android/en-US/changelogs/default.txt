@@ -1,1 +1,1 @@
-• Native app links move from the top banner to the desktop sidebar, with no extra text and an option to dismiss them.
+• Favorite lists are now called featured lists on web and mobile. The star and your existing selections stay the same, and featured lists replace assigned tasks on the home screen.
