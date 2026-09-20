@@ -279,13 +279,13 @@
   "home": {
     "today": "Hoy",
     "upcoming": "Próximamente",
-    "myTasks": "Tus tareas",
+    "featuredLists": "Listas destacadas",
     "seeAll": "Ver todas",
     "goToCalendar": "Ir al calendario",
     "eventsToday": "eventos hoy",
     "tasksAssigned": "tareas asignadas",
     "noUpcoming": "Ningún evento próximo",
-    "noTasks": "Nada pendiente",
+    "noFeaturedLists": "Aún no hay listas destacadas. Marca una lista con la estrella para que aparezca aquí.",
     "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos"
   },
   "feedback": {
@@ -409,7 +409,7 @@
   },
   "lists": {
     "empty": "Aún no hay listas",
-    "favorites": "Favoritas",
+    "favorites": "Destacadas",
     "sectionLists": "Listas",
     "completed": "Completadas",
     "showMoreCompleted": "Mostrar más",
@@ -453,8 +453,8 @@
     "detailsLabel": "Detalles",
     "categoryLabel": "Categoría",
     "templateItemsCount": "{count} elementos",
-    "addToFavorites": "Añadir a favoritas",
-    "removeFromFavorites": "Quitar de favoritas",
+    "addToFavorites": "Añadir a destacadas",
+    "removeFromFavorites": "Quitar de destacadas",
     "listTypeLabel": "Tipo de lista",
     "listTypeRegular": "Lista normal",
     "listTypeRegularDescription": "Una lista sencilla, como la lista de la compra o una lista de cosas por hacer.",

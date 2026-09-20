@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.27.0] — 2026-09-20
+
+### ca
+
+- [improvement] Les llistes preferides ara es diuen destacades al web i a l'app mòbil. Conserven l'estrella i les llistes que ja tenies marcades, i apareixen a l'inici en lloc de les tasques assignades.
+
+### es
+
+- [improvement] Las listas favoritas ahora se llaman destacadas en la web y en la app móvil. Conservan la estrella y las listas que ya tenías marcadas, y aparecen en el inicio en lugar de las tareas asignadas.
+
+### en
+
+- [improvement] Favorite lists are now called featured lists on web and mobile. The star and your existing selections stay the same, and featured lists replace assigned tasks on the home screen.
+
 ## [1.26.2] — 2026-09-20
 
 ### ca

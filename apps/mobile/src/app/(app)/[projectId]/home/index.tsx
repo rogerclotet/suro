@@ -1,5 +1,4 @@
 import { api } from "backend/convex/_generated/api";
-import type { Doc } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { type Href, Stack, useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
@@ -8,15 +7,14 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronRight,
-  Flag,
   Settings,
+  Star,
 } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { HomeSectionChips } from "@/components/home-section-chips";
-import { priorityColor, useFormatDue } from "@/components/task-fields";
 import { useLocale, useTranslations } from "@/i18n";
 import {
   useFormatEventRange,
@@ -39,8 +37,6 @@ type ActiveList = NonNullable<
   ReturnType<typeof useOfflineListsOverview>
 >["active"][number];
 type CalEvent = FunctionReturnType<typeof api.events.listByRange>[number];
-type Task = Doc<"listItems"> & { listName: string };
-type TaskBucket = "overdue" | "today" | "upcoming" | "noDate";
 
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 5;
@@ -315,128 +311,47 @@ function EventCard({
   );
 }
 
-function dueDayCode(task: Task): number {
-  const d = new Date(task.dueAt ?? 0);
-  if (task.dueAllDay) {
-    return (
-      d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
-    );
-  }
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-}
-
-function todayCode(now: Date): number {
-  return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-}
-
-function bucketFor(task: Task, today: number): TaskBucket {
-  if (task.dueAt === undefined) {
-    return "noDate";
-  }
-  const day = dueDayCode(task);
-  if (day < today) {
-    return "overdue";
-  }
-  if (day === today) {
-    return "today";
-  }
-  return "upcoming";
-}
-
-const BUCKET_LABELS: Record<
-  TaskBucket,
-  "agendaOverdue" | "agendaToday" | "agendaUpcoming" | "agendaNoDate"
-> = {
-  overdue: "agendaOverdue",
-  today: "agendaToday",
-  upcoming: "agendaUpcoming",
-  noDate: "agendaNoDate",
-};
-
-function TaskCard({
-  task,
-  bucket,
-  showBucketLabel,
-  formatDue,
-}: {
-  task: Task;
-  bucket: TaskBucket;
-  showBucketLabel: boolean;
-  formatDue: (item: { dueAt: number; dueAllDay?: boolean }) => string;
-}) {
+function FeaturedListCard({ list }: { list: ActiveList }) {
   const router = useRouter();
-  const pid = useProjectId();
-  const t = useTheme();
-  const tl = useTranslations("mobile.lists");
-  const overdue = bucket === "overdue";
-  const priority = task.priority ?? "normal";
+  const total = list.items.length;
+  const done = list.items.filter((item) => item.completed).length;
+  const complete = total > 0 && done === total;
 
   return (
-    <View>
-      {showBucketLabel ? (
-        <Txt
-          size={11}
-          weight="700"
-          style={{
-            paddingHorizontal: 0,
-            paddingTop: 8,
-            paddingBottom: 4,
-            letterSpacing: 0.5,
-            color: overdue ? t.danger : t.muted,
-          }}
-        >
-          {tl(BUCKET_LABELS[bucket]).toUpperCase()}
+    <Pressable
+      onPress={() =>
+        router.push({
+          pathname: `/${list.projectId}/lists/${list._id}`,
+          params: { name: list.name },
+        })
+      }
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 12,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <View style={{ flex: 1, gap: 2 }}>
+        <Txt weight="700" muted={complete} numberOfLines={1}>
+          {list.name}
         </Txt>
-      ) : null}
-      <Pressable
-        onPress={() =>
-          router.navigate({
-            pathname: `/${pid}/lists/${task.listId}`,
-            params: { name: task.listName },
-          })
-        }
-        accessibilityRole="button"
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          paddingVertical: 12,
-          paddingLeft: overdue ? 10 : 0,
-          borderLeftWidth: overdue ? 2 : 0,
-          borderLeftColor: overdue ? t.danger : undefined,
-          opacity: pressed ? 0.7 : 1,
-        })}
-      >
-        <View
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: overdue ? t.danger : t.muted,
-          }}
+        {list.description ? (
+          <Txt muted size={13} numberOfLines={1}>
+            {list.description}
+          </Txt>
+        ) : null}
+      </View>
+      <View style={{ alignItems: "flex-end", gap: 4, minWidth: 48 }}>
+        <Txt muted size={13}>{`${done}/${total}`}</Txt>
+        <ProgressBar
+          value={total === 0 ? 0 : done / total}
+          complete={complete}
         />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Txt weight="700" numberOfLines={1}>
-            {task.name}
-          </Txt>
-          <Txt muted size={12} numberOfLines={1}>
-            {task.listName}
-          </Txt>
-        </View>
-        {task.dueAt !== undefined ? (
-          <Txt size={12} style={{ color: overdue ? t.danger : t.muted }}>
-            {formatDue({ dueAt: task.dueAt, dueAllDay: task.dueAllDay })}
-          </Txt>
-        ) : null}
-        {priority !== "normal" ? (
-          <Flag
-            color={priorityColor(t, priority)}
-            fill={priorityColor(t, priority)}
-            size={14}
-          />
-        ) : null}
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -478,21 +393,13 @@ export default function HomeDashboard() {
   }, [listsOverview]);
 
   const rawTasks = usePersistentQuery(api.tasks.myTasks, { projectId: pid });
-  const previewTasks = useMemo(() => {
-    if (!rawTasks) {
-      return undefined;
-    }
-    const today = todayCode(new Date());
-    return rawTasks.slice(0, PREVIEW_LIMIT).map((task) => ({
-      task,
-      bucket: bucketFor(task, today),
-    }));
-  }, [rawTasks]);
+  const featuredLists = listsOverview?.active
+    .filter((list) => list.favorite)
+    .slice(0, PREVIEW_LIMIT);
   const taskCount = rawTasks?.length ?? 0;
 
   const formatEventTime = useFormatEventTime();
   const formatEventRange = useFormatEventRange();
-  const formatDue = useFormatDue();
   const longDate = useLongDate();
 
   const dateLabel = longDate(bounds.today);
@@ -526,32 +433,22 @@ export default function HomeDashboard() {
         </View>
 
         <Panel
-          icon={CheckSquare}
-          title={tHome("myTasks")}
-          seeAllHref={`/${pid}/lists/tasks`}
+          icon={Star}
+          title={tHome("featuredLists")}
+          seeAllHref={`/${pid}/lists`}
           seeAllLabel={tHome("seeAll")}
         >
-          {previewTasks === undefined ? (
+          {featuredLists === undefined ? (
             <Loading />
-          ) : previewTasks.length === 0 ? (
-            <EmptyState text={tHome("noTasks")} />
+          ) : featuredLists.length === 0 ? (
+            <EmptyState text={tHome("noFeaturedLists")} />
           ) : (
-            <>
-              {previewTasks.map(({ task, bucket }, index) => {
-                const prevBucket = previewTasks[index - 1]?.bucket;
-                return (
-                  <View key={task._id}>
-                    {index > 0 ? <RowDivider /> : null}
-                    <TaskCard
-                      task={task}
-                      bucket={bucket}
-                      showBucketLabel={bucket !== prevBucket}
-                      formatDue={formatDue}
-                    />
-                  </View>
-                );
-              })}
-            </>
+            featuredLists.map((list, index) => (
+              <View key={list._id}>
+                {index > 0 ? <RowDivider /> : null}
+                <FeaturedListCard list={list} />
+              </View>
+            ))
           )}
         </Panel>
 
