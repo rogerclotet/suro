@@ -1,7 +1,6 @@
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import { auth } from "@/auth";
-import { DownloadAppBanner } from "@/components/download-app-banner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { pathnameHeader } from "@/proxy";
 import AppSidebar from "./app-sidebar/app-sidebar";
@@ -34,12 +33,7 @@ export default async function SidebarLayout({
   const pathname = requestHeaders.get(pathnameHeader) ?? "";
 
   if (!session || isStandalonePath(pathname)) {
-    return (
-      <>
-        <DownloadAppBanner />
-        {children}
-      </>
-    );
+    return children;
   }
 
   return (
@@ -47,7 +41,6 @@ export default async function SidebarLayout({
       <AppSidebar />
 
       <SidebarInset>
-        <DownloadAppBanner />
         <SidebarInsetContent>{children}</SidebarInsetContent>
       </SidebarInset>
     </SidebarProvider>

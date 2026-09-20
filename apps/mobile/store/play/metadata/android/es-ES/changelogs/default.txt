@@ -1,1 +1,1 @@
-• En la app móvil, si no se puede guardar o eliminar un elemento de una lista, el editor muestra el error y conserva los cambios para que puedas volver a intentarlo.
+• Los enlaces a las apps nativas pasan del banner superior a la barra lateral de escritorio, sin texto adicional y con la opción de ocultarlos.

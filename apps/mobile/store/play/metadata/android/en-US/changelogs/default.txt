@@ -1,1 +1,1 @@
-• In the mobile app, failed list item saves or deletions now show an error and keep the editor open with your changes ready to retry.
+• Native app links move from the top banner to the desktop sidebar, with no extra text and an option to dismiss them.

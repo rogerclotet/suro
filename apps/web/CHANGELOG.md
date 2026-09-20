@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.26.2] — 2026-09-20
+
+### ca
+
+- [improvement] Els enllaços a les apps natives passen del bàner superior a la barra lateral d'escriptori, sense text addicional i amb l'opció d'amagar-los.
+
+### es
+
+- [improvement] Los enlaces a las apps nativas pasan del banner superior a la barra lateral de escritorio, sin texto adicional y con la opción de ocultarlos.
+
+### en
+
+- [improvement] Native app links move from the top banner to the desktop sidebar, with no extra text and an option to dismiss them.
+
 ## [1.26.1] — 2026-09-09
 
 ### ca

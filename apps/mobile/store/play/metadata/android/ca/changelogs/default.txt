@@ -1,1 +1,1 @@
-• A l'app mòbil, si no es pot desar o eliminar un element d'una llista, l'editor mostra l'error i conserva els canvis perquè ho puguis tornar a provar.
+• Els enllaços a les apps natives passen del bàner superior a la barra lateral d'escriptori, sense text addicional i amb l'opció d'amagar-los.
