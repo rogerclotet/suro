@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/app/_state/feedback-state";
 import CreateProjectForm from "@/app/[locale]/groups/_components/create-project/create-project-form";
+import { SidebarAppLinks } from "@/components/sidebar-app-links";
 import {
   Sidebar,
   SidebarContent,
@@ -87,6 +88,7 @@ export default function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <SidebarAppLinks />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={openFeedback}>

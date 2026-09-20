@@ -1,5 +1,5 @@
 // Native app store links, shared between the marketing badges and the
-// in-app download banner so the URLs live in exactly one place.
+// sidebar app links so the URLs live in exactly one place.
 
 export const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=dev.clotet.suro";

@@ -36,7 +36,7 @@ type StoreBadgeProps = {
 
 /**
  * A single app-store badge link that tracks outbound clicks. Shared between
- * the marketing `AppBadges` and the in-app download banner so both render the
+ * the marketing `AppBadges` and the sidebar app links so both render the
  * exact same official artwork and fire the same `app_store_click` event.
  */
 export function StoreBadge({
