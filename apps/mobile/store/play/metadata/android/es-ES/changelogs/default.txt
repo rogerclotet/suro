@@ -1,1 +1,1 @@
-• Las listas favoritas ahora se llaman destacadas en la web y en la app móvil. Conservan la estrella y las listas que ya tenías marcadas, y aparecen en el inicio en lugar de las tareas asignadas.
+• Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.

@@ -1,1 +1,1 @@
-• Favorite lists are now called featured lists on web and mobile. The star and your existing selections stay the same, and featured lists replace assigned tasks on the home screen.
+• Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.

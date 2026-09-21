@@ -1,1 +1,1 @@
-• Les llistes preferides ara es diuen destacades al web i a l'app mòbil. Conserven l'estrella i les llistes que ja tenies marcades, i apareixen a l'inici en lloc de les tasques assignades.
+• Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.
