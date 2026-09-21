@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.27.1",
+    "version": "1.27.2",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The web sidebar has a warm neutral background in light mode and softer hover colors in both themes.",
+        "releaseNotes": "• Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• La barra lateral de la web tiene un fondo neutro cálido en el tema claro y colores más suaves al pasar el cursor en ambos temas.",
+        "releaseNotes": "• Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• La barra lateral del web té un fons neutre càlid en el tema clar i colors més suaus en passar-hi el cursor en tots dos temes.",
+        "releaseNotes": "• Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

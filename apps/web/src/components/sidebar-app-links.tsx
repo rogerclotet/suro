@@ -52,19 +52,29 @@ export function SidebarAppLinks() {
   };
 
   return (
-    <div className="relative hidden flex-col items-start gap-2 p-2 pr-10 group-data-[collapsible=icon]:hidden md:flex">
-      <StoreBadge store="app_store" imgClassName="h-9" />
-      <StoreBadge store="google_play" imgClassName="h-9" />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        onClick={dismiss}
-        aria-label={t("dismiss")}
-        className="absolute top-1 right-1 text-muted-foreground"
-      >
-        <X />
-      </Button>
-    </div>
+    <section
+      aria-label={t("title")}
+      className="hidden flex-col gap-3 border-sidebar-border border-b px-2 pt-2 pb-3 group-data-[collapsible=icon]:hidden md:flex"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-medium text-sidebar-foreground/70 text-xs">
+          {t("title")}
+        </h2>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={dismiss}
+          aria-label={t("dismiss")}
+          className="-my-1 -mr-1 shrink-0 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <X />
+        </Button>
+      </div>
+      <div className="flex flex-col items-start gap-2">
+        <StoreBadge store="app_store" imgClassName="h-9" />
+        <StoreBadge store="google_play" imgClassName="h-9" />
+      </div>
+    </section>
   );
 }

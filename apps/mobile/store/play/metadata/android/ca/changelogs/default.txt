@@ -1,1 +1,1 @@
-• La barra lateral del web té un fons neutre càlid en el tema clar i colors més suaus en passar-hi el cursor en tots dos temes.
+• Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.

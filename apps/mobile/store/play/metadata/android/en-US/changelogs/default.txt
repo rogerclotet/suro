@@ -1,1 +1,1 @@
-• The web sidebar has a warm neutral background in light mode and softer hover colors in both themes.
+• Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.

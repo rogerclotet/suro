@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.27.2] — 2026-09-21
+
+### ca
+
+- [improvement] Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.
+
+### es
+
+- [improvement] Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.
+
+### en
+
+- [improvement] Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.
+
 ## [1.27.1] — 2026-09-21
 
 ### ca

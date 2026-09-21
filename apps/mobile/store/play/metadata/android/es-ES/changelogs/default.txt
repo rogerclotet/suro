@@ -1,1 +1,1 @@
-• La barra lateral de la web tiene un fondo neutro cálido en el tema claro y colores más suaves al pasar el cursor en ambos temas.
+• Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.
