@@ -1,1 +1,1 @@
-• Las listas favoritas ahora se llaman destacadas en la web y en la app móvil. Conservan la estrella y las listas que ya tenías marcadas, y aparecen en el inicio en lugar de las tareas asignadas.
+• La barra lateral de la web tiene un fondo neutro cálido en el tema claro y colores más suaves al pasar el cursor en ambos temas.

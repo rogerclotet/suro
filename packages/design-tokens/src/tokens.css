@@ -23,12 +23,12 @@
     --border: #c3b18d;
     --input: #c3b18d;
     --ring: #314e2a;
-    --sidebar: #dce6cb;
+    --sidebar: #ede5d8;
     --sidebar-foreground: #1b2a22;
     --sidebar-primary: #314e2a;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #c97a3d;
-    --sidebar-accent-foreground: #ffffff;
+    --sidebar-accent: #e3dacb;
+    --sidebar-accent-foreground: #1b2a22;
     --sidebar-active: #a3bc8d;
     --sidebar-active-foreground: #1b2a22;
     --sidebar-border: #c3b18d;
@@ -72,8 +72,8 @@
     --sidebar-foreground: #f3ecdf;
     --sidebar-primary: #a3bc8d;
     --sidebar-primary-foreground: #1b2a22;
-    --sidebar-accent: #e0a066;
-    --sidebar-accent-foreground: #1b2a22;
+    --sidebar-accent: #382f28;
+    --sidebar-accent-foreground: #f3ecdf;
     --sidebar-active: #a3bc8d;
     --sidebar-active-foreground: #1b2a22;
     --sidebar-border: #40362f;

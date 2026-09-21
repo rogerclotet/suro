@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.27.1] — 2026-09-21
+
+### ca
+
+- [improvement] La barra lateral del web té un fons neutre càlid en el tema clar i colors més suaus en passar-hi el cursor en tots dos temes.
+
+### es
+
+- [improvement] La barra lateral de la web tiene un fondo neutro cálido en el tema claro y colores más suaves al pasar el cursor en ambos temas.
+
+### en
+
+- [improvement] The web sidebar has a warm neutral background in light mode and softer hover colors in both themes.
+
 ## [1.27.0] — 2026-09-20
 
 ### ca

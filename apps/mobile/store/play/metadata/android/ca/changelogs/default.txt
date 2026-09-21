@@ -1,1 +1,1 @@
-• Les llistes preferides ara es diuen destacades al web i a l'app mòbil. Conserven l'estrella i les llistes que ja tenies marcades, i apareixen a l'inici en lloc de les tasques assignades.
+• La barra lateral del web té un fons neutre càlid en el tema clar i colors més suaus en passar-hi el cursor en tots dos temes.

@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.27.0",
+    "version": "1.27.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Favorite lists are now called featured lists on web and mobile. The star and your existing selections stay the same, and featured lists replace assigned tasks on the home screen.",
+        "releaseNotes": "• The web sidebar has a warm neutral background in light mode and softer hover colors in both themes.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Las listas favoritas ahora se llaman destacadas en la web y en la app móvil. Conservan la estrella y las listas que ya tenías marcadas, y aparecen en el inicio en lugar de las tareas asignadas.",
+        "releaseNotes": "• La barra lateral de la web tiene un fondo neutro cálido en el tema claro y colores más suaves al pasar el cursor en ambos temas.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Les llistes preferides ara es diuen destacades al web i a l'app mòbil. Conserven l'estrella i les llistes que ja tenies marcades, i apareixen a l'inici en lloc de les tasques assignades.",
+        "releaseNotes": "• La barra lateral del web té un fons neutre càlid en el tema clar i colors més suaus en passar-hi el cursor en tots dos temes.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
