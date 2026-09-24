@@ -3,7 +3,7 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -12,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import { useProjects } from "@/app/_state/project-state";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
 import {
@@ -23,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
-import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { useSession } from "@/lib/session";
 import { linkEventListSchema } from "../../_components/event/data";
 
@@ -42,9 +40,11 @@ export default function LinkListForm({
     },
     resolver: valibotResolver(linkEventListSchema),
   });
-  const { project } = useProjects();
-  const allLists = useProjectLists(project?.id);
-  const lists = allLists?.filter((list) => list.eventId === null);
+  const { isAuthenticated } = useConvexAuth();
+  const lists = useQuery(
+    api.events.listLinkCandidates,
+    isAuthenticated ? { projectId: event.projectId as Id<"projects"> } : "skip",
+  );
   const linkList = useMutation(api.events.linkList);
 
   const onSubmit = useCallback(
@@ -104,7 +104,7 @@ export default function LinkListForm({
                     </FormControl>
                     <SelectContent>
                       {lists?.map((list) => (
-                        <SelectItem key={list.id} value={list.id}>
+                        <SelectItem key={list._id} value={list._id}>
                           {list.name}
                         </SelectItem>
                       ))}

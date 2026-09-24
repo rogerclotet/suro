@@ -3,7 +3,7 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -12,7 +12,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
-import { useProjects } from "@/app/_state/project-state";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import ModalForm from "@/components/ui/modal-form";
 import {
@@ -41,12 +40,11 @@ export default function LinkNoteForm({
     },
     resolver: valibotResolver(linkEventNoteSchema),
   });
-  const { project } = useProjects();
-  const notesData = useQuery(
-    api.notes.listByProject,
-    project ? { projectId: project.id as Id<"projects"> } : "skip",
+  const { isAuthenticated } = useConvexAuth();
+  const notes = useQuery(
+    api.events.noteLinkCandidates,
+    isAuthenticated ? { projectId: event.projectId as Id<"projects"> } : "skip",
   );
-  const notes = notesData?.filter((note) => note.eventId === undefined);
   const linkNote = useMutation(api.events.linkNote);
 
   const onSubmit = useCallback(

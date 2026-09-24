@@ -2,7 +2,7 @@
 
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useMemo } from "react";
 
 /**
@@ -13,33 +13,34 @@ export function useHasLinkCandidates(
   projectId: string | undefined,
   linked: { list: boolean; note: boolean; pot: boolean },
 ): boolean {
+  const { isAuthenticated } = useConvexAuth();
   const lists = useQuery(
-    api.lists.listByProject,
-    projectId && !linked.list
+    api.events.listLinkCandidates,
+    isAuthenticated && projectId && !linked.list
       ? { projectId: projectId as Id<"projects"> }
       : "skip",
   );
   const notes = useQuery(
-    api.notes.listByProject,
-    projectId && !linked.note
+    api.events.noteLinkCandidates,
+    isAuthenticated && projectId && !linked.note
       ? { projectId: projectId as Id<"projects"> }
       : "skip",
   );
   const pots = useQuery(
-    api.expenses.listPots,
-    projectId && !linked.pot
+    api.events.potLinkCandidates,
+    isAuthenticated && projectId && !linked.pot
       ? { projectId: projectId as Id<"projects"> }
       : "skip",
   );
 
   return useMemo(() => {
-    if (!linked.list && lists?.some((item) => !item.eventId)) {
+    if (!linked.list && lists?.length) {
       return true;
     }
-    if (!linked.note && notes?.some((item) => !item.eventId)) {
+    if (!linked.note && notes?.length) {
       return true;
     }
-    if (!linked.pot && pots?.some((item) => !item.eventId)) {
+    if (!linked.pot && pots?.length) {
       return true;
     }
     return false;

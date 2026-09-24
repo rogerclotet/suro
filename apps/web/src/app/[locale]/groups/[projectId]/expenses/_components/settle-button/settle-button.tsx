@@ -3,9 +3,17 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import {
+  createSettlementDraft,
+  selectedSettlementPayments,
+  settlementPaymentKey,
+  settlementProposalsMatch,
+  toggleSettlementPayment,
+} from "domain/expenses";
 import { Check, Handshake } from "lucide-react";
+import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -25,27 +33,8 @@ export default function SettleButton({
   members: Member[];
   potId: string;
 }) {
-  // Every proposal starts selected (matching the mobile settle sheet); only
-  // the opt-outs are tracked, so the default stays "settle everything".
-  const [excluded, setExcluded] = useState<ReadonlySet<number>>(new Set());
   const { data: session } = useSession();
-
-  const selected = useMemo(
-    () => (pending ?? []).filter((_, index) => !excluded.has(index)),
-    [pending, excluded],
-  );
-
-  function handleProposalChange(index: number, isSelected: boolean) {
-    setExcluded((prev) => {
-      const next = new Set(prev);
-      if (isSelected) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
-    });
-  }
+  const t = useTranslations("settlement");
 
   return (
     <>
@@ -54,16 +43,15 @@ export default function SettleButton({
           trigger={
             <Button variant="ghost" size="sm" className="gap-2">
               <Handshake />
-              Saldar
+              {t("title")}
             </Button>
           }
-          title="Saldar deutes"
-          description="Selecciona les propostes que vulguis realitzar per saldar deutes"
+          title={t("title")}
+          description={t("description")}
         >
           <SettleButtonContent
+            key={potId}
             pending={pending}
-            selected={selected}
-            onProposalChange={handleProposalChange}
             members={members}
             potId={potId}
             sessionId={session?.user.id}
@@ -76,25 +64,35 @@ export default function SettleButton({
 
 function SettleButtonContent({
   pending,
-  selected,
-  onProposalChange,
   members,
   potId,
   sessionId,
 }: {
   pending: SettlingPayment[];
-  selected: SettlingPayment[];
-  onProposalChange: (index: number, selected: boolean) => void;
   members: Member[];
   potId: string;
   sessionId?: string;
 }) {
   const { close } = useModalForm();
+  const t = useTranslations("settlement");
+  const [draft, setDraft] = useState(() => createSettlementDraft(pending));
+  const [busy, setBusy] = useState(false);
+  const [operationId, setOperationId] = useState(() => crypto.randomUUID());
+  const selected = selectedSettlementPayments(draft);
+  const stale = !settlementProposalsMatch(draft.reviewed, pending);
   const settlePayments = useMutation(api.expenses.settlePayments);
 
   async function handleSubmit() {
+    if (busy || stale || selected.length === 0) return;
+    setBusy(true);
     try {
       await settlePayments({
+        operationId,
+        reviewedPayments: draft.reviewed.map((p) => ({
+          from: p.from as Id<"users">,
+          to: p.to as Id<"users">,
+          amount: p.amount,
+        })),
         potId: potId as Id<"pots">,
         payments: selected.map((p) => ({
           from: p.from as Id<"users">,
@@ -103,37 +101,58 @@ function SettleButtonContent({
         })),
       });
       close();
-      toast.success("Deutes saldats correctament");
+      toast.success(t("success"));
     } catch (e) {
       posthog.captureException(e, {
         distinctId: sessionId,
         action: "settle_payments",
         potId,
       });
-      toast.error("Error al saldar deutes");
+      toast.error(t("error"));
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
     <>
-      {pending.length === 0 ? (
+      {stale && (
+        <Alert>
+          <AlertDescription>{t("changed")}</AlertDescription>
+          <Button
+            disabled={busy}
+            onClick={() => {
+              setDraft(createSettlementDraft(pending));
+              setOperationId(crypto.randomUUID());
+            }}
+          >
+            {t("review")}
+          </Button>
+        </Alert>
+      )}
+      {draft.reviewed.length === 0 ? (
         <Alert>
           <Check className="h-4 w-4" />
-          <AlertTitle>{"Ja s'han saldat tots els pagaments"}</AlertTitle>
-          <AlertDescription>
-            No hi ha cap deute pendent a saldar.
-          </AlertDescription>
+          <AlertTitle>{t("allSettled")}</AlertTitle>
+          <AlertDescription>{t("noPayments")}</AlertDescription>
         </Alert>
       ) : (
         <div className="mb-2 space-y-2">
-          <h2 className="font-semibold">Propostes per saldar deutes:</h2>
+          <h2 className="font-semibold">{t("proposals")}</h2>
           <ul className="space-y-2">
-            {pending.map((payment, index) => (
-              <li key={`${payment.from}-${payment.to}-${payment.amount}`}>
+            {draft.reviewed.map((payment) => (
+              <li key={settlementPaymentKey(payment)}>
                 <SettleProposal
                   payment={payment}
                   members={members}
-                  onChange={(selected) => onProposalChange(index, selected)}
+                  checked={draft.selectedKeys.has(
+                    settlementPaymentKey(payment),
+                  )}
+                  disabled={busy || stale}
+                  onChange={() => {
+                    setDraft(toggleSettlementPayment(draft, payment));
+                    setOperationId(crypto.randomUUID());
+                  }}
                 />
               </li>
             ))}
@@ -141,13 +160,13 @@ function SettleButtonContent({
         </div>
       )}
 
-      {pending.length > 0 && (
+      {draft.reviewed.length > 0 && (
         <Button
-          disabled={pending.length === 0}
+          disabled={busy || stale || selected.length === 0}
           onClick={handleSubmit}
           className="w-full"
         >
-          Confirmar seleccionades
+          {t("confirm")}
         </Button>
       )}
     </>

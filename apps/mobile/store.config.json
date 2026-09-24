@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.28.0",
+    "version": "1.29.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• All-day events display and edit on the correct date in every timezone. Events ending at midnight no longer appear on the following day.\n• Calendar events still default to all-day. Switching to timed suggests a one-hour slot and preserves edited times when changing dates or toggling all-day.",
+        "releaseNotes": "• Settlements keep selected payments and ask you to review changed amounts. Partial payments no longer close the pot.\n• Mobile expense sync retries no longer duplicate pots, expenses or settlements.\n• Events prevent conflicting links to lists, notes and pots.\n• The dashboard and link pickers load less data.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los eventos de todo el día se muestran y se editan en la fecha correcta en todas las zonas horarias. Los que terminan a medianoche ya no aparecen al día siguiente.\n• El calendario sigue creando eventos de todo el día por defecto. Al activar las horas, sugiere una franja de una hora y conserva las horas editadas al cambiar de fechas o volver a activar todo el día.",
+        "releaseNotes": "• Las liquidaciones conservan los pagos seleccionados y piden revisar los importes cuando cambian. Los pagos parciales ya no cierran el bote.\n• Los reintentos de sincronización de gastos en el móvil ya no duplican botes, gastos ni liquidaciones.\n• Los eventos evitan enlaces en conflicto con listas, notas y botes.\n• El panel y los selectores de enlaces cargan menos datos.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els esdeveniments de tot el dia es mostren i s'editen a la data correcta en tots els fusos horaris. Els que acaben a mitjanit ja no apareixen l'endemà.\n• El calendari continua creant esdeveniments de tot el dia per defecte. En activar les hores, suggereix una franja d'una hora i conserva les hores editades en canviar de dates o tornar a activar tot el dia.",
+        "releaseNotes": "• Les liquidacions conserven els pagaments seleccionats i demanen revisar els imports quan canvien. Els pagaments parcials ja no tanquen el pot.\n• Els reintents de sincronització de despeses al mòbil ja no dupliquen pots, despeses ni liquidacions.\n• Els esdeveniments eviten enllaços en conflicte amb llistes, notes i pots.\n• El tauler i els selectors d'enllaços carreguen menys dades.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

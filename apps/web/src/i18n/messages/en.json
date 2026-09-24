@@ -859,5 +859,18 @@
     "back": "Back",
     "finish": "Finish",
     "letsGo": "Let's go!"
+  },
+  "settlement": {
+    "title": "Settle debts",
+    "description": "Select the payments you want to record.",
+    "success": "Payments recorded",
+    "error": "Could not record payments. Review the current proposals and try again.",
+    "changed": "The proposed payments have changed. Review the latest amounts before confirming.",
+    "review": "Review updated payments",
+    "allSettled": "All payments are settled",
+    "noPayments": "There are no pending payments.",
+    "proposals": "Proposed payments",
+    "confirm": "Confirm selected payments",
+    "someone": "Someone"
   }
 }

@@ -165,3 +165,25 @@ export function adaptTemplate(t: ConvexTemplate): Template {
     updatedAt: t.updatedAt ? new Date(t.updatedAt) : null,
   };
 }
+
+export type ListPreviewData = Pick<
+  ListDetail,
+  "id" | "projectId" | "name" | "description" | "event"
+> & {
+  total: number;
+  done: number;
+};
+
+export function adaptListPreview(
+  list: FunctionReturnType<typeof api.lists.homePreviews>["previews"][number],
+): ListPreviewData {
+  return {
+    id: list._id,
+    projectId: list.projectId,
+    name: list.name,
+    description: list.description ?? null,
+    event: null,
+    total: list.total,
+    done: list.done,
+  };
+}

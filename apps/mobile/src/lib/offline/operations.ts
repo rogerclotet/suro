@@ -151,6 +151,7 @@ export const OPERATIONS = {
     "expenses:createPot",
     api.expenses.createPot,
     v.strictObject({
+      operationId: v.optional(v.string()),
       projectId: id("projects"),
       name: v.string(),
       memberIds: v.array(id("users")),
@@ -161,6 +162,7 @@ export const OPERATIONS = {
     "expenses:createSpending",
     api.expenses.createSpending,
     v.strictObject({
+      operationId: v.optional(v.string()),
       potId: id("pots"),
       amount: number(),
       description: v.optional(v.string()),
@@ -173,7 +175,17 @@ export const OPERATIONS = {
     "expenses:settlePayments",
     api.expenses.settlePayments,
     v.strictObject({
+      operationId: v.optional(v.string()),
       potId: id("pots"),
+      reviewedPayments: v.optional(
+        v.array(
+          v.strictObject({
+            from: id("users"),
+            to: id("users"),
+            amount: number(),
+          }),
+        ),
+      ),
       payments: v.array(
         v.strictObject({
           from: id("users"),
@@ -206,4 +218,13 @@ export function parseOperation(functionName: string, args: unknown): Operation {
   if (!isOperationName(functionName))
     throw new Error("Unsupported saved operation");
   return OPERATIONS[functionName].parse(args);
+}
+
+/** Expense operations that persist a server receipt for safe retries. */
+export function isRetrySafeExpense(name: OperationName): boolean {
+  return (
+    name === "expenses:createPot" ||
+    name === "expenses:createSpending" ||
+    name === "expenses:settlePayments"
+  );
 }

@@ -285,3 +285,49 @@ export const clearCompleted = mutation({
     return null;
   },
 });
+
+/** Count only the lists shown on the dashboard; never load unrelated item history. */
+export const homePreviews = query({
+  args: { projectId: v.id("projects"), eventIds: v.array(v.id("events")) },
+  handler: async (ctx, { projectId, eventIds }) => {
+    await requireProjectMember(ctx, projectId);
+    if (eventIds.length > 5)
+      throw new Error("At most five preview events are supported");
+    const lists = await ctx.db
+      .query("lists")
+      .withIndex("by_project_updatedAt", (q) => q.eq("projectId", projectId))
+      .order("desc")
+      .collect();
+    const favorites = lists.filter((list) => list.favorite).slice(0, 5);
+    const events = new Set(eventIds);
+    const selected = new Map(favorites.map((list) => [list._id, list]));
+    // Match event details for legacy duplicates: show the oldest linked resource.
+    for (const eventId of events) {
+      const linked = lists
+        .filter((list) => list.eventId === eventId)
+        .sort(
+          (a, b) =>
+            a._creationTime - b._creationTime || a._id.localeCompare(b._id),
+        )[0];
+      if (linked) selected.set(linked._id, linked);
+    }
+    const previews = await Promise.all(
+      [...selected.values()].map(async (list) => {
+        const items = await ctx.db
+          .query("listItems")
+          .withIndex("by_list", (q) => q.eq("listId", list._id))
+          .collect();
+        return {
+          _id: list._id,
+          projectId,
+          name: list.name,
+          description: list.description,
+          eventId: list.eventId,
+          total: items.length,
+          done: items.filter((item) => item.completed).length,
+        };
+      }),
+    );
+    return { previews, favoriteIds: favorites.map((list) => list._id) };
+  },
+});

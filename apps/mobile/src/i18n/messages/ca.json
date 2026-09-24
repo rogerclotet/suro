@@ -1177,7 +1177,9 @@
       "soloLastMonth": "Mes passat",
       "soloRecentSpendings": "Despeses recents",
       "soloNoSpendings": "Encara no hi ha despeses. Toca + per afegir-ne una.",
-      "soloUntitledSpending": "Despesa"
+      "soloUntitledSpending": "Despesa",
+      "settlementChanged": "Les propostes de pagament han canviat. Revisa els imports actuals abans de confirmar.",
+      "reviewSettlement": "Revisar els pagaments actualitzats"
     }
   },
   "offline": {

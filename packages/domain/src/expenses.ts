@@ -115,3 +115,51 @@ export function generateProposals<UserId extends string>(
   }
   return payments;
 }
+
+/** Directed payment identity. The amount stays in the reviewed draft. */
+export function settlementPaymentKey(payment: SettlingPayment): string {
+  return JSON.stringify([payment.from, payment.to]);
+}
+
+export type SettlementDraft<Payment extends SettlingPayment> = {
+  reviewed: Payment[];
+  selectedKeys: ReadonlySet<string>;
+};
+
+export function createSettlementDraft<Payment extends SettlingPayment>(
+  proposals: readonly Payment[],
+): SettlementDraft<Payment> {
+  return {
+    reviewed: proposals.map((payment) => ({ ...payment })),
+    selectedKeys: new Set(proposals.map(settlementPaymentKey)),
+  };
+}
+
+export function toggleSettlementPayment<Payment extends SettlingPayment>(
+  draft: SettlementDraft<Payment>,
+  payment: Payment,
+): SettlementDraft<Payment> {
+  const selectedKeys = new Set(draft.selectedKeys);
+  const key = settlementPaymentKey(payment);
+  if (selectedKeys.has(key)) selectedKeys.delete(key);
+  else selectedKeys.add(key);
+  return { ...draft, selectedKeys };
+}
+
+export function selectedSettlementPayments<Payment extends SettlingPayment>(
+  draft: SettlementDraft<Payment>,
+): Payment[] {
+  return draft.reviewed.filter((payment) =>
+    draft.selectedKeys.has(settlementPaymentKey(payment)),
+  );
+}
+
+/** Reordering does not invalidate review; amounts and participants do. */
+export function settlementProposalsMatch(
+  reviewed: readonly SettlingPayment[],
+  current: readonly SettlingPayment[],
+): boolean {
+  const keys = (payments: readonly SettlingPayment[]) =>
+    payments.map((p) => JSON.stringify([p.from, p.to, p.amount])).sort();
+  return JSON.stringify(keys(reviewed)) === JSON.stringify(keys(current));
+}

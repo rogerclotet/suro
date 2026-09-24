@@ -3,6 +3,7 @@ import { eventOverlapsRange, normalizeEventEnd } from "domain/events";
 import type { Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
+import { requireEventLinkSlot } from "./model/eventLinks";
 import { loadListWithItems } from "./model/lists";
 import { notifyProject } from "./model/notify";
 import {
@@ -219,6 +220,7 @@ export const createLinkedList = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
+    await requireEventLinkSlot(ctx, "lists", eventId);
     const creator = await ctx.db.get(userId);
     const listId = await ctx.db.insert("lists", {
       name: event.name,
@@ -247,6 +249,7 @@ export const linkList = mutation({
     if (list.projectId !== event.projectId) {
       throw new Error("List and event are not in the same project");
     }
+    await requireEventLinkSlot(ctx, "lists", eventId, list);
     await ctx.db.patch(list._id, { eventId: event._id, updatedBy: userId });
     await recordProjectActivity(ctx, event.projectId);
     return null;
@@ -272,6 +275,7 @@ export const createLinkedNote = mutation({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
+    await requireEventLinkSlot(ctx, "notes", eventId);
     const noteId = await ctx.db.insert("notes", {
       name: event.name,
       contents: "",
@@ -298,6 +302,7 @@ export const linkNote = mutation({
     if (note.projectId !== event.projectId) {
       throw new Error("Note and event are not in the same project");
     }
+    await requireEventLinkSlot(ctx, "notes", eventId, note);
     await ctx.db.patch(note._id, { eventId: event._id, updatedBy: userId });
     await recordProjectActivity(ctx, event.projectId);
     return null;
@@ -330,6 +335,7 @@ export const createLinkedPot = mutation({
   },
   handler: async (ctx, { eventId, memberIds }) => {
     const { event, userId } = await requireEventAccess(ctx, eventId);
+    await requireEventLinkSlot(ctx, "pots", eventId);
 
     let resolved: Id<"users">[];
     if (memberIds === undefined) {
@@ -383,6 +389,7 @@ export const linkPot = mutation({
     if (pot.projectId !== event.projectId) {
       throw new Error("Pot and event are not in the same project");
     }
+    await requireEventLinkSlot(ctx, "pots", eventId, pot);
     await ctx.db.patch(pot._id, { eventId: event._id });
     await recordProjectActivity(ctx, event.projectId);
     return null;
@@ -449,5 +456,78 @@ export const exportData = internalQuery({
       .collect();
 
     return { calendarName: project.name, events };
+  },
+});
+
+export const listLinkCandidates = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const rows = await ctx.db
+      .query("lists")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    return rows
+      .filter((row) => row.eventId === undefined)
+      .map((row) => ({ _id: row._id, name: row.name }));
+  },
+});
+
+export const noteLinkCandidates = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const rows = await ctx.db
+      .query("notes")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    return rows
+      .filter((row) => row.eventId === undefined)
+      .map((row) => ({ _id: row._id, name: row.name }));
+  },
+});
+
+export const potLinkCandidates = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    await requireProjectMember(ctx, projectId);
+    const rows = await ctx.db
+      .query("pots")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    return rows
+      .filter((row) => row.eventId === undefined && row.settledAt === undefined)
+      .map((row) => ({ _id: row._id, name: row.name }));
+  },
+});
+
+/** Audit before changing legacy detail reads from first() to unique(). */
+export const auditLinkDuplicates = internalQuery({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const conflicts: {
+      kind: "lists" | "notes" | "pots";
+      eventId: Id<"events">;
+      resourceIds: string[];
+    }[] = [];
+    for (const kind of ["lists", "notes", "pots"] as const) {
+      const rows = await ctx.db
+        .query(kind)
+        .withIndex("by_project", (q) => q.eq("projectId", projectId))
+        .collect();
+      const byEvent = new Map<Id<"events">, string[]>();
+      for (const row of rows) {
+        if (row.eventId)
+          byEvent.set(row.eventId, [
+            ...(byEvent.get(row.eventId) ?? []),
+            row._id,
+          ]);
+      }
+      for (const [eventId, resourceIds] of byEvent) {
+        if (resourceIds.length > 1)
+          conflicts.push({ kind, eventId, resourceIds });
+      }
+    }
+    return conflicts;
   },
 });

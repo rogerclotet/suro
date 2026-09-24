@@ -1,2 +1,4 @@
-• All-day events display and edit on the correct date in every timezone. Events ending at midnight no longer appear on the following day.
-• Calendar events still default to all-day. Switching to timed suggests a one-hour slot and preserves edited times when changing dates or toggling all-day.
+• Settlements keep selected payments and ask you to review changed amounts. Partial payments no longer close the pot.
+• Mobile expense sync retries no longer duplicate pots, expenses or settlements.
+• Events prevent conflicting links to lists, notes and pots.
+• The dashboard and link pickers load less data.

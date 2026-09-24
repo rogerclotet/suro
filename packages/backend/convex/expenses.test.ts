@@ -255,3 +255,154 @@ describe("expenses: solo groups", () => {
     ).rejects.toThrow("at least two members");
   });
 });
+
+it("deduplicates an expense retried after a lost acknowledgement", async () => {
+  const potId = await makePot();
+  const args = {
+    potId,
+    from: ids.alice,
+    amount: 800,
+    operationId: "durable-expense-1",
+  };
+  const first = await alice.mutation(api.expenses.createSpending, args);
+  const retry = await alice.mutation(api.expenses.createSpending, args);
+  expect(retry).toBe(first);
+  expect(await potSpendings(potId)).toHaveLength(1);
+});
+
+it("deduplicates pot creation, scopes keys by actor and rejects changed requests", async () => {
+  const args = {
+    projectId: ids.family,
+    name: "Retry",
+    memberIds: [ids.alice, ids.bob],
+    operationId: "pot-operation",
+  };
+  const first = await alice.mutation(api.expenses.createPot, args);
+  expect(await alice.mutation(api.expenses.createPot, args)).toBe(first);
+  await expect(
+    alice.mutation(api.expenses.createPot, { ...args, name: "Changed" }),
+  ).rejects.toThrow("OPERATION_CONFLICT");
+  const bob = t.withIdentity({ subject: `${ids.bob}|session` });
+  expect(await bob.mutation(api.expenses.createPot, args)).not.toBe(first);
+  expect(await potMembers(first)).toHaveLength(2);
+});
+
+it("deduplicates settlements before checking the now-changed proposals", async () => {
+  const potId = await makePot();
+  await alice.mutation(api.expenses.createSpending, {
+    potId,
+    from: ids.alice,
+    amount: 800,
+  });
+  const payments = [{ from: ids.bob, to: ids.alice, amount: 400 }];
+  const args = {
+    potId,
+    payments,
+    reviewedPayments: payments,
+    operationId: "settlement-operation",
+  };
+  await alice.mutation(api.expenses.settlePayments, args);
+  const settledAt = (await alice.query(api.expenses.getPot, { potId }))
+    ?.settledAt;
+  await alice.mutation(api.expenses.settlePayments, args);
+  expect(await potSpendings(potId)).toHaveLength(2);
+  expect((await alice.query(api.expenses.getPot, { potId }))?.settledAt).toBe(
+    settledAt,
+  );
+});
+
+it("rejects stale settlement review atomically and allows a fresh review", async () => {
+  const potId = await makePot();
+  await alice.mutation(api.expenses.createSpending, {
+    potId,
+    from: ids.alice,
+    amount: 800,
+  });
+  const reviewedPayments = [{ from: ids.bob, to: ids.alice, amount: 400 }];
+  await alice.mutation(api.expenses.createSpending, {
+    potId,
+    from: ids.bob,
+    amount: 200,
+  });
+  const args = {
+    potId,
+    payments: reviewedPayments,
+    reviewedPayments,
+    operationId: "review-operation",
+  };
+  await expect(
+    alice.mutation(api.expenses.settlePayments, args),
+  ).rejects.toThrow("SETTLEMENT_CHANGED");
+  expect(await potSpendings(potId)).toHaveLength(2);
+  const payments = [{ from: ids.bob, to: ids.alice, amount: 300 }];
+  await alice.mutation(api.expenses.settlePayments, {
+    ...args,
+    payments,
+    reviewedPayments: payments,
+  });
+  expect(await potSpendings(potId)).toHaveLength(3);
+});
+
+it("does not mark an empty or partial settlement as fully settled", async () => {
+  const potId = await makePot();
+  await alice.mutation(api.expenses.createSpending, {
+    potId,
+    from: ids.alice,
+    amount: 800,
+  });
+  await alice.mutation(api.expenses.settlePayments, { potId, payments: [] });
+  expect(
+    (await alice.query(api.expenses.getPot, { potId }))?.settledAt,
+  ).toBeUndefined();
+  await alice.mutation(api.expenses.settlePayments, {
+    potId,
+    payments: [{ from: ids.bob, to: ids.alice, amount: 100 }],
+  });
+  expect(
+    (await alice.query(api.expenses.getPot, { potId }))?.settledAt,
+  ).toBeUndefined();
+});
+
+it("does not let a receipt bypass membership checks or repeat side effects", async () => {
+  const potId = await makePot();
+  const args = {
+    potId,
+    from: ids.alice,
+    amount: 800,
+    operationId: "expense-side-effects",
+  };
+  await alice.mutation(api.expenses.createSpending, args);
+  const before = await t.run((ctx) => ctx.db.query("notifications").collect());
+  await alice.mutation(api.expenses.createSpending, args);
+  expect(await t.run((ctx) => ctx.db.query("notifications").collect())).toEqual(
+    before,
+  );
+  await t.run(async (ctx) => {
+    const member = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_user", (q) =>
+        q.eq("projectId", ids.family).eq("userId", ids.alice),
+      )
+      .unique();
+    if (member) await ctx.db.delete(member._id);
+  });
+  await expect(
+    alice.mutation(api.expenses.createSpending, args),
+  ).rejects.toThrow();
+});
+
+it("deletes retained operation receipts when their account is deleted", async () => {
+  await alice.mutation(api.expenses.createPot, {
+    projectId: ids.family,
+    name: "Trip",
+    memberIds: [ids.alice, ids.bob],
+    operationId: "account-receipt",
+  });
+  expect(
+    await t.run((ctx) => ctx.db.query("expenseOperations").collect()),
+  ).toHaveLength(1);
+  await alice.mutation(api.users.deleteAccount, {});
+  expect(
+    await t.run((ctx) => ctx.db.query("expenseOperations").collect()),
+  ).toEqual([]);
+});

@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { flush } from "./flush";
 import { isOnlineNow } from "./network";
 import {
+  isRetrySafeExpense,
   OPERATIONS,
   type OperationName,
   type OperationReference,
@@ -32,7 +33,9 @@ export function useQueuedMutation<K extends OperationName>(
   return useCallback(
     async (args: FunctionArgs<OperationReference<K>>) => {
       const resolvedArgs = remapArgs(args, outbox.getIdmap());
+      // Expense writes must reach disk before any send, even while online.
       if (
+        !isRetrySafeExpense(name) &&
         isOnlineNow() &&
         !outbox.getEntries().length &&
         !hasUnresolvedTemp(resolvedArgs)

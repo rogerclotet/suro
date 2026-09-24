@@ -1177,7 +1177,9 @@
       "soloLastMonth": "Mes pasado",
       "soloRecentSpendings": "Gastos recientes",
       "soloNoSpendings": "Aún no hay gastos. Toca + para añadir uno.",
-      "soloUntitledSpending": "Gasto"
+      "soloUntitledSpending": "Gasto",
+      "settlementChanged": "Las propuestas de pago han cambiado. Revisa los importes actuales antes de confirmar.",
+      "reviewSettlement": "Revisar los pagos actualizados"
     }
   },
   "offline": {

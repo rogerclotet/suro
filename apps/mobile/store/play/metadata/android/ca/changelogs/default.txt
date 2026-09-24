@@ -1,2 +1,4 @@
-• Els esdeveniments de tot el dia es mostren i s'editen a la data correcta en tots els fusos horaris. Els que acaben a mitjanit ja no apareixen l'endemà.
-• El calendari continua creant esdeveniments de tot el dia per defecte. En activar les hores, suggereix una franja d'una hora i conserva les hores editades en canviar de dates o tornar a activar tot el dia.
+• Les liquidacions conserven els pagaments seleccionats i demanen revisar els imports quan canvien. Els pagaments parcials ja no tanquen el pot.
+• Els reintents de sincronització de despeses al mòbil ja no dupliquen pots, despeses ni liquidacions.
+• Els esdeveniments eviten enllaços en conflicte amb llistes, notes i pots.
+• El tauler i els selectors d'enllaços carreguen menys dades.

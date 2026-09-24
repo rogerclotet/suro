@@ -373,6 +373,7 @@ export function useOfflineGetPot(
         settledAt = entry.createdAt;
       }
     }
+    if (settlements.length > 0) settledAt = undefined;
     return { ...potBase, spendings, balances, settlements, settledAt };
   }, [
     base,

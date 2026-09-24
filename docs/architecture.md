@@ -15,7 +15,7 @@ Suro has one backend and two clients. Convex owns persistence, permissions, auth
 | Native checklist behavior and presentation | `apps/mobile/src/features/lists` |
 | Native offline persistence, replay and projections | `apps/mobile/src/lib/offline` |
 
-Keep `domain` independent of Convex, React, native modules, storage and network calls. It takes typed inputs and returns values. Convex checks membership and validates external arguments before invoking those rules. The server's expense balances and settlement proposals are authoritative; mobile uses the same arithmetic to project pending changes.
+Keep `domain` independent of Convex, React, native modules, storage and network calls. It takes typed inputs and returns values. Convex checks membership and validates external arguments before invoking those rules. The server's expense balances and settlement proposals are authoritative; mobile uses the same arithmetic to project pending changes. Both clients create a settlement draft from reviewed payment identities and amounts. A reorder preserves selection. Changes to participants or amounts require an explicit refresh, and new clients send the reviewed proposals for a transactional server check. Partial payments leave a pot open while any balance remains.
 
 Clients keep their own components and translations. Share pure behavior where it must agree across platforms. The web checklist and the native checklist need different interaction and rendering code.
 
@@ -53,13 +53,33 @@ Replay requires both connectivity and a confirmed server identity matching the q
 
 The replay tests use the real persistence and replay code with injected storage, identity, network state and a send function. They cover restart, legacy migration, unreadable records, dependency chains, failed writes, recovery an account change during a request, writes added during a flush, and temporary route IDs becoming server IDs. Native storage and device interactions still need device testing.
 
-Replay is not an exactly-once delivery guarantee. A crash after a server mutation succeeds but before its local acknowledgement can replay it. Recurring completion is guarded; create/settlement commands would need server-persisted operation keys for general deduplication. Keep that requirement explicit when introducing non-idempotent operations.
+Expense pot creation, spending creation and settlement now use optional `operationId` arguments. Mobile persists these commands in the outbox even when online. Replay assigns and saves a UUID before the first send, including for existing queue entries. Operation IDs are opaque keys, not temporary document references. The server records the result and a hash of the request in `expenseOperations`, scoped to the authenticated user, in the same transaction as the write and its side effects. Retries return that result; reusing a key for different arguments is an error. Authorization still applies before a receipt is returned.
+
+Receipts have no time-based expiry because devices may stay offline indefinitely. Account deletion removes them. Older installed clients can continue sending the original arguments, but writes without a key do not gain deduplication. A successful write sent before upgrade cannot be retroactively identified by a newly assigned key. Other queued mutations still have their existing replay semantics; this is not a general exactly-once delivery guarantee.
+
+New settlement commands include `reviewedPayments`. A stale offline settlement fails without inserting payments and stays in the existing failed-write queue. Discard that failed command before opening a fresh settlement review. Legacy queues that lack reviewed proposals keep their original submission semantics.
+
+## Event links
+
+`model/eventLinks.ts` enforces one list, note and pot per event inside the write transaction, including migration writes. Repeating the same link succeeds; attaching a second resource of that kind or moving an already-linked resource fails. Unlink explicitly before moving a resource. All callers retain their authorization checks.
+
+Historical duplicates may still exist. Event details keep their tolerant `first()` reads until those records are reconciled. Run the internal `events:auditLinkDuplicates` query with a `projectId` to list conflicts, then unlink the unwanted associations without deleting the resources. Audit all affected projects before tightening reads to `unique()`.
 
 ## Query scaling
 
 The backend list test includes 120 weekly lists with 20 items each. Fetching summaries plus one detail returns less than one tenth of the JSON payload of `listByProject`. The summary query reads list documents without joining every item's history; the detail query only subscribes to the selected list's items.
 
-This fixture measures payload shape, not production latency or Convex billing. `overviewByProject` still scans list items to determine completion, and expense views still aggregate spending history. Before adding counters or denormalized completion fields, measure document reads, result sizes and latency for real groups. If those scans become costly, introduce transactional counters and paginated history with explicit consistency tests. A response limit alone does not reduce the current scan.
+The same 120-list, 2,400-item fixture now measures dashboard previews and list link candidates separately. Instrumentation counts documents returned by real database reads in `convex-test`, including repeated reads, rather than estimating reads from response size:
+
+| Query | JSON bytes | Documents returned by DB calls |
+| --- | ---: | ---: |
+| Full lists with items | 552,117 | 2,641 |
+| Dashboard previews, five favorites | 894 | 221 |
+| Unlinked list candidates | 7,150 | 121 |
+
+`lists.homePreviews` still scans the project's list documents, then reads items only for up to five favorites and the lists linked to up to five upcoming events. It returns completion counts, not items. The candidate queries scan resource documents without joining list items, pot members or users. Note candidates omit contents from the response, but still read note documents containing those contents. No query-cache or outbox invalidation is required because these are new query names.
+
+These measurements do not establish production latency or Convex billing. `overviewByProject` still scans list items to determine completion, and expense views still aggregate spending history. Before adding counters or denormalized completion fields, measure document reads, result sizes and latency for real groups. If those scans become costly, introduce transactional counters and paginated history with explicit consistency tests. A response limit alone does not reduce the current scan.
 
 Shared package changes must reach their consumers: `domain` affects web, backend and native releases; `design-tokens` affects web and native builds. Web/backend path filters, Docker workspace manifests and Next's transpilation configuration include those packages. Every root version bump with a matching top changelog entry triggers a native release, regardless of changed paths, including backend-only and web-only releases.
 

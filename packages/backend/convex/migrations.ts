@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
+import { requireEventLinkSlot } from "./model/eventLinks";
 
 /**
  * One-off Postgres → Convex migration upserts, driven by scripts/migrate.mjs.
@@ -201,6 +202,17 @@ export const upsertList = mutation({
       .query("lists")
       .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
       .unique();
+    if (data.eventId) {
+      await requireEventLinkSlot(
+        ctx,
+        "lists",
+        data.eventId,
+        existing ? { ...existing, projectId: data.projectId } : undefined,
+      );
+      const event = await ctx.db.get(data.eventId);
+      if (event?.projectId !== data.projectId)
+        throw new Error("Resource and event must belong to the same project");
+    }
     if (existing) {
       await ctx.db.patch(existing._id, data);
       return existing._id;
@@ -297,6 +309,17 @@ export const upsertNote = mutation({
       .query("notes")
       .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
       .unique();
+    if (data.eventId) {
+      await requireEventLinkSlot(
+        ctx,
+        "notes",
+        data.eventId,
+        existing ? { ...existing, projectId: data.projectId } : undefined,
+      );
+      const event = await ctx.db.get(data.eventId);
+      if (event?.projectId !== data.projectId)
+        throw new Error("Resource and event must belong to the same project");
+    }
     if (existing) {
       await ctx.db.patch(existing._id, data);
       return existing._id;
@@ -322,6 +345,17 @@ export const upsertPot = mutation({
       .query("pots")
       .withIndex("by_legacyId", (q) => q.eq("legacyId", data.legacyId))
       .unique();
+    if (data.eventId) {
+      await requireEventLinkSlot(
+        ctx,
+        "pots",
+        data.eventId,
+        existing ? { ...existing, projectId: data.projectId } : undefined,
+      );
+      const event = await ctx.db.get(data.eventId);
+      if (event?.projectId !== data.projectId)
+        throw new Error("Resource and event must belong to the same project");
+    }
     if (existing) {
       await ctx.db.patch(existing._id, data);
       return existing._id;

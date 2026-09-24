@@ -6,6 +6,29 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.29.0] — 2026-09-24
+
+### ca
+
+- [fix] Les liquidacions conserven els pagaments seleccionats i demanen revisar els imports quan canvien. Els pagaments parcials ja no tanquen el pot.
+- [fix] Els reintents de sincronització de despeses al mòbil ja no dupliquen pots, despeses ni liquidacions.
+- [fix] Els esdeveniments eviten enllaços en conflicte amb llistes, notes i pots.
+- [improvement] El tauler i els selectors d'enllaços carreguen menys dades.
+
+### es
+
+- [fix] Las liquidaciones conservan los pagos seleccionados y piden revisar los importes cuando cambian. Los pagos parciales ya no cierran el bote.
+- [fix] Los reintentos de sincronización de gastos en el móvil ya no duplican botes, gastos ni liquidaciones.
+- [fix] Los eventos evitan enlaces en conflicto con listas, notas y botes.
+- [improvement] El panel y los selectores de enlaces cargan menos datos.
+
+### en
+
+- [fix] Settlements keep selected payments and ask you to review changed amounts. Partial payments no longer close the pot.
+- [fix] Mobile expense sync retries no longer duplicate pots, expenses or settlements.
+- [fix] Events prevent conflicting links to lists, notes and pots.
+- [improvement] The dashboard and link pickers load less data.
+
 ## [1.28.0] — 2026-09-24
 
 ### ca

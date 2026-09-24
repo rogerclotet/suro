@@ -859,5 +859,18 @@
     "back": "Enrere",
     "finish": "Acabar",
     "letsGo": "Som-hi!"
+  },
+  "settlement": {
+    "title": "Saldar deutes",
+    "description": "Selecciona els pagaments que vols registrar.",
+    "success": "Pagaments registrats",
+    "error": "No s’han pogut registrar els pagaments. Revisa les propostes actuals i torna-ho a provar.",
+    "changed": "Les propostes de pagament han canviat. Revisa els imports actuals abans de confirmar.",
+    "review": "Revisar els pagaments actualitzats",
+    "allSettled": "Tots els pagaments estan saldats",
+    "noPayments": "No hi ha cap pagament pendent.",
+    "proposals": "Propostes de pagament",
+    "confirm": "Confirmar els pagaments seleccionats",
+    "someone": "Algú"
   }
 }
