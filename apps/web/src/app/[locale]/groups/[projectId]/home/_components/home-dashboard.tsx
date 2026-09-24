@@ -4,6 +4,13 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
+  eventDatesForForm,
+  eventLocalStart,
+  eventWindowBounds,
+  pickUpcomingEvents,
+  sameDay,
+} from "domain/events";
+import {
   Calendar,
   CalendarDays,
   CheckSquare,
@@ -19,7 +26,7 @@ import { useProjects } from "@/app/_state/project-state";
 import ListPreview from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
 import ProgressRing from "@/app/[locale]/groups/[projectId]/lists/_components/progress-ring";
 import { Link } from "@/i18n/navigation";
-import { isEventOnDay } from "@/lib/event-day";
+import { eventTimes, isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
 import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { cn } from "@/lib/utils";
@@ -204,7 +211,7 @@ function EventCard({
       }
     >
       <EventDateBadge
-        date={event.startAt}
+        date={eventLocalStart(eventTimes(event))}
         isToday={isToday}
         todayLabel={todayLabel}
         locale={locale}
@@ -223,23 +230,12 @@ function EventCard({
 const DATE_OPTS: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
 const TIME_OPTS: Intl.DateTimeFormatOptions = { timeStyle: "short" };
 
-function sameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
 function formatEventRange(event: CalendarEvent, locale: string): string {
-  const { startAt, endAt, allDay } = event;
+  const { from: startAt, to: endAt } = eventDatesForForm(eventTimes(event));
+  const { allDay } = event;
 
   if (allDay) {
-    const displayEnd = new Date(
-      endAt.getFullYear(),
-      endAt.getMonth(),
-      endAt.getDate() - 1,
-    );
+    const displayEnd = endAt;
     if (sameDay(displayEnd, startAt)) {
       return startAt.toLocaleDateString(locale, DATE_OPTS);
     }
@@ -258,14 +254,8 @@ function formatEventTime(
   allDayLabel: string,
 ): string {
   if (event.allDay) {
-    const displayEnd = new Date(
-      event.endAt.getFullYear(),
-      event.endAt.getMonth(),
-      event.endAt.getDate() - 1,
-    );
-    return sameDay(displayEnd, event.startAt)
-      ? allDayLabel
-      : formatEventRange(event, locale);
+    const { from, to } = eventDatesForForm(eventTimes(event));
+    return sameDay(to, from) ? allDayLabel : formatEventRange(event, locale);
   }
   if (sameDay(event.startAt, event.endAt)) {
     return `${event.startAt.toLocaleTimeString(locale, TIME_OPTS)} - ${event.endAt.toLocaleTimeString(locale, TIME_OPTS)}`;
@@ -278,27 +268,19 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   const t = useTranslations("home");
   const tCalendar = useTranslations("calendar");
 
-  const [bounds] = useState(() => {
-    const today = new Date();
-    const from = new Date(today);
-    from.setHours(0, 0, 0, 0);
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
-    return {
-      today,
-      from,
-      endOfToday: endOfToday.getTime(),
-      to: new Date(from.getTime() + UPCOMING_WINDOW_MS),
-    };
-  });
-
-  const events = useEventsInRange(projectId, bounds.from, bounds.to);
+  const [bounds] = useState(() =>
+    eventWindowBounds(new Date(), UPCOMING_WINDOW_MS),
+  );
+  const events = useEventsInRange(projectId, bounds.today, bounds.lastDay);
   const upcomingEvents = useMemo(
     () =>
-      events
-        ?.filter((event) => event.endAt.getTime() >= bounds.from.getTime())
-        .slice(0, PREVIEW_LIMIT),
-    [events, bounds.from],
+      events &&
+      pickUpcomingEvents(
+        events.map((event) => ({ ...eventTimes(event), source: event })),
+        bounds.today,
+        PREVIEW_LIMIT,
+      ).map((event) => event.source),
+    [events, bounds.today],
   );
   const todayEventCount = useMemo(
     () =>

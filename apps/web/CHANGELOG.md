@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.28.0] — 2026-09-24
+
+### ca
+
+- [fix] Els esdeveniments de tot el dia es mostren i s'editen a la data correcta en tots els fusos horaris. Els que acaben a mitjanit ja no apareixen l'endemà.
+- [improvement] El calendari continua creant esdeveniments de tot el dia per defecte. En activar les hores, suggereix una franja d'una hora i conserva les hores editades en canviar de dates o tornar a activar tot el dia.
+
+### es
+
+- [fix] Los eventos de todo el día se muestran y se editan en la fecha correcta en todas las zonas horarias. Los que terminan a medianoche ya no aparecen al día siguiente.
+- [improvement] El calendario sigue creando eventos de todo el día por defecto. Al activar las horas, sugiere una franja de una hora y conserva las horas editadas al cambiar de fechas o volver a activar todo el día.
+
+### en
+
+- [fix] All-day events display and edit on the correct date in every timezone. Events ending at midnight no longer appear on the following day.
+- [improvement] Calendar events still default to all-day. Switching to timed suggests a one-hour slot and preserves edited times when changing dates or toggling all-day.
+
 ## [1.27.2] — 2026-09-21
 
 ### ca

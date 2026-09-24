@@ -8,7 +8,7 @@ Suro has one backend and two clients. Convex owns persistence, permissions, auth
 | --- | --- |
 | Schema and public API | `packages/backend/convex/schema.ts` and domain query/mutation modules |
 | Authorization and joins | `packages/backend/convex/model` |
-| Expense arithmetic, recurrence, task ordering and aggregation | `packages/domain/src` |
+| Expense arithmetic, calendar dates, recurrence, task ordering and aggregation | `packages/domain/src` |
 | Shared visual values | `packages/design-tokens` |
 | Web reactive adapters | `apps/web/src/lib/queries` and `app/_data` |
 | Web project subscription and selection | `app/_components/projects-provider` |
@@ -32,6 +32,14 @@ The web project provider is the only owner of project selection effects. It deri
 The native checklist composes row and sheet components, a draft editor hook, a scroll lifecycle hook and typed command hooks. Online optimistic commands and offline queue projections both use `overlayItems`. Keep focus-follow state in the checklist: asynchronous submission must not unmount the active add input between entries.
 
 Group ordering uses `projects.lastActivityAt`, with creation time as the fallback for groups without recorded activity. Content mutations call `recordProjectActivity` in the same transaction after authorization, including quiet list-item, note, calendar, file and expense edits. Recording activity does not create unread notifications. Opening a group does not change its activity timestamp. Mobile search filters the ordered groups locally by group name and all member names, including cached groups while offline.
+
+## Calendar dates
+
+`domain/events` owns date-only conversion, overlap rules, countdowns, upcoming-event selection and form date transitions. Clients own localized formatting and input controls. All-day events store UTC midnight boundaries with an exclusive end. Their dates must be reconstructed from UTC date parts before displaying or editing them locally. Timed events store instants, also with exclusive ends, so an event ending at midnight does not appear on the following day.
+
+The create/update API continues to accept an inclusive all-day end for compatibility with installed clients and offline writes. The backend adds one UTC day using `normalizeEventEnd`. Query bounds cover both UTC date-only and local timed boundaries. Clients filter fetched events by local calendar days before displaying them.
+
+New forms default to all-day. Switching to timed suggests the next local half-hour today or 09:00 on another selected date, with a one-hour duration. Changing the start time preserves duration. Changing dates preserves edited clock times, and toggling all-day remembers the latest timed draft. A fresh dialog starts from the selected date or the saved event.
 
 ## Offline protocol changes
 

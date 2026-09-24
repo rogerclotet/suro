@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.27.2",
+    "version": "1.28.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.",
+        "releaseNotes": "• All-day events display and edit on the correct date in every timezone. Events ending at midnight no longer appear on the following day.\n• Calendar events still default to all-day. Switching to timed suggests a one-hour slot and preserves edited times when changing dates or toggling all-day.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.",
+        "releaseNotes": "• Los eventos de todo el día se muestran y se editan en la fecha correcta en todas las zonas horarias. Los que terminan a medianoche ya no aparecen al día siguiente.\n• El calendario sigue creando eventos de todo el día por defecto. Al activar las horas, sugiere una franja de una hora y conserva las horas editadas al cambiar de fechas o volver a activar todo el día.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.",
+        "releaseNotes": "• Els esdeveniments de tot el dia es mostren i s'editen a la data correcta en tots els fusos horaris. Els que acaben a mitjanit ja no apareixen l'endemà.\n• El calendari continua creant esdeveniments de tot el dia per defecte. En activar les hores, suggereix una franja d'una hora i conserva les hores editades en canviar de dates o tornar a activar tot el dia.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

@@ -1,16 +1,20 @@
+import {
+  changeEventDays,
+  changeEventEnd,
+  changeEventStart,
+  createEventDateDraft,
+  type EventDateDraft,
+  editEventDateDraft,
+  eventDatesForMutation,
+  toggleEventAllDay,
+} from "domain/events";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Dimensions, Pressable, ScrollView, Switch, View } from "react-native";
 import { MonthGrid } from "@/components/month-grid";
 import { type Time, TimeStepper, timeOf } from "@/components/time-stepper";
 import { useTranslations } from "@/i18n";
 import { useMediumDate } from "@/lib/datetime";
-import {
-  allDayDisplayEnd,
-  inclusiveDayCount,
-  sameDay,
-  startOfDay,
-  utcMidnight,
-} from "@/lib/event-dates";
+import { inclusiveDayCount, sameDay, startOfDay } from "@/lib/event-dates";
 import { useTheme } from "@/theme";
 import { Button, Field, Sheet, Txt } from "@/ui";
 
@@ -23,43 +27,6 @@ export type EventFormValues = {
   endAt: number;
   allDay: boolean;
 };
-
-function timeToMinutes(t: Time): number {
-  return t.hour * 60 + t.minute;
-}
-
-/** Default timed window: next full hour, 1h long (start capped so end fits today). */
-function defaultTimedWindow(): { start: Time; end: Time } {
-  const hour = Math.min(new Date().getHours() + 1, 22);
-  return {
-    start: { hour, minute: 0 },
-    end: { hour: hour + 1, minute: 0 },
-  };
-}
-
-/**
- * When start moves past end on the same calendar day, push end to start+1h.
- * Minutes wrap; hours past 23 spill by bumping `toDay` via the caller.
- */
-function endAtLeastOneHourAfter(start: Time): Time {
-  const endMinutes = timeToMinutes(start) + 60;
-  return {
-    hour: Math.floor(endMinutes / 60) % 24,
-    minute: endMinutes % 60,
-  };
-}
-
-function startAtLeastOneHourBefore(end: Time): Time {
-  const startMinutes = timeToMinutes(end) - 60;
-  if (startMinutes >= 0) {
-    return {
-      hour: Math.floor(startMinutes / 60),
-      minute: startMinutes % 60,
-    };
-  }
-  // End is before 01:00 — clamp start to 00:00 and let the caller keep dates.
-  return { hour: 0, minute: 0 };
-}
 
 export function EventForm({
   visible,
@@ -84,11 +51,14 @@ export function EventForm({
   const mediumDate = useMediumDate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [allDay, setAllDay] = useState(true);
-  const [fromDay, setFromDay] = useState(() => startOfDay(new Date()));
-  const [toDay, setToDay] = useState(() => startOfDay(new Date()));
-  const [startTime, setStartTime] = useState<Time>({ hour: 9, minute: 0 });
-  const [endTime, setEndTime] = useState<Time>({ hour: 10, minute: 0 });
+  const [draft, setDraft] = useState<EventDateDraft>(() =>
+    createEventDateDraft(new Date()),
+  );
+  const { allDay } = draft;
+  const fromDay = startOfDay(draft.dates.from);
+  const toDay = startOfDay(draft.dates.to);
+  const startTime = timeOf(draft.dates.from.getTime());
+  const endTime = timeOf(draft.dates.to.getTime());
   const [pickerMonth, setPickerMonth] = useState(() => startOfDay(new Date()));
   // Which endpoint the next calendar tap sets. Surfaced in the UI (the active
   // row is highlighted) so the two-tap "pick start, pick end" flow is visible.
@@ -107,126 +77,46 @@ export function EventForm({
     }
     setTarget("start");
     const init = initialRef.current;
-    if (init) {
-      setName(init.name);
-      setDescription(init.description);
-      setAllDay(init.allDay);
-      const start = startOfDay(new Date(init.startAt));
-      const end = init.allDay
-        ? startOfDay(allDayDisplayEnd(init.endAt))
-        : startOfDay(new Date(init.endAt));
-      setFromDay(start);
-      setToDay(end);
-      setPickerMonth(start);
-      if (!init.allDay) {
-        setStartTime(timeOf(init.startAt));
-        setEndTime(timeOf(init.endAt));
-      } else {
-        const { start: s, end: e } = defaultTimedWindow();
-        setStartTime(s);
-        setEndTime(e);
-      }
-    } else {
-      const base = startOfDay(defaultDateRef.current ?? new Date());
-      const { start, end } = defaultTimedWindow();
-      setName("");
-      setDescription("");
-      setAllDay(true);
-      setFromDay(base);
-      setToDay(base);
-      setPickerMonth(base);
-      setStartTime(start);
-      setEndTime(end);
-    }
+    const next = init
+      ? editEventDateDraft(init)
+      : createEventDateDraft(defaultDateRef.current ?? new Date());
+    setName(init?.name ?? "");
+    setDescription(init?.description ?? "");
+    setDraft(next);
+    setPickerMonth(startOfDay(next.dates.from));
   }, [visible]);
 
   function handleSelectDay(day: Date) {
-    if (target === "start") {
-      setFromDay(day);
-      // Collapse to a single day when starting fresh (the range is one day) or
-      // when the new start jumps past the old end; otherwise keep the end so
-      // re-picking just the start preserves the span.
-      if (sameDay(fromDay, toDay) || day.getTime() > toDay.getTime()) {
-        setToDay(day);
-      }
-      setTarget("end");
-    } else {
-      if (day.getTime() >= fromDay.getTime()) {
-        setToDay(day);
-      } else {
-        // Tapping before the start while setting the end grows the range back.
-        setFromDay(day);
-      }
-      setTarget("start");
-    }
+    const days =
+      target === "start"
+        ? {
+            from: day,
+            to: sameDay(fromDay, toDay) || day > toDay ? day : toDay,
+          }
+        : {
+            from: day < fromDay ? day : fromDay,
+            to: day < fromDay ? toDay : day,
+          };
+    setDraft(changeEventDays(draft, days));
+    setTarget(target === "start" ? "end" : "start");
   }
 
   function handleStartTimeChange(value: Time) {
-    setStartTime(value);
-    if (!sameDay(fromDay, toDay)) {
-      return;
-    }
-    if (timeToMinutes(value) >= timeToMinutes(endTime)) {
-      const next = endAtLeastOneHourAfter(value);
-      // If +1h wraps past midnight on a same-day event, bump the end day.
-      if (timeToMinutes(next) <= timeToMinutes(value)) {
-        const nextDay = new Date(fromDay);
-        nextDay.setDate(nextDay.getDate() + 1);
-        setToDay(startOfDay(nextDay));
-      }
-      setEndTime(next);
-    }
+    const from = new Date(draft.dates.from);
+    from.setHours(value.hour, value.minute, 0, 0);
+    setDraft({ allDay: false, dates: changeEventStart(draft.dates, from) });
   }
 
   function handleEndTimeChange(value: Time) {
-    setEndTime(value);
-    if (!sameDay(fromDay, toDay)) {
-      return;
-    }
-    if (timeToMinutes(startTime) >= timeToMinutes(value)) {
-      setStartTime(startAtLeastOneHourBefore(value));
-    }
+    const to = new Date(draft.dates.to);
+    to.setHours(value.hour, value.minute, 0, 0);
+    setDraft({ allDay: false, dates: changeEventEnd(draft.dates, to) });
   }
 
   function submit() {
     const trimmed = name.trim();
-    if (!trimmed) {
-      return;
-    }
-    let startAt: number;
-    let endAt: number;
-    if (allDay) {
-      startAt = utcMidnight(
-        fromDay.getFullYear(),
-        fromDay.getMonth(),
-        fromDay.getDate(),
-      );
-      endAt = utcMidnight(
-        toDay.getFullYear(),
-        toDay.getMonth(),
-        toDay.getDate(),
-      );
-    } else {
-      startAt = new Date(
-        fromDay.getFullYear(),
-        fromDay.getMonth(),
-        fromDay.getDate(),
-        startTime.hour,
-        startTime.minute,
-      ).getTime();
-      endAt = new Date(
-        toDay.getFullYear(),
-        toDay.getMonth(),
-        toDay.getDate(),
-        endTime.hour,
-        endTime.minute,
-      ).getTime();
-      // Final guard: never submit a zero/negative duration.
-      if (endAt <= startAt) {
-        endAt = startAt + 60 * 60 * 1000;
-      }
-    }
-    onSubmit({ name: trimmed, description, startAt, endAt, allDay });
+    if (!trimmed) return;
+    onSubmit({ name: trimmed, description, ...eventDatesForMutation(draft) });
   }
 
   const multiDay = !sameDay(fromDay, toDay);
@@ -268,7 +158,9 @@ export function EventForm({
           <Txt size={15}>{tForm("allDay")}</Txt>
           <Switch
             value={allDay}
-            onValueChange={setAllDay}
+            onValueChange={(checked) =>
+              setDraft(toggleEventAllDay(draft, checked))
+            }
             trackColor={{ true: t.primary, false: t.border }}
           />
         </View>

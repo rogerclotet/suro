@@ -3,6 +3,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
+import { calendarQueryBounds, eventOverlapsDays } from "domain/events";
 import { adaptEvent, type CalendarEvent } from "@/app/_data/event";
 import { adaptList, type List } from "@/app/_data/list";
 
@@ -17,12 +18,13 @@ export function useEventsInRange(
     projectId
       ? {
           projectId: projectId as Id<"projects">,
-          from: from.getTime(),
-          to: to.getTime(),
+          ...calendarQueryBounds(from, to),
         }
       : "skip",
   );
-  return data?.map(adaptEvent);
+  return data
+    ?.filter((event) => eventOverlapsDays(event, from, to))
+    .map(adaptEvent);
 }
 
 /** Linked-note identity used by event detail navigation. */

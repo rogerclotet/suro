@@ -12,7 +12,11 @@ async function destination(ctx: QueryCtx, row: Doc<"notifications">) {
     case "calendar": {
       const event = await ctx.db.get(target.eventId);
       return event?.projectId === projectId
-        ? { kind: "calendar" as const, startAt: event.startAt }
+        ? {
+            kind: "calendar" as const,
+            startAt: event.startAt,
+            allDay: event.allDay,
+          }
         : fallback;
     }
     case "lists": {

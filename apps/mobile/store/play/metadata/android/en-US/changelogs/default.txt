@@ -1,1 +1,2 @@
-• Mobile app links in the sidebar now have a subtle separator and heading to make them easier to find.
+• All-day events display and edit on the correct date in every timezone. Events ending at midnight no longer appear on the following day.
+• Calendar events still default to all-day. Switching to timed suggests a one-hour slot and preserves edited times when changing dates or toggling all-day.

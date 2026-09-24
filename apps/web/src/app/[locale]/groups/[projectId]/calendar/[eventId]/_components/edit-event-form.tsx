@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Event } from "@/app/_data/event";
+import { eventSchema } from "@/app/[locale]/groups/[projectId]/calendar/_components/event/data";
 import {
   eventDatesForForm,
   eventDatesForMutation,
@@ -22,7 +23,6 @@ import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useSession } from "@/lib/session";
-import { eventSchema } from "../../_components/event/data";
 
 export default function EditEventForm({
   event,
@@ -33,6 +33,24 @@ export default function EditEventForm({
 }) {
   const { data: session } = useSession();
   const t = useTranslations("calendar");
+  return (
+    <ModalForm
+      trigger={trigger}
+      title={t("editTitle")}
+      description={t("editDescription")}
+    >
+      <EditEventFormContent event={event} sessionId={session?.user.id} />
+    </ModalForm>
+  );
+}
+
+function EditEventFormContent({
+  event,
+  sessionId,
+}: {
+  event: Event;
+  sessionId?: string;
+}) {
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
       name: event.name,
@@ -43,51 +61,12 @@ export default function EditEventForm({
     resolver: valibotResolver(eventSchema),
   });
 
-  const handlers = useEventDates({
-    form,
-    preserveTimes: true,
-    originalTimes: { from: event.startAt, to: event.endAt },
-  });
-
-  return (
-    <ModalForm
-      trigger={trigger}
-      title={t("editTitle")}
-      description={t("editDescription")}
-    >
-      <EditEventFormContent
-        form={form}
-        event={event}
-        sessionId={session?.user.id}
-        {...handlers}
-      />
-    </ModalForm>
-  );
-}
-
-function EditEventFormContent({
-  form,
-  event,
-  sessionId,
-  handleDatesChange,
-  handleStartTimeChange,
-  handleEndTimeChange,
-  handleAllDayChange,
-}: {
-  form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
-  event: Event;
-  sessionId?: string;
-  handleDatesChange: Parameters<typeof EventFormFields>[0]["handleDatesChange"];
-  handleStartTimeChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleStartTimeChange"];
-  handleEndTimeChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleEndTimeChange"];
-  handleAllDayChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleAllDayChange"];
-}) {
+  const {
+    handleDatesChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+    handleAllDayChange,
+  } = useEventDates({ form });
   const { close } = useModalForm();
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");

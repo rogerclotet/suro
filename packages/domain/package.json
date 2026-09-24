@@ -6,7 +6,8 @@
   "exports": {
     "./expenses": "./src/expenses.ts",
     "./tasks": "./src/tasks.ts",
-    "./month-totals": "./src/month-totals.ts"
+    "./month-totals": "./src/month-totals.ts",
+    "./events": "./src/events.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

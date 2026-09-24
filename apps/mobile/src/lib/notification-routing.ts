@@ -1,5 +1,6 @@
 import type { api } from "backend/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
+import { eventLocalStart } from "domain/events";
 import { withHomeTabPrefix } from "./group-paths";
 
 export type UnreadSection = FunctionReturnType<
@@ -11,7 +12,7 @@ export function notificationHref(receipt: UnreadSection): string {
   const destination = receipt.destination;
   const path =
     destination.kind === "calendar"
-      ? `/${receipt.projectId}/calendar?date=${destination.startAt}`
+      ? `/${receipt.projectId}/calendar?date=${eventLocalStart({ startAt: destination.startAt, allDay: destination.allDay ?? false }).getTime()}`
       : withHomeTabPrefix(destination.path);
   return `${path}${path.includes("?") ? "&" : "?"}notification=${receipt.latestId}`;
 }

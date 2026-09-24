@@ -2,6 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { calendarQueryBounds } from "domain/events";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -13,7 +14,7 @@ import { sectionHeaderBadges } from "@/components/header-badges";
 import { MonthGrid, monthGridRange } from "@/components/month-grid";
 import { useTranslations } from "@/i18n";
 import { useFormatEventTime, useLongDate } from "@/lib/datetime";
-import { endOfDay, isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { isEventOnDay, startOfDay } from "@/lib/event-dates";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -53,7 +54,7 @@ export default function CalendarScreen() {
   // edges) still get their dots and appear when such a day is selected.
   const { from, to } = useMemo(() => {
     const { start, end } = monthGridRange(month);
-    return { from: startOfDay(start).getTime(), to: endOfDay(end).getTime() };
+    return calendarQueryBounds(start, end);
   }, [month]);
 
   const events = usePersistentQuery(api.events.listByRange, {

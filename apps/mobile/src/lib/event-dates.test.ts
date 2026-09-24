@@ -32,15 +32,15 @@ function timed(
   };
 }
 
-// All-day events are stored half-open: endAt is local midnight of the day
+// All-day events are stored half-open: endAt is UTC midnight of the day
 // *after* the last covered day.
 function allDay(
   firstDay: [number, number, number],
   dayAfterLast: [number, number, number],
 ): EventTimes {
   return {
-    startAt: new Date(...firstDay).getTime(),
-    endAt: new Date(...dayAfterLast).getTime(),
+    startAt: Date.UTC(...firstDay),
+    endAt: Date.UTC(...dayAfterLast),
     allDay: true,
   };
 }
@@ -117,7 +117,7 @@ describe("utcMidnight", () => {
 describe("allDayDisplayEnd", () => {
   it("subtracts a day from the half-open end boundary", () => {
     // Stored endAt = Jan 16 (day after) → last displayed day is Jan 15.
-    const result = allDayDisplayEnd(new Date(2024, 0, 16).getTime());
+    const result = allDayDisplayEnd(Date.UTC(2024, 0, 16));
     expect(result.getFullYear()).toBe(2024);
     expect(result.getMonth()).toBe(0);
     expect(result.getDate()).toBe(15);
@@ -337,11 +337,15 @@ describe("timeRemainingParts", () => {
 });
 
 describe("eventWindowBounds", () => {
-  it("queries from the start of today", () => {
+  it("covers local and UTC boundaries for thirty calendar days", () => {
     const now = new Date("2026-07-05T15:30:00");
     const { from, to } = eventWindowBounds(now);
-    expect(new Date(from).getHours()).toBe(0);
-    expect(to - from).toBe(30 * DAY_MS);
+    expect(from).toBeLessThanOrEqual(new Date(2026, 6, 5).getTime());
+    expect(from).toBeLessThanOrEqual(Date.UTC(2026, 6, 5));
+    expect(to).toBeGreaterThanOrEqual(
+      new Date(2026, 7, 3, 23, 59, 59, 999).getTime(),
+    );
+    expect(to).toBeGreaterThanOrEqual(Date.UTC(2026, 7, 4) - 1);
   });
 });
 
