@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   CirclePlus,
@@ -695,39 +695,34 @@ function useLinkCandidates(
   projectId: Id<"projects">,
   linked: { list: boolean; note: boolean; pot: boolean },
 ): LinkCandidate[] {
+  const { isAuthenticated } = useConvexAuth();
   const lists = usePersistentQuery(
-    api.lists.listByProject,
-    linked.list ? "skip" : { projectId },
+    api.events.listLinkCandidates,
+    !isAuthenticated || linked.list ? "skip" : { projectId },
   );
   const notes = usePersistentQuery(
-    api.notes.listByProject,
-    linked.note ? "skip" : { projectId },
+    api.events.noteLinkCandidates,
+    !isAuthenticated || linked.note ? "skip" : { projectId },
   );
   const pots = usePersistentQuery(
-    api.expenses.listPots,
-    linked.pot ? "skip" : { projectId },
+    api.events.potLinkCandidates,
+    !isAuthenticated || linked.pot ? "skip" : { projectId },
   );
   return useMemo(() => {
     const out: LinkCandidate[] = [];
     if (!linked.list) {
       for (const list of lists ?? []) {
-        if (!list.eventId) {
-          out.push({ kind: "list", id: list._id, name: list.name });
-        }
+        out.push({ kind: "list", id: list._id, name: list.name });
       }
     }
     if (!linked.note) {
       for (const note of notes ?? []) {
-        if (!note.eventId) {
-          out.push({ kind: "note", id: note._id, name: note.name });
-        }
+        out.push({ kind: "note", id: note._id, name: note.name });
       }
     }
     if (!linked.pot) {
       for (const pot of pots ?? []) {
-        if (!pot.eventId) {
-          out.push({ kind: "pot", id: pot._id, name: pot.name });
-        }
+        out.push({ kind: "pot", id: pot._id, name: pot.name });
       }
     }
     return out;

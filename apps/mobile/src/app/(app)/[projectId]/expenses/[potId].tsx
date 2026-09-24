@@ -1,6 +1,13 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
+import {
+  createSettlementDraft,
+  selectedSettlementPayments,
+  settlementPaymentKey,
+  settlementProposalsMatch,
+  toggleSettlementPayment,
+} from "domain/expenses";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ellipsis, Trash2 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -395,11 +402,14 @@ export default function PotDetail() {
         pot={pot}
         onClose={() => setAdding(false)}
       />
-      <SettleSheet
-        visible={settling}
-        pot={pot}
-        onClose={() => setSettling(false)}
-      />
+      {settling && (
+        <SettleSheet
+          key={pot._id}
+          visible={settling}
+          pot={pot}
+          onClose={() => setSettling(false)}
+        />
+      )}
 
       <Sheet visible={optionsOpen} onClose={() => setOptionsOpen(false)}>
         <Txt size={18} weight="700">
@@ -612,45 +622,58 @@ function SettleSheet({
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
   const tc = useTranslations("mobile.common");
-  // All proposals selected by default; users can deselect any.
-  const [excluded, setExcluded] = useState<Set<number>>(new Set());
+  const [draft, setDraft] = useState(() =>
+    createSettlementDraft(pot.settlements),
+  );
   const [busy, setBusy] = useState(false);
-
-  function toggle(index: number) {
-    const next = new Set(excluded);
-    if (next.has(index)) {
-      next.delete(index);
-    } else {
-      next.add(index);
-    }
-    setExcluded(next);
-  }
+  const stale = !settlementProposalsMatch(draft.reviewed, pot.settlements);
+  const selected = selectedSettlementPayments(draft);
 
   async function submit() {
-    const payments = pot.settlements
-      .filter((_, index) => !excluded.has(index))
-      .map((p) => ({ from: p.from, to: p.to, amount: p.amount }));
+    if (busy || stale) return;
+    const payments = selected.map((p) => ({
+      from: p.from,
+      to: p.to,
+      amount: p.amount,
+    }));
     if (payments.length === 0) {
       return;
     }
     setBusy(true);
     try {
-      await settlePayments({ potId: pot._id, payments });
-      setExcluded(new Set());
+      await settlePayments({
+        potId: pot._id,
+        payments,
+        reviewedPayments: draft.reviewed.map((p) => ({
+          from: p.from,
+          to: p.to,
+          amount: p.amount,
+        })),
+      });
       onClose();
     } finally {
       setBusy(false);
     }
   }
 
-  const selectedCount = pot.settlements.length - excluded.size;
+  const selectedCount = selected.length;
 
   return (
     <Sheet visible={visible} onClose={onClose}>
       <Txt size={18} weight="700">
         {tExp("settleUp")}
       </Txt>
-      {pot.settlements.length === 0 ? (
+      {stale && (
+        <View style={{ gap: 8 }}>
+          <Txt>{tExp("settlementChanged")}</Txt>
+          <Button
+            title={tExp("reviewSettlement")}
+            disabled={busy}
+            onPress={() => setDraft(createSettlementDraft(pot.settlements))}
+          />
+        </View>
+      )}
+      {draft.reviewed.length === 0 ? (
         <Txt muted>{tExp("everyoneSettled")}</Txt>
       ) : (
         <>
@@ -658,13 +681,15 @@ function SettleSheet({
             style={{ maxHeight: 320 }}
             contentContainerStyle={{ gap: 8 }}
           >
-            {pot.settlements.map((payment, index) => {
-              const on = !excluded.has(index);
+            {draft.reviewed.map((payment) => {
+              const on = draft.selectedKeys.has(settlementPaymentKey(payment));
               return (
                 <Pressable
-                  // biome-ignore lint/suspicious/noArrayIndexKey: proposals are a stable ordered list for this render
-                  key={index}
-                  onPress={() => toggle(index)}
+                  key={settlementPaymentKey(payment)}
+                  disabled={busy || stale}
+                  onPress={() =>
+                    setDraft(toggleSettlementPayment(draft, payment))
+                  }
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -693,7 +718,7 @@ function SettleSheet({
                 ? tExp("settling")
                 : tExp("recordPayments", { count: selectedCount })
             }
-            disabled={busy || selectedCount === 0}
+            disabled={busy || stale || selectedCount === 0}
             onPress={submit}
           />
         </>

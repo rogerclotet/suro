@@ -1,3 +1,4 @@
+import { randomUUID } from "expo-crypto";
 import { convex } from "@/lib/convex";
 import { isOnlineNow } from "./network";
 import { OPERATIONS } from "./operations";
@@ -10,6 +11,7 @@ export function setFlushingUserId(userId: string | null) {
 }
 export const flush = createFlusher({
   queue: outbox,
+  newOperationId: randomUUID,
   isOnline: isOnlineNow,
   currentUserId: () => confirmedUserId,
   send: (operation) =>

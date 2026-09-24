@@ -1,4 +1,5 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { settlementProposalsMatch } from "domain/expenses";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   type MutationCtx,
@@ -7,6 +8,10 @@ import {
   query,
 } from "./_generated/server";
 import { track } from "./model/analytics";
+import {
+  findExpenseOperation,
+  recordExpenseOperation,
+} from "./model/expenseOperations";
 import {
   calculateBalances,
   generateProposals,
@@ -320,12 +325,21 @@ export const ensureSoloPot = mutation({
 
 export const createPot = mutation({
   args: {
+    operationId: v.optional(v.string()),
     projectId: v.id("projects"),
     name: v.string(),
     memberIds: v.array(v.id("users")),
   },
-  handler: async (ctx, { projectId, name, memberIds }) => {
+  handler: async (ctx, { projectId, name, memberIds, operationId }) => {
     const userId = await requireProjectMember(ctx, projectId);
+    const request = JSON.stringify(["createPot", projectId, name, memberIds]);
+    const receipt = await findExpenseOperation(
+      ctx,
+      userId,
+      operationId,
+      request,
+    );
+    if (receipt?.result.kind === "pot") return receipt.result.id;
     const trimmed = name.trim();
     if (trimmed === "") {
       throw new Error("Pot name is required");
@@ -372,6 +386,10 @@ export const createPot = mutation({
       projectId,
       memberCount: unique.length,
     });
+    await recordExpenseOperation(ctx, userId, operationId, request, {
+      kind: "pot",
+      id: potId,
+    });
     return potId;
   },
 });
@@ -413,6 +431,7 @@ export const deletePot = mutation({
 
 export const createSpending = mutation({
   args: {
+    operationId: v.optional(v.string()),
     potId: v.id("pots"),
     amount: v.number(),
     description: v.optional(v.string()),
@@ -420,8 +439,26 @@ export const createSpending = mutation({
     // Omit `to` to split equally among all pot members.
     to: v.optional(v.id("users")),
   },
-  handler: async (ctx, { potId, amount, description, from, to }) => {
+  handler: async (
+    ctx,
+    { potId, amount, description, from, to, operationId },
+  ) => {
     const { pot, userId } = await requirePotAccess(ctx, potId);
+    const request = JSON.stringify([
+      "createSpending",
+      potId,
+      amount,
+      description,
+      from,
+      to,
+    ]);
+    const receipt = await findExpenseOperation(
+      ctx,
+      userId,
+      operationId,
+      request,
+    );
+    if (receipt?.result.kind === "spending") return receipt.result.id;
     if (!Number.isInteger(amount) || amount <= 0) {
       throw new Error("Amount must be a positive number");
     }
@@ -470,24 +507,70 @@ export const createSpending = mutation({
       projectId: pot.projectId,
       split: to === undefined ? "equal" : "single",
     });
+    await recordExpenseOperation(ctx, userId, operationId, request, {
+      kind: "spending",
+      id: spendingId,
+    });
     return spendingId;
   },
 });
 
+const paymentValidator = v.object({
+  from: v.id("users"),
+  to: v.id("users"),
+  amount: v.number(),
+});
+
 export const settlePayments = mutation({
   args: {
+    operationId: v.optional(v.string()),
+    reviewedPayments: v.optional(v.array(paymentValidator)),
     potId: v.id("pots"),
-    payments: v.array(
-      v.object({
-        from: v.id("users"),
-        to: v.id("users"),
-        amount: v.number(),
-      }),
-    ),
+    payments: v.array(paymentValidator),
   },
-  handler: async (ctx, { potId, payments }) => {
+  handler: async (ctx, { potId, payments, reviewedPayments, operationId }) => {
     const { pot, userId } = await requirePotAccess(ctx, potId);
+    const tuples = (values: typeof payments) =>
+      values.map((p) => [p.from, p.to, p.amount]);
+    const request = JSON.stringify([
+      "settlePayments",
+      potId,
+      tuples(payments),
+      reviewedPayments && tuples(reviewedPayments),
+    ]);
+    const receipt = await findExpenseOperation(
+      ctx,
+      userId,
+      operationId,
+      request,
+    );
+    if (receipt?.result.kind === "settlement") return null;
     const memberIds = await potMemberIds(ctx, potId);
+    const spendings = await ctx.db
+      .query("spendings")
+      .withIndex("by_pot", (q) => q.eq("potId", potId))
+      .collect();
+    if (reviewedPayments !== undefined) {
+      const current = generateProposals(
+        calculateBalances(memberIds, spendings),
+      );
+      const selectedKeys = payments.map((p) =>
+        JSON.stringify([p.from, p.to, p.amount]),
+      );
+      if (
+        !settlementProposalsMatch(reviewedPayments, current) ||
+        new Set(selectedKeys).size !== selectedKeys.length ||
+        payments.some(
+          (p) =>
+            !current.some(
+              (c) =>
+                c.from === p.from && c.to === p.to && c.amount === p.amount,
+            ),
+        )
+      ) {
+        throw new ConvexError({ code: "SETTLEMENT_CHANGED" });
+      }
+    }
 
     for (const payment of payments) {
       if (!Number.isInteger(payment.amount) || payment.amount <= 0) {
@@ -510,12 +593,20 @@ export const settlePayments = mutation({
         createdBy: userId,
       });
     }
-    await ctx.db.patch(pot._id, { settledAt: Date.now() });
+    const balances = calculateBalances(memberIds, [...spendings, ...payments]);
+    await ctx.db.patch(pot._id, {
+      settledAt: [...balances.values()].every((amount) => amount === 0)
+        ? Date.now()
+        : undefined,
+    });
     await track(ctx, userId, "payments_settled", {
       projectId: pot.projectId,
       paymentCount: payments.length,
     });
     await recordProjectActivity(ctx, pot.projectId);
+    await recordExpenseOperation(ctx, userId, operationId, request, {
+      kind: "settlement",
+    });
     return null;
   },
 });

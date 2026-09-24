@@ -5,7 +5,11 @@ import { type IdMap, isTempId, type OutboxEntry } from "./types";
 // Free text such as a list named "temp-shopping" must never become a dependency.
 function isReferenceKey(key: string) {
   return (
-    key.endsWith("Id") || key.endsWith("Ids") || key === "from" || key === "to"
+    key !== "operationId" &&
+    (key.endsWith("Id") ||
+      key.endsWith("Ids") ||
+      key === "from" ||
+      key === "to")
   );
 }
 export function tempIdsIn(value: unknown, reference = false): string[] {

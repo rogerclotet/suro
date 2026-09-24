@@ -99,3 +99,60 @@ it("skips unresolved route IDs, then subscribes using their acknowledged server 
   expect(detailArgs()).toContainEqual({ listId: "real-list" });
   expect(detailArgs()).toContainEqual({ potId: "real-pot" });
 });
+
+it("keeps a pot open while a queued settlement leaves an unpaid balance", async () => {
+  queue.setUserId("user");
+  queue.enqueue(
+    entry({
+      id: "pot-create",
+      functionName: "expenses:createPot",
+      args: { name: "Trip" },
+      tempIds: ["temp-pot"],
+    }),
+  );
+  queue.acknowledge("pot-create", "temp-pot", "real-pot");
+  boundary.read.mockImplementation((query, args) => {
+    if (args === "skip") return undefined;
+    if (getFunctionName(query) === "users:me")
+      return { _id: "u1", name: "Alice" };
+    if (getFunctionName(query) === "expenses:getPot")
+      return {
+        _id: "real-pot",
+        projectId: "project-1",
+        name: "Trip",
+        createdBy: "u1",
+        members: [
+          { _id: "u1", name: "Alice" },
+          { _id: "u2", name: "Bob" },
+        ],
+        spendings: [
+          {
+            _id: "spending",
+            _creationTime: 0,
+            potId: "real-pot",
+            amount: 800,
+            from: "u1",
+          },
+        ],
+        balances: [],
+        settlements: [],
+      };
+    return undefined;
+  });
+  queue.enqueue(
+    entry({
+      id: "partial",
+      functionName: "expenses:settlePayments",
+      args: {
+        potId: "real-pot",
+        payments: [{ from: "u2", to: "u1", amount: 100 }],
+      },
+      createdAt: 100,
+    }),
+  );
+  await act(async () => root.render(createElement(Probe)));
+  expect(result.pot?.settledAt).toBeUndefined();
+  expect(result.pot?.settlements).toMatchObject([
+    { from: "u2", to: "u1", amount: 300 },
+  ]);
+});

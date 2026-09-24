@@ -1177,7 +1177,9 @@
       "soloLastMonth": "Last month",
       "soloRecentSpendings": "Recent expenses",
       "soloNoSpendings": "No expenses yet. Tap + to add one.",
-      "soloUntitledSpending": "Expense"
+      "soloUntitledSpending": "Expense",
+      "settlementChanged": "The proposed payments have changed. Review the latest amounts before confirming.",
+      "reviewSettlement": "Review updated payments"
     }
   },
   "offline": {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -14,13 +14,16 @@ export default function SettleProposal({
   payment,
   members,
   onChange,
+  checked,
+  disabled,
 }: {
   payment: SettlingPayment;
   members: Member[];
   onChange: (selected: boolean) => void;
+  checked: boolean;
+  disabled: boolean;
 }) {
-  // Proposals start selected, like the mobile settle sheet.
-  const [checked, setChecked] = useState(true);
+  const t = useTranslations("settlement");
   const checkboxId = `settle-${payment.from}-${payment.to}-${payment.amount}`;
 
   return (
@@ -34,11 +37,11 @@ export default function SettleProposal({
         <Checkbox
           id={checkboxId}
           checked={checked}
+          disabled={disabled}
           onCheckedChange={(checked) => {
             if (checked === "indeterminate") {
               return;
             }
-            setChecked(checked);
             onChange(checked);
           }}
         />
@@ -46,11 +49,11 @@ export default function SettleProposal({
         <div className="flex flex-col">
           <div className="flex flex-row flex-wrap items-center gap-2">
             <span className="font-semibold text-foreground">
-              {getUserName(payment.from, members)}
+              {getUserName(payment.from, members, t("someone"))}
             </span>
             <ArrowRight className="h-4 w-4" />{" "}
             <span className="font-semibold text-foreground">
-              {getUserName(payment.to, members)}
+              {getUserName(payment.to, members, t("someone"))}
             </span>
           </div>
           <MonetaryAmount amount={payment.amount} currency={payment.currency} />
@@ -60,6 +63,6 @@ export default function SettleProposal({
   );
 }
 
-function getUserName(userId: string, members: Member[]) {
-  return members.find((u) => u.user.id === userId)?.user.name ?? "Desconegut";
+function getUserName(userId: string, members: Member[], fallback: string) {
+  return members.find((u) => u.user.id === userId)?.user.name ?? fallback;
 }

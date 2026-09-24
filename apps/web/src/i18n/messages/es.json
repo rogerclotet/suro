@@ -859,5 +859,18 @@
     "back": "Atrás",
     "finish": "Terminar",
     "letsGo": "¡Vamos!"
+  },
+  "settlement": {
+    "title": "Saldar deudas",
+    "description": "Selecciona los pagos que quieres registrar.",
+    "success": "Pagos registrados",
+    "error": "No se han podido registrar los pagos. Revisa las propuestas actuales e inténtalo de nuevo.",
+    "changed": "Las propuestas de pago han cambiado. Revisa los importes actuales antes de confirmar.",
+    "review": "Revisar los pagos actualizados",
+    "allSettled": "Todos los pagos están saldados",
+    "noPayments": "No hay ningún pago pendiente.",
+    "proposals": "Propuestas de pago",
+    "confirm": "Confirmar los pagos seleccionados",
+    "someone": "Alguien"
   }
 }

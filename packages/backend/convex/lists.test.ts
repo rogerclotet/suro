@@ -2,6 +2,8 @@ import { convexTest } from "convex-test";
 import { beforeEach, describe, expect, it } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { listLinkCandidates } from "./events";
+import { homePreviews, listByProject } from "./lists";
 import schema from "./schema";
 
 const modules = import.meta.glob(["./**/*.ts", "!./**/*.test.ts"]);
@@ -520,10 +522,10 @@ it("keeps navigation payload independent of item history and loads the selected 
       const listId = await ctx.db.insert("lists", {
         projectId: project,
         name: `Week ${i}`,
-        favorite: false,
+        favorite: i >= 115,
         createdBy: user,
         updatedAt: i,
-        eventId: event,
+        eventId: i === 119 ? event : undefined,
       });
       for (let j = 0; j < 20; j++)
         await ctx.db.insert("listItems", {
@@ -556,9 +558,86 @@ it("keeps navigation payload independent of item history and loads the selected 
   console.info(
     `List payload fixture: ${before} → ${after} JSON characters (120 lists, 2400 items)`,
   );
+  // Count documents returned by real convex-test DB reads, separately from JSON size.
+  const measured = async (
+    handler:
+      | typeof listByProject
+      | typeof homePreviews
+      | typeof listLinkCandidates,
+  ) => {
+    let reads = 0;
+    // Convex keeps the handler at runtime, but omits it from its public declarations.
+    if (!("_handler" in handler) || typeof handler._handler !== "function") {
+      throw new Error("Expected a registered Convex query handler");
+    }
+    const invoke = handler._handler;
+    const result: unknown = await client.run((ctx) =>
+      invoke(
+        {
+          ...ctx,
+          db: observeReads(ctx.db, (count) => {
+            reads += count;
+          }),
+        },
+        { projectId: project, eventIds: [event] },
+      ),
+    );
+    return { reads, bytes: JSON.stringify(result).length, result };
+  };
+  const full = await measured(listByProject);
+  const preview = await measured(homePreviews);
+  const candidates = await measured(listLinkCandidates);
+  expect(preview.reads).toBeLessThan(full.reads / 10);
+  expect(preview.bytes).toBeLessThan(full.bytes / 10);
+  expect(candidates.reads).toBeLessThan(full.reads / 10);
+  expect(candidates.bytes).toBeLessThan(full.bytes / 10);
+  const home = await client.query(api.lists.homePreviews, {
+    projectId: project,
+    eventIds: [event],
+  });
+  expect(home.favoriteIds).toHaveLength(5);
+  expect(home.previews).toHaveLength(5);
+  expect(home.previews.find((row) => row._id === first._id)).toMatchObject({
+    total: 20,
+    done: 0,
+  });
+  expect(home.previews.every((row) => !("items" in row))).toBe(true);
+  console.info(
+    `Dashboard fixture: full ${full.bytes} bytes / ${full.reads} document reads; previews ${preview.bytes} bytes / ${preview.reads} reads; candidates ${candidates.bytes} bytes / ${candidates.reads} reads`,
+  );
+  await expect(
+    t
+      .withIdentity({ subject: `${outsider}|session` })
+      .query(api.lists.homePreviews, { projectId: project, eventIds: [event] }),
+  ).rejects.toThrow("Project not found");
   await expect(
     t
       .withIdentity({ subject: `${outsider}|session` })
       .query(api.lists.summariesByProject, { projectId: project }),
   ).rejects.toThrow("Project not found");
 });
+
+/** Observe the real database, including chained query builders; never replace results. */
+function observeReads<T extends object>(
+  target: T,
+  onRead: (count: number) => void,
+): T {
+  return new Proxy(target, {
+    get(object, key) {
+      const value: unknown = Reflect.get(object, key);
+      if (typeof value !== "function") return value;
+      return (...args: unknown[]) => {
+        const result: unknown = Reflect.apply(value, object, args);
+        if (["get", "collect", "first", "unique"].includes(String(key))) {
+          return Promise.resolve(result).then((rows) => {
+            onRead(Array.isArray(rows) ? rows.length : rows === null ? 0 : 1);
+            return rows;
+          });
+        }
+        return result !== null && typeof result === "object"
+          ? observeReads(result, onRead)
+          : result;
+      };
+    },
+  });
+}

@@ -2,7 +2,7 @@
 
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import {
   eventDatesForForm,
   eventLocalStart,
@@ -21,14 +21,12 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/_data/event";
-import type { List } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
-import ListPreview from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
+import { adaptListPreview, type ListPreviewData } from "@/app/_data/list";
+import { ListPreviewRow } from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
 import ProgressRing from "@/app/[locale]/groups/[projectId]/lists/_components/progress-ring";
 import { Link } from "@/i18n/navigation";
 import { eventTimes, isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
-import { useProjectLists } from "@/lib/queries/use-project-lists";
 import { cn } from "@/lib/utils";
 import { HomeSectionChips } from "./home-section-chips";
 
@@ -192,11 +190,11 @@ function EventCard({
   isToday: boolean;
   todayLabel: string;
   locale: string;
-  linkedList?: List;
+  linkedList?: ListPreviewData;
   linkedListA11y?: (done: number, total: number) => string;
 }) {
-  const total = linkedList?.items.length ?? 0;
-  const done = linkedList?.items.filter((item) => item.completed).length ?? 0;
+  const total = linkedList?.total ?? 0;
+  const done = linkedList?.done ?? 0;
   const pending = total - done;
 
   return (
@@ -288,23 +286,37 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
     [events, bounds.today],
   );
 
-  const lists = useProjectLists(projectId);
+  const { isAuthenticated } = useConvexAuth();
+  const listPreviews = useQuery(
+    api.lists.homePreviews,
+    isAuthenticated && upcomingEvents
+      ? {
+          projectId: projectId as Id<"projects">,
+          eventIds: upcomingEvents.map((event) => event.id as Id<"events">),
+        }
+      : "skip",
+  );
   const listsByEventId = useMemo(() => {
-    const map = new Map<string, List>();
-    for (const list of lists ?? []) {
+    const map = new Map<string, ListPreviewData>();
+    for (const list of listPreviews?.previews ?? []) {
       if (list.eventId) {
-        map.set(list.eventId, list);
+        map.set(list.eventId, adaptListPreview(list));
       }
     }
     return map;
-  }, [lists]);
+  }, [listPreviews]);
 
-  const rawTasks = useQuery(api.tasks.myTasks, {
-    projectId: projectId as Id<"projects">,
-  });
-  const featuredLists = lists
-    ?.filter((list) => list.favorite)
-    .slice(0, PREVIEW_LIMIT);
+  const rawTasks = useQuery(
+    api.tasks.myTasks,
+    isAuthenticated
+      ? {
+          projectId: projectId as Id<"projects">,
+        }
+      : "skip",
+  );
+  const featuredLists = listPreviews?.previews
+    .filter((list) => listPreviews.favoriteIds.includes(list._id))
+    .map(adaptListPreview);
   const taskCount = rawTasks?.length ?? 0;
 
   const dateLabel = bounds.today.toLocaleDateString(locale, {
@@ -342,7 +354,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
             <EmptyState text={t("noFeaturedLists")} />
           ) : (
             featuredLists.map((list) => (
-              <ListPreview key={list.id} list={list} />
+              <ListPreviewRow key={list.id} list={list} />
             ))
           )}
         </Panel>

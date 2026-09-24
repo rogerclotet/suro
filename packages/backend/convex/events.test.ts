@@ -484,3 +484,190 @@ describe("calendar feed (ICS export)", () => {
     expect(missing.status).toBe(400);
   });
 });
+
+it("rejects a second linked list instead of hiding it in event details", async () => {
+  const eventId = await alice.mutation(api.events.create, {
+    projectId: ids.family,
+    name: "Trip",
+    startAt: JAN_10,
+    endAt: JAN_10_END,
+    allDay: false,
+  });
+  const listId = await alice.mutation(api.events.createLinkedList, { eventId });
+  await alice.mutation(api.events.linkList, { eventId, listId });
+  await expect(
+    alice.mutation(api.events.createLinkedList, { eventId }),
+  ).rejects.toThrow("already has a linked");
+});
+
+it("rejects conflicting notes and pots, while repeated links and explicit unlinking work", async () => {
+  await t.run((ctx) =>
+    ctx.db.insert("projectMembers", { projectId: ids.family, userId: ids.bob }),
+  );
+  const makeEvent = () =>
+    alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Trip",
+      startAt: JAN_10,
+      endAt: JAN_10_END,
+      allDay: false,
+    });
+  const first = await makeEvent();
+  const second = await makeEvent();
+  const noteId = await alice.mutation(api.events.createLinkedNote, {
+    eventId: first,
+  });
+  const potId = await alice.mutation(api.events.createLinkedPot, {
+    eventId: first,
+  });
+  await alice.mutation(api.events.linkNote, { eventId: first, noteId });
+  await alice.mutation(api.events.linkPot, { eventId: first, potId });
+  await expect(
+    alice.mutation(api.events.createLinkedNote, { eventId: first }),
+  ).rejects.toThrow("already has a linked");
+  await expect(
+    alice.mutation(api.events.createLinkedPot, { eventId: first }),
+  ).rejects.toThrow("already has a linked");
+  await expect(
+    alice.mutation(api.events.linkNote, { eventId: second, noteId }),
+  ).rejects.toThrow("another event");
+  await expect(
+    alice.mutation(api.events.linkPot, { eventId: second, potId }),
+  ).rejects.toThrow("another event");
+  const otherNote = await alice.mutation(api.events.createLinkedNote, {
+    eventId: second,
+  });
+  await alice.mutation(api.events.unlinkNote, {
+    eventId: second,
+    noteId: otherNote,
+  });
+  await expect(
+    alice.mutation(api.events.linkNote, { eventId: first, noteId: otherNote }),
+  ).rejects.toThrow("already has a linked");
+  await alice.mutation(api.events.unlinkNote, { eventId: first, noteId });
+  await alice.mutation(api.events.linkNote, { eventId: second, noteId });
+  expect(
+    (await alice.query(api.events.get, { eventId: second }))?.note?._id,
+  ).toBe(noteId);
+});
+
+it("audits legacy duplicate links without breaking reads or deleting resources", async () => {
+  const eventId = await alice.mutation(api.events.create, {
+    projectId: ids.family,
+    name: "Trip",
+    startAt: JAN_10,
+    endAt: JAN_10_END,
+    allDay: false,
+  });
+  const first = await alice.mutation(api.events.createLinkedList, { eventId });
+  const second = await t.run((ctx) =>
+    ctx.db.insert("lists", {
+      projectId: ids.family,
+      name: "Legacy duplicate",
+      favorite: false,
+      eventId,
+      createdBy: ids.alice,
+      updatedAt: 0,
+    }),
+  );
+  expect(
+    await t.query(internal.events.auditLinkDuplicates, {
+      projectId: ids.family,
+    }),
+  ).toEqual([{ kind: "lists", eventId, resourceIds: [first, second] }]);
+  expect((await alice.query(api.events.get, { eventId }))?.list?._id).toBe(
+    first,
+  );
+  await alice.mutation(api.events.unlinkList, { eventId, listId: second });
+  expect(
+    await t.query(internal.events.auditLinkDuplicates, {
+      projectId: ids.family,
+    }),
+  ).toEqual([]);
+  expect(await alice.query(api.lists.get, { listId: second })).not.toBeNull();
+});
+
+it("returns only unlinked candidate IDs and names, excludes settled pots, and gates membership", async () => {
+  const listId = await alice.mutation(api.lists.create, {
+    projectId: ids.family,
+    name: "Packing",
+  });
+  await alice.mutation(api.listItems.create, {
+    listId,
+    name: "Large item history",
+  });
+  const noteId = await alice.mutation(api.notes.create, {
+    projectId: ids.family,
+    name: "Notes",
+  });
+  const potId = await alice.mutation(api.expenses.createPot, {
+    projectId: ids.family,
+    name: "Budget",
+    memberIds: [ids.alice],
+  });
+  expect(
+    await alice.query(api.events.listLinkCandidates, { projectId: ids.family }),
+  ).toEqual([{ _id: listId, name: "Packing" }]);
+  expect(
+    await alice.query(api.events.noteLinkCandidates, { projectId: ids.family }),
+  ).toEqual([{ _id: noteId, name: "Notes" }]);
+  expect(
+    await alice.query(api.events.potLinkCandidates, { projectId: ids.family }),
+  ).toEqual([{ _id: potId, name: "Budget" }]);
+  await t.run((ctx) => ctx.db.patch(potId, { settledAt: 1 }));
+  expect(
+    await alice.query(api.events.potLinkCandidates, { projectId: ids.family }),
+  ).toEqual([]);
+  const eventId = await alice.mutation(api.events.create, {
+    projectId: ids.family,
+    name: "Trip",
+    startAt: JAN_10,
+    endAt: JAN_10_END,
+    allDay: false,
+  });
+  await alice.mutation(api.events.linkList, { eventId, listId });
+  await alice.mutation(api.events.linkNote, { eventId, noteId });
+  expect(
+    await alice.query(api.events.listLinkCandidates, { projectId: ids.family }),
+  ).toEqual([]);
+  expect(
+    await alice.query(api.events.noteLinkCandidates, { projectId: ids.family }),
+  ).toEqual([]);
+  for (const query of [
+    api.events.listLinkCandidates,
+    api.events.noteLinkCandidates,
+    api.events.potLinkCandidates,
+  ]) {
+    await expect(bob.query(query, { projectId: ids.family })).rejects.toThrow();
+  }
+});
+
+it("allows only one of two competing list links", async () => {
+  const eventId = await alice.mutation(api.events.create, {
+    projectId: ids.family,
+    name: "Trip",
+    startAt: JAN_10,
+    endAt: JAN_10_END,
+    allDay: false,
+  });
+  const first = await alice.mutation(api.lists.create, {
+    projectId: ids.family,
+    name: "First",
+  });
+  const second = await alice.mutation(api.lists.create, {
+    projectId: ids.family,
+    name: "Second",
+  });
+  const results = await Promise.allSettled([
+    alice.mutation(api.events.linkList, { eventId, listId: first }),
+    alice.mutation(api.events.linkList, { eventId, listId: second }),
+  ]);
+  expect(
+    results.filter((result) => result.status === "fulfilled"),
+  ).toHaveLength(1);
+  expect(
+    await t.query(internal.events.auditLinkDuplicates, {
+      projectId: ids.family,
+    }),
+  ).toEqual([]);
+});

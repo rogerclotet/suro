@@ -18,6 +18,17 @@ export default defineSchema({
   // `users` below to extend it with app fields, keeping the required `email` index.
   ...authTables,
 
+  expenseOperations: defineTable({
+    userId: v.id("users"),
+    operationId: v.string(),
+    requestHash: v.string(),
+    result: v.union(
+      v.object({ kind: v.literal("pot"), id: v.id("pots") }),
+      v.object({ kind: v.literal("spending"), id: v.id("spendings") }),
+      v.object({ kind: v.literal("settlement") }),
+    ),
+  }).index("by_user_operation", ["userId", "operationId"]),
+
   users: defineTable({
     // Fields @convex-dev/auth reads/writes:
     name: v.optional(v.string()),

@@ -99,6 +99,11 @@ export async function deleteUserAccount(
   ctx: MutationCtx,
   userId: Id<"users">,
 ): Promise<void> {
+  const operations = await ctx.db
+    .query("expenseOperations")
+    .withIndex("by_user_operation", (q) => q.eq("userId", userId))
+    .collect();
+  for (const operation of operations) await ctx.db.delete(operation._id);
   const ownedProjects = await ctx.db
     .query("projects")
     .withIndex("by_createdBy", (q) => q.eq("createdBy", userId))

@@ -1,7 +1,13 @@
 import { ConvexError } from "convex/values";
-import { OPERATIONS, type Operation, parseOperation } from "./operations";
+import {
+  isRetrySafeExpense,
+  OPERATIONS,
+  type Operation,
+  parseOperation,
+} from "./operations";
 import type { OutboxStore } from "./outbox-core";
 import { compact, hasUnresolvedTemp, remapArgs } from "./outbox-logic";
+import { parseEntry } from "./persistence";
 
 function isMissing(error: unknown): boolean {
   if (!(error instanceof ConvexError)) return false;
@@ -20,11 +26,13 @@ export function createFlusher({
   send,
   isOnline,
   currentUserId,
+  newOperationId = () => crypto.randomUUID(),
 }: {
   queue: OutboxStore;
   send: (operation: Operation) => Promise<unknown>;
   isOnline: () => boolean;
   currentUserId: () => string | null;
+  newOperationId?: () => string;
 }) {
   let flushing = false;
   return async function flush() {
@@ -53,8 +61,32 @@ export function createFlusher({
           .getEntries()
           .find((candidate) => candidate.status === "pending");
         if (!entry) break;
+        const entryId = entry.id;
         try {
-          const args = remapArgs(entry.args, queue.getIdmap());
+          let savedArgs = entry.args;
+          if (
+            isRetrySafeExpense(entry.functionName) &&
+            !(
+              "operationId" in entry.args &&
+              entry.args.operationId !== undefined
+            )
+          ) {
+            // Persist a UUID before sending, including for queues saved by older clients.
+            // Local counter IDs alone collide across devices and account resets.
+            const upgraded = parseEntry({
+              ...entry,
+              args: { ...entry.args, operationId: newOperationId() },
+            });
+            queue.replaceEntries(
+              queue
+                .getEntries()
+                .map((candidate) =>
+                  candidate.id === upgraded.id ? upgraded : candidate,
+                ),
+            );
+            savedArgs = upgraded.args;
+          }
+          const args = remapArgs(savedArgs, queue.getIdmap());
           if (hasUnresolvedTemp(args))
             throw new Error("A preceding change has not synced");
           const operation = parseOperation(entry.functionName, args);
@@ -78,7 +110,7 @@ export function createFlusher({
               error instanceof Error ? error.message : "Sync failed";
             queue.replaceEntries(
               queue.getEntries().map((candidate) =>
-                candidate.id === entry.id
+                candidate.id === entryId
                   ? {
                       ...candidate,
                       status: "failed",

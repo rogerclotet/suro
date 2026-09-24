@@ -295,3 +295,56 @@ it("retains legacy ID mappings even when its entries slot is absent", () => {
   });
   expect(createOutboxStore(storage).allocTempId("lists")).toBe("temp-lists-13");
 });
+
+it("persists a UUID for a legacy expense before sending and reuses it after restart", async () => {
+  const { queue, storage } = memory();
+  queue.enqueue(
+    entry({
+      id: "temp-operation-durable",
+      functionName: "expenses:createSpending",
+      args: { potId: "pot-1", from: "u1", amount: 500 },
+      tempIds: ["temp-spending"],
+    }),
+  );
+  const sent: unknown[] = [];
+  let online = true;
+  await createFlusher({
+    newOperationId: () => "unique-operation-uuid",
+    queue,
+    currentUserId: () => "u1",
+    isOnline: () => online,
+    send: async (operation) => {
+      sent.push(operation.args);
+      online = false;
+      return "real-spending";
+    },
+  })();
+  const restarted = createOutboxStore(storage);
+  expect(restarted.getEntries()).toHaveLength(1);
+  online = true;
+  await createFlusher({
+    queue: restarted,
+    currentUserId: () => "u1",
+    isOnline: () => online,
+    send: async (operation) => {
+      sent.push(operation.args);
+      return "real-spending";
+    },
+  })();
+  expect(sent).toEqual([
+    {
+      potId: "pot-1",
+      from: "u1",
+      amount: 500,
+      operationId: "unique-operation-uuid",
+    },
+    {
+      potId: "pot-1",
+      from: "u1",
+      amount: 500,
+      operationId: "unique-operation-uuid",
+    },
+  ]);
+  expect(restarted.getIdmap()["temp-spending"]).toBe("real-spending");
+  expect(restarted.getEntries()).toEqual([]);
+});

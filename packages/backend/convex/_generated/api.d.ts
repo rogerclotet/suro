@@ -29,6 +29,8 @@ import type * as model_auth from "../model/auth.js";
 import type * as model_authI18n from "../model/authI18n.js";
 import type * as model_categories from "../model/categories.js";
 import type * as model_colors from "../model/colors.js";
+import type * as model_eventLinks from "../model/eventLinks.js";
+import type * as model_expenseOperations from "../model/expenseOperations.js";
 import type * as model_expenses from "../model/expenses.js";
 import type * as model_fileUrls from "../model/fileUrls.js";
 import type * as model_ics from "../model/ics.js";
@@ -81,6 +83,8 @@ declare const fullApi: ApiFromModules<{
   "model/authI18n": typeof model_authI18n;
   "model/categories": typeof model_categories;
   "model/colors": typeof model_colors;
+  "model/eventLinks": typeof model_eventLinks;
+  "model/expenseOperations": typeof model_expenseOperations;
   "model/expenses": typeof model_expenses;
   "model/fileUrls": typeof model_fileUrls;
   "model/ics": typeof model_ics;

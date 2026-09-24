@@ -3,7 +3,7 @@
 import { eventLocalStart } from "domain/events";
 import { CalendarFold } from "lucide-react";
 import { useLocale } from "next-intl";
-import type { List } from "@/app/_data/list";
+import type { List, ListPreviewData } from "@/app/_data/list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import { eventTimes } from "@/lib/event-day";
@@ -16,10 +16,21 @@ import ProgressRing from "./progress-ring";
  * completion ring trailing.
  */
 export default function ListPreview({ list }: { list: List }) {
+  return (
+    <ListPreviewRow
+      list={{
+        ...list,
+        total: list.items.length,
+        done: list.items.filter((item) => item.completed).length,
+      }}
+    />
+  );
+}
+
+export function ListPreviewRow({ list }: { list: ListPreviewData }) {
   const locale = useLocale();
-  const total = list.items.length;
-  const pending = list.items.filter((item) => !item.completed).length;
-  const done = total - pending;
+  const { total, done } = list;
+  const pending = total - done;
   const completed = total > 0 && pending === 0;
 
   return (
