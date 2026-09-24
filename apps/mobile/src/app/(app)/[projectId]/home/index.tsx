@@ -21,7 +21,11 @@ import {
   useFormatEventTime,
   useLongDate,
 } from "@/lib/datetime";
-import { isEventOnDay, pickUpcomingEvents } from "@/lib/event-dates";
+import {
+  eventLocalStart,
+  isEventOnDay,
+  pickUpcomingEvents,
+} from "@/lib/event-dates";
 import { unreadCount } from "@/lib/notification-routing";
 import {
   useOpenNotificationSection,
@@ -286,7 +290,7 @@ function EventCard({
       })}
     >
       <EventDateBadge
-        date={new Date(event.startAt)}
+        date={eventLocalStart(event)}
         isToday={isToday}
         todayLabel={todayLabel}
       />

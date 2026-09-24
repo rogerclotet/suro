@@ -9,11 +9,18 @@ import {
 const DAY = 86_400_000;
 
 describe("widgetEventBounds", () => {
-  it("queries from the start of today", () => {
+  it("covers local and UTC boundaries for thirty calendar days", () => {
     const now = new Date("2026-07-05T15:30:00");
     const { from, to } = widgetEventBounds(now);
-    expect(new Date(from).getHours()).toBe(0);
-    expect(to - from).toBe(30 * DAY);
+    expect(from).toBe(
+      Math.min(new Date(2026, 6, 5).getTime(), Date.UTC(2026, 6, 5)),
+    );
+    expect(to).toBe(
+      Math.max(
+        new Date(2026, 7, 3, 23, 59, 59, 999).getTime(),
+        Date.UTC(2026, 7, 4) - 1,
+      ),
+    );
   });
 });
 

@@ -1,1 +1,2 @@
-• Los enlaces a las apps móviles de la barra lateral ahora tienen un separador discreto y un título para encontrarlos más fácilmente.
+• Los eventos de todo el día se muestran y se editan en la fecha correcta en todas las zonas horarias. Los que terminan a medianoche ya no aparecen al día siguiente.
+• El calendario sigue creando eventos de todo el día por defecto. Al activar las horas, sugiere una franja de una hora y conserva las horas editadas al cambiar de fechas o volver a activar todo el día.

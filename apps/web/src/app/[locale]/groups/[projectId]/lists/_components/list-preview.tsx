@@ -1,10 +1,12 @@
 "use client";
 
+import { eventLocalStart } from "domain/events";
 import { CalendarFold } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { List } from "@/app/_data/list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
+import { eventTimes } from "@/lib/event-day";
 import { cn } from "@/lib/utils";
 import ProgressRing from "./progress-ring";
 
@@ -48,7 +50,7 @@ export default function ListPreview({ list }: { list: List }) {
         {list.event && (
           <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
             <CalendarFold size={11} />
-            {list.event.startAt.toLocaleString(locale, {
+            {eventLocalStart(eventTimes(list.event)).toLocaleString(locale, {
               dateStyle: "medium",
             })}
           </div>

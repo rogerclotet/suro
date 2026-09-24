@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { eventOverlapsRange, normalizeEventEnd } from "domain/events";
 import type { Id } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { track } from "./model/analytics";
@@ -13,13 +14,6 @@ import {
 } from "./model/permissions";
 import { recordProjectActivity } from "./model/projectActivity";
 
-/** Adds a UTC day to an all-day event's end so the half-open range still
- * overlaps the final day — mirrors the Drizzle app's createEvent/editEvent. */
-const DAY_MS = 86_400_000;
-function normalizeEnd(endAt: number, allDay: boolean): number {
-  return allDay ? endAt + DAY_MS : endAt;
-}
-
 export const listByRange = query({
   args: {
     projectId: v.id("projects"),
@@ -28,8 +22,8 @@ export const listByRange = query({
   },
   handler: async (ctx, { projectId, from, to }) => {
     await requireProjectMember(ctx, projectId);
-    // Bound the scan by startAt <= window end, then keep events whose end is at
-    // or after the window start (overlap test, like the Postgres query).
+    // Bound the scan by startAt <= window end, then keep events whose end is
+    // after the window start. Event ends are exclusive.
     const candidates = await ctx.db
       .query("events")
       .withIndex("by_project_start", (q) =>
@@ -37,7 +31,7 @@ export const listByRange = query({
       )
       .collect();
     return candidates
-      .filter((event) => event.endAt >= from)
+      .filter((event) => eventOverlapsRange(event, from, to))
       .sort((a, b) => a.startAt - b.startAt);
   },
 });
@@ -109,7 +103,7 @@ export const create = mutation({
       name: trimmed,
       description: (description ?? "").trim() || undefined,
       startAt,
-      endAt: normalizeEnd(endAt, allDay),
+      endAt: normalizeEventEnd(endAt, allDay),
       allDay,
       projectId,
       createdBy: userId,
@@ -151,7 +145,7 @@ export const update = mutation({
       name: trimmed,
       description: (description ?? "").trim() || undefined,
       startAt,
-      endAt: normalizeEnd(endAt, allDay),
+      endAt: normalizeEventEnd(endAt, allDay),
       allDay,
       updatedBy: userId,
       updatedAt: Date.now(),

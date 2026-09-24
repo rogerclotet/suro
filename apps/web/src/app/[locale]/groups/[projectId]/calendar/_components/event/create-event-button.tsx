@@ -4,10 +4,11 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
+import { createEventDateDraft } from "domain/events";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { type FormEvent, useCallback, useEffect } from "react";
+import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -34,29 +35,6 @@ export default function CreateEventButton({
   const t = useTranslations("calendar");
 
   const { project } = useProjects();
-  const form = useForm<v.InferInput<typeof eventSchema>>({
-    defaultValues: {
-      name: "",
-      description: "",
-      allDay: true,
-    },
-    resolver: valibotResolver(eventSchema),
-  });
-
-  const {
-    handleDatesChange,
-    handleStartTimeChange,
-    handleEndTimeChange,
-    handleAllDayChange,
-  } = useEventDates({ form, preserveTimes: false });
-
-  useEffect(() => {
-    const date = new Date(defaultDate.getTime());
-    date.setHours(0, 0, 0, 0);
-    form.setValue("dates", { from: date, to: date });
-    form.setValue("allDay", true);
-  }, [defaultDate, form]);
-
   return (
     <ModalForm
       trigger={<Action icon={PlusIcon} label={t("createTitle")} />}
@@ -64,44 +42,41 @@ export default function CreateEventButton({
       description={t("createDescription")}
     >
       <CreateEventFormContent
-        form={form}
         project={project}
         onCreate={onCreate}
         sessionId={session?.user.id}
-        handleDatesChange={handleDatesChange}
-        handleStartTimeChange={handleStartTimeChange}
-        handleEndTimeChange={handleEndTimeChange}
-        handleAllDayChange={handleAllDayChange}
+        defaultDate={defaultDate}
       />
     </ModalForm>
   );
 }
 
 function CreateEventFormContent({
-  form,
   project,
   onCreate,
   sessionId,
-  handleDatesChange,
-  handleStartTimeChange,
-  handleEndTimeChange,
-  handleAllDayChange,
+  defaultDate,
 }: {
-  form: ReturnType<typeof useForm<v.InferInput<typeof eventSchema>>>;
   project: Project | null;
   onCreate?: (from: Date | undefined, to: Date | undefined) => void;
   sessionId?: string;
-  handleDatesChange: Parameters<typeof EventFormFields>[0]["handleDatesChange"];
-  handleStartTimeChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleStartTimeChange"];
-  handleEndTimeChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleEndTimeChange"];
-  handleAllDayChange: Parameters<
-    typeof EventFormFields
-  >[0]["handleAllDayChange"];
+  defaultDate: Date;
 }) {
+  const form = useForm<v.InferInput<typeof eventSchema>>({
+    defaultValues: {
+      name: "",
+      description: "",
+      allDay: true,
+      dates: createEventDateDraft(defaultDate).dates,
+    },
+    resolver: valibotResolver(eventSchema),
+  });
+  const {
+    handleDatesChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+    handleAllDayChange,
+  } = useEventDates({ form });
   const { close } = useModalForm();
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");

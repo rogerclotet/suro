@@ -1,7 +1,9 @@
 "use client";
 
+import { eventDatesForForm, sameDay } from "domain/events";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
+import { eventTimes } from "@/lib/event-day";
 
 export default function TimeRange({
   startAt,
@@ -18,16 +20,14 @@ export default function TimeRange({
 
   const range = useMemo(() => {
     if (allDay) {
-      const allDayEndAt = new Date(
-        endAt.getFullYear(),
-        endAt.getMonth(),
-        endAt.getDate() - 1,
+      const { from: start, to: allDayEndAt } = eventDatesForForm(
+        eventTimes({ startAt, endAt, allDay }),
       );
 
-      if (isSameDay(allDayEndAt, startAt)) {
+      if (sameDay(allDayEndAt, start)) {
         return (
           <span className={className}>
-            {startAt.toLocaleDateString(locale, {
+            {start.toLocaleDateString(locale, {
               dateStyle: "medium",
             })}
           </span>
@@ -36,7 +36,7 @@ export default function TimeRange({
 
       return (
         <span className={className}>
-          {startAt.toLocaleString(locale, {
+          {start.toLocaleString(locale, {
             dateStyle: "medium",
           })}
           {" - "}
@@ -47,7 +47,7 @@ export default function TimeRange({
       );
     }
 
-    if (isSameDay(startAt, endAt)) {
+    if (sameDay(startAt, endAt)) {
       return (
         <span className={className}>
           {startAt.toLocaleString(locale, {
@@ -78,12 +78,4 @@ export default function TimeRange({
   }, [startAt, endAt, allDay, className, locale]);
 
   return range;
-}
-
-function isSameDay(date1: Date, date2: Date) {
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
 }

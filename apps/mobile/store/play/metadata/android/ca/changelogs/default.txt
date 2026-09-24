@@ -1,1 +1,2 @@
-• Els enllaços a les apps mòbils de la barra lateral ara tenen un separador discret i un títol per trobar-los més fàcilment.
+• Els esdeveniments de tot el dia es mostren i s'editen a la data correcta en tots els fusos horaris. Els que acaben a mitjanit ja no apareixen l'endemà.
+• El calendari continua creant esdeveniments de tot el dia per defecte. En activar les hores, suggereix una franja d'una hora i conserva les hores editades en canviar de dates o tornar a activar tot el dia.

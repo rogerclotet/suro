@@ -24,9 +24,24 @@ function receipt(section: UnreadSection["section"], count = 1): UnreadSection {
 describe("notification navigation", () => {
   it("opens an event's month and carries the receipt identity even for repeated dates", () => {
     const calendar = receipt("calendar");
-    calendar.destination = { kind: "calendar", startAt: Date.UTC(2027, 2, 12) };
+    calendar.destination = {
+      kind: "calendar",
+      startAt: Date.UTC(2027, 2, 12),
+      allDay: false,
+    };
     expect(notificationHref(calendar)).toBe(
       `/group/calendar?date=${Date.UTC(2027, 2, 12)}&notification=notification`,
+    );
+  });
+  it("opens an all-day event on its UTC calendar date in the local calendar", () => {
+    const calendar = receipt("calendar");
+    calendar.destination = {
+      kind: "calendar",
+      startAt: Date.UTC(2027, 2, 12),
+      allDay: true,
+    };
+    expect(notificationHref(calendar)).toBe(
+      `/group/calendar?date=${new Date(2027, 2, 12).getTime()}&notification=notification`,
     );
   });
   it("uses the same Home nesting as push links for notes and files", () => {

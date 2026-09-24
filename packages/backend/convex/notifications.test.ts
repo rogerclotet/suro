@@ -81,6 +81,25 @@ describe("unread activity", () => {
     expect(stored[0]?.target).toEqual({ kind: "calendar", eventId });
   });
 
+  it("includes date-only semantics in calendar destinations", async () => {
+    await ctx.alice.mutation(api.events.create, {
+      projectId: ctx.ids.group,
+      name: "All day",
+      startAt: Date.UTC(2027, 2, 12),
+      endAt: Date.UTC(2027, 2, 12),
+      allDay: true,
+    });
+    expect(await ctx.bob.query(api.notifications.unread)).toMatchObject([
+      {
+        destination: {
+          kind: "calendar",
+          startAt: Date.UTC(2027, 2, 12),
+          allDay: true,
+        },
+      },
+    ]);
+  });
+
   it("selects the most recently received event, even if its date is earlier", async () => {
     await newEvent("Later", Date.UTC(2027, 4, 1));
     vi.advanceTimersByTime(1);

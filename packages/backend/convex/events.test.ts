@@ -172,6 +172,31 @@ describe("events: range query", () => {
     });
   }
 
+  it("excludes events ending exactly at the start of the query", async () => {
+    const day = Date.UTC(2026, 8, 24);
+    await makeEvent("Ends at midnight", day - 3_600_000, day);
+    await alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Yesterday",
+      startAt: day - DAY,
+      endAt: day - DAY,
+      allDay: true,
+    });
+    await alice.mutation(api.events.create, {
+      projectId: ids.family,
+      name: "Today",
+      startAt: day,
+      endAt: day,
+      allDay: true,
+    });
+    const events = await alice.query(api.events.listByRange, {
+      projectId: ids.family,
+      from: day,
+      to: day + DAY - 1,
+    });
+    expect(events.map((event) => event.name)).toEqual(["Today"]);
+  });
+
   it("returns only events overlapping the window, sorted by start", async () => {
     const jan = Date.UTC(2024, 0, 1);
     const feb = Date.UTC(2024, 1, 1);
