@@ -4,9 +4,9 @@ import { api } from "backend/convex/_generated/api";
 import type { Doc, Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
+import { captureException } from "@/lib/error-reporting";
 import { updateListItems } from "@/lib/queries/update-list-items";
 import { useSession } from "@/lib/session";
 import type { TaskMutationArgs } from "./data";
@@ -87,12 +87,7 @@ export default function useCreateListItem(
         expectedDueAt: completed.dueAt?.getTime() ?? null,
       }).catch((e: unknown) => {
         console.error("[use-create-list-item] reopen failed:", e);
-        posthog.captureException(e, {
-          distinctId: session?.user.id,
-          action: "reopen_list_item",
-          projectId: list.projectId,
-          listId: list.id,
-        });
+        captureException(e, { action: "reopen_list_item" });
         toast.error(t("itemUpdateError"));
       });
       return true;
@@ -108,12 +103,7 @@ export default function useCreateListItem(
       ...task,
     }).catch((e: unknown) => {
       console.error("[use-create-list-item] create failed:", e);
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_list_item",
-        projectId: list.projectId,
-        listId: list.id,
-      });
+      captureException(e, { action: "create_list_item" });
       onError(name);
       toast.error(t("itemCreateError"));
     });

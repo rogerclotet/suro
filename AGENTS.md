@@ -21,7 +21,7 @@ Both clients talk to the same Convex deployment. There is no separate server or 
 - **Data flow**: reactive Convex (`useQuery`/`useMutation`) in client components; `fetchQuery`/`preloadQuery` in RSC. No ORM, no REST layer.
 - **UI/state**: Radix UI + Tiptap (rich text), React Hook Form + Valibot/Zod, Zustand.
 - **Tooling**: pnpm workspaces, Biome (format + lint), Vitest (jsdom for web, `convex-test` for backend), Husky + lint-staged.
-- **Analytics**: PostHog (product analytics + error tracking).
+- **Analytics**: PostHog for product analytics and surveys; GlitchTip via Sentry SDKs for anonymous production errors. See `docs/error-reporting.md` for build configuration.
 
 Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadthing, Web Push, the Dexie offline layer. Secret Santa remains disabled. In-app unread activity and native push notifications run on Convex.
 

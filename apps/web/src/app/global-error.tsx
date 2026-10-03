@@ -1,8 +1,8 @@
 "use client";
 
 import NextError from "next/error";
-import posthog from "posthog-js";
 import { type ComponentType, useEffect } from "react";
+import { captureException } from "@/lib/error-reporting";
 import { isNetworkError } from "@/lib/is-network-error";
 
 // next/error's class component type isn't a valid JSX component under React 19
@@ -20,7 +20,7 @@ export default function GlobalError({
   useEffect(() => {
     // Transient network failures are recoverable, not bugs — don't report them.
     if (isNetworkError(error)) return;
-    posthog.captureException(error);
+    captureException(error);
   }, [error]);
 
   return (

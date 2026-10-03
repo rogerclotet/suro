@@ -103,7 +103,7 @@ function FeedbackSheetForm({
       onClose();
       Alert.alert(tf("success"));
     } catch (e) {
-      void reportFeedbackError(posthog, e);
+      void reportFeedbackError(e);
       Alert.alert(tf("error"));
     } finally {
       setSubmitting(false);

@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { linkEventPotSchema } from "../../_components/event/data";
 
 export default function LinkPotForm({
@@ -32,7 +31,6 @@ export default function LinkPotForm({
   event: Event;
   trigger: React.ReactNode;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
   const form = useForm({
     defaultValues: {
@@ -56,16 +54,11 @@ export default function LinkPotForm({
         });
         toast.success(t("linkPotSuccess"));
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: session?.user.id,
-          action: "link_event_pot",
-          projectId: event.projectId,
-          eventId: event.id,
-        });
+        captureException(e, { action: "link_event_pot" });
         toast.error(t("linkPotError"));
       }
     },
-    [event, session?.user.id, t, linkPot],
+    [event, t, linkPot],
   );
 
   const handleFormSubmit = useCallback(

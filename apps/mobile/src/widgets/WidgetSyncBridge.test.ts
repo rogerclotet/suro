@@ -25,10 +25,7 @@ vi.mock("convex/react", () => {
   };
 });
 vi.mock("react-native", () => ({ Platform: { OS: "android" } }));
-vi.mock("posthog-react-native", () => {
-  const posthog = { captureException: state.capture };
-  return { usePostHog: () => posthog };
-});
+vi.mock("@/lib/error-reporting", () => ({ captureException: state.capture }));
 vi.mock("@/lib/offline", () => ({
   useAuthGate: () => ({ isAuthenticated: state.storedAuthenticated }),
   usePersistentQuery: state.persistentQuery,

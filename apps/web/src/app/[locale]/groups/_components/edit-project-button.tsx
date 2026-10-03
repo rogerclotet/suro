@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Edit, SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -29,7 +28,7 @@ import { Label } from "@/components/ui/label";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 const editProjectSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty(), v.trim()),
@@ -46,7 +45,6 @@ export default function EditProjectButton({ project }: { project: Project }) {
     },
     resolver: valibotResolver(editProjectSchema),
   });
-  const { data: session } = useSession();
 
   return (
     <ModalForm
@@ -58,11 +56,7 @@ export default function EditProjectButton({ project }: { project: Project }) {
       title={t("editTitle")}
       description={t("editDescription")}
     >
-      <EditProjectFormContent
-        form={form}
-        project={project}
-        sessionId={session?.user.id}
-      />
+      <EditProjectFormContent form={form} project={project} />
     </ModalForm>
   );
 }
@@ -70,11 +64,9 @@ export default function EditProjectButton({ project }: { project: Project }) {
 function EditProjectFormContent({
   form,
   project,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof editProjectSchema>>>;
   project: Project;
-  sessionId?: string;
 }) {
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
@@ -95,15 +87,11 @@ function EditProjectFormContent({
         toast.success(t("editSuccess", { name: data.name }));
         close();
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "edit_project",
-          projectId: project.id,
-        });
+        captureException(e, { action: "edit_project" });
         toast.error(t("editError"));
       }
     },
-    [project, sessionId, close, t, updateProject],
+    [project, close, t, updateProject],
   );
 
   const handleFormSubmit = useCallback(

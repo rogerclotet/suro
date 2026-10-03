@@ -11,9 +11,8 @@ const POSTHOG_HOST =
 /**
  * Wraps the app in PostHog when a key is configured, else renders children
  * untouched so local dev (or any build without analytics keys) still runs.
- * Mirrors the web's posthog-js setup: EU project, app-lifecycle autocapture,
- * and JS error tracking (the web's `capture_exceptions`). Screen views and user
- * identification are handled by `AnalyticsBridge`.
+ * Captures product analytics. Screen views and user identification are handled
+ * by `AnalyticsBridge`; error reporting is configured separately.
  */
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
   if (!POSTHOG_KEY) {
@@ -27,15 +26,7 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
         // App opened/installed/updated/backgrounded — the mobile engagement
         // baseline (default true; explicit for clarity).
         captureAppLifecycleEvents: true,
-        // Report uncaught JS errors and unhandled promise rejections. Native
-        // (iOS/Android) crashes additionally need the `@posthog/react-native-
-        // plugin` config plugin (see app.config.ts) + `nativeCrashes: true`.
-        errorTracking: {
-          autocapture: {
-            uncaughtExceptions: true,
-            unhandledRejections: true,
-          },
-        },
+        errorTracking: { autocapture: false },
       }}
       autocapture={{
         // expo-router can't be screen-autocaptured (it doesn't expose a

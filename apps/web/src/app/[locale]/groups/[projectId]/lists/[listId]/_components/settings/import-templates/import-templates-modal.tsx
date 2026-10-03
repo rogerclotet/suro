@@ -4,7 +4,6 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { List, Template } from "@/app/_data/list";
@@ -14,7 +13,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { useOptionalResponsiveMenu } from "@/components/ui/responsive-menu";
 import { Spinner } from "@/components/ui/spinner";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import TemplatePreview from "./template-preview";
 
 export default function ImportTemplatesModal({
@@ -53,7 +52,6 @@ function ImportTemplatesContent({
   >({});
   const [submitting, setSubmitting] = useState(false);
   const { project } = useProjects();
-  const { data: session } = useSession();
   const { close } = useModalForm();
   const menu = useOptionalResponsiveMenu();
   const t = useTranslations("templates");
@@ -103,15 +101,7 @@ function ImportTemplatesContent({
       close();
       menu?.setOpen(false);
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "import_templates_to_existing_list",
-        projectId: project.id,
-        listId: list.id,
-        templateIds: templates
-          .filter((_t, idx) => selected[idx])
-          .map((t) => t.id),
-      });
+      captureException(e, { action: "import_templates_to_existing_list" });
       toast.error(t("importError"));
     } finally {
       setSubmitting(false);

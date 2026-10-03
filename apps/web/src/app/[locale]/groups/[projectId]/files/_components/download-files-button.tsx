@@ -2,11 +2,11 @@
 
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { File } from "@/app/_data/file";
 import { Button } from "@/components/ui/button";
+import { captureException } from "@/lib/error-reporting";
 
 export default function DownloadFilesButton({
   files,
@@ -51,7 +51,7 @@ export default function DownloadFilesButton({
       }
     } catch (error) {
       if (!abortController.signal.aborted) {
-        posthog.captureException(error, { action: "download_files" });
+        captureException(error, { action: "download_files" });
         toast.error(t("downloadError"));
       }
     } finally {

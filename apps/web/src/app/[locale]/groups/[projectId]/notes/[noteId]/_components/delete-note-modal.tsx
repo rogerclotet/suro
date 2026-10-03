@@ -4,12 +4,11 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Note } from "@/app/_data/note";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function DeleteNoteModal({
   note,
@@ -19,7 +18,6 @@ export default function DeleteNoteModal({
   trigger: React.ReactNode;
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
   const t = useTranslations("notes");
   const tCommon = useTranslations("common");
   const deleteNote = useMutation(api.notes.remove);
@@ -33,12 +31,7 @@ export default function DeleteNoteModal({
       });
       toast.success(t("deleteSuccess", { name: note.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "delete_note",
-        projectId: note.projectId,
-        noteId: note.id,
-      });
+      captureException(e, { action: "delete_note" });
       toast.error(t("deleteError"));
     }
   }

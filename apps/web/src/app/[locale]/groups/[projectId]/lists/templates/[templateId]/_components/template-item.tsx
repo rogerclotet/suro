@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FocusEvent, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -20,11 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { templateItemSchema } from "../../_components/create-template/data";
 
 export default function TemplateItem({
-  template,
   item,
   onChange,
 }: {
@@ -41,7 +39,6 @@ export default function TemplateItem({
   });
   const { project } = useProjects();
   const formRef = useRef<HTMLFormElement>(null);
-  const { data: session } = useSession();
   const t = useTranslations("lists");
 
   async function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
@@ -50,12 +47,7 @@ export default function TemplateItem({
 
       form.reset({ name: data.name, category: data.category });
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "update_template_item",
-        projectId: project?.id,
-        templateId: template.id,
-      });
+      captureException(e, { action: "update_template_item" });
       toast.error(t("itemCreateError"));
       return;
     }

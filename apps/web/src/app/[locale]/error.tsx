@@ -2,10 +2,10 @@
 
 import { AlertCircle, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { captureException } from "@/lib/error-reporting";
 import { isNetworkError } from "@/lib/is-network-error";
 
 export default function ErrorPage({
@@ -23,7 +23,7 @@ export default function ErrorPage({
   useEffect(() => {
     // Don't report transient network failures: they're noise, not bugs.
     if (recoverable) return;
-    posthog.captureException(error);
+    captureException(error);
   }, [error, recoverable]);
 
   // Retry automatically as soon as connectivity comes back.

@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -26,11 +25,10 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { potSchema } from "./data";
 
 export default function CreatePotButton() {
-  const { data: session } = useSession();
   const { project } = useProjects();
   const t = useTranslations("expenses");
   const form = useForm<v.InferInput<typeof potSchema>>({
@@ -49,11 +47,7 @@ export default function CreatePotButton() {
           title={t("createPotTitle")}
           description={t("createPotDescription")}
         >
-          <CreatePotFormContent
-            form={form}
-            project={project}
-            sessionId={session?.user.id}
-          />
+          <CreatePotFormContent form={form} project={project} />
         </ModalForm>
       )}
     </>
@@ -63,11 +57,9 @@ export default function CreatePotButton() {
 function CreatePotFormContent({
   form,
   project,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof potSchema>>>;
   project: Project;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const router = useRouter();
@@ -92,11 +84,7 @@ function CreatePotFormContent({
         });
       }
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionId,
-        action: "create_pot",
-        projectId: project.id,
-      });
+      captureException(e, { action: "create_pot" });
       toast.error(t("createPotError"));
     }
   }

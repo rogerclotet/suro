@@ -4,8 +4,8 @@ import { z } from "zod";
 export const env = createEnv({
   /**
    * Server-side environment variables. The app's data, auth, and storage all
-   * run on Convex now, so the web server only needs PostHog (server-side
-   * capture) — everything else moved to the Convex deployment's own env.
+   * run on Convex. Error reporting uses the public GlitchTip DSN; upload
+   * credentials are consumed only by next.config.ts at build time.
    */
   server: {
     NODE_ENV: z
@@ -19,6 +19,12 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_CONVEX_URL: z.string().url(),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT: z.enum(["production"]).optional(),
+    NEXT_PUBLIC_SENTRY_RELEASE: z
+      .string()
+      .regex(/^suro@[a-f0-9]{7}$/)
+      .optional(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
   },
@@ -29,6 +35,9 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
+    NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

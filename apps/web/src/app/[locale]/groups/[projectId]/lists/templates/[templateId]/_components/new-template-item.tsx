@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -12,14 +11,13 @@ import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import { InputGroupInput } from "@/components/ui/input-group";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import AddItemForm from "../../../_components/add-item/add-item-form";
 import { templateItemSchema } from "../../_components/create-template/data";
 
 type Item = Template["items"][number];
 
 export default function NewTemplateItem({
-  template,
   onCreate,
 }: {
   template: Template;
@@ -33,7 +31,6 @@ export default function NewTemplateItem({
     resolver: valibotResolver(templateItemSchema),
   });
   const { project } = useProjects();
-  const { data: session } = useSession();
   const t = useTranslations("lists");
 
   function onSubmit(data: v.InferInput<typeof templateItemSchema>) {
@@ -50,12 +47,7 @@ export default function NewTemplateItem({
 
     onCreate({ name: data.name, category: data.category ?? null }).catch(
       (e: unknown) => {
-        posthog.captureException(e, {
-          distinctId: session?.user.id,
-          action: "create_template_item",
-          projectId: template.projectId,
-          templateId: template.id,
-        });
+        captureException(e, { action: "create_template_item" });
         // Restore the lost name for a retry, unless a new one is mid-typing.
         if (form.getValues("name") === "") {
           form.setValue("name", data.name, { shouldDirty: true });

@@ -7,7 +7,6 @@ import { useMutation } from "convex/react";
 import { createEventDateDraft } from "domain/events";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,7 +17,7 @@ import Action from "@/components/action";
 import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { eventSchema } from "./data";
 import { eventDatesForMutation } from "./date-values";
 import EventFormFields from "./event-form-fields";
@@ -31,7 +30,6 @@ export default function CreateEventButton({
   defaultDate: Date;
   onCreate?: (from: Date | undefined, to: Date | undefined) => void;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
 
   const { project } = useProjects();
@@ -44,7 +42,6 @@ export default function CreateEventButton({
       <CreateEventFormContent
         project={project}
         onCreate={onCreate}
-        sessionId={session?.user.id}
         defaultDate={defaultDate}
       />
     </ModalForm>
@@ -54,12 +51,10 @@ export default function CreateEventButton({
 function CreateEventFormContent({
   project,
   onCreate,
-  sessionId,
   defaultDate,
 }: {
   project: Project | null;
   onCreate?: (from: Date | undefined, to: Date | undefined) => void;
-  sessionId?: string;
   defaultDate: Date;
 }) {
   const form = useForm<v.InferInput<typeof eventSchema>>({
@@ -105,15 +100,11 @@ function CreateEventFormContent({
         form.reset();
         close();
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "create_event",
-          projectId: project?.id,
-        });
+        captureException(e, { action: "create_event" });
         toast.error(t("createError"));
       }
     },
-    [project, onCreate, form, sessionId, close, t, tLists, createEvent],
+    [project, onCreate, form, close, t, tLists, createEvent],
   );
 
   const handleFormSubmit = useCallback(

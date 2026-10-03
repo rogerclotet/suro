@@ -4,11 +4,10 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
 import ModalAction from "@/components/ui/modal-action";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function UnlinkEventNoteModal({
   event,
@@ -19,7 +18,6 @@ export default function UnlinkEventNoteModal({
   note: { id: string };
   trigger: React.ReactNode;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
   const unlinkNote = useMutation(api.events.unlinkNote);
 
@@ -31,12 +29,7 @@ export default function UnlinkEventNoteModal({
       });
       toast.success(t("unlinkNoteSuccess"));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "unlink_event_note",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
+      captureException(e, { action: "unlink_event_note" });
       toast.error(t("unlinkNoteError"));
     }
   }

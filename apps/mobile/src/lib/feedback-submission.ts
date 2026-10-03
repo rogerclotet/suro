@@ -1,4 +1,5 @@
 import type { PostHog } from "posthog-react-native";
+import { captureException, flushErrors } from "@/lib/error-reporting";
 import {
   FEEDBACK_QUESTION_MESSAGE_ID,
   FEEDBACK_QUESTION_SECTION_ID,
@@ -10,16 +11,7 @@ import {
   type FeedbackType,
 } from "@/lib/feedback-survey";
 
-type FeedbackClient = Pick<
-  PostHog,
-  | "capture"
-  | "flush"
-  | "ready"
-  | "optedOut"
-  | "captureException"
-  | "captureLog"
-  | "flushLogs"
->;
+type FeedbackClient = Pick<PostHog, "capture" | "flush" | "ready" | "optedOut">;
 
 type FeedbackInput = {
   type: FeedbackType;
@@ -69,37 +61,12 @@ export async function submitFeedback(
   await posthog.flush();
 }
 
-export async function reportFeedbackError(
-  posthog: FeedbackClient | undefined,
-  error: unknown,
-) {
+export async function reportFeedbackError(error: unknown) {
   console.error("[feedback] submit failed:", error);
-  if (!posthog) {
-    return;
-  }
-  const attributes = {
-    action: "submit_feedback",
-    $survey_id: FEEDBACK_SURVEY_ID,
-  };
-  // Logs and exception events have separate queues. Neither reporting failure
-  // should stop the form from displaying the original submission error.
-  const results = await Promise.allSettled([
-    (async () => {
-      posthog.captureException(error, attributes);
-      await posthog.flush();
-    })(),
-    (async () => {
-      posthog.captureLog({
-        body: "Feedback submission failed",
-        level: "error",
-        attributes,
-      });
-      await posthog.flushLogs();
-    })(),
-  ]);
-  for (const result of results) {
-    if (result.status === "rejected") {
-      console.error("[feedback] error reporting failed:", result.reason);
-    }
+  try {
+    captureException(error, { action: "submit_feedback" });
+    await flushErrors();
+  } catch (reportingError) {
+    console.error("[feedback] error reporting failed:", reportingError);
   }
 }

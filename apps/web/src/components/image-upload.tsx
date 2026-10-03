@@ -6,10 +6,9 @@ import { useMutation } from "convex/react";
 import { Camera, Loader2, type LucideIcon, Trash2, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { Button } from "./ui/button";
 
 export interface ImageAction {
@@ -46,7 +45,6 @@ export default function ImageUpload({
   children,
 }: ImageUploadProps) {
   const router = useRouter();
-  const { data: session } = useSession();
   const [uploaded, setUploaded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -98,10 +96,7 @@ export default function ImageUpload({
       onUploadComplete?.();
       router.refresh();
     } catch (error) {
-      posthog.captureException(error, {
-        distinctId: session?.user.id,
-        action: `upload_image_${target.kind}`,
-      });
+      captureException(error, { action: `upload_image_${target.kind}` });
       toast.error(t("imageUploadError"));
     } finally {
       setUploading(false);

@@ -15,6 +15,7 @@ COPY apps/web/package.json ./apps/web/package.json
 # install the backend package and its `convex` dependency.
 COPY packages/backend/package.json ./packages/backend/package.json
 COPY packages/domain/package.json ./packages/domain/package.json
+COPY packages/error-reporting/package.json ./packages/error-reporting/package.json
 # web prebuild runs `design-tokens generate` (needs `tsx` from this package).
 COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
 RUN \
@@ -30,6 +31,7 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 # `backend/convex/_generated/api` resolves `convex/server` from here; without
 # the workspace's node_modules (the `convex` symlink) the build can't find it.
 COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
+COPY --from=deps /app/packages/error-reporting/node_modules ./packages/error-reporting/node_modules
 COPY --from=deps /app/packages/design-tokens/node_modules ./packages/design-tokens/node_modules
 COPY . .
 
@@ -44,14 +46,23 @@ ARG NEXT_PUBLIC_POSTHOG_KEY=""
 ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
 ARG NEXT_PUBLIC_POSTHOG_HOST=""
 ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
-# Build-time only: upload client source maps to PostHog so production stack
-# traces are readable. Unset for preview builds, which skip the upload.
-ARG POSTHOG_API_KEY=""
-ENV POSTHOG_API_KEY=$POSTHOG_API_KEY
-ARG POSTHOG_ENV_ID=""
-ENV POSTHOG_ENV_ID=$POSTHOG_ENV_ID
+# Set only in production. Previews and compile checks leave these empty.
+ARG NEXT_PUBLIC_SENTRY_DSN=""
+ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+ARG NEXT_PUBLIC_SENTRY_ENVIRONMENT=""
+ENV NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT
+ARG SURO_COMMIT_SHA=""
+ENV SURO_COMMIT_SHA=$SURO_COMMIT_SHA
+ARG SENTRY_URL=""
+ENV SENTRY_URL=$SENTRY_URL
+ARG SENTRY_ORG=""
+ENV SENTRY_ORG=$SENTRY_ORG
+ARG SENTRY_PROJECT=""
+ENV SENTRY_PROJECT=$SENTRY_PROJECT
 
-RUN pnpm --filter web build
+# The upload token never enters an image layer or build argument.
+RUN --mount=type=secret,id=sentry_auth_token \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" pnpm --filter web build
 
 # Production image, copy all the files and run next
 FROM base AS runner

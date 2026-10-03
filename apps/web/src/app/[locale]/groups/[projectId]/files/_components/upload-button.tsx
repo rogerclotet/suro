@@ -5,11 +5,10 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Loader2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { cn } from "@/lib/utils";
 
 export default function UploadButton({
@@ -25,7 +24,6 @@ export default function UploadButton({
   className?: string;
   onUploadingChange?: (uploading: boolean) => void;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("files");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -68,12 +66,7 @@ export default function UploadButton({
       }
       toast.success(t("shareSuccess"));
     } catch (error) {
-      posthog.captureException(error, {
-        distinctId: session?.user.id,
-        action: "upload_file",
-        projectId,
-        eventId,
-      });
+      captureException(error, { action: "upload_file" });
       toast.error(t("shareError"));
     } finally {
       setUploading(false);

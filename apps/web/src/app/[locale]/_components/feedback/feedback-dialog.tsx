@@ -40,6 +40,7 @@ import {
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
+import { captureException } from "@/lib/error-reporting";
 import {
   FEEDBACK_QUESTION_MESSAGE_ID,
   FEEDBACK_QUESTION_SECTION_ID,
@@ -48,7 +49,6 @@ import {
   FEEDBACK_SURVEY_ID,
   FEEDBACK_TYPE_LABELS,
 } from "@/lib/feedback-survey";
-import { useSession } from "@/lib/session";
 import { type FeedbackInput, feedbackSchema } from "./feedback-schema";
 
 // Rendered once in the authenticated chrome (sidebar-inset-content) and driven by the
@@ -75,7 +75,6 @@ function ClientFeedbackDialog() {
   const tNav = useTranslations("nav");
   const { open, setOpen, closeFeedback } = useFeedback();
   const isMdOrLarger = useMediaQuery("(min-width: 768px)");
-  const { data: session } = useSession();
 
   const form = useForm({
     defaultValues: {
@@ -107,10 +106,7 @@ function ClientFeedbackDialog() {
       form.reset();
       closeFeedback();
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "submit_feedback",
-      });
+      captureException(e, { action: "submit_feedback" });
       toast.error(t("error"));
     }
   }

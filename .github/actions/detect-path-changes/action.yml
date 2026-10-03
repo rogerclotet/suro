@@ -25,6 +25,7 @@ runs:
             - 'apps/web/**'
             - 'packages/backend/**'
             - 'packages/domain/**'
+            - 'packages/error-reporting/**'
             - 'package.json'
             - 'pnpm-lock.yaml'
             - 'pnpm-workspace.yaml'

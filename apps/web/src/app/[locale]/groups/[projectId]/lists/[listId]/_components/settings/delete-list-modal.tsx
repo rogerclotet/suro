@@ -4,13 +4,12 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import type { List } from "@/app/_data/list";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function DeleteListModal({
   list,
@@ -20,7 +19,6 @@ export default function DeleteListModal({
   trigger: ReactNode;
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
   const deleteList = useMutation(api.lists.remove);
@@ -35,12 +33,7 @@ export default function DeleteListModal({
 
       toast.success(t("deleteSuccess", { name: list.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "delete_list",
-        projectId: list.projectId,
-        listId: list.id,
-      });
+      captureException(e, { action: "delete_list" });
       toast.error(t("deleteError"));
     }
   }

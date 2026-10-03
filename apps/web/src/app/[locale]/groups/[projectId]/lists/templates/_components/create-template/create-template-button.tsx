@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -23,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { templateSchema } from "./data";
 
 export default function CreateTemplateButton({
@@ -40,7 +39,6 @@ export default function CreateTemplateButton({
     resolver: valibotResolver(templateSchema),
   });
   const router = useRouter();
-  const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
   const createTemplate = useMutation(api.templates.create);
@@ -59,11 +57,7 @@ export default function CreateTemplateButton({
         params: { projectId, templateId },
       });
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_template",
-        projectId,
-      });
+      captureException(e, { action: "create_template" });
       toast.error(t("createError"));
       return;
     } finally {

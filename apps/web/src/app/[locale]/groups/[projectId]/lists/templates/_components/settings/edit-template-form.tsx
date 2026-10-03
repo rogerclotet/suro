@@ -6,13 +6,11 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import {
   Form,
   FormControl,
@@ -24,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { templateSchema } from "../create-template/data";
 
 export default function EditTemplateForm({
@@ -42,8 +40,6 @@ export default function EditTemplateForm({
     },
     resolver: valibotResolver(templateSchema),
   });
-  const { project } = useProjects();
-  const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
   const updateTemplate = useMutation(api.templates.update);
@@ -58,12 +54,7 @@ export default function EditTemplateForm({
       });
       toast.success(t("editSuccess", { name: data.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "update_template",
-        projectId: project?.id,
-        templateId: template.id,
-      });
+      captureException(e, { action: "update_template" });
       toast.error(t("editError"));
     }
   }

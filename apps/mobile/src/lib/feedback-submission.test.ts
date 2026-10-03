@@ -5,6 +5,15 @@ import {
   FEEDBACK_SURVEY_ID,
 } from "./feedback-survey";
 
+const reporter = vi.hoisted(() => ({
+  capture: vi.fn(),
+  flush: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/lib/error-reporting", () => ({
+  captureException: reporter.capture,
+  flushErrors: reporter.flush,
+}));
+
 const input = {
   type: "bug",
   section: "lists",
@@ -19,9 +28,6 @@ function client() {
     ready: vi.fn().mockResolvedValue(undefined),
     flush: vi.fn().mockResolvedValue(undefined),
     optedOut: false,
-    captureException: vi.fn(),
-    captureLog: vi.fn(),
-    flushLogs: vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -87,65 +93,25 @@ describe("feedback submission", () => {
 });
 
 describe("feedback error reporting", () => {
-  it("logs locally when PostHog is unavailable", async () => {
-    const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    const error = new Error("PostHog is not configured");
-    await reportFeedbackError(undefined, error);
-    expect(log).toHaveBeenCalledWith(expect.any(String), error);
-  });
-
-  it("sends both error tracking and structured logs without including feedback text", async () => {
+  it("reports without a PostHog client or feedback content", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const posthog = client();
     const error = new Error("Network unavailable");
-    await reportFeedbackError(posthog, error);
-    expect(posthog.captureException).toHaveBeenCalledWith(
-      error,
-      expect.objectContaining({
-        action: "submit_feedback",
-        $survey_id: FEEDBACK_SURVEY_ID,
-      }),
-    );
-    expect(posthog.captureLog).toHaveBeenCalledWith(
-      expect.objectContaining({ level: "error" }),
-    );
-    expect(posthog.flush).toHaveBeenCalled();
-    expect(posthog.flushLogs).toHaveBeenCalled();
-    expect(JSON.stringify(posthog.captureLog.mock.calls)).not.toContain(
-      input.message,
-    );
-  });
-
-  it("contains reporting failures and logs them locally", async () => {
-    const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    const posthog = client();
-    posthog.captureException.mockImplementation(() => {
-      throw new Error("Reporter failed");
+    await reportFeedbackError(error);
+    expect(reporter.capture).toHaveBeenCalledWith(error, {
+      action: "submit_feedback",
     });
-    await expect(
-      reportFeedbackError(posthog, new Error("Send failed")),
-    ).resolves.toBeUndefined();
-    expect(log).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ message: "Reporter failed" }),
-    );
+    expect(reporter.flush).toHaveBeenCalled();
   });
 
-  it("handles rejected event and log flushes without an unhandled rejection", async () => {
+  it("contains delivery failures so the draft remains retryable", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    const posthog = client();
-    posthog.flush.mockRejectedValue(new Error("Events offline"));
-    posthog.flushLogs.mockRejectedValue(new Error("Logs offline"));
+    reporter.flush.mockRejectedValueOnce(new Error("Reporter offline"));
     await expect(
-      reportFeedbackError(posthog, new Error("Send failed")),
+      reportFeedbackError(new Error("Send failed")),
     ).resolves.toBeUndefined();
     expect(log).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({ message: "Events offline" }),
-    );
-    expect(log).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ message: "Logs offline" }),
+      expect.objectContaining({ message: "Reporter offline" }),
     );
   });
 });

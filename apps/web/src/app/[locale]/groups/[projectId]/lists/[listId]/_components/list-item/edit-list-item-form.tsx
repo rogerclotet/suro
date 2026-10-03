@@ -3,7 +3,6 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { SaveIcon, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,7 +22,7 @@ import ModalAction from "@/components/ui/modal-action";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Textarea } from "@/components/ui/textarea";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { cn } from "@/lib/utils";
 import {
   listItemSchema,
@@ -67,7 +66,7 @@ function EditListItemFormContent(props: {
 }) {
   const { item, list, onChange, onDelete } = props;
   const { id: itemId } = item;
-  const { id: listId, items: listItems, projectId } = list;
+  const { id: listId, items: listItems } = list;
 
   const form = useForm({
     defaultValues: {
@@ -83,7 +82,6 @@ function EditListItemFormContent(props: {
     },
     resolver: valibotResolver(listItemSchema),
   });
-  const { data: session } = useSession();
   const { project } = useProjects();
   const { close } = useModalForm();
   const t = useTranslations("lists");
@@ -134,27 +132,11 @@ function EditListItemFormContent(props: {
         toast.success(t("itemUpdated"));
         close();
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: session?.user.id,
-          action: "update_list_item",
-          projectId,
-          listId,
-          itemId,
-        });
+        captureException(e, { action: "update_list_item" });
         toast.error(t("itemUpdateError"));
       }
     },
-    [
-      close,
-      form,
-      itemId,
-      listId,
-      listItems,
-      onChange,
-      projectId,
-      session?.user.id,
-      t,
-    ],
+    [close, form, listItems, onChange, t],
   );
 
   const handleFormSubmit = useCallback(
@@ -175,16 +157,10 @@ function EditListItemFormContent(props: {
       toast.success(t("deleteItemSuccess"));
       close();
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "delete_list_item",
-        projectId,
-        listId,
-        itemId,
-      });
+      captureException(e, { action: "delete_list_item" });
       toast.error(t("deleteItemError"));
     }
-  }, [close, itemId, listId, onDelete, projectId, session?.user.id, t]);
+  }, [close, onDelete, t]);
 
   if (!project) {
     return null;
