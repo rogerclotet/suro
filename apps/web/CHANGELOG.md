@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.31.0] — 2026-10-03
+
+### ca
+
+- [improvement] Millorem els informes de fallades a Android i iOS per diagnosticar els tancaments inesperats de l'app.
+
+### es
+
+- [improvement] Mejoramos los informes de fallos en Android e iOS para diagnosticar los cierres inesperados de la app.
+
+### en
+
+- [improvement] Improved crash reporting on Android and iOS to help diagnose unexpected app closures.
+
 ## [1.30.0] — 2026-10-03
 
 ### ca

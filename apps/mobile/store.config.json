@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.30.0",
+    "version": "1.31.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.",
+        "releaseNotes": "• Improved crash reporting on Android and iOS to help diagnose unexpected app closures.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• El widget de Android muestra las listas destacadas con el recuento de elementos completados y los próximos eventos, como en el inicio. Puedes desplazarte por el contenido y ya no se muestran las tareas asignadas.",
+        "releaseNotes": "• Mejoramos los informes de fallos en Android e iOS para diagnosticar los cierres inesperados de la app.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.",
+        "releaseNotes": "• Millorem els informes de fallades a Android i iOS per diagnosticar els tancaments inesperats de l'app.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

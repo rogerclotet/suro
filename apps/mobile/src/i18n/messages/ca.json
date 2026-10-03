@@ -1,4 +1,16 @@
 {
+  "errorTest": {
+    "title": "Prova d'informes d'errors",
+    "instructions": "Executa una prova cada vegada i comprova GlitchTip. Després d'una fallada nativa, torna a obrir l'app perquè enviï l'informe desat.",
+    "disabled": "Els informes d'errors estan desactivats en aquesta compilació. Utilitza una compilació de producció amb un DSN configurat.",
+    "capture": "Envia un error capturat",
+    "clientError": "Provoca un error de JavaScript",
+    "promiseError": "Rebutja una promesa sense gestionar",
+    "renderError": "Provoca un error de renderització",
+    "nativeCrash": "Provoca una fallada nativa",
+    "nativeWarning": "Això tancarà l'app expressament. Torna-la a obrir després per enviar l'informe de la fallada.",
+    "crashNow": "Provoca la fallada"
+  },
   "metadata": {
     "title": "Suro",
     "description": "El suro compartit per a la gent amb qui comparteixes el dia a dia. Llistes, calendari, fitxers, despeses i amic invisible en un sol lloc.",

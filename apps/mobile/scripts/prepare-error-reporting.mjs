@@ -5,6 +5,11 @@ if (process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT === "production") {
   if (!process.env.EXPO_PUBLIC_SENTRY_DSN)
     throw new Error("Production builds require EXPO_PUBLIC_SENTRY_DSN");
   requireUploadConfig();
+  if (process.env.SENTRY_DISABLE_XCODE_DEBUG_UPLOAD === "true") {
+    throw new Error(
+      "Production native debug symbol uploads must not be bypassed",
+    );
+  }
   const release = currentRelease();
   // EAS persists this for Gradle/Xcode, including the Hermes sourcemap upload.
   // Local builds inherit it from build-with-release.mjs instead.

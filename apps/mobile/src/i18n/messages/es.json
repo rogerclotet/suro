@@ -1,4 +1,16 @@
 {
+  "errorTest": {
+    "title": "Prueba de informes de errores",
+    "instructions": "Ejecuta una prueba cada vez y comprueba GlitchTip. Después de un fallo nativo, vuelve a abrir la app para que envíe el informe guardado.",
+    "disabled": "Los informes de errores están desactivados en esta compilación. Utiliza una compilación de producción con un DSN configurado.",
+    "capture": "Envía un error capturado",
+    "clientError": "Provoca un error de JavaScript",
+    "promiseError": "Rechaza una promesa sin gestionar",
+    "renderError": "Provoca un error de renderizado",
+    "nativeCrash": "Provoca un fallo nativo",
+    "nativeWarning": "Esto cerrará la app deliberadamente. Vuelve a abrirla después para enviar el informe del fallo.",
+    "crashNow": "Provoca el fallo"
+  },
   "metadata": {
     "title": "Suro",
     "description": "El corcho compartido para la gente con la que compartes tu día a día. Listas, calendario, archivos, gastos y amigo invisible en un solo sitio.",
