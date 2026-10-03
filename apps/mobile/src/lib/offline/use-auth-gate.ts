@@ -4,10 +4,9 @@ import { useConvexAuth } from "convex/react";
 type AuthGate = { isLoading: boolean; isAuthenticated: boolean };
 
 /**
- * Auth state for routing and query gates that also resolves on an offline cold
- * start. Use this anywhere you'd otherwise gate on `convex/react`'s
- * `useConvexAuth` to decide "show the app vs. redirect to /login" or "run the
- * query vs. skip".
+ * Auth state for routing and cached content on an offline cold start. This can
+ * trust a stored token before the server accepts it. Protected network requests
+ * must use `convex/react`'s `useConvexAuth` instead.
  *
  * `convex/react`'s `useConvexAuth` only clears `isLoading` once the backend
  * confirms the token over the websocket. With no network that confirmation

@@ -1,4 +1,5 @@
-import type { Doc } from "backend/convex/_generated/dataModel";
+import type { api } from "backend/convex/_generated/api";
+import type { FunctionReturnType } from "convex/server";
 import { type Locale, normalizeLocale } from "@/i18n/config";
 import {
   type EventTimes,
@@ -10,45 +11,10 @@ import {
 } from "@/lib/event-dates";
 import { PREVIEW_LIMIT, UPCOMING_WINDOW_MS } from "./constants";
 import { widgetLabels } from "./labels";
-import type { WidgetSnapshot, WidgetTaskRow } from "./types";
+import type { WidgetSnapshot } from "./types";
 
 type CalEvent = EventTimes & { _id: string; name: string };
-type Task = Doc<"listItems"> & { listName: string };
-
-function dueDayCode(task: Task): number {
-  const d = new Date(task.dueAt ?? 0);
-  if (task.dueAllDay) {
-    return (
-      d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
-    );
-  }
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-}
-
-function todayCode(now: Date): number {
-  return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-}
-
-function formatDue(
-  item: { dueAt: number; dueAllDay?: boolean },
-  locale: Locale,
-): string {
-  const date = new Date(item.dueAt);
-  const dateLabel = date.toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    year:
-      date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
-  });
-  if (item.dueAllDay) {
-    return dateLabel;
-  }
-  const timeLabel = date.toLocaleTimeString(locale, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  return `${dateLabel} ${timeLabel}`;
-}
+type ListPreviews = FunctionReturnType<typeof api.lists.homePreviews>;
 
 function formatEventWhen(event: CalEvent, today: Date, locale: Locale): string {
   if (isEventOnDay(event, today)) {
@@ -65,18 +31,13 @@ export function pickWidgetEvents(
   return pickUpcomingEvents(events, now, PREVIEW_LIMIT);
 }
 
-/** Top incomplete assigned tasks, preserving the server sort order. */
-export function pickWidgetTasks(tasks: Task[]): Task[] {
-  return tasks.slice(0, PREVIEW_LIMIT);
-}
-
 export function buildWidgetSnapshot(input: {
   locale: string | undefined;
   signedIn: boolean;
   projectId?: string;
   projectName?: string;
   events?: CalEvent[];
-  tasks?: Task[];
+  lists?: ListPreviews;
   now?: Date;
 }): WidgetSnapshot {
   const locale = normalizeLocale(input.locale);
@@ -90,7 +51,7 @@ export function buildWidgetSnapshot(input: {
       signedIn: false,
       labels,
       events: [],
-      tasks: [],
+      lists: [],
     };
   }
 
@@ -101,14 +62,13 @@ export function buildWidgetSnapshot(input: {
       signedIn: true,
       labels,
       events: [],
-      tasks: [],
+      lists: [],
     };
   }
 
   const projectId = input.projectId;
   const events = input.events ?? [];
-  const tasks = input.tasks ?? [];
-  const todayIndex = todayCode(now);
+  const lists = input.lists;
 
   return {
     updatedAt: now.getTime(),
@@ -124,22 +84,19 @@ export function buildWidgetSnapshot(input: {
       when: formatEventWhen(event, now, locale),
       path: `/${projectId}/calendar/${event._id}`,
     })),
-    tasks: pickWidgetTasks(tasks).map((task) => {
-      const overdue = task.dueAt !== undefined && dueDayCode(task) < todayIndex;
-      const row: WidgetTaskRow = {
-        id: task._id,
-        name: task.name,
-        listName: task.listName,
-        overdue,
-        path: `/${projectId}/lists/${task.listId}`,
-      };
-      if (task.dueAt !== undefined) {
-        row.dueLabel = formatDue(
-          { dueAt: task.dueAt, dueAllDay: task.dueAllDay },
-          locale,
-        );
-      }
-      return row;
+    lists: (lists?.favoriteIds ?? []).slice(0, PREVIEW_LIMIT).flatMap((id) => {
+      const list = lists?.previews.find((preview) => preview._id === id);
+      return list
+        ? [
+            {
+              id: list._id,
+              name: list.name,
+              done: list.done,
+              total: list.total,
+              path: `/${projectId}/lists/${list._id}`,
+            },
+          ]
+        : [];
     }),
   };
 }

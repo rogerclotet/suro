@@ -12,7 +12,7 @@ export function signedOutWidgetSnapshot(
     signedIn: false,
     labels,
     events: [],
-    tasks: [],
+    lists: [],
   };
 }
 
@@ -27,6 +27,6 @@ export function unconfiguredWidgetSnapshot(
     signedIn: true,
     labels,
     events: [],
-    tasks: [],
+    lists: [],
   };
 }

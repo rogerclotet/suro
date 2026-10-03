@@ -6,6 +6,34 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.30.0] — 2026-10-03
+
+### ca
+
+- [improvement] El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.
+
+### es
+
+- [improvement] El widget de Android muestra las listas destacadas con el recuento de elementos completados y los próximos eventos, como en el inicio. Puedes desplazarte por el contenido y ya no se muestran las tareas asignadas.
+
+### en
+
+- [improvement] The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.
+
+## [1.29.1] — 2026-10-03
+
+### ca
+
+- [fix] Els ginys d'Android esperen que es confirmi la sessió abans de sincronitzar-se per evitar errors en iniciar sessió.
+
+### es
+
+- [fix] Los widgets de Android esperan a que se confirme la sesión antes de sincronizarse para evitar errores al iniciar sesión.
+
+### en
+
+- [fix] Android widgets wait for the session to be confirmed before syncing to prevent errors during sign-in.
+
 ## [1.29.0] — 2026-09-24
 
 ### ca

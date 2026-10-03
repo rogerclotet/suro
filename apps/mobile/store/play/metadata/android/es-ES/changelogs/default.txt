@@ -1,4 +1,1 @@
-• Las liquidaciones conservan los pagos seleccionados y piden revisar los importes cuando cambian. Los pagos parciales ya no cierran el bote.
-• Los reintentos de sincronización de gastos en el móvil ya no duplican botes, gastos ni liquidaciones.
-• Los eventos evitan enlaces en conflicto con listas, notas y botes.
-• El panel y los selectores de enlaces cargan menos datos.
+• El widget de Android muestra las listas destacadas con el recuento de elementos completados y los próximos eventos, como en el inicio. Puedes desplazarte por el contenido y ya no se muestran las tareas asignadas.

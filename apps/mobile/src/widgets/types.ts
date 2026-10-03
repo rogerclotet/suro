@@ -8,21 +8,19 @@ export type WidgetEventRow = {
   path: string;
 };
 
-export type WidgetTaskRow = {
+export type WidgetListRow = {
   id: string;
   name: string;
-  listName: string;
-  dueLabel?: string;
-  overdue: boolean;
-  /** Deep-link path inside the app, e.g. `/<projectId>/lists/<listId>`. */
+  done: number;
+  total: number;
   path: string;
 };
 
 export type WidgetLabels = {
   upcoming: string;
-  myTasks: string;
+  featuredLists: string;
   noEvents: string;
-  noTasks: string;
+  noLists: string;
   signIn: string;
   noGroup: string;
   configurePrompt: string;
@@ -38,5 +36,5 @@ export type WidgetSnapshot = {
   homePath?: string;
   labels: WidgetLabels;
   events: WidgetEventRow[];
-  tasks: WidgetTaskRow[];
+  lists: WidgetListRow[];
 };

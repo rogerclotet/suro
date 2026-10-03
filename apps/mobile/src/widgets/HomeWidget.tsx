@@ -4,6 +4,7 @@ import type React from "react";
 import {
   FlexWidget,
   ImageWidget,
+  ListWidget,
   TextWidget,
   type WidgetRepresentation,
 } from "react-native-android-widget";
@@ -20,14 +21,12 @@ const palette = {
     card: nativePalette.light.card,
     text: nativePalette.light.text,
     muted: nativePalette.light.muted,
-    danger: nativePalette.light.danger,
   },
   dark: {
     bg: nativePalette.dark.bg,
     card: nativePalette.dark.card,
     text: nativePalette.dark.text,
     muted: nativePalette.dark.muted,
-    danger: nativePalette.dark.danger,
   },
 } as const;
 
@@ -145,44 +144,41 @@ function eventRow(
   );
 }
 
-function taskRow(
-  task: WidgetSnapshot["tasks"][number],
+function listRow(
+  list: WidgetSnapshot["lists"][number],
   colors: (typeof palette)[Scheme],
 ) {
-  const subtitle = task.dueLabel
-    ? `${task.listName} · ${task.dueLabel}`
-    : task.listName;
+  const complete = list.total > 0 && list.done === list.total;
   return (
     <FlexWidget
-      key={task.id}
+      key={list.id}
       clickAction="OPEN_URI"
-      clickActionData={{ uri: appUri(task.path) }}
+      clickActionData={{ uri: appUri(list.path) }}
       style={{
         backgroundColor: colors.card,
         borderRadius: 10,
         padding: 10,
         marginBottom: 8,
-        flexDirection: "column",
+        flexDirection: "row",
+        alignItems: "center",
       }}
     >
+      <FlexWidget style={{ flex: 1, width: 0 }}>
+        <TextWidget
+          text={list.name}
+          maxLines={1}
+          truncate="END"
+          style={{
+            fontSize: 14,
+            fontWeight: "700",
+            color: complete ? colors.muted : colors.text,
+            marginRight: 8,
+          }}
+        />
+      </FlexWidget>
       <TextWidget
-        text={task.name}
-        maxLines={1}
-        truncate="END"
-        style={{
-          fontSize: 14,
-          color: colors.text,
-          marginBottom: 2,
-        }}
-      />
-      <TextWidget
-        text={subtitle}
-        maxLines={1}
-        truncate="END"
-        style={{
-          fontSize: 12,
-          color: task.overdue ? colors.danger : colors.muted,
-        }}
+        text={`${list.done}/${list.total}`}
+        style={{ fontSize: 12, color: colors.muted }}
       />
     </FlexWidget>
   );
@@ -260,15 +256,17 @@ function renderForScheme(
     >
       {widgetHeader(title, colors, snapshot.homePath)}
 
-      {sectionLabel(snapshot.labels.upcoming, colors)}
-      {snapshot.events.length === 0
-        ? emptyLine(snapshot.labels.noEvents, colors)
-        : snapshot.events.map((event) => eventRow(event, colors))}
+      <ListWidget>
+        {sectionLabel(snapshot.labels.featuredLists, colors)}
+        {snapshot.lists.length === 0
+          ? emptyLine(snapshot.labels.noLists, colors)
+          : snapshot.lists.map((list) => listRow(list, colors))}
 
-      {sectionLabel(snapshot.labels.myTasks, colors)}
-      {snapshot.tasks.length === 0
-        ? emptyLine(snapshot.labels.noTasks, colors)
-        : snapshot.tasks.map((task) => taskRow(task, colors))}
+        {sectionLabel(snapshot.labels.upcoming, colors)}
+        {snapshot.events.length === 0
+          ? emptyLine(snapshot.labels.noEvents, colors)
+          : snapshot.events.map((event) => eventRow(event, colors))}
+      </ListWidget>
     </FlexWidget>
   );
 }

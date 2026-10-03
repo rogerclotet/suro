@@ -1,6 +1,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useConvex } from "convex/react";
+import { useConvex, useConvexAuth } from "convex/react";
+import { usePostHog } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { normalizeLocale } from "@/i18n/config";
@@ -17,8 +18,10 @@ import { persistProjectSnapshot, refreshAllWidgets } from "./sync";
  */
 export function WidgetSyncBridge() {
   const { isAuthenticated } = useAuthGate();
-  const me = usePersistentQuery(api.users.me, isAuthenticated ? {} : "skip");
+  const { isAuthenticated: canQuery } = useConvexAuth();
+  const me = usePersistentQuery(api.users.me, canQuery ? {} : "skip");
   const convex = useConvex();
+  const posthog = usePostHog();
   const bounds = useTodayAnchor();
   const locale = normalizeLocale(me?.locale);
   const lastSyncKey = useRef("");
@@ -33,7 +36,9 @@ export function WidgetSyncBridge() {
     async function sync() {
       writeWidgetAuth(isAuthenticated, locale);
 
-      if (!isAuthenticated) {
+      // Stored auth keeps offline widgets visible, but protected requests must
+      // wait for Convex to confirm the token over the websocket.
+      if (!isAuthenticated || !canQuery) {
         await refreshAllWidgets(locale);
         return;
       }
@@ -47,14 +52,18 @@ export function WidgetSyncBridge() {
       const snapshots: string[] = [];
 
       for (const projectId of projectIds) {
+        if (cancelled) return;
         const pid = projectId as Id<"projects">;
-        const [events, tasks, project] = await Promise.all([
+        const [events, lists, project] = await Promise.all([
           convex.query(api.events.listByRange, {
             projectId: pid,
             from: bounds.from,
             to: bounds.to,
           }),
-          convex.query(api.tasks.myTasks, { projectId: pid }),
+          convex.query(api.lists.homePreviews, {
+            projectId: pid,
+            eventIds: [],
+          }),
           convex.query(api.projects.get, { projectId: pid }),
         ]);
         if (cancelled) {
@@ -66,7 +75,7 @@ export function WidgetSyncBridge() {
           projectId: pid,
           projectName: project?.name,
           events,
-          tasks,
+          lists,
         });
         persistProjectSnapshot(pid, snapshot);
         snapshots.push(JSON.stringify(snapshot));
@@ -80,12 +89,24 @@ export function WidgetSyncBridge() {
       await refreshAllWidgets(locale);
     }
 
-    void sync();
+    void sync().catch((error: unknown) => {
+      if (!cancelled) {
+        posthog.captureException(error, { action: "sync_android_widgets" });
+      }
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, locale, convex, bounds.from, bounds.to]);
+  }, [
+    isAuthenticated,
+    canQuery,
+    locale,
+    convex,
+    posthog,
+    bounds.from,
+    bounds.to,
+  ]);
 
   return null;
 }

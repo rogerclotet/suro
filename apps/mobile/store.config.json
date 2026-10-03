@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.29.0",
+    "version": "1.30.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Settlements keep selected payments and ask you to review changed amounts. Partial payments no longer close the pot.\n• Mobile expense sync retries no longer duplicate pots, expenses or settlements.\n• Events prevent conflicting links to lists, notes and pots.\n• The dashboard and link pickers load less data.",
+        "releaseNotes": "• The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Las liquidaciones conservan los pagos seleccionados y piden revisar los importes cuando cambian. Los pagos parciales ya no cierran el bote.\n• Los reintentos de sincronización de gastos en el móvil ya no duplican botes, gastos ni liquidaciones.\n• Los eventos evitan enlaces en conflicto con listas, notas y botes.\n• El panel y los selectores de enlaces cargan menos datos.",
+        "releaseNotes": "• El widget de Android muestra las listas destacadas con el recuento de elementos completados y los próximos eventos, como en el inicio. Puedes desplazarte por el contenido y ya no se muestran las tareas asignadas.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Les liquidacions conserven els pagaments seleccionats i demanen revisar els imports quan canvien. Els pagaments parcials ja no tanquen el pot.\n• Els reintents de sincronització de despeses al mòbil ja no dupliquen pots, despeses ni liquidacions.\n• Els esdeveniments eviten enllaços en conflicte amb llistes, notes i pots.\n• El tauler i els selectors d'enllaços carreguen menys dades.",
+        "releaseNotes": "• El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
