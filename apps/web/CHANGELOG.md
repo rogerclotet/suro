@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.30.0] — 2026-10-03
+
+### ca
+
+- [improvement] El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.
+
+### es
+
+- [improvement] El widget de Android muestra las listas destacadas con el recuento de elementos completados y los próximos eventos, como en el inicio. Puedes desplazarte por el contenido y ya no se muestran las tareas asignadas.
+
+### en
+
+- [improvement] The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.
+
 ## [1.29.1] — 2026-10-03
 
 ### ca

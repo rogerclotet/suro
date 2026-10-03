@@ -96,7 +96,7 @@
             {
               "name": "SuroHome",
               "label": "Suro",
-              "description": "Upcoming events and your assigned tasks",
+              "description": "Starred lists and upcoming events",
               "minWidth": "250dp",
               "minHeight": "180dp",
               "targetCellWidth": 4,

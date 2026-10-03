@@ -54,13 +54,16 @@ export function WidgetSyncBridge() {
       for (const projectId of projectIds) {
         if (cancelled) return;
         const pid = projectId as Id<"projects">;
-        const [events, tasks, project] = await Promise.all([
+        const [events, lists, project] = await Promise.all([
           convex.query(api.events.listByRange, {
             projectId: pid,
             from: bounds.from,
             to: bounds.to,
           }),
-          convex.query(api.tasks.myTasks, { projectId: pid }),
+          convex.query(api.lists.homePreviews, {
+            projectId: pid,
+            eventIds: [],
+          }),
           convex.query(api.projects.get, { projectId: pid }),
         ]);
         if (cancelled) {
@@ -72,7 +75,7 @@ export function WidgetSyncBridge() {
           projectId: pid,
           projectName: project?.name,
           events,
-          tasks,
+          lists,
         });
         persistProjectSnapshot(pid, snapshot);
         snapshots.push(JSON.stringify(snapshot));

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { api } from "backend/convex/_generated/api";
+import { getFunctionName } from "convex/server";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -51,7 +52,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   state.auth = { isLoading: true, isAuthenticated: false };
   state.storedAuthenticated = true;
-  state.query.mockReset().mockResolvedValue([]);
+  state.query.mockReset().mockImplementation(async (query) => {
+    return getFunctionName(query) === "lists:homePreviews"
+      ? { previews: [], favoriteIds: [] }
+      : [];
+  });
   root = createRoot(document.createElement("div"));
 });
 afterEach(async () => {
@@ -75,6 +80,13 @@ it("keeps cached widgets signed in without requesting protected data until auth 
     to: 1,
   });
   expect(state.query).toHaveBeenCalledTimes(3);
+  expect(state.query).toHaveBeenCalledWith(api.lists.homePreviews, {
+    projectId: "group",
+    eventIds: [],
+  });
+  expect(
+    state.query.mock.calls.map(([query]) => getFunctionName(query)),
+  ).not.toContain("tasks:myTasks");
   expect(state.persist).toHaveBeenCalledTimes(1);
 });
 

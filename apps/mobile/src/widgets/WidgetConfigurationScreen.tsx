@@ -1,6 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useConvex } from "convex/react";
+import { useConvex, useConvexAuth } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Check } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -32,6 +32,7 @@ export function WidgetConfigurationScreen({
   const locale = normalizeLocale(useLocale());
   const tw = useTranslations("mobile.widget");
   const { isAuthenticated } = useAuthGate();
+  const { isAuthenticated: canQuery } = useConvexAuth();
   const projects = usePersistentQuery(
     api.projects.listMine,
     isAuthenticated ? {} : "skip",
@@ -47,13 +48,14 @@ export function WidgetConfigurationScreen({
 
   const preview = useCallback(
     async (projectId: Id<"projects">, projectName: string) => {
-      const [events, tasks] = await Promise.all([
+      if (!canQuery) return;
+      const [events, lists] = await Promise.all([
         convex.query(api.events.listByRange, {
           projectId,
           from: bounds.from,
           to: bounds.to,
         }),
-        convex.query(api.tasks.myTasks, { projectId }),
+        convex.query(api.lists.homePreviews, { projectId, eventIds: [] }),
       ]);
       const snapshot = buildWidgetSnapshot({
         locale,
@@ -61,25 +63,25 @@ export function WidgetConfigurationScreen({
         projectId,
         projectName,
         events,
-        tasks,
+        lists,
       });
       renderWidget(renderHomeWidget(snapshot));
     },
-    [bounds.from, bounds.to, convex, locale, renderWidget],
+    [canQuery, bounds.from, bounds.to, convex, locale, renderWidget],
   );
 
   useEffect(() => {
-    if (!selected || !projects) {
+    if (!selected || !projects || !canQuery) {
       return;
     }
     const project = projects.find((entry) => entry._id === selected);
     if (project) {
       void preview(selected, project.name);
     }
-  }, [selected, projects, preview]);
+  }, [selected, projects, preview, canQuery]);
 
   async function save() {
-    if (!selected || !projects) {
+    if (!selected || !projects || !canQuery) {
       return;
     }
     const project = projects.find((entry) => entry._id === selected);
@@ -89,13 +91,16 @@ export function WidgetConfigurationScreen({
     setSaving(true);
     try {
       setWidgetProjectId(widgetInfo.widgetId, selected);
-      const [events, tasks] = await Promise.all([
+      const [events, lists] = await Promise.all([
         convex.query(api.events.listByRange, {
           projectId: selected,
           from: bounds.from,
           to: bounds.to,
         }),
-        convex.query(api.tasks.myTasks, { projectId: selected }),
+        convex.query(api.lists.homePreviews, {
+          projectId: selected,
+          eventIds: [],
+        }),
       ]);
       const snapshot = buildWidgetSnapshot({
         locale,
@@ -103,7 +108,7 @@ export function WidgetConfigurationScreen({
         projectId: selected,
         projectName: project.name,
         events,
-        tasks,
+        lists,
       });
       persistProjectSnapshot(selected, snapshot);
       renderWidget(renderHomeWidget(snapshot));
@@ -174,7 +179,7 @@ export function WidgetConfigurationScreen({
           <Button
             title={tw("save")}
             onPress={() => void save()}
-            disabled={!selected || saving}
+            disabled={!selected || saving || !canQuery}
           />
         </View>
       </View>

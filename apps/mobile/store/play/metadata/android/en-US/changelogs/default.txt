@@ -1,1 +1,1 @@
-• Android widgets wait for the session to be confirmed before syncing to prevent errors during sign-in.
+• The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.

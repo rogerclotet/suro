@@ -1,1 +1,1 @@
-• Els ginys d'Android esperen que es confirmi la sessió abans de sincronitzar-se per evitar errors en iniciar sessió.
+• El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.

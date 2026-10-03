@@ -1,8 +1,8 @@
+import type { Id } from "backend/convex/_generated/dataModel";
 import { describe, expect, it } from "vitest";
 import {
   buildWidgetSnapshot,
   pickWidgetEvents,
-  pickWidgetTasks,
   widgetEventBounds,
 } from "./build-snapshot";
 
@@ -65,18 +65,6 @@ describe("pickWidgetEvents", () => {
   });
 });
 
-describe("pickWidgetTasks", () => {
-  it("keeps the server order and preview limit", () => {
-    const tasks = pickWidgetTasks([
-      { _id: "1", name: "A", listName: "Inbox", listId: "l1" } as never,
-      { _id: "2", name: "B", listName: "Inbox", listId: "l1" } as never,
-      { _id: "3", name: "C", listName: "Inbox", listId: "l1" } as never,
-      { _id: "4", name: "D", listName: "Inbox", listId: "l1" } as never,
-    ]);
-    expect(tasks.map((task) => task._id)).toEqual(["1", "2", "3"]);
-  });
-});
-
 describe("buildWidgetSnapshot", () => {
   it("builds a signed-out placeholder", () => {
     const snapshot = buildWidgetSnapshot({ signedIn: false, locale: "en" });
@@ -102,20 +90,54 @@ describe("buildWidgetSnapshot", () => {
           allDay: false,
         },
       ],
-      tasks: [
-        {
-          _id: "t1",
-          name: "Buy milk",
-          listName: "Groceries",
-          listId: "l1",
-          dueAt: now.getTime() + DAY,
-          dueAllDay: true,
-        } as never,
-      ],
+      lists: {
+        favoriteIds: ["l1" as Id<"lists">],
+        previews: [
+          {
+            _id: "l1" as Id<"lists">,
+            projectId: "p1" as Id<"projects">,
+            description: undefined,
+            eventId: undefined,
+            name: "Groceries",
+            done: 2,
+            total: 5,
+          },
+        ],
+      },
     });
     expect(snapshot.projectName).toBe("Flatmates");
     expect(snapshot.events[0]?.path).toBe("/p1/calendar/e1");
-    expect(snapshot.tasks[0]?.path).toBe("/p1/lists/l1");
-    expect(snapshot.tasks[0]?.dueLabel).toBeTruthy();
+    expect(snapshot.lists[0]?.path).toBe("/p1/lists/l1");
+    expect(snapshot.lists[0]).toMatchObject({
+      name: "Groceries",
+      done: 2,
+      total: 5,
+    });
+    expect(snapshot).not.toHaveProperty("tasks");
   });
+});
+
+it("preserves starred-list order and completion counts, excluding other previews", () => {
+  const previews = Array.from({ length: 5 }, (_, index) => ({
+    _id: String(index) as Id<"lists">,
+    projectId: "p1" as Id<"projects">,
+    description: undefined,
+    eventId: undefined,
+    name: `List ${index}`,
+    done: index,
+    total: index,
+  }));
+  const snapshot = buildWidgetSnapshot({
+    signedIn: true,
+    locale: "es",
+    projectId: "p1",
+    lists: {
+      previews,
+      favoriteIds: ["3", "0", "2", "1"] as Id<"lists">[],
+    },
+  });
+  expect(snapshot.lists.map((list) => list.id)).toEqual(["3", "0", "2"]);
+  expect(snapshot.lists[0]).toMatchObject({ done: 3, total: 3 });
+  expect(snapshot.lists[1]).toMatchObject({ done: 0, total: 0 });
+  expect(snapshot.labels.featuredLists).toBeTruthy();
 });
