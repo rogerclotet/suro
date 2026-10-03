@@ -4,6 +4,11 @@
     "description": "El corcho compartido para la gente con la que compartes tu día a día. Listas, calendario, archivos, gastos y amigo invisible en un solo sitio.",
     "appShortName": "Suro"
   },
+  "errorTest": {
+    "title": "Prueba de informes de errores",
+    "clientError": "Provoca un error en el cliente",
+    "serverError": "Provoca un error en el servidor"
+  },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",

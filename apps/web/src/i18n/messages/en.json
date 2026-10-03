@@ -4,6 +4,11 @@
     "description": "A shared corkboard for the people you do life with. Group lists, calendar, files, shared expenses and Secret Santa, all in one calm place.",
     "appShortName": "Suro"
   },
+  "errorTest": {
+    "title": "Error reporting test",
+    "clientError": "Trigger client error",
+    "serverError": "Trigger server error"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
