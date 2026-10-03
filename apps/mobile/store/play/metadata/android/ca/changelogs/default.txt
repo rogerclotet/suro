@@ -1,1 +1,1 @@
-• El giny d'Android mostra les llistes destacades amb el recompte d'elements completats i els propers esdeveniments, com a l'inici. Pots desplaçar-te pel contingut i ja no s'hi mostren les tasques assignades.
+• Millorem els informes de fallades a Android i iOS per diagnosticar els tancaments inesperats de l'app.

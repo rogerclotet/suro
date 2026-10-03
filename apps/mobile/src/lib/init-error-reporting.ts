@@ -3,21 +3,25 @@ import { anonymousError } from "error-reporting";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
 
+const reportingEnabled =
+  !__DEV__ &&
+  process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT === "production" &&
+  !!process.env.EXPO_PUBLIC_SENTRY_DSN;
+
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   release: Constants.expoConfig?.extra?.sentryRelease,
   dist: Application.nativeBuildVersion ?? undefined,
   environment: "production",
-  enabled:
-    !__DEV__ &&
-    process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT === "production" &&
-    !!process.env.EXPO_PUBLIC_SENTRY_DSN,
+  enabled: reportingEnabled,
   sendDefaultPii: false,
   maxBreadcrumbs: 0,
   tracesSampleRate: 0,
   enableAutoSessionTracking: false,
-  // Native crash payloads bypass the JS privacy filter. Keep the existing JS
-  // error coverage until a native beforeSend filter is implemented on both OSes.
-  enableNative: false,
+  enableNative: reportingEnabled,
+  // AppDelegate/MainApplication initialize native capture before JS starts.
+  // Do not reinitialize it here and overwrite the native event filters.
+  autoInitializeNativeSdk: false,
+  enableLogs: false,
   beforeSend: anonymousError,
 });

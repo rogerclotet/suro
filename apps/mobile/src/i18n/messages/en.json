@@ -1,4 +1,16 @@
 {
+  "errorTest": {
+    "title": "Error reporting test",
+    "instructions": "Run one test at a time, then check GlitchTip. After a native crash, reopen the app so it can send the saved report.",
+    "disabled": "Error reporting is disabled in this build. Use a production build with a configured DSN.",
+    "capture": "Send a captured error",
+    "clientError": "Throw a JavaScript error",
+    "promiseError": "Reject an unhandled promise",
+    "renderError": "Throw a render error",
+    "nativeCrash": "Trigger a native crash",
+    "nativeWarning": "This deliberately closes the app. Reopen it afterward to send the crash report.",
+    "crashNow": "Crash now"
+  },
   "metadata": {
     "title": "Suro",
     "description": "A shared corkboard for the people you do life with. Group lists, calendar, files, shared expenses and Secret Santa, all in one calm place.",

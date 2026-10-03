@@ -1,1 +1,1 @@
-• The Android widget shows starred lists with completion counts and upcoming events, matching Home. Content is scrollable and assigned tasks are no longer shown.
+• Improved crash reporting on Android and iOS to help diagnose unexpected app closures.
