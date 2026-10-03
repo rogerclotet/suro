@@ -4,11 +4,6 @@
     "description": "El suro compartit per a la gent amb qui comparteixes el dia a dia. Llistes, calendari, fitxers, despeses i amic invisible en un sol lloc.",
     "appShortName": "Suro"
   },
-  "errorTest": {
-    "title": "Prova d'informes d'errors",
-    "clientError": "Provoca un error al client",
-    "serverError": "Provoca un error al servidor"
-  },
   "common": {
     "save": "Desar",
     "cancel": "Cancel·lar",
