@@ -18,14 +18,6 @@ function convexFailure(message: string | undefined) {
   };
 }
 
-function errorSummary(message: string | undefined): string {
-  const convex = convexFailure(message);
-  if (!convex) return "Error details omitted for privacy";
-  return convex.function
-    ? `Convex ${convex.function.type}(${convex.function.name}) failed`
-    : "Convex request failed";
-}
-
 function sourcePath(path: string | undefined): string | undefined {
   return path
     ?.split(/[?#]/, 1)[0]
@@ -45,7 +37,7 @@ function frameWithoutData(frame: StackFrame): StackFrame {
   };
 }
 
-/** An allowlist prevents new SDK integrations from silently adding personal data. */
+/** Keep diagnostic messages while allowlisting the surrounding event metadata. */
 export function anonymousError(event: ErrorEvent): ErrorEvent {
   const action = event.tags?.action;
   const tags: Record<string, string> = {};
@@ -67,6 +59,7 @@ export function anonymousError(event: ErrorEvent): ErrorEvent {
     timestamp: event.timestamp,
     platform: event.platform,
     level: event.level,
+    message: event.message,
     release: event.release,
     dist: event.dist,
     environment: event.environment,
@@ -76,8 +69,7 @@ export function anonymousError(event: ErrorEvent): ErrorEvent {
     exception: event.exception && {
       values: event.exception.values?.map((exception) => ({
         type: exception.type,
-        // Error messages can contain form values, tokens or server arguments.
-        value: errorSummary(exception.value),
+        value: exception.value,
         stacktrace: exception.stacktrace && {
           frames: exception.stacktrace.frames?.map(frameWithoutData),
         },

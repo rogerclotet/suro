@@ -1,8 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { anonymousError } from "./index";
 
-describe("anonymous error reports", () => {
-  it("keeps Convex log correlation without retaining the error payload", () => {
+describe("error report filtering", () => {
+  it("preserves event messages and each exception in the cause chain", () => {
+    const event = anonymousError({
+      type: undefined,
+      message: "Suro client error reporting test",
+      exception: {
+        values: [
+          { type: "TypeError", value: "Cannot read properties of undefined" },
+          { type: "Error", value: "Suro server error reporting test" },
+          { type: "Error" },
+        ],
+      },
+    });
+    expect(event.message).toBe("Suro client error reporting test");
+    expect(event.exception?.values?.map(({ value }) => value)).toEqual([
+      "Cannot read properties of undefined",
+      "Suro server error reporting test",
+      undefined,
+    ]);
+  });
+
+  it("keeps Convex log correlation and the original error messages", () => {
     const event = anonymousError({
       type: undefined,
       tags: { action: "create_note", userId: "private-user" },
@@ -27,11 +47,12 @@ describe("anonymous error reports", () => {
       convex_function_type: "M",
     });
     expect(event.exception?.values?.[0]?.value).toBe(
-      "Convex M(notes:create) failed",
+      "[CONVEX M(notes:create)] [Request ID: d064ef901f7ec0b7] Server Error\n  Called by client",
     );
-    expect(JSON.stringify(event)).not.toMatch(
-      /private-user|private note|person@example.com/,
+    expect(event.exception?.values?.[1]?.value).toBe(
+      "private note from person@example.com",
     );
+    expect(JSON.stringify(event)).not.toContain("private-user");
   });
 
   it("retains the request ID from HTTP client errors without inventing a function name", () => {
@@ -49,7 +70,7 @@ describe("anonymous error reports", () => {
     expect(event.tags).toEqual({ convex_request_id: "d064ef901f7ec0b7" });
   });
 
-  it("does not copy arbitrary messages or malformed correlation fields", () => {
+  it("preserves messages without treating malformed prefixes as correlation fields", () => {
     for (const value of [
       "User said [Request ID: d064ef901f7ec0b7]",
       "[CONVEX M(person@example.com)] [Request ID: d064ef901f7ec0b7] private note",
@@ -60,9 +81,7 @@ describe("anonymous error reports", () => {
         exception: { values: [{ value }] },
       });
       expect(event.tags).toBeUndefined();
-      expect(event.exception?.values?.[0]?.value).toBe(
-        "Error details omitted for privacy",
-      );
+      expect(event.exception?.values?.[0]?.value).toBe(value);
     }
   });
 
@@ -91,7 +110,7 @@ describe("anonymous error reports", () => {
         values: [
           {
             type: "TypeError",
-            value: "Could not save private note for person@example.com",
+            value: "Could not save note",
             stacktrace: {
               frames: [
                 {
