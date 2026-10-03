@@ -10,11 +10,11 @@
     "ios": "node scripts/run-ios-simulator.mjs",
     "ios:rebuild": "rm -rf ios android .expo && node scripts/run-ios-simulator.mjs",
     "web": "expo start --web",
-    "build:android:preview": "mkdir -p build && eas build --platform android --profile preview --local --output build/suro-preview.apk",
-    "build:android:dev": "mkdir -p build && eas build --platform android --profile dev --local --output build/suro-dev.apk",
-    "build:android:prod-apk": "mkdir -p build && eas build --platform android --profile production-apk --local --output build/suro-prod.apk",
-    "build:android:release": "mkdir -p build && eas build --platform android --profile production --local --output build/suro-release.aab",
-    "build:ios:release": "mkdir -p build && PATH=/usr/bin:$PATH eas build --platform ios --profile production --local --output build/suro-release.ipa",
+    "build:android:preview": "mkdir -p build && node scripts/build-with-release.mjs --platform android --profile preview --local --output build/suro-preview.apk",
+    "build:android:dev": "mkdir -p build && node scripts/build-with-release.mjs --platform android --profile dev --local --output build/suro-dev.apk",
+    "build:android:prod-apk": "mkdir -p build && node scripts/build-with-release.mjs --platform android --profile production-apk --local --output build/suro-prod.apk",
+    "build:android:release": "mkdir -p build && node scripts/build-with-release.mjs --platform android --profile production --local --output build/suro-release.aab",
+    "build:ios:release": "mkdir -p build && PATH=/usr/bin:$PATH node scripts/build-with-release.mjs --platform ios --profile production --local --output build/suro-release.ipa",
     "presubmit:android:release": "pnpm -w changelog:generate",
     "submit:android:release": "bundle exec fastlane android release",
     "submit:android:metadata": "bundle exec fastlane android metadata",
@@ -29,7 +29,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "eas-build-post-install": "node scripts/prepare-error-reporting.mjs"
   },
   "dependencies": {
     "@10play/tentap-editor": "^1.0.1",
@@ -40,9 +41,11 @@
     "@expo/metro-runtime": "~57.0.15",
     "@floating-ui/dom": "^1.8.0",
     "@formatjs/intl-pluralrules": "^6.3.13",
+    "@sentry/react-native": "^8.29.0",
     "backend": "workspace:*",
     "convex": "^1.45.0",
     "design-tokens": "workspace:*",
+    "domain": "workspace:*",
     "expo": "~57.0.19",
     "expo-apple-authentication": "~57.0.1",
     "expo-application": "~57.0.2",
@@ -86,8 +89,8 @@
     "react-native-webview": "13.16.1",
     "react-native-worklets": "0.10.1",
     "use-intl": "^4.14.2",
-    "domain": "workspace:*",
-    "valibot": "1.4.2"
+    "valibot": "1.4.2",
+    "error-reporting": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",

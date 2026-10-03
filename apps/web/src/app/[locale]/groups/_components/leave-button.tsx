@@ -5,12 +5,12 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import { Button } from "@/components/ui/button";
 import ModalAction from "@/components/ui/modal-action";
+import { captureException } from "@/lib/error-reporting";
 import { useSession } from "@/lib/session";
 
 export default function LeaveButton({ project }: { project: Project }) {
@@ -26,11 +26,7 @@ export default function LeaveButton({ project }: { project: Project }) {
       selectProject(projectToSelect);
       toast.success(t("leaveSuccess", { name: project.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "leave_project",
-        projectId: project.id,
-      });
+      captureException(e, { action: "leave_project" });
       toast.error(t("leaveError"));
     }
   }

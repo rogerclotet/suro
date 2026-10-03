@@ -26,10 +26,16 @@ on:
         required: false
       NEXT_PUBLIC_POSTHOG_HOST:
         required: false
-      POSTHOG_API_KEY:
-        required: false
-      POSTHOG_ENV_ID:
-        required: false
+      NEXT_PUBLIC_SENTRY_DSN:
+        required: true
+      SENTRY_URL:
+        required: true
+      SENTRY_ORG:
+        required: true
+      SENTRY_PROJECT:
+        required: true
+      SENTRY_AUTH_TOKEN:
+        required: true
       CONVEX_DEPLOY_KEY:
         required: true
       GHCR_PULL_TOKEN:
@@ -76,8 +82,14 @@ jobs:
             NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
             NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
             NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-            POSTHOG_API_KEY=${{ secrets.POSTHOG_API_KEY }}
-            POSTHOG_ENV_ID=${{ secrets.POSTHOG_ENV_ID }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_SENTRY_ENVIRONMENT=production
+            SURO_COMMIT_SHA=${{ inputs.commit_sha }}
+            SENTRY_URL=${{ secrets.SENTRY_URL }}
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
 
   backend_convex_deploy:
     if: inputs.backend_changed == 'true'

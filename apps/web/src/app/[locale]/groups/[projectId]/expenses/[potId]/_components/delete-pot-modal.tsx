@@ -4,11 +4,10 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function DeletePotModal({
   pot,
@@ -18,7 +17,6 @@ export default function DeletePotModal({
   trigger: React.ReactNode;
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
   const t = useTranslations("expenses");
   const tCommon = useTranslations("common");
   const deletePot = useMutation(api.expenses.deletePot);
@@ -32,11 +30,7 @@ export default function DeletePotModal({
       });
       toast.success(t("deletePotSuccess", { name: pot.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "delete_pot",
-        projectId: pot.projectId,
-      });
+      captureException(e, { action: "delete_pot" });
       toast.error(t("deletePotError"));
     }
   }

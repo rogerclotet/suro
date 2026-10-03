@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -26,7 +25,7 @@ import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
 import SubmitButton from "@/components/ui/submit-button";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { noteSchema } from "./schema";
 
 export default function CreateNoteButton({ projectId }: { projectId: string }) {
@@ -39,7 +38,6 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
     resolver: valibotResolver(noteSchema),
   });
   const { project } = useProjects();
-  const { data: session } = useSession();
   const t = useTranslations("notes");
 
   return (
@@ -58,7 +56,6 @@ export default function CreateNoteButton({ projectId }: { projectId: string }) {
         form={form}
         project={project}
         projectId={projectId}
-        sessionId={session?.user.id}
       />
     </ModalForm>
   );
@@ -68,12 +65,10 @@ function CreateNoteFormContent({
   form,
   project,
   projectId,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof noteSchema>>>;
   project: Project | null;
   projectId: string;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const router = useRouter();
@@ -105,11 +100,7 @@ function CreateNoteFormContent({
         });
       }
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionId,
-        action: "create_note",
-        projectId,
-      });
+      captureException(e, { action: "create_note" });
       toast.error(t("createError"));
     }
   }

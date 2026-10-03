@@ -4,14 +4,12 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import type { Template } from "@/app/_data/list";
-import { useProjects } from "@/app/_state/project-state";
 import ModalAction from "@/components/ui/modal-action";
 import { useRouter } from "@/i18n/navigation";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function DeleteTemplateModal({
   template,
@@ -21,8 +19,6 @@ export default function DeleteTemplateModal({
   trigger: ReactNode;
 }) {
   const router = useRouter();
-  const { project } = useProjects();
-  const { data: session } = useSession();
   const t = useTranslations("templates");
   const tCommon = useTranslations("common");
   const deleteTemplate = useMutation(api.templates.remove);
@@ -37,12 +33,7 @@ export default function DeleteTemplateModal({
 
       toast.success(t("deleteSuccess", { name: template.name }));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "delete_template",
-        projectId: project?.id,
-        templateId: template.id,
-      });
+      captureException(e, { action: "delete_template" });
       toast.error(t("deleteError"));
     }
   }

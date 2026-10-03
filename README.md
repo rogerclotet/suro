@@ -40,3 +40,5 @@ Run `pnpm --filter backend codegen` after API/schema changes. Tests use Vitest a
 ## License
 
 Suro is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). If you run a modified version of Suro as a network service, you must make your source code available to its users.
+
+Production error tracking uses GlitchTip through Sentry-compatible SDKs. See [error reporting configuration](docs/error-reporting.md) for CI/EAS variables, sourcemaps, release naming, and privacy filtering.

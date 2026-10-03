@@ -5,7 +5,6 @@ import { api } from "backend/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -20,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { projectSchema } from "./data";
 
 export default function CreateProjectForm({
@@ -55,7 +54,6 @@ function CreateProjectFormContent({
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
   const { close } = useModalForm();
-  const { data: session } = useSession();
   const createProject = useMutation(api.projects.create);
 
   async function onSubmit(data: v.InferInput<typeof projectSchema>) {
@@ -68,10 +66,7 @@ function CreateProjectFormContent({
       form.reset();
       close();
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_project",
-      });
+      captureException(e, { action: "create_project" });
       toast.error(t("createError"));
     }
   }

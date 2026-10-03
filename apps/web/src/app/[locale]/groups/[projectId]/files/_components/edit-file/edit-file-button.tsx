@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Edit, SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { editFileSchema } from "./schema";
 
 export default function EditFileButton({ file }: { file: File }) {
@@ -33,7 +32,6 @@ export default function EditFileButton({ file }: { file: File }) {
     },
     resolver: valibotResolver(editFileSchema),
   });
-  const { data: session } = useSession();
   const t = useTranslations("files");
 
   return (
@@ -49,11 +47,7 @@ export default function EditFileButton({ file }: { file: File }) {
       title={t("editTitle")}
       description={t("editDescription")}
     >
-      <EditFileFormContent
-        form={form}
-        file={file}
-        sessionId={session?.user.id}
-      />
+      <EditFileFormContent form={form} file={file} />
     </ModalForm>
   );
 }
@@ -61,11 +55,9 @@ export default function EditFileButton({ file }: { file: File }) {
 function EditFileFormContent({
   form,
   file,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof editFileSchema>>>;
   file: File;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const t = useTranslations("files");
@@ -79,17 +71,11 @@ function EditFileFormContent({
         toast.success(t("editSuccess"));
         close();
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "edit_file",
-          projectId: file.projectId,
-          eventId: file.eventId,
-          fileId: file.id,
-        });
+        captureException(e, { action: "edit_file" });
         toast.error(t("editError"));
       }
     },
-    [file, sessionId, close, t, renameFile],
+    [file, close, t, renameFile],
   );
 
   const handleFormSubmit = useCallback(

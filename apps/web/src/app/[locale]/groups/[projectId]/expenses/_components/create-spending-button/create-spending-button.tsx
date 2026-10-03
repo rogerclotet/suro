@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -30,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubmitButton from "@/components/ui/submit-button";
+import { captureException } from "@/lib/error-reporting";
 import { useSession } from "@/lib/session";
 import { spendingSchema } from "./data";
 
@@ -62,12 +62,7 @@ export default function CreateSpendingButton({
       title={t("createSpendingTitle")}
       description={t("createSpendingDescription")}
     >
-      <CreateSpendingFormContent
-        form={form}
-        members={members}
-        pot={pot}
-        sessionId={session?.user.id}
-      />
+      <CreateSpendingFormContent form={form} members={members} pot={pot} />
     </ModalForm>
   );
 }
@@ -76,12 +71,10 @@ function CreateSpendingFormContent({
   form,
   members,
   pot,
-  sessionId,
 }: {
   form: ReturnType<typeof useForm<v.InferInput<typeof spendingSchema>>>;
   members: Member[];
   pot: Pot;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const t = useTranslations("expenses");
@@ -101,11 +94,7 @@ function CreateSpendingFormContent({
       toast.success(t("createSpendingSuccess"));
       close();
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionId,
-        action: "create_spending",
-        potId: pot.id,
-      });
+      captureException(e, { action: "create_spending" });
       toast.error(t("createSpendingError"));
     }
   }

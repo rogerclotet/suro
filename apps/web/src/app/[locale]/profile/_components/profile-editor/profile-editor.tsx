@@ -6,7 +6,6 @@ import { api } from "backend/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { Info, LogOut, SaveIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,7 +41,7 @@ import { useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { CatppuccinColor } from "@/lib/catppuccin-colors";
 import { DATE_LOCALE_OPTIONS, normalizeDateLocale } from "@/lib/date-locale";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import ThemeSettings from "../theme-settings";
 import { profileSchema } from "./data";
 
@@ -90,7 +89,6 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
     },
     resolver: valibotResolver(profileSchema),
   });
-  const { data: session } = useSession();
   const removeAvatarImage = useMutation(api.users.removeAvatarImage);
   const resetProviderImage = useMutation(api.users.resetProviderImage);
   const updateProfile = useMutation(api.users.updateProfile);
@@ -146,12 +144,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
         router.replace("/profile", { locale: data.locale });
       }
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "edit_profile",
-        userId: user.id,
-        data,
-      });
+      captureException(e, { action: "edit_profile" });
       toast.error(t("saveError"));
     }
   }

@@ -9,8 +9,8 @@ import { useItemEditor } from "./use-item-editor";
 
 const boundary = vi.hoisted(() => ({ alert: vi.fn(), capture: vi.fn() }));
 vi.mock("react-native", () => ({ Alert: { alert: boundary.alert } }));
-vi.mock("posthog-react-native", () => ({
-  usePostHog: () => ({ captureException: boundary.capture }),
+vi.mock("@/lib/error-reporting", () => ({
+  captureException: boundary.capture,
 }));
 vi.mock("@/i18n", () => ({ useTranslations: () => (key: string) => key }));
 // The native task controls aren't rendered by this hook test.
@@ -71,8 +71,6 @@ it("handles a rejected save, preserves the draft, and allows a successful retry"
   expect(boundary.alert).toHaveBeenCalledWith("itemUpdateError");
   expect(boundary.capture).toHaveBeenCalledWith(error, {
     action: "update_list_item",
-    listId: item.listId,
-    itemId: item._id,
   });
   updateItem.mockResolvedValueOnce({ kind: "synced", value: null });
   await act(async () => editor.onSubmit());
@@ -122,7 +120,5 @@ it("handles a rejected delete without dismissing the editor", async () => {
   expect(boundary.alert).toHaveBeenCalledWith("deleteItemError");
   expect(boundary.capture).toHaveBeenCalledWith(error, {
     action: "delete_list_item",
-    listId: item.listId,
-    itemId: item._id,
   });
 });

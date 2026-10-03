@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { currentRelease } from "error-reporting/build";
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 /**
@@ -93,12 +94,26 @@ const applyVariant = (resolved: ExpoConfig): ExpoConfig => {
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+  const reporting = process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT === "production";
+  const release = reporting ? currentRelease() : undefined;
+
   const resolved = applyVariant({
     ...(config as ExpoConfig),
     version,
+    extra: { ...config.extra, sentryRelease: release },
     plugins: [
       ...(config.plugins ?? []),
       "./plugins/widget-configure-on-add.js",
+      [
+        "@sentry/react-native/expo",
+        {
+          url: process.env.SENTRY_URL,
+          organization: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          useNativeInit: false,
+          disableAutoUpload: !reporting,
+        },
+      ],
     ],
   });
   // Only a local `expo run:ios` sim build strips entitlements it can't sign;

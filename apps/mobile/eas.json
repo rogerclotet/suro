@@ -6,13 +6,17 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": ""
+      }
     },
     "preview": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://incredible-dodo-909.eu-west-1.convex.cloud",
-        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com",
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": ""
       },
       "environment": "preview"
     },
@@ -28,7 +32,11 @@
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
         "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
-        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com",
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": "production",
+        "SENTRY_ALLOW_FAILURE": "false",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "false",
+        "SENTRY_DISABLE_NATIVE_DEBUG_UPLOAD": "true"
       },
       "environment": "production"
     },
@@ -37,7 +45,11 @@
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://marvelous-lobster-518.convex.cloud",
         "EXPO_PUBLIC_SITE_URL": "https://suroapp.cat",
-        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com"
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://eu.i.posthog.com",
+        "EXPO_PUBLIC_SENTRY_ENVIRONMENT": "production",
+        "SENTRY_ALLOW_FAILURE": "false",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "false",
+        "SENTRY_DISABLE_NATIVE_DEBUG_UPLOAD": "true"
       },
       "environment": "production"
     }

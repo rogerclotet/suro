@@ -4,11 +4,11 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useLocale, useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Note } from "@/app/_data/note";
 import { RichTextEditor } from "@/components/ui/rich-text-editor-lazy";
+import { captureException } from "@/lib/error-reporting";
 import { formatRelative } from "@/lib/format-relative";
 import { useSession } from "@/lib/session";
 
@@ -82,12 +82,7 @@ export default function NoteEditor({
         SAVED_INDICATOR_MS,
       );
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionIdRef.current,
-        action: "edit_note",
-        projectId: noteRef.current.projectId,
-        noteId: noteRef.current.id,
-      });
+      captureException(e, { action: "edit_note" });
       toast.error(tRef.current("editError"));
       setSaveState("idle");
     }

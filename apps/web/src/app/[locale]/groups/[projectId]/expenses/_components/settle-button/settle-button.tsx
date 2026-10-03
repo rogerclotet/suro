@@ -12,13 +12,12 @@ import {
 } from "domain/expenses";
 import { Check, Handshake } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import SettleProposal from "./_components/settle-proposal";
 import type { SettlingPayment } from "./data";
 
@@ -33,7 +32,6 @@ export default function SettleButton({
   members: Member[];
   potId: string;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("settlement");
 
   return (
@@ -54,7 +52,6 @@ export default function SettleButton({
             pending={pending}
             members={members}
             potId={potId}
-            sessionId={session?.user.id}
           />
         </ModalForm>
       )}
@@ -66,12 +63,10 @@ function SettleButtonContent({
   pending,
   members,
   potId,
-  sessionId,
 }: {
   pending: SettlingPayment[];
   members: Member[];
   potId: string;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const t = useTranslations("settlement");
@@ -103,11 +98,7 @@ function SettleButtonContent({
       close();
       toast.success(t("success"));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionId,
-        action: "settle_payments",
-        potId,
-      });
+      captureException(e, { action: "settle_payments" });
       toast.error(t("error"));
     } finally {
       setBusy(false);

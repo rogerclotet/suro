@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PiggyBank } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as v from "valibot";
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 const eventPotSchema = v.object({
   memberIds: v.pipe(
@@ -45,7 +44,6 @@ export default function CreateEventPotForm({
   event: Event;
   trigger: React.ReactNode;
 }) {
-  const { data: session } = useSession();
   const { project } = useProjects();
   const t = useTranslations("calendar");
 
@@ -59,11 +57,7 @@ export default function CreateEventPotForm({
       title={t("createPotTitle")}
       description={t("createPotDescription")}
     >
-      <CreateEventPotFormContent
-        event={event}
-        project={project}
-        sessionId={session?.user.id}
-      />
+      <CreateEventPotFormContent event={event} project={project} />
     </ModalForm>
   );
 }
@@ -71,11 +65,9 @@ export default function CreateEventPotForm({
 function CreateEventPotFormContent({
   event,
   project,
-  sessionId,
 }: {
   event: Event;
   project: Project;
-  sessionId?: string;
 }) {
   const { close } = useModalForm();
   const t = useTranslations("calendar");
@@ -99,12 +91,7 @@ function CreateEventPotFormContent({
       toast.success(t("createPotSuccess"));
       close();
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: sessionId,
-        action: "create_event_pot",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
+      captureException(e, { action: "create_event_pot" });
       toast.error(t("createPotError"));
     }
   }

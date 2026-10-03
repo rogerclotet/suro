@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import { useOptionalResponsiveMenu } from "@/components/ui/responsive-menu";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 import { listSchema } from "../../../_components/create-list/data";
 
 export default function EditListForm({
@@ -56,7 +55,6 @@ function EditListFormContent({ list }: { list: List }) {
     },
     resolver: valibotResolver(listSchema),
   });
-  const { data: session } = useSession();
   const { close } = useModalForm();
   const menu = useOptionalResponsiveMenu();
   const t = useTranslations("lists");
@@ -77,12 +75,7 @@ function EditListFormContent({ list }: { list: List }) {
       close();
       menu?.setOpen(false);
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "update_list",
-        projectId: list.projectId,
-        listId: list.id,
-      });
+      captureException(e, { action: "update_list" });
       toast.error(t("editError"));
     }
   }

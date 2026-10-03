@@ -1,4 +1,3 @@
-import { usePostHog } from "posthog-react-native";
 import { useRef, useState } from "react";
 import { Alert } from "react-native";
 import {
@@ -8,6 +7,7 @@ import {
   taskDraftToArgs,
 } from "@/components/task-fields";
 import { useTranslations } from "@/i18n";
+import { captureException } from "@/lib/error-reporting";
 import type { Item } from "./types";
 import type { useChecklistCommands } from "./use-checklist-commands";
 
@@ -16,7 +16,6 @@ export function useItemEditor({
   removeItem,
 }: Pick<ReturnType<typeof useChecklistCommands>, "updateItem" | "removeItem">) {
   const t = useTranslations("lists");
-  const posthog = usePostHog();
   const pending = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
@@ -57,7 +56,7 @@ export function useItemEditor({
       setItemSheetOpen(false);
     } catch (error) {
       Alert.alert(t("itemUpdateError"));
-      reportError(error, "update_list_item", target);
+      reportError(error, "update_list_item");
     } finally {
       pending.current = false;
       setSubmitting(false);
@@ -76,7 +75,7 @@ export function useItemEditor({
       setItemSheetOpen(false);
     } catch (error) {
       Alert.alert(t("deleteItemError"));
-      reportError(error, "delete_list_item", target);
+      reportError(error, "delete_list_item");
     } finally {
       pending.current = false;
       setSubmitting(false);
@@ -86,13 +85,10 @@ export function useItemEditor({
   function reportError(
     error: unknown,
     action: "update_list_item" | "delete_list_item",
-    target: Item,
   ) {
     try {
-      posthog?.captureException(error, {
+      captureException(error, {
         action,
-        listId: target.listId,
-        itemId: target._id,
       });
     } catch {
       // Reporting must not prevent retrying the preserved draft.

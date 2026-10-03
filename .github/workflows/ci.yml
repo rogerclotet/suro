@@ -54,8 +54,7 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: "1"
           NEXT_TELEMETRY_DISABLED: "1"
-          POSTHOG_API_KEY: ""
-          POSTHOG_ENV_ID: ""
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ""
         run: pnpm run build
 
   release_tag:

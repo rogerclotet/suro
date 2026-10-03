@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
@@ -26,8 +25,8 @@ import ModalForm from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "@/i18n/navigation";
+import { captureException } from "@/lib/error-reporting";
 import { useProjectTemplates } from "@/lib/queries/use-project-lists";
-import { useSession } from "@/lib/session";
 import { listSchema } from "./data";
 
 export default function CreateListButton({ projectId }: { projectId: string }) {
@@ -44,7 +43,6 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
   const { project } = useProjects();
   const templates = useProjectTemplates(projectId);
   const createList = useMutation(api.lists.create);
-  const { data: session } = useSession();
   const t = useTranslations("lists");
   const tCommon = useTranslations("common");
 
@@ -70,11 +68,7 @@ export default function CreateListButton({ projectId }: { projectId: string }) {
         params: { projectId, listId },
       });
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_list",
-        projectId,
-      });
+      captureException(e, { action: "create_list" });
       toast.error(t("createError"));
     } finally {
       form.reset();

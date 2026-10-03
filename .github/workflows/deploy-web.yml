@@ -14,6 +14,7 @@ on:
       - "packages/backend/**"
       - "packages/design-tokens/**"
       - "packages/domain/**"
+      - "packages/error-reporting/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"

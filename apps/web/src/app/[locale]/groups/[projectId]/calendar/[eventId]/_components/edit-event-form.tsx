@@ -6,7 +6,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { SaveIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { type FormEvent, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,7 +21,7 @@ import { useEventDates } from "@/app/[locale]/groups/[projectId]/calendar/_compo
 import { Form } from "@/components/ui/form";
 import ModalForm, { useModalForm } from "@/components/ui/modal-form";
 import SubmitButton from "@/components/ui/submit-button";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 export default function EditEventForm({
   event,
@@ -31,7 +30,6 @@ export default function EditEventForm({
   event: Event;
   trigger: React.ReactNode;
 }) {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
   return (
     <ModalForm
@@ -39,18 +37,12 @@ export default function EditEventForm({
       title={t("editTitle")}
       description={t("editDescription")}
     >
-      <EditEventFormContent event={event} sessionId={session?.user.id} />
+      <EditEventFormContent event={event} />
     </ModalForm>
   );
 }
 
-function EditEventFormContent({
-  event,
-  sessionId,
-}: {
-  event: Event;
-  sessionId?: string;
-}) {
+function EditEventFormContent({ event }: { event: Event }) {
   const form = useForm<v.InferInput<typeof eventSchema>>({
     defaultValues: {
       name: event.name,
@@ -93,16 +85,11 @@ function EditEventFormContent({
         });
         close();
       } catch (e) {
-        posthog.captureException(e, {
-          distinctId: sessionId,
-          action: "edit_event",
-          projectId: event.projectId,
-          eventId: event.id,
-        });
+        captureException(e, { action: "edit_event" });
         toast.error(t("editError"));
       }
     },
-    [event, form, sessionId, close, t, updateEvent],
+    [event, form, close, t, updateEvent],
   );
 
   const handleFormSubmit = useCallback(

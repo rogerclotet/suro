@@ -4,10 +4,9 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import { toast } from "sonner";
 import type { Event } from "@/app/_data/event";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 /**
  * The "create and link a fresh record" actions for an event, shared by the
@@ -17,7 +16,6 @@ export function useCreateLinked(event: Event): {
   handleCreateLinkedList: () => Promise<void>;
   handleCreateLinkedNote: () => Promise<void>;
 } {
-  const { data: session } = useSession();
   const t = useTranslations("calendar");
   const createLinkedList = useMutation(api.events.createLinkedList);
   const createLinkedNote = useMutation(api.events.createLinkedNote);
@@ -27,12 +25,7 @@ export function useCreateLinked(event: Event): {
       await createLinkedList({ eventId: event.id as Id<"events"> });
       toast.success(t("createListSuccess"));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_list",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
+      captureException(e, { action: "create_event_list" });
       toast.error(t("createListError"));
     }
   }
@@ -42,12 +35,7 @@ export function useCreateLinked(event: Event): {
       await createLinkedNote({ eventId: event.id as Id<"events"> });
       toast.success(t("createNoteSuccess"));
     } catch (e) {
-      posthog.captureException(e, {
-        distinctId: session?.user.id,
-        action: "create_event_note",
-        projectId: event.projectId,
-        eventId: event.id,
-      });
+      captureException(e, { action: "create_event_note" });
       toast.error(t("createNoteError"));
     }
   }

@@ -1,10 +1,10 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvex, useConvexAuth } from "convex/react";
-import { usePostHog } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { normalizeLocale } from "@/i18n/config";
+import { captureException } from "@/lib/error-reporting";
 import { useAuthGate, usePersistentQuery } from "@/lib/offline";
 import { useTodayAnchor } from "@/lib/use-today-anchor";
 import { writeWidgetAuth } from "./auth-state";
@@ -21,7 +21,6 @@ export function WidgetSyncBridge() {
   const { isAuthenticated: canQuery } = useConvexAuth();
   const me = usePersistentQuery(api.users.me, canQuery ? {} : "skip");
   const convex = useConvex();
-  const posthog = usePostHog();
   const bounds = useTodayAnchor();
   const locale = normalizeLocale(me?.locale);
   const lastSyncKey = useRef("");
@@ -91,22 +90,14 @@ export function WidgetSyncBridge() {
 
     void sync().catch((error: unknown) => {
       if (!cancelled) {
-        posthog.captureException(error, { action: "sync_android_widgets" });
+        captureException(error, { action: "sync_android_widgets" });
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [
-    isAuthenticated,
-    canQuery,
-    locale,
-    convex,
-    posthog,
-    bounds.from,
-    bounds.to,
-  ]);
+  }, [isAuthenticated, canQuery, locale, convex, bounds.from, bounds.to]);
 
   return null;
 }

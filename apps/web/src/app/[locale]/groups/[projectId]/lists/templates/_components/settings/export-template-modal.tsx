@@ -5,7 +5,6 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
-import posthog from "posthog-js";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,11 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSession } from "@/lib/session";
+import { captureException } from "@/lib/error-reporting";
 
 function ExportTemplateForm({ template }: { template: Template }) {
   const { projects } = useProjects();
-  const { data: session } = useSession();
   const { close } = useModalForm();
   const [targetProjectId, setTargetProjectId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,12 +50,7 @@ function ExportTemplateForm({ template }: { template: Template }) {
       );
       close();
     } catch (err) {
-      posthog.captureException(err, {
-        distinctId: session?.user.id,
-        action: "export_template",
-        templateId: template.id,
-        targetProjectId,
-      });
+      captureException(err, { action: "export_template" });
       toast.error(t("exportError"));
     } finally {
       setIsSubmitting(false);

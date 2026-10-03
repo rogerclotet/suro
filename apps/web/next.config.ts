@@ -1,9 +1,14 @@
 import path from "node:path";
-import { withPostHogConfig } from "@posthog/nextjs-config";
+import { withSentryConfig } from "@sentry/nextjs/config";
+import { currentRelease, requireUploadConfig } from "error-reporting/build";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+const sentryOrigin = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? new URL(process.env.NEXT_PUBLIC_SENTRY_DSN).origin
+  : "";
 
 const cspReportOnly = [
   "default-src 'self'",
@@ -12,7 +17,7 @@ const cspReportOnly = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://*.googleusercontent.com https://*.convex.cloud https://*.suroapp.cat https://*.convex.site",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud https://*.suroapp.cat https://*.convex.site",
+  `connect-src 'self' https://*.ingest.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh https://*.convex.cloud wss://*.convex.cloud https://*.suroapp.cat https://*.convex.site ${sentryOrigin}`,
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -37,7 +42,7 @@ const nextConfig = {
   // workspace-hoisted deps. Without this, Next guesses the app dir and the
   // standalone server is missing modules at runtime.
   outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
-  transpilePackages: ["design-tokens", "domain"],
+  transpilePackages: ["design-tokens", "domain", "error-reporting"],
   experimental: {
     // Restore pre-v15 Router Cache duration for dynamic routes.
     // Next.js 15+ defaults to 0 (every navigation refetches from server).
@@ -113,22 +118,45 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
 } satisfies NextConfig;
 
-// Source map upload runs at build time only. It needs a personal API key with
-// error-tracking write access plus the environment ID. Gate on both:
-// resolveConfig in @posthog/nextjs-config throws when sourcemaps are enabled
-// without credentials, so builds that lack them (local dev, MR previews) must
-// opt out rather than fail.
-const posthogSourcemapsEnabled =
-  !!process.env.POSTHOG_API_KEY && !!process.env.POSTHOG_ENV_ID;
+// Production uploads are mandatory once reporting is enabled. Preview and
+// compile-check builds do not set this environment, even with NODE_ENV=production.
+const reporting = process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT === "production";
+if (reporting) {
+  if (!process.env.NEXT_PUBLIC_SENTRY_DSN)
+    throw new Error(
+      "Production error reporting requires NEXT_PUBLIC_SENTRY_DSN",
+    );
+  requireUploadConfig();
+  process.env.NEXT_PUBLIC_SENTRY_RELEASE = currentRelease();
+}
 
-export default withPostHogConfig(withNextIntl(nextConfig), {
-  personalApiKey: process.env.POSTHOG_API_KEY ?? "",
-  projectId: process.env.POSTHOG_ENV_ID ?? "",
-  // PostHog EU API host. This is the app host the CLI uploads to, distinct from
-  // the eu.i.posthog.com ingestion host the browser SDK posts events to.
-  host: "https://eu.posthog.com",
+export default withSentryConfig(withNextIntl(nextConfig), {
+  sentryUrl: process.env.SENTRY_URL,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  telemetry: false,
+  // Navigation tracing is intentionally disabled.
+  suppressOnRouterTransitionStartWarning: true,
+  silent: !reporting,
+  release: {
+    name: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+    create: reporting,
+    finalize: reporting,
+  },
   sourcemaps: {
-    enabled: posthogSourcemapsEnabled,
-    deleteAfterUpload: true,
+    disable: !reporting,
+    assets: [
+      ".next/static/**/*.js",
+      ".next/static/**/*.map",
+      ".next/server/**/*.js",
+      ".next/server/**/*.map",
+    ],
+    deleteSourcemapsAfterUpload: true,
+  },
+  widenClientFileUpload: true,
+  // The SDK otherwise logs upload failures and continues the build.
+  errorHandler(error) {
+    throw error;
   },
 });
