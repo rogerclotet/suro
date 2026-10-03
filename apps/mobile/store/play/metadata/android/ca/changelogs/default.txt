@@ -1,4 +1,1 @@
-• Les liquidacions conserven els pagaments seleccionats i demanen revisar els imports quan canvien. Els pagaments parcials ja no tanquen el pot.
-• Els reintents de sincronització de despeses al mòbil ja no dupliquen pots, despeses ni liquidacions.
-• Els esdeveniments eviten enllaços en conflicte amb llistes, notes i pots.
-• El tauler i els selectors d'enllaços carreguen menys dades.
+• Els ginys d'Android esperen que es confirmi la sessió abans de sincronitzar-se per evitar errors en iniciar sessió.

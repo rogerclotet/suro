@@ -1,4 +1,1 @@
-• Settlements keep selected payments and ask you to review changed amounts. Partial payments no longer close the pot.
-• Mobile expense sync retries no longer duplicate pots, expenses or settlements.
-• Events prevent conflicting links to lists, notes and pots.
-• The dashboard and link pickers load less data.
+• Android widgets wait for the session to be confirmed before syncing to prevent errors during sign-in.
