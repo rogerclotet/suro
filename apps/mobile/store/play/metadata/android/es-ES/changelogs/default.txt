@@ -1,1 +1,2 @@
-• Mejoramos los informes de fallos en Android e iOS para diagnosticar los cierres inesperados de la app.
+• Los enlaces a grupos inexistentes o a los que no tienes acceso muestran una página de contenido no encontrado.
+• Las páginas de error de la web tienen un diseño más claro, con opciones para reintentar o volver al inicio, sin detalles técnicos.

@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.31.0",
+    "version": "1.32.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Improved crash reporting on Android and iOS to help diagnose unexpected app closures.",
+        "releaseNotes": "• Links to missing or inaccessible groups now show a not-found page.\n• Web error pages have a clearer design with retry and home options, without technical details.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Mejoramos los informes de fallos en Android e iOS para diagnosticar los cierres inesperados de la app.",
+        "releaseNotes": "• Los enlaces a grupos inexistentes o a los que no tienes acceso muestran una página de contenido no encontrado.\n• Las páginas de error de la web tienen un diseño más claro, con opciones para reintentar o volver al inicio, sin detalles técnicos.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Millorem els informes de fallades a Android i iOS per diagnosticar els tancaments inesperats de l'app.",
+        "releaseNotes": "• Els enllaços a grups inexistents o als quals no tens accés mostren una pàgina de contingut no trobat.\n• Les pàgines d'error del web tenen un disseny més clar, amb opcions per tornar-ho a provar o tornar a l'inici, sense detalls tècnics.",
         "marketingUrl": "https://suro.clotet.dev",
         "supportUrl": "https://suro.clotet.dev",
         "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"

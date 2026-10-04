@@ -16,12 +16,12 @@ export default function ProjectsProvider({
   // Mounted in the locale layout, so it also renders for signed-out visitors
   // (e.g. an invite link in an incognito window). listMineDetailed requires
   // auth, so skip it until the session resolves to avoid a "Not logged in".
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const data = useQuery(
     api.projects.listMineDetailed,
     isAuthenticated ? {} : "skip",
   );
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { projectId } = useParams<{ projectId?: string }>();
   const userId = isAuthenticated ? (session?.user.id ?? null) : null;
   const projects = useMemo(() => (data ?? []).map(adaptProject), [data]);
@@ -32,6 +32,11 @@ export default function ProjectsProvider({
       projects={userId ? projects : []}
       userId={userId}
       routeProjectId={projectId}
+      isLoading={
+        isLoading ||
+        status === "loading" ||
+        (isAuthenticated && data === undefined)
+      }
     >
       {children}
     </ProjectSelectionProvider>

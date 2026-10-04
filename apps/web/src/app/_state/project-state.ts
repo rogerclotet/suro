@@ -8,6 +8,7 @@ export type ProjectState = {
   project: Project | null;
   selectProject: (project: Project | undefined) => void;
   isAdmin: boolean;
+  isLoading: boolean;
 };
 
 export const ProjectsContext = createContext<ProjectState | null>(null);

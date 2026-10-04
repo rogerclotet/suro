@@ -15,11 +15,13 @@ export function ProjectSelectionProvider({
   projects,
   userId,
   routeProjectId,
+  isLoading = false,
   children,
 }: {
   projects: Project[];
   userId: string | null;
   routeProjectId?: string;
+  isLoading?: boolean;
   children: ReactNode;
 }) {
   const [preference, setPreference] = useState<{
@@ -81,8 +83,9 @@ export function ProjectSelectionProvider({
       selectProject,
       isAdmin:
         userId !== null && project !== null && userId === project.createdBy,
+      isLoading,
     }),
-    [projects, project, selectProject, userId],
+    [projects, project, selectProject, userId, isLoading],
   );
   return <ProjectsContext value={state}>{children}</ProjectsContext>;
 }

@@ -814,7 +814,9 @@
   "errors": {
     "notFound": "No se ha encontrado la página.",
     "notFoundDescription": "Puede que el enlace sea incorrecto o que la página se haya movido. Vuelve al inicio para continuar.",
-    "backHome": "Volver al inicio"
+    "backHome": "Volver al inicio",
+    "unexpectedTitle": "Algo ha salido mal",
+    "unexpectedDescription": "No hemos podido cargar esta página. Inténtalo de nuevo o vuelve al inicio."
   },
   "notifications": {
     "list_items_completed": "{actorName} ha marcado {count, plural, =1 {1 elemento} other {# elementos}} como completados en la lista {listName}",

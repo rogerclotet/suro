@@ -1,1 +1,2 @@
-• Improved crash reporting on Android and iOS to help diagnose unexpected app closures.
+• Links to missing or inaccessible groups now show a not-found page.
+• Web error pages have a clearer design with retry and home options, without technical details.

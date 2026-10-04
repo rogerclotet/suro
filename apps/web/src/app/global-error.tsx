@@ -1,32 +1,44 @@
 "use client";
 
-import NextError from "next/error";
-import { type ComponentType, useEffect } from "react";
-import { captureException } from "@/lib/error-reporting";
-import { isNetworkError } from "@/lib/is-network-error";
+import "@/styles/globals.css";
+import "@fontsource/convergence/index.css";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { useEffect, useState } from "react";
+import ErrorContent from "@/components/error-content";
+import ca from "@/i18n/messages/ca.json";
+import en from "@/i18n/messages/en.json";
+import es from "@/i18n/messages/es.json";
+import { type Locale, routing } from "@/i18n/routing";
 
-// next/error's class component type isn't a valid JSX component under React 19
-// types; treat it as a plain component (runtime is unchanged).
-const NextErrorPage = NextError as unknown as ComponentType<{
-  statusCode: number;
-}>;
+// This boundary replaces the locale layout, so it supplies its own styles and
+// translations without relying on any of the providers that may have failed.
+const messages = {
+  ca: { common: ca.common, errors: ca.errors },
+  es: { common: es.common, errors: es.errors },
+  en: { common: en.common, errors: en.errors },
+};
 
-export default function GlobalError({
-  error,
-}: {
+export default function GlobalError(props: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
+  const [locale, setLocale] = useState<Locale>(routing.defaultLocale);
+
   useEffect(() => {
-    // Transient network failures are recoverable, not bugs — don't report them.
-    if (isNetworkError(error)) return;
-    captureException(error);
-  }, [error]);
+    const segment = window.location.pathname.split("/")[1];
+    if (hasLocale(routing.locales, segment)) setLocale(segment);
+  }, []);
 
   return (
-    <html lang="ca">
-      <body className="p-4">
-        <NextErrorPage statusCode={0} />
+    <html lang={locale} className="dark">
+      <body>
+        <NextIntlClientProvider
+          locale={locale}
+          messages={messages[locale]}
+          timeZone="Europe/Madrid"
+        >
+          <ErrorContent {...props} />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

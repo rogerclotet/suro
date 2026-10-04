@@ -814,7 +814,9 @@
   "errors": {
     "notFound": "Page not found.",
     "notFoundDescription": "The link may be incorrect, or the page may have moved. Head home to pick up where you left off.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "unexpectedTitle": "Something went wrong",
+    "unexpectedDescription": "We couldn't load this page. Try again, or head back home."
   },
   "notifications": {
     "list_items_completed": "{actorName} marked {count, plural, =1 {1 item} other {# items}} as completed in the list {listName}",
