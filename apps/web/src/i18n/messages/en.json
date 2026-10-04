@@ -813,6 +813,7 @@
   },
   "errors": {
     "notFound": "Page not found.",
+    "notFoundDescription": "The link may be incorrect, or the page may have moved. Head home to pick up where you left off.",
     "backHome": "Back to home"
   },
   "notifications": {
