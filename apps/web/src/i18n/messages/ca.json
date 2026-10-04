@@ -813,6 +813,7 @@
   },
   "errors": {
     "notFound": "No s'ha trobat la pàgina.",
+    "notFoundDescription": "Pot ser que l'enllaç sigui incorrecte o que la pàgina s'hagi mogut. Torna a l'inici per continuar.",
     "backHome": "Tornar a l'inici"
   },
   "notifications": {

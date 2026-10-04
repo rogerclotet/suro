@@ -51,13 +51,3 @@ Use the existing `pnpm --filter mobile build:*` scripts for local native builds.
 ## Verification
 
 The repository checks cover the privacy filter, release naming, required credentials, and migrated capture calls. A real upload and symbolication check requires your GlitchTip instance and credentials: build a production release, trigger a test exception in that build, confirm its release and readable source location, and inspect its event JSON for excluded data. This is infrastructure work and does not itself bump the app version; mobile distribution follows the next normal versioned release.
-
-## Temporary mobile diagnostics
-
-The unlinked `suro:///error-test` route is included temporarily for testing store builds. Open that URL on a device with Suro installed. It only opens the screen; a native crash requires pressing a button and confirming. There are no automatic crash triggers in the URL.
-
-Use a new production build on each platform. The screen has separate tests for explicit capture, an uncaught JavaScript error, an unhandled rejection, a render error, and a native crash. Tests are disabled when reporting is off. Run one test at a time; JavaScript failures may require reopening the app. After the native crash, reopen the app and leave it online so the saved report can upload. Test without a debugger attached.
-
-In GlitchTip, verify the message, matching `suro@<commit>` release and build number, readable source locations, and the filtered event JSON. Native crash reports use the SDK's own crash message. Review the EAS build logs for both JavaScript map and native symbol uploads. The installed GlitchTip server must support native symbol ingestion and processing.
-
-Remove `apps/mobile/src/app/error-test.tsx` and the `errorTest` translation namespaces after testing. Keep the native reporting plugin, initialization, symbol uploads, and their tests.
