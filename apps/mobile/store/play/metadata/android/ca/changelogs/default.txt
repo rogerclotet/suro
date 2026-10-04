@@ -1,1 +1,2 @@
-• Millorem els informes de fallades a Android i iOS per diagnosticar els tancaments inesperats de l'app.
+• Els enllaços a grups inexistents o als quals no tens accés mostren una pàgina de contingut no trobat.
+• Les pàgines d'error del web tenen un disseny més clar, amb opcions per tornar-ho a provar o tornar a l'inici, sense detalls tècnics.

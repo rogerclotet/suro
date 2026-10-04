@@ -6,6 +6,23 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.32.0] — 2026-10-04
+
+### ca
+
+- [fix] Els enllaços a grups inexistents o als quals no tens accés mostren una pàgina de contingut no trobat.
+- [improvement] Les pàgines d'error del web tenen un disseny més clar, amb opcions per tornar-ho a provar o tornar a l'inici, sense detalls tècnics.
+
+### es
+
+- [fix] Los enlaces a grupos inexistentes o a los que no tienes acceso muestran una página de contenido no encontrado.
+- [improvement] Las páginas de error de la web tienen un diseño más claro, con opciones para reintentar o volver al inicio, sin detalles técnicos.
+
+### en
+
+- [fix] Links to missing or inaccessible groups now show a not-found page.
+- [improvement] Web error pages have a clearer design with retry and home options, without technical details.
+
 ## [1.31.0] — 2026-10-03
 
 ### ca

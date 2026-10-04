@@ -814,7 +814,9 @@
   "errors": {
     "notFound": "No s'ha trobat la pàgina.",
     "notFoundDescription": "Pot ser que l'enllaç sigui incorrecte o que la pàgina s'hagi mogut. Torna a l'inici per continuar.",
-    "backHome": "Tornar a l'inici"
+    "backHome": "Tornar a l'inici",
+    "unexpectedTitle": "Alguna cosa no ha anat bé",
+    "unexpectedDescription": "No hem pogut carregar aquesta pàgina. Torna-ho a provar o torna a l'inici."
   },
   "notifications": {
     "list_items_completed": "{actorName} ha marcat {count, plural, =1 {1 element} other {# elements}} com a completats a la llista {listName}",

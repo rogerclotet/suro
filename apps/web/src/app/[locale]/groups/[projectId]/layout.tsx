@@ -1,12 +1,12 @@
 import { api } from "backend/convex/_generated/api";
-import type { Id } from "backend/convex/_generated/dataModel";
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import ProjectRouteGuard from "@/app/_components/projects-provider/project-route-guard";
 import { getAuthToken } from "@/lib/convex/server";
 
 export default function ProjectLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <ProjectRouteGuard>{children}</ProjectRouteGuard>;
 }
 
 export async function generateMetadata({
@@ -21,12 +21,12 @@ export async function generateMetadata({
     return {};
   }
 
-  // Membership-gated; a non-member or missing project just yields no metadata.
-  const project = await fetchQuery(
-    api.projects.get,
-    { projectId: projectId as Id<"projects"> },
-    { token },
-  ).catch(() => null);
+  // Match against memberships so malformed URL IDs never reach an ID validator.
+  // Metadata is optional; page queries still surface unexpected failures.
+  const projects = await fetchQuery(api.projects.listMine, {}, { token }).catch(
+    () => [],
+  );
+  const project = projects.find((project) => project._id === projectId);
 
   if (!project) {
     return {};
