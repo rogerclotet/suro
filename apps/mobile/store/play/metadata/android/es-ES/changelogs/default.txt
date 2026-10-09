@@ -1,2 +1,1 @@
-• Los enlaces a grupos inexistentes o a los que no tienes acceso muestran una página de contenido no encontrado.
-• Las páginas de error de la web tienen un diseño más claro, con opciones para reintentar o volver al inicio, sin detalles técnicos.
+• El widget de Android muestra las listas y los eventos como en la app: filas planas con separadores y la fecha de cada evento en una etiqueta.

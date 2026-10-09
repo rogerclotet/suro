@@ -10,7 +10,7 @@ import {
 } from "react-native-android-widget";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 import { unconfiguredWidgetSnapshot } from "./placeholders";
-import type { WidgetSnapshot } from "./types";
+import type { WidgetEventDate, WidgetSnapshot } from "./types";
 
 const LOGO_SIZE = 22;
 const WIDGET_LOGO = require("../../assets/images/favicon.png") as number;
@@ -18,29 +18,32 @@ const WIDGET_LOGO = require("../../assets/images/favicon.png") as number;
 const palette = {
   light: {
     bg: nativePalette.light.bg,
-    card: nativePalette.light.card,
     text: nativePalette.light.text,
     muted: nativePalette.light.muted,
+    primary: nativePalette.light.primary,
+    onPrimary: nativePalette.light.onPrimary,
+    border: nativePalette.light.border,
   },
   dark: {
     bg: nativePalette.dark.bg,
-    card: nativePalette.dark.card,
     text: nativePalette.dark.text,
     muted: nativePalette.dark.muted,
+    primary: nativePalette.dark.primary,
+    onPrimary: nativePalette.dark.onPrimary,
+    border: nativePalette.dark.border,
   },
 } as const;
 
 type Scheme = keyof typeof palette;
+type Colors = (typeof palette)[Scheme];
+
+const BADGE_WIDTH = 44;
 
 function appUri(path: string): string {
   return Linking.createURL(path.replace(/^\//, ""));
 }
 
-function widgetHeader(
-  title: string,
-  colors: (typeof palette)[Scheme],
-  homePath?: string,
-) {
+function widgetHeader(title: string, colors: Colors, homePath?: string) {
   return (
     <FlexWidget
       clickAction={homePath ? "OPEN_URI" : undefined}
@@ -73,11 +76,12 @@ function widgetHeader(
   );
 }
 
-function sectionLabel(text: string, colors: (typeof palette)[Scheme]) {
+function sectionLabel(text: string, colors: Colors, marginTop = 0) {
   return (
     <TextWidget
       text={text.toUpperCase()}
       style={{
+        marginTop,
         fontSize: 11,
         fontFamily: FONT,
         fontWeight: "700",
@@ -89,7 +93,7 @@ function sectionLabel(text: string, colors: (typeof palette)[Scheme]) {
   );
 }
 
-function emptyLine(text: string, colors: (typeof palette)[Scheme]) {
+function emptyLine(text: string, colors: Colors) {
   return (
     <TextWidget
       text={text}
@@ -103,50 +107,114 @@ function emptyLine(text: string, colors: (typeof palette)[Scheme]) {
   );
 }
 
+// Rows are flat with a hairline between them, like the app's Home panels.
+function rowStyle(colors: Colors, isFirst: boolean) {
+  return {
+    width: "match_parent",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderTopWidth: isFirst ? 0 : 1,
+    borderTopColor: colors.border,
+  } as const;
+}
+
+function eventDateBadge(
+  date: WidgetEventDate,
+  todayLabel: string,
+  colors: Colors,
+) {
+  const badgeStyle = {
+    width: BADGE_WIDTH,
+    borderRadius: 8,
+    paddingVertical: 6,
+    marginRight: 12,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  } as const;
+
+  if (date.isToday) {
+    return (
+      <FlexWidget style={{ ...badgeStyle, backgroundColor: colors.primary }}>
+        <TextWidget
+          text={todayLabel.toUpperCase()}
+          maxLines={1}
+          style={{
+            fontSize: 10,
+            fontWeight: "700",
+            color: colors.onPrimary,
+            letterSpacing: 0.5,
+          }}
+        />
+      </FlexWidget>
+    );
+  }
+
+  return (
+    <FlexWidget style={{ ...badgeStyle, backgroundColor: `${colors.muted}30` }}>
+      <TextWidget
+        text={String(date.day)}
+        style={{
+          fontSize: 18,
+          fontFamily: FONT,
+          fontWeight: "700",
+          color: colors.text,
+        }}
+      />
+      <TextWidget
+        text={date.month.toUpperCase()}
+        maxLines={1}
+        style={{ fontSize: 10, color: colors.muted, letterSpacing: 0.5 }}
+      />
+    </FlexWidget>
+  );
+}
+
 function eventRow(
   event: WidgetSnapshot["events"][number],
-  colors: (typeof palette)[Scheme],
+  todayLabel: string,
+  colors: Colors,
+  isFirst: boolean,
 ) {
   return (
     <FlexWidget
       key={event.id}
       clickAction="OPEN_URI"
       clickActionData={{ uri: appUri(event.path) }}
-      style={{
-        backgroundColor: colors.card,
-        borderRadius: 10,
-        padding: 10,
-        marginBottom: 8,
-        flexDirection: "column",
-      }}
+      style={rowStyle(colors, isFirst)}
     >
-      <TextWidget
-        text={event.name}
-        maxLines={1}
-        truncate="END"
-        style={{
-          fontSize: 14,
-          fontWeight: "700",
-          color: colors.text,
-          marginBottom: 2,
-        }}
-      />
-      <TextWidget
-        text={event.when}
-        maxLines={1}
-        truncate="END"
-        style={{
-          fontSize: 12,
-          color: colors.muted,
-        }}
-      />
+      {event.date ? eventDateBadge(event.date, todayLabel, colors) : null}
+      <FlexWidget style={{ flex: 1, width: 0, flexDirection: "column" }}>
+        <TextWidget
+          text={event.name}
+          maxLines={1}
+          truncate="END"
+          style={{
+            fontSize: 14,
+            fontWeight: "700",
+            color: colors.text,
+            marginBottom: 2,
+          }}
+        />
+        <TextWidget
+          text={event.when}
+          maxLines={1}
+          truncate="END"
+          style={{
+            fontSize: 12,
+            color: colors.muted,
+          }}
+        />
+      </FlexWidget>
     </FlexWidget>
   );
 }
 
 function listRow(
   list: WidgetSnapshot["lists"][number],
-  colors: (typeof palette)[Scheme],
+  colors: Colors,
+  isFirst: boolean,
 ) {
   const complete = list.total > 0 && list.done === list.total;
   return (
@@ -154,14 +222,7 @@ function listRow(
       key={list.id}
       clickAction="OPEN_URI"
       clickActionData={{ uri: appUri(list.path) }}
-      style={{
-        backgroundColor: colors.card,
-        borderRadius: 10,
-        padding: 10,
-        marginBottom: 8,
-        flexDirection: "row",
-        alignItems: "center",
-      }}
+      style={rowStyle(colors, isFirst)}
     >
       <FlexWidget style={{ flex: 1, width: 0 }}>
         <TextWidget
@@ -260,12 +321,16 @@ function renderForScheme(
         {sectionLabel(snapshot.labels.featuredLists, colors)}
         {snapshot.lists.length === 0
           ? emptyLine(snapshot.labels.noLists, colors)
-          : snapshot.lists.map((list) => listRow(list, colors))}
+          : snapshot.lists.map((list, index) =>
+              listRow(list, colors, index === 0),
+            )}
 
-        {sectionLabel(snapshot.labels.upcoming, colors)}
+        {sectionLabel(snapshot.labels.upcoming, colors, 12)}
         {snapshot.events.length === 0
           ? emptyLine(snapshot.labels.noEvents, colors)
-          : snapshot.events.map((event) => eventRow(event, colors))}
+          : snapshot.events.map((event, index) =>
+              eventRow(event, snapshot.labels.today, colors, index === 0),
+            )}
       </ListWidget>
     </FlexWidget>
   );

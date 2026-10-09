@@ -115,6 +115,40 @@ describe("buildWidgetSnapshot", () => {
     });
     expect(snapshot).not.toHaveProperty("tasks");
   });
+
+  it("puts the date in a badge and keeps only the times in the subtitle", () => {
+    const now = new Date("2026-07-05T09:00:00");
+    const snapshot = buildWidgetSnapshot({
+      signedIn: true,
+      locale: "en",
+      projectId: "p1",
+      now,
+      events: [
+        {
+          _id: "today",
+          name: "Lunch",
+          startAt: new Date("2026-07-05T13:00:00").getTime(),
+          endAt: new Date("2026-07-05T14:00:00").getTime(),
+          allDay: false,
+        },
+        {
+          _id: "later",
+          name: "Vet",
+          startAt: new Date("2026-07-08T19:30:00").getTime(),
+          endAt: new Date("2026-07-08T20:30:00").getTime(),
+          allDay: false,
+        },
+      ],
+    });
+    expect(snapshot.events[0]?.date).toMatchObject({ isToday: true });
+    expect(snapshot.events[1]?.date).toEqual({
+      day: 8,
+      month: "Jul",
+      isToday: false,
+    });
+    expect(snapshot.events[1]?.when).not.toContain("Jul");
+    expect(snapshot.events[1]?.when).toContain("7:30");
+  });
 });
 
 it("preserves starred-list order and completion counts, excluding other previews", () => {

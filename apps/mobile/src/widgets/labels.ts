@@ -12,5 +12,6 @@ export function widgetLabels(locale: Locale | undefined): WidgetLabels {
     noGroup: messages.widget.noGroup,
     configurePrompt: messages.widget.configurePrompt,
     allDay: messages.calendar.allDay,
+    today: messages.home.today,
   };
 }

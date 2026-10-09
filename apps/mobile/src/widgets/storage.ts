@@ -17,6 +17,13 @@ const cachedSnapshot = v.object({
       id: v.string(),
       name: v.string(),
       when: v.string(),
+      date: v.optional(
+        v.object({
+          day: v.number(),
+          month: v.string(),
+          isToday: v.boolean(),
+        }),
+      ),
       path: v.string(),
     }),
   ),
