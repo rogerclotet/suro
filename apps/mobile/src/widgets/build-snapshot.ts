@@ -3,24 +3,35 @@ import type { FunctionReturnType } from "convex/server";
 import { type Locale, normalizeLocale } from "@/i18n/config";
 import {
   type EventTimes,
+  eventLocalStart,
   eventWindowBounds,
   formatTimeOfDay,
-  formatTimeRange,
   isEventOnDay,
   pickUpcomingEvents,
 } from "@/lib/event-dates";
 import { PREVIEW_LIMIT, UPCOMING_WINDOW_MS } from "./constants";
 import { widgetLabels } from "./labels";
-import type { WidgetSnapshot } from "./types";
+import type { WidgetEventDate, WidgetSnapshot } from "./types";
 
 type CalEvent = EventTimes & { _id: string; name: string };
 type ListPreviews = FunctionReturnType<typeof api.lists.homePreviews>;
 
-function formatEventWhen(event: CalEvent, today: Date, locale: Locale): string {
-  if (isEventOnDay(event, today)) {
-    return formatTimeOfDay(event, locale) || widgetLabels(locale).allDay;
-  }
-  return formatTimeRange(event, locale);
+// The date badge carries the day, so the subtitle only needs the clock times.
+function formatEventWhen(event: CalEvent, locale: Locale): string {
+  return formatTimeOfDay(event, locale) || widgetLabels(locale).allDay;
+}
+
+function eventDate(
+  event: CalEvent,
+  today: Date,
+  locale: Locale,
+): WidgetEventDate {
+  const start = eventLocalStart(event);
+  return {
+    day: start.getDate(),
+    month: start.toLocaleDateString(locale, { month: "short" }),
+    isToday: isEventOnDay(event, today),
+  };
 }
 
 /** Pick the next events for the widget: today's first, then upcoming days. */
@@ -81,7 +92,8 @@ export function buildWidgetSnapshot(input: {
     events: pickWidgetEvents(events, now).map((event) => ({
       id: event._id,
       name: event.name,
-      when: formatEventWhen(event, now, locale),
+      when: formatEventWhen(event, locale),
+      date: eventDate(event, now, locale),
       path: `/${projectId}/calendar/${event._id}`,
     })),
     lists: (lists?.favoriteIds ?? []).slice(0, PREVIEW_LIMIT).flatMap((id) => {

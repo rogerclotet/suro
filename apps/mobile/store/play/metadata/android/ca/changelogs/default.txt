@@ -1,2 +1,1 @@
-• Els enllaços a grups inexistents o als quals no tens accés mostren una pàgina de contingut no trobat.
-• Les pàgines d'error del web tenen un disseny més clar, amb opcions per tornar-ho a provar o tornar a l'inici, sense detalls tècnics.
+• El giny d'Android mostra les llistes i els esdeveniments com a l'app: files planes amb separadors i la data de cada esdeveniment en una etiqueta.

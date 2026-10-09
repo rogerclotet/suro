@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.32.1] — 2026-10-09
+
+### ca
+
+- [improvement] El giny d'Android mostra les llistes i els esdeveniments com a l'app: files planes amb separadors i la data de cada esdeveniment en una etiqueta.
+
+### es
+
+- [improvement] El widget de Android muestra las listas y los eventos como en la app: filas planas con separadores y la fecha de cada evento en una etiqueta.
+
+### en
+
+- [improvement] The Android widget now shows lists and events like the app: flat rows with dividers and each event's date in a badge.
+
 ## [1.32.0] — 2026-10-04
 
 ### ca

@@ -1,2 +1,1 @@
-• Links to missing or inaccessible groups now show a not-found page.
-• Web error pages have a clearer design with retry and home options, without technical details.
+• The Android widget now shows lists and events like the app: flat rows with dividers and each event's date in a badge.
