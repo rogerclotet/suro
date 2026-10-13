@@ -10,6 +10,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Image, Platform, Pressable, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useLocale, useTranslations } from "@/i18n";
+import { pendingInvitation } from "@/lib/pending-invitation";
 import { useTheme } from "@/theme";
 import { Button, Field, KeyboardAwareScreen, Txt } from "@/ui";
 
@@ -242,9 +243,10 @@ export default function Login() {
   // Once Convex Auth flips to authenticated (OAuth or OTP), leave the login
   // screen automatically — otherwise it sits here until a manual reload.
   if (isAuthenticated) {
-    // Hand off to the index router, which resumes the last group (or routes to
-    // group creation when the user has none).
-    return <Redirect href="/" />;
+    // Resume the invitation that sent the user here, if any. Otherwise hand off
+    // to the index router, which resumes the last group (or routes to group
+    // creation when the user has none).
+    return <Redirect href={pendingInvitation() ?? "/"} />;
   }
 
   return (

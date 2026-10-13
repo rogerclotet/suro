@@ -1,1 +1,4 @@
-• El widget de Android muestra las listas y los eventos como en la app: filas planas con separadores y la fecha de cada evento en una etiqueta.
+• Los enlaces de invitación y de eventos compartidos desde la app ahora se abren en la app.
+• Al iniciar sesión desde una invitación, vuelves a la invitación y no a la lista de grupos.
+• Al quitar a un miembro de un grupo, el enlace de invitación anterior deja de funcionar.
+• Mejoras de seguridad en los archivos compartidos y dependencias actualizadas.
