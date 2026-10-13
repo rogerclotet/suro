@@ -89,31 +89,57 @@ const serveFile = httpAction(async (ctx, request) => {
     "Access-Control-Allow-Origin": "*",
     // Immutable: a storage id always maps to the same bytes.
     "Cache-Control": "private, max-age=31536000, immutable",
+    // The declared type is the uploader's claim; never let a browser guess a
+    // more dangerous one from the bytes.
+    "X-Content-Type-Options": "nosniff",
   };
   if (blob.type) {
     headers["Content-Type"] = blob.type;
   }
+  const disposition = rendersSafelyInline(blob.type) ? "inline" : "attachment";
   const name = url.searchParams.get("name");
   if (name) {
     // inline so images/PDFs still render in-tab; the filename drives the title.
-    headers["Content-Disposition"] = contentDispositionInline(name);
+    headers["Content-Disposition"] = contentDisposition(disposition, name);
+  } else if (disposition === "attachment") {
+    headers["Content-Disposition"] = disposition;
   }
   return new Response(blob, { status: 200, headers });
 });
 
+// Raster images, media, PDFs and plain text: types a browser shows without
+// running anything the uploader wrote.
+const INLINE_SAFE_TYPE =
+  /^(?:image\/(?!svg\+xml$)[\w.+-]+|audio\/[\w.+-]+|video\/[\w.+-]+|application\/pdf|text\/plain)$/;
+
 /**
- * Build a safe `Content-Disposition: inline` value for a (user-controlled) file
- * name: an ASCII-sanitised `filename` for legacy clients plus an RFC 5987
- * `filename*` carrying the exact UTF-8 name. Percent-encoding both prevents
- * header injection via quotes/newlines in the name.
+ * Whether navigating to a blob of this type may render it in the tab. The type
+ * is whatever the uploader sent, and this route is served from a subdomain of
+ * the web app, so a document type (HTML, SVG, XML) or an unknown one must
+ * download instead of opening as a page on our domain. Images still load in
+ * `<img>` either way: the disposition only governs navigations.
  */
-function contentDispositionInline(name: string): string {
+function rendersSafelyInline(contentType: string): boolean {
+  const essence = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
+  return INLINE_SAFE_TYPE.test(essence);
+}
+
+/**
+ * Build a safe `Content-Disposition` value for a (user-controlled) file name:
+ * an ASCII-sanitised `filename` for legacy clients plus an RFC 5987 `filename*`
+ * carrying the exact UTF-8 name. Percent-encoding both prevents header
+ * injection via quotes/newlines in the name.
+ */
+function contentDisposition(
+  disposition: "inline" | "attachment",
+  name: string,
+): string {
   const ascii = name.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
   const encoded = encodeURIComponent(name).replace(
     /['()*]/g,
     (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`,
   );
-  return `inline; filename="${ascii}"; filename*=UTF-8''${encoded}`;
+  return `${disposition}; filename="${ascii}"; filename*=UTF-8''${encoded}`;
 }
 
 http.route({ path: "/f", method: "GET", handler: serveFile });

@@ -283,3 +283,146 @@ describe("files: owner-only rename + delete", () => {
     expect(stillThere).toBeNull();
   });
 });
+
+describe("files: blob ownership", () => {
+  /** A file alice uploaded to Family, with bob able to see its storage id. */
+  async function aliceFileSeenByBob() {
+    const fileId = await saveFamilyFile("Receipt");
+    const storageId = await t.run(async (ctx) => {
+      const file = await ctx.db.get(fileId);
+      if (file === null) throw new Error("fixture file missing");
+      return file.storageId;
+    });
+    return { fileId, storageId };
+  }
+
+  function blobExists(storageId: Id<"_storage">) {
+    return t.run(async (ctx) => (await ctx.storage.get(storageId)) !== null);
+  }
+
+  it("records the stored blob's size instead of the client's claim", async () => {
+    const storageId = await storeBlob("hello world");
+    await alice.mutation(api.files.saveFile, {
+      projectId: ids.family,
+      storageId,
+      name: "Notes",
+      type: "text/plain",
+      size: 0,
+    });
+    const files = await alice.query(api.files.listByProject, {
+      projectId: ids.family,
+    });
+    expect(files[0]?.size).toBe(11);
+  });
+
+  it("rejects a storage id with no stored blob", async () => {
+    const storageId = await storeBlob();
+    await t.run((ctx) => ctx.storage.delete(storageId));
+    await expect(
+      alice.mutation(api.files.saveFile, {
+        projectId: ids.family,
+        storageId,
+        name: "Ghost",
+        type: "image/png",
+        size: 5,
+      }),
+    ).rejects.toThrow("Uploaded file not found");
+  });
+
+  it("stops another user adopting a file's blob to delete it", async () => {
+    const { storageId } = await aliceFileSeenByBob();
+
+    // Bob re-registers alice's blob in his own group so he would own a row
+    // whose removal deletes it.
+    await expect(
+      bob.mutation(api.files.saveFile, {
+        projectId: ids.other,
+        storageId,
+        name: "Mine now",
+        type: "image/png",
+        size: 5,
+      }),
+    ).rejects.toThrow("Uploaded file not found");
+    expect(await blobExists(storageId)).toBe(true);
+  });
+
+  it("stops another user adopting a file's blob as their avatar or group image", async () => {
+    const { storageId } = await aliceFileSeenByBob();
+
+    await expect(
+      bob.mutation(api.users.setAvatarImage, { storageId }),
+    ).rejects.toThrow("Uploaded file not found");
+    await expect(
+      bob.mutation(api.projects.setImage, { projectId: ids.other, storageId }),
+    ).rejects.toThrow("Uploaded file not found");
+
+    // The follow-up "remove" calls that used to delete the adopted blob.
+    await bob.mutation(api.users.removeAvatarImage, {});
+    await bob.mutation(api.projects.removeImage, { projectId: ids.other });
+    expect(await blobExists(storageId)).toBe(true);
+  });
+
+  it("stops another user adopting someone's avatar or a group image", async () => {
+    const avatar = await storeBlob("avatar");
+    const groupImage = await storeBlob("group");
+    await alice.mutation(api.users.setAvatarImage, { storageId: avatar });
+    await alice.mutation(api.projects.setImage, {
+      projectId: ids.family,
+      storageId: groupImage,
+    });
+
+    for (const storageId of [avatar, groupImage]) {
+      await expect(
+        bob.mutation(api.users.setAvatarImage, { storageId }),
+      ).rejects.toThrow("Uploaded file not found");
+      await expect(
+        bob.mutation(api.files.saveFile, {
+          projectId: ids.other,
+          storageId,
+          name: "Stolen",
+          type: "image/png",
+          size: 5,
+        }),
+      ).rejects.toThrow("Uploaded file not found");
+      expect(await blobExists(storageId)).toBe(true);
+    }
+  });
+
+  it("stops a PDF thumbnail's blob being adopted", async () => {
+    const fileId = await saveFamilyFile("Contract");
+    const thumbnailStorageId = await storeBlob("thumb");
+    await t.mutation(internal.files.attachThumbnail, {
+      fileId,
+      thumbnailStorageId,
+    });
+
+    await expect(
+      bob.mutation(api.users.setAvatarImage, { storageId: thumbnailStorageId }),
+    ).rejects.toThrow("Uploaded file not found");
+    expect(await blobExists(thumbnailStorageId)).toBe(true);
+  });
+
+  it("keeps the avatar and group image when the same upload is saved twice", async () => {
+    const avatar = await storeBlob("avatar");
+    const groupImage = await storeBlob("group");
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await alice.mutation(api.users.setAvatarImage, { storageId: avatar });
+      await alice.mutation(api.projects.setImage, {
+        projectId: ids.family,
+        storageId: groupImage,
+      });
+    }
+    expect(await blobExists(avatar)).toBe(true);
+    expect(await blobExists(groupImage)).toBe(true);
+  });
+
+  it("still replaces an avatar with a fresh upload and deletes the old blob", async () => {
+    const first = await storeBlob("first");
+    const second = await storeBlob("second");
+    await alice.mutation(api.users.setAvatarImage, { storageId: first });
+    await alice.mutation(api.users.setAvatarImage, { storageId: second });
+
+    expect(await blobExists(first)).toBe(false);
+    expect(await blobExists(second)).toBe(true);
+  });
+});

@@ -61,3 +61,63 @@ describe("file URLs: branded token-gated serving", () => {
     );
   });
 });
+
+describe("file URLs: uploader-controlled content types", () => {
+  async function serve(type: string, name?: string) {
+    const t = convexTest(schema, modules);
+    const storageId = await t.run((ctx) =>
+      ctx.storage.store(new Blob(["<script>alert(1)</script>"], { type })),
+    );
+    const url = await serveFileUrl(
+      storageId,
+      () => Promise.resolve("unused"),
+      name,
+    );
+    const { pathname, search } = new URL(url ?? "");
+    return t.fetch(`${pathname}${search}`);
+  }
+
+  it.each([
+    "text/html",
+    "text/html; charset=utf-8",
+    "TEXT/HTML",
+    "image/svg+xml",
+    "application/xhtml+xml",
+    "text/xml",
+    "application/javascript",
+    "",
+  ])("downloads %j instead of rendering it on our domain", async (type) => {
+    const named = await serve(type, "page.html");
+    expect(named.headers.get("Content-Disposition")).toMatch(
+      /^attachment; filename="page\.html"/,
+    );
+
+    const unnamed = await serve(type);
+    expect(unnamed.headers.get("Content-Disposition")).toBe("attachment");
+  });
+
+  it.each([
+    "image/png",
+    "image/jpeg",
+    "image/heic",
+    "application/pdf",
+    "video/mp4",
+    "audio/mpeg",
+    "text/plain; charset=utf-8",
+  ])("still renders %j in the tab", async (type) => {
+    const named = await serve(type, "file");
+    expect(named.headers.get("Content-Disposition")).toMatch(
+      /^inline; filename="file"/,
+    );
+
+    const unnamed = await serve(type);
+    expect(unnamed.headers.get("Content-Disposition")).toBeNull();
+  });
+
+  it("forbids content sniffing for every blob", async () => {
+    for (const type of ["image/png", "text/html", ""]) {
+      const res = await serve(type);
+      expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    }
+  });
+});

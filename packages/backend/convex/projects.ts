@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { deleteProjectCascade } from "./model/account";
 import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
+import { requireUnclaimedBlob } from "./model/blobs";
 import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
 import { notifyProject } from "./model/notify";
@@ -373,6 +374,12 @@ export const setImage = mutation({
     if (project.createdBy !== userId) {
       throw new Error("Only the creator can edit this group");
     }
+    // A repeat of the same upload must not fall through to "delete the previous
+    // image", which would delete the blob it is about to keep.
+    if (project.imageStorageId === storageId) {
+      return null;
+    }
+    await requireUnclaimedBlob(ctx, storageId);
     const rawUrl = await ctx.storage.getUrl(storageId);
     if (rawUrl === null) {
       throw new Error("Uploaded image not found");
@@ -436,6 +443,9 @@ export const removeMember = mutation({
       .collect();
     for (const receipt of unread) await ctx.db.delete(receipt._id);
     await ctx.db.delete(membership._id);
+    // Every member can read the invite token, so the removed one still holds a
+    // working link and could rejoin in one tap. Issue a new one.
+    await ctx.db.patch(projectId, { inviteToken: crypto.randomUUID() });
     return null;
   },
 });

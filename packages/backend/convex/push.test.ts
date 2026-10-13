@@ -55,6 +55,7 @@ function stubExpo(payload: unknown = { data: [{ status: "ok" }] }, ok = true) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("pushTokens.register / unregister", () => {
@@ -177,6 +178,28 @@ describe("push.sendToProject", () => {
       data: { path: `/${ctx.family}/lists` },
       channelId: "lists",
     });
+  });
+
+  it("authenticates to Expo only when an access token is configured", async () => {
+    const send = () =>
+      ctx.t.action(internal.push.sendToProject, {
+        projectId: ctx.family,
+        actorId: ctx.alice,
+        bodyKey: "list_created",
+        bodyParams: { name: "Groceries" },
+        path: `/${ctx.family}/lists`,
+      });
+    const authorization = (fetchMock: ReturnType<typeof stubExpo>) =>
+      new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get("Authorization");
+
+    const anonymous = stubExpo();
+    await send();
+    expect(authorization(anonymous)).toBeNull();
+
+    vi.stubEnv("EXPO_ACCESS_TOKEN", "expo-secret");
+    const authenticated = stubExpo();
+    await send();
+    expect(authorization(authenticated)).toBe("Bearer expo-secret");
   });
 
   it("delivers to every device a member has registered", async () => {
