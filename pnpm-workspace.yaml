@@ -6,7 +6,7 @@ packages:
 # from the workspace manifest, not package.json.
 overrides:
   "@types/react": 19.2.18
-  "@types/react-dom": 19.2.5
+  "@types/react-dom": 19.2.7
   # Single React version across web + mobile (duplicate React breaks native).
   react: 19.2.8
   react-dom: 19.2.8
@@ -15,13 +15,20 @@ overrides:
   "ws@>=8.0.0 <8.21.0": ">=8.21.0"
   # postcss<8.5.10 (via next) XSS in CSS processing — GHSA-qx2v-qp2m-jg93.
   "postcss@<8.5.10": ">=8.5.10"
-  # dompurify<=3.4.12 XSS via IN_PLACE hook — GHSA-55q2-fjhq-7xh7.
+  # dompurify<=3.4.15 XSS via IN_PLACE hooks — GHSA-55q2-fjhq-7xh7,
+  # GHSA-p98j-92pf-mc4p, GHSA-6688-9rhm-gjv2.
   # Stay on isomorphic-dompurify 3.19 (Node 25); 3.20+/4.x exclude odd Node.
-  dompurify: ">=3.4.13"
+  dompurify: ">=3.4.16"
   # fast-uri host confusion / SSRF — GHSA-7p8r-x3mc-p8w7, GHSA-5jgf-p345-68v8.
-  "fast-uri@>=3.0.0 <3.1.6": ">=3.1.6"
-  # brace-expansion DoS — GHSA-rgw5-rvv9-x895.
-  "brace-expansion@>=4.0.0 <5.0.9": ">=5.0.9"
+  # Caret, not ">=3.1.6": the open bound resolved ajv's ^3 request to 4.1.4,
+  # which carries its own advisories (GHSA-hrr3-gc8f-f4qj, GHSA-jvvf-x445-j334).
+  "fast-uri@>=3.0.0 <3.1.6": "^3.1.6"
+  # brace-expansion DoS — GHSA-rgw5-rvv9-x895, GHSA-qhr7-859c-m2p7,
+  # GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr. One pin per major in the tree
+  # (1.x and 2.x arrive via eas-cli's glob/minimatch).
+  "brace-expansion@<1.1.21": "^1.1.21"
+  "brace-expansion@>=2.0.0 <2.1.7": "^2.1.7"
+  "brace-expansion@>=4.0.0 <5.0.12": ">=5.0.12"
   # js-yaml quadratic CPU — GHSA-5p4m-2wfm-xmqj.
   "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1"
   # nanoid infinite loop when size is zero — GHSA-2v37-7h3g-55p8.
@@ -39,6 +46,31 @@ overrides:
   "@tiptap/core@>=2.0.0 <3.30.4": ">=3.30.4"
   # decode-uri-component DoS — GHSA-vcc3-ghjq-m6fr (via expo-router).
   "decode-uri-component@<=0.4.2": ">=0.5.0"
+  # undici DoS / TLS validation bypass / cookie disclosure —
+  # GHSA-rfgv-xxqx-mfg5, GHSA-w293-vg96-wgc3, GHSA-2jfj-6hjv-fm6j and others
+  # (via isomorphic-dompurify's jsdom on the web server).
+  "undici@>=7.0.0 <7.29.1": "^7.29.1"
+  # shell-quote command injection — GHSA-pqg4-j6r4-53mv (via
+  # react-native's react-devtools-core, dev tooling only).
+  "shell-quote@<1.11.0": ">=1.11.0"
+  # compression memory-leak DoS — GHSA-vc2v-76pw-4v95 (via @expo/cli dev server).
+  "compression@<1.8.2": "^1.8.2"
+  # source-map-js event-loop DoS — GHSA-68fv-2mgg-jv7q (via jsdom's css-tree).
+  "source-map-js@<1.2.2": "^1.2.2"
+  # The rest are eas-cli's own pinned dependencies (build/submit tooling, never
+  # shipped in an app or the web server). Semver-compatible patch pins only:
+  # joi ReDoS / prototype pollution — GHSA-6h2x-m376-mqjq, GHSA-wr44-6hxh-3jwq.
+  "joi@>=17.0.0 <17.13.8": "^17.13.8"
+  # minimatch ReDoS — GHSA-3ppc-4f35-3m26, GHSA-7r86-cg39-jmmj, GHSA-23c5-xmqv-rm74.
+  "minimatch@>=5.0.0 <5.1.8": "^5.1.8"
+  # node-tar uncontrolled recursion — GHSA-r292-9mhp-454m.
+  "tar@>=7.0.0 <7.5.21": "^7.5.21"
+  # ajv ReDoS with `$data` — GHSA-2g4f-4pwh-qvx6.
+  "ajv@>=8.0.0 <8.18.0": "^8.18.0"
+  # moment path traversal via locale name — GHSA-4p3w-j4w9-5jqw.
+  "moment@<2.31.0": "^2.31.0"
+  # yaml stack overflow on nested collections — GHSA-48c2-rrv3-qjmp.
+  "yaml@>=2.0.0 <2.8.3": "^2.8.3"
 
 onlyBuiltDependencies:
   - "@napi-rs/canvas"

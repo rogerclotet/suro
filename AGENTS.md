@@ -71,6 +71,16 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 - Schema/field changes go in `packages/backend/convex/schema.ts` (+ `codegen`).
 - Tests are colocated next to the code under test. All user-facing strings go through next-intl; new routes under `app/[locale]/`.
 
+## Dependency updates
+
+`pnpm outdated -r` overstates what can move. Before bumping, check these couplings:
+
+- **Expo SDK pins the native set.** `react-native`, `react-native-reanimated`, `-worklets`, `-screens`, `-safe-area-context`, `-gesture-handler`, `-webview`, `-svg`, `@react-native/metro-config`, `@babel/core`, `eslint` and mobile `typescript` move only with an Expo SDK upgrade. `cd apps/mobile && npx expo install --check` is the authority; `expo.install.exclude` in `apps/mobile/package.json` lists the deliberate deviations (`@sentry/react-native`, `react`, `react-dom`).
+- **React stays on the minor React Native's renderer ships** (19.2.x for RN 0.86), pinned once for web and mobile in `pnpm-workspace.yaml`.
+- **The three Sentry packages share one `@sentry/core`.** `error-reporting` pins the version `@sentry/react-native` depends on, and `apps/web` pins `@sentry/nextjs` to the same number. A mismatch fails the web typecheck.
+- **`isomorphic-dompurify` 4.x excludes Node 25** (the web image's runtime), so it stays on 3.19 with a `dompurify` override.
+- Transitive advisories are pinned under `overrides` in `pnpm-workspace.yaml`, one comment per advisory. Use a caret range so a pin cannot cross a major. Run `pnpm audit` after any update.
+
 ## Changelog
 
 `apps/web/CHANGELOG.md` is the curated, user-facing changelog — **not** a full history. With every commit, update it **only if** the change is an important fix or a user-facing change (new feature, visible behavior change, notable bugfix). Skip it for refactors, internal/infra changes, dependency bumps, tests, or docs.

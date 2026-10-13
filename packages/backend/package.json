@@ -22,19 +22,19 @@
   },
   "dependencies": {
     "@auth/core": "0.41.3",
-    "@convex-dev/auth": "^0.0.95",
+    "@convex-dev/auth": "^0.0.96",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
-    "convex": "^1.45.0",
-    "jose": "^6.2.10",
-    "mupdf": "^1.28.0",
+    "convex": "^1.46.0",
+    "jose": "^6.2.12",
+    "mupdf": "^1.28.1",
     "postgres": "^3.4.9",
     "domain": "workspace:*"
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "convex-test": "^0.0.56",
+    "convex-test": "^0.0.61",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.4"
   }
 }
