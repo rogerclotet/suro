@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.33.1] — 2026-10-14
+
+### ca
+
+- [fix] A l'iPhone, l'app ja no tanca la sessió de sobte després de bloquejar el mòbil amb l'app oberta.
+
+### es
+
+- [fix] En el iPhone, la app ya no cierra la sesión de repente después de bloquear el móvil con la app abierta.
+
+### en
+
+- [fix] On iPhone, the app no longer signs you out unexpectedly after you lock the phone with the app open.
+
 ## [1.33.0] — 2026-10-14
 
 ### ca

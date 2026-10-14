@@ -1,4 +1,1 @@
-• Los enlaces de invitación y de eventos compartidos desde la app ahora se abren en la app.
-• Al iniciar sesión desde una invitación, vuelves a la invitación y no a la lista de grupos.
-• Al quitar a un miembro de un grupo, el enlace de invitación anterior deja de funcionar.
-• Mejoras de seguridad en los archivos compartidos y dependencias actualizadas.
+• En el iPhone, la app ya no cierra la sesión de repente después de bloquear el móvil con la app abierta.

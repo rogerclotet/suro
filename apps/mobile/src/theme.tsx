@@ -17,6 +17,9 @@ import {
   useState,
 } from "react";
 import { Appearance, useColorScheme } from "react-native";
+import { isKeychainLockedError } from "@/lib/auth-storage";
+import { captureException } from "@/lib/error-reporting";
+import { readRaw, writeRaw } from "@/lib/offline/storage";
 
 export { FONT };
 
@@ -47,26 +50,58 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+function readStoredPreference(): ThemePreference {
+  const stored = readRaw(PREFERENCE_KEY) ?? null;
+  return isThemePreference(stored) ? stored : "system";
+}
+
 /**
- * Holds the user's theme preference (persisted in SecureStore) and resolves it
- * against the live OS scheme. Replaces the web's next-themes — the preference
- * lives on-device, so it doesn't round-trip to the shared user record.
+ * Builds before this one kept the preference in SecureStore. Copy it over once
+ * so upgrading doesn't reset a forced light/dark choice. Storing "system" when
+ * there was nothing to copy marks the migration done.
+ */
+async function migrateSecureStorePreference(): Promise<ThemePreference | null> {
+  if (readRaw(PREFERENCE_KEY) !== undefined) {
+    return null;
+  }
+  const stored = await SecureStore.getItemAsync(PREFERENCE_KEY);
+  // The user may have picked a theme while the keychain read was in flight.
+  if (readRaw(PREFERENCE_KEY) !== undefined) {
+    return null;
+  }
+  const migrated = isThemePreference(stored) ? stored : "system";
+  writeRaw(PREFERENCE_KEY, migrated);
+  if (stored !== null) {
+    await SecureStore.deleteItemAsync(PREFERENCE_KEY);
+  }
+  return migrated;
+}
+
+/**
+ * Holds the user's theme preference (persisted in the on-device MMKV store) and
+ * resolves it against the live OS scheme. Replaces the web's next-themes — the
+ * preference lives on-device, so it doesn't round-trip to the shared user
+ * record. MMKV reads synchronously, so the first frame already has the saved
+ * scheme.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme = useColorScheme();
-  const [preference, setPreferenceState] = useState<ThemePreference>("system");
+  const [preference, setPreferenceState] =
+    useState<ThemePreference>(readStoredPreference);
 
-  // Restore the saved preference once; default to "system" until it loads.
   useEffect(() => {
     let active = true;
-    SecureStore.getItemAsync(PREFERENCE_KEY)
-      .then((stored) => {
-        if (active && isThemePreference(stored)) {
-          setPreferenceState(stored);
+    migrateSecureStorePreference()
+      .then((migrated) => {
+        if (active && migrated !== null) {
+          setPreferenceState(migrated);
         }
       })
-      .catch(() => {
-        // A missing/unreadable preference just leaves the "system" default.
+      .catch((error: unknown) => {
+        // A locked keychain leaves the old value for the next launch to migrate.
+        if (!isKeychainLockedError(error)) {
+          captureException(error, { action: "theme-preference-migration" });
+        }
       });
     return () => {
       active = false;
@@ -75,7 +110,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setPreference = useCallback((next: ThemePreference) => {
     setPreferenceState(next);
-    void SecureStore.setItemAsync(PREFERENCE_KEY, next).catch(() => {});
+    writeRaw(PREFERENCE_KEY, next);
   }, []);
 
   const scheme: Scheme =
