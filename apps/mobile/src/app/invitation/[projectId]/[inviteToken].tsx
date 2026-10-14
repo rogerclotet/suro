@@ -4,6 +4,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
 import {
@@ -78,6 +79,7 @@ function Invite({
   const acceptInvite = useMutation(api.projects.acceptInvite);
   const t = useTranslations("invitation");
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [joining, setJoining] = useState(false);
 
   // Showing this screen signed in is the resume: a later sign-in must not be
@@ -118,7 +120,17 @@ function Invite({
 
   return (
     <Screen>
-      <View style={{ flex: 1, padding: 24, gap: 24 }}>
+      {/* No header above this route (it sits outside (app)), so the content
+          has to clear the status bar and home indicator itself. */}
+      <View
+        style={{
+          flex: 1,
+          padding: 24,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 24,
+          gap: 24,
+        }}
+      >
         <View style={{ alignItems: "center", gap: 12, paddingTop: 24 }}>
           <Avatar
             kind="group"
