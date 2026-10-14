@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.32.1",
+    "version": "1.33.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,10 +53,10 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• The Android widget now shows lists and events like the app: flat rows with dividers and each event's date in a badge.",
-        "marketingUrl": "https://suro.clotet.dev",
-        "supportUrl": "https://suro.clotet.dev",
-        "privacyPolicyUrl": "https://suro.clotet.dev/en/privacy"
+        "releaseNotes": "• Invitation and event links shared from the app now open in the app.\n• Signing in from an invitation now returns you to it instead of the groups list.\n• Removing a member from a group now invalidates the previous invitation link.\n• Security improvements for shared files, plus updated dependencies.",
+        "marketingUrl": "https://suroapp.cat",
+        "supportUrl": "https://suroapp.cat",
+        "privacyPolicyUrl": "https://suroapp.cat/en/privacy"
       },
       "es-ES": {
         "title": "Suro: Planes compartidos",
@@ -73,10 +73,10 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• El widget de Android muestra las listas y los eventos como en la app: filas planas con separadores y la fecha de cada evento en una etiqueta.",
-        "marketingUrl": "https://suro.clotet.dev",
-        "supportUrl": "https://suro.clotet.dev",
-        "privacyPolicyUrl": "https://suro.clotet.dev/es/privacidad"
+        "releaseNotes": "• Los enlaces de invitación y de eventos compartidos desde la app ahora se abren en la app.\n• Al iniciar sesión desde una invitación, vuelves a la invitación y no a la lista de grupos.\n• Al quitar a un miembro de un grupo, el enlace de invitación anterior deja de funcionar.\n• Mejoras de seguridad en los archivos compartidos y dependencias actualizadas.",
+        "marketingUrl": "https://suroapp.cat",
+        "supportUrl": "https://suroapp.cat",
+        "privacyPolicyUrl": "https://suroapp.cat/es/privacidad"
       },
       "ca": {
         "title": "Suro",
@@ -93,10 +93,10 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• El giny d'Android mostra les llistes i els esdeveniments com a l'app: files planes amb separadors i la data de cada esdeveniment en una etiqueta.",
-        "marketingUrl": "https://suro.clotet.dev",
-        "supportUrl": "https://suro.clotet.dev",
-        "privacyPolicyUrl": "https://suro.clotet.dev/ca/privacitat"
+        "releaseNotes": "• Els enllaços d'invitació i d'esdeveniments compartits des de l'app ara s'obren a l'app.\n• En iniciar sessió des d'una invitació, tornes a la invitació i no a la llista de grups.\n• En treure un membre d'un grup, l'enllaç d'invitació anterior deixa de funcionar.\n• Millores de seguretat en els fitxers compartits i dependències actualitzades.",
+        "marketingUrl": "https://suroapp.cat",
+        "supportUrl": "https://suroapp.cat",
+        "privacyPolicyUrl": "https://suroapp.cat/ca/privacitat"
       }
     }
   }

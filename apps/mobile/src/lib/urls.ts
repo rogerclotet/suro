@@ -3,7 +3,11 @@
  * inlined at build time (same pattern as src/lib/convex.ts).
  */
 
-const DEFAULT_SITE_URL = "https://suro.clotet.dev";
+/**
+ * Used when a build sets no `EXPO_PUBLIC_SITE_URL`. Any host shared from here
+ * must also be registered for app links in app.json (scripts/app-links.test.ts).
+ */
+export const DEFAULT_SITE_URL = "https://suroapp.cat";
 
 /** Absolute link into the production web app for a given path. */
 export function webUrl(path: string): string {

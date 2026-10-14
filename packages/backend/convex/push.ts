@@ -142,6 +142,11 @@ async function deliver(
 
   // Expo accepts up to 100 messages per request; groups are small, so a single
   // request is enough. Chunk here if a group ever exceeds that.
+
+  // Without Expo's "enhanced security" anyone holding a device's push token can
+  // send it notifications as this app. Once that is enabled on the Expo
+  // project, sends must carry this token; unset, they stay unauthenticated.
+  const accessToken = process.env.EXPO_ACCESS_TOKEN;
   let response: Response;
   try {
     response = await fetch(EXPO_PUSH_ENDPOINT, {
@@ -149,6 +154,7 @@ async function deliver(
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       body: JSON.stringify(messages),
     });

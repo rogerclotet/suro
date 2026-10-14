@@ -2,10 +2,16 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
+import {
+  clearPendingInvitation,
+  invitationRoute,
+  rememberPendingInvitation,
+} from "@/lib/pending-invitation";
 import { Button, Center, Loading, Screen, Txt } from "@/ui";
 
 /**
@@ -40,7 +46,14 @@ export default function InvitationScreen() {
             </Txt>
             <Button
               title={t("accept")}
-              onPress={() => router.replace("/login")}
+              onPress={() => {
+                // Login returns here once signed in, instead of dropping the
+                // invite on the groups list.
+                rememberPendingInvitation(
+                  invitationRoute(projectId, inviteToken),
+                );
+                router.replace("/login");
+              }}
             />
           </View>
         </Center>
@@ -66,7 +79,14 @@ function Invite({
   const acceptInvite = useMutation(api.projects.acceptInvite);
   const t = useTranslations("invitation");
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [joining, setJoining] = useState(false);
+
+  // Showing this screen signed in is the resume: a later sign-in must not be
+  // sent back to an invitation that was already presented.
+  useEffect(() => {
+    clearPendingInvitation();
+  }, []);
 
   if (preview === undefined) {
     return (
@@ -100,7 +120,17 @@ function Invite({
 
   return (
     <Screen>
-      <View style={{ flex: 1, padding: 24, gap: 24 }}>
+      {/* No header above this route (it sits outside (app)), so the content
+          has to clear the status bar and home indicator itself. */}
+      <View
+        style={{
+          flex: 1,
+          padding: 24,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 24,
+          gap: 24,
+        }}
+      >
         <View style={{ alignItems: "center", gap: 12, paddingTop: 24 }}>
           <Avatar
             kind="group"

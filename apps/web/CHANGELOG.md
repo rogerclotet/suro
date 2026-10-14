@@ -6,6 +6,29 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.33.0] — 2026-10-14
+
+### ca
+
+- [fix] Els enllaços d'invitació i d'esdeveniments compartits des de l'app ara s'obren a l'app.
+- [fix] En iniciar sessió des d'una invitació, tornes a la invitació i no a la llista de grups.
+- [fix] En treure un membre d'un grup, l'enllaç d'invitació anterior deixa de funcionar.
+- [improvement] Millores de seguretat en els fitxers compartits i dependències actualitzades.
+
+### es
+
+- [fix] Los enlaces de invitación y de eventos compartidos desde la app ahora se abren en la app.
+- [fix] Al iniciar sesión desde una invitación, vuelves a la invitación y no a la lista de grupos.
+- [fix] Al quitar a un miembro de un grupo, el enlace de invitación anterior deja de funcionar.
+- [improvement] Mejoras de seguridad en los archivos compartidos y dependencias actualizadas.
+
+### en
+
+- [fix] Invitation and event links shared from the app now open in the app.
+- [fix] Signing in from an invitation now returns you to it instead of the groups list.
+- [fix] Removing a member from a group now invalidates the previous invitation link.
+- [improvement] Security improvements for shared files, plus updated dependencies.
+
 ## [1.32.1] — 2026-10-09
 
 ### ca

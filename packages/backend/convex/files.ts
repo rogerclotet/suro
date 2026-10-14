@@ -8,6 +8,7 @@ import {
   query,
 } from "./_generated/server";
 import { track } from "./model/analytics";
+import { requireUnclaimedBlob } from "./model/blobs";
 import { serveFileUrl } from "./model/fileUrls";
 import { notifyProject } from "./model/notify";
 import { requireFileOwner, requireProjectMember } from "./model/permissions";
@@ -51,11 +52,14 @@ export const saveFile = mutation({
     storageId: v.id("_storage"),
     name: v.string(),
     type: v.string(),
+    // Accepted for installed clients but not trusted: the stored blob's own
+    // size is recorded (a picker that reports none used to save "0 bytes").
     size: v.number(),
     eventId: v.optional(v.id("events")),
   },
   handler: async (ctx, args) => {
     const userId = await requireProjectMember(ctx, args.projectId);
+    const blob = await requireUnclaimedBlob(ctx, args.storageId);
     if (args.eventId) {
       const event = await ctx.db.get(args.eventId);
       if (event === null || event.projectId !== args.projectId) {
@@ -70,7 +74,7 @@ export const saveFile = mutation({
       name,
       storageId: args.storageId,
       type: args.type,
-      size: args.size,
+      size: blob.size,
       projectId: args.projectId,
       eventId: args.eventId,
       uploadedBy: userId,

@@ -3,6 +3,7 @@ import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
 import { AppleNative } from "./AppleNative";
+import { isAllowedAppRedirect } from "./model/allowedAppSchemes";
 import { isAllowedWebOrigin } from "./model/allowedWebOrigins";
 import { track } from "./model/analytics";
 import { getRandomColor } from "./model/colors";
@@ -13,7 +14,9 @@ import { ResendOTP } from "./ResendOTP";
  * deployment env vars:
  *   AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET (Google), AUTH_RESEND_KEY, AUTH_EMAIL_FROM
  *   (email OTP), SITE_URL, plus JWT_PRIVATE_KEY + JWKS (`npx @convex-dev/auth`).
- * Optional: ALLOWED_WEB_ORIGINS (see `isAllowedWebOrigin`), and AUTH_APPLE_ID +
+ * Optional: ALLOWED_WEB_ORIGINS (see `isAllowedWebOrigin`), ALLOWED_APP_SCHEMES
+ *   (see `isAllowedAppRedirect`; set `suro,surodev,exp` on the dev deployment
+ *   for the dev app variant and Expo Go), and AUTH_APPLE_ID +
  *   AUTH_APPLE_SECRET (web Apple OAuth; the secret is a self-signed ES256 JWT
  *   that expires after at most 6 months — regenerate it before then). The web
  *   client hides its Apple button until those are set (see `oauthProviders`).
@@ -62,8 +65,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     // own every branch the default handled (native deep links, relative paths,
     // SITE_URL absolutes) plus cross-origin web returns for shared deployments.
     async redirect({ redirectTo }) {
-      // Native deep links (suro:// standalone, exp:// Expo Go) round-trip as-is.
-      if (redirectTo.startsWith("suro://") || redirectTo.startsWith("exp://")) {
+      // Native deep links round-trip as-is, for the app schemes this
+      // deployment accepts (the released app only, unless configured).
+      if (isAllowedAppRedirect(redirectTo)) {
         return redirectTo;
       }
       // Absolute web URL: the client passes its own origin so the round-trip

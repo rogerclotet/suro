@@ -11,6 +11,7 @@
  * "@/" path-alias plugin configured.
  */
 import { LOCALES, type Locale, normalizeLocale } from "../i18n/config";
+import { DEFAULT_SITE_URL } from "./urls";
 
 const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   groups: { ca: "grups", es: "grupos" },
@@ -102,7 +103,7 @@ export function withHomeTabPrefix(route: string): string {
 export function webPathToRoute(path: string): string {
   let pathname: string;
   try {
-    pathname = new URL(path, "https://suro.clotet.dev").pathname;
+    pathname = new URL(path, DEFAULT_SITE_URL).pathname;
   } catch {
     return path;
   }

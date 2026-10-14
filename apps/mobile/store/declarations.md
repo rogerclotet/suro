@@ -5,7 +5,7 @@ the Play Console. These describe the app **as currently shipped** (no ads, no
 IAP, no analytics SDK in the native app). If that changes, update this file and
 the consoles together — see [Future monetization](#future-monetization-iap--ads).
 
-Derived from the privacy policy at https://suro.clotet.dev/en/privacy
+Derived from the privacy policy at https://suroapp.cat/en/privacy
 (`apps/web/src/app/[locale]/_components/privacy-content.tsx`). The native app
 talks only to the Convex backend (+ file storage); PostHog runs on the **web**
 app only — the Expo app ships no analytics or crash SDK.
@@ -20,7 +20,7 @@ the Convex Auth rows — then signs out everywhere. Authored content in groups
 created by *others* stays for the remaining members.
 
 The Google Play **web deletion URL** (link it from the Data safety form) is
-`https://suro.clotet.dev/<locale>/account-deletion` (e.g. `/en/account-deletion`,
+`https://suroapp.cat/<locale>/account-deletion` (e.g. `/en/account-deletion`,
 `/ca/eliminacio-del-compte`, `/es/eliminacion-de-la-cuenta`). It explains both
 the in-app flow and the email fallback (`suro@clotet.dev`).
 
@@ -50,7 +50,7 @@ the in-app flow and the email fallback (`suro@clotet.dev`).
 
 ### Play content declarations (App content page)
 
-- **Privacy policy URL:** https://suro.clotet.dev/en/privacy
+- **Privacy policy URL:** https://suroapp.cat/en/privacy
 - **App access:** the whole app requires sign-in → provide access credentials:
   the review account (`AUTH_REVIEW_EMAIL`) + fixed OTP (`AUTH_REVIEW_OTP`),
   with the note from [Review notes](#review-notes--demo-account).

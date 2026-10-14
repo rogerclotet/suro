@@ -53,6 +53,8 @@ export default defineSchema({
     legacyId: v.optional(v.string()),
   })
     .index("email", ["email"])
+    // Blob ownership lookup (see model/blobs.ts).
+    .index("by_customImageStorageId", ["customImageStorageId"])
     .index("by_legacyId", ["legacyId"]),
 
   projects: defineTable({
@@ -75,6 +77,8 @@ export default defineSchema({
     .index("by_inviteToken", ["inviteToken"])
     .index("by_createdBy", ["createdBy"])
     .index("by_calendarToken", ["calendarToken"])
+    // Blob ownership lookup (see model/blobs.ts).
+    .index("by_imageStorageId", ["imageStorageId"])
     .index("by_legacyId", ["legacyId"]),
 
   // Many-to-many membership (replaces f_projectToUser).
@@ -220,6 +224,9 @@ export default defineSchema({
   })
     .index("by_project", ["projectId"])
     .index("by_event", ["eventId"])
+    // Blob ownership lookups (see model/blobs.ts).
+    .index("by_storageId", ["storageId"])
+    .index("by_thumbnailStorageId", ["thumbnailStorageId"])
     .index("by_legacyId", ["legacyId"]),
 
   // Free-text notes. `format` mirrors the Drizzle column ("html" | "plain");

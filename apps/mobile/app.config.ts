@@ -20,7 +20,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  *    custom scheme ("surodev"), so a dev build installs alongside the Play
  *    Store / App Store prod app instead of replacing it. The dev variant also
  *    drops the prod deep-link config (Android `intentFilters` to
- *    suro.clotet.dev, iOS `associatedDomains`) so it never hijacks production
+ *    suroapp.cat, iOS `associatedDomains`) so it never hijacks production
  *    universal links, and drops `googleServicesFile` since the prod
  *    google-services.json only declares the prod package — keeping it would
  *    fail the Google Services Gradle step on a package mismatch. (Remote push
@@ -28,7 +28,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  *
  * 3. Drops the two iOS entitlements a local `expo run:ios` simulator build can't
  *    sign — Sign in with Apple (the `expo-apple-authentication` plugin) and
- *    `associatedDomains` (universal links to suro.clotet.dev). Both need a
+ *    `associatedDomains` (universal links to suroapp.cat). Both need a
  *    provisioning profile, so on the simulator they fail with "No code signing
  *    certificates are available." `prebuild` rewrites the native files every run,
  *    so this has to be filtered here.

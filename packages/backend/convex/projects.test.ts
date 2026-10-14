@@ -441,6 +441,39 @@ describe("group management permissions and cleanup", () => {
     expect(await t.run((ctx) => ctx.db.get(family))).not.toBeNull();
   });
 
+  it("issues a new invite link so a removed member cannot rejoin with the old one", async () => {
+    const { t, alice, bob, family } = await seedManagedGroup();
+    const admin = t.withIdentity({ subject: `${alice}|session` });
+    const removed = t.withIdentity({ subject: `${bob}|session` });
+    await admin.mutation(api.projects.removeMember, {
+      projectId: family,
+      userId: bob,
+    });
+
+    await expect(
+      removed.mutation(api.projects.acceptInvite, {
+        projectId: family,
+        inviteToken: "secret-token",
+      }),
+    ).rejects.toThrow(/invalid invite token/i);
+    await expect(
+      removed.query(api.projects.getByInvite, {
+        projectId: family,
+        inviteToken: "secret-token",
+      }),
+    ).resolves.toBeNull();
+    expect((await members(t, family)).map((m) => m.userId)).toEqual([alice]);
+
+    // The administrator's fresh link still lets them back in on purpose.
+    const project = await admin.query(api.projects.get, { projectId: family });
+    expect(project?.inviteToken).not.toBe("secret-token");
+    await removed.mutation(api.projects.acceptInvite, {
+      projectId: family,
+      inviteToken: project?.inviteToken ?? "",
+    });
+    expect(await members(t, family)).toHaveLength(2);
+  });
+
   it("protects the administrator and rejects a target outside the group", async () => {
     const { t, alice, outsider, family } = await seedManagedGroup();
     const admin = t.withIdentity({ subject: `${alice}|session` });

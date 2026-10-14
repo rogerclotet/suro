@@ -4,6 +4,7 @@ import { mutation, query } from "./_generated/server";
 import { deleteUserAccount } from "./model/account";
 import { track } from "./model/analytics";
 import { requireUserId } from "./model/auth";
+import { requireUnclaimedBlob } from "./model/blobs";
 import { CATPPUCCIN_COLOR_KEYS } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
 
@@ -135,6 +136,12 @@ export const setAvatarImage = mutation({
   handler: async (ctx, { storageId }) => {
     const userId = await requireUserId(ctx);
     const user = await ctx.db.get(userId);
+    // A repeat of the same upload must not fall through to "delete the previous
+    // avatar", which would delete the blob it is about to keep.
+    if (user?.customImageStorageId === storageId) {
+      return null;
+    }
+    await requireUnclaimedBlob(ctx, storageId);
     const rawUrl = await ctx.storage.getUrl(storageId);
     if (rawUrl === null) {
       throw new Error("Uploaded image not found");

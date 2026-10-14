@@ -41,7 +41,7 @@ import Reanimated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FONT, useTheme } from "./theme";
+import { DISPLAY_FONT, useTheme } from "./theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SHEET_DISMISS_DISTANCE = 96;
@@ -408,7 +408,7 @@ export function Fab({
       animateFrom="right"
       // Paper reads the label font from its own theme; override just that slot
       // so the FAB matches the app typeface without a global PaperProvider.
-      theme={{ fonts: { labelLarge: { fontFamily: FONT, fontWeight: "700" } } }}
+      theme={{ fonts: { labelLarge: DISPLAY_FONT } }}
       style={{
         position: "absolute",
         right: 16,
@@ -650,9 +650,9 @@ export function Txt({
       {...rest}
       style={[
         {
-          ...(useDisplay ? { fontFamily: FONT } : null),
           fontSize: size,
           fontWeight: weight,
+          ...(useDisplay ? DISPLAY_FONT : null),
           color: muted ? t.muted : t.text,
           textDecorationLine: strike ? "line-through" : "none",
         },
@@ -694,8 +694,7 @@ export function Button({
     >
       <Text
         style={{
-          fontFamily: FONT,
-          fontWeight: "700",
+          ...DISPLAY_FONT,
           fontSize: 16,
           textAlign: "center",
           color: textColor,
