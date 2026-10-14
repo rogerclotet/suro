@@ -150,9 +150,9 @@ describe("webPathToRoute", () => {
   });
 
   it("accepts a full absolute URL and strips the locale prefix", () => {
-    expect(
-      webPathToRoute(`https://suro.clotet.dev/en/groups/${PID}/files`),
-    ).toBe(`/${PID}/home/files`);
+    expect(webPathToRoute(`https://suroapp.cat/en/groups/${PID}/files`)).toBe(
+      `/${PID}/home/files`,
+    );
   });
 
   it("nests notes and files under the Home tab's own stack", () => {

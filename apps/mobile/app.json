@@ -9,7 +9,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "dev.clotet.suro",
-      "associatedDomains": ["applinks:suro.clotet.dev", "applinks:suroapp.cat"],
+      "associatedDomains": ["applinks:suroapp.cat"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -30,26 +30,6 @@
           "autoVerify": true,
           "category": ["BROWSABLE", "DEFAULT"],
           "data": [
-            {
-              "scheme": "https",
-              "host": "suro.clotet.dev",
-              "pathPrefix": "/groups"
-            },
-            {
-              "scheme": "https",
-              "host": "suro.clotet.dev",
-              "pathPrefix": "/en/groups"
-            },
-            {
-              "scheme": "https",
-              "host": "suro.clotet.dev",
-              "pathPrefix": "/ca/grups"
-            },
-            {
-              "scheme": "https",
-              "host": "suro.clotet.dev",
-              "pathPrefix": "/es/grupos"
-            },
             {
               "scheme": "https",
               "host": "suroapp.cat",

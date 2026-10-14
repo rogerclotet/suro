@@ -26,7 +26,7 @@ afterEach(() => {
 
 describe("webUrl", () => {
   it("falls back to the production site when unset", () => {
-    expect(webUrl("/groups/abc")).toBe("https://suro.clotet.dev/groups/abc");
+    expect(webUrl("/groups/abc")).toBe("https://suroapp.cat/groups/abc");
   });
 
   it("uses the configured site base", () => {
