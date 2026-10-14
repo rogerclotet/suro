@@ -1,4 +1,1 @@
-• Els enllaços d'invitació i d'esdeveniments compartits des de l'app ara s'obren a l'app.
-• En iniciar sessió des d'una invitació, tornes a la invitació i no a la llista de grups.
-• En treure un membre d'un grup, l'enllaç d'invitació anterior deixa de funcionar.
-• Millores de seguretat en els fitxers compartits i dependències actualitzades.
+• A l'iPhone, l'app ja no tanca la sessió de sobte després de bloquejar el mòbil amb l'app oberta.
