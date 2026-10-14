@@ -20,6 +20,13 @@ import { Appearance, useColorScheme } from "react-native";
 
 export { FONT };
 
+/**
+ * Convergence ships only a 400 weight, so display text must ask for exactly
+ * that. Given a bold weight, iOS falls back to the regular face, but Android
+ * finds no bold variant of the custom family and draws the system font instead.
+ */
+export const DISPLAY_FONT = { fontFamily: FONT, fontWeight: "400" } as const;
+
 export type Theme = (typeof nativePalette)[keyof typeof nativePalette];
 type Scheme = keyof typeof nativePalette;
 

@@ -11,7 +11,7 @@ import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { isBlankHtml, toEditorHtml } from "@/lib/note-content";
 import { useNoteEditLock } from "@/lib/use-note-edit-lock";
-import { FONT, useTheme } from "@/theme";
+import { DISPLAY_FONT, useTheme } from "@/theme";
 import { Loading, Screen, Txt } from "@/ui";
 
 type Note = NonNullable<FunctionReturnType<typeof api.notes.get>>;
@@ -208,9 +208,8 @@ function NoteEditorContent({
             placeholder={tNotes("titlePlaceholder")}
             placeholderTextColor={t.muted}
             style={{
-              fontFamily: FONT,
+              ...DISPLAY_FONT,
               fontSize: 22,
-              fontWeight: "700",
               color: t.text,
             }}
           />
