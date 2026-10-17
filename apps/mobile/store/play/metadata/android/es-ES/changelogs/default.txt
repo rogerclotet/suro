@@ -1,1 +1,1 @@
-• En el iPhone, la app ya no cierra la sesión de repente después de bloquear el móvil con la app abierta.
+• Las listas se animan con suavidad: los elementos nuevos ya no parpadean al guardarse y, en la web, marcar o mover un elemento responde al instante.

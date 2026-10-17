@@ -1,5 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
+import { listItemSignature } from "domain/row-keys";
 import { type RefObject, useMemo, useRef, useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import Animated, {
@@ -24,6 +25,7 @@ import type { DragData, Item } from "@/features/lists/types";
 import { useChecklistCommands } from "@/features/lists/use-checklist-commands";
 import { useChecklistScroll } from "@/features/lists/use-checklist-scroll";
 import { useItemEditor } from "@/features/lists/use-item-editor";
+import { useStableRowKeys } from "@/features/lists/use-stable-row-keys";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { useOfflineListGet, usePersistentQuery } from "@/lib/offline";
@@ -114,6 +116,14 @@ export function ListChecklist({
   const sections = useMemo(
     () => (list ? groupByCategory(list.items, uncategorized, true) : []),
     [list, uncategorized],
+  );
+  // A created row keeps its optimistic placeholder's key once confirmed, so
+  // it isn't cross-faded out and back in under its server id.
+  const rowKeys = useStableRowKeys(
+    (list?.items ?? []).map((item) => ({
+      id: item._id,
+      signature: listItemSignature(item),
+    })),
   );
 
   function toggle(item: Item) {
@@ -319,7 +329,7 @@ export function ListChecklist({
             ) : null}
             {section.data.map((item) => (
               <DraggableItemRow
-                key={`${item._id}:${dragResetKey}`}
+                key={`${rowKeys.get(item._id)?.key ?? item._id}:${dragResetKey}`}
                 item={item}
                 taskMode={taskMode}
                 memberById={memberById}

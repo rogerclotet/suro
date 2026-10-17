@@ -11,29 +11,29 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { listItemSignature } from "domain/row-keys";
 import { compareTasks } from "domain/tasks";
+import { AnimatePresence, useInstantLayoutTransition } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { List, ListItem } from "@/app/_data/list";
-import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
+import { MotionProvider } from "@/components/motion/motion-provider";
+import { useStableRowKeys } from "@/lib/use-stable-row-keys";
 import CategoryItems from "./category-items";
 import type { TaskMutationArgs } from "./list-item/data";
 import NewListItem from "./list-item/new-list-item";
+import useListItemCommands from "./list-item/use-list-item-commands";
 
 export default function CheckList(props: { list: List }) {
   const list = props.list;
   const t = useTranslations("lists");
 
-  // Animates category sections appearing/disappearing and sliding into place
-  // (e.g. a new category created by a move, or one emptied out). Items moving
-  // within a section are animated by the section's own list (CategoryItems).
-  const sectionsParent = useStableAutoAnimate<HTMLDivElement>();
-
   const [dragging, setDragging] = useState(false);
+  // The row last dropped into another section, until its old copy is gone:
+  // the move swaps it in place instead of cross-fading (see draggableRowPresence).
+  const [droppedItemId, setDroppedItemId] = useState<string | null>(null);
   // Which category section's inline add row is expanded (undefined = none;
   // null = the top no-category form, which is always visible and only tracked
   // here so a categorized add collapses any open section row). Set after each
@@ -46,10 +46,15 @@ export default function CheckList(props: { list: List }) {
   const keyboardSensor = useSensor(KeyboardSensor);
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
-  const updateItem = useMutation(api.listItems.update);
-  const setCompleted = useMutation(api.listItems.setCompleted);
-  const setCategory = useMutation(api.listItems.setCategory);
-  const removeItem = useMutation(api.listItems.remove);
+  const {
+    update: updateItem,
+    setCompleted,
+    setCategory,
+    remove: removeItem,
+  } = useListItemCommands(list);
+  // Showing the empty sections' drop targets shifts the rows under the
+  // pointer; that jump must be instant or the dragged row drifts away.
+  const startInstantLayoutTransition = useInstantLayoutTransition();
 
   // Keep a ref to the latest list so stable callbacks can read current state.
   const listRef = useRef(list);
@@ -59,6 +64,12 @@ export default function CheckList(props: { list: List }) {
   const itemsByCategory = useMemo(
     () => groupItemsByCategory(list.items, true),
     [list.items],
+  );
+  const rowKeys = useStableRowKeys(
+    list.items.map((item) => ({
+      id: item.id,
+      signature: listItemSignature(item),
+    })),
   );
 
   const handleChange = useCallback(
@@ -114,6 +125,8 @@ export default function CheckList(props: { list: List }) {
     [removeItem],
   );
 
+  const handleExitComplete = useCallback(() => setDroppedItemId(null), []);
+
   const handleAddActivate = useCallback((category: string | null) => {
     setActiveAdd(category);
   }, []);
@@ -129,7 +142,7 @@ export default function CheckList(props: { list: List }) {
   }, []);
 
   function handleDragStart(_event: DragStartEvent) {
-    setDragging(true);
+    startInstantLayoutTransition(() => setDragging(true));
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -166,6 +179,7 @@ export default function CheckList(props: { list: List }) {
       return;
     }
 
+    setDroppedItemId(item.id);
     await setCategory({ itemId: item.id as Id<"listItems">, category });
   }
 
@@ -173,54 +187,65 @@ export default function CheckList(props: { list: List }) {
   const totalCount = list.items.length;
 
   return (
-    <DndContext
-      id="list-dnd"
-      modifiers={[restrictToVerticalAxis]}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      sensors={sensors}
-    >
-      <div className="mx-auto max-w-lg">
-        {totalCount > 0 && (
-          <div className="mb-3 flex items-center gap-2.5">
-            <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
-              <div
-                className="h-full rounded-sm bg-primary transition-[width] duration-300 ease-in-out"
-                style={{ width: `${(doneCount / totalCount) * 100}%` }}
-              />
-            </div>
-            <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
-              {doneCount}/{totalCount}
-            </span>
-          </div>
-        )}
-        {/* The always-visible no-category entry point with the quick category
-            selector; the uncategorized section sorts first, right below it. */}
-        <NewListItem list={list} onSubmitted={handleAddSubmitted} />
-      </div>
-
-      <div
-        ref={sectionsParent}
-        className="mx-auto flex max-w-lg flex-col items-stretch gap-4"
+    <MotionProvider>
+      <DndContext
+        id="list-dnd"
+        modifiers={[restrictToVerticalAxis]}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
       >
-        {itemsByCategory.map(({ category, items }) => (
-          <CategoryItems
-            key={`category-${category === "" ? "<none>" : category}`}
-            category={category}
-            items={items}
-            list={list}
-            isDragging={dragging}
-            handleChange={handleChange}
-            handleCompleted={handleCompleted}
-            handleDelete={handleDelete}
-            addActive={activeAdd === category}
-            onAddActivate={handleAddActivate}
-            onAddDeactivate={handleAddDeactivate}
-            onAddSubmitted={handleAddSubmitted}
-          />
-        ))}
-      </div>
-    </DndContext>
+        <div className="mx-auto max-w-lg">
+          {totalCount > 0 && (
+            <div className="mb-3 flex items-center gap-2.5">
+              <div className="h-1 flex-1 overflow-hidden rounded-sm bg-muted">
+                <div
+                  className="h-full rounded-sm bg-primary transition-[width] duration-300 ease-in-out"
+                  style={{ width: `${(doneCount / totalCount) * 100}%` }}
+                />
+              </div>
+              <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
+                {doneCount}/{totalCount}
+              </span>
+            </div>
+          )}
+          {/* The always-visible no-category entry point with the quick category
+            selector; the uncategorized section sorts first, right below it. */}
+          <NewListItem list={list} onSubmitted={handleAddSubmitted} />
+        </div>
+
+        {/* `relative` anchors sections that pop out of the flow while they
+          fade out, so the ones below can slide up at once. */}
+        <div className="relative mx-auto flex max-w-lg flex-col items-stretch gap-4">
+          <AnimatePresence
+            initial={false}
+            mode="popLayout"
+            custom={droppedItemId}
+            onExitComplete={handleExitComplete}
+          >
+            {itemsByCategory.map(({ category, items }) => (
+              <CategoryItems
+                key={`category-${category === "" ? "<none>" : category}`}
+                category={category}
+                items={items}
+                rowKeys={rowKeys}
+                droppedItemId={droppedItemId}
+                onExitComplete={handleExitComplete}
+                list={list}
+                isDragging={dragging}
+                handleChange={handleChange}
+                handleCompleted={handleCompleted}
+                handleDelete={handleDelete}
+                addActive={activeAdd === category}
+                onAddActivate={handleAddActivate}
+                onAddDeactivate={handleAddDeactivate}
+                onAddSubmitted={handleAddSubmitted}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      </DndContext>
+    </MotionProvider>
   );
 }
 
