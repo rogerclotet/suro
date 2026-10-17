@@ -10,6 +10,7 @@ import { captureException } from "@/lib/error-reporting";
 import { updateListItems } from "@/lib/queries/update-list-items";
 import { useSession } from "@/lib/session";
 import type { TaskMutationArgs } from "./data";
+import useListItemCommands from "./use-list-item-commands";
 
 /**
  * Create-item logic shared by every inline add row: duplicate check (reopening
@@ -54,17 +55,7 @@ export default function useCreateListItem(
     },
   );
 
-  const updateItem = useMutation(
-    api.listItems.setCompleted,
-  ).withOptimisticUpdate((store, args) => {
-    updateListItems(store, list, (items) =>
-      items.map((item) =>
-        item._id === args.itemId
-          ? { ...item, completed: args.completed, updatedAt: Date.now() }
-          : item,
-      ),
-    );
-  });
+  const { setCompleted } = useListItemCommands(list);
 
   function submit(
     name: string,
@@ -81,7 +72,7 @@ export default function useCreateListItem(
     }
     const completed = matches.find((i) => i.completed);
     if (completed) {
-      updateItem({
+      setCompleted({
         itemId: completed.id as Id<"listItems">,
         completed: false,
         expectedDueAt: completed.dueAt?.getTime() ?? null,

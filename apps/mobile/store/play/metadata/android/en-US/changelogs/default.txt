@@ -1,1 +1,1 @@
-• On iPhone, the app no longer signs you out unexpectedly after you lock the phone with the app open.
+• Lists animate smoothly: new items no longer flicker as they're saved, and on the web checking off or moving an item responds instantly.

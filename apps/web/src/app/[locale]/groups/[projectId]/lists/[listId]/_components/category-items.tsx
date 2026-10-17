@@ -1,9 +1,12 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import { type CSSProperties, memo } from "react";
+import type { RowKeys } from "domain/row-keys";
+import { AnimatePresence, useComposedRefs } from "motion/react";
+import * as m from "motion/react-m";
+import { type CSSProperties, memo, type Ref } from "react";
 import type { List } from "@/app/_data/list";
-import { useStableAutoAnimate } from "@/lib/use-stable-auto-animate";
+import { droppableSectionPresence } from "@/components/motion/list-transitions";
 import { cn } from "@/lib/utils";
 import type { TaskMutationArgs } from "./list-item/data";
 import InlineAddItem from "./list-item/inline-add-item";
@@ -12,6 +15,9 @@ import ListItem from "./list-item/list-item";
 export default memo(function CategoryItems(props: {
   items: List["items"];
   category: string;
+  rowKeys: RowKeys;
+  droppedItemId: string | null;
+  onExitComplete: () => void;
   list: List;
   isDragging: boolean;
   handleChange: (
@@ -31,19 +37,23 @@ export default memo(function CategoryItems(props: {
   onAddActivate: (category: string | null) => void;
   onAddDeactivate: (category: string | null) => void;
   onAddSubmitted: (category: string | null) => void;
+  /** Set by AnimatePresence to pop the section out of the flow on exit. */
+  ref?: Ref<HTMLDivElement>;
 }) {
-  const animationParent = useStableAutoAnimate<HTMLUListElement>();
   const { isOver, setNodeRef } = useDroppable({
     id: props.category === "" ? "droppable" : `droppable-${props.category}`,
     data: { category: props.category },
   });
+  const ref = useComposedRefs(setNodeRef, props.ref);
   const style: CSSProperties = {
     display: props.items.length > 0 || props.isDragging ? "block" : "none",
   };
 
   return (
-    <div
-      ref={setNodeRef}
+    <m.div
+      ref={ref}
+      layout="position"
+      {...droppableSectionPresence(props.items.map((item) => item.id))}
       style={style}
       // Drop target highlights with a faint primary wash, like mobile's
       // category drop zones (`${t.primary}14`).
@@ -57,13 +67,21 @@ export default memo(function CategoryItems(props: {
         {props.category}
       </h3>
 
-      <ul ref={animationParent}>
-        {props.items.length > 0 ? (
-          props.items.map((item) => (
+      {/* `relative` anchors rows that pop out of the flow while they fade
+          out, so their siblings close the gap at once. */}
+      <ul className="relative">
+        <AnimatePresence
+          initial={false}
+          mode="popLayout"
+          custom={props.droppedItemId}
+          onExitComplete={props.onExitComplete}
+        >
+          {props.items.map((item) => (
             <ListItem
-              key={item.id}
+              key={props.rowKeys.get(item.id)?.key ?? item.id}
               list={props.list}
               item={item}
+              droppedItemId={props.droppedItemId}
               onChange={(name, details, completed, category, task) =>
                 props.handleChange(
                   item,
@@ -79,12 +97,13 @@ export default memo(function CategoryItems(props: {
                 props.handleCompleted(item, completed)
               }
             />
-          ))
-        ) : (
+          ))}
+        </AnimatePresence>
+        {props.items.length === 0 ? (
           // Drop placeholder for an emptied section; it (re)appears via a
           // display toggle when a drag starts, which restarts the fade-in.
           <div className="fade-in mb-2 h-10 animate-in rounded-md border-2 border-border border-dashed duration-300" />
-        )}
+        ) : null}
       </ul>
 
       {/* Items created here go straight to this category; the no-category
@@ -99,6 +118,6 @@ export default memo(function CategoryItems(props: {
           onSubmitted={props.onAddSubmitted}
         />
       )}
-    </div>
+    </m.div>
   );
 });

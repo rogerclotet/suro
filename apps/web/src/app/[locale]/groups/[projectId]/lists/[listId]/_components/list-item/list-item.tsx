@@ -2,9 +2,12 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { GripVertical, RepeatIcon } from "lucide-react";
+import * as m from "motion/react-m";
 import { useTranslations } from "next-intl";
+import type { Ref } from "react";
 import type { List, ListItem as ListItemType } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { draggableRowPresence } from "@/components/motion/list-transitions";
 import { Checkbox } from "@/components/ui/checkbox";
 import UserAvatar from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
@@ -16,6 +19,7 @@ import { PriorityBadge } from "./priority-badge";
 export default function ListItem(props: {
   list: List;
   item: ListItemType;
+  droppedItemId: string | null;
   onChange: (
     name: string,
     details: string,
@@ -25,6 +29,8 @@ export default function ListItem(props: {
   ) => Promise<void>;
   onCompleted: (completed: boolean) => Promise<void>;
   onDelete?: () => Promise<void>;
+  /** Set by AnimatePresence to pop the row out of the flow on exit. */
+  ref?: Ref<HTMLLIElement>;
 }) {
   const { list, item } = props;
   const t = useTranslations("lists");
@@ -46,13 +52,15 @@ export default function ListItem(props: {
   const repeat = presetFromRecurrence(item.recurrence);
 
   return (
-    <li
-      className={cn(
-        "flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted",
-        // `relative` makes the z-index effective: a static li ignores it and
-        // paints in DOM order, hiding the dragged row behind later categories.
-        isDragging && "relative z-50",
-      )}
+    // The li owns the layout and presence animations; the drag translation
+    // lives on the inner row so the two transforms never fight.
+    <m.li
+      ref={props.ref}
+      layout="position"
+      {...draggableRowPresence(item.id, props.droppedItemId)}
+      // `relative` makes the z-index effective: a static li ignores it and
+      // paints in DOM order, hiding the dragged row behind later categories.
+      className={cn(isDragging && "relative z-50")}
       onKeyDown={(e) => {
         const tag = (e.target as HTMLElement).tagName;
         if (
@@ -64,89 +72,93 @@ export default function ListItem(props: {
           e.preventDefault();
         }
       }}
-      ref={setNodeRef}
-      style={style}
     >
-      <div className="flex flex-row items-center">
-        <Checkbox
-          checked={item.completed ?? false}
-          onCheckedChange={(checked) => props.onCompleted(checked === true)}
-          className="h-6 w-6 transition-all"
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
+      <div
+        className="flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
+        ref={setNodeRef}
+        style={style}
+      >
+        <div className="flex flex-row items-center">
+          <Checkbox
+            checked={item.completed ?? false}
+            onCheckedChange={(checked) => props.onCompleted(checked === true)}
+            className="h-6 w-6 transition-all"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
 
-      {/* Name (the edit trigger) plus, on task lists, a metadata row beneath it.
+        {/* Name (the edit trigger) plus, on task lists, a metadata row beneath it.
           The chips live outside the trigger <button> so block elements like the
           priority badge stay valid HTML. */}
-      <div className="grow overflow-hidden">
-        <EditListItemForm
-          list={list}
-          item={item}
-          onChange={props.onChange}
-          onDelete={props.onDelete}
-          trigger={
-            <button
-              type="button"
-              // The strike-through is always present and fades in/out via
-              // text-decoration-color (covered by transition-colors), which
-              // animates per line box so wrapped names stay struck correctly.
-              className={cn(
-                "wrap-break-word block w-full overflow-hidden text-left line-through transition-colors duration-300",
-                item.completed
-                  ? "text-muted-foreground decoration-current"
-                  : "decoration-transparent",
+        <div className="grow overflow-hidden">
+          <EditListItemForm
+            list={list}
+            item={item}
+            onChange={props.onChange}
+            onDelete={props.onDelete}
+            trigger={
+              <button
+                type="button"
+                // The strike-through is always present and fades in/out via
+                // text-decoration-color (covered by transition-colors), which
+                // animates per line box so wrapped names stay struck correctly.
+                className={cn(
+                  "wrap-break-word block w-full overflow-hidden text-left line-through transition-colors duration-300",
+                  item.completed
+                    ? "text-muted-foreground decoration-current"
+                    : "decoration-transparent",
+                )}
+              >
+                {item.name}
+                {item.details ? (
+                  <span className="block text-muted-foreground text-xs">
+                    {item.details}
+                  </span>
+                ) : null}
+              </button>
+            }
+          />
+          {assignee || item.priority || item.dueAt || repeat !== "none" ? (
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {assignee && (
+                <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+                  <UserAvatar user={assignee} className="h-5 w-5" />
+                  {assignee.name}
+                </span>
               )}
-            >
-              {item.name}
-              {item.details ? (
-                <span className="block text-muted-foreground text-xs">
-                  {item.details}
+              {item.priority && <PriorityBadge priority={item.priority} />}
+              {item.dueAt && (
+                <DueChip
+                  dueAt={item.dueAt}
+                  allDay={item.dueAllDay}
+                  completed={item.completed ?? false}
+                />
+              )}
+              {repeat !== "none" ? (
+                <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+                  <RepeatIcon className="size-3" />
+                  {t(`repeat_${repeat}`)}
                 </span>
               ) : null}
-            </button>
-          }
-        />
-        {assignee || item.priority || item.dueAt || repeat !== "none" ? (
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            {assignee && (
-              <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
-                <UserAvatar user={assignee} className="h-5 w-5" />
-                {assignee.name}
-              </span>
-            )}
-            {item.priority && <PriorityBadge priority={item.priority} />}
-            {item.dueAt && (
-              <DueChip
-                dueAt={item.dueAt}
-                allDay={item.dueAllDay}
-                completed={item.completed ?? false}
-              />
-            )}
-            {repeat !== "none" ? (
-              <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
-                <RepeatIcon className="size-3" />
-                {t(`repeat_${repeat}`)}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+            </div>
+          ) : null}
+        </div>
 
-      <button
-        type="button"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.stopPropagation();
-          }
-        }}
-        className="cursor-grab text-muted-foreground"
-        {...listeners}
-        {...attributes}
-      >
-        <GripVertical />
-      </button>
-    </li>
+        <button
+          type="button"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+            }
+          }}
+          className="cursor-grab text-muted-foreground"
+          {...listeners}
+          {...attributes}
+        >
+          <GripVertical />
+        </button>
+      </div>
+    </m.li>
   );
 }

@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.33.2] — 2026-10-17
+
+### ca
+
+- [fix] Les llistes s'animen amb suavitat: els elements nous ja no parpellegen en desar-se i, al web, marcar o moure un element respon a l'instant.
+
+### es
+
+- [fix] Las listas se animan con suavidad: los elementos nuevos ya no parpadean al guardarse y, en la web, marcar o mover un elemento responde al instante.
+
+### en
+
+- [fix] Lists animate smoothly: new items no longer flicker as they're saved, and on the web checking off or moving an item responds instantly.
+
 ## [1.33.1] — 2026-10-14
 
 ### ca

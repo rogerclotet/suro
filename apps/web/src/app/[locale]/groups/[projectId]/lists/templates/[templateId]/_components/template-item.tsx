@@ -2,13 +2,15 @@
 
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Check, Loader2 } from "lucide-react";
+import * as m from "motion/react-m";
 import { useTranslations } from "next-intl";
-import { type FocusEvent, useRef } from "react";
+import { type FocusEvent, type Ref, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type * as v from "valibot";
 import type { Template } from "@/app/_data/list";
 import { useProjects } from "@/app/_state/project-state";
+import { ROW_PRESENCE } from "@/components/motion/list-transitions";
 import { Button } from "@/components/ui/button";
 import CategoryPicker from "@/components/ui/category-picker";
 import {
@@ -25,10 +27,13 @@ import { templateItemSchema } from "../../_components/create-template/data";
 export default function TemplateItem({
   item,
   onChange,
+  ref,
 }: {
   template: Template;
   item: Template["items"][number];
   onChange: (name: string, category: string | null) => Promise<void>;
+  /** Set by AnimatePresence to pop the row out of the flow on exit. */
+  ref?: Ref<HTMLLIElement>;
 }) {
   const form = useForm({
     defaultValues: {
@@ -60,7 +65,12 @@ export default function TemplateItem({
   }
 
   return (
-    <li className="flex w-full items-center justify-between">
+    <m.li
+      ref={ref}
+      layout="position"
+      {...ROW_PRESENCE}
+      className="flex w-full items-center justify-between"
+    >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -124,6 +134,6 @@ export default function TemplateItem({
           />
         </form>
       </Form>
-    </li>
+    </m.li>
   );
 }

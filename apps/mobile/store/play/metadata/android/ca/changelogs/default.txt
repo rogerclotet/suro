@@ -1,1 +1,1 @@
-• A l'iPhone, l'app ja no tanca la sessió de sobte després de bloquejar el mòbil amb l'app oberta.
+• Les llistes s'animen amb suavitat: els elements nous ja no parpellegen en desar-se i, al web, marcar o moure un element respon a l'instant.
