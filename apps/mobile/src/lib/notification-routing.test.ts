@@ -53,6 +53,11 @@ describe("notification navigation", () => {
     expect(notificationHref(receipt("files"))).toBe(
       "/group/home/files?notification=notification",
     );
+    const secretSanta = receipt("secretSanta");
+    secretSanta.destination = { kind: "path", path: "/group/secret-santa" };
+    expect(notificationHref(secretSanta)).toBe(
+      "/group/home/secret-santa?notification=notification",
+    );
   });
   it("preserves group settings parameters and list or pot targets", () => {
     const members = receipt("members");
@@ -102,6 +107,10 @@ describe("notification navigation", () => {
       projectId: "group",
       section: "files",
     });
+    expect(notificationVisit("/group/home/secret-santa/ideas")).toEqual({
+      projectId: "group",
+      section: "secretSanta",
+    });
     expect(notificationVisit("/group-settings", "group")).toEqual({
       projectId: "group",
       section: "members",
@@ -112,12 +121,13 @@ describe("notification navigation", () => {
       receipt("notes", 2),
       receipt("files", 3),
       receipt("members"),
+      receipt("secretSanta", 7),
       receipt("calendar", 4),
       receipt("lists", 5),
       receipt("expenses", 6),
     ];
-    expect(unreadCount(rows, projectId, "home")).toBe(6);
-    expect(unreadCount(rows, projectId)).toBe(21);
+    expect(unreadCount(rows, projectId, "home")).toBe(13);
+    expect(unreadCount(rows, projectId)).toBe(28);
     expect(unreadCount(rows, projectId, "calendar")).toBe(4);
     expect(unreadCount(rows, "other-group")).toBe(0);
   });

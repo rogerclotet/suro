@@ -20,10 +20,11 @@ export default function HomeLayout() {
       }}
     >
       <Stack.Screen name="index" options={rootOptions} />
-      {/* files/ and notes/ own their own header via a nested Stack — hide
-          this outer one so it doesn't double up with theirs. */}
+      {/* files/, notes/ and secret-santa/ own their own header via a nested
+          Stack — hide this outer one so it doesn't double up with theirs. */}
       <Stack.Screen name="files" options={{ headerShown: false }} />
       <Stack.Screen name="notes" options={{ headerShown: false }} />
+      <Stack.Screen name="secret-santa" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -1,5 +1,6 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { deleteUserSecretSantaData } from "./secretSantas";
 
 /**
  * Delete a project and everything scoped to it — lists + items, pots + members,
@@ -53,6 +54,9 @@ export async function deleteProjectCascade(
   }
 
   for (const table of [
+    "secretSantaGiftIdeas",
+    "secretSantaParticipants",
+    "secretSantas",
     "notifications",
     "spendings",
     "events",
@@ -85,7 +89,8 @@ export async function deleteProjectCascade(
  *      states ("including any groups you created").
  *   2. Memberships in groups created by *others* → removed (the user leaves; the
  *      group and its shared content survive for the remaining members).
- *   3. Pot memberships, push tokens, and the avatar blob.
+ *   3. Pot memberships, Secret Santa participation and gift ideas, push
+ *      tokens, and the avatar blob.
  *   4. Convex Auth rows: accounts (+ their verification codes) and sessions
  *      (+ their refresh tokens). This signs the user out of every device.
  *   5. The user document itself.
@@ -128,6 +133,8 @@ export async function deleteUserAccount(
   for (const member of potMembers) {
     await ctx.db.delete(member._id);
   }
+
+  await deleteUserSecretSantaData(ctx, userId);
 
   const unread = await ctx.db
     .query("notifications")

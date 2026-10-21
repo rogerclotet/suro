@@ -6,6 +6,7 @@ import {
   CirclePlus,
   FilePlus,
   FileText,
+  Gift,
   ListPlus,
   ListTodo,
   type LucideIcon,
@@ -68,6 +69,7 @@ export default function EventDetail() {
   const t = useTheme();
   const router = useRouter();
   const tCal = useTranslations("mobile.calendar");
+  const tNav = useTranslations("nav");
   const tFiles = useTranslations("mobile.files");
   const tc = useTranslations("mobile.common");
   const locale = useLocale();
@@ -229,9 +231,12 @@ export default function EventDetail() {
   const linkedList = event.list;
   const linkedNote = event.note;
   const linkedPot = event.pot;
+  const linkedSecretSanta = event.secretSanta;
   // Pending uploads keep the gallery visible so the in-flight tile shows.
   const hasFiles = (eventFiles && eventFiles.length > 0) || pending;
-  const hasExtras = Boolean(linkedList || linkedNote || linkedPot || hasFiles);
+  const hasExtras = Boolean(
+    linkedList || linkedNote || linkedPot || linkedSecretSanta || hasFiles,
+  );
   // Quiet prompts for whatever the event still lacks, sitting under the event
   // header so add actions are visible before scrolling past a linked list.
   const showAddChips =
@@ -418,6 +423,14 @@ export default function EventDetail() {
                       void unlinkPot({ eventId: eid, potId: linkedPot._id }),
                   )
                 }
+              />
+            ) : null}
+            {linkedSecretSanta ? (
+              <LinkedCard
+                icon={Gift}
+                name={linkedSecretSanta.name}
+                subtitle={tNav("secretSanta")}
+                onPress={() => router.navigate(`/${pid}/home/secret-santa`)}
               />
             ) : null}
             {hasFiles ? (
@@ -817,8 +830,9 @@ function LinkedCard({
   name: string;
   subtitle: string;
   onPress: () => void;
-  onUnlink: () => void;
-  unlinkLabel: string;
+  /** Omitted for links managed elsewhere, such as a Secret Santa's event. */
+  onUnlink?: () => void;
+  unlinkLabel?: string;
 }) {
   const t = useTheme();
   return (
@@ -836,15 +850,17 @@ function LinkedCard({
             {subtitle}
           </Txt>
         </Pressable>
-        <Pressable
-          onPress={onUnlink}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={unlinkLabel}
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-        >
-          <Unlink color={t.muted} size={18} />
-        </Pressable>
+        {onUnlink ? (
+          <Pressable
+            onPress={onUnlink}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={unlinkLabel}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Unlink color={t.muted} size={18} />
+          </Pressable>
+        ) : null}
       </View>
     </Card>
   );

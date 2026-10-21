@@ -301,6 +301,59 @@ export default defineSchema({
     .index("by_pot", ["potId"])
     .index("by_legacyId", ["legacyId"]),
 
+  // A gift exchange within a group. At most one is active (not archived) per
+  // project. Its creator or the group admin organizes it. `drawnAt` marks the
+  // draw as done; participants and exclusions are fixed from then on.
+  secretSantas: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    // The exchange moment, kept in sync with the linked calendar event. All-day
+    // values follow the events convention (UTC midnight of the local date).
+    exchangeAt: v.number(),
+    exchangeAllDay: v.optional(v.boolean()),
+    // Whole euros. A zero `max` means no suggested budget.
+    priceRange: v.object({ min: v.number(), max: v.number() }),
+    // Groups of participant user ids who must not draw each other.
+    exclusions: v.array(v.array(v.id("users"))),
+    eventId: v.optional(v.id("events")),
+    drawnAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+    createdBy: v.id("users"),
+    updatedBy: v.optional(v.id("users")),
+    updatedAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_event", ["eventId"]),
+
+  // `assignedTo` is private: only the participant themselves may read it.
+  secretSantaParticipants: defineTable({
+    secretSantaId: v.id("secretSantas"),
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    assignedTo: v.optional(v.id("users")),
+  })
+    .index("by_secretSanta", ["secretSantaId"])
+    .index("by_secretSanta_user", ["secretSantaId", "userId"])
+    .index("by_project", ["projectId"])
+    .index("by_project_user", ["projectId", "userId"])
+    .index("by_user", ["userId"]),
+
+  // A participant's wishes, shown only to the participant who drew them.
+  secretSantaGiftIdeas: defineTable({
+    secretSantaId: v.id("secretSantas"),
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    url: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_secretSanta_user", ["secretSantaId", "userId"])
+    .index("by_project", ["projectId"])
+    .index("by_project_user", ["projectId", "userId"])
+    .index("by_user", ["userId"]),
+
   // Expo push tokens — one row per device (replaces the PWA's web-push
   // `pushSubscriptions`). Deduped by the token string; rows are pruned when Expo
   // reports the device gone (DeviceNotRegistered), mirroring the web's 404/410

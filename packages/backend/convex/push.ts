@@ -30,6 +30,8 @@ const CHANNEL_BY_BODY_KEY: Record<string, string> = {
   spending_created_with_description: "expenses",
   task_assigned: "tasks",
   task_due: "tasks",
+  secret_santa_created: "secretSanta",
+  secret_santa_started: "secretSanta",
 };
 
 type Recipient = { token: string; locale: string };

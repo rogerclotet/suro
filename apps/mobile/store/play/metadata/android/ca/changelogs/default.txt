@@ -1,1 +1,1 @@
-• Les llistes s'animen amb suavitat: els elements nous ja no parpellegen en desar-se i, al web, marcar o moure un element respon a l'instant.
+• Torna l'amic invisible, ara també a l'app mòbil. Qualsevol membre en pot organitzar un: tria qui hi participa, la data, el pressupost i les exclusions, i fes el sorteig. Cada participant descobreix a qui li toca i pot afegir idees de regals que només veurà qui li hagi tocat. L'intercanvi apareix al calendari.

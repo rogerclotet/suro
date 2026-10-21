@@ -24,6 +24,7 @@ const LOCALIZED_SEGMENTS: Record<string, Partial<Record<Locale, string>>> = {
   expenses: { ca: "despeses", es: "gastos" },
   invitation: { ca: "invitacio", es: "invitacion" },
   "secret-santa": { ca: "amic-invisible", es: "amigo-invisible" },
+  ideas: { ca: "idees" },
 };
 
 const CANONICAL_SEGMENTS: Record<string, string> = {};
@@ -60,6 +61,7 @@ const MOBILE_FEATURES = new Set([
   "files",
   "notes",
   "expenses",
+  "secret-santa",
 ]);
 
 // Features that live behind the Home tab rather than getting their own bottom
@@ -70,7 +72,7 @@ const MOBILE_FEATURES = new Set([
 // Nesting the screen under the Home tab's own stack (and rewriting the
 // canonical path here) makes it reachable. Keep in sync with the routes under
 // [projectId]/home/ and HOME_SECTIONS in lib/home-sections.ts.
-const HOME_TAB_FEATURES = new Set(["files", "notes"]);
+const HOME_TAB_FEATURES = new Set(["files", "notes", "secret-santa"]);
 
 /**
  * Rewrite a canonical in-app group route so Home-tab sections carry their

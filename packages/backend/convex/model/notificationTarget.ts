@@ -9,6 +9,10 @@ export const notificationTarget = v.union(
   v.object({ kind: v.literal("notes"), noteId: v.id("notes") }),
   v.object({ kind: v.literal("files") }),
   v.object({ kind: v.literal("members") }),
+  v.object({
+    kind: v.literal("secretSanta"),
+    secretSantaId: v.id("secretSantas"),
+  }),
 );
 export type NotificationTarget = Infer<typeof notificationTarget>;
 
@@ -19,6 +23,7 @@ export const notificationSection = v.union(
   v.literal("notes"),
   v.literal("files"),
   v.literal("members"),
+  v.literal("secretSanta"),
 );
 export type NotificationSection = Infer<typeof notificationSection>;
 
@@ -48,5 +53,7 @@ export function notificationPath(
       return `/${projectId}/files`;
     case "members":
       return `/group-settings?projectId=${projectId}`;
+    case "secretSanta":
+      return `/${projectId}/secret-santa`;
   }
 }

@@ -14,6 +14,7 @@ import {
   requireProjectMember,
 } from "./model/permissions";
 import { recordProjectActivity } from "./model/projectActivity";
+import { syncFromLinkedEvent, unlinkEvent } from "./model/secretSantas";
 
 export const listByRange = query({
   args: {
@@ -37,7 +38,10 @@ export const listByRange = query({
   },
 });
 
-/** The event plus its linked list, note, and expense pot — each or null. */
+/**
+ * The event plus its linked list, note, expense pot and active Secret Santa —
+ * each or null.
+ */
 export const get = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
@@ -50,20 +54,28 @@ export const get = query({
       return null;
     }
     await requireProjectMember(ctx, event.projectId);
-    const [linkedList, linkedNote, linkedPot] = await Promise.all([
-      ctx.db
-        .query("lists")
-        .withIndex("by_event", (q) => q.eq("eventId", event._id))
-        .first(),
-      ctx.db
-        .query("notes")
-        .withIndex("by_event", (q) => q.eq("eventId", event._id))
-        .first(),
-      ctx.db
-        .query("pots")
-        .withIndex("by_event", (q) => q.eq("eventId", event._id))
-        .first(),
-    ]);
+    const [linkedList, linkedNote, linkedPot, linkedSecretSantas] =
+      await Promise.all([
+        ctx.db
+          .query("lists")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .first(),
+        ctx.db
+          .query("notes")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .first(),
+        ctx.db
+          .query("pots")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .first(),
+        ctx.db
+          .query("secretSantas")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .collect(),
+      ]);
+    const secretSanta = linkedSecretSantas.find(
+      (row) => row.archivedAt === undefined,
+    );
     // The pot card only needs a member count, not the full balances payload.
     let pot = null;
     if (linkedPot) {
@@ -78,6 +90,9 @@ export const get = query({
       list: linkedList ? await loadListWithItems(ctx, linkedList) : null,
       note: linkedNote,
       pot,
+      secretSanta: secretSanta
+        ? { _id: secretSanta._id, name: secretSanta.name }
+        : null,
     };
   },
 });
@@ -151,6 +166,10 @@ export const update = mutation({
       updatedBy: userId,
       updatedAt: Date.now(),
     });
+    const updated = await ctx.db.get(event._id);
+    if (updated !== null) {
+      await syncFromLinkedEvent(ctx, updated, userId);
+    }
     await recordProjectActivity(ctx, event.projectId);
     return null;
   },
@@ -190,6 +209,7 @@ export const remove = mutation({
     for (const pot of linkedPots) {
       await ctx.db.patch(pot._id, { eventId: undefined });
     }
+    await unlinkEvent(ctx, event._id);
     await ctx.db.delete(event._id);
     await track(ctx, userId, "event_deleted", { projectId: event.projectId });
     await recordProjectActivity(ctx, event.projectId);

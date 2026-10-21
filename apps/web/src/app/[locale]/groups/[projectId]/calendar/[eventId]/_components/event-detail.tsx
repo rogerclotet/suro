@@ -1,6 +1,6 @@
 "use client";
 
-import { Folders, ListTodo, NotebookText, Wallet } from "lucide-react";
+import { Folders, Gift, ListTodo, NotebookText, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useProjects } from "@/app/_state/project-state";
@@ -29,6 +29,7 @@ export default function EventDetail({
 }) {
   const tCommon = useTranslations("common");
   const tCal = useTranslations("calendar");
+  const tNav = useTranslations("nav");
   const { project } = useProjects();
   const data = useEvent(eventId);
   const files = useEventFiles(eventId);
@@ -46,10 +47,10 @@ export default function EventDetail({
     return null;
   }
 
-  const { event, list, note, pot } = data;
+  const { event, list, note, pot, secretSanta } = data;
   const canCreatePot = (project?.users.length ?? 0) >= 2;
   const hasFiles = (files?.length ?? 0) > 0 || uploading;
-  const hasExtras = Boolean(list || note || pot || hasFiles);
+  const hasExtras = Boolean(list || note || pot || secretSanta || hasFiles);
 
   return (
     <div className="space-y-6">
@@ -144,6 +145,24 @@ export default function EventDetail({
                   {pot.name !== event.name ? pot.name : tCal("potSection")}
                 </Link>
               </h2>
+            </div>
+          )}
+
+          {secretSanta !== null && (
+            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="flex items-center gap-2 font-semibold text-xl">
+                <Gift />
+                {tNav("secretSanta")}
+              </h2>
+              <Link
+                href={{
+                  pathname: "/groups/[projectId]/secret-santa",
+                  params: { projectId },
+                }}
+                className="text-primary underline"
+              >
+                {secretSanta.name}
+              </Link>
             </div>
           )}
 

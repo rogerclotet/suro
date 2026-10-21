@@ -8,6 +8,7 @@ import { CATPPUCCIN_COLOR_KEYS, getRandomColor } from "./model/colors";
 import { serveFileUrl } from "./model/fileUrls";
 import { notifyProject } from "./model/notify";
 import { requireProjectAdmin, requireProjectMember } from "./model/permissions";
+import { withdrawFromPendingDraws } from "./model/secretSantas";
 
 /** Projects (groups) the current user belongs to. Ported from getProjects. */
 export const listMine = query({
@@ -327,6 +328,7 @@ export const leave = mutation({
       .collect();
     for (const receipt of unread) await ctx.db.delete(receipt._id);
     await ctx.db.delete(membership._id);
+    await withdrawFromPendingDraws(ctx, projectId, userId);
     await notifyProject(ctx, {
       projectId,
       actorId: userId,
@@ -443,6 +445,7 @@ export const removeMember = mutation({
       .collect();
     for (const receipt of unread) await ctx.db.delete(receipt._id);
     await ctx.db.delete(membership._id);
+    await withdrawFromPendingDraws(ctx, projectId, userId);
     // Every member can read the invite token, so the removed one still holds a
     // working link and could rejoin in one tap. Issue a new one.
     await ctx.db.patch(projectId, { inviteToken: crypto.randomUUID() });

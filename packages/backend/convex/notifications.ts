@@ -39,6 +39,9 @@ async function destination(ctx: QueryCtx, row: Doc<"notifications">) {
       if (pot?.projectId !== projectId) return fallback;
       break;
     }
+    // The section page shows whichever Secret Santa is current, so its path
+    // stays valid after an archive.
+    case "secretSanta":
     case "files":
     case "members":
       break;

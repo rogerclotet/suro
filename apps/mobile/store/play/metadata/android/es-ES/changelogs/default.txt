@@ -1,1 +1,1 @@
-• Las listas se animan con suavidad: los elementos nuevos ya no parpadean al guardarse y, en la web, marcar o mover un elemento responde al instante.
+• Vuelve el amigo invisible, ahora también en la app móvil. Cualquier miembro puede organizar uno: elige quién participa, la fecha, el presupuesto y las exclusiones, y haz el sorteo. Cada participante descubre a quién le toca y puede añadir ideas de regalos que solo verá quien le haya tocado. El intercambio aparece en el calendario.

@@ -65,6 +65,16 @@ const MESSAGES: Record<string, Record<Locale, string>> = {
     ca: "Tasca assignada: {name}",
     es: "Tarea asignada: {name}",
   },
+  secret_santa_created: {
+    en: "You're taking part in the Secret Santa: {name}",
+    ca: "Participes a l'Amic Invisible: {name}",
+    es: "Participas en el Amigo Invisible: {name}",
+  },
+  secret_santa_started: {
+    en: "The Secret Santa draw has been completed",
+    ca: "S'ha realitzat el sorteig de l'Amic Invisible",
+    es: "Se ha realizado el sorteo del Amigo Invisible",
+  },
   task_due: {
     en: "Task due: {name}",
     ca: "Tasca per fer: {name}",

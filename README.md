@@ -14,7 +14,7 @@ The interface is available in Catalan, Spanish and English.
 
 ## Development
 
-This is a pnpm monorepo. `packages/backend` owns the Convex API, auth and storage; `apps/web` is the Next.js PWA and `apps/mobile` is the Expo app. `packages/domain` contains shared pure rules and `packages/design-tokens` contains shared styling values. Secret Santa is currently disabled.
+This is a pnpm monorepo. `packages/backend` owns the Convex API, auth and storage; `apps/web` is the Next.js PWA and `apps/mobile` is the Expo app. `packages/domain` contains shared pure rules and `packages/design-tokens` contains shared styling values.
 
 ```sh
 pnpm install

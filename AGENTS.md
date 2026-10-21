@@ -23,7 +23,7 @@ Both clients talk to the same Convex deployment. There is no separate server or 
 - **Tooling**: pnpm workspaces, Biome (format + lint), Vitest (jsdom for web, `convex-test` for backend), Husky + lint-staged.
 - **Analytics**: PostHog for product analytics and surveys; GlitchTip via Sentry SDKs for anonymous production errors. See `docs/error-reporting.md` for build configuration.
 
-Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadthing, Web Push, the Dexie offline layer. Secret Santa remains disabled. In-app unread activity and native push notifications run on Convex.
+Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadthing, Web Push, the Dexie offline layer. In-app unread activity and native push notifications run on Convex.
 
 ## Commands
 
@@ -45,7 +45,7 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 
 ## Backend (`packages/backend/convex`)
 
-- `schema.ts` — the tables (`users`, `projects`, `projectMembers`, `categories`, `events`, `lists`, `listItems`, `listTemplates`, `files`, `notes`, `pots`, `potMembers`, `spendings`). Migrated rows carry a `legacyId` + `by_legacyId` index (dropped after cutover).
+- `schema.ts` — the tables (`users`, `projects`, `projectMembers`, `categories`, `events`, `lists`, `listItems`, `listTemplates`, `files`, `notes`, `pots`, `potMembers`, `spendings`, `secretSantas`, `secretSantaParticipants`, `secretSantaGiftIdeas`). Migrated rows carry a `legacyId` + `by_legacyId` index (dropped after cutover).
 - `auth.ts` / `auth.config.ts` — Convex Auth (Google + Apple + Resend OTP); `afterUserCreatedOrUpdated` provisions the personal project on sign-up. `oauthProviders` tells the clients which optional providers are configured. `AppleNative.ts` is the iOS native Sign in with Apple provider (verifies the `expo-apple-authentication` identity token; the web redirect flow can't run in the app because Safari drops the OAuth state cookie on Apple's cross-site POST).
 - One file per domain (`lists.ts`, `events.ts`, `expenses.ts`, `files.ts`, `projects.ts`, `users.ts`, …) exporting public `query`/`mutation` functions — these **are** the API. Shared helpers live under `convex/model/` (`auth` → `requireUserId`, `permissions` → `requireProjectMember`, …); gate every project-scoped function with one of them.
 - `http.ts` — the public `.ics` calendar feed, gated by `projects.calendarToken` (distinct from `inviteToken`).

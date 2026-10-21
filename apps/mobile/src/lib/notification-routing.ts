@@ -33,8 +33,11 @@ export function notificationVisit(
     case "expenses":
       return { projectId, section: tab };
     case "home":
-      return child === "notes" || child === "files"
-        ? { projectId, section: child }
+      if (child === "notes" || child === "files") {
+        return { projectId, section: child };
+      }
+      return child === "secret-santa"
+        ? { projectId, section: "secretSanta" as const }
         : null;
     default:
       return null;
@@ -52,7 +55,7 @@ export function unreadCount(
       section === undefined ||
       section === receipt.section ||
       (section === "home" &&
-        ["notes", "files", "members"].includes(receipt.section));
+        ["notes", "files", "members", "secretSanta"].includes(receipt.section));
     return count + (matches ? receipt.count : 0);
   }, 0);
 }
