@@ -1,1 +1,1 @@
-• Lists animate smoothly: new items no longer flicker as they're saved, and on the web checking off or moving an item responds instantly.
+• Secret Santa is back, now in the mobile app too. Any member can organize one: choose who takes part, the date, the budget and any exclusions, then run the draw. Each participant finds out who they got and can add gift ideas that only their Secret Santa sees. The exchange shows up in the calendar.

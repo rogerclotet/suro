@@ -84,8 +84,11 @@ describe("toCanonicalSegment", () => {
 });
 
 describe("withHomeTabPrefix", () => {
-  it("nests a files/notes route under the Home tab", () => {
+  it("nests a files/notes/Secret Santa route under the Home tab", () => {
     expect(withHomeTabPrefix(`/${PID}/files`)).toBe(`/${PID}/home/files`);
+    expect(withHomeTabPrefix(`/${PID}/secret-santa`)).toBe(
+      `/${PID}/home/secret-santa`,
+    );
     expect(withHomeTabPrefix(`/${PID}/notes/abc`)).toBe(
       `/${PID}/home/notes/abc`,
     );
@@ -172,8 +175,20 @@ describe("webPathToRoute", () => {
     expect(webPathToRoute(`/groups/${PID}`)).toBe(`/${PID}/home`);
   });
 
-  it("falls back to the group home for features without a native screen", () => {
+  it("nests localized Secret Santa links under the Home tab", () => {
     expect(webPathToRoute(`/ca/grups/${PID}/amic-invisible`)).toBe(
+      `/${PID}/home/secret-santa`,
+    );
+    expect(webPathToRoute(`/es/grupos/${PID}/amigo-invisible/ideas`)).toBe(
+      `/${PID}/home/secret-santa/ideas`,
+    );
+    expect(webPathToRoute(`/ca/grups/${PID}/amic-invisible/idees`)).toBe(
+      `/${PID}/home/secret-santa/ideas`,
+    );
+  });
+
+  it("falls back to the group home for features without a native screen", () => {
+    expect(webPathToRoute(`/ca/grups/${PID}/configuracio`)).toBe(
       `/${PID}/home`,
     );
   });

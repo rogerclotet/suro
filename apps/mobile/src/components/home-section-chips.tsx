@@ -67,7 +67,7 @@ export function HomeSectionChips() {
           icon={section.icon}
           count={unreadCount(unread, pid, section.key)}
           onPress={() =>
-            openSection(section.key, `/${pid}/home/${section.key}`)
+            openSection(section.key, `/${pid}/home/${section.path}`)
           }
         />
       ))}

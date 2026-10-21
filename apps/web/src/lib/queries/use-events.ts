@@ -31,12 +31,15 @@ export function useEventsInRange(
 export type LinkedNote = { id: string; name: string; projectId: string };
 /** Linked-pot identity used by event detail navigation. */
 export type LinkedPot = { id: string; name: string; memberCount: number };
+/** The active Secret Santa whose exchange this event marks. */
+export type LinkedSecretSanta = { id: string; name: string };
 
 export type EventWithLinks = {
   event: CalendarEvent;
   list: List | null;
   note: LinkedNote | null;
   pot: LinkedPot | null;
+  secretSanta: LinkedSecretSanta | null;
 };
 
 /**
@@ -68,6 +71,9 @@ export function useEvent(eventId: string): EventWithLinks | null | undefined {
           name: data.pot.name,
           memberCount: data.pot.memberCount,
         }
+      : null,
+    secretSanta: data.secretSanta
+      ? { id: data.secretSanta._id, name: data.secretSanta.name }
       : null,
   };
 }

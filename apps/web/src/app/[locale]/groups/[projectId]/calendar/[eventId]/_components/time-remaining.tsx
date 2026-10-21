@@ -2,14 +2,14 @@
 
 import { timeRemainingParts } from "domain/events";
 import { useTranslations } from "next-intl";
-import type { Event } from "@/app/_data/event";
+import type { CalendarEvent } from "@/app/_data/event";
 import { eventTimes } from "@/lib/event-day";
 
 export default function TimeRemaining({
   event,
   className,
 }: {
-  event: Event;
+  event: Pick<CalendarEvent, "startAt" | "endAt" | "allDay">;
   className?: string;
 }) {
   const t = useTranslations("calendar");

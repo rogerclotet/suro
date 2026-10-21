@@ -11,10 +11,8 @@ const project = (id: string, name = id): Project => ({
   inviteToken: "invite",
   image: null,
   color: "blue",
-  features: { secretSanta: false },
   users: [],
   categories: [],
-  secretSantas: [],
 });
 const projects = [project("a"), project("b")];
 function Reader({ label }: { label: string }) {

@@ -8,7 +8,6 @@ import {
   HandCoins,
   Home,
   LayoutTemplateIcon,
-  LightbulbIcon,
   ListTodo,
   Users,
 } from "lucide-react";
@@ -92,24 +91,10 @@ const itemParts: MenuItemPart[] = [
     nameKey: "secretSanta",
     pathPart: "secret-santa",
     icon: <GiftIcon />,
-    children: [
-      {
-        nameKey: "ideas",
-        pathPart: "ideas",
-        icon: <LightbulbIcon />,
-        isActive: (project) =>
-          project.secretSantas.some(
-            (s) => s.assignmentsDone && s.datetime > new Date(),
-          ),
-      },
-    ],
   },
 ];
 
 function isItemAvailable(item: MenuItemPart, project: Project) {
-  if (item.pathPart === "secret-santa" && !project.features.secretSanta) {
-    return false;
-  }
   return item.isActive === undefined || item.isActive(project);
 }
 
@@ -140,19 +125,8 @@ export function useMenuItems(): MenuItem[] {
   const urlProjectId = params?.projectId;
   const effectiveProjectId = selectedProject?.id ?? urlProjectId;
 
-  const enabledFeatureItemParts = useMemo(() => {
-    return itemParts.filter((item) => {
-      switch (item.pathPart) {
-        case "secret-santa":
-          return selectedProject?.features.secretSanta ?? false;
-        default:
-          return true;
-      }
-    });
-  }, [selectedProject]);
-
   const activeItemParts = useMemo(() => {
-    return enabledFeatureItemParts
+    return itemParts
       .filter((item) => {
         if (selectedProject === null) {
           return item.isActive === undefined;
@@ -176,7 +150,7 @@ export function useMenuItems(): MenuItem[] {
             children?.length && children.length > 0 ? children : undefined,
         };
       });
-  }, [enabledFeatureItemParts, selectedProject]);
+  }, [selectedProject]);
 
   const items = useMemo(() => {
     return activeItemParts.map(

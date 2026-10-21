@@ -23,9 +23,7 @@ const project: Project = {
   inviteToken: "invite",
   image: null,
   color: "blue",
-  features: { secretSanta: false },
   categories: [],
-  secretSantas: [],
   users: ["admin", "member"].map((id) => ({
     user: {
       id,

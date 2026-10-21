@@ -26,12 +26,15 @@ export function DateField({
   disabled,
   className,
   placeholder,
+  clearable = true,
 }: {
   value: Date | null;
   onChange: (date: Date | null) => void;
   disabled?: boolean;
   className?: string;
   placeholder?: string;
+  /** Offer a button that resets the value to `null`. */
+  clearable?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("lists");
@@ -68,7 +71,7 @@ export function DateField({
             )}
           </Button>
         </PopoverTrigger>
-        {value && (
+        {clearable && value && (
           <Button
             type="button"
             variant="ghost"

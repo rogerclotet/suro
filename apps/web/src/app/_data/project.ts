@@ -30,10 +30,8 @@ export type Project = {
   inviteToken: string;
   image: string | null;
   color: string;
-  features: { secretSanta: boolean };
   users: ProjectMember[];
   categories: ProjectCategory[];
-  secretSantas: { assignmentsDone: boolean; datetime: Date }[];
 };
 
 /** Map a Convex `listMineDetailed` row to the app's `Project` shape. */
@@ -45,8 +43,6 @@ export function adaptProject(p: ConvexProjectDetailed): Project {
     inviteToken: p.inviteToken,
     image: p.image ?? null,
     color: p.color,
-    // Secret Santa is disabled during the Convex cutover.
-    features: { secretSanta: false },
     users: p.members.map((m) => ({
       user: {
         id: m._id,
@@ -61,6 +57,5 @@ export function adaptProject(p: ConvexProjectDetailed): Project {
       name: c.name,
       projectId: c.projectId,
     })),
-    secretSantas: [],
   };
 }

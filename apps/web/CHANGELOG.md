@@ -6,6 +6,20 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.34.0] — 2026-10-21
+
+### ca
+
+- [feature] Torna l'amic invisible, ara també a l'app mòbil. Qualsevol membre en pot organitzar un: tria qui hi participa, la data, el pressupost i les exclusions, i fes el sorteig. Cada participant descobreix a qui li toca i pot afegir idees de regals que només veurà qui li hagi tocat. L'intercanvi apareix al calendari.
+
+### es
+
+- [feature] Vuelve el amigo invisible, ahora también en la app móvil. Cualquier miembro puede organizar uno: elige quién participa, la fecha, el presupuesto y las exclusiones, y haz el sorteo. Cada participante descubre a quién le toca y puede añadir ideas de regalos que solo verá quien le haya tocado. El intercambio aparece en el calendario.
+
+### en
+
+- [feature] Secret Santa is back, now in the mobile app too. Any member can organize one: choose who takes part, the date, the budget and any exclusions, then run the draw. Each participant finds out who they got and can add gift ideas that only their Secret Santa sees. The exchange shows up in the calendar.
+
 ## [1.33.2] — 2026-10-17
 
 ### ca
