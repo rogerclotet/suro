@@ -34,7 +34,7 @@ export default function EventPreview({
           params: { projectId: event.projectId, eventId: event.id },
         } as never
       }
-      className="flex items-stretch gap-3 px-1 py-3 transition-colors hover:bg-border/40"
+      className="flex items-stretch gap-3 px-1 py-3 transition-colors hover:bg-accent"
     >
       <div className={cn("w-1 shrink-0 rounded-full", accentClass)} />
       <div className="min-w-0 flex-1">

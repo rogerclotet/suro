@@ -1,1 +1,1 @@
-• Secret Santa is back, now in the mobile app too. Any member can organize one: choose who takes part, the date, the budget and any exclusions, then run the draw. Each participant finds out who they got and can add gift ideas that only their Secret Santa sees. The exchange shows up in the calendar.
+• Hover and selected states have more contrast, especially in dark mode: menus, tabs and list rows now clearly show the active item.

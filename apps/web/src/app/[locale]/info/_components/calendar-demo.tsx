@@ -52,7 +52,7 @@ export default function CalendarDemo() {
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex w-full items-center gap-2 rounded-md py-1 text-left text-sm transition-colors hover:bg-muted/50"
+          className="flex w-full items-center gap-2 rounded-md py-1 text-left text-sm transition-colors hover:bg-accent"
           aria-expanded={open}
         >
           <ChevronRight
@@ -71,7 +71,7 @@ export default function CalendarDemo() {
             {items.map((it) => (
               <li
                 key={it.id}
-                className="flex flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
+                className="flex flex-row items-start gap-5 rounded-lg p-2 hover:bg-accent"
               >
                 <div className="flex flex-row items-center">
                   <Checkbox

@@ -74,7 +74,7 @@ export default function ListItem(props: {
       }}
     >
       <div
-        className="flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
+        className="flex cursor-pointer touch-manipulation flex-row items-start gap-5 rounded-lg p-2 hover:bg-accent"
         ref={setNodeRef}
         style={style}
       >

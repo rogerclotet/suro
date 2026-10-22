@@ -109,7 +109,7 @@ export default function ListsDemo() {
                   {categoryItems.map((it) => (
                     <li
                       key={it.id}
-                      className="flex flex-row items-start gap-5 rounded-lg p-2 hover:bg-muted"
+                      className="flex flex-row items-start gap-5 rounded-lg p-2 hover:bg-accent"
                     >
                       <div className="flex flex-row items-center">
                         <Checkbox

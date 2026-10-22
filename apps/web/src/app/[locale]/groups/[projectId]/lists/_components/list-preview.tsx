@@ -39,7 +39,7 @@ export function ListPreviewRow({ list }: { list: ListPreviewData }) {
         pathname: "/groups/[projectId]/lists/[listId]",
         params: { projectId: list.projectId, listId: list.id },
       }}
-      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-border/50"
+      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent"
     >
       <div className="min-w-0 flex-1">
         {/* Done lists recede: muted name, faded ring. */}
