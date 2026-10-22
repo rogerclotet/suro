@@ -1,9 +1,9 @@
 # Manual store re-submission for a commit that already built on main. The
-# Mobile release workflow waits for EAS builds and submits automatically; use
-# this only to re-submit a specific commit (e.g. after a transient store error).
+# Release workflow waits for EAS builds and submits automatically; use this
+# only to re-submit a specific commit (e.g. after a transient store error).
 #
-# commit_sha — the push that produced the EAS build artifact (Mobile release
-# run lookup).
+# commit_sha — the full SHA of the push that produced the EAS build artifacts
+# (suro-<platform>-<sha>, kept 14 days).
 # ios_skip_upload — the binary already reached App Store Connect and only the
 # metadata push / review submission needs retrying.
 # checkout_sha — optional ref for release notes / fastlane metadata (defaults to
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: Commit SHA on main (from the Mobile release run that triggered EAS builds)
+        description: Full commit SHA on main (from the Release run that triggered EAS builds)
         required: true
         type: string
       checkout_sha:
@@ -52,69 +52,43 @@ env:
   CHECKOUT_SHA: ${{ inputs.checkout_sha != '' && inputs.checkout_sha || inputs.commit_sha }}
 
 jobs:
-  find_ci_run:
+  find_build_artifacts:
     runs-on: ubuntu-latest
     outputs:
-      run_id: ${{ steps.find.outputs.run_id }}
+      android_run_id: ${{ steps.find.outputs.android_run_id }}
+      ios_run_id: ${{ steps.find.outputs.ios_run_id }}
     steps:
+      # A build job uploads its artifact only after the EAS build succeeded, so
+      # the artifact alone identifies a usable run, whichever workflow made it.
       - uses: actions/github-script@v9
         id: find
+        env:
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+          PLATFORM: ${{ inputs.platform }}
         with:
           script: |
-            const sha = '${{ inputs.commit_sha }}';
-            const platform = '${{ inputs.platform }}';
-            const buildJobNames =
-              platform === 'ios'
-                ? ['mobile_release / mobile_eas_build_ios']
-                : platform === 'android'
-                  ? ['mobile_release / mobile_eas_build_android']
-                  : [
-                      'mobile_release / mobile_eas_build_android',
-                      'mobile_release / mobile_eas_build_ios',
-                    ];
+            const sha = process.env.COMMIT_SHA;
+            const platforms =
+              process.env.PLATFORM === 'both' ? ['android', 'ios'] : [process.env.PLATFORM];
 
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'mobile-release.yml',
-              head_sha: sha,
-              event: 'push',
-              per_page: 5,
-            });
-
-            async function runHasSuccessfulBuild(runId) {
-              const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+            for (const platform of platforms) {
+              const name = `suro-${platform}-${sha}`;
+              const { data } = await github.rest.actions.listArtifactsForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                run_id: runId,
+                name,
               });
-              return buildJobNames.every((jobName) =>
-                jobs.jobs.some(
-                  (job) => job.name === jobName && job.conclusion === 'success',
-                ),
-              );
-            }
-
-            for (const run of data.workflow_runs) {
-              if (run.conclusion === 'success') {
-                core.setOutput('run_id', String(run.id));
+              const artifact = data.artifacts.find((entry) => !entry.expired);
+              if (!artifact) {
+                core.setFailed(`No unexpired ${name} artifact; is ${sha} the full SHA of a release push from the last 14 days?`);
                 return;
               }
-              if (run.conclusion === 'failure' && (await runHasSuccessfulBuild(run.id))) {
-                core.info(
-                  `Using CI run ${run.id} for ${sha}: overall failure, but required build job(s) succeeded`,
-                );
-                core.setOutput('run_id', String(run.id));
-                return;
-              }
+              core.info(`Using ${name} from run ${artifact.workflow_run.id}`);
+              core.setOutput(`${platform}_run_id`, String(artifact.workflow_run.id));
             }
-
-            core.setFailed(
-              `No Mobile release run with a successful store build found for commit ${sha}`,
-            );
 
   submit_android:
-    needs: find_ci_run
+    needs: find_build_artifacts
     if: inputs.platform == 'android' || inputs.platform == 'both'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -126,7 +100,7 @@ jobs:
         with:
           name: suro-android-${{ inputs.commit_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ needs.find_ci_run.outputs.run_id }}
+          run-id: ${{ needs.find_build_artifacts.outputs.android_run_id }}
           path: apps/mobile/build
       - uses: ./.github/actions/mobile-submit-android
         with:
@@ -135,7 +109,7 @@ jobs:
           redownload-if-missing: "true"
 
   submit_ios:
-    needs: find_ci_run
+    needs: find_build_artifacts
     if: inputs.platform == 'ios' || inputs.platform == 'both'
     runs-on: ubuntu-latest
     # Includes waiting for Apple to process the build before submitting it.
@@ -148,7 +122,7 @@ jobs:
         with:
           name: suro-ios-${{ inputs.commit_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ needs.find_ci_run.outputs.run_id }}
+          run-id: ${{ needs.find_build_artifacts.outputs.ios_run_id }}
           path: apps/mobile/build
       - uses: ./.github/actions/mobile-submit-ios
         with:

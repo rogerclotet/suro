@@ -1,0 +1,229 @@
+# Release on pushes to main that bump the root package.json version (with a
+# matching CHANGELOG entry), or via Actions → Release → Run workflow (skips the
+# gate; main only).
+#
+# Publishes the GitHub release (tag v<version>, notes from the CHANGELOG entry)
+# and ships both mobile apps, end to end with no console visit: EAS builds both
+# binaries, Android goes straight to the Play production track at 100%, and iOS
+# uploads the build, pushes the listing text, then submits the version for
+# review with automatic release on approval. Apple screenshot re-upload runs
+# when store/apple/screenshots changed in the same push, or when the manual run
+# opts in.
+#
+# Every release bumps package.json, so other pushes don't start a run. GitHub
+# ignores path filters on pushes of more than 300 changed files; if a release
+# push that large doesn't start one, use Run workflow.
+#
+# Play listing text/images ship separately via play-listing.yml; both share the
+# play-console concurrency group so fastlane never overlaps.
+# For re-submitting an already-built commit, use mobile-submit.yml instead.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      push_screenshots:
+        description: Re-upload the committed App Store screenshots (slow)
+        required: false
+        type: boolean
+        default: false
+
+# Only collapses runs of the same commit (a manual run started while the push
+# run is still going).
+concurrency:
+  group: release-${{ github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  EXPO_APPLE_TEAM_ID: ${{ vars.EXPO_APPLE_TEAM_ID != '' && vars.EXPO_APPLE_TEAM_ID || '2XUF926TS6' }}
+
+jobs:
+  release_gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.gate.outputs.should_build }}
+      push_screenshots: ${{ steps.screenshots.outputs.push_screenshots }}
+    steps:
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          echo "Releases are only allowed on main (got $REF)." >&2
+          exit 1
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Decide whether this push is a release
+        id: gate
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            echo "reason=Manual workflow_dispatch (gate skipped) on $GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node apps/mobile/scripts/should-build-native.mjs
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
+        if: github.event_name == 'push' && steps.gate.outputs.should_build == 'true'
+      - name: Decide whether to re-upload App Store screenshots
+        id: screenshots
+        env:
+          REQUESTED: ${{ inputs.push_screenshots }}
+          CHANGED: ${{ steps.changes.outputs.apple_screenshots }}
+        run: |
+          # Manual runs use the checkbox; pushes re-upload when the screenshots changed.
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            value="$REQUESTED"
+          else
+            value="$CHANGED"
+          fi
+          echo "push_screenshots=${value:-false}" >> "$GITHUB_OUTPUT"
+
+  quality:
+    needs: release_gate
+    if: needs.release_gate.outputs.should_release == 'true'
+    uses: ./.github/workflows/reusable-quality-checks.yml
+
+  github_release:
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # A no-op on manual runs (no previous commit to compare) and when the
+      # tag already exists, so re-running is safe.
+      - name: Tag and publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: node scripts/publish-release.mjs
+
+  mobile_eas_build_android:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: mobile...
+      - name: Trigger EAS Android build
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          mkdir -p build
+          pnpm exec eas build --platform android --profile production --non-interactive --json --no-wait > build/eas-android.json
+          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-android.json)
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+          echo "Triggered EAS android build $BUILD_ID"
+      - name: Wait for EAS Android build and download
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh android build/eas-android.json build/suro-release.aab "$EXPECTED_VERSION"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: suro-android-${{ github.sha }}
+          path: |
+            apps/mobile/build/eas-android.json
+            apps/mobile/build/suro-release.aab
+          retention-days: 14
+
+  mobile_eas_build_ios:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: mobile...
+      - name: Trigger EAS iOS build
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          mkdir -p build
+          pnpm exec eas build --platform ios --profile production --non-interactive --json --no-wait > build/eas-ios.json
+          BUILD_ID=$(jq -r '(if type=="array" then .[0] else . end) | .id' build/eas-ios.json)
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then echo "No build id in EAS output" >&2; exit 1; fi
+          echo "Triggered EAS ios build $BUILD_ID"
+      - name: Wait for EAS iOS build and download
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          EXPECTED_VERSION=$(jq -r .version ../../package.json)
+          bash scripts/ci-download-eas-build.sh ios build/eas-ios.json build/suro-release.ipa "$EXPECTED_VERSION"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: suro-ios-${{ github.sha }}
+          path: |
+            apps/mobile/build/eas-ios.json
+            apps/mobile/build/ios-build-number.txt
+            apps/mobile/build/suro-release.ipa
+          retention-days: 14
+
+  mobile_play_store_submit:
+    needs: mobile_eas_build_android
+    # Shared with play-listing.yml so listing and binary submits never collide.
+    concurrency:
+      group: play-console
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: suro-android-${{ github.sha }}
+          path: apps/mobile/build
+      - uses: ./.github/actions/mobile-submit-android
+        with:
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          play-service-account-json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+  mobile_app_store_submit:
+    needs: [release_gate, mobile_eas_build_ios]
+    # Two releases merged close together submit one after the other instead
+    # of racing on the same App Store version.
+    concurrency:
+      group: app-store-connect
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    # Submitting for review waits for Apple to finish processing the binary,
+    # which usually takes 5-20 minutes after the upload.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: suro-ios-${{ github.sha }}
+          path: apps/mobile/build
+      - uses: ./.github/actions/mobile-submit-ios
+        with:
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+          expo-apple-team-id: ${{ env.EXPO_APPLE_TEAM_ID }}
+          app-store-connect-api-key-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          app-store-connect-api-key-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          app-store-connect-api-key-issuer-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          push-screenshots: ${{ needs.release_gate.outputs.push_screenshots }}

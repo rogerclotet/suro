@@ -21,67 +21,21 @@ on:
 permissions:
   contents: read
 
-env:
-  PREVIEW_LABEL: deploy-preview
-
 jobs:
-  resolve:
-    runs-on: ubuntu-latest
-    outputs:
-      pr_number: ${{ steps.resolve.outputs.pr_number }}
-      teardown: ${{ steps.resolve.outputs.teardown }}
-    steps:
-      - uses: actions/github-script@v9
-        id: resolve
-        with:
-          script: |
-            const label = process.env.PREVIEW_LABEL;
-
-            if (context.eventName === 'workflow_dispatch') {
-              core.setOutput('pr_number', String('${{ inputs.pr_number }}'));
-              core.setOutput('teardown', 'true');
-              return;
-            }
-
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-
-              if (context.payload.action === 'unlabeled') {
-                if (context.payload.label?.name !== label) {
-                  core.setOutput('teardown', 'false');
-                  return;
-                }
-                core.setOutput('pr_number', String(pr.number));
-                core.setOutput('teardown', 'true');
-                return;
-              }
-
-              if (context.payload.action === 'closed') {
-                if (!pr.merged) {
-                  core.setOutput('teardown', 'false');
-                  return;
-                }
-                const hadLabel = pr.labels.some((entry) => entry.name === label);
-                if (!hadLabel) {
-                  core.setOutput('teardown', 'false');
-                  return;
-                }
-                core.setOutput('pr_number', String(pr.number));
-                core.setOutput('teardown', 'true');
-              }
-            }
-        env:
-          PREVIEW_LABEL: ${{ env.PREVIEW_LABEL }}
-
   stop_preview:
-    needs: resolve
-    if: needs.resolve.outputs.teardown == 'true'
+    # Other label removals and PRs closed without a preview skip without a
+    # runner. `env` isn't available in a job `if`, hence the literal label.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'deploy-preview') ||
+      (github.event.action == 'closed' && github.event.pull_request.merged &&
+       contains(github.event.pull_request.labels.*.name, 'deploy-preview'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Tear down preview environment
         env:
-          CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
+          CI_MERGE_REQUEST_IID: ${{ github.event.pull_request.number || inputs.pr_number }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           SSH_IP: ${{ secrets.SSH_IP }}

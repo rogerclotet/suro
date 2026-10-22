@@ -1,14 +1,17 @@
 # Production web + Convex deploy on pushes to main when web and/or backend
 # paths change. Quality checks run here so deploys stay self-contained.
 #
-# Web image build + SSH deploy, and Convex deploy, live in
-# reusable-web-deploy.yml (backend finishes before web when both change).
+# The trigger paths are everything the web image is built from, so every run
+# builds and ships the image. Convex deploys only when backend paths changed,
+# and finishes before the web deploy so the new frontend lands on an
+# up-to-date backend.
 
 name: Web and backend deploy
 
 on:
   push:
     branches: [main]
+    # Keep in sync with the `web` filter in .github/actions/detect-path-changes.
     paths:
       - "apps/web/**"
       - "packages/backend/**"
@@ -23,36 +26,128 @@ on:
       - ".dockerignore"
       - "compose.yaml"
 
+# Deploys queue instead of running side by side, so the newest commit always
+# deploys last. GitHub keeps only the newest waiting run and cancels older
+# waiting ones; the backend check diffs against the last successful deploy, so
+# Convex changes from a cancelled run ship with the run that replaced it.
 concurrency:
-  group: deploy-web-${{ github.sha }}
-  cancel-in-progress: true
+  group: production-deploy
+  cancel-in-progress: false
 
 permissions:
   contents: read
-  packages: write
+
+env:
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
-  detect_path_changes:
+  detect_backend_changes:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     outputs:
-      web: ${{ steps.changes.outputs.web }}
       backend: ${{ steps.changes.outputs.backend }}
     steps:
       - uses: actions/checkout@v7
+      - name: Find the last successful deploy
+        id: last_deploy
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-web.yml',
+              branch: 'main',
+              status: 'success',
+              per_page: 1,
+            });
+            // Empty falls back to the push's previous commit.
+            core.setOutput('sha', data.workflow_runs[0]?.head_sha ?? '');
       - uses: ./.github/actions/detect-path-changes
         id: changes
+        with:
+          base: ${{ steps.last_deploy.outputs.sha }}
 
   quality:
     uses: ./.github/workflows/reusable-quality-checks.yml
 
-  web_and_backend_deploy:
-    needs: [detect_path_changes, quality]
+  web_docker_build_push:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}
+            ${{ env.REGISTRY_IMAGE }}:latest
+          build-args: |
+            SKIP_ENV_VALIDATION=1
+            NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+            NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+            NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_SENTRY_ENVIRONMENT=production
+            SURO_COMMIT_SHA=${{ github.sha }}
+            SENTRY_URL=${{ secrets.SENTRY_URL }}
+            SENTRY_ORG=${{ secrets.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+  backend_convex_deploy:
+    needs: [detect_backend_changes, quality]
+    if: needs.detect_backend_changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: backend...
+      - name: Deploy Convex backend
+        working-directory: packages/backend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: npx convex deploy
+
+  web_deploy_production:
+    needs: [web_docker_build_push, backend_convex_deploy]
+    # Runs after the Convex deploy, or without it when the backend didn't change.
     if: |
-      needs.quality.result == 'success' &&
-      (needs.detect_path_changes.outputs.web == 'true' || needs.detect_path_changes.outputs.backend == 'true')
-    uses: ./.github/workflows/reusable-web-deploy.yml
-    with:
-      web_changed: ${{ needs.detect_path_changes.outputs.web }}
-      backend_changed: ${{ needs.detect_path_changes.outputs.backend }}
-      commit_sha: ${{ github.sha }}
-    secrets: inherit
+      always() &&
+      needs.web_docker_build_push.result == 'success' &&
+      (needs.backend_convex_deploy.result == 'success' || needs.backend_convex_deploy.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Deploy production web
+        env:
+          CI_COMMIT_SHA: ${{ github.sha }}
+          CI_REGISTRY: ghcr.io
+          CI_REGISTRY_USER: ${{ github.repository_owner }}
+          CI_REGISTRY_PASSWORD: ${{ secrets.GHCR_PULL_TOKEN }}
+          CI_REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_IP: ${{ secrets.SSH_IP }}
+          SSH_PROJECT_DIRECTORY: ${{ secrets.SSH_PROJECT_DIRECTORY }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends sshpass openssh-client
+          chmod +x apps/web/scripts/deploy.sh
+          apps/web/scripts/deploy.sh

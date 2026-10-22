@@ -1,10 +1,9 @@
-# CI checks for Suro: lint/typecheck/test on every PR and main push, a Next.js
-# compile-check on web-affecting PRs, and GitHub release tagging when the root
-# version bumps on main.
+# CI checks for Suro: lint/typecheck/test on every PR and main push, plus a
+# Next.js compile-check on web-affecting PRs.
 #
 # Production deploys live in sibling workflows:
 #   deploy-web.yml      — web image + Convex (path-gated)
-#   mobile-release.yml  — EAS builds + store submit (release-gated)
+#   release.yml         — GitHub release + EAS builds + store submit (version bump)
 #   play-listing.yml    — Play Store listing text/images
 #   preview-deploy.yml / preview-teardown.yml — ephemeral PR previews
 #   mobile-submit.yml   — manual store re-submit
@@ -28,48 +27,27 @@ permissions:
   contents: read
 
 jobs:
-  detect_path_changes:
-    runs-on: ubuntu-latest
-    outputs:
-      web: ${{ steps.changes.outputs.web }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/detect-path-changes
-        id: changes
-
+  # The ruleset requires this check by its name, `quality / repo_quality_checks`.
   quality:
     uses: ./.github/workflows/reusable-quality-checks.yml
 
   web_pr_build:
-    needs: detect_path_changes
-    if: github.event_name == 'pull_request' && needs.detect_path_changes.outputs.web == 'true'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup-node-pnpm
+      - uses: ./.github/actions/detect-path-changes
+        id: changes
+      # PRs that don't touch the web app pass without building.
+      - if: steps.changes.outputs.web == 'true'
+        uses: ./.github/actions/setup-node-pnpm
         with:
           install-filter: web...
       - name: Next.js production build (compile check)
+        if: steps.changes.outputs.web == 'true'
         env:
           SKIP_ENV_VALIDATION: "1"
           NEXT_TELEMETRY_DISABLED: "1"
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ""
         run: pnpm run build
-
-  release_tag:
-    needs: quality
-    if: github.event_name == 'push' && needs.quality.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Tag and publish a GitHub release when the version changed
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BEFORE_SHA: ${{ github.event.before }}
-          AFTER_SHA: ${{ github.sha }}
-        run: node scripts/publish-release.mjs

@@ -28,10 +28,10 @@ Native OAuth redirects use the `suro://` scheme. iOS Apple sign-in uses `AppleNa
 
 ## Builds (local)
 
-Build locally with the scripts below, or let CI do it: on `main`, a version bump
-plus native or shared-domain/design-token changes trigger parallel EAS **cloud** builds that wait for
-completion and submit to the stores automatically — see the root `AGENTS.md` →
-Deploys and `.github/workflows/mobile-release.yml`. The local scripts are EAS **local**
+Build locally with the scripts below, or let CI do it: on `main`, every version
+bump triggers parallel EAS **cloud** builds that wait for completion and submit
+to the stores automatically — see the root `AGENTS.md` → Deploys and
+`.github/workflows/release.yml`. The local scripts are EAS **local**
 builds signed with the EAS-managed credentials; log in once with `eas login`
 (eas-cli is a devDependency, so the scripts resolve it from the workspace).
 
