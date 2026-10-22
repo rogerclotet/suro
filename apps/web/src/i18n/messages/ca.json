@@ -805,7 +805,11 @@
     "ideasUnavailable": "Les idees de regals són per als participants de l'amic invisible actual del grup.",
     "backToSecretSanta": "Anar a l'amic invisible",
     "ideaSaveError": "No s'ha pogut desar la idea, torna-ho a provar més tard",
-    "ideaDeleteError": "No s'ha pogut eliminar la idea, torna-ho a provar més tard"
+    "ideaDeleteError": "No s'ha pogut eliminar la idea, torna-ho a provar més tard",
+    "myIdeasSummary": "{count, plural, =0 {Afegeix idees per a qui et toqui} one {# idea, només la veurà qui et toqui} other {# idees, només les veurà qui et toqui}}",
+    "drawHint": "Quan hi siguin tots, fes el sorteig. Cada participant rebrà una notificació i descobrirà a qui ha de fer el regal.",
+    "drawBlockedByExclusions": "Cap sorteig compleix aquestes exclusions. Elimina'n una per poder fer el sorteig.",
+    "exchangePassedHint": "La data de l'intercanvi ja ha passat. Quan acabeu, arxiva aquest amic invisible des del menú perquè el grup en pugui començar un de nou."
   },
   "invitation": {
     "invalidTitle": "Invitació invàlida",

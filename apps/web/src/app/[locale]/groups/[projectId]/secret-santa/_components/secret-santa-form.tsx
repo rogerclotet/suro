@@ -234,7 +234,9 @@ export default function SecretSantaForm({
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>{t("participants")}</FieldLabel>
+            <FieldLabel>
+              {t("participants")} ({field.value.length}/{members.length})
+            </FieldLabel>
             {participantsLocked && (
               <FieldDescription>{t("participantsLocked")}</FieldDescription>
             )}
@@ -254,7 +256,9 @@ export default function SecretSantaForm({
                     }
                   />
                   <UserAvatar user={user} className="h-6 w-6 text-xs" />
-                  <Label htmlFor={`participant-${user.id}`}>{user.name}</Label>
+                  <Label htmlFor={`participant-${user.id}`}>
+                    {user.name ?? t("unnamedMember")}
+                  </Label>
                 </div>
               ))}
               <FieldError errors={[fieldState.error]} />

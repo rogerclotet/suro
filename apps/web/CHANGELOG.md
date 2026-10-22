@@ -6,6 +6,26 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.35.0] — 2026-10-22
+
+### ca
+
+- [improvement] L'amic invisible estrena disseny a l'app mòbil: els detalls d'un cop d'ull, una targeta de regal per descobrir a qui et toca, accés directe a les teves idees i un sorteig més clar per a qui l'organitza.
+- [fix] El sorteig ja no queda bloquejat quan algú marxa: s'eliminen les exclusions que el farien impossible, i qui l'organitza veu per què no es pot fer.
+- [fix] Editar l'amic invisible des del menú d'opcions ara funciona a l'iPhone, i al web les idees de regal mostren tota la descripció i l'enllaç.
+
+### es
+
+- [improvement] El amigo invisible estrena diseño en la app móvil: los detalles de un vistazo, una tarjeta para descubrir a quién te toca, acceso directo a tus ideas y un sorteo más claro para quien lo organiza.
+- [fix] El sorteo ya no se bloquea cuando alguien se va: se eliminan las exclusiones que lo harían imposible, y quien lo organiza ve el motivo.
+- [fix] Editar el amigo invisible desde el menú de opciones ya funciona en el iPhone, y en la web las ideas de regalo muestran toda la descripción y el enlace.
+
+### en
+
+- [improvement] Secret Santa has a fresh look in the mobile app: the key details at a glance, a gift card to flip for your match, a shortcut to your gift ideas and a clearer draw step for the organizer.
+- [fix] The draw no longer gets stuck when someone leaves: exclusions that would make it impossible are removed, and the organizer sees why the draw is blocked.
+- [fix] Editing a Secret Santa from the options menu now works on iPhone, and on the web gift ideas show their whole description and link.
+
 ## [1.34.0] — 2026-10-21
 
 ### ca

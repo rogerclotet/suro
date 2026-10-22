@@ -83,6 +83,10 @@ function HeaderActionButton({
  * `unstable_headerRightItems`, with the actions to the left of the "+". On
  * Android the create affordance is the `Fab`, so only the secondary actions go
  * in `headerRight`.
+ *
+ * `setOptions` merges, so a screen whose actions come and go (e.g. after losing
+ * organizer rights) gets an explicit empty value rather than an omitted key,
+ * which would leave the previous buttons in place.
  */
 export function headerCreateAction(
   create?: CreateAction,
@@ -90,7 +94,7 @@ export function headerCreateAction(
 ) {
   if (Platform.OS !== "ios") {
     if (actions.length === 0) {
-      return {};
+      return { headerRight: undefined };
     }
     return {
       headerRight: () => (

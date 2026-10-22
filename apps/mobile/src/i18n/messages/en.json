@@ -738,7 +738,19 @@
     "descriptionPlaceholder": "Description (optional)",
     "budgetHint": "Whole euros. Leave the maximum empty to skip the suggested budget.",
     "budgetMinPlaceholder": "Minimum €",
-    "budgetMaxPlaceholder": "Maximum €"
+    "budgetMaxPlaceholder": "Maximum €",
+    "myIdeasSummary": "{count, plural, =0 {Add ideas for whoever draws you} one {# idea, only whoever draws you sees it} other {# ideas, only whoever draws you sees them}}",
+    "participantsCount": "{count, plural, one {# participant} other {# participants}}",
+    "drawHint": "When everyone's in, run the draw. Each participant gets a notification and finds out who they give a gift to.",
+    "drawBlockedByExclusions": "No draw fits these exclusions. Remove one to run the draw.",
+    "drawRunning": "Drawing…",
+    "howItWorks": "How it works",
+    "emptyStepDetails": "Choose the date, the budget and who takes part.",
+    "emptyStepIdeas": "Everyone adds gift ideas for whoever draws them.",
+    "emptyStepDraw": "Run the draw: each person finds out who they give to, and nobody else does.",
+    "exclusionSelected": "{count} of {max} selected",
+    "exchangePassedHint": "The exchange date has passed. When you're done, archive this Secret Santa from the menu so the group can start a new one.",
+    "drawPanelTitle": "Ready for the draw?"
   },
   "invitation": {
     "invalidTitle": "Invalid invitation",

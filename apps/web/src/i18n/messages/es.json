@@ -805,7 +805,11 @@
     "ideasUnavailable": "Las ideas de regalos son para los participantes del amigo invisible actual del grupo.",
     "backToSecretSanta": "Ir al amigo invisible",
     "ideaSaveError": "No se ha podido guardar la idea, vuelve a intentarlo más tarde",
-    "ideaDeleteError": "No se ha podido eliminar la idea, vuelve a intentarlo más tarde"
+    "ideaDeleteError": "No se ha podido eliminar la idea, vuelve a intentarlo más tarde",
+    "myIdeasSummary": "{count, plural, =0 {Añade ideas para quien te toque} one {# idea, solo la verá quien te toque} other {# ideas, solo las verá quien te toque}}",
+    "drawHint": "Cuando estén todos, haz el sorteo. Cada participante recibirá una notificación y descubrirá a quién tiene que hacer el regalo.",
+    "drawBlockedByExclusions": "Ningún sorteo cumple estas exclusiones. Elimina alguna para poder hacer el sorteo.",
+    "exchangePassedHint": "La fecha del intercambio ya ha pasado. Cuando terminéis, archiva este amigo invisible desde el menú para que el grupo pueda empezar uno nuevo."
   },
   "invitation": {
     "invalidTitle": "Invitación no válida",

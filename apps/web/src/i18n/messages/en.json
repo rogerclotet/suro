@@ -805,7 +805,11 @@
     "ideasUnavailable": "Gift ideas are for participants in the group's current Secret Santa.",
     "backToSecretSanta": "Go to Secret Santa",
     "ideaSaveError": "Could not save the idea, please try again later",
-    "ideaDeleteError": "Could not delete the idea, please try again later"
+    "ideaDeleteError": "Could not delete the idea, please try again later",
+    "myIdeasSummary": "{count, plural, =0 {Add ideas for whoever draws you} one {# idea, only whoever draws you sees it} other {# ideas, only whoever draws you sees them}}",
+    "drawHint": "When everyone's in, run the draw. Each participant gets a notification and finds out who they give a gift to.",
+    "drawBlockedByExclusions": "No draw fits these exclusions. Remove one to run the draw.",
+    "exchangePassedHint": "The exchange date has passed. When you're done, archive this Secret Santa from the menu so the group can start a new one."
   },
   "invitation": {
     "invalidTitle": "Invalid invitation",

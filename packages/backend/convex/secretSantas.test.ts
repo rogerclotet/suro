@@ -439,6 +439,25 @@ describe("membership changes", () => {
     expect(ideas).toEqual([]);
   });
 
+  it("drops exclusions that would block the draw once fewer take part", async () => {
+    const ctx = await setup();
+    const secretSantaId = await createSecretSanta(ctx);
+    await ctx.anna.mutation(api.secretSantas.addExclusion, {
+      secretSantaId,
+      userIds: [ctx.annaId, ctx.bernatId],
+    });
+    await ctx.carla.mutation(api.projects.leave, {
+      projectId: ctx.projectId,
+    });
+
+    const current = await ctx.anna.query(api.secretSantas.current, {
+      projectId: ctx.projectId,
+    });
+    expect(current?.participants).toHaveLength(3);
+    expect(current?.exclusions).toEqual([]);
+    await ctx.anna.mutation(api.secretSantas.draw, { secretSantaId });
+  });
+
   it("keeps a leaving member in a completed draw", async () => {
     const ctx = await setup();
     const secretSantaId = await createSecretSanta(ctx);

@@ -1,1 +1,3 @@
-• Torna l'amic invisible, ara també a l'app mòbil. Qualsevol membre en pot organitzar un: tria qui hi participa, la data, el pressupost i les exclusions, i fes el sorteig. Cada participant descobreix a qui li toca i pot afegir idees de regals que només veurà qui li hagi tocat. L'intercanvi apareix al calendari.
+• L'amic invisible estrena disseny a l'app mòbil: els detalls d'un cop d'ull, una targeta de regal per descobrir a qui et toca, accés directe a les teves idees i un sorteig més clar per a qui l'organitza.
+• El sorteig ja no queda bloquejat quan algú marxa: s'eliminen les exclusions que el farien impossible, i qui l'organitza veu per què no es pot fer.
+• Editar l'amic invisible des del menú d'opcions ara funciona a l'iPhone, i al web les idees de regal mostren tota la descripció i l'enllaç.

@@ -20,16 +20,20 @@ import { cn } from "@/lib/utils";
 import { secretSantaErrorMessage } from "./errors";
 import ParticipantCard from "./participant-card";
 
+/**
+ * Groups who must not draw each other. The organizer removes them until the
+ * draw, and adds new ones while enough people take part.
+ */
 export default function Exclusions({
   secretSanta,
+  editable,
+  canAdd,
 }: {
   secretSanta: SecretSanta;
+  editable: boolean;
+  canAdd: boolean;
 }) {
   const t = useTranslations("secretSanta");
-  const editable = secretSanta.canOrganize && !secretSanta.drawn;
-  if (!editable && secretSanta.exclusions.length === 0) {
-    return null;
-  }
 
   return (
     <>
@@ -53,7 +57,7 @@ export default function Exclusions({
         ))}
       </ul>
 
-      {editable && (
+      {canAdd && (
         <ModalForm
           trigger={
             <Button variant="outline">

@@ -1,3 +1,4 @@
+import { giftLinkLabel } from "domain/secret-santa";
 import { ExternalLinkIcon } from "lucide-react";
 import type { GiftIdea } from "@/app/_data/secret-santa";
 import { ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
@@ -6,26 +7,25 @@ export default function GiftIdeaContent({ giftIdea }: { giftIdea: GiftIdea }) {
   return (
     <ItemContent>
       <ItemTitle>{giftIdea.name}</ItemTitle>
-      <ItemDescription className="space-y-1">
-        {giftIdea.description && (
-          <span className="block whitespace-pre-line">
-            {giftIdea.description}
-          </span>
-        )}
-        {giftIdea.url && (
-          <a
-            href={giftIdea.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex flex-row items-center gap-2 text-muted-foreground"
-          >
-            <ExternalLinkIcon className="size-4 shrink-0" />
-            <span className="wrap-anywhere line-clamp-1 text-sm">
-              {giftIdea.url}
-            </span>
-          </a>
-        )}
-      </ItemDescription>
+      {/* The whole wish matters to the giver, so it isn't clamped, and the
+          link sits outside it so a long description can't hide it. */}
+      {giftIdea.description && (
+        <ItemDescription className="line-clamp-none whitespace-pre-line">
+          {giftIdea.description}
+        </ItemDescription>
+      )}
+      {giftIdea.url && (
+        <a
+          href={giftIdea.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={giftIdea.url}
+          className="inline-flex max-w-full items-center gap-1.5 self-start rounded-full bg-muted px-2.5 py-0.5 font-semibold text-primary text-xs hover:underline"
+        >
+          <ExternalLinkIcon className="size-3.5 shrink-0" />
+          <span className="truncate">{giftLinkLabel(giftIdea.url)}</span>
+        </a>
+      )}
     </ItemContent>
   );
 }

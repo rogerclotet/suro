@@ -1,1 +1,3 @@
-• Vuelve el amigo invisible, ahora también en la app móvil. Cualquier miembro puede organizar uno: elige quién participa, la fecha, el presupuesto y las exclusiones, y haz el sorteo. Cada participante descubre a quién le toca y puede añadir ideas de regalos que solo verá quien le haya tocado. El intercambio aparece en el calendario.
+• El amigo invisible estrena diseño en la app móvil: los detalles de un vistazo, una tarjeta para descubrir a quién te toca, acceso directo a tus ideas y un sorteo más claro para quien lo organiza.
+• El sorteo ya no se bloquea cuando alguien se va: se eliminan las exclusiones que lo harían imposible, y quien lo organiza ve el motivo.
+• Editar el amigo invisible desde el menú de opciones ya funciona en el iPhone, y en la web las ideas de regalo muestran toda la descripción y el enlace.

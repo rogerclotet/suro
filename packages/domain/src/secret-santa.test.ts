@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   canGiveTo,
   drawAssignments,
+  drawProblem,
+  exchangeHasPassed,
   exclusionError,
+  giftLinkLabel,
   hasValidDraw,
   maxExclusionSize,
   parseGiftUrl,
@@ -89,6 +92,14 @@ describe("drawAssignments", () => {
   });
 });
 
+describe("drawProblem", () => {
+  it("explains what keeps the organizer from drawing", () => {
+    expect(drawProblem(["a"], [])).toBe("tooFewParticipants");
+    expect(drawProblem(["a", "b", "c"], [["a", "b"]])).toBe("exclusions");
+    expect(drawProblem(["a", "b", "c", "d"], [["a", "b"]])).toBeNull();
+  });
+});
+
 describe("exclusionError", () => {
   const participants = ["a", "b", "c", "d", "e"];
 
@@ -119,9 +130,23 @@ describe("pruneExclusions", () => {
           ["a", "b"],
           ["c", "d", "e"],
         ],
-        ["a", "c", "d"],
+        ["a", "c", "d", "f"],
       ),
     ).toEqual([["c", "d"]]);
+  });
+
+  it("removes groups larger than half of the remaining participants", () => {
+    const exclusions = [
+      ["a", "b"],
+      ["c", "d", "e"],
+    ];
+    // Six people allow a group of three; five allow only two.
+    expect(pruneExclusions(exclusions, ["a", "b", "c", "d", "e"])).toEqual([
+      ["a", "b"],
+    ]);
+    // Three people can't keep any exclusion and still have a valid draw.
+    expect(hasValidDraw(["a", "b", "c"], [["a", "b"]])).toBe(false);
+    expect(pruneExclusions(exclusions, ["a", "b", "c"])).toEqual([]);
   });
 });
 
@@ -155,5 +180,42 @@ describe("parseGiftUrl", () => {
     expect(parseGiftUrl("javascript:alert(1)")).toEqual({ valid: false });
     expect(parseGiftUrl("ftp://shop.example")).toEqual({ valid: false });
     expect(parseGiftUrl("a red scarf")).toEqual({ valid: false });
+  });
+});
+
+describe("giftLinkLabel", () => {
+  it("shortens a link to its host", () => {
+    expect(giftLinkLabel("https://www.amazon.es/dp/B0?tag=x")).toBe(
+      "amazon.es",
+    );
+    expect(giftLinkLabel("http://shop.example.com#top")).toBe(
+      "shop.example.com",
+    );
+    expect(giftLinkLabel("https://example.com")).toBe("example.com");
+  });
+});
+
+describe("exchangeHasPassed", () => {
+  it("ends a timed exchange at its start and an all-day one with its day", () => {
+    const evening = new Date(2026, 11, 24, 20).getTime();
+    expect(
+      exchangeHasPassed(
+        { exchangeAt: evening, exchangeAllDay: false },
+        evening - 1,
+      ),
+    ).toBe(false);
+    expect(
+      exchangeHasPassed(
+        { exchangeAt: evening, exchangeAllDay: false },
+        evening,
+      ),
+    ).toBe(true);
+    const allDay = { exchangeAt: Date.UTC(2026, 11, 24), exchangeAllDay: true };
+    expect(
+      exchangeHasPassed(allDay, new Date(2026, 11, 24, 23).getTime()),
+    ).toBe(false);
+    expect(exchangeHasPassed(allDay, new Date(2026, 11, 25).getTime())).toBe(
+      true,
+    );
   });
 });
