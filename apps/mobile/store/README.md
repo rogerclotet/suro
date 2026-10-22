@@ -80,8 +80,8 @@ A release is a normal PR to `main`. Everything after the merge is CI.
    and bump the root `package.json` version to match. The pre-commit hook runs
    `changelog:generate`, which writes the Play `changelogs/default.txt` files and
    `store.config.json`'s `apple.version` + `releaseNotes`; CI fails if they drift.
-2. Merge. On `main`, `mobile_release_gate` (version bump + matching CHANGELOG
-   entry, regardless of changed paths) triggers the **Mobile release** workflow, which:
+2. Merge. On `main`, `release_gate` (version bump + matching CHANGELOG entry,
+   regardless of what else changed) lets the **Release** workflow go on, which:
    - builds both binaries on EAS and waits for them;
    - **Android** → `fastlane android release`: AAB + release notes to the Play
      **production** track, full rollout;
@@ -90,8 +90,8 @@ A release is a normal PR to `main`. Everything after the merge is CI.
      build, cancels an older in-review version if needed, attaches the new
      build, uploads screenshots if they changed, and submits for review with
      `automatic_release` so it ships on approval.
-3. CI's `release_tag` tags the commit `v<version>` and publishes a GitHub release
-   with the CHANGELOG entry as its notes.
+3. The same workflow's `github_release` tags the commit `v<version>` and
+   publishes a GitHub release with the CHANGELOG entry as its notes.
 
 Both stores still gate on **their** review; nothing else needs a console visit.
 
@@ -102,7 +102,7 @@ Checks and manual fallbacks:
 node apps/mobile/store/check-metadata.mjs
 
 # force a full EAS build + store submit (skips the release gate; main only):
-# Actions -> "Mobile release" -> Run workflow (optional push_screenshots).
+# Actions -> "Release" -> Run workflow (optional push_screenshots).
 
 # re-submit a commit that already built (transient store error), or force a
 # screenshot re-upload: Actions -> "Mobile submit" -> commit sha + platform.

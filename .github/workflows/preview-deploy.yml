@@ -38,90 +38,36 @@ permissions:
   packages: write
   pull-requests: write
 
-concurrency:
-  group: preview-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
-  cancel-in-progress: true
-
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
   PREVIEW_DOMAIN: suro.clotet.dev
-  PREVIEW_LABEL: deploy-preview
-  PREVIEW_COMMAND: /deploy-preview
 
 jobs:
-  resolve:
+  preview:
+    # Decided here rather than in a script job, so pushes to unlabeled PRs and
+    # unrelated comments skip without a runner and never join (and cancel) the
+    # concurrency group below. `env` isn't available in a job `if`, hence the
+    # literal label and command.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'deploy-preview') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'deploy-preview')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '/deploy-preview') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    concurrency:
+      group: preview-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
-    outputs:
-      pr_number: ${{ steps.resolve.outputs.pr_number }}
-      deploy: ${{ steps.resolve.outputs.deploy }}
-      notify: ${{ steps.resolve.outputs.notify }}
+    timeout-minutes: 60
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+      # Auto-redeploys on push only comment when something needs attention.
+      NOTIFY: ${{ github.event.action == 'synchronize' && 'on-failure' || 'always' }}
     steps:
-      - uses: actions/github-script@v9
-        id: resolve
-        with:
-          script: |
-            const label = process.env.PREVIEW_LABEL;
-            const command = process.env.PREVIEW_COMMAND;
-
-            if (context.eventName === 'workflow_dispatch') {
-              const prNumber = String('${{ inputs.pr_number }}');
-              core.setOutput('pr_number', prNumber);
-              core.setOutput('deploy', 'true');
-              core.setOutput('notify', 'true');
-              return;
-            }
-
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-              if (context.payload.action === 'labeled') {
-                if (context.payload.label?.name !== label) {
-                  core.setOutput('deploy', 'false');
-                  return;
-                }
-                core.setOutput('notify', 'true');
-              } else if (context.payload.action === 'synchronize') {
-                const hasLabel = pr.labels.some((entry) => entry.name === label);
-                if (!hasLabel) {
-                  core.setOutput('deploy', 'false');
-                  return;
-                }
-                core.setOutput('notify', 'on-failure');
-              }
-              core.setOutput('pr_number', String(pr.number));
-              core.setOutput('deploy', 'true');
-              return;
-            }
-
-            if (context.eventName === 'issue_comment') {
-              const body = (context.payload.comment?.body || '').trim();
-              if (!body.startsWith(command)) {
-                core.setOutput('deploy', 'false');
-                return;
-              }
-              if (!context.payload.issue?.pull_request) {
-                core.setOutput('deploy', 'false');
-                return;
-              }
-              // Anyone can comment on a public repo, and comment-triggered
-              // runs get the repo's secrets.
-              const association = context.payload.comment.author_association;
-              if (!['OWNER', 'MEMBER', 'COLLABORATOR'].includes(association)) {
-                core.info(`Ignoring ${command} from ${context.payload.comment.user.login} (${association})`);
-                core.setOutput('deploy', 'false');
-                return;
-              }
-              core.setOutput('pr_number', String(context.payload.issue.number));
-              core.setOutput('deploy', 'true');
-              core.setOutput('notify', 'true');
-            }
-        env:
-          PREVIEW_LABEL: ${{ env.PREVIEW_LABEL }}
-          PREVIEW_COMMAND: ${{ env.PREVIEW_COMMAND }}
       - name: Refuse pull requests from forks
-        if: steps.resolve.outputs.deploy == 'true'
+        id: same_repo
         uses: actions/github-script@v9
-        env:
-          PR_NUMBER: ${{ steps.resolve.outputs.pr_number }}
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
@@ -136,57 +82,38 @@ jobs:
               );
             }
 
-  detect_path_changes:
-    needs: resolve
-    if: needs.resolve.outputs.deploy == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      web: ${{ steps.changes.outputs.web }}
-    steps:
       - uses: actions/checkout@v7
         with:
-          ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
+          ref: refs/pull/${{ env.PR_NUMBER }}/merge
           persist-credentials: false
       - uses: ./.github/actions/detect-path-changes
         id: changes
 
-  build_preview:
-    needs: [resolve, detect_path_changes]
-    if: needs.resolve.outputs.deploy == 'true' && needs.detect_path_changes.outputs.web == 'true'
-    timeout-minutes: 45
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: refs/pull/${{ needs.resolve.outputs.pr_number }}/merge
-          persist-credentials: false
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+      - if: steps.changes.outputs.web == 'true'
+        uses: docker/setup-buildx-action@v4
+      - if: steps.changes.outputs.web == 'true'
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v7
+      - if: steps.changes.outputs.web == 'true'
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY_IMAGE }}:mr-${{ needs.resolve.outputs.pr_number }}
+          tags: ${{ env.REGISTRY_IMAGE }}:mr-${{ env.PR_NUMBER }}
           build-args: |
             SKIP_ENV_VALIDATION=1
             NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL_PREVIEW }}
             NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
             NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
 
-  deploy_preview:
-    needs: [resolve, detect_path_changes, build_preview]
-    if: needs.resolve.outputs.deploy == 'true' && needs.detect_path_changes.outputs.web == 'true'
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
       - name: Deploy preview environment
+        id: deploy
+        if: steps.changes.outputs.web == 'true'
         env:
-          CI_MERGE_REQUEST_IID: ${{ needs.resolve.outputs.pr_number }}
+          CI_MERGE_REQUEST_IID: ${{ env.PR_NUMBER }}
           CI_REGISTRY: ghcr.io
           CI_REGISTRY_USER: ${{ github.repository_owner }}
           CI_REGISTRY_PASSWORD: ${{ secrets.GHCR_PULL_TOKEN }}
@@ -200,38 +127,34 @@ jobs:
           chmod +x apps/web/scripts/deploy-preview.sh
           apps/web/scripts/deploy-preview.sh
 
-  notify:
-    needs: [resolve, detect_path_changes, build_preview, deploy_preview]
-    if: always() && needs.resolve.result == 'success' && needs.resolve.outputs.deploy == 'true' && needs.resolve.outputs.notify != ''
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v9
+      # A superseded run stays quiet; the run that replaced it reports.
+      - name: Comment the result on the PR
+        if: ${{ !cancelled() && steps.same_repo.outcome == 'success' }}
+        uses: actions/github-script@v9
+        env:
+          WEB_CHANGED: ${{ steps.changes.outputs.web }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          JOB_STATUS: ${{ job.status }}
         with:
           script: |
-            const prNumber = '${{ needs.resolve.outputs.pr_number }}';
+            const prNumber = process.env.PR_NUMBER;
             const previewUrl = `https://mr-${prNumber}.${process.env.PREVIEW_DOMAIN}`;
-            const hasWebChanges = '${{ needs.detect_path_changes.outputs.web }}' === 'true';
-            const buildResult = '${{ needs.build_preview.result }}';
-            const deployResult = '${{ needs.deploy_preview.result }}';
-            const notifyMode = '${{ needs.resolve.outputs.notify }}';
             const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            const hasWebChanges = process.env.WEB_CHANGED === 'true';
+            const failed = process.env.JOB_STATUS === 'failure';
 
             let body;
-            if (!hasWebChanges) {
-              body = `Preview deploy skipped for #${prNumber}: no web-affecting changes in this PR.`;
-            } else if (deployResult === 'success') {
+            if (process.env.DEPLOY_OUTCOME === 'success') {
               body = `Preview deployed: ${previewUrl}`;
-            } else if (buildResult === 'failure' || deployResult === 'failure') {
+            } else if (failed) {
               body = `Preview deploy failed for #${prNumber}. See the [workflow run](${runUrl}).`;
+            } else if (!hasWebChanges) {
+              body = `Preview deploy skipped for #${prNumber}: no web-affecting changes in this PR.`;
             } else {
               body = `Preview deploy skipped for #${prNumber}.`;
             }
 
-            const shouldNotify =
-              notifyMode === 'true' ||
-              (notifyMode === 'on-failure' && (buildResult === 'failure' || deployResult === 'failure' || !hasWebChanges));
-
-            if (!shouldNotify) {
+            if (process.env.NOTIFY === 'on-failure' && !failed && hasWebChanges) {
               return;
             }
 
@@ -241,5 +164,3 @@ jobs:
               issue_number: Number(prNumber),
               body,
             });
-        env:
-          PREVIEW_DOMAIN: ${{ env.PREVIEW_DOMAIN }}

@@ -23,8 +23,6 @@ runs:
       with:
         ruby-version: "3.4"
     - uses: ./.github/actions/setup-node-pnpm
-      with:
-        apt-packages: build-essential git ca-certificates curl jq
     - shell: bash
       run: gem install bundler -v 4.0.11 --no-document
     - name: Run fastlane android ${{ inputs.lane }}

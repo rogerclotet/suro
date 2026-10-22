@@ -1,6 +1,7 @@
 // @ts-check
 /**
- * Decides whether CI should trigger EAS native builds for a push to main.
+ * Decides whether a push to main is a release: the Release workflow then
+ * publishes the GitHub release and triggers the EAS native builds.
  *
  * Builds only when all of the following are true:
  *   1. Root package.json version bumped over the push's commit range
