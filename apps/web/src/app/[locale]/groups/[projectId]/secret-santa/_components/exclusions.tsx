@@ -212,7 +212,7 @@ function CreateExclusionForm({ secretSanta }: { secretSanta: SecretSanta }) {
               aria-pressed={isSelected}
               disabled={full}
               onClick={() => toggle(person.id)}
-              className="cursor-pointer rounded-xl transition-opacity hover:bg-accent/40 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+              className="cursor-pointer rounded-xl transition-opacity hover:bg-accent disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
             >
               <ParticipantTile
                 person={person}

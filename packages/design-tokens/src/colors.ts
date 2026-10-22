@@ -157,7 +157,9 @@ export const webLight = {
   secondaryForeground: brand.text1,
   muted: brand.primaryLight,
   mutedForeground: brand.text2,
-  accent: brand.primaryLight,
+  // Hover/focus/selected fill. A step darker than `primaryLight` so it still
+  // reads against the beige page, not only against white cards and popovers.
+  accent: "#CFDCB8",
   accentForeground: brand.primary,
   destructive: brand.error,
   destructiveForeground: "#ffffff",
@@ -170,7 +172,7 @@ export const webLight = {
   sidebarForeground: brand.text1,
   sidebarPrimary: brand.primary,
   sidebarPrimaryForeground: "#ffffff",
-  sidebarAccent: "#E3DACB",
+  sidebarAccent: "#DBD0BB",
   sidebarAccentForeground: brand.text1,
   sidebarActive: brand.text3,
   sidebarActiveForeground: brand.text1,
@@ -195,7 +197,9 @@ export const webDark = {
   secondaryForeground: brandDark.background,
   muted: brandDark.primaryLight,
   mutedForeground: brandDark.text2,
-  accent: brandDark.primaryLight,
+  // Hover/focus/selected fill. Must differ from `popover`/`sidebar`
+  // (`navBar`), otherwise menu and select highlights vanish.
+  accent: "#453A32",
   accentForeground: brandDark.text1,
   destructive: brandDark.error,
   destructiveForeground: nativeDark.card,
@@ -208,7 +212,7 @@ export const webDark = {
   sidebarForeground: brandDark.text1,
   sidebarPrimary: brandDark.primary,
   sidebarPrimaryForeground: brand.text1,
-  sidebarAccent: "#382F28",
+  sidebarAccent: "#453A32",
   sidebarAccentForeground: brandDark.text1,
   sidebarActive: brandDark.text3,
   sidebarActiveForeground: brand.text1,

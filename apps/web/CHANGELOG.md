@@ -26,6 +26,20 @@ with a type: `feature`, `fix`, or `improvement`.
 - [fix] The draw no longer gets stuck when someone leaves: exclusions that would make it impossible are removed, and the organizer sees why the draw is blocked.
 - [fix] Editing a Secret Santa from the options menu now works on iPhone, and on the web gift ideas show their whole description and link.
 
+## [1.34.1] — 2026-10-22
+
+### ca
+
+- [fix] Els estats de pas del ratolí i de selecció tenen més contrast, sobretot en mode fosc: els menús, les pestanyes i les files de les llistes ara mostren clarament l'element actiu.
+
+### es
+
+- [fix] Los estados al pasar el ratón y de selección tienen más contraste, sobre todo en modo oscuro: los menús, las pestañas y las filas de las listas ahora muestran claramente el elemento activo.
+
+### en
+
+- [fix] Hover and selected states have more contrast, especially in dark mode: menus, tabs and list rows now clearly show the active item.
+
 ## [1.34.0] — 2026-10-21
 
 ### ca

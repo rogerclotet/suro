@@ -96,7 +96,7 @@ export default function ProjectsTable() {
         {projects.map((project) => (
           <TableRow
             key={project.id}
-            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
+            className="hover:bg-accent [&_.avatar]:transition-colors hover:[&_.avatar]:border-accent"
           >
             <TableCell>
               <Link

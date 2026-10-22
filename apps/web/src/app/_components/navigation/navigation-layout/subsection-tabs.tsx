@@ -42,8 +42,8 @@ export default function SubsectionTabs() {
               className={cn(
                 "flex-1 rounded-[9px] px-3 py-[7px] text-center font-display text-sm transition-all",
                 isActive
-                  ? "bg-accent font-medium text-foreground"
-                  : "text-muted-foreground",
+                  ? "bg-primary font-medium text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {item.name}

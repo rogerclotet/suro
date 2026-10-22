@@ -90,7 +90,7 @@ export default function MyTasks({ projectId }: { projectId: string }) {
                     pathname: "/groups/[projectId]/lists/[listId]",
                     params: { projectId, listId: task.listId },
                   }}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-accent"
                 >
                   <div className="grow overflow-hidden">
                     <p className="truncate">{task.name}</p>

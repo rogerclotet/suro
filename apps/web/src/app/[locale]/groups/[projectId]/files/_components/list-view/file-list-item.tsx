@@ -20,7 +20,7 @@ export default function FileListItem({ file }: { file: File }) {
   const session = useSession();
 
   return (
-    <li className="flex h-16 items-center gap-4 border-background not-last:border-b-2 hover:bg-muted">
+    <li className="flex h-16 items-center gap-4 border-background not-last:border-b-2 hover:bg-accent">
       <NextLink href={file.url} target="_blank" rel="noopener noreferrer">
         <div className="flex w-16 shrink-0 items-center justify-center overflow-hidden">
           {file.type.includes("image") ? (
