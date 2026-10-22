@@ -711,7 +711,6 @@
     "ideaCreateAction": "Afegir idea",
     "ideaCreateTitle": "Afegir idea",
     "ideaCreateDescription": "Afegeix una idea per al teu amic invisible",
-    "emptyMessage": "Crea-ne un i tria qui hi participa, el pressupost i les exclusions.",
     "organizedBy": "Organitzat per {name}",
     "dateLabel": "Data",
     "timeLabel": "Hora",
@@ -749,8 +748,7 @@
     "emptyStepIdeas": "Cadascú afegeix idees de regals per a qui li toqui.",
     "emptyStepDraw": "Fes el sorteig: cadascú descobreix a qui fa el regal, i ningú més ho sap.",
     "exclusionSelected": "{count} de {max} seleccionats",
-    "exchangePassedHint": "La data de l'intercanvi ja ha passat. Quan acabeu, arxiva aquest amic invisible des del menú perquè el grup en pugui començar un de nou.",
-    "drawPanelTitle": "Tot a punt per al sorteig?"
+    "exchangePassedHint": "La data de l'intercanvi ja ha passat. Quan acabeu, arxiva aquest amic invisible des del menú perquè el grup en pugui començar un de nou."
   },
   "invitation": {
     "invalidTitle": "Invitació invàlida",

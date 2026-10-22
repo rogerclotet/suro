@@ -88,10 +88,10 @@ export function RevealCard({
             justifyContent: "space-evenly",
             padding: 16,
             shadowColor: "#000",
-            shadowOpacity: 0.18,
-            shadowRadius: 14,
-            shadowOffset: { width: 0, height: 8 },
-            elevation: 6,
+            shadowOpacity: 0.12,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 3,
           }}
         >
           {revealed ? (

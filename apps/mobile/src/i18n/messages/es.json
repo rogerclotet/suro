@@ -711,7 +711,6 @@
     "ideaCreateAction": "Añadir idea",
     "ideaCreateTitle": "Añadir idea",
     "ideaCreateDescription": "Añade una idea para tu amigo invisible",
-    "emptyMessage": "Crea uno y elige quién participa, el presupuesto y las exclusiones.",
     "organizedBy": "Organizado por {name}",
     "dateLabel": "Fecha",
     "timeLabel": "Hora",
@@ -749,8 +748,7 @@
     "emptyStepIdeas": "Cada uno añade ideas de regalos para quien le toque.",
     "emptyStepDraw": "Haz el sorteo: cada uno descubre a quién hace el regalo, y nadie más lo sabe.",
     "exclusionSelected": "{count} de {max} seleccionados",
-    "exchangePassedHint": "La fecha del intercambio ya ha pasado. Cuando terminéis, archiva este amigo invisible desde el menú para que el grupo pueda empezar uno nuevo.",
-    "drawPanelTitle": "¿Todo listo para el sorteo?"
+    "exchangePassedHint": "La fecha del intercambio ya ha pasado. Cuando terminéis, archiva este amigo invisible desde el menú para que el grupo pueda empezar uno nuevo."
   },
   "invitation": {
     "invalidTitle": "Invitación no válida",

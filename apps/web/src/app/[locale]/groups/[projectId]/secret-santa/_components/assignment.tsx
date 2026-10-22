@@ -9,6 +9,7 @@ import { Item } from "@/components/ui/item";
 import UserAvatar from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 import GiftIdeaContent from "./gift-idea-content";
+import { SectionLabel } from "./layout";
 
 type AssignmentData = NonNullable<SecretSanta["assignment"]>;
 
@@ -24,7 +25,7 @@ export default function Assignment({
 
   return (
     <div className="columns-1 gap-4 space-y-4 lg:columns-2">
-      <div className="flex break-inside-avoid items-center justify-center py-12">
+      <div className="flex break-inside-avoid items-center justify-center py-6">
         <button
           type="button"
           onClick={() => setRevealed(!revealed)}
@@ -38,7 +39,7 @@ export default function Assignment({
             )}
           >
             <div className="backface-hidden absolute inset-0 size-full">
-              <Card className="flex aspect-3/4 w-full flex-col items-center justify-evenly drop-shadow-2xl">
+              <Card className="flex aspect-3/4 w-full flex-col items-center justify-evenly drop-shadow-md">
                 <CardHeader className="flex h-auto w-full items-center justify-center">
                   <BadgeQuestionMarkIcon className="aspect-square h-auto w-[80%] text-muted" />
                 </CardHeader>
@@ -48,7 +49,7 @@ export default function Assignment({
               </Card>
             </div>
             <div className="backface-hidden transform-[rotateY(180deg)] absolute inset-0 size-full">
-              <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-2xl">
+              <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-md">
                 <CardHeader className="flex h-auto w-full items-center justify-center">
                   <UserAvatar
                     user={assignment}
@@ -68,23 +69,35 @@ export default function Assignment({
 
       {revealed && (
         <div className="fade-in-0 lg:slide-in-from-left-5 animate-in break-inside-avoid space-y-4 duration-500">
-          <h3 className="font-semibold text-lg">{t("yourMatch", { name })}</h3>
-          <h4 className="font-semibold">{t("giftIdeas")}</h4>
-          {assignment.giftIdeas.length === 0 ? (
-            <p className="text-muted-foreground italic">
-              {t("matchIdeasIntro", { name })}
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {assignment.giftIdeas.map((giftIdea) => (
-                <li key={giftIdea.id}>
-                  <Item variant="card">
-                    <GiftIdeaContent giftIdea={giftIdea} />
-                  </Item>
-                </li>
-              ))}
-            </ul>
-          )}
+          <h3 className="font-display font-semibold text-xl">
+            {t("yourMatch", { name })}
+          </h3>
+          <section className="space-y-1">
+            <SectionLabel
+              count={
+                assignment.giftIdeas.length > 0
+                  ? assignment.giftIdeas.length
+                  : undefined
+              }
+            >
+              {t("giftIdeas")}
+            </SectionLabel>
+            {assignment.giftIdeas.length === 0 ? (
+              <p className="py-2 text-muted-foreground text-sm">
+                {t("matchIdeasIntro", { name })}
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {assignment.giftIdeas.map((giftIdea) => (
+                  <li key={giftIdea.id}>
+                    <Item className="px-0 py-3">
+                      <GiftIdeaContent giftIdea={giftIdea} />
+                    </Item>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       )}
     </div>

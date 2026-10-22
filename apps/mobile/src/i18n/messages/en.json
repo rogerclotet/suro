@@ -711,7 +711,6 @@
     "ideaCreateAction": "Add idea",
     "ideaCreateTitle": "Add idea",
     "ideaCreateDescription": "Add an idea for your Secret Santa",
-    "emptyMessage": "Create one and choose who takes part, the budget and any exclusions.",
     "organizedBy": "Organized by {name}",
     "dateLabel": "Date",
     "timeLabel": "Time",
@@ -749,8 +748,7 @@
     "emptyStepIdeas": "Everyone adds gift ideas for whoever draws them.",
     "emptyStepDraw": "Run the draw: each person finds out who they give to, and nobody else does.",
     "exclusionSelected": "{count} of {max} selected",
-    "exchangePassedHint": "The exchange date has passed. When you're done, archive this Secret Santa from the menu so the group can start a new one.",
-    "drawPanelTitle": "Ready for the draw?"
+    "exchangePassedHint": "The exchange date has passed. When you're done, archive this Secret Santa from the menu so the group can start a new one."
   },
   "invitation": {
     "invalidTitle": "Invalid invitation",

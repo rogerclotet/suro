@@ -7,9 +7,9 @@ import {
   headerBackAction,
   headerCreateAction,
 } from "@/components/header-badges";
-import { GiftIdeaRow } from "@/features/secret-santa/gift-idea-row";
+import { GiftIdeaList } from "@/features/secret-santa/gift-idea-list";
 import { GiftIdeaSheet } from "@/features/secret-santa/gift-idea-sheet";
-import { Notice } from "@/features/secret-santa/notice";
+import { StatusLine } from "@/features/secret-santa/layout";
 import type { GiftIdea } from "@/features/secret-santa/types";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
@@ -59,28 +59,22 @@ export default function GiftIdeasScreen() {
         <Loading />
       ) : secretSanta === null || !participating ? (
         <View style={{ padding: 16 }}>
-          <Notice icon={Lightbulb} text={tSanta("ideasUnavailable")} />
+          <StatusLine icon={Lightbulb} text={tSanta("ideasUnavailable")} />
         </View>
       ) : (
         <>
           <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 8 }}
             onScroll={fab.onScroll}
             scrollEventThrottle={16}
           >
-            <Notice icon={Lock} text={tSanta("ideasIntro")} />
+            <StatusLine icon={Lock} text={tSanta("ideasIntro")} />
             {giftIdeas === undefined ? (
               <Loading />
             ) : giftIdeas.length === 0 ? (
               <EmptyIdeas onAdd={() => openSheet(null)} />
             ) : (
-              giftIdeas.map((giftIdea) => (
-                <GiftIdeaRow
-                  key={giftIdea._id}
-                  giftIdea={giftIdea}
-                  onPress={() => openSheet(giftIdea)}
-                />
-              ))
+              <GiftIdeaList giftIdeas={giftIdeas} onPress={openSheet} />
             )}
           </ScrollView>
           <Fab
@@ -104,19 +98,8 @@ function EmptyIdeas({ onAdd }: { onAdd: () => void }) {
   const t = useTheme();
   const tSanta = useTranslations("secretSanta");
   return (
-    <View style={{ alignItems: "center", gap: 12, paddingVertical: 32 }}>
-      <View
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: 36,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: `${t.marker}26`,
-        }}
-      >
-        <Lightbulb color={t.marker} size={34} />
-      </View>
+    <View style={{ alignItems: "center", gap: 12, paddingVertical: 40 }}>
+      <Lightbulb color={t.muted} size={28} />
       <Txt muted size={15} style={{ textAlign: "center", maxWidth: 280 }}>
         {tSanta("ideasEmpty")}
       </Txt>

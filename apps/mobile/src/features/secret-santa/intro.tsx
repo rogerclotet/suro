@@ -2,7 +2,8 @@ import { Gift } from "lucide-react-native";
 import { View } from "react-native";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
-import { Button, Card, Txt } from "@/ui";
+import { Button, Txt } from "@/ui";
+import { Divider, SectionLabel } from "./layout";
 
 /**
  * What a Secret Santa is and how one runs, with the create action when the
@@ -22,19 +23,19 @@ export function SecretSantaIntro({
     tSanta("emptyStepDraw"),
   ];
   return (
-    <View style={{ gap: 20 }}>
-      <View style={{ alignItems: "center", gap: 12, paddingTop: 8 }}>
+    <View style={{ gap: 24 }}>
+      <View style={{ alignItems: "center", gap: 12, paddingTop: 16 }}>
         <View
           style={{
-            width: 88,
-            height: 88,
-            borderRadius: 44,
+            width: 72,
+            height: 72,
+            borderRadius: 36,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: t.navBar,
+            backgroundColor: `${t.primary}1a`,
           }}
         >
-          <Gift color={t.primary} size={44} />
+          <Gift color={t.primary} size={34} />
         </View>
         <Txt size={20} weight="700" style={{ textAlign: "center" }}>
           {onCreate ? tSanta("emptyTitle") : tSanta("infoDescription")}
@@ -43,41 +44,27 @@ export function SecretSantaIntro({
           {tSanta("description")}
         </Txt>
       </View>
-      <Card>
-        <View style={{ gap: 14 }}>
-          <Txt size={16} weight="700" display>
-            {tSanta("howItWorks")}
-          </Txt>
-          {steps.map((step, index) => (
-            <View
-              key={step}
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-start",
-                gap: 12,
-              }}
+      <Divider hairline />
+      <View style={{ gap: 14 }}>
+        <SectionLabel title={tSanta("howItWorks")} />
+        {steps.map((step, index) => (
+          <View
+            key={step}
+            style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}
+          >
+            <Txt
+              size={15}
+              weight="700"
+              style={{ color: t.primary, width: 16, textAlign: "center" }}
             >
-              <View
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 13,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: t.primary,
-                }}
-              >
-                <Txt size={13} weight="700" style={{ color: t.onPrimary }}>
-                  {String(index + 1)}
-                </Txt>
-              </View>
-              <Txt size={15} style={{ flex: 1, paddingTop: 3 }}>
-                {step}
-              </Txt>
-            </View>
-          ))}
-        </View>
-      </Card>
+              {String(index + 1)}
+            </Txt>
+            <Txt size={15} style={{ flex: 1 }}>
+              {step}
+            </Txt>
+          </View>
+        ))}
+      </View>
       {onCreate ? (
         <Button title={tSanta("createAction")} onPress={onCreate} />
       ) : null}

@@ -194,8 +194,8 @@ export function SecretSantaFormSheet({
           label={`${tSanta("participants")} (${draft.participantIds.length}/${members.length})`}
           hint={participantsLocked ? tSanta("participantsLocked") : undefined}
         >
-          <View style={{ gap: 8 }}>
-            {members.map((member) => {
+          <View>
+            {members.map((member, index) => {
               const on = draft.participantIds.includes(member.userId);
               return (
                 <Pressable
@@ -212,10 +212,9 @@ export function SecretSantaFormSheet({
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 12,
-                    borderWidth: 1,
-                    borderColor: on ? t.primary : t.border,
-                    borderRadius: 12,
-                    padding: 10,
+                    paddingVertical: 10,
+                    borderTopWidth: index === 0 ? 0 : 1,
+                    borderColor: t.border,
                     opacity: participantsLocked ? 0.6 : 1,
                   }}
                 >
@@ -224,7 +223,7 @@ export function SecretSantaFormSheet({
                     name={member.name}
                     image={member.image}
                     color={member.avatarColor}
-                    size={28}
+                    size={32}
                   />
                   <Txt style={{ flex: 1 }} numberOfLines={1}>
                     {member.name ?? tSanta("unnamedMember")}

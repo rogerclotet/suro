@@ -3,56 +3,23 @@ import { Avatar } from "@/components/avatar";
 import { useTranslations } from "@/i18n";
 import { useTheme } from "@/theme";
 import { Txt } from "@/ui";
+import { SectionLabel } from "./layout";
 import { PersonTile } from "./person-tile";
 import type { Person } from "./types";
 
 const STACK_LIMIT = 6;
 const STACK_AVATAR = 32;
 
-/** A section title with a trailing count pill. */
-export function SectionTitle({
-  title,
-  count,
-}: {
-  title: string;
-  count?: number;
-}) {
-  const t = useTheme();
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-      <Txt size={18} weight="700">
-        {title}
-      </Txt>
-      {count === undefined ? null : (
-        <View
-          style={{
-            minWidth: 24,
-            paddingHorizontal: 8,
-            paddingVertical: 2,
-            borderRadius: 999,
-            alignItems: "center",
-            backgroundColor: t.navBar,
-          }}
-        >
-          <Txt size={13} weight="700" style={{ color: t.primary }}>
-            {count}
-          </Txt>
-        </View>
-      )}
-    </View>
-  );
-}
-
-/** Everyone taking part, as a grid of tiles. */
+/** Everyone taking part, as a grid of avatars. */
 export function ParticipantGrid({ participants }: { participants: Person[] }) {
   const tSanta = useTranslations("secretSanta");
   return (
-    <View style={{ gap: 10 }}>
-      <SectionTitle
+    <View style={{ gap: 12 }}>
+      <SectionLabel
         title={tSanta("participants")}
         count={participants.length}
       />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 8 }}>
         {participants.map((person) => (
           <PersonTile key={person.userId} person={person} />
         ))}

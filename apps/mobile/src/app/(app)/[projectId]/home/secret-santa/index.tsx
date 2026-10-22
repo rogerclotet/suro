@@ -32,17 +32,20 @@ import {
   priceRangeFromDraft,
   type SecretSantaDraft,
 } from "@/features/secret-santa/form-values";
-import { GiftIdeaRow } from "@/features/secret-santa/gift-idea-row";
+import { GiftIdeaList } from "@/features/secret-santa/gift-idea-list";
+import { SecretSantaHeader } from "@/features/secret-santa/header";
 import { SecretSantaIntro } from "@/features/secret-santa/intro";
+import {
+  Divider,
+  SectionLabel,
+  StatusLine,
+} from "@/features/secret-santa/layout";
 import { MyIdeasRow } from "@/features/secret-santa/my-ideas-row";
-import { Notice } from "@/features/secret-santa/notice";
 import {
   ParticipantGrid,
   ParticipantStack,
-  SectionTitle,
 } from "@/features/secret-santa/participants";
 import { RevealCard } from "@/features/secret-santa/reveal-card";
-import { SummaryCard } from "@/features/secret-santa/summary-card";
 import type { Person, SecretSanta } from "@/features/secret-santa/types";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
@@ -264,29 +267,30 @@ function SecretSantaDetail({
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 20 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 24 }}
     >
-      <SummaryCard
+      <SecretSantaHeader
         secretSanta={secretSanta}
         onOpenEvent={
           eventId ? () => router.navigate(`/${pid}/calendar/${eventId}`) : null
         }
       />
+      <Divider hairline />
+
+      {status ? <StatusLine icon={status.icon} text={status.text} /> : null}
+      {canOrganize && drawn && exchangeHasPassed(secretSanta, Date.now()) ? (
+        <StatusLine icon={Archive} text={tSanta("exchangePassedHint")} />
+      ) : null}
 
       {drawn && secretSanta.assignment ? (
         <Match assignment={secretSanta.assignment} />
       ) : null}
-      {status ? <Notice icon={status.icon} text={status.text} /> : null}
 
       {secretSanta.isParticipant ? (
         <MyIdeasRow
           count={myIdeas?.length}
           onPress={() => router.push(`/${pid}/home/secret-santa/ideas`)}
         />
-      ) : null}
-
-      {canOrganize && drawn && exchangeHasPassed(secretSanta, Date.now()) ? (
-        <Notice icon={Archive} text={tSanta("exchangePassedHint")} />
       ) : null}
 
       {drawn ? (
@@ -303,7 +307,12 @@ function SecretSantaDetail({
         />
       ) : null}
 
-      {canOrganize && !drawn ? <DrawPanel secretSanta={secretSanta} /> : null}
+      {canOrganize && !drawn ? (
+        <>
+          <Divider hairline />
+          <DrawPanel secretSanta={secretSanta} />
+        </>
+      ) : null}
 
       <Sheet
         visible={optionsOpen}
@@ -366,27 +375,27 @@ function Match({
     <View style={{ gap: 16 }}>
       <RevealCard person={assignment} onRevealChange={setRevealed} />
       {revealed ? (
-        <View style={{ gap: 10 }}>
-          <Txt size={18} weight="700" style={{ textAlign: "center" }}>
+        <View style={{ gap: 16 }}>
+          <Txt size={20} weight="700" style={{ textAlign: "center" }}>
             {tSanta("yourMatch", { name })}
           </Txt>
-          <SectionTitle
-            title={tSanta("giftIdeas")}
-            count={
-              assignment.giftIdeas.length > 0
-                ? assignment.giftIdeas.length
-                : undefined
-            }
-          />
-          {assignment.giftIdeas.length === 0 ? (
-            <Txt muted style={{ fontStyle: "italic" }}>
-              {tSanta("matchIdeasIntro", { name })}
-            </Txt>
-          ) : (
-            assignment.giftIdeas.map((giftIdea) => (
-              <GiftIdeaRow key={giftIdea._id} giftIdea={giftIdea} />
-            ))
-          )}
+          <View style={{ gap: 4 }}>
+            <SectionLabel
+              title={tSanta("giftIdeas")}
+              count={
+                assignment.giftIdeas.length > 0
+                  ? assignment.giftIdeas.length
+                  : undefined
+              }
+            />
+            {assignment.giftIdeas.length === 0 ? (
+              <Txt muted size={14} style={{ paddingVertical: 8 }}>
+                {tSanta("matchIdeasIntro", { name })}
+              </Txt>
+            ) : (
+              <GiftIdeaList giftIdeas={assignment.giftIdeas} />
+            )}
+          </View>
         </View>
       ) : null}
     </View>

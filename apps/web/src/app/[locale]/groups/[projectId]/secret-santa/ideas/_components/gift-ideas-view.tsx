@@ -3,13 +3,19 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { InfoIcon, PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
+import {
+  LightbulbIcon,
+  LockIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import type { GiftIdea } from "@/app/_data/secret-santa";
 import GiftIdeaContent from "@/app/[locale]/groups/[projectId]/secret-santa/_components/gift-idea-content";
+import { StatusLine } from "@/app/[locale]/groups/[projectId]/secret-santa/_components/layout";
 import Action from "@/components/action";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions } from "@/components/ui/item";
 import LoadingPage from "@/components/ui/loading-page";
@@ -29,7 +35,6 @@ export default function GiftIdeasView({ projectId }: { projectId: string }) {
     secretSanta?.isParticipant ? secretSanta.id : undefined,
   );
   const t = useTranslations("secretSanta");
-  const tCommon = useTranslations("common");
 
   if (secretSanta === undefined) {
     return <LoadingPage />;
@@ -37,45 +42,41 @@ export default function GiftIdeasView({ projectId }: { projectId: string }) {
 
   if (secretSanta === null || !secretSanta.isParticipant) {
     return (
-      <Alert className="mx-auto max-w-lg">
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>{tCommon("info")}</AlertTitle>
-        <AlertDescription className="mt-2 space-y-2">
-          <p>{t("ideasUnavailable")}</p>
-          <Link
-            href={{
-              pathname: "/groups/[projectId]/secret-santa",
-              params: { projectId },
-            }}
-            className="text-primary underline"
-          >
-            {t("backToSecretSanta")}
-          </Link>
-        </AlertDescription>
-      </Alert>
+      <div className="mx-auto max-w-lg space-y-3 py-6 text-center">
+        <p className="text-muted-foreground">{t("ideasUnavailable")}</p>
+        <Link
+          href={{
+            pathname: "/groups/[projectId]/secret-santa",
+            params: { projectId },
+          }}
+          className="text-primary underline"
+        >
+          {t("backToSecretSanta")}
+        </Link>
+      </div>
     );
   }
 
   const secretSantaId = secretSanta.id as Id<"secretSantas">;
 
   return (
-    <div className="mb-8 space-y-4">
-      <h2 className="font-semibold text-2xl">{t("ideasTitle")}</h2>
-
-      <Alert>
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>{tCommon("info")}</AlertTitle>
-        <AlertDescription>
-          <p>{t("ideasIntro")}</p>
-        </AlertDescription>
-      </Alert>
+    <div className="mb-8 max-w-3xl space-y-4">
+      <div className="space-y-2">
+        <h2 className="font-display font-semibold text-2xl">
+          {t("ideasTitle")}
+        </h2>
+        <StatusLine icon={LockIcon} text={t("ideasIntro")} />
+      </div>
 
       {giftIdeas === undefined ? null : giftIdeas.length === 0 ? (
-        <p className="text-muted-foreground italic">{t("ideasEmpty")}</p>
+        <div className="flex flex-col items-center gap-3 py-10 text-center text-muted-foreground">
+          <LightbulbIcon className="size-7" />
+          <p>{t("ideasEmpty")}</p>
+        </div>
       ) : (
-        <ul className="columns-1 gap-2 space-y-2 lg:columns-2 2xl:columns-3">
+        <ul className="divide-y divide-border">
           {giftIdeas.map((giftIdea) => (
-            <li key={giftIdea.id} className="break-inside-avoid">
+            <li key={giftIdea.id}>
               <GiftIdeaItem giftIdea={giftIdea} />
             </li>
           ))}
@@ -138,7 +139,7 @@ function GiftIdeaItem({ giftIdea }: { giftIdea: GiftIdea }) {
   }
 
   return (
-    <Item variant="card">
+    <Item className="px-0 py-3">
       <GiftIdeaContent giftIdea={giftIdea} />
       <ItemActions>
         <ModalForm
