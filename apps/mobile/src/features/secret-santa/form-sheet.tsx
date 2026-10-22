@@ -1,4 +1,5 @@
 import { startOfDay } from "domain/events";
+import { Check } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, Pressable, ScrollView, Switch, View } from "react-native";
 import { Avatar } from "@/components/avatar";
@@ -190,11 +191,11 @@ export function SecretSantaFormSheet({
         </Section>
 
         <Section
-          label={tSanta("participants")}
+          label={`${tSanta("participants")} (${draft.participantIds.length}/${members.length})`}
           hint={participantsLocked ? tSanta("participantsLocked") : undefined}
         >
-          <View style={{ gap: 8 }}>
-            {members.map((member) => {
+          <View>
+            {members.map((member, index) => {
               const on = draft.participantIds.includes(member.userId);
               return (
                 <Pressable
@@ -202,6 +203,7 @@ export function SecretSantaFormSheet({
                   onPress={() => toggleParticipant(member.userId)}
                   disabled={participantsLocked}
                   accessibilityRole="checkbox"
+                  accessibilityLabel={member.name ?? tSanta("unnamedMember")}
                   accessibilityState={{
                     checked: on,
                     disabled: participantsLocked,
@@ -210,10 +212,9 @@ export function SecretSantaFormSheet({
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 12,
-                    borderWidth: 1,
-                    borderColor: on ? t.primary : t.border,
-                    borderRadius: 12,
-                    padding: 10,
+                    paddingVertical: 10,
+                    borderTopWidth: index === 0 ? 0 : 1,
+                    borderColor: t.border,
                     opacity: participantsLocked ? 0.6 : 1,
                   }}
                 >
@@ -222,16 +223,30 @@ export function SecretSantaFormSheet({
                     name={member.name}
                     image={member.image}
                     color={member.avatarColor}
-                    size={28}
+                    size={32}
                   />
                   <Txt style={{ flex: 1 }} numberOfLines={1}>
                     {member.name ?? tSanta("unnamedMember")}
                   </Txt>
-                  {on ? (
-                    <Txt weight="700" style={{ color: t.primary }}>
-                      ✓
-                    </Txt>
-                  ) : null}
+                  <View
+                    // Remount on toggle: Android drops the corner radius when
+                    // a mounted view's background color changes.
+                    key={on ? "on" : "off"}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      borderWidth: on ? 0 : 1.5,
+                      borderColor: t.border,
+                      backgroundColor: on ? t.primary : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {on ? (
+                      <Check color={t.onPrimary} size={14} strokeWidth={3} />
+                    ) : null}
+                  </View>
                 </Pressable>
               );
             })}

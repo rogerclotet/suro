@@ -68,18 +68,23 @@ export function ExclusionSheet({
       <Txt muted size={14}>
         {tSanta("exclusionCreateDescription", { count: limit })}
       </Txt>
+      <Txt size={13} weight="700" style={{ color: t.primary }}>
+        {tSanta("exclusionSelected", { count: selected.length, max: limit })}
+      </Txt>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {secretSanta.participants.map((person) => {
           const on = selected.includes(person.userId);
+          const full = !on && selected.length >= limit;
           return (
             <Pressable
               key={person.userId}
               onPress={() => toggle(person.userId)}
+              disabled={full}
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
+              accessibilityState={{ checked: on, disabled: full }}
               accessibilityLabel={person.name ?? tSanta("unnamedMember")}
             >
-              <PersonTile person={person} selected={on} />
+              <PersonTile person={person} selected={on} dimmed={full} />
             </Pressable>
           );
         })}

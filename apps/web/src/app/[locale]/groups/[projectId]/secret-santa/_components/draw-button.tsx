@@ -14,8 +14,10 @@ import { secretSantaErrorMessage } from "./errors";
 
 export default function DrawButton({
   secretSanta,
+  disabled,
 }: {
   secretSanta: SecretSanta;
+  disabled: boolean;
 }) {
   const draw = useMutation(api.secretSantas.draw);
   const t = useTranslations("secretSanta");
@@ -39,7 +41,13 @@ export default function DrawButton({
       description={t("drawDescription")}
       actionText={t("drawAction")}
       onAction={handleDraw}
-      trigger={<Action icon={ShuffleIcon} label={t("drawAction")} />}
+      trigger={
+        <Action
+          icon={ShuffleIcon}
+          label={t("drawAction")}
+          disabled={disabled}
+        />
+      }
     />
   );
 }

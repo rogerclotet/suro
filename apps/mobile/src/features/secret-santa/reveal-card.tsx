@@ -1,4 +1,4 @@
-import { BadgeQuestionMark } from "lucide-react-native";
+import { Gift } from "lucide-react-native";
 import { useMemo, useRef, useState } from "react";
 import { Animated, Easing, Pressable, View } from "react-native";
 import { Avatar } from "@/components/avatar";
@@ -11,9 +11,9 @@ const HALF_FLIP_MS = 220;
 const CARD_WIDTH = 220;
 
 /**
- * A face-down card that flips to show who the participant drew. The faces swap
- * at the edge-on midpoint instead of relying on `backfaceVisibility`, which is
- * unreliable for rotated views on Android.
+ * A gift card that flips to show who the participant drew. The faces
+ * swap at the edge-on midpoint instead of relying on `backfaceVisibility`,
+ * which is unreliable for rotated views on Android.
  */
 export function RevealCard({
   person,
@@ -65,62 +65,78 @@ export function RevealCard({
       accessibilityLabel={
         revealed ? tSanta("hideMatch") : tSanta("tapToReveal")
       }
-      style={{ alignSelf: "center", paddingVertical: 16 }}
+      style={{ alignSelf: "center", paddingVertical: 8 }}
     >
       <Animated.View
         style={{
           width: CARD_WIDTH,
           aspectRatio: 3 / 4,
-          borderRadius: 20,
-          borderWidth: 1,
-          borderColor: t.border,
-          backgroundColor: t.card,
-          alignItems: "center",
-          justifyContent: "space-evenly",
-          padding: 16,
           transform: [{ perspective: 1000 }, { rotateY }],
-          shadowColor: "#000",
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
-          elevation: 6,
         }}
       >
-        {revealed ? (
-          <>
-            <Avatar
-              kind="user"
-              name={person.name}
-              image={person.image}
-              color={person.avatarColor}
-              size={128}
-            />
-            <Txt
-              size={22}
-              weight="700"
-              numberOfLines={2}
-              style={{ color: t.primary, textAlign: "center" }}
-            >
-              {name}
-            </Txt>
-          </>
-        ) : (
-          <>
-            <View
-              style={{
-                width: 128,
-                height: 128,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <BadgeQuestionMark color={t.border} size={112} />
-            </View>
-            <Txt muted size={14} style={{ textAlign: "center" }}>
-              {tSanta("tapToReveal")}
-            </Txt>
-          </>
-        )}
+        {/* Each face mounts with its own fill: Android drops the corner
+            radius when a mounted view's background color changes. */}
+        <View
+          key={revealed ? "front" : "back"}
+          style={{
+            flex: 1,
+            borderRadius: 20,
+            borderWidth: revealed ? 1 : 0,
+            borderColor: t.border,
+            backgroundColor: revealed ? t.card : t.primary,
+            alignItems: "center",
+            justifyContent: "space-evenly",
+            padding: 16,
+            shadowColor: "#000",
+            shadowOpacity: 0.12,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 3,
+          }}
+        >
+          {revealed ? (
+            <>
+              <Avatar
+                kind="user"
+                name={person.name}
+                image={person.image}
+                color={person.avatarColor}
+                size={120}
+              />
+              <Txt
+                size={22}
+                weight="700"
+                numberOfLines={2}
+                style={{ color: t.primary, textAlign: "center" }}
+              >
+                {name}
+              </Txt>
+            </>
+          ) : (
+            <>
+              <View
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  bottom: 10,
+                  left: 10,
+                  borderRadius: 14,
+                  borderWidth: 1.5,
+                  borderStyle: "dashed",
+                  borderColor: `${t.onPrimary}59`,
+                }}
+              />
+              <Gift color={t.onPrimary} size={84} strokeWidth={1.5} />
+              <Txt
+                size={15}
+                style={{ color: t.onPrimary, textAlign: "center" }}
+              >
+                {tSanta("tapToReveal")}
+              </Txt>
+            </>
+          )}
+        </View>
       </Animated.View>
     </Pressable>
   );

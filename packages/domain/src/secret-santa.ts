@@ -1,3 +1,5 @@
+import { DAY_MS, eventLocalStart } from "./events";
+
 /** A draw needs at least two participants, who would simply swap gifts. */
 export const MIN_PARTICIPANTS = 2;
 
@@ -82,6 +84,24 @@ export function parseGiftUrl(raw: string): GiftUrl {
   return WEB_URL.test(url) ? { valid: true, url } : { valid: false };
 }
 
+/** The host of a stored gift link, without `www.`, as a compact label. */
+export function giftLinkLabel(url: string): string {
+  const host = url.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").split(/[/?#]/)[0];
+  return (host ?? url).replace(/^www\./i, "") || url;
+}
+
+/** Whether the exchange is over: an all-day one lasts until its day ends. */
+export function exchangeHasPassed(
+  exchange: { exchangeAt: number; exchangeAllDay: boolean },
+  now: number,
+): boolean {
+  const start = eventLocalStart({
+    startAt: exchange.exchangeAt,
+    allDay: exchange.exchangeAllDay,
+  }).getTime();
+  return now >= (exchange.exchangeAllDay ? start + DAY_MS : start);
+}
+
 /** Nobody gives to themselves or to anyone sharing an exclusion group. */
 export function canGiveTo(
   giver: string,
@@ -94,14 +114,20 @@ export function canGiveTo(
   );
 }
 
-/** Drop exclusion members who no longer take part, and groups left too small. */
+/**
+ * Drop exclusion members who no longer take part, then the groups that no
+ * longer fit: one member is no exclusion, and a group larger than half the
+ * participants has more givers than outside receivers, so it alone would make
+ * the draw impossible. Below four participants that clears every group.
+ */
 export function pruneExclusions<T extends string>(
   exclusions: readonly (readonly T[])[],
   participants: readonly T[],
 ): T[][] {
+  const maxSize = maxExclusionSize(participants.length);
   return exclusions
     .map((group) => group.filter((id) => participants.includes(id)))
-    .filter((group) => group.length >= 2);
+    .filter((group) => group.length >= 2 && group.length <= maxSize);
 }
 
 /** Whether any assignment satisfies every exclusion. */
@@ -113,6 +139,17 @@ export function hasValidDraw(
     participants.length >= MIN_PARTICIPANTS &&
     findMatching(participants, exclusions, (ids) => ids) !== null
   );
+}
+
+export type DrawProblem = "tooFewParticipants" | "exclusions";
+
+/** Why the organizer can't run the draw yet, or null when they can. */
+export function drawProblem(
+  participants: readonly string[],
+  exclusions: readonly (readonly string[])[],
+): DrawProblem | null {
+  if (participants.length < MIN_PARTICIPANTS) return "tooFewParticipants";
+  return hasValidDraw(participants, exclusions) ? null : "exclusions";
 }
 
 /**

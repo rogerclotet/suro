@@ -782,7 +782,6 @@
     "ideaCreateAction": "Add idea",
     "ideaCreateTitle": "Add idea",
     "ideaCreateDescription": "Add an idea for your Secret Santa",
-    "emptyMessage": "Create one and choose who takes part, the budget and any exclusions.",
     "organizedBy": "Organized by {name}",
     "dateLabel": "Date",
     "timeLabel": "Time",
@@ -805,7 +804,16 @@
     "ideasUnavailable": "Gift ideas are for participants in the group's current Secret Santa.",
     "backToSecretSanta": "Go to Secret Santa",
     "ideaSaveError": "Could not save the idea, please try again later",
-    "ideaDeleteError": "Could not delete the idea, please try again later"
+    "ideaDeleteError": "Could not delete the idea, please try again later",
+    "myIdeasSummary": "{count, plural, =0 {Add ideas for whoever draws you} one {# idea, only whoever draws you sees it} other {# ideas, only whoever draws you sees them}}",
+    "drawHint": "When everyone's in, run the draw. Each participant gets a notification and finds out who they give a gift to.",
+    "drawBlockedByExclusions": "No draw fits these exclusions. Remove one to run the draw.",
+    "exchangePassedHint": "The exchange date has passed. When you're done, archive this Secret Santa from the menu so the group can start a new one.",
+    "howItWorks": "How it works",
+    "emptyStepDetails": "Choose the date, the budget and who takes part.",
+    "emptyStepIdeas": "Everyone adds gift ideas for whoever draws them.",
+    "emptyStepDraw": "Run the draw: each person finds out who they give to, and nobody else does.",
+    "exclusionSelected": "{count} of {max} selected"
   },
   "invitation": {
     "invalidTitle": "Invalid invitation",

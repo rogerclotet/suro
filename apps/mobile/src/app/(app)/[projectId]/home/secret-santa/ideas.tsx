@@ -1,18 +1,21 @@
 import { api } from "backend/convex/_generated/api";
 import { Stack, useRouter } from "expo-router";
+import { Lightbulb, Lock } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import {
   headerBackAction,
   headerCreateAction,
 } from "@/components/header-badges";
-import { GiftIdeaRow } from "@/features/secret-santa/gift-idea-row";
+import { GiftIdeaList } from "@/features/secret-santa/gift-idea-list";
 import { GiftIdeaSheet } from "@/features/secret-santa/gift-idea-sheet";
+import { StatusLine } from "@/features/secret-santa/layout";
 import type { GiftIdea } from "@/features/secret-santa/types";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
-import { Card, Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
+import { useTheme } from "@/theme";
+import { Button, Fab, Loading, Screen, Txt, useFabScroll } from "@/ui";
 
 /** The participant's own wishes, visible only to whoever draws them. */
 export default function GiftIdeasScreen() {
@@ -42,48 +45,36 @@ export default function GiftIdeasScreen() {
         options={{
           title: tSanta("ideasTitle"),
           ...headerBackAction(() => router.back(), tc("back")),
-          ...(participating
-            ? headerCreateAction({
-                onPress: () => openSheet(null),
-                label: tSanta("ideaCreateAction"),
-              })
-            : {}),
+          ...headerCreateAction(
+            participating
+              ? {
+                  onPress: () => openSheet(null),
+                  label: tSanta("ideaCreateAction"),
+                }
+              : undefined,
+          ),
         }}
       />
       {secretSanta === undefined ? (
         <Loading />
       ) : secretSanta === null || !participating ? (
         <View style={{ padding: 16 }}>
-          <Card>
-            <Txt muted>{tSanta("ideasUnavailable")}</Txt>
-          </Card>
+          <StatusLine icon={Lightbulb} text={tSanta("ideasUnavailable")} />
         </View>
       ) : (
         <>
           <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 8 }}
             onScroll={fab.onScroll}
             scrollEventThrottle={16}
           >
-            <Card>
-              <Txt muted size={14}>
-                {tSanta("ideasIntro")}
-              </Txt>
-            </Card>
+            <StatusLine icon={Lock} text={tSanta("ideasIntro")} />
             {giftIdeas === undefined ? (
               <Loading />
             ) : giftIdeas.length === 0 ? (
-              <Txt muted style={{ fontStyle: "italic" }}>
-                {tSanta("ideasEmpty")}
-              </Txt>
+              <EmptyIdeas onAdd={() => openSheet(null)} />
             ) : (
-              giftIdeas.map((giftIdea) => (
-                <GiftIdeaRow
-                  key={giftIdea._id}
-                  giftIdea={giftIdea}
-                  onPress={() => openSheet(giftIdea)}
-                />
-              ))
+              <GiftIdeaList giftIdeas={giftIdeas} onPress={openSheet} />
             )}
           </ScrollView>
           <Fab
@@ -100,5 +91,26 @@ export default function GiftIdeasScreen() {
         </>
       )}
     </Screen>
+  );
+}
+
+function EmptyIdeas({ onAdd }: { onAdd: () => void }) {
+  const t = useTheme();
+  const tSanta = useTranslations("secretSanta");
+  return (
+    <View style={{ alignItems: "center", gap: 12, paddingVertical: 40 }}>
+      <Lightbulb color={t.muted} size={28} />
+      <Txt muted size={15} style={{ textAlign: "center", maxWidth: 280 }}>
+        {tSanta("ideasEmpty")}
+      </Txt>
+      {/* Android already shows the FAB; iOS's header "+" is easy to miss. */}
+      {Platform.OS === "ios" ? (
+        <Button
+          title={tSanta("ideaCreateAction")}
+          variant="ghost"
+          onPress={onAdd}
+        />
+      ) : null}
+    </View>
   );
 }

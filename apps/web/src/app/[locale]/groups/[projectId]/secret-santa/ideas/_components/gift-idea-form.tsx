@@ -59,7 +59,9 @@ export default function GiftIdeaForm({
   const form = useForm<GiftIdeaValues>({
     defaultValues: initialValues,
     resolver: valibotResolver(schema),
-    mode: "onChange",
+    // A link passes through invalid states while typed ("amaz"), so fields
+    // are judged once left, then live.
+    mode: "onTouched",
   });
 
   async function handleSubmit(values: GiftIdeaValues) {

@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.34.1",
+    "version": "1.35.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Hover and selected states have more contrast, especially in dark mode: menus, tabs and list rows now clearly show the active item.",
+        "releaseNotes": "• Secret Santa has a fresh look in the mobile app: the key details at a glance, a gift card to flip for your match, a shortcut to your gift ideas and a clearer draw step for the organizer.\n• The draw no longer gets stuck when someone leaves: exclusions that would make it impossible are removed, and the organizer sees why the draw is blocked.\n• Editing a Secret Santa from the options menu now works on iPhone, and on the web gift ideas show their whole description and link.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Los estados al pasar el ratón y de selección tienen más contraste, sobre todo en modo oscuro: los menús, las pestañas y las filas de las listas ahora muestran claramente el elemento activo.",
+        "releaseNotes": "• El amigo invisible estrena diseño en la app móvil: los detalles de un vistazo, una tarjeta para descubrir a quién te toca, acceso directo a tus ideas y un sorteo más claro para quien lo organiza.\n• El sorteo ya no se bloquea cuando alguien se va: se eliminan las exclusiones que lo harían imposible, y quien lo organiza ve el motivo.\n• Editar el amigo invisible desde el menú de opciones ya funciona en el iPhone, y en la web las ideas de regalo muestran toda la descripción y el enlace.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Els estats de pas del ratolí i de selecció tenen més contrast, sobretot en mode fosc: els menús, les pestanyes i les files de les llistes ara mostren clarament l'element actiu.",
+        "releaseNotes": "• L'amic invisible estrena disseny a l'app mòbil: els detalls d'un cop d'ull, una targeta de regal per descobrir a qui et toca, accés directe a les teves idees i un sorteig més clar per a qui l'organitza.\n• El sorteig ja no queda bloquejat quan algú marxa: s'eliminen les exclusions que el farien impossible, i qui l'organitza veu per què no es pot fer.\n• Editar l'amic invisible des del menú d'opcions ara funciona a l'iPhone, i al web les idees de regal mostren tota la descripció i l'enllaç.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/ca/privacitat"

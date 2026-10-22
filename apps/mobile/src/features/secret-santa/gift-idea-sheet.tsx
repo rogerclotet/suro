@@ -32,6 +32,9 @@ export function GiftIdeaSheet({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  // Typing a link passes through invalid states ("amaz"), so it is only
+  // judged once the field is left or the idea is saved.
+  const [urlChecked, setUrlChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -45,12 +48,17 @@ export function GiftIdeaSheet({
     setName(idea?.name ?? "");
     setDescription(idea?.description ?? "");
     setUrl(idea?.url ?? "");
+    setUrlChecked(false);
     setError(null);
   }, [visible]);
 
   const urlValid = parseGiftUrl(url).valid;
 
   async function submit() {
+    if (!urlValid) {
+      setUrlChecked(true);
+      return;
+    }
     setBusy(true);
     try {
       const values = { name, description, url };
@@ -108,11 +116,12 @@ export function GiftIdeaSheet({
           placeholder={tSanta("ideasUrlPlaceholder")}
           value={url}
           onChangeText={setUrl}
+          onBlur={() => setUrlChecked(true)}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
         />
-        {urlValid ? null : (
+        {urlValid || !urlChecked ? null : (
           <Txt size={13} style={{ color: t.danger }}>
             {tSanta("validationInvalidUrl")}
           </Txt>
@@ -125,7 +134,7 @@ export function GiftIdeaSheet({
       ) : null}
       <Button
         title={busy ? tc("saving") : tc("save")}
-        disabled={busy || name.trim() === "" || !urlValid}
+        disabled={busy || name.trim() === ""}
         onPress={submit}
       />
       {giftIdea ? (

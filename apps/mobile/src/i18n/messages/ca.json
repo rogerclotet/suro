@@ -711,7 +711,6 @@
     "ideaCreateAction": "Afegir idea",
     "ideaCreateTitle": "Afegir idea",
     "ideaCreateDescription": "Afegeix una idea per al teu amic invisible",
-    "emptyMessage": "Crea-ne un i tria qui hi participa, el pressupost i les exclusions.",
     "organizedBy": "Organitzat per {name}",
     "dateLabel": "Data",
     "timeLabel": "Hora",
@@ -738,7 +737,18 @@
     "descriptionPlaceholder": "Descripció (opcional)",
     "budgetHint": "Euros sencers. Deixa el màxim buit per no suggerir cap pressupost.",
     "budgetMinPlaceholder": "Mínim €",
-    "budgetMaxPlaceholder": "Màxim €"
+    "budgetMaxPlaceholder": "Màxim €",
+    "myIdeasSummary": "{count, plural, =0 {Afegeix idees per a qui et toqui} one {# idea, només la veurà qui et toqui} other {# idees, només les veurà qui et toqui}}",
+    "participantsCount": "{count, plural, one {# participant} other {# participants}}",
+    "drawHint": "Quan hi siguin tots, fes el sorteig. Cada participant rebrà una notificació i descobrirà a qui ha de fer el regal.",
+    "drawBlockedByExclusions": "Cap sorteig compleix aquestes exclusions. Elimina'n una per poder fer el sorteig.",
+    "drawRunning": "Sortejant…",
+    "howItWorks": "Com funciona",
+    "emptyStepDetails": "Tria la data, el pressupost i qui hi participa.",
+    "emptyStepIdeas": "Cadascú afegeix idees de regals per a qui li toqui.",
+    "emptyStepDraw": "Fes el sorteig: cadascú descobreix a qui fa el regal, i ningú més ho sap.",
+    "exclusionSelected": "{count} de {max} seleccionats",
+    "exchangePassedHint": "La data de l'intercanvi ja ha passat. Quan acabeu, arxiva aquest amic invisible des del menú perquè el grup en pugui començar un de nou."
   },
   "invitation": {
     "invalidTitle": "Invitació invàlida",

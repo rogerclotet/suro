@@ -1,1 +1,3 @@
-• Los estados al pasar el ratón y de selección tienen más contraste, sobre todo en modo oscuro: los menús, las pestañas y las filas de las listas ahora muestran claramente el elemento activo.
+• El amigo invisible estrena diseño en la app móvil: los detalles de un vistazo, una tarjeta para descubrir a quién te toca, acceso directo a tus ideas y un sorteo más claro para quien lo organiza.
+• El sorteo ya no se bloquea cuando alguien se va: se eliminan las exclusiones que lo harían imposible, y quien lo organiza ve el motivo.
+• Editar el amigo invisible desde el menú de opciones ya funciona en el iPhone, y en la web las ideas de regalo muestran toda la descripción y el enlace.
