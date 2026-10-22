@@ -44,7 +44,7 @@ export default function InlineAddItem(props: InlineAddItemProps) {
       <button
         type="button"
         onClick={props.onActivate}
-        className="flex w-full cursor-pointer flex-row items-center gap-2 rounded-lg p-2 text-muted-foreground hover:bg-muted"
+        className="flex w-full cursor-pointer flex-row items-center gap-2 rounded-lg p-2 text-muted-foreground hover:bg-accent"
       >
         <Plus className="size-4" />
         {t("addItem")}

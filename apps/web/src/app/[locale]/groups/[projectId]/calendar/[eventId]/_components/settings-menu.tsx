@@ -177,7 +177,8 @@ export default function SettingsMenu({
           trigger={
             <ResponsiveMenuItem
               onSelect={(e) => e.preventDefault()}
-              className="cursor-pointer gap-2 hover:bg-destructive hover:text-destructive-foreground"
+              variant="destructive"
+              className="cursor-pointer gap-2"
             >
               <Trash2 />
               {t("deleteTitle")}

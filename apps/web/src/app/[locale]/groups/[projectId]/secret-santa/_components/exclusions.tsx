@@ -204,7 +204,7 @@ function CreateExclusionForm({ secretSanta }: { secretSanta: SecretSanta }) {
                 person={person}
                 fallbackName={t("unnamedMember")}
                 className={cn(
-                  "box-content border-2 hover:bg-accent/10",
+                  "box-content border-2 hover:bg-accent",
                   isSelected && "border-primary bg-primary/10",
                 )}
               />

@@ -47,7 +47,7 @@ export default function SpendingsTable({
         {members.map((u) => (
           <TableRow
             key={u.user.id}
-            className="hover:bg-card [&_.avatar]:transition-colors hover:[&_.avatar]:border-card"
+            className="hover:bg-accent [&_.avatar]:transition-colors hover:[&_.avatar]:border-accent"
           >
             <TableCell className="flex items-center gap-4">
               <UserAvatar user={u.user} />

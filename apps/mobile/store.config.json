@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.34.0",
+    "version": "1.34.1",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• Secret Santa is back, now in the mobile app too. Any member can organize one: choose who takes part, the date, the budget and any exclusions, then run the draw. Each participant finds out who they got and can add gift ideas that only their Secret Santa sees. The exchange shows up in the calendar.",
+        "releaseNotes": "• Hover and selected states have more contrast, especially in dark mode: menus, tabs and list rows now clearly show the active item.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Vuelve el amigo invisible, ahora también en la app móvil. Cualquier miembro puede organizar uno: elige quién participa, la fecha, el presupuesto y las exclusiones, y haz el sorteo. Cada participante descubre a quién le toca y puede añadir ideas de regalos que solo verá quien le haya tocado. El intercambio aparece en el calendario.",
+        "releaseNotes": "• Los estados al pasar el ratón y de selección tienen más contraste, sobre todo en modo oscuro: los menús, las pestañas y las filas de las listas ahora muestran claramente el elemento activo.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Torna l'amic invisible, ara també a l'app mòbil. Qualsevol membre en pot organitzar un: tria qui hi participa, la data, el pressupost i les exclusions, i fes el sorteig. Cada participant descobreix a qui li toca i pot afegir idees de regals que només veurà qui li hagi tocat. L'intercanvi apareix al calendari.",
+        "releaseNotes": "• Els estats de pas del ratolí i de selecció tenen més contrast, sobretot en mode fosc: els menús, les pestanyes i les files de les llistes ara mostren clarament l'element actiu.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/ca/privacitat"
