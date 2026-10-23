@@ -1,4 +1,4 @@
-import { ConvexReactClient } from "convex/react";
+import { type AuthTokenFetcher, ConvexReactClient } from "convex/react";
 import * as SecureStore from "expo-secure-store";
 import { AppState, Platform } from "react-native";
 import {
@@ -7,6 +7,7 @@ import {
   isKeychainLockedError,
   type SecureKeyStore,
 } from "@/lib/auth-storage";
+import { withTokenFetchRecovery } from "@/lib/auth-token-fetcher";
 import { captureException } from "@/lib/error-reporting";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -19,7 +20,24 @@ if (!convexUrl) {
   );
 }
 
-export const convex = new ConvexReactClient(convexUrl, {
+class TokenRecoveringConvexClient extends ConvexReactClient {
+  override setAuth(
+    fetchToken: AuthTokenFetcher,
+    onChange?: (isAuthenticated: boolean) => void,
+    onRefreshChange?: (isRefreshing: boolean) => void,
+  ): void {
+    super.setAuth(
+      withTokenFetchRecovery(fetchToken, {
+        onError: (error) =>
+          captureException(error, { action: "auth-token-refresh" }),
+      }),
+      onChange,
+      onRefreshChange,
+    );
+  }
+}
+
+export const convex = new TokenRecoveringConvexClient(convexUrl, {
   unsavedChangesWarning: false,
 });
 
