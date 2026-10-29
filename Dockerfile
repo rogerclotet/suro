@@ -1,4 +1,4 @@
-FROM node:25.1 AS base
+FROM node:26.13 AS base
 
 # Install pnpm
 RUN npm install -g pnpm@latest-10
