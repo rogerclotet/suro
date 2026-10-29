@@ -1,7 +1,8 @@
 import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextMiddleware, NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
+import { rejectFormPost } from "@/lib/form-post-guard";
 
 export const pathnameHeader = "x-pathname";
 
@@ -118,8 +119,28 @@ function handleIntl(request: NextRequest): NextResponse {
  * with a file extension (static assets, `sw.js`, `manifest.webmanifest`), while
  * still covering page routes and `/api/auth`.
  */
-export default convexAuthNextjsMiddleware((request) => handleIntl(request));
+const authMiddleware = convexAuthNextjsMiddleware((request) =>
+  handleIntl(request),
+);
+
+// The form-post guard runs first so a rejected probe never reaches Convex Auth.
+const proxy: NextMiddleware = (request, event) =>
+  rejectFormPost(request) ?? authMiddleware(request, event);
+
+export default proxy;
 
 export const config = {
-  matcher: ["/((?!_next|_vercel|ingest|.*\\..*).*)"],
+  matcher: [
+    "/((?!_next|_vercel|ingest|.*\\..*).*)",
+    // Scanners also post junk multipart bodies to paths like `/wp-login.php`,
+    // which the entry above skips; Next renders the not-found page for them
+    // and parses the body all the same.
+    {
+      source: "/((?!_next/static|_next/image|ingest).*)",
+      has: [
+        { type: "header", key: "content-type", value: "multipart/form-data.*" },
+      ],
+      missing: [{ type: "header", key: "next-action" }],
+    },
+  ],
 };

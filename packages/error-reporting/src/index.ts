@@ -1,4 +1,4 @@
-import type { ErrorEvent, StackFrame } from "@sentry/core";
+import type { ErrorEvent, RequestEventData, StackFrame } from "@sentry/core";
 
 function convexFailure(message: string | undefined) {
   // Only accept the SDK's prefix, never arbitrary text inside an error payload.
@@ -37,10 +37,70 @@ function frameWithoutData(frame: StackFrame): StackFrame {
   };
 }
 
+const httpMethods = new Set([
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "OPTIONS",
+]);
+
+function header(
+  headers: RequestEventData["headers"],
+  name: string,
+): string | undefined {
+  if (!headers) return undefined;
+  const key = Object.keys(headers).find((key) => key.toLowerCase() === name);
+  return key === undefined ? undefined : headers[key];
+}
+
+/**
+ * Describes the request behind a Next.js server request error (the only events
+ * with a `nextjs` context) without its URL, query, headers or body. The route
+ * is the file-system pattern (`/[locale]/lists`), never the concrete path, and
+ * the content type loses its parameters.
+ */
+function requestTags(event: ErrorEvent): Record<string, string> {
+  const tags: Record<string, string> = {};
+  const nextjs = event.contexts?.nextjs;
+  if (!nextjs) return tags;
+  const routeType = nextjs.route_type;
+  if (typeof routeType === "string" && /^[a-z]+$/.test(routeType))
+    tags.route_type = routeType;
+  const routerPath = nextjs.router_path;
+  if (
+    typeof routerPath === "string" &&
+    routerPath.length <= 200 &&
+    /^\/[\w\-./[\]()@]*$/.test(routerPath)
+  )
+    tags.router_path = routerPath;
+
+  // The SDK's raw request snapshot; `event.request` only carries headers when
+  // header collection is on.
+  const request: RequestEventData | undefined =
+    event.sdkProcessingMetadata?.normalizedRequest ?? event.request;
+  if (!request) return tags;
+  const method = request.method?.toUpperCase();
+  if (method && httpMethods.has(method)) tags.http_method = method;
+  const mediaType = header(request.headers, "content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+  if (mediaType && /^[a-z]+\/[\w.+-]+$/.test(mediaType))
+    tags.content_type = mediaType;
+  if (request.headers)
+    tags.has_next_action = String(
+      header(request.headers, "next-action") !== undefined,
+    );
+  return tags;
+}
+
 /** Keep diagnostic messages while allowlisting the surrounding event metadata. */
 export function anonymousError(event: ErrorEvent): ErrorEvent {
   const action = event.tags?.action;
-  const tags: Record<string, string> = {};
+  const tags = requestTags(event);
   if (typeof action === "string" && /^[a-z_]+$/.test(action))
     tags.action = action;
   const convex = event.exception?.values
