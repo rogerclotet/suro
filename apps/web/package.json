@@ -53,7 +53,7 @@
     "error-reporting": "workspace:*",
     "fflate": "^0.8.3",
     "ics": "^3.12.1",
-    "isomorphic-dompurify": "^3.19.0",
+    "isomorphic-dompurify": "^4.6.0",
     "lucide-react": "^1.64.0",
     "motion": "^14.7.1",
     "nanoid": "^6.0.2",
