@@ -441,10 +441,8 @@ export function Screen({ children }: { children: ReactNode }) {
 // subtracting it makes the lift correct in both cases: ~0 for a full-screen
 // container (login), the tab-bar height once nested inside the tabs.
 function useKeyboardLift() {
-  const keyboard = useAnimatedKeyboard({
-    isStatusBarTranslucentAndroid: true,
-    isNavigationBarTranslucentAndroid: true,
-  });
+  // Edge-to-edge makes Reanimated treat both system bars as translucent.
+  const keyboard = useAnimatedKeyboard();
   const viewRef = useRef<ViewInstance>(null);
   const bottomInset = useSharedValue(0);
 

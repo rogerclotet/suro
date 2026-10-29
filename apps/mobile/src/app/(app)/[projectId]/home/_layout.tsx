@@ -5,7 +5,7 @@ import { FONT, useTheme } from "@/theme";
 // Anchor the Home tab on its index (the dashboard) so a deep link straight to
 // a nested section (e.g. /<pid>/home/notes) still has the dashboard underneath
 // it as a back target.
-export const unstable_settings = { initialRouteName: "index" };
+export const unstable_settings = { anchor: "index" };
 
 export default function HomeLayout() {
   const t = useTheme();
