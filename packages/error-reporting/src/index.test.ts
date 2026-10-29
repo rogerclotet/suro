@@ -160,4 +160,89 @@ describe("error report filtering", () => {
     expect(event.tags).toEqual({ action: "create_note" });
     expect(event.user).toEqual({ ip_address: "0.0.0.0" });
   });
+
+  it("describes the request behind a Next.js server error without identifying it", () => {
+    const event = anonymousError({
+      type: undefined,
+      contexts: {
+        nextjs: {
+          request_path: "/ca/invite/secret-token?ref=person@example.com",
+          router_kind: "App Router",
+          router_path: "/[locale]/invite/[token]",
+          route_type: "render",
+        },
+      },
+      request: { url: "https://suroapp.cat/ca/invite/secret-token" },
+      sdkProcessingMetadata: {
+        normalizedRequest: {
+          method: "post",
+          headers: {
+            "Content-Type": "multipart/form-data; boundary=secret-boundary",
+            cookie: "token=secret",
+            "user-agent": "private-agent",
+          },
+        },
+      },
+      exception: {
+        values: [{ type: "TypeError", value: "Failed to parse body" }],
+      },
+    });
+    expect(event.tags).toEqual({
+      route_type: "render",
+      router_path: "/[locale]/invite/[token]",
+      http_method: "POST",
+      content_type: "multipart/form-data",
+      has_next_action: "false",
+    });
+    const payload = JSON.stringify(event);
+    for (const secret of ["secret", "person@example.com", "private-agent"]) {
+      expect(payload).not.toContain(secret);
+    }
+  });
+
+  it("flags server-action calls and falls back to the event request", () => {
+    const event = anonymousError({
+      type: undefined,
+      contexts: { nextjs: { route_type: "action", router_path: "/[locale]" } },
+      request: {
+        method: "POST",
+        headers: { "next-action": "7f00aa", "content-type": "text/plain" },
+      },
+    });
+    expect(event.tags).toEqual({
+      route_type: "action",
+      router_path: "/[locale]",
+      http_method: "POST",
+      content_type: "text/plain",
+      has_next_action: "true",
+    });
+  });
+
+  it("drops request fields that don't match their expected shape", () => {
+    const event = anonymousError({
+      type: undefined,
+      contexts: {
+        nextjs: {
+          route_type: "Render person@example.com",
+          router_path: "/ca/notes?id=private note",
+        },
+      },
+      request: {
+        method: "PROPFIND person@example.com",
+        headers: { "content-type": "person@example.com" },
+      },
+    });
+    expect(event.tags).toEqual({ has_next_action: "false" });
+  });
+
+  it("adds no request fields to client events", () => {
+    const event = anonymousError({
+      type: undefined,
+      request: {
+        method: "GET",
+        headers: { "content-type": "text/html", "User-Agent": "private" },
+      },
+    });
+    expect(event.tags).toBeUndefined();
+  });
 });
