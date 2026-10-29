@@ -53,7 +53,7 @@ export default async function AccountDeletionPage({
       </header>
 
       <article className="mx-auto max-w-3xl px-6 pt-6 pb-20">
-        <h1 className="font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           {t("title")}
         </h1>
         <div className="mt-8">

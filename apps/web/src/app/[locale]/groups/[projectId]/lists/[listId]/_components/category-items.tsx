@@ -62,7 +62,7 @@ export default memo(function CategoryItems(props: {
       <h3
         key={`title_${props.category}`}
         // Muted uppercase micro-header, mirroring mobile's section titles.
-        className="px-2 font-semibold text-muted-foreground text-xs uppercase tracking-wider"
+        className="px-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
       >
         {props.category}
       </h3>
@@ -102,7 +102,7 @@ export default memo(function CategoryItems(props: {
         {props.items.length === 0 ? (
           // Drop placeholder for an emptied section; it (re)appears via a
           // display toggle when a drag starts, which restarts the fade-in.
-          <div className="fade-in mb-2 h-10 animate-in rounded-md border-2 border-border border-dashed duration-300" />
+          <div className="mb-2 h-10 animate-in rounded-md border-2 border-dashed border-border duration-300 fade-in" />
         ) : null}
       </ul>
 

@@ -31,7 +31,7 @@ export default function EventBacklink({
         startAt={event.startAt}
         endAt={event.endAt}
         allDay={event.allDay}
-        className="mt-0.5 text-muted-foreground text-sm"
+        className="mt-0.5 text-sm text-muted-foreground"
       />
     </div>
   );

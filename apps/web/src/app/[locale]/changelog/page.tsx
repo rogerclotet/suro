@@ -54,10 +54,10 @@ export default async function ChangelogPage({
   return (
     <main className="min-h-screen bg-background">
       <article className="mx-auto max-w-2xl px-6 pt-10 pb-20">
-        <h1 className="font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           {t("pageTitle")}
         </h1>
-        <p className="mt-3 text-muted-foreground leading-relaxed">
+        <p className="mt-3 leading-relaxed text-muted-foreground">
           {t("intro")}
         </p>
 
@@ -70,10 +70,10 @@ export default async function ChangelogPage({
             return (
               <section key={entry.version}>
                 <div className="flex items-baseline gap-3">
-                  <h2 className="font-semibold text-foreground text-xl tracking-tight">
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
                     v{entry.version}
                   </h2>
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-sm text-muted-foreground">
                     {dateFormatter.format(parseDateOnly(entry.date))}
                   </span>
                 </div>
@@ -89,7 +89,7 @@ export default async function ChangelogPage({
                       >
                         {t(TYPE_LABEL[change.type])}
                       </Badge>
-                      <span className="text-foreground text-sm leading-relaxed">
+                      <span className="text-sm leading-relaxed text-foreground">
                         {change.text}
                       </span>
                     </li>

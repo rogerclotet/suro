@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
 const fabVariants = cva(
-  "relative inline-flex items-center justify-center font-display font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+  "relative inline-flex items-center justify-center font-display font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -74,7 +74,7 @@ const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
             )}
           />
         )}
-        {label && <span className="font-semibold text-sm">{label}</span>}
+        {label && <span className="text-sm font-semibold">{label}</span>}
         {children}
       </Button>
     );

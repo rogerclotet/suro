@@ -107,7 +107,7 @@ function MobileHeader() {
 
   return (
     <div className="flex w-full items-center justify-between gap-2">
-      <span className="min-w-0 font-semibold text-lg leading-tight">
+      <span className="min-w-0 text-lg leading-tight font-semibold">
         {tNav(titleKey)}
       </span>
       {titleKey === "groups" && (
@@ -116,7 +116,7 @@ function MobileHeader() {
             type="button"
             variant="outline"
             onClick={openFeedback}
-            className="min-h-11 gap-1.5 rounded-xl px-2.5 font-normal text-muted-foreground text-xs shadow-none"
+            className="min-h-11 gap-1.5 rounded-xl px-2.5 text-xs font-normal text-muted-foreground shadow-none"
           >
             <MessageSquarePlusIcon className="size-[18px]" aria-hidden="true" />
             {tNav("feedback")}

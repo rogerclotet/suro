@@ -5,15 +5,18 @@ React Native app (Expo Router) for groups, lists/tasks, calendar, files, notes, 
 ## Run
 
 1. Start the Convex backend and copy its URL:
+
    ```sh
    pnpm --filter backend dev        # prints CONVEX_URL
    ```
 2. Point the app at it:
+
    ```sh
    cp apps/mobile/.env.example apps/mobile/.env
    # set EXPO_PUBLIC_CONVEX_URL=<your CONVEX_URL>
    ```
 3. Run on a device/simulator:
+
    ```sh
    pnpm --filter mobile ios       # or: android
    ```
@@ -35,11 +38,11 @@ to the stores automatically — see the root `AGENTS.md` → Deploys and
 builds signed with the EAS-managed credentials; log in once with `eas login`
 (eas-cli is a devDependency, so the scripts resolve it from the workspace).
 
-| Script (`pnpm --filter mobile …`) | Profile (`eas.json`) | Output |
-| --- | --- | --- |
-| `build:android:preview` | `preview` (dev Convex) | `build/suro-preview.apk` (sideload-able) |
-| `build:android:release` | `production` | `build/suro-release.aab` (store-ready) |
-| `build:ios:release` | `production` | `build/suro-release.ipa` (store-ready) |
+| Script (`pnpm --filter mobile …`) | Profile (`eas.json`)   | Output                                   |
+| --------------------------------- | ---------------------- | ---------------------------------------- |
+| `build:android:preview`           | `preview` (dev Convex) | `build/suro-preview.apk` (sideload-able) |
+| `build:android:release`           | `production`           | `build/suro-release.aab` (store-ready)   |
+| `build:ios:release`               | `production`           | `build/suro-release.ipa` (store-ready)   |
 
 Prerequisites:
 

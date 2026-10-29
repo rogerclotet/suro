@@ -149,10 +149,10 @@ export default function NoteEditor({
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("titlePlaceholder")}
             aria-label={t("titlePlaceholder")}
-            className="w-full bg-transparent font-semibold text-xl outline-none placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent text-xl font-semibold outline-none placeholder:text-muted-foreground/40"
           />
           {statusLabel && (
-            <p className="mt-1 text-muted-foreground/70 text-xs">
+            <p className="mt-1 text-xs text-muted-foreground/70">
               {statusLabel}
             </p>
           )}

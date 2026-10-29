@@ -83,7 +83,7 @@ export default function ListsDemo() {
   return (
     <Card className="px-4 py-5">
       <div className="mx-auto w-full max-w-lg">
-        <h3 className="px-2 font-semibold text-base text-foreground">
+        <h3 className="px-2 text-base font-semibold text-foreground">
           {t("demoListsName")}
         </h3>
         <div className="mt-3 mb-4 flex items-center gap-2.5 px-2">
@@ -104,7 +104,7 @@ export default function ListsDemo() {
             );
             return (
               <div key={category.id}>
-                <h4 className="px-2 font-semibold text-lg">{category.name}</h4>
+                <h4 className="px-2 text-lg font-semibold">{category.name}</h4>
                 <ul>
                   {categoryItems.map((it) => (
                     <li
@@ -122,7 +122,7 @@ export default function ListsDemo() {
                       <label
                         htmlFor={`demo-list-${it.id}`}
                         className={cn(
-                          "wrap-break-word grow cursor-pointer overflow-hidden text-left",
+                          "grow cursor-pointer overflow-hidden text-left wrap-break-word",
                           it.completed && "text-muted-foreground line-through",
                         )}
                       >

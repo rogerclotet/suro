@@ -36,7 +36,7 @@ export default function FilesNotesDemo() {
             {demoFileKeys.map((file) => (
               <li
                 key={file.id}
-                className="flex h-14 items-center gap-4 not-last:border-background not-last:border-b-2 px-4"
+                className="flex h-14 items-center gap-4 px-4 not-last:border-b-2 not-last:border-background"
               >
                 <div className="flex w-10 shrink-0 items-center justify-center">
                   {file.type.startsWith("image/") ? (
@@ -53,11 +53,11 @@ export default function FilesNotesDemo() {
                 </div>
                 <div className="flex min-w-0 grow flex-col">
                   <span className="truncate text-sm">{t(file.name)}</span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     {readableSize(file.size)}
                   </span>
                 </div>
-                <span className="shrink-0 text-muted-foreground text-xs">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {t("demoFilesUploadedBy", { name: file.uploadedByName })}
                 </span>
               </li>

@@ -77,7 +77,7 @@ export default async function Landing() {
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-2">
             <Image src="/logo.png" alt="Suro" width={36} height={36} priority />
-            <span className="font-semibold text-foreground text-lg">Suro</span>
+            <span className="text-lg font-semibold text-foreground">Suro</span>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
@@ -100,13 +100,13 @@ export default async function Landing() {
           }}
         />
         <div className="relative mx-auto max-w-3xl text-center">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("heroTagline")}
           </p>
-          <h1 className="mt-4 text-balance font-semibold text-4xl text-foreground tracking-tight md:text-5xl lg:text-6xl">
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-balance text-foreground md:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground leading-relaxed">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground">
             {t("heroSubtitle")}
           </p>
           <div className="mt-10 flex flex-col items-center gap-4">
@@ -114,7 +114,7 @@ export default async function Landing() {
             <TrackLoginLink
               location="hero"
               href="/login"
-              className="text-muted-foreground text-sm underline-offset-4 transition-colors hover:text-foreground hover:underline"
+              className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
               {t("heroWebLink")}
             </TrackLoginLink>
@@ -125,10 +125,10 @@ export default async function Landing() {
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
               {t("featuresEyebrow")}
             </p>
-            <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
               {t("featuresTitle")}
             </h2>
           </div>
@@ -141,10 +141,10 @@ export default async function Landing() {
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 font-semibold text-lg text-popover-foreground">
+                <h3 className="mt-4 text-lg font-semibold text-popover-foreground">
                   {title}
                 </h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -155,7 +155,7 @@ export default async function Landing() {
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-balance text-center font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="text-center text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("useCasesTitle")}
           </h2>
           <div className="mt-12 grid gap-5 md:grid-cols-3">
@@ -164,10 +164,10 @@ export default async function Landing() {
                 key={title}
                 className="rounded-xl border border-border bg-popover p-6 shadow-sm"
               >
-                <h3 className="font-semibold text-lg text-popover-foreground">
+                <h3 className="text-lg font-semibold text-popover-foreground">
                   {title}
                 </h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -178,10 +178,10 @@ export default async function Landing() {
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl rounded-2xl bg-secondary px-8 py-12 text-center text-secondary-foreground shadow-lg md:px-12 md:py-16">
-          <h2 className="text-balance font-semibold text-3xl tracking-tight md:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance md:text-4xl">
             {t("ctaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-pretty text-base text-secondary-foreground/80 leading-relaxed">
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-pretty text-secondary-foreground/80">
             {t("ctaBody")}
           </p>
           <AppBadges className="mt-8" />
@@ -198,12 +198,12 @@ export default async function Landing() {
       </section>
 
       <footer className="px-6 pt-6 pb-12">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 border-border border-t pt-8 sm:flex-row sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 border-t border-border pt-8 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
             <Image src="/logo.png" alt="Suro" width={24} height={24} />
-            <span className="font-semibold text-foreground text-sm">Suro</span>
+            <span className="text-sm font-semibold text-foreground">Suro</span>
           </div>
-          <p className="text-muted-foreground text-sm sm:flex-1 sm:px-6 sm:text-center">
+          <p className="text-sm text-muted-foreground sm:flex-1 sm:px-6 sm:text-center">
             {t("footerTagline")}
           </p>
           <nav className="flex items-center gap-5 text-sm">

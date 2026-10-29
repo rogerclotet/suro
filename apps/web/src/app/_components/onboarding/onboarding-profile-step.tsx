@@ -77,8 +77,8 @@ export default function OnboardingProfileStep({
         <UserIcon className="h-8 w-8" />
       </div>
       <div className="space-y-1 text-center">
-        <h3 className="font-semibold text-xl">{t("profileTitle")}</h3>
-        <p className="text-muted-foreground text-sm">{t("profileBody")}</p>
+        <h3 className="text-xl font-semibold">{t("profileTitle")}</h3>
+        <p className="text-sm text-muted-foreground">{t("profileBody")}</p>
       </div>
 
       <div className="w-full space-y-4 pt-2">

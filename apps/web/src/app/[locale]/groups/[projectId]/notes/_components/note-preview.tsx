@@ -28,14 +28,14 @@ export default function NotePreview({ note }: { note: Note }) {
       <h3 className="line-clamp-1 font-semibold text-foreground">
         {note.name}
       </h3>
-      <div className="mt-2 line-clamp-5 flex-1 whitespace-pre-line text-muted-foreground text-xs leading-relaxed">
+      <div className="mt-2 line-clamp-5 flex-1 text-xs leading-relaxed whitespace-pre-line text-muted-foreground">
         {preview || (
           <span className="text-muted-foreground/50 italic">
             {t("emptyPreview")}
           </span>
         )}
       </div>
-      <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground/70 uppercase tracking-wide">
+      <div className="mt-3 flex items-center gap-2 text-[10px] tracking-wide text-muted-foreground/70 uppercase">
         {note.eventId && (
           <CalendarFold className="size-3 shrink-0 text-primary/60" />
         )}

@@ -69,7 +69,7 @@ export default function Profile() {
 
         <Link href="/changelog">
           <ResponsiveMenuItem
-            className="cursor-pointer justify-between gap-2 text-muted-foreground text-xs"
+            className="cursor-pointer justify-between gap-2 text-xs text-muted-foreground"
             onClick={() => setOpenMobile(false)}
           >
             <span>{tChangelog("versionLabel")}</span>

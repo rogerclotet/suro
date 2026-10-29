@@ -11,7 +11,7 @@ export function SectionLabel({
   count?: number;
 }) {
   return (
-    <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+    <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
       {children}
       {count !== undefined && ` · ${count}`}
     </h3>

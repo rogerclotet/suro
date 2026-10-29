@@ -116,13 +116,13 @@ function EditorToolbar({
   const t = useTranslations("notes.editor");
 
   if (!editor) {
-    return <div className="h-10 border-input border-b" />;
+    return <div className="h-10 border-b border-input" />;
   }
 
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-0.5 border-input border-b p-1",
+        "flex flex-wrap items-center gap-0.5 border-b border-input p-1",
         inline && "sticky top-0 z-10 bg-background/95 backdrop-blur",
       )}
     >
@@ -299,7 +299,7 @@ function LinkButton({ editor }: { editor: Editor }) {
       <PopoverContent className="w-72 space-y-2 p-3">
         <label
           htmlFor={inputId}
-          className="block font-medium text-muted-foreground text-xs"
+          className="block text-xs font-medium text-muted-foreground"
         >
           {t("link")}
         </label>

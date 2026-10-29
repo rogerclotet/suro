@@ -7,7 +7,13 @@ import { endOfWeek, startOfWeek } from "date-fns";
 import { CalendarArrowDown, Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { type ComponentProps, useMemo, useState } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import type { CalendarDay, DayButton, Modifiers } from "react-day-picker";
 import { toast } from "sonner";
 import type { CalendarEvent } from "@/app/_data/event";
@@ -88,6 +94,66 @@ function Events({
   );
 }
 
+type CalendarDayEvents = {
+  events: CalendarEvent[] | undefined;
+  eventColors: Map<string, number>;
+};
+
+// DayPicker remounts slot components whose identity changes, so the day
+// button is module-level and reads the visible range's events from context.
+const CalendarDayEventsContext = createContext<CalendarDayEvents>({
+  events: undefined,
+  eventColors: new Map(),
+});
+
+function EventDayButton({
+  className,
+  day,
+  modifiers,
+  ...props
+}: {
+  className?: string;
+  day: CalendarDay;
+  modifiers: Modifiers;
+} & ComponentProps<typeof DayButton>) {
+  const { events, eventColors } = useContext(CalendarDayEventsContext);
+  const dayEvents = events
+    ?.filter((event) => isEventOnDay(event, day.date))
+    .slice(0, 3);
+
+  return (
+    <div className="relative aspect-square w-full overflow-visible">
+      <CalendarDayButton
+        className="text-sm"
+        day={day}
+        modifiers={modifiers}
+        {...props}
+      />
+
+      {dayEvents && dayEvents.length > 0 && (
+        /* Bottom-centered 5px dots, like the mobile month grid. */
+        <div className="pointer-events-none absolute bottom-[3px] left-1/2 flex -translate-x-1/2 gap-0.5">
+          {dayEvents.map((event) => {
+            const color = eventColors.get(event.id) ?? 0;
+            const dotClasses = modifiers.selected
+              ? EVENT_DOT_ON_PRIMARY_CLASSES
+              : EVENT_DOT_CLASSES;
+            return (
+              <div
+                key={event.id}
+                className={cn(
+                  "z-10 h-[5px] w-[5px] rounded-full",
+                  dotClasses[color],
+                )}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Calendar({
   dateLocale,
 }: {
@@ -149,53 +215,10 @@ export default function Calendar({
     return colors;
   }, [events]);
 
-  function CustomDayButton({
-    className,
-    day,
-    modifiers,
-    ...props
-  }: {
-    className?: string;
-    day: CalendarDay;
-    modifiers: Modifiers;
-  } & ComponentProps<typeof DayButton>) {
-    const dayEvents = events
-      ?.filter((event) => isEventOnDay(event, day.date))
-      .slice(0, 3);
-
-    return (
-      <div className="relative aspect-square w-full overflow-visible">
-        <CalendarDayButton
-          className="text-sm"
-          day={day}
-          modifiers={modifiers}
-          dateLocale={dateLocale}
-          {...props}
-        />
-
-        {dayEvents && dayEvents.length > 0 && (
-          /* Bottom-centered 5px dots, like the mobile month grid. */
-          <div className="pointer-events-none absolute bottom-[3px] left-1/2 flex -translate-x-1/2 gap-0.5">
-            {dayEvents.map((event) => {
-              const color = eventColors.get(event.id) ?? 0;
-              const dotClasses = modifiers.selected
-                ? EVENT_DOT_ON_PRIMARY_CLASSES
-                : EVENT_DOT_CLASSES;
-              return (
-                <div
-                  key={event.id}
-                  className={cn(
-                    "z-10 h-[5px] w-[5px] rounded-full",
-                    dotClasses[color],
-                  )}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
+  const dayEvents = useMemo(
+    () => ({ events, eventColors }),
+    [events, eventColors],
+  );
 
   function handleDaySelect(date: Date | undefined) {
     if (date) {
@@ -224,24 +247,26 @@ export default function Calendar({
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:gap-8">
-        <div className="flex w-full flex-col items-stretch md:w-auto md:min-w-[20rem] md:max-w-sm">
-          <CalendarComponent
-            mode="single"
-            month={currentMonth}
-            selected={date}
-            onSelect={handleDaySelect}
-            onMonthChange={setCurrentMonth}
-            locale={dfLocale}
-            dateLocale={dateLocale}
-            className="w-full"
-            classNames={{
-              caption_label: "text-md",
-              root: "w-full",
-            }}
-            components={{
-              DayButton: CustomDayButton,
-            }}
-          />
+        <div className="flex w-full flex-col items-stretch md:w-auto md:max-w-sm md:min-w-[20rem]">
+          <CalendarDayEventsContext value={dayEvents}>
+            <CalendarComponent
+              mode="single"
+              month={currentMonth}
+              selected={date}
+              onSelect={handleDaySelect}
+              onMonthChange={setCurrentMonth}
+              locale={dfLocale}
+              dateLocale={dateLocale}
+              className="w-full"
+              classNames={{
+                caption_label: "text-md",
+                root: "w-full",
+              }}
+              components={{
+                DayButton: EventDayButton,
+              }}
+            />
+          </CalendarDayEventsContext>
           <Button
             variant="outline"
             size="sm"
@@ -255,7 +280,7 @@ export default function Calendar({
 
         {date && (
           <div className="grow">
-            <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 font-semibold text-xl">
+            <h2 className="mb-4 flex flex-wrap items-center justify-between gap-4 text-xl font-semibold">
               {new Intl.DateTimeFormat(uiLocale, { dateStyle: "long" }).format(
                 date,
               )}

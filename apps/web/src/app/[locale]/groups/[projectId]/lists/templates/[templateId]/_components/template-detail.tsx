@@ -48,7 +48,7 @@ export default function TemplateDetail({ templateId }: { templateId: string }) {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="flex items-center gap-2 font-semibold text-xl">
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
           <LayoutTemplateIcon /> {template.name}
         </h1>
         <SettingsMenu template={template} />

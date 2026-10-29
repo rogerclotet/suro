@@ -51,7 +51,7 @@ export default function GroupSettings({ projectId }: { projectId: string }) {
       <div className="flex items-center gap-4">
         <ProjectAvatar project={project} className="size-14 text-2xl" />
         <div className="min-w-0 flex-1">
-          <h1 className="break-words font-display font-semibold text-2xl">
+          <h1 className="font-display text-2xl font-semibold break-words">
             {project.name}
           </h1>
           <p className="text-muted-foreground">{t("manageTitle")}</p>
@@ -60,7 +60,7 @@ export default function GroupSettings({ projectId }: { projectId: string }) {
         <InviteButton project={project} />
       </div>
       <section className="space-y-2">
-        <h2 className="font-display font-semibold text-lg">
+        <h2 className="font-display text-lg font-semibold">
           {t("membersTitle")}
         </h2>
         <ul className="divide-y divide-border">
@@ -71,7 +71,7 @@ export default function GroupSettings({ projectId }: { projectId: string }) {
                 {user.name ?? t("unnamedMember")}
               </span>
               {user.id === project.createdBy ? (
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sm text-muted-foreground">
                   {t("administrator")}
                 </span>
               ) : isAdmin ? (
@@ -81,7 +81,7 @@ export default function GroupSettings({ projectId }: { projectId: string }) {
           ))}
         </ul>
       </section>
-      <div className="border-border border-t pt-4">
+      <div className="border-t border-border pt-4">
         {isAdmin ? (
           <DeleteProjectButton projectId={project.id} showLabel />
         ) : (

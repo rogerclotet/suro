@@ -67,7 +67,7 @@ export default function ProgressRing({
       {pending > 0 && (
         // Two digits is all the ring fits; beyond that the gauge matters more
         // than the exact number.
-        <span className="font-bold text-muted-foreground text-xs tabular-nums">
+        <span className="text-xs font-bold text-muted-foreground tabular-nums">
           {pending > 99 ? "99" : pending}
         </span>
       )}

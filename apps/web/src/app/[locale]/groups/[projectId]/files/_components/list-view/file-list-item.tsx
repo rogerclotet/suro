@@ -60,7 +60,7 @@ export default function FileListItem({ file }: { file: File }) {
           )}
         </div>
 
-        <span className="text-muted-foreground text-xs">
+        <span className="text-xs text-muted-foreground">
           {readableSize(file.size)}
         </span>
       </div>
@@ -68,7 +68,7 @@ export default function FileListItem({ file }: { file: File }) {
       <div className="flex shrink-0 flex-col items-end pr-4">
         <Tooltip>
           <TooltipTrigger>
-            <span className="line-clamp-2 max-w-32 text-muted-foreground text-sm">
+            <span className="line-clamp-2 max-w-32 text-sm text-muted-foreground">
               {file.uploadedBy.name}
             </span>
           </TooltipTrigger>
@@ -87,7 +87,7 @@ export default function FileListItem({ file }: { file: File }) {
               } as never
             }
           >
-            <span className="line-clamp-2 flex max-w-32 flex-row items-center gap-2 text-muted-foreground text-sm">
+            <span className="line-clamp-2 flex max-w-32 flex-row items-center gap-2 text-sm text-muted-foreground">
               <CalendarFold size={14} className="shrink-0" />
               <span className="line-clamp-1">{file.event.name}</span>
             </span>

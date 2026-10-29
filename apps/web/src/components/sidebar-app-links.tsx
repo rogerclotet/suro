@@ -54,10 +54,10 @@ export function SidebarAppLinks() {
   return (
     <section
       aria-label={t("title")}
-      className="hidden flex-col gap-3 border-sidebar-border border-b px-2 pt-2 pb-3 group-data-[collapsible=icon]:hidden md:flex"
+      className="hidden flex-col gap-3 border-b border-sidebar-border px-2 pt-2 pb-3 group-data-[collapsible=icon]:hidden md:flex"
     >
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-medium text-sidebar-foreground/70 text-xs">
+        <h2 className="text-xs font-medium text-sidebar-foreground/70">
           {t("title")}
         </h2>
         <Button

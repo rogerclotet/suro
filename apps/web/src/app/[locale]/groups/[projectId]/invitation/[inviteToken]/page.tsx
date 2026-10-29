@@ -104,7 +104,7 @@ export default async function InvitePage({
             </div>
           ) : (
             <>
-              <p className="text-center text-muted-foreground text-sm">
+              <p className="text-center text-sm text-muted-foreground">
                 {t("loginPrompt")}
               </p>
               <Login redirectTo={redirectTo} compact />

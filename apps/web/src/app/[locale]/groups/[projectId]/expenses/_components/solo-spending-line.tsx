@@ -68,7 +68,7 @@ export default function SoloSpendingLine({ spending }: { spending: Spending }) {
           )}
         </p>
         {displayDate ? (
-          <p className="text-muted-foreground text-sm">{displayDate}</p>
+          <p className="text-sm text-muted-foreground">{displayDate}</p>
         ) : null}
       </div>
       <MonetaryAmount

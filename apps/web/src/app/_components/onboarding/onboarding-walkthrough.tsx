@@ -134,8 +134,8 @@ function ClientOnboardingWalkthrough({
           <div className="flex flex-col items-center gap-4 py-2 text-center">
             <Image src="/logo.png" alt="Suro" width={64} height={64} />
             <div className="space-y-2">
-              <h3 className="font-semibold text-xl">{t("welcomeTitle")}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <h3 className="text-xl font-semibold">{t("welcomeTitle")}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {t("welcomeBody")}
               </p>
             </div>

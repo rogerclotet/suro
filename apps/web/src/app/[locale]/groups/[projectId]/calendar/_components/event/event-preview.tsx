@@ -39,7 +39,7 @@ export default function EventPreview({
       <div className={cn("w-1 shrink-0 rounded-full", accentClass)} />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="truncate font-semibold text-base leading-snug">
+          <div className="truncate text-base leading-snug font-semibold">
             {event.name}
           </div>
           {event.files.length > 0 && (
@@ -48,7 +48,7 @@ export default function EventPreview({
                 <Folders className="size-4 shrink-0 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p className="font-normal text-base">{t("filesShared")}</p>
+                <p className="text-base font-normal">{t("filesShared")}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -64,7 +64,7 @@ export default function EventPreview({
           <div
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Already sanitized
             dangerouslySetInnerHTML={{ __html: textToHtml(event.description) }}
-            className="wrap-break-word mt-1 line-clamp-2 text-muted-foreground text-sm"
+            className="mt-1 line-clamp-2 text-sm wrap-break-word text-muted-foreground"
           />
         ) : null}
       </div>

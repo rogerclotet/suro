@@ -33,7 +33,7 @@ export default function ThemeSettings() {
 
   return (
     <div className="space-y-2">
-      <Label className="font-medium text-base">{t("theme")}</Label>
+      <Label className="text-base font-medium">{t("theme")}</Label>
       <Select value={mounted ? theme : undefined} onValueChange={setTheme}>
         <SelectTrigger>
           <SelectValue placeholder={tNav("chooseTheme")} />
@@ -49,7 +49,7 @@ export default function ThemeSettings() {
           ))}
         </SelectContent>
       </Select>
-      <p className="text-muted-foreground text-sm">{t("themeDescription")}</p>
+      <p className="text-sm text-muted-foreground">{t("themeDescription")}</p>
     </div>
   );
 }

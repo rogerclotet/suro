@@ -103,7 +103,7 @@ export default function ListItem(props: {
                 // text-decoration-color (covered by transition-colors), which
                 // animates per line box so wrapped names stay struck correctly.
                 className={cn(
-                  "wrap-break-word block w-full overflow-hidden text-left line-through transition-colors duration-300",
+                  "block w-full overflow-hidden text-left wrap-break-word line-through transition-colors duration-300",
                   item.completed
                     ? "text-muted-foreground decoration-current"
                     : "decoration-transparent",
@@ -111,7 +111,7 @@ export default function ListItem(props: {
               >
                 {item.name}
                 {item.details ? (
-                  <span className="block text-muted-foreground text-xs">
+                  <span className="block text-xs text-muted-foreground">
                     {item.details}
                   </span>
                 ) : null}
@@ -121,7 +121,7 @@ export default function ListItem(props: {
           {assignee || item.priority || item.dueAt || repeat !== "none" ? (
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               {assignee && (
-                <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
                   <UserAvatar user={assignee} className="h-5 w-5" />
                   {assignee.name}
                 </span>
@@ -135,7 +135,7 @@ export default function ListItem(props: {
                 />
               )}
               {repeat !== "none" ? (
-                <span className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
                   <RepeatIcon className="size-3" />
                   {t(`repeat_${repeat}`)}
                 </span>

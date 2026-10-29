@@ -46,7 +46,7 @@ export default function NoteEdit({ noteId }: { noteId: string }) {
                 : "editingBySomeone",
           )}
         </p>
-        <h1 className="font-semibold text-xl">{note.name}</h1>
+        <h1 className="text-xl font-semibold">{note.name}</h1>
         <RichTextContent format={note.format} content={note.contents} />
         <Action label={t("doneEditing")} icon={CheckIcon} onClick={done} />
       </>

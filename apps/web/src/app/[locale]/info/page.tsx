@@ -121,10 +121,10 @@ export default async function InfoPage({
           }}
         />
         <div className="relative mx-auto max-w-4xl text-left md:text-center">
-          <h1 className="text-balance font-semibold text-4xl text-foreground tracking-tight md:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-semibold tracking-tight text-balance text-foreground md:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="mt-6 max-w-2xl text-pretty text-base text-muted-foreground leading-relaxed md:mx-auto md:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground md:mx-auto md:text-lg">
             {t("heroSubtitle")}
           </p>
           <ul className="mt-12 grid max-w-md grid-cols-3 gap-x-3 gap-y-6 sm:mx-auto sm:max-w-2xl sm:grid-cols-6">
@@ -136,7 +136,7 @@ export default async function InfoPage({
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="text-balance font-medium text-foreground text-xs">
+                <span className="text-xs font-medium text-balance text-foreground">
                   {label}
                 </span>
               </li>
@@ -147,13 +147,13 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("problemEyebrow")}
           </p>
-          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("problemTitle")}
           </h2>
-          <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+          <p className="mt-6 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             {t("problemBody")}
           </p>
         </div>
@@ -161,13 +161,13 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("valueEyebrow")}
           </p>
-          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("valueTitle")}
           </h2>
-          <div className="mt-6 flex flex-col gap-4 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+          <div className="mt-6 flex flex-col gap-4 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             <p>{t("valueBody1")}</p>
             <p>{t("valueBody2")}</p>
             <p>{t("valueBody3")}</p>
@@ -175,16 +175,16 @@ export default async function InfoPage({
         </div>
       </section>
 
-      <div className="mt-8 border-border border-t bg-muted/30">
+      <div className="mt-8 border-t border-border bg-muted/30">
         <section className="px-6 pt-14 pb-2 md:pt-20">
           <div className="mx-auto max-w-3xl text-left md:text-center">
-            <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
               {t("featuresEyebrow")}
             </p>
-            <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
               {t("featuresTitle")}
             </h2>
-            <p className="mt-4 text-pretty text-base text-muted-foreground leading-relaxed">
+            <p className="mt-4 text-base leading-relaxed text-pretty text-muted-foreground">
               {t("featuresSubtitle")}
             </p>
           </div>
@@ -220,16 +220,16 @@ export default async function InfoPage({
           reverse
         />
 
-        <div className="border-border border-b" />
+        <div className="border-b border-border" />
       </div>
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-left md:text-center">
-            <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
               {t("audienceEyebrow")}
             </p>
-            <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
               {t("audienceTitle")}
             </h2>
           </div>
@@ -239,10 +239,10 @@ export default async function InfoPage({
                 key={title}
                 className="rounded-xl border border-border bg-popover p-6 shadow-sm"
               >
-                <h3 className="font-semibold text-lg text-popover-foreground">
+                <h3 className="text-lg font-semibold text-popover-foreground">
                   {title}
                 </h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -254,13 +254,13 @@ export default async function InfoPage({
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-left md:text-center">
-            <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
               {t("diffEyebrow")}
             </p>
-            <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
               {t("diffTitle")}
             </h2>
-            <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+            <p className="mt-6 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
               {t("diffIntro")}
             </p>
           </div>
@@ -274,11 +274,11 @@ export default async function InfoPage({
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     {icons}
                   </div>
-                  <h3 className="font-semibold text-lg text-popover-foreground">
+                  <h3 className="text-lg font-semibold text-popover-foreground">
                     {title}
                   </h3>
                 </div>
-                <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -289,13 +289,13 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("roadmapEyebrow")}
           </p>
-          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("roadmapTitle")}
           </h2>
-          <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+          <p className="mt-6 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             {t("roadmapBody")}
           </p>
         </div>
@@ -303,18 +303,18 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("privacyEyebrow")}
           </p>
-          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("privacyTitle")}
           </h2>
-          <p className="mt-6 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+          <p className="mt-6 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             {t("privacyBody")}
           </p>
           <Link
             href="/privacy"
-            className="mt-6 inline-flex items-center gap-1.5 font-medium text-foreground text-sm transition-colors hover:text-primary"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-primary"
           >
             {t("privacyLink")}
             <ArrowRight className="h-4 w-4" />
@@ -324,21 +324,21 @@ export default async function InfoPage({
 
       <section className="px-6 py-14 md:py-20">
         <div className="mx-auto max-w-3xl">
-          <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
             {t("monetizationEyebrow")}
           </p>
-          <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
             {t("monetizationTitle")}
           </h2>
           <div className="mt-8 rounded-xl border border-border bg-popover p-6 shadow-sm">
-            <p className="font-semibold text-base text-popover-foreground">
+            <p className="text-base font-semibold text-popover-foreground">
               {t("monetizationPrimaryHeading")}
             </p>
-            <p className="mt-2 text-muted-foreground text-sm leading-relaxed md:text-base">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
               {t("monetizationPrimaryBody")}
             </p>
           </div>
-          <p className="mt-8 font-semibold text-base text-foreground">
+          <p className="mt-8 text-base font-semibold text-foreground">
             {t("monetizationAltHeading")}
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -360,10 +360,10 @@ export default async function InfoPage({
                 key={title}
                 className="rounded-xl border border-border bg-popover p-5 shadow-sm"
               >
-                <h3 className="font-medium text-popover-foreground text-sm">
+                <h3 className="text-sm font-medium text-popover-foreground">
                   {title}
                 </h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -373,16 +373,16 @@ export default async function InfoPage({
       </section>
 
       <footer className="px-6 pt-6 pb-12">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 border-border border-t pt-8 sm:flex-row sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 border-t border-border pt-8 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
             <Image src="/logo.png" alt="Suro" width={24} height={24} />
-            <span className="font-semibold text-foreground text-sm">Suro</span>
+            <span className="text-sm font-semibold text-foreground">Suro</span>
           </div>
           <a
             href={AUTHOR_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             {AUTHOR_NAME}
           </a>

@@ -118,7 +118,7 @@ export default function ListsClientContainer({
             startAt={currentList.event.startAt}
             endAt={currentList.event.endAt}
             allDay={currentList.event.allDay}
-            className="mt-0.5 text-muted-foreground text-sm"
+            className="mt-0.5 text-sm text-muted-foreground"
           />
         </div>
       )}
@@ -134,7 +134,7 @@ export default function ListsClientContainer({
             }}
           />
         )}
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {tLists("createdMeta", {
             name: currentList.createdByName ?? tCommon("someone"),
             date: currentList.createdAt

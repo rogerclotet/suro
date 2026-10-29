@@ -43,7 +43,7 @@ export default function Exclusions({
       >
         {t("exclusionsTitle")}
       </SectionLabel>
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t("exclusionsDescription")}
       </p>
 
@@ -198,7 +198,7 @@ function CreateExclusionForm({ secretSanta }: { secretSanta: SecretSanta }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="font-semibold text-primary text-sm">
+      <p className="text-sm font-semibold text-primary">
         {t("exclusionSelected", { count: selected.length, max: limit })}
       </p>
       <div className="flex flex-wrap gap-y-2">

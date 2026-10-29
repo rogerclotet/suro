@@ -106,7 +106,7 @@ export default function TemplateItems({ template }: { template: Template }) {
                 key={`title_${category}`}
                 layout="position"
                 {...SECTION_PRESENCE}
-                className="font-semibold text-lg"
+                className="text-lg font-semibold"
               >
                 {category}
               </m.h3>,

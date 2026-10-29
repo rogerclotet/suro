@@ -141,7 +141,7 @@ function CreatePotFormContent({
                             disabled={form.formState.isSubmitting}
                           />
                         </FormControl>
-                        <span className="font-normal text-sm">
+                        <span className="text-sm font-normal">
                           {u.user.name}
                         </span>
                       </FormItem>

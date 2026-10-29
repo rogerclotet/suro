@@ -26,13 +26,13 @@ Background failures that never reach a client and errors swallowed without an ex
 
 Set these GitHub Actions secrets:
 
-| Secret | Value |
-| --- | --- |
-| `NEXT_PUBLIC_SENTRY_DSN` | GlitchTip project DSN |
-| `SENTRY_URL` | HTTPS origin of your GlitchTip instance |
-| `SENTRY_ORG` | Organization slug |
-| `SENTRY_PROJECT` | Project slug |
-| `SENTRY_AUTH_TOKEN` | Token allowed to create releases and upload sourcemaps |
+| Secret                   | Value                                                  |
+| ------------------------ | ------------------------------------------------------ |
+| `NEXT_PUBLIC_SENTRY_DSN` | GlitchTip project DSN                                  |
+| `SENTRY_URL`             | HTTPS origin of your GlitchTip instance                |
+| `SENTRY_ORG`             | Organization slug                                      |
+| `SENTRY_PROJECT`         | Project slug                                           |
+| `SENTRY_AUTH_TOKEN`      | Token allowed to create releases and upload sourcemaps |
 
 The production workflow sets `NEXT_PUBLIC_SENTRY_ENVIRONMENT=production` and supplies the deployed commit as `SURO_COMMIT_SHA`. Next derives `NEXT_PUBLIC_SENTRY_RELEASE` as `suro@` plus the first seven commit characters. The same value labels runtime events and uploaded source maps. Docker receives the upload token through a BuildKit secret, not an image build argument. Maps are uploaded during compilation and deleted afterward. Missing configuration or a failed upload fails the build before the image can be pushed or deployed.
 

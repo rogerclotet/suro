@@ -59,9 +59,9 @@ export default function NoteView({ noteId }: { noteId: string }) {
     <div className="flex min-h-full flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="break-words font-semibold text-xl">{note.name}</h1>
+          <h1 className="text-xl font-semibold break-words">{note.name}</h1>
           {updatedAt && (
-            <p className="mt-1 text-muted-foreground/70 text-xs">
+            <p className="mt-1 text-xs text-muted-foreground/70">
               {formatRelative(updatedAt, locale)}
             </p>
           )}
@@ -83,7 +83,7 @@ export default function NoteView({ noteId }: { noteId: string }) {
       </div>
 
       {lock && (
-        <p role="status" className="text-muted-foreground text-sm">
+        <p role="status" className="text-sm text-muted-foreground">
           {lock.editorName
             ? t("editingBy", { name: lock.editorName })
             : t("editingBySomeone")}

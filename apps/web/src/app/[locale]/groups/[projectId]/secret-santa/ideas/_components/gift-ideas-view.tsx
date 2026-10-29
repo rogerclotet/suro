@@ -62,7 +62,7 @@ export default function GiftIdeasView({ projectId }: { projectId: string }) {
   return (
     <div className="mb-8 max-w-3xl space-y-4">
       <div className="space-y-2">
-        <h2 className="font-display font-semibold text-2xl">
+        <h2 className="font-display text-2xl font-semibold">
           {t("ideasTitle")}
         </h2>
         <StatusLine icon={LockIcon} text={t("ideasIntro")} />

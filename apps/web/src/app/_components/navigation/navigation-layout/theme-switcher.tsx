@@ -29,9 +29,9 @@ export default function ThemeSwitcher() {
     return (
       <Collapsible>
         <CollapsibleTrigger asChild>
-          <div className="flex w-full cursor-pointer select-none items-center gap-3 rounded-md px-4 py-3 text-base outline-hidden transition-colors *:last:transition-transform active:bg-accent data-[state=open]:*:last:rotate-90 [&_svg:not([class*='size-'])]:size-5 [&_svg:not([class*='text-'])]:text-muted-foreground">
-            <Sun className="rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+          <div className="flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-base outline-hidden transition-colors select-none *:last:transition-transform active:bg-accent data-[state=open]:*:last:rotate-90 [&_svg:not([class*='size-'])]:size-5 [&_svg:not([class*='text-'])]:text-muted-foreground">
+            <Sun className="scale-100 rotate-0 transition-transform dark:scale-0 dark:-rotate-90" />
+            <Moon className="absolute scale-0 rotate-90 transition-transform dark:scale-100 dark:rotate-0" />
             <span>{t("chooseTheme")}</span>
             <ChevronRight className="ml-auto" />
           </div>
@@ -58,8 +58,8 @@ export default function ThemeSwitcher() {
       <DropdownMenuSub>
         <CollapsibleTrigger asChild>
           <DropdownMenuSubTrigger className="*:last:transition-transform *:last:duration-200 data-[state=open]:*:last:rotate-90">
-            <Sun className="rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+            <Sun className="scale-100 rotate-0 transition-transform dark:scale-0 dark:-rotate-90" />
+            <Moon className="absolute scale-0 rotate-90 transition-transform dark:scale-100 dark:rotate-0" />
             <span>{t("chooseTheme")}</span>
           </DropdownMenuSubTrigger>
         </CollapsibleTrigger>

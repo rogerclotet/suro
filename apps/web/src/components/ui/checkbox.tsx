@@ -17,7 +17,7 @@ const Checkbox = forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-4 w-4 shrink-0 cursor-pointer rounded-sm border-2 border-primary ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      "peer h-4 w-4 shrink-0 cursor-pointer rounded-sm border-2 border-primary ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
       className,
     )}
     {...props}
@@ -25,7 +25,7 @@ const Checkbox = forwardRef<
     <CheckboxPrimitive.Indicator
       // The indicator mounts on check, so the enter animation pops the mark in.
       className={cn(
-        "zoom-in-50 flex animate-in items-center justify-center text-current duration-200",
+        "flex animate-in items-center justify-center text-current duration-200 zoom-in-50",
       )}
     >
       <Check className="h-4 w-4" />

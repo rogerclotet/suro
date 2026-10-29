@@ -55,7 +55,7 @@ export default function PotPreview({
             <MonetaryAmount
               amount={pot.totalSpent}
               currency="EUR"
-              className="font-semibold text-foreground text-lg"
+              className="text-lg font-semibold text-foreground"
             />
             <span className="text-xs">
               {t("averagePerPersonInline", {
