@@ -57,6 +57,10 @@ overrides:
   "compression@<1.8.2": "^1.8.2"
   # source-map-js event-loop DoS — GHSA-68fv-2mgg-jv7q (via jsdom's css-tree).
   "source-map-js@<1.2.2": "^1.2.2"
+  # vite dev-server file disclosure / XSS — GHSA-587h-7wmj-h5pm,
+  # GHSA-698v-4r3x-3vcv, GHSA-r825-w8mm-5pxw, GHSA-rq7h-c2jc-7f22,
+  # GHSA-9jrq-w75r-8gcw (via vitest, test tooling only).
+  "vite@>=8.0.0 <8.1.6": "^8.1.6"
   # The rest are eas-cli's own pinned dependencies (build/submit tooling, never
   # shipped in an app or the web server). Semver-compatible patch pins only:
   # joi ReDoS / prototype pollution — GHSA-6h2x-m376-mqjq, GHSA-wr44-6hxh-3jwq.
@@ -71,6 +75,8 @@ overrides:
   "moment@<2.31.0": "^2.31.0"
   # yaml stack overflow on nested collections — GHSA-48c2-rrv3-qjmp.
   "yaml@>=2.0.0 <2.8.3": "^2.8.3"
+  # node-forge RSA PKCS#1 v1.5 signature forgery — GHSA-86w9-cpqp-85rv.
+  "node-forge@>=1.0.0 <1.4.1": "^1.4.2"
 
 onlyBuiltDependencies:
   - "@napi-rs/canvas"
