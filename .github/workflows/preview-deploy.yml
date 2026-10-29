@@ -16,6 +16,11 @@
 # preview secrets, so only branches of this repository deploy, and only the
 # repo's owner, members and collaborators can trigger one by comment.
 #
+# Every preview first pushes the PR's Convex backend to the dev deployment that
+# all previews share (CONVEX_DEPLOY_KEY_PREVIEW), so the frontend never runs
+# against functions it doesn't know. Two previews deployed close together
+# overwrite each other's backend: the last deploy wins.
+#
 # Preview URL: https://mr-<pr>.suro.clotet.dev
 
 name: Preview deploy
@@ -88,6 +93,28 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/detect-path-changes
         id: changes
+
+      # Deploys whenever the preview does, not only when backend paths changed:
+      # the shared dev deployment drifts (e.g. a local `convex dev` from an
+      # older branch), and the preview must run against its own merge ref.
+      - if: steps.changes.outputs.web == 'true'
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          install-filter: backend...
+      - name: Deploy Convex backend to the dev deployment
+        if: steps.changes.outputs.web == 'true'
+        working-directory: packages/backend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PREVIEW }}
+        run: |
+          # Only a dev deployment key may push PR code; a prod key here would
+          # ship unreviewed backend changes to production.
+          case "$CONVEX_DEPLOY_KEY" in
+            dev:*) ;;
+            "") echo "::error::CONVEX_DEPLOY_KEY_PREVIEW is not set." >&2; exit 1 ;;
+            *) echo "::error::CONVEX_DEPLOY_KEY_PREVIEW must be a dev deployment key (dev:...)." >&2; exit 1 ;;
+          esac
+          npx convex deploy
 
       - if: steps.changes.outputs.web == 'true'
         uses: docker/setup-buildx-action@v4
