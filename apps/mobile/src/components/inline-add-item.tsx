@@ -1,7 +1,7 @@
 import type { Id } from "backend/convex/_generated/dataModel";
 import { Check, Plus } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { Pressable, type TextInput, View } from "react-native";
+import { Pressable, type TextInputInstance, View } from "react-native";
 import type { PickerCategory } from "@/components/category-picker";
 import {
   EMPTY_TASK_DRAFT,
@@ -74,7 +74,7 @@ export function NewItemRow({
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [task, setTask] = useState<TaskDraft>(EMPTY_TASK_DRAFT);
-  const nameRef = useRef<TextInput>(null);
+  const nameRef = useRef<TextInputInstance>(null);
 
   function handleSubmit() {
     const trimmed = name.trim();

@@ -24,14 +24,17 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   type ScrollViewProps,
   type StyleProp,
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   type TextInputProps,
   type TextProps,
   View,
+  type ViewInstance,
   type ViewStyle,
 } from "react-native";
 import { AnimatedFAB } from "react-native-paper";
@@ -442,7 +445,7 @@ function useKeyboardLift() {
     isStatusBarTranslucentAndroid: true,
     isNavigationBarTranslucentAndroid: true,
   });
-  const viewRef = useRef<View>(null);
+  const viewRef = useRef<ViewInstance>(null);
   const bottomInset = useSharedValue(0);
 
   const measure = useCallback(() => {
@@ -494,59 +497,60 @@ export function KeyboardAwareView({
   );
 }
 
-export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
-  function KeyboardAwareScrollView(props, forwardedRef) {
-    const { viewRef, onLayout, style: liftStyle } = useKeyboardLift();
-    const scrollRef = useRef<ScrollView>(null);
+export const KeyboardAwareScrollView = forwardRef<
+  ScrollViewInstance,
+  ScrollViewProps
+>(function KeyboardAwareScrollView(props, forwardedRef) {
+  const { viewRef, onLayout, style: liftStyle } = useKeyboardLift();
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
-    const setScrollRef = useCallback(
-      (node: ScrollView | null) => {
-        scrollRef.current = node;
-        if (typeof forwardedRef === "function") {
-          forwardedRef(node);
-        } else if (forwardedRef) {
-          forwardedRef.current = node;
-        }
-      },
-      [forwardedRef],
-    );
+  const setScrollRef = useCallback(
+    (node: ScrollViewInstance | null) => {
+      scrollRef.current = node;
+      if (typeof forwardedRef === "function") {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    },
+    [forwardedRef],
+  );
 
-    // After the keyboard opens, nudge the scroll view so the focused field sits
-    // above it — padding alone leaves the scroll offset unchanged.
-    useEffect(() => {
-      const showEvt =
-        Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-      const sub = Keyboard.addListener(showEvt, () => {
-        const focused = TextInput.State.currentlyFocusedInput();
-        if (focused && scrollRef.current) {
-          requestAnimationFrame(() => {
-            scrollRef.current?.scrollResponderScrollNativeHandleToKeyboard(
-              focused,
-              0,
-              true,
-            );
-          });
-        }
-      });
-      return () => sub.remove();
-    }, []);
+  // After the keyboard opens, nudge the scroll view so the focused field sits
+  // above it — padding alone leaves the scroll offset unchanged.
+  useEffect(() => {
+    const showEvt =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const sub = Keyboard.addListener(showEvt, () => {
+      const focused = TextInput.State.currentlyFocusedInput();
+      if (focused && scrollRef.current) {
+        requestAnimationFrame(() => {
+          scrollRef.current?.scrollResponderScrollNativeHandleToKeyboard(
+            focused,
+            0,
+            true,
+          );
+        });
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
-    return (
-      <Reanimated.View
-        ref={viewRef}
-        onLayout={onLayout}
-        style={[{ flex: 1 }, liftStyle]}
-      >
-        <ScrollView
-          ref={setScrollRef}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          {...props}
-        />
-      </Reanimated.View>
-    );
-  },
-);
+  return (
+    <Reanimated.View
+      ref={viewRef}
+      onLayout={onLayout}
+      style={[{ flex: 1 }, liftStyle]}
+    >
+      <ScrollView
+        ref={setScrollRef}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        {...props}
+      />
+    </Reanimated.View>
+  );
+});
 
 // Screen for full-screen forms: lifts content above the soft keyboard and wraps
 // it in a ScrollView so the action button stays reachable and taps land while
@@ -841,12 +845,12 @@ export function Field({
   autoFocus,
   ref: forwardedRef,
   ...props
-}: TextInputProps & { ref?: Ref<TextInput> }) {
+}: TextInputProps & { ref?: Ref<TextInputInstance> }) {
   const t = useTheme();
   const sheetPresented = useContext(SheetPresentationContext);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const setInputRef = useCallback(
-    (node: TextInput | null) => {
+    (node: TextInputInstance | null) => {
       inputRef.current = node;
       if (typeof forwardedRef === "function") {
         forwardedRef(node);
