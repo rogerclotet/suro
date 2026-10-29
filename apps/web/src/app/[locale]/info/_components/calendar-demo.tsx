@@ -62,7 +62,7 @@ export default function CalendarDemo() {
           <span className="font-medium">
             {t("demoCalendarLinkedListLabel")}
           </span>
-          <span className="ml-auto text-muted-foreground text-xs">
+          <span className="ml-auto text-xs text-muted-foreground">
             {items.filter((i) => i.completed).length} / {items.length}
           </span>
         </button>
@@ -84,7 +84,7 @@ export default function CalendarDemo() {
                 <label
                   htmlFor={`demo-cal-${it.id}`}
                   className={cn(
-                    "wrap-break-word grow cursor-pointer overflow-hidden text-left",
+                    "grow cursor-pointer overflow-hidden text-left wrap-break-word",
                     it.completed && "text-muted-foreground line-through",
                   )}
                 >

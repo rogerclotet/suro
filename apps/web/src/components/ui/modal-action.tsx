@@ -77,7 +77,7 @@ function ClientModalAction({
           style={getDialogTransformOriginStyle(triggerOrigin)}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle className="wrap-anywhere text-wrap">
+            <AlertDialogTitle className="text-wrap wrap-anywhere">
               {title}
             </AlertDialogTitle>
             {description && (
@@ -104,7 +104,7 @@ function ClientModalAction({
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle className="wrap-anywhere text-wrap">{title}</DrawerTitle>
+          <DrawerTitle className="text-wrap wrap-anywhere">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
         {children}

@@ -19,13 +19,13 @@ export default function FeatureSection({
       <div className="mx-auto max-w-6xl">
         <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
           <div className={cn(reverse && "md:order-2")}>
-            <p className="font-medium text-amber-700 text-sm uppercase tracking-[0.2em] dark:text-amber-300">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase dark:text-amber-300">
               {eyebrow}
             </p>
-            <h2 className="mt-3 text-balance font-semibold text-3xl text-foreground tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance text-foreground md:text-4xl">
               {title}
             </h2>
-            <p className="mt-5 text-pretty text-base text-muted-foreground leading-relaxed md:text-lg">
+            <p className="mt-5 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
               {body}
             </p>
           </div>

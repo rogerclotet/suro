@@ -82,7 +82,7 @@ function Intro({ canCreate }: { canCreate: boolean }) {
         <span className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <GiftIcon className="size-8" />
         </span>
-        <h2 className="font-display font-semibold text-xl">
+        <h2 className="font-display text-xl font-semibold">
           {canCreate ? t("emptyTitle") : t("infoDescription")}
         </h2>
         <p className="text-muted-foreground">{t("description")}</p>
@@ -206,7 +206,7 @@ function DrawSection({ secretSanta }: { secretSanta: SecretSanta }) {
     <>
       <Separator />
       {problem === null ? (
-        <p className="text-muted-foreground text-sm">{t("drawHint")}</p>
+        <p className="text-sm text-muted-foreground">{t("drawHint")}</p>
       ) : (
         <StatusLine
           icon={TriangleAlertIcon}

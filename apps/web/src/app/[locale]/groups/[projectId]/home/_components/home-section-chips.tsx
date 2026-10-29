@@ -22,7 +22,7 @@ export function HomeSectionChips({ projectId }: { projectId: string }) {
             }}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5",
-              "font-semibold text-[13px] text-foreground transition-opacity hover:opacity-70",
+              "text-[13px] font-semibold text-foreground transition-opacity hover:opacity-70",
             )}
           >
             <Icon size={14} className="shrink-0 text-primary" aria-hidden />

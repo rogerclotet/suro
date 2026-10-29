@@ -33,7 +33,7 @@ export default function ParticipantTile({
       </div>
       <p
         className={cn(
-          "wrap-anywhere line-clamp-2 h-8 text-center text-xs leading-tight",
+          "line-clamp-2 h-8 text-center text-xs leading-tight wrap-anywhere",
           selected && "font-semibold text-primary",
         )}
       >

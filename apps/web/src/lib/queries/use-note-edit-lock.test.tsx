@@ -47,6 +47,16 @@ function lease(): Lease {
     },
   };
 }
+function Editor({ onUnmount }: { onUnmount: () => void }) {
+  useEffect(() => onUnmount, [onUnmount]);
+  return null;
+}
+function Screen({ onEditorUnmount }: { onEditorUnmount: () => void }) {
+  const lock = useNoteEditLock(noteId);
+  return lock.kind === "editing" ? (
+    <Editor onUnmount={onEditorUnmount} />
+  ) : null;
+}
 async function settle() {
   await act(async () => {});
 }
@@ -114,20 +124,9 @@ it("enqueues the child's final autosave before releasing", async () => {
   mutations.release.mockImplementation(async () => {
     calls.push("release");
   });
-  function Editor() {
-    useEffect(
-      () => () => {
-        calls.push("save");
-      },
-      [],
-    );
-    return null;
-  }
-  function Screen() {
-    const lock = useNoteEditLock(noteId);
-    return lock.kind === "editing" ? <Editor /> : null;
-  }
-  const { unmount } = render(<Screen />);
+  const { unmount } = render(
+    <Screen onEditorUnmount={() => calls.push("save")} />,
+  );
   await settle();
   unmount();
   await settle();

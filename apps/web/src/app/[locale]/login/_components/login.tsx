@@ -119,10 +119,10 @@ export default function Login({
       {error && (
         <Alert className="rounded-xl border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/50">
           <TriangleAlert className="h-4 w-4 text-red-600 dark:text-red-400" />
-          <AlertTitle className="font-medium text-red-800 text-sm dark:text-red-300">
+          <AlertTitle className="text-sm font-medium text-red-800 dark:text-red-300">
             {t("error.title")}
           </AlertTitle>
-          <AlertDescription className="text-red-700 text-xs leading-relaxed dark:text-red-400">
+          <AlertDescription className="text-xs leading-relaxed text-red-700 dark:text-red-400">
             {error}
           </AlertDescription>
         </Alert>
@@ -134,10 +134,10 @@ export default function Login({
             <Image src="/logo.png" alt="Suro" width={64} height={64} />
           </div>
           <div>
-            <h1 className="font-semibold text-2xl text-foreground tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {t("welcome")}
             </h1>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t("signInPrompt")}
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function Login({
             <button
               type="button"
               onClick={() => oauthSignIn("google")}
-              className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+              className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
             >
               <GoogleLogo className="h-[18px] w-[18px] shrink-0" />
               {t("continueWithGoogle")}
@@ -160,7 +160,7 @@ export default function Login({
               <button
                 type="button"
                 onClick={() => oauthSignIn("apple")}
-                className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground text-sm shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
+                className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
               >
                 <SiApple className="h-[18px] w-[18px] shrink-0" />
                 {t("continueWithApple")}
@@ -171,7 +171,7 @@ export default function Login({
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-muted-foreground text-xs tracking-wide">
+            <span className="text-xs tracking-wide text-muted-foreground">
               {t("or")}
             </span>
             <div className="h-px flex-1 bg-border" />
@@ -185,12 +185,12 @@ export default function Login({
               placeholder={t("emailPlaceholder")}
               required
               disabled={submitting}
-              className="h-10 rounded-xl border-border bg-card text-foreground text-sm placeholder:text-muted-foreground dark:bg-card"
+              className="h-10 rounded-xl border-border bg-card text-sm text-foreground placeholder:text-muted-foreground dark:bg-card"
             />
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-muted-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99] disabled:opacity-50"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99] disabled:opacity-50"
             >
               <Mail className="h-4 w-4 shrink-0" />
               {t("continueWithEmail")}
@@ -202,10 +202,10 @@ export default function Login({
         <div className="space-y-2.5">
           <Alert className="rounded-xl border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/50">
             <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertTitle className="font-medium text-green-800 text-sm dark:text-green-300">
+            <AlertTitle className="text-sm font-medium text-green-800 dark:text-green-300">
               {t("emailSent")}
             </AlertTitle>
-            <AlertDescription className="text-green-700 text-xs leading-relaxed dark:text-green-400">
+            <AlertDescription className="text-xs leading-relaxed text-green-700 dark:text-green-400">
               {t("codeSentDescription")}
             </AlertDescription>
           </Alert>
@@ -218,12 +218,12 @@ export default function Login({
               placeholder={t("codePlaceholder")}
               required
               disabled={submitting}
-              className="h-10 rounded-xl border-border bg-card text-center font-mono text-foreground text-sm tracking-widest placeholder:text-muted-foreground dark:bg-card"
+              className="h-10 rounded-xl border-border bg-card text-center font-mono text-sm tracking-widest text-foreground placeholder:text-muted-foreground dark:bg-card"
             />
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-foreground text-sm transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99] disabled:opacity-50"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-accent hover:text-accent-foreground active:scale-[0.99] disabled:opacity-50"
             >
               {t("verifyCode")}
             </button>

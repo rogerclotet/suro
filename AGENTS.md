@@ -29,17 +29,17 @@ Removed in the Convex cutover: Drizzle/Postgres, NextAuth, React Query, Uploadth
 
 Run from the repo root; most are workspace-filtered.
 
-| Task | Command |
-| --- | --- |
-| Web dev server | `pnpm dev` (= `pnpm --filter web dev`) |
-| Web build / start | `pnpm build` / `pnpm start` |
-| Convex dev (watch + codegen) | `pnpm --filter backend dev` |
-| Convex codegen (regen `api`/`dataModel`) | `pnpm --filter backend codegen` |
-| Convex deploy | `pnpm --filter backend exec convex deploy` |
-| Tests (all workspaces / one) | `pnpm test` / `pnpm --filter web test` |
-| Mobile builds (local, EAS) | `pnpm --filter mobile build:android:release` / `build:android:preview` / `build:ios:release` |
-| Lint + format check / fix | `pnpm biome:check` / `pnpm biome:fix` |
-| Typecheck (all workspaces) | `pnpm typecheck` |
+| Task                                     | Command                                                                                      |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Web dev server                           | `pnpm dev` (= `pnpm --filter web dev`)                                                       |
+| Web build / start                        | `pnpm build` / `pnpm start`                                                                  |
+| Convex dev (watch + codegen)             | `pnpm --filter backend dev`                                                                  |
+| Convex codegen (regen `api`/`dataModel`) | `pnpm --filter backend codegen`                                                              |
+| Convex deploy                            | `pnpm --filter backend exec convex deploy`                                                   |
+| Tests (all workspaces / one)             | `pnpm test` / `pnpm --filter web test`                                                       |
+| Mobile builds (local, EAS)               | `pnpm --filter mobile build:android:release` / `build:android:preview` / `build:ios:release` |
+| Lint + format check / fix                | `pnpm biome:check` / `pnpm biome:fix`                                                        |
+| Typecheck (all workspaces)               | `pnpm typecheck`                                                                             |
 
 After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-commit hook runs the same gate across all workspaces — don't bypass it with `--no-verify`. Never apply Biome's **unsafe** fixes (`biome check --write --unsafe`); they can change behavior.
 
@@ -70,6 +70,7 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 - Project-scoped access is enforced **server-side** in the Convex function (`requireProjectMember`); don't reimplement auth in the client.
 - Schema/field changes go in `packages/backend/convex/schema.ts` (+ `codegen`).
 - Tests are colocated next to the code under test. All user-facing strings go through next-intl; new routes under `app/[locale]/`.
+- Biome's Tailwind rules read the theme from `apps/web/src/styles/globals.css` (`tailwind.stylesheet` in `biome.json`). `noReactNativeRawText` is scoped to `apps/mobile/**` and allows raw text in `Txt`; register any new mobile text wrapper in its `skip` list.
 
 ## Dependency updates
 
@@ -78,7 +79,6 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 - **Expo SDK pins the native set.** `react-native`, `react-native-reanimated`, `-worklets`, `-screens`, `-safe-area-context`, `-gesture-handler`, `-webview`, `-svg`, `@react-native/metro-config`, `@babel/core`, `eslint` and mobile `typescript` move only with an Expo SDK upgrade. `cd apps/mobile && npx expo install --check` is the authority; `expo.install.exclude` in `apps/mobile/package.json` lists the deliberate deviations (`@sentry/react-native`, `react`, `react-dom`).
 - **React stays on the minor React Native's renderer ships** (19.2.x for RN 0.86), pinned once for web and mobile in `pnpm-workspace.yaml`.
 - **The three Sentry packages share one `@sentry/core`.** `error-reporting` pins the version `@sentry/react-native` depends on, and `apps/web` pins `@sentry/nextjs` to the same number. A mismatch fails the web typecheck.
-- **Biome stays on 2.5.x** (`~` range). 2.6 renames `useSortedClasses` to `useTailwindSortedClasses` with a different order (about 500 warnings whose fixes are unsafe), adds `noComponentHookFactories` / `noReactNativeRawText` errors, and starts formatting Markdown. Move it in a dedicated change.
 - **`isomorphic-dompurify` 4.x excludes Node 25** (the web image's runtime), so it stays on 3.19 with a `dompurify` override.
 - Transitive advisories are pinned under `overrides` in `pnpm-workspace.yaml`, one comment per advisory. Use a caret range so a pin cannot cross a major. Run `pnpm audit` after any update.
 
@@ -104,14 +104,14 @@ Data, auth, and storage all run on **Convex** — the web container is just the 
 
 CI is split across focused workflows (so each Actions run stays a small graph):
 
-| Workflow | When |
-| --- | --- |
-| `ci.yml` (**CI**) | Every PR / push to `main`: quality checks, web PR compile-check |
-| `deploy-web.yml` | Push to `main` when web/backend paths change → Docker image + Convex + SSH prod. Runs queue (`production-deploy` group), so the newest commit always deploys last |
-| `release.yml` (**Release**) | Push to `main` that bumps the root version → GitHub release + EAS + store submit; also **Actions → Release → Run workflow** (skips the gate, `main` only) |
-| `play-listing.yml` | Push to `main` when Play listing text/images change |
-| `preview-deploy.yml` / `preview-teardown.yml` | Ephemeral PR previews (label / `/deploy-preview`) |
-| `mobile-submit.yml` | Manual store re-submit for a prior build (no new EAS build) |
+| Workflow                                      | When                                                                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml` (**CI**)                             | Every PR / push to `main`: quality checks, web PR compile-check                                                                                                   |
+| `deploy-web.yml`                              | Push to `main` when web/backend paths change → Docker image + Convex + SSH prod. Runs queue (`production-deploy` group), so the newest commit always deploys last |
+| `release.yml` (**Release**)                   | Push to `main` that bumps the root version → GitHub release + EAS + store submit; also **Actions → Release → Run workflow** (skips the gate, `main` only)         |
+| `play-listing.yml`                            | Push to `main` when Play listing text/images change                                                                                                               |
+| `preview-deploy.yml` / `preview-teardown.yml` | Ephemeral PR previews (label / `/deploy-preview`)                                                                                                                 |
+| `mobile-submit.yml`                           | Manual store re-submit for a prior build (no new EAS build)                                                                                                       |
 
 Path filters live in `.github/actions/detect-path-changes` (and matching `on.push.paths` on deploy workflows): web image / `web_deploy_production` on `apps/web` + `packages/backend` + `packages/domain` + `packages/design-tokens` + root config; `backend_convex_deploy` on `packages/backend` + `packages/domain`, diffed against the last successful deploy so backend changes from a failed or superseded run still ship. Native mobile builds are **not** path-filtered — `release_gate` (`apps/mobile/scripts/should-build-native.mjs`) requires a root version bump and a matching top entry in `apps/web/CHANGELOG.md`, regardless of what else changed (the workflow only listens for pushes touching the root `package.json`, which every bump does). Backend-only and web-only changelog releases also produce mobile builds. `repo_quality_checks` (lint/typecheck/test) runs in CI and again inside each deploy workflow before shipping; the Next.js compile-check is `web_pr_build`, which builds only on web-affecting PRs. Decisions that depend only on the event (preview labels, comment text) go in a job-level `if:`, so irrelevant events skip without a runner.
 
@@ -130,6 +130,7 @@ The deploy host must have:
 
 - **Pangolin/Traefik** already running (cert resolver `letsencrypt`).
 - **A shared Docker network** Traefik can reach — `familia-previews` by default. Create it and join Pangolin's `gerbil` (Traefik shares gerbil's network namespace) so it resolves containers by name:
+
   ```sh
   docker network create familia-previews
   docker network connect familia-previews gerbil

@@ -18,7 +18,7 @@ export default function PageFeedback({
       <div className="flex w-full max-w-md flex-col items-center">
         <div className="mb-10 flex items-center gap-2">
           <Image src="/logo.png" alt="" width={36} height={36} priority />
-          <span className="font-display font-semibold text-lg">Suro</span>
+          <span className="font-display text-lg font-semibold">Suro</span>
         </div>
 
         <div
@@ -27,7 +27,7 @@ export default function PageFeedback({
         >
           <Pin className="absolute -top-3 left-1/2 size-6 -translate-x-1/2 rotate-12 text-secondary" />
           {kind === "not-found" ? (
-            <p className="font-display text-8xl text-primary tracking-tight sm:text-9xl">
+            <p className="font-display text-8xl tracking-tight text-primary sm:text-9xl">
               404
             </p>
           ) : kind === "offline" ? (
@@ -43,10 +43,10 @@ export default function PageFeedback({
           )}
         </div>
 
-        <h1 className="text-balance font-semibold text-3xl tracking-tight sm:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-4 max-w-sm text-pretty text-base text-muted-foreground leading-relaxed">
+        <p className="mt-4 max-w-sm text-base leading-relaxed text-pretty text-muted-foreground">
           {description}
         </p>
         <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row">

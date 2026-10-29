@@ -21,8 +21,8 @@ export default function InfoStickyHeader() {
       className={cn(
         "sticky top-0 z-50 px-6 transition-colors duration-150",
         scrolled
-          ? "border-border border-b bg-background/70 backdrop-blur-md"
-          : "border-transparent border-b bg-transparent",
+          ? "border-b border-border bg-background/70 backdrop-blur-md"
+          : "border-b border-transparent bg-transparent",
       )}
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >

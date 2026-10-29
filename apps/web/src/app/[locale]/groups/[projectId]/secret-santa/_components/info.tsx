@@ -39,7 +39,7 @@ export default function SecretSantaInfo({
     <div className="space-y-3">
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="font-display font-semibold text-2xl">
+          <h2 className="font-display text-2xl font-semibold">
             {secretSanta.name}
           </h2>
           {secretSanta.canOrganize && (
@@ -54,7 +54,7 @@ export default function SecretSantaInfo({
               endAt: secretSanta.exchangeAt,
               allDay: secretSanta.exchangeAllDay,
             }}
-            className="block text-primary text-sm"
+            className="block text-sm text-primary"
           />
         </ClientOnly>
       </div>
@@ -85,7 +85,7 @@ export default function SecretSantaInfo({
               eventId: secretSanta.eventId,
             },
           }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 font-semibold text-[13px] text-foreground transition-opacity hover:opacity-70"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[13px] font-semibold text-foreground transition-opacity hover:opacity-70"
         >
           <CalendarDaysIcon size={14} className="shrink-0 text-primary" />
           {t("viewInCalendar")}
@@ -103,7 +103,7 @@ function MetaLine({
   children: ReactNode;
 }) {
   return (
-    <p className="flex items-center gap-2 text-muted-foreground text-sm">
+    <p className="flex items-center gap-2 text-sm text-muted-foreground">
       <Icon className="size-4 shrink-0" />
       <span>{children}</span>
     </p>

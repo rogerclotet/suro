@@ -10,7 +10,7 @@ type RichTextEditorProps = ComponentProps<typeof RichTextEditorComponent>;
 function BoxedSkeleton() {
   return (
     <div className="rich-text-editor rounded-md border border-input bg-background">
-      <div className="h-10 border-input border-b" />
+      <div className="h-10 border-b border-input" />
       <Skeleton className="m-3 h-24 rounded-sm" />
     </div>
   );
@@ -19,7 +19,7 @@ function BoxedSkeleton() {
 function InlineSkeleton() {
   return (
     <div className="rich-text-editor flex min-h-[200px] flex-1 flex-col bg-background">
-      <div className="h-10 shrink-0 border-input border-b" />
+      <div className="h-10 shrink-0 border-b border-input" />
       <Skeleton className="my-3 flex-1 rounded-sm" />
     </div>
   );

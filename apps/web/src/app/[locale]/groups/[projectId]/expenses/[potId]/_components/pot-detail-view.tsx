@@ -50,7 +50,7 @@ export default function PotDetailView({
             <MonetaryAmount
               amount={pot.totalSpent}
               currency="EUR"
-              className="font-semibold text-3xl tabular-nums"
+              className="text-3xl font-semibold tabular-nums"
             />
           </CardContent>
         </Card>
@@ -64,7 +64,7 @@ export default function PotDetailView({
             <MonetaryAmount
               amount={average}
               currency="EUR"
-              className="font-semibold text-3xl tabular-nums"
+              className="text-3xl font-semibold tabular-nums"
             />
           </CardContent>
         </Card>
@@ -72,7 +72,7 @@ export default function PotDetailView({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h1 className="font-semibold text-xl">{pot.name}</h1>
+          <h1 className="text-xl font-semibold">{pot.name}</h1>
           {pot.settledAt && (
             // Muted bordered chip, like mobile's settled marker.
             <Badge variant="outline" className="text-muted-foreground">
@@ -111,7 +111,7 @@ export default function PotDetailView({
         balances={pot.balances}
       />
 
-      <h2 className="font-semibold text-lg">{t("lastTransactions")}</h2>
+      <h2 className="text-lg font-semibold">{t("lastTransactions")}</h2>
       <SpendingsList spendings={pot.spendings} />
     </div>
   );

@@ -170,7 +170,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
                 <FormControl>
                   <Input {...field} placeholder={t("namePlaceholder")} />
                 </FormControl>
-                <Label className="text-muted-foreground text-sm italic">
+                <Label className="text-sm text-muted-foreground italic">
                   {t("namePublicHint")}
                 </Label>
               </FormItem>
@@ -226,7 +226,7 @@ export default function ProfileEditor({ user }: { user: ProfileUser }) {
                     onChange={(color) => field.onChange(color)}
                   />
                 </FormControl>
-                <Label className="text-muted-foreground text-sm italic">
+                <Label className="text-sm text-muted-foreground italic">
                   {t("backgroundColorHint")}
                 </Label>
               </FormItem>

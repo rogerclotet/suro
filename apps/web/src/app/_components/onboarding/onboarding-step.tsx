@@ -17,8 +17,8 @@ export default function OnboardingStep({
         {icon}
       </div>
       <div className="space-y-2">
-        <h3 className="font-semibold text-xl">{title}</h3>
-        <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
       </div>
     </div>
   );

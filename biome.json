@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -38,14 +38,12 @@
         "noUnknownAtRules": "off"
       },
       "correctness": {
-        "noChildrenProp": "off"
+        "noChildrenProp": "off",
+        "noReactNativeRawText": "off"
       },
       "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "functions": ["clsx", "cva", "cn"]
-          }
+        "useTailwindSortedClasses": {
+          "level": "warn"
         }
       }
     },
@@ -56,11 +54,24 @@
   },
   "overrides": [
     {
+      "includes": ["apps/mobile/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noReactNativeRawText": {
+              "level": "error",
+              "options": { "skip": ["Txt"] }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/components/ui/chart.tsx"],
       "linter": {
         "rules": {
           "nursery": {
-            "useSortedClasses": "off"
+            "useTailwindSortedClasses": "off"
           },
           "security": {
             "noDangerouslySetInnerHtml": "off"
@@ -78,5 +89,10 @@
         "organizeImports": "on"
       }
     }
+  },
+  "tailwind": {
+    "stylesheet": "./apps/web/src/styles/globals.css",
+    "mergeFunctions": ["clsx", "cn"],
+    "variantFunctions": ["cva"]
   }
 }

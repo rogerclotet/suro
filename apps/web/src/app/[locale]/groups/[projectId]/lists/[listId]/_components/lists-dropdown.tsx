@@ -20,7 +20,7 @@ export default function ListsDropdown({
 }) {
   return (
     <Select value={listId} onValueChange={onListChange}>
-      <SelectTrigger className="gap-2 font-semibold text-xl">
+      <SelectTrigger className="gap-2 text-xl font-semibold">
         <SelectValue placeholder="Llista" />
       </SelectTrigger>
       <SelectContent>

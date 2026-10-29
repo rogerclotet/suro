@@ -35,7 +35,7 @@ export default function PrivacyDialog({
         </button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-2xl gap-0 overflow-y-auto p-0">
-        <DialogHeader className="sticky top-0 z-10 border-border border-b bg-background px-6 pt-6 pb-4">
+        <DialogHeader className="sticky top-0 z-10 border-b border-border bg-background px-6 pt-6 pb-4">
           <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="px-6 py-6">{children}</div>

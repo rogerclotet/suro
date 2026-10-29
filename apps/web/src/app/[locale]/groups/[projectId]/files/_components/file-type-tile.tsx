@@ -14,7 +14,7 @@ export function PdfBadge() {
   return (
     <span
       aria-hidden
-      className="absolute right-1.5 bottom-1.5 rounded-[6px] bg-pdf px-1.5 py-0.5 font-bold text-[10px] text-white tracking-[1px]"
+      className="absolute right-1.5 bottom-1.5 rounded-[6px] bg-pdf px-1.5 py-0.5 text-[10px] font-bold tracking-[1px] text-white"
     >
       PDF
     </span>
@@ -48,7 +48,7 @@ export function FileTypeTile({
         className={cn("size-1/3", pdf ? "text-pdf" : "text-muted-foreground")}
       />
       {pdf && (
-        <span className="font-bold text-pdf text-xs tracking-[1px]">PDF</span>
+        <span className="text-xs font-bold tracking-[1px] text-pdf">PDF</span>
       )}
     </div>
   );

@@ -49,7 +49,7 @@ export default function GroupsScreen() {
               key={p.id}
               className={cn(
                 "flex items-center px-4",
-                index > 0 && "border-border border-t",
+                index > 0 && "border-t border-border",
               )}
             >
               <button
@@ -93,9 +93,9 @@ export default function GroupsScreen() {
           trigger={
             <button
               type="button"
-              className="flex w-full items-center gap-3 border-border border-t px-4 py-2.5 text-left text-primary transition-opacity hover:opacity-80"
+              className="flex w-full items-center gap-3 border-t border-border px-4 py-2.5 text-left text-primary transition-opacity hover:opacity-80"
             >
-              <span className="flex size-[38px] items-center justify-center rounded-[11px] border-[1.5px] border-primary border-dashed">
+              <span className="flex size-[38px] items-center justify-center rounded-[11px] border-[1.5px] border-dashed border-primary">
                 <PlusIcon className="size-5" />
               </span>
               {tGroups("createTitle")}
@@ -142,7 +142,7 @@ export default function GroupsScreen() {
 
       <Link
         href="/changelog"
-        className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-muted-foreground text-xs transition-colors hover:bg-accent"
+        className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent"
       >
         <span>{tChangelog("versionLabel")}</span>
         <span>v{CURRENT_VERSION}</span>

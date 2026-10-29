@@ -52,7 +52,7 @@ export function StoreBadge({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "rounded-xl outline-none transition-opacity hover:opacity-80 focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "rounded-xl transition-opacity outline-none hover:opacity-80 focus-visible:ring-[3px] focus-visible:ring-ring/50",
         className,
       )}
     >

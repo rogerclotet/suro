@@ -37,7 +37,7 @@ export function DatePicker({ dates, onDatesChange, className }: Props) {
             id="date"
             variant={"outline"}
             className={cn(
-              "text-ellipsis font-normal",
+              "font-normal text-ellipsis",
               !dates && "text-muted-foreground",
             )}
           >

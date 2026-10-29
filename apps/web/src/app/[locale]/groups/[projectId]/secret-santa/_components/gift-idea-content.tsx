@@ -20,7 +20,7 @@ export default function GiftIdeaContent({ giftIdea }: { giftIdea: GiftIdea }) {
           target="_blank"
           rel="noopener noreferrer"
           title={giftIdea.url}
-          className="inline-flex max-w-full items-center gap-1.5 self-start rounded-full bg-muted px-2.5 py-0.5 font-semibold text-primary text-xs hover:underline"
+          className="inline-flex max-w-full items-center gap-1.5 self-start rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-primary hover:underline"
         >
           <ExternalLinkIcon className="size-3.5 shrink-0" />
           <span className="truncate">{giftLinkLabel(giftIdea.url)}</span>

@@ -65,7 +65,7 @@ function Section({
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-semibold text-base text-foreground">{title}</h2>
+      <h2 className="text-base font-semibold text-foreground">{title}</h2>
       {children}
     </section>
   );

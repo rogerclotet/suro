@@ -4,16 +4,16 @@ Suro has one backend and two clients. Convex owns persistence, permissions, auth
 
 ## Ownership
 
-| Responsibility | Location |
-| --- | --- |
-| Schema and public API | `packages/backend/convex/schema.ts` and domain query/mutation modules |
-| Authorization and joins | `packages/backend/convex/model` |
-| Expense arithmetic, calendar dates, recurrence, task ordering and aggregation | `packages/domain/src` |
-| Shared visual values | `packages/design-tokens` |
-| Web reactive adapters | `apps/web/src/lib/queries` and `app/_data` |
-| Web project subscription and selection | `app/_components/projects-provider` |
-| Native checklist behavior and presentation | `apps/mobile/src/features/lists` |
-| Native offline persistence, replay and projections | `apps/mobile/src/lib/offline` |
+| Responsibility                                                                | Location                                                              |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Schema and public API                                                         | `packages/backend/convex/schema.ts` and domain query/mutation modules |
+| Authorization and joins                                                       | `packages/backend/convex/model`                                       |
+| Expense arithmetic, calendar dates, recurrence, task ordering and aggregation | `packages/domain/src`                                                 |
+| Shared visual values                                                          | `packages/design-tokens`                                              |
+| Web reactive adapters                                                         | `apps/web/src/lib/queries` and `app/_data`                            |
+| Web project subscription and selection                                        | `app/_components/projects-provider`                                   |
+| Native checklist behavior and presentation                                    | `apps/mobile/src/features/lists`                                      |
+| Native offline persistence, replay and projections                            | `apps/mobile/src/lib/offline`                                         |
 
 Keep `domain` independent of Convex, React, native modules, storage and network calls. It takes typed inputs and returns values. Convex checks membership and validates external arguments before invoking those rules. The server's expense balances and settlement proposals are authoritative; mobile uses the same arithmetic to project pending changes. Both clients create a settlement draft from reviewed payment identities and amounts. A reorder preserves selection. Changes to participants or amounts require an explicit refresh, and new clients send the reviewed proposals for a transactional server check. Partial payments leave a pot open while any balance remains.
 
@@ -71,11 +71,11 @@ The backend list test includes 120 weekly lists with 20 items each. Fetching sum
 
 The same 120-list, 2,400-item fixture now measures dashboard previews and list link candidates separately. Instrumentation counts documents returned by real database reads in `convex-test`, including repeated reads, rather than estimating reads from response size:
 
-| Query | JSON bytes | Documents returned by DB calls |
-| --- | ---: | ---: |
-| Full lists with items | 552,117 | 2,641 |
-| Dashboard previews, five favorites | 894 | 221 |
-| Unlinked list candidates | 7,150 | 121 |
+| Query                              | JSON bytes | Documents returned by DB calls |
+| ---------------------------------- | ---------: | -----------------------------: |
+| Full lists with items              |    552,117 |                          2,641 |
+| Dashboard previews, five favorites |        894 |                            221 |
+| Unlinked list candidates           |      7,150 |                            121 |
 
 `lists.homePreviews` still scans the project's list documents, then reads items only for up to five favorites and the lists linked to up to five upcoming events. It returns completion counts, not items. The candidate queries scan resource documents without joining list items, pot members or users. Note candidates omit contents from the response, but still read note documents containing those contents. No query-cache or outbox invalidation is required because these are new query names.
 

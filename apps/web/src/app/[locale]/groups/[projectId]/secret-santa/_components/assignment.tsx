@@ -30,15 +30,15 @@ export default function Assignment({
           type="button"
           onClick={() => setRevealed(!revealed)}
           aria-label={revealed ? t("hideMatch") : t("tapToReveal")}
-          className="perspective-[100rem] aspect-3/4 h-auto w-[60%] min-w-[200px] max-w-[300px] cursor-pointer"
+          className="aspect-3/4 h-auto w-[60%] max-w-[300px] min-w-[200px] cursor-pointer perspective-[100rem]"
         >
           <div
             className={cn(
-              "transform-3d relative size-full transition duration-500 ease-in-out",
+              "relative size-full transition duration-500 ease-in-out transform-3d",
               revealed && "rotate-y-180",
             )}
           >
-            <div className="backface-hidden absolute inset-0 size-full">
+            <div className="absolute inset-0 size-full backface-hidden">
               <Card className="flex aspect-3/4 w-full flex-col items-center justify-evenly drop-shadow-md">
                 <CardHeader className="flex h-auto w-full items-center justify-center">
                   <BadgeQuestionMarkIcon className="aspect-square h-auto w-[80%] text-muted" />
@@ -48,7 +48,7 @@ export default function Assignment({
                 </CardContent>
               </Card>
             </div>
-            <div className="backface-hidden transform-[rotateY(180deg)] absolute inset-0 size-full">
+            <div className="absolute inset-0 size-full transform-[rotateY(180deg)] backface-hidden">
               <Card className="flex aspect-3/4 w-full flex-col items-stretch justify-evenly drop-shadow-md">
                 <CardHeader className="flex h-auto w-full items-center justify-center">
                   <UserAvatar
@@ -57,7 +57,7 @@ export default function Assignment({
                   />
                 </CardHeader>
                 <CardContent className="flex h-16 items-center justify-center">
-                  <span className="line-clamp-2 text-ellipsis font-bold text-2xl text-primary">
+                  <span className="line-clamp-2 text-2xl font-bold text-ellipsis text-primary">
                     {name}
                   </span>
                 </CardContent>
@@ -68,8 +68,8 @@ export default function Assignment({
       </div>
 
       {revealed && (
-        <div className="fade-in-0 lg:slide-in-from-left-5 animate-in break-inside-avoid space-y-4 duration-500">
-          <h3 className="font-display font-semibold text-xl">
+        <div className="animate-in break-inside-avoid space-y-4 duration-500 fade-in-0 lg:slide-in-from-left-5">
+          <h3 className="font-display text-xl font-semibold">
             {t("yourMatch", { name })}
           </h3>
           <section className="space-y-1">
@@ -83,7 +83,7 @@ export default function Assignment({
               {t("giftIdeas")}
             </SectionLabel>
             {assignment.giftIdeas.length === 0 ? (
-              <p className="py-2 text-muted-foreground text-sm">
+              <p className="py-2 text-sm text-muted-foreground">
                 {t("matchIdeasIntro", { name })}
               </p>
             ) : (

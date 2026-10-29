@@ -85,7 +85,7 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
           style={getDialogTransformOriginStyle(triggerOrigin)}
         >
           <DialogHeader>
-            <DialogTitle className="wrap-anywhere text-wrap">
+            <DialogTitle className="text-wrap wrap-anywhere">
               {title}
             </DialogTitle>
             {description && (
@@ -105,7 +105,7 @@ function ClientModalForm({ trigger, title, description, children }: Props) {
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent className="flex max-h-[92dvh] flex-col">
         <DrawerHeader className="shrink-0">
-          <DrawerTitle className="wrap-anywhere text-wrap">{title}</DrawerTitle>
+          <DrawerTitle className="text-wrap wrap-anywhere">{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
         {/* Scrollable body so the create/save button and date picker stay

@@ -17,7 +17,7 @@ account** calls `users.deleteAccount`, which hard-deletes the user and all
 linked data — groups they created (full cascade incl. stored files), their
 memberships in other groups, pot memberships, push tokens, the avatar blob, and
 the Convex Auth rows — then signs out everywhere. Authored content in groups
-created by *others* stays for the remaining members.
+created by _others_ stays for the remaining members.
 
 The Google Play **web deletion URL** (link it from the Data safety form) is
 `https://suroapp.cat/<locale>/account-deletion` (e.g. `/en/account-deletion`,
@@ -28,14 +28,14 @@ the in-app flow and the email fallback (`suro@clotet.dev`).
 
 **Does your app collect or share any of the required user data types?** Yes.
 
-| Data type | Collected | Shared | Optional | Purpose |
-| --- | --- | --- | --- | --- |
-| Personal info → Name | Yes | No | Yes (defaults to email) | App functionality (shown to your group) |
-| Personal info → Email address | Yes | No | No | App functionality (account, sign-in) |
-| Photos and videos → Photos | Yes | No | Yes (only if the user uploads) | App functionality (group file sharing, avatars) |
-| Files and docs | Yes | No | Yes (only if the user uploads) | App functionality (group file sharing) |
-| Messages → Other in-app messages | Yes | No | Yes | App functionality (lists, notes, events, expenses shared with the group) |
-| Device or other IDs | Yes | No | Yes (only with notifications enabled) | App functionality (Expo push token for notifications) |
+| Data type                        | Collected | Shared | Optional                              | Purpose                                                                  |
+| -------------------------------- | --------- | ------ | ------------------------------------- | ------------------------------------------------------------------------ |
+| Personal info → Name             | Yes       | No     | Yes (defaults to email)               | App functionality (shown to your group)                                  |
+| Personal info → Email address    | Yes       | No     | No                                    | App functionality (account, sign-in)                                     |
+| Photos and videos → Photos       | Yes       | No     | Yes (only if the user uploads)        | App functionality (group file sharing, avatars)                          |
+| Files and docs                   | Yes       | No     | Yes (only if the user uploads)        | App functionality (group file sharing)                                   |
+| Messages → Other in-app messages | Yes       | No     | Yes                                   | App functionality (lists, notes, events, expenses shared with the group) |
+| Device or other IDs              | Yes       | No     | Yes (only with notifications enabled) | App functionality (Expo push token for notifications)                    |
 
 - **Is all of the user data collected by your app encrypted in transit?** Yes
   (HTTPS/WSS to Convex).
@@ -56,7 +56,7 @@ the in-app flow and the email fallback (`suro@clotet.dev`).
   with the note from [Review notes](#review-notes--demo-account).
 - **Content rating (IARC questionnaire):** no violence, no sexuality, no
   profanity, no controlled substances, no gambling, no user-to-user
-  *public* interaction (groups are private, invite-only), no sharing of user
+  _public_ interaction (groups are private, invite-only), no sharing of user
   location → expected rating **Everyone / PEGI 3**.
 - **Target audience:** 18+ (or 16+) — not directed at children; do NOT select
   any under-13 bracket (triggers Families policy).
@@ -71,13 +71,13 @@ All collected data is **linked to the user's identity** (it lives in their
 account) and **not used for tracking** (no third-party advertising/data
 brokers; answer "No" to tracking).
 
-| Category | Data | Linked to user | Used for tracking | Purpose |
-| --- | --- | --- | --- | --- |
-| Contact info | Email address | Yes | No | App functionality |
-| Contact info | Name | Yes | No | App functionality |
-| User content | Photos or videos | Yes | No | App functionality |
-| User content | Other user content (lists, notes, events, expenses, files) | Yes | No | App functionality |
-| Identifiers | Device ID (Expo push token, only with notifications enabled) | Yes | No | App functionality |
+| Category     | Data                                                         | Linked to user | Used for tracking | Purpose           |
+| ------------ | ------------------------------------------------------------ | -------------- | ----------------- | ----------------- |
+| Contact info | Email address                                                | Yes            | No                | App functionality |
+| Contact info | Name                                                         | Yes            | No                | App functionality |
+| User content | Photos or videos                                             | Yes            | No                | App functionality |
+| User content | Other user content (lists, notes, events, expenses, files)   | Yes            | No                | App functionality |
+| Identifiers  | Device ID (Expo push token, only with notifications enabled) | Yes            | No                | App functionality |
 
 Not collected: location, contacts, browsing/search history, health, financial
 instruments, diagnostics, usage analytics (no analytics SDK in the native app).
@@ -102,10 +102,10 @@ sign-in:
 - Email: the value of `AUTH_REVIEW_EMAIL` (suggested: `review@suro.clotet.dev`)
 - Code: the value of `AUTH_REVIEW_OTP` (pick a 6-digit code; set both env vars
   on the **production** Convex deployment: `npx convex env set ...`)
-- Note for reviewers: *"Choose 'Continue with email', enter the demo email,
+- Note for reviewers: _"Choose 'Continue with email', enter the demo email,
   then enter the one-time code provided here — this reviewer account uses a
   fixed code instead of an emailed one. The account is a member of a demo
-  group with sample lists, calendar events, notes and shared expenses."*
+  group with sample lists, calendar events, notes and shared expenses."_
 - Stage the demo content with
   `npx convex run seed:demoGroup '{"email": "<review email>", "locale": "en"}'`.
 - Mirror the values into `apple.review.demoUsername` / `demoPassword` in

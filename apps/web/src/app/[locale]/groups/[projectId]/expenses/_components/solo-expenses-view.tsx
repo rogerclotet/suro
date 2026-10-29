@@ -35,7 +35,7 @@ function MonthCardHeading({
       <CardDescription className="text-xs leading-tight">
         {period}
       </CardDescription>
-      <CardTitle className="font-medium text-sm leading-tight">
+      <CardTitle className="text-sm leading-tight font-medium">
         {month}
       </CardTitle>
     </CardHeader>
@@ -104,7 +104,7 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
             <MonetaryAmount
               amount={thisMonthTotal}
               currency="EUR"
-              className="font-semibold text-3xl tabular-nums"
+              className="text-3xl font-semibold tabular-nums"
             />
           </CardContent>
         </Card>
@@ -117,7 +117,7 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
             <MonetaryAmount
               amount={lastMonthTotal}
               currency="EUR"
-              className="font-semibold text-3xl tabular-nums"
+              className="text-3xl font-semibold tabular-nums"
             />
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export default function SoloExpensesView({ projectId }: { projectId: string }) {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="font-semibold text-lg">{t("soloRecentSpendings")}</h2>
+          <h2 className="text-lg font-semibold">{t("soloRecentSpendings")}</h2>
           {potId !== null ? (
             <CreateSoloSpendingButton potId={potId} memberId={memberId} />
           ) : null}

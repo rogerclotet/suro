@@ -54,7 +54,7 @@ function Panel({
     <section className={cn("flex flex-col", className)}>
       <div className="mb-2 flex items-center gap-2">
         <Icon size={15} className="shrink-0 text-primary" aria-hidden />
-        <h2 className="flex-1 font-semibold text-sm tracking-tight">{title}</h2>
+        <h2 className="flex-1 text-sm font-semibold tracking-tight">{title}</h2>
         {seeAllHref && (
           <Link
             href={seeAllHref}
@@ -97,11 +97,11 @@ function InlineStat({
 }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground"
+      className="inline-flex shrink-0 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground"
       title={label}
     >
       <Icon size={14} className="text-primary" aria-hidden />
-      <span className="font-semibold tabular-nums text-foreground">
+      <span className="font-semibold text-foreground tabular-nums">
         {count}
       </span>
       <span className="hidden min-[420px]:inline">{label}</span>
@@ -124,7 +124,7 @@ function HeroHeader({
 }) {
   return (
     <header className="flex flex-nowrap items-center gap-3 border-b border-border/60 pb-4">
-      <p className="min-w-0 flex-1 truncate font-bold text-xl tracking-tight">
+      <p className="min-w-0 flex-1 truncate text-xl font-bold tracking-tight">
         {dateLabel}
       </p>
       <div className="flex shrink-0 flex-nowrap items-center gap-2.5">
@@ -156,7 +156,7 @@ function EventDateBadge({
   if (isToday) {
     return (
       <div className="flex min-w-[2.75rem] flex-col items-center justify-center rounded-lg bg-primary px-2 py-1.5 text-primary-foreground">
-        <span className="font-bold text-[10px] uppercase leading-none tracking-wide">
+        <span className="text-[10px] leading-none font-bold tracking-wide uppercase">
           {todayLabel}
         </span>
       </div>
@@ -168,8 +168,8 @@ function EventDateBadge({
 
   return (
     <div className="flex min-w-[2.75rem] flex-col items-center justify-center rounded-lg bg-muted px-2 py-1.5">
-      <span className="font-bold text-lg leading-none tabular-nums">{day}</span>
-      <span className="font-semibold text-[10px] uppercase leading-none tracking-wide text-muted-foreground">
+      <span className="text-lg leading-none font-bold tabular-nums">{day}</span>
+      <span className="text-[10px] leading-none font-semibold tracking-wide text-muted-foreground uppercase">
         {month}
       </span>
     </div>

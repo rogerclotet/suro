@@ -220,7 +220,7 @@ function CategoryPickerView({
   const list = (
     <div role="listbox" className="flex flex-col gap-0.5">
       {trimmedQuery !== "" && !hasCategoryRows && (
-        <div className="px-2 py-1.5 text-muted-foreground text-sm">
+        <div className="px-2 py-1.5 text-sm text-muted-foreground">
           {t("noResults")}
         </div>
       )}
@@ -255,7 +255,7 @@ function CategoryPickerView({
           <div className="flex flex-col gap-2">
             {/* Without a trigger label, name the field in the dropdown itself. */}
             {iconOnly && (
-              <div className="px-1 font-medium text-muted-foreground text-xs">
+              <div className="px-1 text-xs font-medium text-muted-foreground">
                 {t("label")}
               </div>
             )}
@@ -319,7 +319,7 @@ function OptionRow({
       onClick={onSelect}
       onMouseMove={onHover}
       className={cn(
-        "flex w-full cursor-pointer select-none items-center gap-2 rounded-md text-left outline-none",
+        "flex w-full cursor-pointer items-center gap-2 rounded-md text-left outline-none select-none",
         mode === "mobile" ? "px-4 py-3 text-base" : "px-2 py-1.5 text-sm",
         highlighted && "bg-accent text-accent-foreground",
         row.type === "create" && "text-primary",

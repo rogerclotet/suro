@@ -74,7 +74,7 @@ export default function MyTasks({ projectId }: { projectId: string }) {
     <div className="mx-auto w-full max-w-lg">
       {BUCKET_ORDER.filter((key) => buckets[key].length > 0).map((key) => (
         <section key={key}>
-          <h2 className="px-4 pt-4 pb-1 text-muted-foreground text-xs uppercase tracking-wider">
+          <h2 className="px-4 pt-4 pb-1 text-xs tracking-wider text-muted-foreground uppercase">
             {t(`taskBucket_${key}`)}
           </h2>
           <div className="divide-y divide-border">
@@ -94,7 +94,7 @@ export default function MyTasks({ projectId }: { projectId: string }) {
                 >
                   <div className="grow overflow-hidden">
                     <p className="truncate">{task.name}</p>
-                    <p className="truncate text-muted-foreground text-xs">
+                    <p className="truncate text-xs text-muted-foreground">
                       {task.listName}
                     </p>
                   </div>

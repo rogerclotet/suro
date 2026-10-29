@@ -32,7 +32,7 @@ export default function FileCard({ file }: { file: File }) {
             href={file.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="min-w-0 flex-1 truncate font-medium text-md"
+            className="text-md min-w-0 flex-1 truncate font-medium"
           >
             {file.name}
           </NextLink>
@@ -44,7 +44,7 @@ export default function FileCard({ file }: { file: File }) {
           )}
         </div>
 
-        <span className="text-muted-foreground text-sm">
+        <span className="text-sm text-muted-foreground">
           {readableSize(file.size)}
         </span>
 
@@ -64,7 +64,7 @@ function ExtraInfo({ file }: { file: File }) {
             params: { projectId: file.event.projectId, eventId: file.event.id },
           } as never
         }
-        className="flex min-w-0 flex-row items-center gap-2 text-muted-foreground text-sm"
+        className="flex min-w-0 flex-row items-center gap-2 text-sm text-muted-foreground"
       >
         <CalendarFold size={14} className="shrink-0" />
         <span className="truncate">{file.event.name}</span>
@@ -73,7 +73,7 @@ function ExtraInfo({ file }: { file: File }) {
   }
 
   return (
-    <span className="truncate text-muted-foreground text-sm">
+    <span className="truncate text-sm text-muted-foreground">
       {file.uploadedBy.name}
     </span>
   );

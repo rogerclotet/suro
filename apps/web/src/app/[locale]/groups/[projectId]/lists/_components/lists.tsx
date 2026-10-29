@@ -77,7 +77,7 @@ export default function Lists({ projectId }: { projectId: string }) {
       <div className="mx-auto w-full max-w-lg">
         {sections.map((section) => (
           <section key={section.key}>
-            <h2 className="px-4 pt-4 pb-1 text-muted-foreground text-xs uppercase tracking-wider">
+            <h2 className="px-4 pt-4 pb-1 text-xs tracking-wider text-muted-foreground uppercase">
               {section.title}
             </h2>
             <div className="divide-y divide-border">
@@ -94,7 +94,7 @@ export default function Lists({ projectId }: { projectId: string }) {
                 className="flex w-full items-center justify-center gap-1.5 py-3 text-muted-foreground transition-opacity hover:opacity-70"
               >
                 <ChevronDown size={16} />
-                <span className="font-bold text-[13px]">
+                <span className="text-[13px] font-bold">
                   {t("showMoreCompleted")}
                 </span>
               </button>

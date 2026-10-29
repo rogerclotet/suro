@@ -298,7 +298,7 @@ export function ResponsiveMenuLabel({
   return (
     <div
       className={cn(
-        "px-4 py-2 font-medium text-muted-foreground text-sm",
+        "px-4 py-2 text-sm font-medium text-muted-foreground",
         className,
       )}
     >

@@ -53,7 +53,7 @@ export default function PotsList({ projectId }: { projectId: string }) {
 
           {overview.settled.length > 0 && (
             <>
-              <h2 className="font-semibold text-lg">{t("settled")}</h2>
+              <h2 className="text-lg font-semibold">{t("settled")}</h2>
               <div className="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
                 {overview.settled.map((pot) => (
                   <PotPreview key={pot.id} pot={pot} projectId={projectId} />
@@ -68,7 +68,7 @@ export default function PotsList({ projectId }: { projectId: string }) {
                   className="flex w-full items-center justify-center gap-1.5 py-3 text-muted-foreground transition-opacity hover:opacity-70"
                 >
                   <ChevronDown size={16} />
-                  <span className="font-bold text-[13px]">
+                  <span className="text-[13px] font-bold">
                     {t("showMoreSettled")}
                   </span>
                 </button>

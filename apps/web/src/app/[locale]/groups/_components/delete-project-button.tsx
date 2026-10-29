@@ -86,7 +86,7 @@ function DeleteGroupForm({ project }: { project: Project }) {
         <Label htmlFor={inputId}>{t("deleteNameLabel")}</Label>
         <p
           id={`${inputId}-hint`}
-          className="break-words text-muted-foreground text-sm"
+          className="text-sm break-words text-muted-foreground"
         >
           {t("deleteNameInstruction", { name: project.name })}
         </p>

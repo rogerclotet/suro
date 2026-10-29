@@ -56,7 +56,7 @@ export default function EventDetail({
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between gap-4">
-          <h1 className="font-semibold text-xl">{event.name}</h1>
+          <h1 className="text-xl font-semibold">{event.name}</h1>
 
           <div className="flex items-center gap-2">
             <ClientOnly>
@@ -78,7 +78,7 @@ export default function EventDetail({
           </div>
         </div>
 
-        <div className="flex flex-wrap text-muted-foreground text-sm">
+        <div className="flex flex-wrap text-sm text-muted-foreground">
           <TimeRemaining
             event={event}
             className="mr-2 text-foreground opacity-70"
@@ -112,10 +112,10 @@ export default function EventDetail({
       />
 
       {hasExtras && (
-        <div className="columns-1 gap-4 space-y-4 border-muted border-t pt-6 md:columns-2">
+        <div className="columns-1 gap-4 space-y-4 border-t border-muted pt-6 md:columns-2">
           {list !== null && (
-            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-              <h2 className="font-semibold text-xl">
+            <div className="break-inside-avoid space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="text-xl font-semibold">
                 <Link
                   href={{
                     pathname: "/groups/[projectId]/lists/[listId]",
@@ -132,8 +132,8 @@ export default function EventDetail({
           )}
 
           {pot !== null && (
-            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-              <h2 className="font-semibold text-xl">
+            <div className="break-inside-avoid space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="text-xl font-semibold">
                 <Link
                   href={{
                     pathname: "/groups/[projectId]/expenses/[potId]",
@@ -149,8 +149,8 @@ export default function EventDetail({
           )}
 
           {secretSanta !== null && (
-            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-              <h2 className="flex items-center gap-2 font-semibold text-xl">
+            <div className="break-inside-avoid space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="flex items-center gap-2 text-xl font-semibold">
                 <Gift />
                 {tNav("secretSanta")}
               </h2>
@@ -167,8 +167,8 @@ export default function EventDetail({
           )}
 
           {note !== null && (
-            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
-              <h2 className="flex items-center gap-2 font-semibold text-xl">
+            <div className="break-inside-avoid space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
+              <h2 className="flex items-center gap-2 text-xl font-semibold">
                 <NotebookText />
                 {tCal("notesSection")}
               </h2>
@@ -185,9 +185,9 @@ export default function EventDetail({
           )}
 
           {hasFiles && (
-            <div className="break-inside-avoid space-y-4 border-muted border-y py-6 md:rounded-lg md:border-x md:px-6">
+            <div className="break-inside-avoid space-y-4 border-y border-muted py-6 md:rounded-lg md:border-x md:px-6">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="flex items-center gap-2 font-semibold text-xl">
+                <h2 className="flex items-center gap-2 text-xl font-semibold">
                   <Folders />
                   {tCal("filesSection")}
                 </h2>

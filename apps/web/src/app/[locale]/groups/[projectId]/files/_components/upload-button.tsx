@@ -93,7 +93,7 @@ export default function UploadButton({
         disabled={uploading}
         className={cn(
           variant === "chip"
-            ? "h-7 gap-1.5 rounded-full border-dashed px-3 font-normal text-muted-foreground text-xs shadow-none hover:text-foreground"
+            ? "h-7 gap-1.5 rounded-full border-dashed px-3 text-xs font-normal text-muted-foreground shadow-none hover:text-foreground"
             : "w-full gap-2",
           className,
         )}
