@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { useGroupRootOptions } from "@/lib/group-navigation";
 import { FONT, useTheme } from "@/theme";
 
-export const unstable_settings = { initialRouteName: "index" };
+export const unstable_settings = { anchor: "index" };
 
 export default function ExpensesLayout() {
   const t = useTheme();

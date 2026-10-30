@@ -59,10 +59,6 @@ export function NoteRichEditor({
     ],
     initialContent: content,
     avoidIosKeyboard: true,
-    theme: {
-      webview: { backgroundColor: t.bg },
-      webviewContainer: { backgroundColor: t.bg },
-    },
   });
   const editorState = useBridgeState(editor);
   const html = useEditorContent(editor, { type: "html" });
@@ -88,7 +84,13 @@ export function NoteRichEditor({
   return (
     <>
       {editable && <EditorToolbar editor={editor} state={editorState} />}
-      <RichText editor={editor} style={{ flex: 1, backgroundColor: t.bg }} />
+      {/* Styled via props, not the bridge `theme` option: tentap's
+          RecursivePartial over RN 0.88's StyleProp is too deep for tsc. */}
+      <RichText
+        editor={editor}
+        style={{ flex: 1, backgroundColor: t.bg }}
+        containerStyle={{ backgroundColor: t.bg }}
+      />
     </>
   );
 }
