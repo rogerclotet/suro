@@ -22,6 +22,7 @@ import {
   Alert,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   Share,
   StyleSheet,
   View,
@@ -111,7 +112,7 @@ export default function EventDetail() {
 
   // Live countdown: refresh "now" each minute.
   const [now, setNow] = useState(() => Date.now());
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);

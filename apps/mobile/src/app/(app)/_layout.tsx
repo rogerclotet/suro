@@ -8,7 +8,7 @@ import { usePushNotifications } from "@/lib/push";
 import { FONT, useTheme } from "@/theme";
 import { SheetHost } from "@/ui";
 
-export const unstable_settings = { initialRouteName: "groups" };
+export const unstable_settings = { anchor: "groups" };
 
 export default function AppLayout() {
   const { isLoading, isAuthenticated } = useAuthGate();
