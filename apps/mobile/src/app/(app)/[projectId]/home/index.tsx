@@ -15,6 +15,7 @@ import { useMemo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { HomeSectionChips } from "@/components/home-section-chips";
+import { UnreadDot } from "@/components/unread-badge";
 import { useLocale, useTranslations } from "@/i18n";
 import {
   useFormatEventRange,
@@ -28,11 +29,12 @@ import {
 } from "@/lib/event-dates";
 import { unreadCount } from "@/lib/notification-routing";
 import {
-  useOpenNotificationSection,
+  useUnreadItemCount,
   useUnreadNotifications,
 } from "@/lib/notifications";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { attachedRoute, eventRoute } from "@/lib/tab-routes";
 import { useTodayAnchor } from "@/lib/use-today-anchor";
 import { useTheme } from "@/theme";
 import { Loading, ProgressBar, Screen, Txt } from "@/ui";
@@ -269,6 +271,7 @@ function EventCard({
 }) {
   const router = useRouter();
   const pid = useProjectId();
+  const changes = useUnreadItemCount(pid, event._id);
   const total = linkedList?.items.length ?? 0;
   const done = linkedList?.items.filter((item) => item.completed).length ?? 0;
   const complete = total > 0 && done === total;
@@ -276,7 +279,7 @@ function EventCard({
 
   return (
     <Pressable
-      onPress={() => router.navigate(`/${pid}/calendar/${event._id}`)}
+      onPress={() => router.push(eventRoute(pid, "home", event._id))}
       accessibilityRole="button"
       accessibilityLabel={
         linkedList && linkedListA11y ? linkedListA11y(done, total) : undefined
@@ -295,9 +298,12 @@ function EventCard({
         todayLabel={todayLabel}
       />
       <View style={{ flex: 1 }}>
-        <Txt weight="700" numberOfLines={1}>
-          {event.name}
-        </Txt>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Txt weight="700" numberOfLines={1} style={{ flexShrink: 1 }}>
+            {event.name}
+          </Txt>
+          <UnreadDot count={changes} />
+        </View>
         <Txt muted size={13} numberOfLines={1}>
           {when}
         </Txt>
@@ -317,6 +323,7 @@ function EventCard({
 
 function FeaturedListCard({ list }: { list: ActiveList }) {
   const router = useRouter();
+  const changes = useUnreadItemCount(list.projectId, list._id);
   const total = list.items.length;
   const done = list.items.filter((item) => item.completed).length;
   const complete = total > 0 && done === total;
@@ -325,7 +332,7 @@ function FeaturedListCard({ list }: { list: ActiveList }) {
     <Pressable
       onPress={() =>
         router.push({
-          pathname: `/${list.projectId}/lists/${list._id}`,
+          pathname: attachedRoute(list.projectId, "home", "list", list._id),
           params: { name: list.name },
         })
       }
@@ -339,9 +346,17 @@ function FeaturedListCard({ list }: { list: ActiveList }) {
       })}
     >
       <View style={{ flex: 1, gap: 2 }}>
-        <Txt weight="700" muted={complete} numberOfLines={1}>
-          {list.name}
-        </Txt>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Txt
+            weight="700"
+            muted={complete}
+            numberOfLines={1}
+            style={{ flexShrink: 1 }}
+          >
+            {list.name}
+          </Txt>
+          <UnreadDot count={changes} />
+        </View>
         {list.description ? (
           <Txt muted size={13} numberOfLines={1}>
             {list.description}
@@ -362,7 +377,7 @@ function FeaturedListCard({ list }: { list: ActiveList }) {
 export default function HomeDashboard() {
   const pid = useProjectId();
   const unread = useUnreadNotifications();
-  const openSection = useOpenNotificationSection(pid);
+  const router = useRouter();
   const group = usePersistentQuery(api.projects.get, { projectId: pid });
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
@@ -418,8 +433,7 @@ export default function HomeDashboard() {
               icon: Settings,
               label: tGroups("manageGroup"),
               count: unreadCount(unread, pid, "members"),
-              onPress: () =>
-                openSection("members", `/group-settings?projectId=${pid}`),
+              onPress: () => router.push(`/group-settings?projectId=${pid}`),
             },
           ]),
         }}

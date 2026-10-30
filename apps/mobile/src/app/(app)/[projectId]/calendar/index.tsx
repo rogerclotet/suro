@@ -2,19 +2,25 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { calendarQueryBounds } from "domain/events";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { calendarQueryBounds, eventLocalStart } from "domain/events";
+import { Stack, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import type { EventFormValues } from "@/components/event-form";
 import { EventForm } from "@/components/event-form";
 import { ExportCalendarSheet } from "@/components/export-calendar-sheet";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { MonthGrid, monthGridRange } from "@/components/month-grid";
-import { useTranslations } from "@/i18n";
+import { UnreadDot } from "@/components/unread-badge";
+import { useLocale, useTranslations } from "@/i18n";
 import { useFormatEventTime, useLongDate } from "@/lib/datetime";
 import { isEventOnDay, startOfDay } from "@/lib/event-dates";
+import { unreadItems } from "@/lib/notification-routing";
+import {
+  useUnreadItemCount,
+  useUnreadNotifications,
+} from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -24,10 +30,6 @@ type CalendarEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
 export default function CalendarScreen() {
   const pid = useProjectId();
-  const { date, notification } = useLocalSearchParams<{
-    date?: string;
-    notification?: string;
-  }>();
   const router = useRouter();
   const t = useTheme();
   const tCal = useTranslations("mobile.calendar");
@@ -38,13 +40,6 @@ export default function CalendarScreen() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
-  useEffect(() => {
-    if (!date || !notification) return;
-    const day = new Date(Number(date));
-    if (!Number.isFinite(day.getTime())) return;
-    setMonth(new Date(day.getFullYear(), day.getMonth(), 1));
-    setSelectedDay(startOfDay(day));
-  }, [date, notification]);
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
   const [exporting, setExporting] = useState(false);
@@ -140,6 +135,9 @@ export default function CalendarScreen() {
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
       >
+        <NewEvents
+          onOpen={(eventId) => router.push(`/${pid}/calendar/${eventId}`)}
+        />
         <MonthGrid
           month={month}
           onChangeMonth={setMonth}
@@ -196,6 +194,62 @@ export default function CalendarScreen() {
   );
 }
 
+type NewEvent = { id: string; name: string; startAt: number; allDay: boolean };
+
+/**
+ * Events other members added since the user last opened them. They can fall in
+ * any month, so the grid's dots alone wouldn't lead the user to them.
+ */
+function NewEvents({ onOpen }: { onOpen: (eventId: string) => void }) {
+  const pid = useProjectId();
+  const unread = useUnreadNotifications();
+  const t = useTheme();
+  const locale = useLocale();
+  const tCal = useTranslations("mobile.calendar");
+  const events = unreadItems(unread, pid, "calendar")
+    .flatMap((item): NewEvent[] =>
+      item.event && !item.gone ? [{ id: item.id, ...item.event }] : [],
+    )
+    .sort((a, b) => a.startAt - b.startAt);
+  if (events.length === 0) return null;
+
+  return (
+    <View style={{ gap: 4, marginBottom: 16, paddingHorizontal: 2 }}>
+      <Txt muted size={12} style={{ letterSpacing: 1 }}>
+        {tCal("newEvents").toUpperCase()}
+      </Txt>
+      {events.map((event) => (
+        <Pressable
+          key={event.id}
+          onPress={() => onOpen(event.id)}
+          accessibilityRole="button"
+          style={({ pressed }) => ({
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: t.border,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <UnreadDot count={1} />
+          <Txt weight="700" numberOfLines={1} style={{ flex: 1 }}>
+            {event.name}
+          </Txt>
+          <Txt muted size={13}>
+            {eventLocalStart(event).toLocaleDateString(locale, {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+            })}
+          </Txt>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 function EventCard({
   event,
   color,
@@ -207,6 +261,7 @@ function EventCard({
 }) {
   const t = useTheme();
   const formatTime = useFormatEventTime();
+  const changes = useUnreadItemCount(event.projectId, event._id);
   return (
     <Pressable
       onPress={onPress}
@@ -230,9 +285,17 @@ function EventCard({
         }}
       />
       <View style={{ flex: 1, gap: 2 }}>
-        <Txt size={16} weight="700" numberOfLines={1}>
-          {event.name}
-        </Txt>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Txt
+            size={16}
+            weight="700"
+            numberOfLines={1}
+            style={{ flexShrink: 1 }}
+          >
+            {event.name}
+          </Txt>
+          <UnreadDot count={changes} />
+        </View>
         <Txt muted size={13}>
           {formatTime(event)}
         </Txt>

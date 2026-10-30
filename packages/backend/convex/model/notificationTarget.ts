@@ -33,6 +33,29 @@ export function sectionForTarget(
   return target.kind === "templates" ? "lists" : target.kind;
 }
 
+/**
+ * The document a receipt is about, for targets that have their own screen.
+ * Files, members and Secret Santa are read as a whole page, so they have none.
+ */
+export function targetItem(target: NotificationTarget) {
+  switch (target.kind) {
+    case "calendar":
+      return { kind: target.kind, id: target.eventId };
+    case "lists":
+      return { kind: target.kind, id: target.listId };
+    case "templates":
+      return { kind: target.kind, id: target.templateId };
+    case "expenses":
+      return { kind: target.kind, id: target.potId };
+    case "notes":
+      return { kind: target.kind, id: target.noteId };
+    case "files":
+    case "members":
+    case "secretSanta":
+      return null;
+  }
+}
+
 /** Canonical destinations shared with push delivery. Native adds its Home prefix. */
 export function notificationPath(
   projectId: Id<"projects">,

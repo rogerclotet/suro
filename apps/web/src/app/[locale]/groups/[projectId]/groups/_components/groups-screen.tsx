@@ -13,9 +13,12 @@ import type { Project } from "@/app/_data/project";
 import { useProjects } from "@/app/_state/project-state";
 import CreateProjectForm from "@/app/[locale]/groups/_components/create-project/create-project-form";
 import ProjectAvatar from "@/components/project-avatar";
+import { UnreadBadge, UnreadDot } from "@/components/unread-badge";
 import UserAvatar from "@/components/user-avatar";
 import { CURRENT_VERSION } from "@/data/changelog.generated";
 import { Link, useRouter } from "@/i18n/navigation";
+import { unreadCount } from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +33,7 @@ export default function GroupsScreen() {
   const tGroups = useTranslations("groups");
   const tNav = useTranslations("nav");
   const tChangelog = useTranslations("changelog");
+  const unread = useUnreadNotifications();
 
   function handleProjectSelect(p: Project) {
     selectProject(p);
@@ -67,11 +71,14 @@ export default function GroupsScreen() {
                 <span
                   className={cn(
                     "min-w-0 flex-1 truncate",
-                    isActive ? "font-bold" : "font-normal",
+                    isActive || unreadCount(unread, p.id) > 0
+                      ? "font-bold"
+                      : "font-normal",
                   )}
                 >
                   {p.name}
                 </span>
+                <UnreadBadge count={unreadCount(unread, p.id)} />
                 {isActive ? (
                   <CheckIcon className="size-[18px] shrink-0 text-primary" />
                 ) : null}
@@ -81,10 +88,14 @@ export default function GroupsScreen() {
                   pathname: "/groups/[projectId]/settings",
                   params: { projectId: p.id },
                 }}
-                className="p-2 text-muted-foreground transition-opacity hover:opacity-70"
+                className="relative p-2 text-muted-foreground transition-opacity hover:opacity-70"
                 aria-label={tNav("manageGroups")}
               >
                 <Settings2Icon className="size-5" />
+                <UnreadDot
+                  count={unreadCount(unread, p.id, "members")}
+                  className="absolute top-1.5 right-1.5"
+                />
               </Link>
             </div>
           );

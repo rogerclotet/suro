@@ -1,26 +1,35 @@
 import { api } from "backend/convex/_generated/api";
+import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import { unreadItemCount, visitedReceiptIds } from "domain/notifications";
+import { useGlobalSearchParams, usePathname } from "expo-router";
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useRef,
+  useState,
 } from "react";
+import { AppState } from "react-native";
 import {
-  type NotificationSection,
-  notificationHref,
   notificationVisit,
   type UnreadSection,
 } from "@/lib/notification-routing";
 import { useAuthGate, usePersistentQuery } from "@/lib/offline";
 
-const NotificationsContext = createContext<{
-  unread: readonly UnreadSection[];
-  captureVisit: (receipt: UnreadSection) => void;
-}>({ unread: [], captureVisit: () => {} });
+const NotificationsContext = createContext<readonly UnreadSection[]>([]);
+
+function useAppActive() {
+  const [active, setActive] = useState(AppState.currentState === "active");
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) =>
+      setActive(state === "active"),
+    );
+    return () => subscription.remove();
+  }, []);
+  return active;
+}
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuthGate();
@@ -30,85 +39,50 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   );
   const markRead = useMutation(api.notifications.markRead);
   const pathname = usePathname();
-  const params = useGlobalSearchParams<{
+  const { projectId: settingsProjectId } = useGlobalSearchParams<{
     projectId?: string;
-    notification?: string;
-    visit?: string;
   }>();
-  const pending = useRef<UnreadSection | null>(null);
-  const captureVisit = useCallback((receipt: UnreadSection) => {
-    pending.current = receipt;
-  }, []);
-  const visit = notificationVisit(pathname, params.projectId);
-  const key = visit ? `${visit.projectId}/${visit.section}` : null;
-  const activation = params.visit || params.notification;
-  const observed = useRef<{ key: string; activation?: string } | null>(null);
+  // Only a screen in front of the user reads: a backgrounded app can still
+  // receive updates for the screen it was left on.
+  const active = useAppActive();
+  const requested = useRef(new Set<Id<"notifications">>());
 
+  // While a screen is focused, anything new for it is read too: the user is
+  // watching it change live.
   useEffect(() => {
-    if (key === null) {
-      observed.current = null;
-      return;
+    if (!active || unread === undefined) return;
+    const pendingIds = new Set(unread.flatMap((receipt) => receipt.ids));
+    for (const id of requested.current) {
+      if (!pendingIds.has(id)) requested.current.delete(id);
     }
-    if (unread === undefined) return;
-    const sameSection = observed.current?.key === key;
-    if (
-      sameSection &&
-      (!activation || observed.current?.activation === activation)
-    )
-      return;
-    const captured = pending.current;
-    const receipt =
-      captured && `${captured.projectId}/${captured.section}` === key
-        ? captured
-        : unread.find((row) => `${row.projectId}/${row.section}` === key);
-    observed.current = {
-      key,
-      activation: receipt === captured ? captured?.latestId : activation,
-    };
-    if (!receipt) return;
-    if (receipt === captured) pending.current = null;
-    // A second navigation render may arrive after the captured receipts were
-    // cleared. Never let that render consume a newer update in the section.
-    const cutoff =
-      receipt !== captured && params.notification
-        ? receipt.ids.findIndex((id) => id === params.notification)
-        : 0;
-    if (cutoff < 0) return;
-    const ids = receipt.ids.slice(cutoff);
-    void markRead({ projectId: receipt.projectId, ids }).catch((error) => {
-      // Keep the server badge on failure; a later visit can retry.
-      console.error("[notifications] markRead failed", error);
-    });
-  }, [key, activation, params.notification, unread, markRead]);
+    const visit = notificationVisit(pathname, settingsProjectId);
+    if (!visit) return;
+    const ids = visitedReceiptIds(unread, visit).filter(
+      (id) => !requested.current.has(id),
+    );
+    if (ids.length === 0) return;
+    for (const id of ids) requested.current.add(id);
+    void markRead({ projectId: visit.projectId as Id<"projects">, ids }).catch(
+      (error: unknown) => {
+        // Keep the server badge on failure; the next update can retry.
+        for (const id of ids) requested.current.delete(id);
+        console.error("[notifications] markRead failed", error);
+      },
+    );
+  }, [active, unread, pathname, settingsProjectId, markRead]);
 
   return (
-    <NotificationsContext.Provider
-      value={{ unread: unread ?? [], captureVisit }}
-    >
+    <NotificationsContext.Provider value={unread ?? []}>
       {children}
     </NotificationsContext.Provider>
   );
 }
 
 export function useUnreadNotifications() {
-  return useContext(NotificationsContext).unread;
+  return useContext(NotificationsContext);
 }
 
-export function useCaptureNotificationVisit() {
-  return useContext(NotificationsContext).captureVisit;
-}
-
-export function useOpenNotificationSection(projectId: string) {
-  const unread = useUnreadNotifications();
-  const captureVisit = useCaptureNotificationVisit();
-  const router = useRouter();
-  return (section: NotificationSection, fallback: string) => {
-    const receipt = unread.find(
-      (row) => row.projectId === projectId && row.section === section,
-    );
-    if (receipt) captureVisit(receipt);
-    router.navigate(receipt ? notificationHref(receipt) : fallback, {
-      withAnchor: true,
-    });
-  };
+/** Unread receipts about one list, template, event, pot or note. */
+export function useUnreadItemCount(projectId: string, id: string) {
+  return unreadItemCount(useUnreadNotifications(), projectId, id);
 }

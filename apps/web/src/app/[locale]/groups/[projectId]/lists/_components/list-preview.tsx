@@ -5,8 +5,10 @@ import { CalendarFold } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { List, ListPreviewData } from "@/app/_data/list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
 import { eventTimes } from "@/lib/event-day";
+import { useUnreadItemCount } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import ProgressRing from "./progress-ring";
 
@@ -29,6 +31,7 @@ export default function ListPreview({ list }: { list: List }) {
 
 export function ListPreviewRow({ list }: { list: ListPreviewData }) {
   const locale = useLocale();
+  const changes = useUnreadItemCount(list.projectId, list.id);
   const { total, done } = list;
   const pending = total - done;
   const completed = total > 0 && pending === 0;
@@ -43,13 +46,17 @@ export function ListPreviewRow({ list }: { list: ListPreviewData }) {
     >
       <div className="min-w-0 flex-1">
         {/* Done lists recede: muted name, faded ring. */}
-        <div
-          className={cn(
-            "truncate text-base",
-            completed && "text-muted-foreground",
-          )}
-        >
-          {list.name}
+        <div className="flex items-center gap-1.5">
+          <span
+            className={cn(
+              "truncate text-base",
+              completed && "text-muted-foreground",
+              changes > 0 && "font-semibold",
+            )}
+          >
+            {list.name}
+          </span>
+          <UnreadDot count={changes} />
         </div>
 
         {list.description && (

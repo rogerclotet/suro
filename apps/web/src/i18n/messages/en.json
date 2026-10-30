@@ -512,6 +512,7 @@
     "importError": "Could not import templates, please try again later"
   },
   "calendar": {
+    "newEvents": "New events",
     "createTitle": "Create event",
     "createDescription": "Create a new event",
     "createSuccess": "Event {name} created",
@@ -837,6 +838,7 @@
     "unexpectedDescription": "We couldn't load this page. Try again, or head back home."
   },
   "notifications": {
+    "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
     "list_items_completed": "{actorName} marked {count, plural, =1 {1 item} other {# items}} as completed in the list {listName}",
     "list_items_added": "{actorName} added {count, plural, =1 {1 item} other {# items}} to the list {listName}",
     "event_created": "New event: {name} ({timeRange})",

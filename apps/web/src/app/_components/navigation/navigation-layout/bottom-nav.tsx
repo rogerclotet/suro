@@ -1,13 +1,44 @@
 "use client";
 
 import { useMemo } from "react";
+import { useProjects } from "@/app/_state/project-state";
+import { UnreadBadge } from "@/components/unread-badge";
 import { Link, usePathname } from "@/i18n/navigation";
+import {
+  menuSection,
+  type UnreadSection,
+  unreadCount,
+  unreadElsewhere,
+} from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
+
+/**
+ * Home adds up the sections reached from its chips. The group switcher counts
+ * every other group, plus this group's members, whose settings it links to.
+ */
+function itemUnread(
+  unread: readonly UnreadSection[],
+  projectId: string,
+  item: BottomNavItem,
+) {
+  if (item.section === "groups") {
+    return (
+      unreadElsewhere(unread, projectId) +
+      unreadCount(unread, projectId, "members")
+    );
+  }
+  if (item.section === "home") return unreadCount(unread, projectId, "home");
+  const section = menuSection(item.section);
+  return section ? unreadCount(unread, projectId, section) : 0;
+}
 
 export default function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const bottomNavItems = useBottomNavItems();
+  const unread = useUnreadNotifications();
+  const { project } = useProjects();
 
   const activeItem = useMemo(() => {
     const activeItems = bottomNavItems.filter((item) =>
@@ -46,6 +77,7 @@ export default function BottomNav({ className }: { className?: string }) {
             );
           }
 
+          const count = project ? itemUnread(unread, project.id, item) : 0;
           return (
             <Link
               key={item.path}
@@ -57,11 +89,15 @@ export default function BottomNav({ className }: { className?: string }) {
             >
               <div
                 className={cn(
-                  "rounded-full px-4 py-1.5 transition-colors [&_svg]:size-5",
+                  "relative rounded-full px-4 py-1.5 transition-colors [&_svg]:size-5",
                   isActive && "bg-primary/20",
                 )}
               >
                 {item.icon}
+                <UnreadBadge
+                  count={count}
+                  className="absolute -top-1 right-1"
+                />
               </div>
               <span className="max-w-full truncate px-1 text-xs">
                 {item.name}

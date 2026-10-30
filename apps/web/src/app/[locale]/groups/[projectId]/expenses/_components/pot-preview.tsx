@@ -1,3 +1,5 @@
+"use client";
+
 import { CheckIcon, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Pot } from "@/app/_data/pot";
@@ -9,7 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
+import { useUnreadItemCount } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import MonetaryAmount from "./monetary-amount";
 
@@ -21,6 +25,7 @@ export default function PotPreview({
   projectId: string;
 }) {
   const t = useTranslations("expenses");
+  const changes = useUnreadItemCount(projectId, pot.id);
   const isSettled = pot.settledAt !== null;
   const average =
     pot.users.length > 0 ? Math.round(pot.totalSpent / pot.users.length) : 0;
@@ -38,7 +43,10 @@ export default function PotPreview({
       {/* Settled pots recede: a muted fill plus a slight fade. */}
       <Card className={cn("h-full", isSettled && "bg-muted opacity-75")}>
         <CardHeader>
-          <CardTitle>{pot.name}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <span className="min-w-0 truncate">{pot.name}</span>
+            <UnreadDot count={changes} />
+          </CardTitle>
 
           <CardAction>
             {isSettled ? (

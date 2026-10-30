@@ -1,5 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
+import { unreadItemCount } from "domain/notifications";
 import { Stack, useRouter } from "expo-router";
 import {
   Check,
@@ -12,7 +13,10 @@ import { type ReactNode, useMemo, useState } from "react";
 import { Pressable, ScrollView, SectionList, Switch, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { UnreadBadge, UnreadDot } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
+import { unreadItems } from "@/lib/notification-routing";
+import { useUnreadNotifications } from "@/lib/notifications";
 import {
   useOfflineListsOverview,
   usePersistentQuery,
@@ -43,6 +47,10 @@ export default function ListsOverview() {
   const tl = useTranslations("mobile.lists");
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
+  const unread = useUnreadNotifications();
+  const unreadTemplates = unreadItems(unread, pid, "lists")
+    .filter((item) => item.kind === "templates" && !item.gone)
+    .reduce((count, item) => count + item.count, 0);
 
   const sections = useMemo(() => {
     if (!overview) {
@@ -98,6 +106,7 @@ export default function ListsOverview() {
               <NavButton
                 icon={<LayoutTemplate color={t.primary} size={18} />}
                 label={tl("templates")}
+                count={unreadTemplates}
                 onPress={() => router.push(`/${pid}/lists/templates`)}
               />
             </View>
@@ -158,6 +167,7 @@ export default function ListsOverview() {
             const done = item.items.filter((i) => i.completed).length;
             const pending = total - done;
             const completed = total > 0 && pending === 0;
+            const changes = unreadItemCount(unread, pid, item._id);
             return (
               <Pressable
                 onPress={() =>
@@ -176,10 +186,24 @@ export default function ListsOverview() {
                 })}
               >
                 <View style={{ flex: 1 }}>
-                  {/* Done lists recede: muted name, faded marker. */}
-                  <Txt size={16} muted={completed}>
-                    {item.name}
-                  </Txt>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    {/* Done lists recede: muted name, faded marker. */}
+                    <Txt
+                      size={16}
+                      muted={completed}
+                      weight={changes ? "700" : "400"}
+                      style={{ flexShrink: 1 }}
+                    >
+                      {item.name}
+                    </Txt>
+                    <UnreadDot count={changes} />
+                  </View>
                   {item.description ? (
                     <Txt
                       muted
@@ -305,10 +329,12 @@ function ProgressRing({
 function NavButton({
   icon,
   label,
+  count = 0,
   onPress,
 }: {
   icon: ReactNode;
   label: string;
+  count?: number;
   onPress: () => void;
 }) {
   const t = useTheme();
@@ -343,6 +369,7 @@ function NavButton({
       <Txt size={15} weight="700" style={{ flex: 1 }}>
         {label}
       </Txt>
+      <UnreadBadge count={count} />
       <ChevronRight color={t.muted} size={18} />
     </Pressable>
   );

@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx, query } from "./_generated/server";
 import { requireUserId } from "./model/auth";
-import { notificationPath } from "./model/notificationTarget";
+import { notificationPath, targetItem } from "./model/notificationTarget";
 import { requireProjectMember } from "./model/permissions";
 
 async function destination(ctx: QueryCtx, row: Doc<"notifications">) {
@@ -49,7 +49,35 @@ async function destination(ctx: QueryCtx, row: Doc<"notifications">) {
   return { kind: "path" as const, path: notificationPath(projectId, target) };
 }
 
-/** One subscription powers the groups list and every section badge. */
+type TargetItem = NonNullable<ReturnType<typeof targetItem>>;
+type ItemReceipts = TargetItem & { ids: Id<"notifications">[] };
+
+/**
+ * One item's unread receipts. `gone` marks a deleted or moved item, which has
+ * no screen left to read it on; clients clear those from the section page.
+ */
+async function describeItem(
+  ctx: QueryCtx,
+  projectId: Id<"projects">,
+  { kind, id, ids }: ItemReceipts,
+) {
+  const doc = await ctx.db.get(id);
+  const present = doc !== null && doc.projectId === projectId;
+  return {
+    kind,
+    id,
+    ids,
+    count: ids.length,
+    gone: !present,
+    // Calendar badges point at events outside the visible month too.
+    event:
+      kind === "calendar" && present && "startAt" in doc
+        ? { name: doc.name, startAt: doc.startAt, allDay: doc.allDay }
+        : undefined,
+  };
+}
+
+/** One subscription powers the groups list, every section badge and item dots. */
 export const unread = query({
   args: {},
   handler: async (ctx) => {
@@ -66,23 +94,41 @@ export const unread = query({
       .collect();
     const groups = new Map<
       string,
-      { latest: Doc<"notifications">; ids: Doc<"notifications">["_id"][] }
+      {
+        latest: Doc<"notifications">;
+        ids: Id<"notifications">[];
+        items: Map<string, ItemReceipts>;
+      }
     >();
     for (const row of receipts) {
       if (!projects.has(row.projectId)) continue;
       const key = `${row.projectId}/${row.section}`;
-      const group = groups.get(key);
-      if (group) group.ids.push(row._id);
-      else groups.set(key, { latest: row, ids: [row._id] });
+      let group = groups.get(key);
+      if (!group) {
+        group = { latest: row, ids: [], items: new Map() };
+        groups.set(key, group);
+      }
+      group.ids.push(row._id);
+      const item = targetItem(row.target);
+      if (!item) continue;
+      const receiptsForItem = group.items.get(item.id);
+      if (receiptsForItem) receiptsForItem.ids.push(row._id);
+      else group.items.set(item.id, { ...item, ids: [row._id] });
     }
     return Promise.all(
-      [...groups.values()].map(async ({ latest, ids }) => ({
+      [...groups.values()].map(async ({ latest, ids, items }) => ({
         projectId: latest.projectId,
         section: latest.section,
         ids,
         count: ids.length,
         latestId: latest._id,
         destination: await destination(ctx, latest),
+        // Newest first, like `ids`. Older clients ignore this field.
+        targets: await Promise.all(
+          [...items.values()].map((item) =>
+            describeItem(ctx, latest.projectId, item),
+          ),
+        ),
       })),
     );
   },

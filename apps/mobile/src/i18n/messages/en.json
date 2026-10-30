@@ -1070,6 +1070,7 @@
       "downloadCaption": "Save",
       "exportFailed": "Couldn't export the calendar. Please try again.",
       "noEventsForDay": "No events scheduled for this day.",
+      "newEvents": "New events",
       "newEvent": "New event",
       "editEvent": "Edit event",
       "eventOptions": "Event options",

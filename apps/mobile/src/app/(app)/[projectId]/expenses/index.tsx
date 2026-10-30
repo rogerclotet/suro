@@ -7,8 +7,10 @@ import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { sectionHeaderBadges } from "@/components/header-badges";
+import { UnreadDot } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
 import { formatMoney } from "@/lib/money";
+import { useUnreadItemCount } from "@/lib/notifications";
 import {
   useOfflineListPotsOverview,
   usePersistentQuery,
@@ -160,15 +162,19 @@ function PotCard({
 }) {
   const tc = useTranslations("mobile.common");
   const tExp = useTranslations("mobile.expenses");
+  const changes = useUnreadItemCount(useProjectId(), pot._id);
   const average =
     pot.members.length > 0
       ? Math.round(pot.totalSpent / pot.members.length)
       : 0;
   return (
     <Card onPress={onPress} muted={muted}>
-      <Txt size={17} weight="700" numberOfLines={1}>
-        {pot.name}
-      </Txt>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <Txt size={17} weight="700" numberOfLines={1} style={{ flexShrink: 1 }}>
+          {pot.name}
+        </Txt>
+        <UnreadDot count={changes} />
+      </View>
       <View
         style={{
           flexDirection: "row",

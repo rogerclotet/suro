@@ -2,6 +2,7 @@
 
 import { ChevronRightIcon, SquircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useProjects } from "@/app/_state/project-state";
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,6 +13,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -19,7 +21,10 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { UnreadBadge } from "@/components/unread-badge";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { menuSection, unreadCount } from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import {
   type MenuItem,
@@ -31,6 +36,13 @@ export default function NavApps() {
   const menuItems = useMenuItems();
   const pathname = usePathname();
   const { isMobile, setOpenMobile, state } = useSidebar();
+  const unread = useUnreadNotifications();
+  const { project } = useProjects();
+  // Every section has its own entry here, so Home carries no aggregate badge.
+  function countFor(item: MenuItem) {
+    const section = menuSection(item.section);
+    return project && section ? unreadCount(unread, project.id, section) : 0;
+  }
 
   const shouldDisplayChildrenInSidebar = useMemo(() => {
     return !isMobile && state === "expanded";
@@ -43,6 +55,7 @@ export default function NavApps() {
         {menuItems.map((item) => {
           const isItemActive =
             item.path !== "#" && pathname.startsWith(item.path);
+          const count = countFor(item);
 
           return (
             <SidebarMenuItem key={`${item.name}-${item.path}`}>
@@ -50,22 +63,30 @@ export default function NavApps() {
                 <CollapsibleNavItem
                   item={item}
                   pathname={pathname}
+                  count={count}
                   onNavigate={() => setOpenMobile(false)}
                 />
               ) : (
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.name}
-                  isActive={isItemActive}
-                >
-                  <NavLink
-                    href={item.href}
-                    onClick={() => setOpenMobile(false)}
+                <>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.name}
+                    isActive={isItemActive}
                   >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </NavLink>
-                </SidebarMenuButton>
+                    <NavLink
+                      href={item.href}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  {count ? (
+                    <SidebarMenuBadge>
+                      <UnreadBadge count={count} />
+                    </SidebarMenuBadge>
+                  ) : null}
+                </>
               )}
             </SidebarMenuItem>
           );
@@ -78,10 +99,12 @@ export default function NavApps() {
 function CollapsibleNavItem({
   item,
   pathname,
+  count,
   onNavigate,
 }: {
   item: MenuItem;
   pathname: string;
+  count: number;
   onNavigate: () => void;
 }) {
   const router = useRouter();
@@ -118,9 +141,11 @@ function CollapsibleNavItem({
             <SidebarMenuButton tooltip={item.name} isActive={false}>
               {item.icon}
               <span>{item.name}</span>
+              <UnreadBadge count={count} className="ml-auto" />
               <ChevronRightIcon
                 className={cn(
-                  "ml-auto size-4 shrink-0 transition-transform",
+                  "size-4 shrink-0 transition-transform",
+                  !count && "ml-auto",
                   "group-data-[state=open]/collapsible:rotate-90",
                 )}
               />

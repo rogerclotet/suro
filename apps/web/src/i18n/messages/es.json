@@ -512,6 +512,7 @@
     "importError": "No se han podido importar las plantillas, vuelve a intentarlo más tarde"
   },
   "calendar": {
+    "newEvents": "Eventos nuevos",
     "createTitle": "Crear evento",
     "createDescription": "Crear un evento nuevo",
     "createSuccess": "Evento {name} creado",
@@ -837,6 +838,7 @@
     "unexpectedDescription": "No hemos podido cargar esta página. Inténtalo de nuevo o vuelve al inicio."
   },
   "notifications": {
+    "unreadCount": "{count, plural, one {# notificación no leída} other {# notificaciones no leídas}}",
     "list_items_completed": "{actorName} ha marcado {count, plural, =1 {1 elemento} other {# elementos}} como completados en la lista {listName}",
     "list_items_added": "{actorName} ha añadido {count, plural, =1 {1 elemento} other {# elementos}} a la lista {listName}",
     "event_created": "Nuevo evento: {name} ({timeRange})",

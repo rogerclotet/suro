@@ -1,10 +1,10 @@
 import type { Id } from "backend/convex/_generated/dataModel";
 import { describe, expect, it } from "vitest";
 import {
-  notificationHref,
   notificationVisit,
   type UnreadSection,
   unreadCount,
+  unreadItems,
 } from "./notification-routing";
 
 // Convex ids are opaque at this pure routing boundary.
@@ -18,67 +18,12 @@ function receipt(section: UnreadSection["section"], count = 1): UnreadSection {
     ids: [latestId],
     count,
     destination: { kind: "path", path: `/${projectId}/${section}` },
+    targets: [],
   };
 }
 
-describe("notification navigation", () => {
-  it("opens an event's month and carries the receipt identity even for repeated dates", () => {
-    const calendar = receipt("calendar");
-    calendar.destination = {
-      kind: "calendar",
-      startAt: Date.UTC(2027, 2, 12),
-      allDay: false,
-    };
-    expect(notificationHref(calendar)).toBe(
-      `/group/calendar?date=${Date.UTC(2027, 2, 12)}&notification=notification`,
-    );
-  });
-  it("opens an all-day event on its UTC calendar date in the local calendar", () => {
-    const calendar = receipt("calendar");
-    calendar.destination = {
-      kind: "calendar",
-      startAt: Date.UTC(2027, 2, 12),
-      allDay: true,
-    };
-    expect(notificationHref(calendar)).toBe(
-      `/group/calendar?date=${new Date(2027, 2, 12).getTime()}&notification=notification`,
-    );
-  });
-  it("uses the same Home nesting as push links for notes and files", () => {
-    const note = receipt("notes");
-    note.destination = { kind: "path", path: "/group/notes/note" };
-    expect(notificationHref(note)).toBe(
-      "/group/home/notes/note?notification=notification",
-    );
-    expect(notificationHref(receipt("files"))).toBe(
-      "/group/home/files?notification=notification",
-    );
-    const secretSanta = receipt("secretSanta");
-    secretSanta.destination = { kind: "path", path: "/group/secret-santa" };
-    expect(notificationHref(secretSanta)).toBe(
-      "/group/home/secret-santa?notification=notification",
-    );
-  });
-  it("preserves group settings parameters and list or pot targets", () => {
-    const members = receipt("members");
-    members.destination = {
-      kind: "path",
-      path: "/group-settings?projectId=group",
-    };
-    expect(notificationHref(members)).toBe(
-      "/group-settings?projectId=group&notification=notification",
-    );
-    for (const path of [
-      "/group/lists/list",
-      "/group/lists/templates/template",
-      "/group/expenses/pot",
-    ]) {
-      const row = receipt("lists");
-      row.destination = { kind: "path", path };
-      expect(notificationHref(row)).toBe(`${path}?notification=notification`);
-    }
-  });
-  it("leaves unread receipts alone on launch, Home, and account pages", () => {
+describe("notification visits", () => {
+  it("reads nothing on launch, Home, account pages, My tasks or the template index", () => {
     for (const path of [
       "/",
       "/groups",
@@ -86,36 +31,75 @@ describe("notification navigation", () => {
       "/profile",
       "/preferences",
       "/create-group",
+      "/group/lists/tasks",
+      "/group/lists/templates",
+      "/group/expenses/solo-expenses",
     ]) {
       expect(notificationVisit(path)).toBeNull();
     }
   });
-  it("keeps nested navigation within its section, and Home destinations separate", () => {
-    expect(notificationVisit("/group/calendar/event")).toEqual({
+
+  it("treats section indexes as indexes, not as reads of their items", () => {
+    expect(notificationVisit("/group/lists")).toEqual({
       projectId: "group",
-      section: "calendar",
-    });
-    expect(notificationVisit("/group/lists/templates/template")).toEqual({
-      projectId: "group",
+      scope: "index",
       section: "lists",
     });
-    expect(notificationVisit("/group/home/notes/note/edit")).toEqual({
+    expect(notificationVisit("/group/calendar")?.scope).toBe("index");
+    expect(notificationVisit("/group/expenses")?.scope).toBe("index");
+    expect(notificationVisit("/group/home/notes")).toEqual({
       projectId: "group",
+      scope: "index",
       section: "notes",
     });
+  });
+
+  it("maps every item screen to its item, in whichever tab hosts it", () => {
+    const cases: [string, string][] = [
+      ["/group/lists/list", "list"],
+      ["/group/lists/templates/template", "template"],
+      ["/group/calendar/event", "event"],
+      ["/group/calendar/list/list", "list"],
+      ["/group/calendar/note/note/edit", "note"],
+      ["/group/calendar/expense/pot", "pot"],
+      ["/group/expenses/pot", "pot"],
+      ["/group/home/notes/note", "note"],
+      ["/group/home/notes/note/edit", "note"],
+      ["/group/home/event/event", "event"],
+      ["/group/home/list/list", "list"],
+      ["/group/home/note/note", "note"],
+      ["/group/home/expense/pot", "pot"],
+    ];
+    for (const [path, id] of cases) {
+      expect(notificationVisit(path)).toEqual({
+        projectId: "group",
+        scope: "item",
+        id,
+      });
+    }
+  });
+
+  it("reads files, Secret Santa and members as whole pages", () => {
     expect(notificationVisit("/group/home/files")).toEqual({
       projectId: "group",
+      scope: "page",
       section: "files",
     });
     expect(notificationVisit("/group/home/secret-santa/ideas")).toEqual({
       projectId: "group",
+      scope: "page",
       section: "secretSanta",
     });
     expect(notificationVisit("/group-settings", "group")).toEqual({
       projectId: "group",
+      scope: "page",
       section: "members",
     });
+    expect(notificationVisit("/group-settings")).toBeNull();
   });
+});
+
+describe("unread aggregation", () => {
   it("aggregates Home badges without including Calendar, Lists or Expenses", () => {
     const rows = [
       receipt("notes", 2),
@@ -130,5 +114,24 @@ describe("notification navigation", () => {
     expect(unreadCount(rows, projectId)).toBe(28);
     expect(unreadCount(rows, projectId, "calendar")).toBe(4);
     expect(unreadCount(rows, "other-group")).toBe(0);
+  });
+
+  it("lists one section's items within one group", () => {
+    const lists = receipt("lists", 2);
+    const item = (kind: "lists" | "templates", id: string) => ({
+      kind,
+      id: id as Id<"lists">,
+      ids: [latestId],
+      count: 1,
+      gone: false,
+      event: undefined,
+    });
+    lists.targets = [item("lists", "a"), item("templates", "b")];
+    const elsewhere = { ...lists, projectId: "other" as Id<"projects"> };
+    expect(
+      unreadItems([lists, elsewhere, receipt("notes")], projectId, "lists").map(
+        (item) => item.id,
+      ),
+    ).toEqual(["a", "b"]);
   });
 });

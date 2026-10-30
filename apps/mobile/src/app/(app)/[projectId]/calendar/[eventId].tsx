@@ -1,7 +1,12 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvexAuth, useMutation } from "convex/react";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Stack,
+  useLocalSearchParams,
+  usePathname,
+  useRouter,
+} from "expo-router";
 import {
   CirclePlus,
   FilePlus,
@@ -38,6 +43,7 @@ import { localizeGroupPath } from "@/lib/group-paths";
 import { notePreview } from "@/lib/note-content";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { attachedRoute, hostTab } from "@/lib/tab-routes";
 import { webUrl } from "@/lib/urls";
 import { useUploadFile } from "@/lib/use-upload-file";
 import { useTheme } from "@/theme";
@@ -68,6 +74,8 @@ export default function EventDetail() {
   const eid = eventId as Id<"events">;
   const t = useTheme();
   const router = useRouter();
+  // Mounted in the Home and Calendar stacks; attached screens open in the same one.
+  const tab = hostTab(usePathname());
   const tCal = useTranslations("mobile.calendar");
   const tNav = useTranslations("nav");
   const tFiles = useTranslations("mobile.files");
@@ -118,7 +126,7 @@ export default function EventDetail() {
   }, []);
 
   // `null` means the event no longer exists (deleted here or from another
-  // client): return to the calendar instead of rendering — or re-querying — a
+  // client): return to the tab instead of rendering — or re-querying — a
   // deleted event, which would surface an "Event not found" server error.
   useEffect(() => {
     if (event !== null) {
@@ -127,9 +135,9 @@ export default function EventDetail() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace(`/${pid}/calendar`);
+      router.replace(`/${pid}/${tab}`);
     }
-  }, [event, router, pid]);
+  }, [event, router, pid, tab]);
 
   async function handleEdit(values: EventFormValues) {
     setEditing(false);
@@ -180,14 +188,14 @@ export default function EventDetail() {
   }
 
   // Each "create" links a fresh record to the event. Lists stay inline on this
-  // screen; notes and expenses still open in the calendar stack.
+  // screen; notes and expenses open in this tab's stack.
   async function handleCreateLinkedList() {
     await createLinkedList({ eventId: eid });
   }
 
   async function handleCreateLinkedNote() {
     const noteId = await createLinkedNote({ eventId: eid });
-    router.push(`/${pid}/calendar/note/${noteId}`);
+    router.push(attachedRoute(pid, tab, "note", noteId));
   }
 
   // Pots ask who's in them first, so "create" just opens the member picker;
@@ -389,7 +397,7 @@ export default function EventDetail() {
                 unlinkLabel={tCal("unlinkNote")}
                 onPress={() =>
                   router.push({
-                    pathname: `/${pid}/calendar/note/${linkedNote._id}`,
+                    pathname: attachedRoute(pid, tab, "note", linkedNote._id),
                     params: { name: linkedNote.name },
                   })
                 }
@@ -411,7 +419,7 @@ export default function EventDetail() {
                 unlinkLabel={tCal("unlinkExpense")}
                 onPress={() =>
                   router.push({
-                    pathname: `/${pid}/calendar/expense/${linkedPot._id}`,
+                    pathname: attachedRoute(pid, tab, "expense", linkedPot._id),
                     params: { name: linkedPot.name },
                   })
                 }
@@ -430,7 +438,13 @@ export default function EventDetail() {
                 icon={Gift}
                 name={linkedSecretSanta.name}
                 subtitle={tNav("secretSanta")}
-                onPress={() => router.navigate(`/${pid}/home/secret-santa`)}
+                onPress={() =>
+                  // From Calendar this switches tabs: anchor it on the Home
+                  // dashboard so its back button has somewhere to go.
+                  router.navigate(`/${pid}/home/secret-santa`, {
+                    withAnchor: tab === "calendar",
+                  })
+                }
               />
             ) : null}
             {hasFiles ? (
@@ -589,6 +603,7 @@ function CreatePotMembersSheet({
   const members = usePersistentQuery(api.projects.members, { projectId });
   const createLinkedPot = useMutation(api.events.createLinkedPot);
   const router = useRouter();
+  const tab = hostTab(usePathname());
   const t = useTheme();
   const tExp = useTranslations("mobile.expenses");
   const tCal = useTranslations("mobile.calendar");
@@ -625,7 +640,7 @@ function CreatePotMembersSheet({
       });
       setSelected(null);
       onClose();
-      router.push(`/${projectId}/calendar/expense/${potId}`);
+      router.push(attachedRoute(projectId, tab, "expense", potId));
     } finally {
       setBusy(false);
     }

@@ -1,47 +1,89 @@
 import type { api } from "backend/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import { eventLocalStart } from "domain/events";
-import { withHomeTabPrefix } from "./group-paths";
+import type { NotificationVisit } from "domain/notifications";
 
 export type UnreadSection = FunctionReturnType<
   typeof api.notifications.unread
 >[number];
 export type NotificationSection = UnreadSection["section"];
+export type UnreadItem = UnreadSection["targets"][number];
 
-export function notificationHref(receipt: UnreadSection): string {
-  const destination = receipt.destination;
-  const path =
-    destination.kind === "calendar"
-      ? `/${receipt.projectId}/calendar?date=${eventLocalStart({ startAt: destination.startAt, allDay: destination.allDay ?? false }).getTime()}`
-      : withHomeTabPrefix(destination.path);
-  return `${path}${path.includes("?") ? "&" : "?"}notification=${receipt.latestId}`;
-}
+// Screens Home and Calendar host for an event and its attachments, so the back
+// button returns to where they were opened (see lib/tab-routes.ts). Calendar
+// shows events at `calendar/<eventId>` itself.
+const ATTACHED_SCREENS: Record<string, ReadonlySet<string>> = {
+  home: new Set(["event", "list", "note", "expense"]),
+  calendar: new Set(["list", "note", "expense"]),
+};
 
-/** Home itself has no read effect: its badges aggregate independent destinations. */
+/**
+ * Map a route to what it reads. Item screens read their own receipts, section
+ * indexes only clear vanished items, and Home reads nothing: its badges add up
+ * other screens' receipts.
+ */
 export function notificationVisit(
   pathname: string,
   settingsProjectId?: string,
-) {
-  if (pathname === "/group-settings" && settingsProjectId) {
-    return { projectId: settingsProjectId, section: "members" as const };
+): NotificationVisit | null {
+  if (pathname === "/group-settings") {
+    return settingsProjectId
+      ? { projectId: settingsProjectId, scope: "page", section: "members" }
+      : null;
   }
-  const [projectId, tab, child] = pathname.split("/").filter(Boolean);
-  if (!projectId) return null;
+  const [projectId, tab, first, second] = pathname.split("/").filter(Boolean);
+  if (!projectId || !tab) return null;
+  const item = (id: string | undefined): NotificationVisit | null =>
+    id ? { projectId, scope: "item", id } : null;
+  const index = (section: NotificationSection): NotificationVisit => ({
+    projectId,
+    scope: "index",
+    section,
+  });
+  const page = (section: NotificationSection): NotificationVisit => ({
+    projectId,
+    scope: "page",
+    section,
+  });
+
+  if (first && ATTACHED_SCREENS[tab]?.has(first)) return item(second);
   switch (tab) {
-    case "calendar":
     case "lists":
+      if (!first) return index("lists");
+      if (first === "tasks") return null;
+      return first === "templates" ? item(second) : item(first);
+    case "calendar":
+      return first ? item(first) : index("calendar");
     case "expenses":
-      return { projectId, section: tab };
+      if (!first) return index("expenses");
+      return first === "solo-expenses" ? null : item(first);
     case "home":
-      if (child === "notes" || child === "files") {
-        return { projectId, section: child };
+      switch (first) {
+        case "notes":
+          return second ? item(second) : index("notes");
+        case "files":
+          return page("files");
+        case "secret-santa":
+          return page("secretSanta");
+        default:
+          return null;
       }
-      return child === "secret-santa"
-        ? { projectId, section: "secretSanta" as const }
-        : null;
     default:
       return null;
   }
+}
+
+/** Unread items of one section in a group, newest first. */
+export function unreadItems(
+  receipts: readonly UnreadSection[],
+  projectId: string,
+  section: NotificationSection,
+): UnreadItem[] {
+  return receipts
+    .filter(
+      (receipt) =>
+        receipt.projectId === projectId && receipt.section === section,
+    )
+    .flatMap((receipt) => receipt.targets);
 }
 
 export function unreadCount(

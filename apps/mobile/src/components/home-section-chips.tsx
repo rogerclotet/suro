@@ -1,13 +1,11 @@
+import { useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 import { UnreadBadge } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
 import { HOME_SECTIONS } from "@/lib/home-sections";
 import { unreadCount } from "@/lib/notification-routing";
-import {
-  useOpenNotificationSection,
-  useUnreadNotifications,
-} from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/notifications";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
 import { Txt } from "@/ui";
@@ -54,7 +52,7 @@ function SectionChip({
 /** Compact section shortcuts below the home date header. Wraps to a second row. */
 export function HomeSectionChips() {
   const pid = useProjectId();
-  const openSection = useOpenNotificationSection(pid);
+  const router = useRouter();
   const unread = useUnreadNotifications();
   const tNav = useTranslations("nav");
 
@@ -66,9 +64,7 @@ export function HomeSectionChips() {
           label={tNav(section.key)}
           icon={section.icon}
           count={unreadCount(unread, pid, section.key)}
-          onPress={() =>
-            openSection(section.key, `/${pid}/home/${section.path}`)
-          }
+          onPress={() => router.push(`/${pid}/home/${section.path}`)}
         />
       ))}
     </View>

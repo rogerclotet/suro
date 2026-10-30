@@ -8,7 +8,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
+import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
+import { useUnreadItemCount } from "@/lib/queries/use-notifications";
 import { cn, textToHtml } from "@/lib/utils";
 import TimeRange from "./time-range";
 
@@ -25,6 +27,7 @@ export default function EventPreview({
   accentClass: string;
 }) {
   const t = useTranslations("calendar");
+  const changes = useUnreadItemCount(event.projectId, event.id);
   return (
     <Link
       prefetch
@@ -39,8 +42,11 @@ export default function EventPreview({
       <div className={cn("w-1 shrink-0 rounded-full", accentClass)} />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="truncate text-base leading-snug font-semibold">
-            {event.name}
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="truncate text-base leading-snug font-semibold">
+              {event.name}
+            </span>
+            <UnreadDot count={changes} />
           </div>
           {event.files.length > 0 && (
             <Tooltip>

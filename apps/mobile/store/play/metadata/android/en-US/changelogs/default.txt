@@ -1,3 +1,3 @@
-• Secret Santa has a fresh look in the mobile app: the key details at a glance, a gift card to flip for your match, a shortcut to your gift ideas and a clearer draw step for the organizer.
-• The draw no longer gets stuck when someone leaves: exclusions that would make it impossible are removed, and the organizer sees why the draw is blocked.
-• Editing a Secret Santa from the options menu now works on iPhone, and on the web gift ideas show their whole description and link.
+• See what changed: lists, events, expenses, notes and templates with updates show a dot until you open them, and the calendar lists new events. The web app now shows unread counts too.
+• Tapping a tab with updates always opens that section instead of jumping to the latest changed item.
+• In the mobile app, events and lists opened from Home now go back to Home.

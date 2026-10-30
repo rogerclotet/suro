@@ -512,6 +512,7 @@
     "importError": "No s'han pogut importar les plantilles, torna-ho a provar més tard"
   },
   "calendar": {
+    "newEvents": "Esdeveniments nous",
     "createTitle": "Crear esdeveniment",
     "createDescription": "Crear un esdeveniment nou",
     "createSuccess": "Esdeveniment {name} creat",
@@ -837,6 +838,7 @@
     "unexpectedDescription": "No hem pogut carregar aquesta pàgina. Torna-ho a provar o torna a l'inici."
   },
   "notifications": {
+    "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}",
     "list_items_completed": "{actorName} ha marcat {count, plural, =1 {1 element} other {# elements}} com a completats a la llista {listName}",
     "list_items_added": "{actorName} ha afegit {count, plural, =1 {1 element} other {# elements}} a la llista {listName}",
     "event_created": "Nou esdeveniment: {name} ({timeRange})",

@@ -16,6 +16,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -26,7 +27,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
+import { UnreadBadge } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
+import { unreadInSection } from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import ProjectSelector from "../../project-selector";
 import Profile from "../profile/profile";
 import NavApps from "./nav-apps";
@@ -36,6 +40,9 @@ export default function AppSidebar() {
   const { openFeedback } = useFeedback();
   const tNav = useTranslations("nav");
   const tGroups = useTranslations("groups");
+  const unread = useUnreadNotifications();
+  // Joins and leaves are read on each group's settings, linked from here.
+  const membersUnread = unreadInSection(unread, "members");
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -62,6 +69,11 @@ export default function AppSidebar() {
                     {tNav("manageGroups")}
                   </Link>
                 </SidebarMenuButton>
+                {membersUnread ? (
+                  <SidebarMenuBadge>
+                    <UnreadBadge count={membersUnread} />
+                  </SidebarMenuBadge>
+                ) : null}
               </SidebarMenuItem>
             </SidebarMenu>
 

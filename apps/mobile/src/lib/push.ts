@@ -241,14 +241,8 @@ export function usePushNotifications(): void {
         // `/<pid>/<section>/<id>` (the entity the push is about).
         // withHomeTabPrefix nests Home-tab sections (files, notes) under
         // `/<pid>/home/...` to match the mobile tab layout.
-        const route = withHomeTabPrefix(path);
-        const separator = route.includes("?") ? "&" : "?";
-        const visit = encodeURIComponent(
-          response.notification.request.identifier,
-        );
-        router.navigate(`${route}${separator}notification=&visit=${visit}`, {
-          withAnchor: true,
-        });
+        // The opened screen reads its own unread receipts.
+        router.navigate(withHomeTabPrefix(path), { withAnchor: true });
         void notifications()
           .clearLastNotificationResponseAsync()
           .catch(() => {});

@@ -18,7 +18,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/touch-tooltip";
+import { UnreadBadge, UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
+import { unreadCount } from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { useSession } from "@/lib/session";
 import DeleteProjectButton from "../_components/delete-project-button";
 import UsersList from "../_components/users-list";
@@ -31,6 +34,7 @@ export default function ProjectsTable() {
   const { data: session } = useSession();
   const t = useTranslations("groups");
   const tCommon = useTranslations("common");
+  const unread = useUnreadNotifications();
   function deleteButton(project: Project) {
     if (project.createdBy !== session?.user.id) {
       return (
@@ -104,8 +108,10 @@ export default function ProjectsTable() {
                   pathname: "/groups/[projectId]",
                   params: { projectId: project.id },
                 }}
+                className="inline-flex items-center gap-2"
               >
                 {project.name}
+                <UnreadBadge count={unreadCount(unread, project.id)} />
               </Link>
             </TableCell>
             <TableCell className="align-middle">
@@ -120,8 +126,13 @@ export default function ProjectsTable() {
                       params: { projectId: project.id },
                     }}
                     aria-label={t("manageTitle")}
+                    className="relative"
                   >
                     <Settings />
+                    <UnreadDot
+                      count={unreadCount(unread, project.id, "members")}
+                      className="absolute top-1.5 right-1.5"
+                    />
                   </Link>
                 </Button>
                 <InviteButton project={project} />
