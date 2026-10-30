@@ -1070,6 +1070,7 @@
       "downloadCaption": "Desar",
       "exportFailed": "No s'ha pogut exportar el calendari. Torna-ho a provar.",
       "noEventsForDay": "No hi ha esdeveniments per aquest dia.",
+      "newEvents": "Esdeveniments nous",
       "newEvent": "Nou esdeveniment",
       "editEvent": "Editar esdeveniment",
       "eventOptions": "Opcions de l'esdeveniment",

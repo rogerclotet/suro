@@ -24,9 +24,11 @@ import type { CalendarEvent } from "@/app/_data/event";
 import { adaptListPreview, type ListPreviewData } from "@/app/_data/list";
 import { ListPreviewRow } from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
 import ProgressRing from "@/app/[locale]/groups/[projectId]/lists/_components/progress-ring";
+import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
 import { eventTimes, isEventOnDay } from "@/lib/event-day";
 import { useEventsInRange } from "@/lib/queries/use-events";
+import { useUnreadItemCount } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import { HomeSectionChips } from "./home-section-chips";
 
@@ -196,6 +198,7 @@ function EventCard({
   const total = linkedList?.total ?? 0;
   const done = linkedList?.done ?? 0;
   const pending = total - done;
+  const changes = useUnreadItemCount(event.projectId, event.id);
 
   return (
     <Link
@@ -215,7 +218,10 @@ function EventCard({
         locale={locale}
       />
       <div className="min-w-0 flex-1">
-        <div className="truncate font-semibold">{event.name}</div>
+        <div className="flex items-center gap-1.5">
+          <span className="truncate font-semibold">{event.name}</span>
+          <UnreadDot count={changes} />
+        </div>
         <div className="truncate text-[13px] text-muted-foreground">{when}</div>
       </div>
       {linkedList ? (

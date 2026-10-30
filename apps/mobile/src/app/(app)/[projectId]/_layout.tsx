@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import type { ErrorBoundaryProps } from "expo-router";
-import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 import type {
   NativeTabsProps,
   NativeTabTriggerProps,
@@ -13,13 +13,9 @@ import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";
 import {
   type NotificationSection,
-  notificationHref,
   unreadCount,
 } from "@/lib/notification-routing";
-import {
-  useCaptureNotificationVisit,
-  useUnreadNotifications,
-} from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { ProjectIdProvider } from "@/lib/project-id";
 import { FONT, useTheme } from "@/theme";
@@ -77,21 +73,7 @@ export default function ProjectTabs() {
   const projects = usePersistentQuery(api.projects.listMine);
   const liveProjects = useQuery(api.projects.listMine);
   const unread = useUnreadNotifications();
-  const captureVisit = useCaptureNotificationVisit();
-  const router = useRouter();
-  function openUnread(section: NotificationSection) {
-    const receipt = unread.find(
-      (row) => row.projectId === projectId && row.section === section,
-    );
-    if (!receipt) return;
-    captureVisit(receipt);
-    // NativeTabs emits tabPress before its own JUMP_TO. Navigate after that
-    // selection, using the captured receipt even if the root clears its badge.
-    setTimeout(
-      () => router.navigate(notificationHref(receipt), { withAnchor: true }),
-      0,
-    );
-  }
+  // A tab press always opens its section; the rows inside mark what changed.
   function badge(section: NotificationSection | "home") {
     const count = unreadCount(unread, projectId, section);
     return count
@@ -142,28 +124,19 @@ export default function ProjectTabs() {
           <Badge hidden={badge("home") === undefined}>{badge("home")}</Badge>
           <Icon sf="house" md="home" />
         </Trigger>
-        <Trigger
-          name="lists"
-          listeners={{ tabPress: () => openUnread("lists") }}
-        >
+        <Trigger name="lists">
           <Label>{tNav("lists")}</Label>
           <Badge hidden={badge("lists") === undefined}>{badge("lists")}</Badge>
           <Icon sf="checklist" md="checklist" />
         </Trigger>
-        <Trigger
-          name="calendar"
-          listeners={{ tabPress: () => openUnread("calendar") }}
-        >
+        <Trigger name="calendar">
           <Label>{tNav("calendar")}</Label>
           <Badge hidden={badge("calendar") === undefined}>
             {badge("calendar")}
           </Badge>
           <Icon sf="calendar" md="calendar_month" />
         </Trigger>
-        <Trigger
-          name="expenses"
-          listeners={{ tabPress: () => openUnread("expenses") }}
-        >
+        <Trigger name="expenses">
           <Label>{tNav("expenses")}</Label>
           <Badge hidden={badge("expenses") === undefined}>
             {badge("expenses")}

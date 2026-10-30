@@ -7,7 +7,9 @@ import { LayoutTemplate } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, Pressable, View } from "react-native";
 import { headerCreateAction } from "@/components/header-badges";
+import { UnreadDot } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
+import { useUnreadItemCount } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -106,6 +108,7 @@ function TemplateRow({
 }) {
   const t = useTheme();
   const tr = useTranslations("mobile.templates");
+  const changes = useUnreadItemCount(template.projectId, template._id);
   // Show the description, or fall back to the item count when there's none.
   // Must test for a *non-blank* description, not just non-null: migrated
   // templates carry an empty-string description, and `??` would treat that as
@@ -139,7 +142,16 @@ function TemplateRow({
         <LayoutTemplate color={t.primary} size={20} />
       </View>
       <View style={{ flex: 1 }}>
-        <Txt size={16}>{template.name}</Txt>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Txt
+            size={16}
+            weight={changes ? "700" : "400"}
+            style={{ flexShrink: 1 }}
+          >
+            {template.name}
+          </Txt>
+          <UnreadDot count={changes} />
+        </View>
         <Txt muted size={13} numberOfLines={1} style={{ marginTop: 2 }}>
           {subtitle}
         </Txt>

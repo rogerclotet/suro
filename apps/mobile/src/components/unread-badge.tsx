@@ -26,3 +26,23 @@ export function UnreadBadge({ count }: { count: number }) {
     </View>
   );
 }
+
+/** Marks a row whose item changed since the user last opened it. */
+export function UnreadDot({ count }: { count: number }) {
+  const t = useTheme();
+  const tr = useTranslations("mobile.groups");
+  if (!count) return null;
+  return (
+    <View
+      accessible
+      accessibilityLabel={tr("unreadCount", { count })}
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: t.primary,
+        flexShrink: 0,
+      }}
+    />
+  );
+}

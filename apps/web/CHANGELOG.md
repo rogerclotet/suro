@@ -6,6 +6,26 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.36.0] — 2026-10-30
+
+### ca
+
+- [feature] Ara veus què ha canviat: les llistes, els esdeveniments, les despeses, les notes i les plantilles amb novetats mostren un punt fins que les obres, i el calendari llista els esdeveniments nous. El web també mostra els comptadors de novetats.
+- [fix] Tocar una pestanya amb novetats sempre obre aquella secció, en lloc de saltar a l'últim element canviat.
+- [fix] A l'app mòbil, els esdeveniments i les llistes que obres des d'Inici tornen a Inici amb el botó enrere.
+
+### es
+
+- [feature] Ahora ves qué ha cambiado: las listas, los eventos, los gastos, las notas y las plantillas con novedades muestran un punto hasta que los abres, y el calendario muestra los eventos nuevos. La web también muestra los contadores de novedades.
+- [fix] Tocar una pestaña con novedades siempre abre esa sección, en lugar de saltar al último elemento cambiado.
+- [fix] En la app móvil, los eventos y las listas que abres desde Inicio vuelven a Inicio con el botón atrás.
+
+### en
+
+- [feature] See what changed: lists, events, expenses, notes and templates with updates show a dot until you open them, and the calendar lists new events. The web app now shows unread counts too.
+- [fix] Tapping a tab with updates always opens that section instead of jumping to the latest changed item.
+- [fix] In the mobile app, events and lists opened from Home now go back to Home.
+
 ## [1.35.0] — 2026-10-22
 
 ### ca

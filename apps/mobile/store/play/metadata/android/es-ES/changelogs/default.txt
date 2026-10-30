@@ -1,3 +1,3 @@
-• El amigo invisible estrena diseño en la app móvil: los detalles de un vistazo, una tarjeta para descubrir a quién te toca, acceso directo a tus ideas y un sorteo más claro para quien lo organiza.
-• El sorteo ya no se bloquea cuando alguien se va: se eliminan las exclusiones que lo harían imposible, y quien lo organiza ve el motivo.
-• Editar el amigo invisible desde el menú de opciones ya funciona en el iPhone, y en la web las ideas de regalo muestran toda la descripción y el enlace.
+• Ahora ves qué ha cambiado: las listas, los eventos, los gastos, las notas y las plantillas con novedades muestran un punto hasta que los abres, y el calendario muestra los eventos nuevos. La web también muestra los contadores de novedades.
+• Tocar una pestaña con novedades siempre abre esa sección, en lugar de saltar al último elemento cambiado.
+• En la app móvil, los eventos y las listas que abres desde Inicio vuelven a Inicio con el botón atrás.

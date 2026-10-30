@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { NotificationReader } from "@/app/_components/notifications/notification-reader";
 import { useAction } from "@/app/_state/action-state";
 import FeedbackDialog from "@/app/[locale]/_components/feedback/feedback-dialog";
 import { FAB } from "@/components/ui/fab";
@@ -67,6 +68,7 @@ export default function SidebarInsetContent({
 
       <BottomNav />
       <FeedbackDialog />
+      <NotificationReader />
     </div>
   );
 }

@@ -8,6 +8,7 @@
     "./tasks": "./src/tasks.ts",
     "./month-totals": "./src/month-totals.ts",
     "./events": "./src/events.ts",
+    "./notifications": "./src/notifications.ts",
     "./row-keys": "./src/row-keys.ts",
     "./secret-santa": "./src/secret-santa.ts"
   },

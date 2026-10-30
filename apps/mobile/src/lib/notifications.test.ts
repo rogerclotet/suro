@@ -4,22 +4,31 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { UnreadSection } from "./notification-routing";
-import {
-  NotificationsProvider,
-  useCaptureNotificationVisit,
-} from "./notifications";
+import { NotificationsProvider } from "./notifications";
 
 const state = vi.hoisted(() => ({
   pathname: "/groups",
-  params: {} as { projectId?: string; notification?: string; visit?: string },
+  params: {} as { projectId?: string },
   unread: [] as UnreadSection[],
-  markRead: vi.fn(async () => {}),
+  markRead: vi.fn(async (_args: { projectId: string; ids: string[] }) => {}),
+  appState: "active",
+  onAppState: (_state: string) => {},
 }));
 // Replace framework boundaries; the provider and its read-on-visit effects run unchanged.
 vi.mock("expo-router", () => ({
   usePathname: () => state.pathname,
   useGlobalSearchParams: () => state.params,
-  useRouter: () => ({ navigate: vi.fn() }),
+}));
+vi.mock("react-native", () => ({
+  AppState: {
+    get currentState() {
+      return state.appState;
+    },
+    addEventListener: (_event: string, listener: (next: string) => void) => {
+      state.onAppState = listener;
+      return { remove: () => {} };
+    },
+  },
 }));
 vi.mock("convex/react", () => ({ useMutation: () => state.markRead }));
 vi.mock("@/lib/offline", () => ({
@@ -28,26 +37,29 @@ vi.mock("@/lib/offline", () => ({
 }));
 
 let root: Root;
-let capture: ReturnType<typeof useCaptureNotificationVisit>;
-function Probe() {
-  capture = useCaptureNotificationVisit();
-  return null;
-}
 async function render() {
   await act(async () =>
-    root.render(
-      createElement(NotificationsProvider, null, createElement(Probe)),
-    ),
+    root.render(createElement(NotificationsProvider, null)),
   );
 }
-function receipt(id: string): UnreadSection {
+type Item = { id: string; ids: string[]; gone?: boolean };
+function lists(...items: Item[]): UnreadSection {
+  const ids = items.flatMap((item) => item.ids) as Id<"notifications">[];
   return {
     projectId: "group" as Id<"projects">,
     section: "lists",
-    count: 1,
-    ids: [id as Id<"notifications">],
-    latestId: id as Id<"notifications">,
-    destination: { kind: "path", path: "/group/lists/list" },
+    count: ids.length,
+    ids,
+    latestId: ids[0] as Id<"notifications">,
+    destination: { kind: "path", path: "/group/lists" },
+    targets: items.map((item) => ({
+      kind: "lists",
+      id: item.id as Id<"lists">,
+      ids: item.ids as Id<"notifications">[],
+      count: item.ids.length,
+      gone: item.gone ?? false,
+      event: undefined,
+    })),
   };
 }
 beforeEach(() => {
@@ -56,7 +68,9 @@ beforeEach(() => {
   state.pathname = "/groups";
   state.params = {};
   state.unread = [];
-  state.markRead.mockClear();
+  state.appState = "active";
+  state.markRead.mockReset();
+  state.markRead.mockImplementation(async () => {});
 });
 afterEach(async () => {
   await act(async () => root.unmount());
@@ -64,93 +78,76 @@ afterEach(async () => {
 });
 
 describe("notification visits", () => {
-  it("reads once per section visit, preserving updates arriving while browsing its details", async () => {
-    state.unread = [receipt("first")];
-    await render();
-    expect(state.markRead).not.toHaveBeenCalled();
-    state.pathname = "/group/lists";
-    await render();
-    expect(state.markRead).toHaveBeenCalledWith({
-      projectId: "group",
-      ids: ["first"],
-    });
-    state.unread = [receipt("new")];
-    state.pathname = "/group/lists/list";
-    await render();
-    state.pathname = "/group/lists";
-    await render();
-    expect(state.markRead).toHaveBeenCalledTimes(1);
-    state.pathname = "/group/home";
-    await render();
-    state.pathname = "/group/lists";
-    await render();
-    expect(state.markRead).toHaveBeenLastCalledWith({
-      projectId: "group",
-      ids: ["new"],
-    });
-  });
-
-  it("uses the tab-tap snapshot even when newer data arrives before native navigation finishes", async () => {
-    const first = receipt("first");
-    state.unread = [first];
-    await render();
-    capture(first);
+  it("leaves items unread on the section index and reads one when it opens", async () => {
     state.unread = [
-      {
-        ...receipt("new"),
-        ids: ["new", "first"] as Id<"notifications">[],
-        count: 2,
-      },
+      lists({ id: "groceries", ids: ["g1"] }, { id: "chores", ids: ["c1"] }),
     ];
     state.pathname = "/group/lists";
     await render();
-    expect(state.markRead).toHaveBeenCalledWith({
-      projectId: "group",
-      ids: ["first"],
-    });
-    state.unread = [receipt("new")];
-    state.pathname = "/group/lists/list";
-    state.params = { notification: "first" };
+    expect(state.markRead).not.toHaveBeenCalled();
+    state.pathname = "/group/lists/groceries";
     await render();
-    expect(state.markRead).toHaveBeenCalledTimes(1);
+    expect(state.markRead).toHaveBeenCalledExactlyOnceWith({
+      projectId: "group",
+      ids: ["g1"],
+    });
   });
 
-  it("does not clear a second snapshot when nested navigation removes or restores route parameters", async () => {
-    state.pathname = "/group/lists";
-    state.params = { notification: "first" };
-    state.unread = [receipt("first")];
+  it("reads changes arriving while the item is open, without repeating a request", async () => {
+    state.pathname = "/group/home/list/groceries";
+    state.unread = [lists({ id: "groceries", ids: ["g1"] })];
     await render();
-    state.unread = [receipt("new")];
-    state.pathname = "/group/lists/list";
-    state.params = {};
+    // The receipt is still listed until the server confirms the read.
     await render();
-    state.pathname = "/group/lists";
-    state.params = { notification: "first" };
+    state.unread = [
+      lists(
+        { id: "groceries", ids: ["g2", "g1"] },
+        { id: "chores", ids: ["c1"] },
+      ),
+    ];
     await render();
-    expect(state.markRead).toHaveBeenCalledTimes(1);
+    expect(state.markRead.mock.calls.map(([args]) => args.ids)).toEqual([
+      ["g1"],
+      ["g2"],
+    ]);
   });
 
-  it("handles another tab tap and a push tap when their section is already visible", async () => {
-    state.pathname = "/group/lists/list";
-    state.unread = [receipt("first")];
+  it("clears only vanished items from a section index", async () => {
+    state.pathname = "/group/lists";
+    state.unread = [
+      lists(
+        { id: "deleted", ids: ["d1"], gone: true },
+        { id: "chores", ids: ["c1"] },
+      ),
+    ];
     await render();
-    const second = receipt("second");
-    state.unread = [second];
-    await render();
-    capture(second);
-    state.params = { notification: "second" };
-    await render();
-    expect(state.markRead).toHaveBeenLastCalledWith({
+    expect(state.markRead).toHaveBeenCalledExactlyOnceWith({
       projectId: "group",
-      ids: ["second"],
+      ids: ["d1"],
     });
-    state.unread = [receipt("push")];
-    state.params = { notification: "", visit: "push-request-id" };
+  });
+
+  it("waits for the app to return to the foreground", async () => {
+    state.appState = "background";
+    state.pathname = "/group/lists/groceries";
+    state.unread = [lists({ id: "groceries", ids: ["g1"] })];
     await render();
-    expect(state.markRead).toHaveBeenLastCalledWith({
+    expect(state.markRead).not.toHaveBeenCalled();
+    await act(async () => state.onAppState("active"));
+    expect(state.markRead).toHaveBeenCalledExactlyOnceWith({
       projectId: "group",
-      ids: ["push"],
+      ids: ["g1"],
     });
-    expect(state.markRead).toHaveBeenCalledTimes(3);
+  });
+
+  it("retries a failed read on the next update", async () => {
+    state.markRead.mockRejectedValueOnce(new Error("offline"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    state.pathname = "/group/lists/groceries";
+    state.unread = [lists({ id: "groceries", ids: ["g1"] })];
+    await render();
+    state.unread = [lists({ id: "groceries", ids: ["g1"] })];
+    await render();
+    expect(state.markRead).toHaveBeenCalledTimes(2);
   });
 });

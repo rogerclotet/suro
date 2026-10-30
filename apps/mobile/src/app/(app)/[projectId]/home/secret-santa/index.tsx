@@ -50,6 +50,7 @@ import type { Person, SecretSanta } from "@/features/secret-santa/types";
 import { useTranslations } from "@/i18n";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
+import { eventRoute } from "@/lib/tab-routes";
 import { useTheme } from "@/theme";
 import { Loading, Screen, Sheet, Txt } from "@/ui";
 
@@ -272,7 +273,7 @@ function SecretSantaDetail({
       <SecretSantaHeader
         secretSanta={secretSanta}
         onOpenEvent={
-          eventId ? () => router.navigate(`/${pid}/calendar/${eventId}`) : null
+          eventId ? () => router.push(eventRoute(pid, "home", eventId)) : null
         }
       />
       <Divider hairline />

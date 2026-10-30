@@ -9,9 +9,11 @@ import {
   headerBackAction,
   headerCreateAction,
 } from "@/components/header-badges";
+import { UnreadDot } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
 import { useTimeAgo } from "@/lib/datetime";
 import { notePreview } from "@/lib/note-content";
+import { useUnreadItemCount } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { useTheme } from "@/theme";
@@ -159,6 +161,7 @@ function NoteCard({
   const router = useRouter();
   const timeAgo = useTimeAgo();
   const { note, preview } = tile;
+  const changes = useUnreadItemCount(projectId, note._id);
 
   return (
     <Pressable
@@ -188,9 +191,12 @@ function NoteCard({
         }),
       })}
     >
-      <Txt size={16} weight="700" numberOfLines={2}>
-        {note.name}
-      </Txt>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <Txt size={16} weight="700" numberOfLines={2} style={{ flexShrink: 1 }}>
+          {note.name}
+        </Txt>
+        <UnreadDot count={changes} />
+      </View>
       {preview ? (
         <Txt
           muted

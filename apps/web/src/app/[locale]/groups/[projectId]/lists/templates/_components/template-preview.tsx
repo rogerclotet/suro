@@ -1,3 +1,5 @@
+"use client";
+
 import type { Template } from "@/app/_data/list";
 import {
   Card,
@@ -6,9 +8,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
+import { useUnreadItemCount } from "@/lib/queries/use-notifications";
 
 export default function TemplatePreview({ template }: { template: Template }) {
+  const changes = useUnreadItemCount(template.projectId, template.id);
   return (
     <Link
       href={
@@ -21,7 +26,10 @@ export default function TemplatePreview({ template }: { template: Template }) {
     >
       <Card>
         <CardHeader>
-          <CardTitle>{template.name}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <span className="min-w-0 truncate">{template.name}</span>
+            <UnreadDot count={changes} />
+          </CardTitle>
           {template.description && (
             <CardDescription className="line-clamp-2">
               {template.description}

@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/responsive-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UnreadBadge, UnreadDot } from "@/components/unread-badge";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { unreadCount, unreadElsewhere } from "@/lib/notifications";
+import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { useSession } from "@/lib/session";
 import { resolveSectionForProject } from "./use-menu-items";
 
@@ -27,6 +30,7 @@ export default function ProjectSelector() {
   const { data: session } = useSession();
   const tNav = useTranslations("nav");
   const tGroups = useTranslations("groups");
+  const unread = useUnreadNotifications();
 
   function handleProjectSelect(newProject: Project) {
     selectProject(newProject);
@@ -54,6 +58,8 @@ export default function ProjectSelector() {
     );
   }
 
+  const elsewhere = unreadElsewhere(unread, project.id);
+
   return (
     <ResponsiveMenu>
       <ResponsiveMenuTrigger>
@@ -67,7 +73,8 @@ export default function ProjectSelector() {
                 : session?.user.name}
             </span>
           </div>
-          <ChevronsUpDownIcon className="ml-auto" />
+          <UnreadDot count={elsewhere} className="ml-auto" />
+          <ChevronsUpDownIcon className={elsewhere ? undefined : "ml-auto"} />
         </SidebarMenuButton>
       </ResponsiveMenuTrigger>
 
@@ -93,7 +100,8 @@ export default function ProjectSelector() {
             }
           >
             <ProjectAvatar project={p} className="h-6 w-6 text-xs" />
-            <span className="min-w-0 truncate">{p.name}</span>
+            <span className="min-w-0 flex-1 truncate">{p.name}</span>
+            <UnreadBadge count={unreadCount(unread, p.id)} />
           </ResponsiveMenuItem>
         ))}
       </ResponsiveMenuContent>

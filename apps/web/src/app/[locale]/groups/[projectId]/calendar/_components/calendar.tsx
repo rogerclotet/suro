@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import CreateEventButton from "./event/create-event-button";
 import EventPreview from "./event/event-preview";
 import { getMonthEnd } from "./event/month-range";
+import NewEvents from "./event/new-events";
 
 // Per-event accent dots cycle through the palette's five accents, mirroring
 // the mobile calendar (apps/mobile, calendar/index.tsx). On the selected
@@ -246,6 +247,7 @@ export default function Calendar({
 
   return (
     <div className="space-y-4">
+      {project ? <NewEvents projectId={project.id} /> : null}
       <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:gap-8">
         <div className="flex w-full flex-col items-stretch md:w-auto md:max-w-sm md:min-w-[20rem]">
           <CalendarDayEventsContext value={dayEvents}>

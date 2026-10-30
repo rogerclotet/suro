@@ -143,6 +143,79 @@ describe("unread activity", () => {
     expect(await secondDevice.query(api.notifications.unread)).toEqual(unread);
   });
 
+  it("groups receipts per item, newest first, with event details for calendar items", async () => {
+    const groceries = await newList("Groceries");
+    vi.advanceTimersByTime(1);
+    const chores = await newList("Chores");
+    vi.advanceTimersByTime(1);
+    await ctx.alice.mutation(api.listItems.create, {
+      listId: groceries,
+      name: "Milk",
+      assigneeId: ctx.ids.bob,
+    });
+    const eventId = await newEvent("Dinner", Date.UTC(2027, 1, 12));
+    const unread = await ctx.bob.query(api.notifications.unread);
+    const lists = unread.find((r) => r.section === "lists");
+    expect(lists?.count).toBe(3);
+    expect(lists?.targets).toMatchObject([
+      { kind: "lists", id: groceries, count: 2, gone: false },
+      { kind: "lists", id: chores, count: 1, gone: false },
+    ]);
+    expect(lists?.targets.flatMap((target) => target.ids).sort()).toEqual(
+      [...(lists?.ids ?? [])].sort(),
+    );
+    expect(unread.find((r) => r.section === "calendar")?.targets).toEqual([
+      expect.objectContaining({
+        kind: "calendar",
+        id: eventId,
+        gone: false,
+        event: {
+          name: "Dinner",
+          startAt: Date.UTC(2027, 1, 12),
+          allDay: false,
+        },
+      }),
+    ]);
+  });
+
+  it("marks deleted items as gone and gives page-level sections no items", async () => {
+    const listId = await newList();
+    await ctx.t.run((c) => c.db.delete(listId));
+    await ctx.t.run((c) =>
+      notifyUsers(c, {
+        projectId: ctx.ids.group,
+        userIds: [ctx.ids.bob],
+        bodyKey: "file_uploaded",
+        bodyParams: { name: "X" },
+        target: { kind: "files" },
+      }),
+    );
+    const unread = await ctx.bob.query(api.notifications.unread);
+    const [gone] = unread.find((r) => r.section === "lists")?.targets ?? [];
+    expect(gone).toMatchObject({ id: listId, gone: true });
+    expect(gone).not.toHaveProperty("event");
+    expect(unread.find((r) => r.section === "files")?.targets).toEqual([]);
+  });
+
+  it("clears one item without touching the rest of its section", async () => {
+    const groceries = await newList("Groceries");
+    await newList("Chores");
+    const lists = (await ctx.bob.query(api.notifications.unread)).find(
+      (r) => r.section === "lists",
+    );
+    const item = lists?.targets.find((target) => target.id === groceries);
+    if (!item) throw new Error("Expected a receipt for the groceries list");
+    await ctx.bob.mutation(api.notifications.markRead, {
+      projectId: ctx.ids.group,
+      ids: item.ids,
+    });
+    const after = (await ctx.bob.query(api.notifications.unread)).find(
+      (r) => r.section === "lists",
+    );
+    expect(after?.count).toBe(1);
+    expect(after?.targets.map((target) => target.id)).not.toContain(groceries);
+  });
+
   it("rejects clearing another user's receipts or reading a nonmember group", async () => {
     await newList();
     const receipt = (await ctx.bob.query(api.notifications.unread))[0];
