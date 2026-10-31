@@ -2,7 +2,7 @@ import { type RefObject, useEffect, useRef } from "react";
 import type {
   NativeScrollEvent,
   NativeSyntheticEvent,
-  ScrollView,
+  ScrollViewInstance,
 } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import type { DropProviderRef } from "react-native-reanimated-dnd";
@@ -28,7 +28,7 @@ function edgeAutoScrollSpeed(penetration: number): number {
 
 export function useChecklistScroll(
   embedded: boolean,
-  externalScrollRef?: RefObject<ScrollView | null>,
+  externalScrollRef?: RefObject<ScrollViewInstance | null>,
 ) {
   const dropProviderRef = useRef<DropProviderRef>(null);
   const lastPositionUpdate = useRef(0);
@@ -40,7 +40,7 @@ export function useChecklistScroll(
   // which the dnd library resolves from the row's frozen drag origin, lands
   // where the row visually sits. `scrollOffset`/`contentHeight`/the viewport
   // rect are the bookkeeping the loop needs to clamp and place each step.
-  const ownScrollRef = useRef<ScrollView>(null);
+  const ownScrollRef = useRef<ScrollViewInstance>(null);
   const scrollRef =
     embedded && externalScrollRef ? externalScrollRef : ownScrollRef;
   const scrollOffset = useRef(0);

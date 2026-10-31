@@ -6,8 +6,8 @@ import { Redirect, useLocalSearchParams } from "expo-router";
 import type {
   NativeTabsProps,
   NativeTabTriggerProps,
-} from "expo-router/unstable-native-tabs";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+} from "expo-router/native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 import { type FC, type PropsWithChildren, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";

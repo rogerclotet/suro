@@ -77,9 +77,9 @@ After edits run `pnpm biome:fix && pnpm typecheck && pnpm test`. The Husky pre-c
 `pnpm outdated -r` overstates what can move. Before bumping, check these couplings:
 
 - **Expo SDK pins the native set.** `react-native`, `react-native-reanimated`, `-worklets`, `-screens`, `-safe-area-context`, `-gesture-handler`, `-webview`, `-svg`, `@react-native/metro-config`, `@babel/core`, `eslint` and mobile `typescript` move only with an Expo SDK upgrade. `cd apps/mobile && npx expo install --check` is the authority; `expo.install.exclude` in `apps/mobile/package.json` lists the deliberate deviations (`@sentry/react-native`, `react`, `react-dom`).
-- **React stays on the minor React Native's renderer ships** (19.2.x for RN 0.86), pinned once for web and mobile in `pnpm-workspace.yaml`.
+- **React stays on the minor React Native's renderer ships** (19.3.x for RN 0.88), pinned once for web and mobile in `pnpm-workspace.yaml`.
 - **The three Sentry packages share one `@sentry/core`.** `error-reporting` pins the version `@sentry/react-native` depends on, and `apps/web` pins `@sentry/nextjs` to the same number. A mismatch fails the web typecheck.
-- **`isomorphic-dompurify` 4.x excludes Node 25** (the web image's runtime), so it stays on 3.19 with a `dompurify` override.
+- **Node stays on an even-numbered (LTS) major.** Expo SDK 58 and `isomorphic-dompurify` 4 exclude odd releases. Move `.node-version`, root `engines.node`, the `setup-node-pnpm` action default, the `Dockerfile` base image and the `node` pin in `apps/mobile/eas.json` together.
 - Transitive advisories are pinned under `overrides` in `pnpm-workspace.yaml`, one comment per advisory. Use a caret range so a pin cannot cross a major. Run `pnpm audit` after any update.
 
 ## Changelog

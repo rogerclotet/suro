@@ -2,7 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { listItemSignature } from "domain/row-keys";
 import { type RefObject, useMemo, useRef, useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView, type ScrollViewInstance, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -46,7 +46,7 @@ export function ListChecklist({
   /** When true, renders inline without a ScrollView or list metadata blurb. */
   embedded?: boolean;
   /** Parent ScrollView ref for drag auto-scroll in embedded mode. */
-  scrollRef?: RefObject<ScrollView | null>;
+  scrollRef?: RefObject<ScrollViewInstance | null>;
 }) {
   const pid = useProjectId();
   const lid = listId;
