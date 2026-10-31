@@ -6,6 +6,26 @@ important changes and fixes, not an exhaustive history.
 Each version lists its changes per language (`ca`, `es`, `en`). Every change is tagged
 with a type: `feature`, `fix`, or `improvement`.
 
+## [1.37.0] — 2026-10-31
+
+### ca
+
+- [feature] El grup surt a dalt de cada secció: toca'l per canviar de grup sense sortir de la secció. L'app mòbil s'obre a l'últim grup que has fet servir.
+- [feature] Inici mostra el teu dia: les properes tasques i quant deus o et deuen als pots oberts. Els comptadors obren el calendari d'avui i les teves tasques.
+- [improvement] Al web, la barra inferior té les quatre pestanyes de l'app, i les dues pàgines de grups ara són una.
+
+### es
+
+- [feature] El grupo aparece arriba en cada sección: tócalo para cambiar de grupo sin salir de la sección. La app móvil se abre en el último grupo que has usado.
+- [feature] Inicio muestra tu día: las próximas tareas y cuánto debes o te deben en los botes abiertos. Los contadores abren el calendario de hoy y tus tareas.
+- [improvement] En la web, la barra inferior tiene las cuatro pestañas de la app, y las dos páginas de grupos ahora son una.
+
+### en
+
+- [feature] The group now shows at the top of every section: tap it to switch groups without leaving the section. The mobile app opens in the last group you used.
+- [feature] Home shows your day: your next tasks and what you owe or are owed in open pots. The counts open today's calendar and your tasks.
+- [improvement] On the web, the bottom bar has the app's four tabs, and the two groups pages are now one.
+
 ## [1.36.0] — 2026-10-30
 
 ### ca

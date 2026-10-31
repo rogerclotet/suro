@@ -109,3 +109,40 @@ export function compareTasks(a: TaskOrderItem, b: TaskOrderItem): number {
   if (rank !== 0) return rank;
   return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
 }
+
+export type DueBucket = "overdue" | "today" | "upcoming" | "noDate";
+
+/** The task agenda's sections, in display order. */
+export const DUE_BUCKETS: readonly DueBucket[] = [
+  "overdue",
+  "today",
+  "upcoming",
+  "noDate",
+];
+
+/**
+ * Which agenda section a task's due date falls in, against the local day of
+ * `now`. All-day dues are stored at UTC midnight (a date, not an instant), so
+ * their day comes from the UTC parts; timed dues use the instant's local day.
+ */
+export function dueBucket(
+  task: { dueAt?: number | null; dueAllDay?: boolean | null },
+  now: Date,
+): DueBucket {
+  if (task.dueAt === undefined || task.dueAt === null) {
+    return "noDate";
+  }
+  const due = new Date(task.dueAt);
+  const day = task.dueAllDay
+    ? dayCode(due.getUTCFullYear(), due.getUTCMonth(), due.getUTCDate())
+    : dayCode(due.getFullYear(), due.getMonth(), due.getDate());
+  const today = dayCode(now.getFullYear(), now.getMonth(), now.getDate());
+  if (day < today) {
+    return "overdue";
+  }
+  return day === today ? "today" : "upcoming";
+}
+
+function dayCode(year: number, month: number, date: number) {
+  return year * 10_000 + (month + 1) * 100 + date;
+}

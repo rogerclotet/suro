@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.36.0",
+    "version": "1.37.0",
     "copyright": "2026 Roger Clotet",
     "categories": ["PRODUCTIVITY", "LIFESTYLE"],
     "advisory": {
@@ -53,7 +53,7 @@
           "trip",
           "roommate"
         ],
-        "releaseNotes": "• See what changed: lists, events, expenses, notes and templates with updates show a dot until you open them, and the calendar lists new events. The web app now shows unread counts too.\n• Tapping a tab with updates always opens that section instead of jumping to the latest changed item.\n• In the mobile app, events and lists opened from Home now go back to Home.",
+        "releaseNotes": "• The group now shows at the top of every section: tap it to switch groups without leaving the section. The mobile app opens in the last group you used.\n• Home shows your day: your next tasks and what you owe or are owed in open pots. The counts open today's calendar and your tasks.\n• On the web, the bottom bar has the app's four tabs, and the two groups pages are now one.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/en/privacy"
@@ -73,7 +73,7 @@
           "hogar",
           "notas"
         ],
-        "releaseNotes": "• Ahora ves qué ha cambiado: las listas, los eventos, los gastos, las notas y las plantillas con novedades muestran un punto hasta que los abres, y el calendario muestra los eventos nuevos. La web también muestra los contadores de novedades.\n• Tocar una pestaña con novedades siempre abre esa sección, en lugar de saltar al último elemento cambiado.\n• En la app móvil, los eventos y las listas que abres desde Inicio vuelven a Inicio con el botón atrás.",
+        "releaseNotes": "• El grupo aparece arriba en cada sección: tócalo para cambiar de grupo sin salir de la sección. La app móvil se abre en el último grupo que has usado.\n• Inicio muestra tu día: las próximas tareas y cuánto debes o te deben en los botes abiertos. Los contadores abren el calendario de hoy y tus tareas.\n• En la web, la barra inferior tiene las cuatro pestañas de la app, y las dos páginas de grupos ahora son una.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/es/privacidad"
@@ -93,7 +93,7 @@
           "llar",
           "notes"
         ],
-        "releaseNotes": "• Ara veus què ha canviat: les llistes, els esdeveniments, les despeses, les notes i les plantilles amb novetats mostren un punt fins que les obres, i el calendari llista els esdeveniments nous. El web també mostra els comptadors de novetats.\n• Tocar una pestanya amb novetats sempre obre aquella secció, en lloc de saltar a l'últim element canviat.\n• A l'app mòbil, els esdeveniments i les llistes que obres des d'Inici tornen a Inici amb el botó enrere.",
+        "releaseNotes": "• El grup surt a dalt de cada secció: toca'l per canviar de grup sense sortir de la secció. L'app mòbil s'obre a l'últim grup que has fet servir.\n• Inici mostra el teu dia: les properes tasques i quant deus o et deuen als pots oberts. Els comptadors obren el calendari d'avui i les teves tasques.\n• Al web, la barra inferior té les quatre pestanyes de l'app, i les dues pàgines de grups ara són una.",
         "marketingUrl": "https://suroapp.cat",
         "supportUrl": "https://suroapp.cat",
         "privacyPolicyUrl": "https://suroapp.cat/ca/privacitat"

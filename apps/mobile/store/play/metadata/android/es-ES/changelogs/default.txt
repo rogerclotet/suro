@@ -1,3 +1,3 @@
-• Ahora ves qué ha cambiado: las listas, los eventos, los gastos, las notas y las plantillas con novedades muestran un punto hasta que los abres, y el calendario muestra los eventos nuevos. La web también muestra los contadores de novedades.
-• Tocar una pestaña con novedades siempre abre esa sección, en lugar de saltar al último elemento cambiado.
-• En la app móvil, los eventos y las listas que abres desde Inicio vuelven a Inicio con el botón atrás.
+• El grupo aparece arriba en cada sección: tócalo para cambiar de grupo sin salir de la sección. La app móvil se abre en el último grupo que has usado.
+• Inicio muestra tu día: las próximas tareas y cuánto debes o te deben en los botes abiertos. Los contadores abren el calendario de hoy y tus tareas.
+• En la web, la barra inferior tiene las cuatro pestañas de la app, y las dos páginas de grupos ahora son una.

@@ -274,7 +274,8 @@
     "chooseTheme": "Triar tema",
     "themeLight": "Clar",
     "themeDark": "Fosc",
-    "themeSystem": "Sistema"
+    "themeSystem": "Sistema",
+    "allGroups": "Tots els grups"
   },
   "home": {
     "today": "Avui",
@@ -286,7 +287,10 @@
     "tasksAssigned": "tasques assignades",
     "noUpcoming": "Cap esdeveniment proper",
     "noFeaturedLists": "Encara no hi ha llistes destacades. Marca una llista amb l'estrella perquè aparegui aquí.",
-    "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
+    "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets",
+    "balanceOwe": "Deus {amount} en {count, plural, one {# pot} other {# pots}}",
+    "balanceOwed": "Et deuen {amount} en {count, plural, one {# pot} other {# pots}}",
+    "balanceSettled": "Ho tens tot saldat"
   },
   "feedback": {
     "title": "Envia suggeriments",
@@ -396,7 +400,10 @@
     "deleteDataWarning": "Eliminar el grup esborra permanentment totes les llistes, els esdeveniments, els fitxers, les notes i les despeses per a tots els membres. Aquesta acció no es pot desfer.",
     "groupUnavailable": "Aquest grup ja no està disponible.",
     "backToGroups": "Torna als grups",
-    "working": "Espera un moment…"
+    "working": "Espera un moment…",
+    "switchGroupFrom": "{name}. Canvia de grup",
+    "searchPlaceholder": "Cerca grups o persones",
+    "noSearchResults": "Cap grup coincideix amb la cerca."
   },
   "groupSettings": {
     "title": "Configuració del grup",
@@ -472,6 +479,7 @@
     "repeat_weekly": "Cada setmana",
     "repeat_monthly": "Cada mes",
     "repeat_yearly": "Cada any",
+    "myTasks": "Les meves tasques",
     "myTasksEmpty": "No tens cap tasca pendent.",
     "taskBucket_overdue": "Endarrerides",
     "taskBucket_today": "Avui",

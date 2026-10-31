@@ -101,3 +101,15 @@ export function unreadCount(
     return count + (matches ? receipt.count : 0);
   }, 0);
 }
+
+/** Unread receipts in every group except `projectId`. */
+export function unreadElsewhere(
+  receipts: readonly UnreadSection[],
+  projectId: string,
+) {
+  return receipts.reduce(
+    (count, receipt) =>
+      receipt.projectId === projectId ? count : count + receipt.count,
+    0,
+  );
+}

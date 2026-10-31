@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceDueAt } from "./tasks";
+import { advanceDueAt, dueBucket } from "./tasks";
 
 const DAY_MS = 86_400_000;
 const at = (iso: string) => Date.parse(iso);
@@ -67,5 +67,34 @@ describe("advanceDueAt", () => {
     expect(advanceDueAt(due, { freq: "daily", interval: 0 }, due + 1000)).toBe(
       at("2024-01-11T09:00:00Z"),
     );
+  });
+});
+
+describe("dueBucket", () => {
+  // Local noon, so the local day is the same in every test timezone.
+  const now = new Date(2024, 0, 10, 12, 0);
+
+  it("files undated tasks under no date", () => {
+    expect(dueBucket({}, now)).toBe("noDate");
+    expect(dueBucket({ dueAt: null }, now)).toBe("noDate");
+  });
+
+  it("compares timed dues by their local day", () => {
+    expect(
+      dueBucket({ dueAt: new Date(2024, 0, 9, 23, 59).getTime() }, now),
+    ).toBe("overdue");
+    expect(dueBucket({ dueAt: new Date(2024, 0, 10, 8).getTime() }, now)).toBe(
+      "today",
+    );
+    expect(dueBucket({ dueAt: new Date(2024, 0, 11).getTime() }, now)).toBe(
+      "upcoming",
+    );
+  });
+
+  it("reads all-day dues from their UTC date", () => {
+    const allDay = (iso: string) => ({ dueAt: at(iso), dueAllDay: true });
+    expect(dueBucket(allDay("2024-01-09T00:00:00Z"), now)).toBe("overdue");
+    expect(dueBucket(allDay("2024-01-10T00:00:00Z"), now)).toBe("today");
+    expect(dueBucket(allDay("2024-01-11T00:00:00Z"), now)).toBe("upcoming");
   });
 });

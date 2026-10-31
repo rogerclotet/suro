@@ -833,7 +833,10 @@
       "tasksAssigned": "tasques assignades",
       "noUpcoming": "Cap esdeveniment proper",
       "noFeaturedLists": "Encara no hi ha llistes destacades. Marca una llista amb l'estrella perquè aparegui aquí.",
-      "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
+      "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets",
+      "balanceOwe": "Deus {amount} en {count, plural, one {# pot} other {# pots}}",
+      "balanceOwed": "Et deuen {amount} en {count, plural, one {# pot} other {# pots}}",
+      "balanceSettled": "Ho tens tot saldat"
     },
     "widget": {
       "label": "Suro",
@@ -914,7 +917,9 @@
       "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}",
       "searchPlaceholder": "Cerca grups o persones",
       "clearSearch": "Esborra la cerca",
-      "noSearchResults": "Cap grup coincideix amb la cerca."
+      "noSearchResults": "Cap grup coincideix amb la cerca.",
+      "switchGroupFrom": "{name}. Canviar de grup",
+      "allGroups": "Tots els grups"
     },
     "profile": {
       "title": "Perfil",

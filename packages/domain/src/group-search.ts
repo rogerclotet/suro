@@ -1,9 +1,7 @@
-import type { api } from "backend/convex/_generated/api";
-import type { FunctionReturnType } from "convex/server";
-
-type Group = FunctionReturnType<typeof api.projects.listMineDetailed>[number];
-type SearchableGroup = Pick<Group, "name"> & {
-  members: readonly Pick<Group["members"][number], "name">[];
+/** A group as the switchers search it: its name and its members' names. */
+export type SearchableGroup = {
+  name: string;
+  members: readonly { name?: string | null }[];
 };
 
 function normalize(value: string) {

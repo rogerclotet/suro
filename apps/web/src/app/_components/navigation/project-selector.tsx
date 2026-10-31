@@ -16,16 +16,14 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UnreadBadge, UnreadDot } from "@/components/unread-badge";
-import { usePathname, useRouter } from "@/i18n/navigation";
 import { unreadCount, unreadElsewhere } from "@/lib/notifications";
 import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { useSession } from "@/lib/session";
-import { resolveSectionForProject } from "./use-menu-items";
+import { useSwitchGroup } from "./use-switch-group";
 
 export default function ProjectSelector() {
-  const { projects, project, selectProject } = useProjects();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { projects, project } = useProjects();
+  const switchGroup = useSwitchGroup();
   const { state, setOpenMobile } = useSidebar();
   const { data: session } = useSession();
   const tNav = useTranslations("nav");
@@ -33,14 +31,8 @@ export default function ProjectSelector() {
   const unread = useUnreadNotifications();
 
   function handleProjectSelect(newProject: Project) {
-    selectProject(newProject);
     setOpenMobile(false);
-    // pathname is the canonical template, e.g. "/groups/[projectId]/lists"
-    const currentSection = pathname
-      .split("/groups/[projectId]/")[1]
-      ?.split("/")[0];
-    const targetSection = resolveSectionForProject(newProject, currentSection);
-    router.push(`/groups/${newProject.id}/${targetSection}` as never);
+    switchGroup(newProject);
   }
 
   if (!project || projects.length === 0) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attachedRoute, eventRoute, hostTab } from "./tab-routes";
+import { attachedRoute, eventRoute, hostTab, listRoute } from "./tab-routes";
 
 describe("tab routes", () => {
   it("keeps an event and its attachments in the tab that opened it", () => {
@@ -16,6 +16,15 @@ describe("tab routes", () => {
     );
     expect(attachedRoute("group", "calendar", "expense", "pot")).toBe(
       "/group/calendar/expense/pot",
+    );
+  });
+
+  it("opens My Tasks' lists in the tab that shows My Tasks", () => {
+    expect(listRoute("group", "/group/home/tasks", "list")).toBe(
+      "/group/home/list/list",
+    );
+    expect(listRoute("group", "/group/lists/tasks", "list")).toBe(
+      "/group/lists/list",
     );
   });
 });

@@ -274,7 +274,8 @@
     "chooseTheme": "Choose theme",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "themeSystem": "System"
+    "themeSystem": "System",
+    "allGroups": "All groups"
   },
   "home": {
     "today": "Today",
@@ -286,7 +287,10 @@
     "tasksAssigned": "tasks assigned",
     "noUpcoming": "No upcoming events",
     "noFeaturedLists": "No featured lists yet. Star a list to show it here.",
-    "linkedListA11y": "Event with checklist, {done} of {total} items done"
+    "linkedListA11y": "Event with checklist, {done} of {total} items done",
+    "balanceOwe": "You owe {amount} in {count, plural, one {# pot} other {# pots}}",
+    "balanceOwed": "You're owed {amount} in {count, plural, one {# pot} other {# pots}}",
+    "balanceSettled": "You're all settled up"
   },
   "feedback": {
     "title": "Send feedback",
@@ -396,7 +400,10 @@
     "deleteDataWarning": "Deleting this group permanently removes all its lists, calendar events, files, notes and expenses for every member. This cannot be undone.",
     "groupUnavailable": "This group is no longer available.",
     "backToGroups": "Back to groups",
-    "working": "Please wait…"
+    "working": "Please wait…",
+    "switchGroupFrom": "{name}. Switch group",
+    "searchPlaceholder": "Search groups or people",
+    "noSearchResults": "No groups match your search."
   },
   "groupSettings": {
     "title": "Group settings",
@@ -472,6 +479,7 @@
     "repeat_weekly": "Weekly",
     "repeat_monthly": "Monthly",
     "repeat_yearly": "Yearly",
+    "myTasks": "My tasks",
     "myTasksEmpty": "You have no pending tasks.",
     "taskBucket_overdue": "Overdue",
     "taskBucket_today": "Today",

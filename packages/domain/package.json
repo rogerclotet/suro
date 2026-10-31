@@ -10,7 +10,8 @@
     "./events": "./src/events.ts",
     "./notifications": "./src/notifications.ts",
     "./row-keys": "./src/row-keys.ts",
-    "./secret-santa": "./src/secret-santa.ts"
+    "./secret-santa": "./src/secret-santa.ts",
+    "./group-search": "./src/group-search.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

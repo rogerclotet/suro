@@ -3,6 +3,7 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
 import { useConvexAuth, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import {
   eventDatesForForm,
   eventLocalStart,
@@ -15,15 +16,22 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronRight,
+  ListChecks,
   Loader2,
   Star,
+  Wallet,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/_data/event";
-import { adaptListPreview, type ListPreviewData } from "@/app/_data/list";
+import {
+  adaptListPreview,
+  adaptTask,
+  type ListPreviewData,
+} from "@/app/_data/list";
 import { ListPreviewRow } from "@/app/[locale]/groups/[projectId]/lists/_components/list-preview";
 import ProgressRing from "@/app/[locale]/groups/[projectId]/lists/_components/progress-ring";
+import { TaskRow } from "@/app/[locale]/groups/[projectId]/lists/tasks/_components/task-row";
 import { UnreadDot } from "@/components/unread-badge";
 import { Link } from "@/i18n/navigation";
 import { eventTimes, isEventOnDay } from "@/lib/event-day";
@@ -34,6 +42,7 @@ import { HomeSectionChips } from "./home-section-chips";
 
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 5;
+const TASK_PREVIEW_LIMIT = 3;
 
 type WidgetHref = Parameters<typeof Link>[0]["href"];
 
@@ -92,32 +101,38 @@ function InlineStat({
   icon: Icon,
   count,
   label,
+  href,
 }: {
   icon: typeof CalendarDays;
   count: number;
   label: string;
+  href: WidgetHref;
 }) {
   return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground"
+    <Link
+      href={href}
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground transition-opacity hover:opacity-70"
       title={label}
+      aria-label={`${count} ${label}`}
     >
       <Icon size={14} className="text-primary" aria-hidden />
       <span className="font-semibold text-foreground tabular-nums">
         {count}
       </span>
       <span className="hidden min-[420px]:inline">{label}</span>
-    </span>
+    </Link>
   );
 }
 
 function HeroHeader({
+  projectId,
   dateLabel,
   eventCount,
   taskCount,
   eventsLabel,
   tasksLabel,
 }: {
+  projectId: string;
   dateLabel: string;
   eventCount: number;
   taskCount: number;
@@ -134,13 +149,84 @@ function HeroHeader({
           icon={CalendarDays}
           count={eventCount}
           label={eventsLabel}
+          href={{
+            pathname: "/groups/[projectId]/calendar",
+            params: { projectId },
+          }}
         />
         <span className="text-border" aria-hidden>
           ·
         </span>
-        <InlineStat icon={CheckSquare} count={taskCount} label={tasksLabel} />
+        <InlineStat
+          icon={CheckSquare}
+          count={taskCount}
+          label={tasksLabel}
+          href={{
+            pathname: "/groups/[projectId]/lists/tasks",
+            params: { projectId },
+          }}
+        />
       </div>
     </header>
+  );
+}
+
+type Balance = FunctionReturnType<typeof api.expenses.myBalance>;
+
+function formatEuros(cents: number) {
+  return `${(cents / 100).toFixed(2)}€`;
+}
+
+/**
+ * What the user owes and is owed across the group's open shared pots. Hidden
+ * when they aren't in any, so solo groups and groups without pots skip it.
+ */
+function BalanceLine({
+  projectId,
+  balance,
+}: {
+  projectId: string;
+  balance: Balance | undefined;
+}) {
+  const t = useTranslations("home");
+  if (!balance?.openPots) return null;
+  const lines = [
+    balance.owe
+      ? t("balanceOwe", {
+          amount: formatEuros(balance.owe),
+          count: balance.owingPots,
+        })
+      : null,
+    balance.owed
+      ? t("balanceOwed", {
+          amount: formatEuros(balance.owed),
+          count: balance.owedPots,
+        })
+      : null,
+  ].filter((line) => line !== null);
+  return (
+    <Link
+      href={{ pathname: "/groups/[projectId]/expenses", params: { projectId } }}
+      className="flex items-center gap-3 rounded-xl border border-border px-3.5 py-3 text-sm transition-colors hover:bg-accent"
+    >
+      <Wallet size={18} className="shrink-0 text-primary" aria-hidden />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {lines.length === 0 ? (
+          <span>{t("balanceSettled")}</span>
+        ) : (
+          lines.map((line) => (
+            <span key={line} className="font-semibold">
+              {line}
+            </span>
+          ))
+        )}
+      </span>
+      <ChevronRight
+        size={18}
+        className="shrink-0 text-muted-foreground"
+        aria-hidden
+      />
+    </Link>
   );
 }
 
@@ -271,6 +357,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
   const locale = useLocale();
   const t = useTranslations("home");
   const tCalendar = useTranslations("calendar");
+  const tLists = useTranslations("lists");
 
   const [bounds] = useState(() =>
     eventWindowBounds(new Date(), UPCOMING_WINDOW_MS),
@@ -320,6 +407,12 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
         }
       : "skip",
   );
+  const balance = useQuery(
+    api.expenses.myBalance,
+    isAuthenticated ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
+  // Server-sorted by due date, so the first few are the most pressing.
+  const previewTasks = rawTasks?.slice(0, TASK_PREVIEW_LIMIT);
   const featuredLists = listPreviews?.previews
     .filter((list) => listPreviews.favoriteIds.includes(list._id))
     .map(adaptListPreview);
@@ -335,6 +428,7 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
     <div className="mx-auto w-full max-w-4xl space-y-8 py-2">
       <div className="space-y-3">
         <HeroHeader
+          projectId={projectId}
           dateLabel={dateLabel}
           eventCount={todayEventCount}
           taskCount={taskCount}
@@ -342,9 +436,30 @@ export default function HomeDashboard({ projectId }: { projectId: string }) {
           tasksLabel={t("tasksAssigned")}
         />
         <HomeSectionChips projectId={projectId} />
+        <BalanceLine projectId={projectId} balance={balance} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
+        {previewTasks?.length ? (
+          <Panel
+            icon={ListChecks}
+            title={tLists("myTasks")}
+            seeAllHref={{
+              pathname: "/groups/[projectId]/lists/tasks",
+              params: { projectId },
+            }}
+            seeAllLabel={t("seeAll")}
+          >
+            {previewTasks.map((task) => (
+              <TaskRow
+                key={task._id}
+                projectId={projectId}
+                task={adaptTask(task)}
+                className="px-1"
+              />
+            ))}
+          </Panel>
+        ) : null}
         <Panel
           icon={Star}
           title={t("featuredLists")}

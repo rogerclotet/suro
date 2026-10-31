@@ -20,7 +20,13 @@ import UserAvatar from "@/components/user-avatar";
 import type { NavKey } from "@/i18n/message-keys";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import { mobileHeaderSectionKey, useMenuItems } from "../use-menu-items";
+import { GroupChip } from "../group-chip";
+import {
+  mobileHeaderSectionKey,
+  useBottomNavItems,
+  useMenuItems,
+} from "../use-menu-items";
+import { currentSection } from "../use-switch-group";
 
 const standaloneBreadcrumbs = ["groups", "profile"];
 
@@ -56,10 +62,6 @@ const breadcrumbHrefMap: Record<string, HrefFactory> = {
     pathname: "/groups/[projectId]/expenses",
     params: { projectId },
   }),
-  groups: (projectId) => ({
-    pathname: "/groups/[projectId]/groups",
-    params: { projectId },
-  }),
   "secret-santa": (projectId) => ({
     pathname: "/groups/[projectId]/secret-santa",
     params: { projectId },
@@ -91,6 +93,7 @@ function MobileHeader() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
+  const tabs = useBottomNavItems();
 
   const standaloneTitleKey = standalonePages[pathname];
   const sectionKey = mobileHeaderSectionKey(pathname);
@@ -99,6 +102,28 @@ function MobileHeader() {
     return (
       <div className="flex w-full items-center justify-between gap-2">
         <Skeleton className="h-6 w-32" />
+      </div>
+    );
+  }
+
+  if (project && pathname.startsWith("/groups/[projectId]")) {
+    // The bottom bar already names its own sections; other pages say where
+    // they are next to the group.
+    const section = currentSection(pathname);
+    const onTab = tabs.some((tab) => tab.section === section);
+    return (
+      <div className="flex w-full min-w-0 items-center gap-2">
+        <GroupChip project={project} />
+        {sectionKey && !onTab ? (
+          <>
+            <span className="shrink-0 text-muted-foreground" aria-hidden>
+              /
+            </span>
+            <span className="min-w-0 shrink-[2] truncate text-lg leading-tight font-semibold">
+              {tNav(sectionKey)}
+            </span>
+          </>
+        ) : null}
       </div>
     );
   }

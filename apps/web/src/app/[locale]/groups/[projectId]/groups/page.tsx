@@ -1,7 +1,12 @@
-import { checkAuth } from "@/lib/check-auth";
-import GroupsScreen from "./_components/groups-screen";
+import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { getPathname } from "@/i18n/navigation";
 
-export default async function GroupsPage() {
-  await checkAuth();
-  return <GroupsScreen />;
+/**
+ * The old mobile group switcher, merged into `/groups`. Kept as a redirect for
+ * installed PWAs that restore it.
+ */
+export default async function GroupSwitcherPage() {
+  const locale = await getLocale();
+  redirect(getPathname({ href: "/groups", locale }));
 }
