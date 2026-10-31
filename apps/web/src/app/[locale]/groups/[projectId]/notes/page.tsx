@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { checkAuth } from "@/lib/check-auth";
 import CreateNoteButton from "./_components/create-note-button/create-note-button";
 import NoteList from "./_components/note-list";
 import { NotePreviewSkeleton } from "./_components/note-preview";
@@ -8,6 +9,8 @@ export default async function Page({
 }: {
   params: Promise<{ projectId: string }>;
 }) {
+  await checkAuth();
+
   const { projectId } = await params;
 
   return (
