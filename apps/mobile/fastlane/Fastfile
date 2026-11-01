@@ -7,7 +7,8 @@
 #   android release           upload the built AAB + release notes -> production
 #   android metadata          push the full Play listing (text, images, screenshots)
 #   android promote           promote a release from one track to another
-#   ios submit_for_review     attach the processed build, push screenshots, submit
+#   ios submit_for_review     answer the age rating questions EAS can't, attach
+#                             the processed build, push screenshots, submit
 #                             (cancels an in-review older version first)
 #   ios beta                  upload an IPA to TestFlight (local/macOS only)
 #
@@ -118,6 +119,33 @@ def wait_for_processed_build(app_identifier:, version:, build_number: nil, timeo
   end
 end
 
+# Age rating questions EAS Metadata can't answer yet. Since September 2026 Apple
+# won't submit a version until the social media question has an answer, and
+# eas-cli 27 neither sends `socialMedia` nor accepts it in store.config.json's
+# `apple.advisory`. Suro's groups are private and invite-only: no feed, likes,
+# comments or reposts that spread content beyond the group (store/declarations.md).
+AGE_RATING_ANSWERS = { "socialMedia" => false }.freeze
+
+# Writes AGE_RATING_ANSWERS to the age rating of the App Information the next
+# version is reviewed with. A raw PATCH, so it doesn't depend on the pinned
+# Spaceship knowing the attribute. Assumes `asc_api_key` already authorized it.
+def answer_age_rating_questions(app_identifier:)
+  app = Spaceship::ConnectAPI::App.find(app_identifier)
+  UI.user_error!("App #{app_identifier} not found in App Store Connect") if app.nil?
+
+  app_info = app.fetch_edit_app_info
+  UI.user_error!("No editable App Information to answer the age rating on") if app_info.nil?
+
+  declaration = app_info.fetch_age_rating_declaration
+  UI.user_error!("App Information #{app_info.id} has no age rating declaration") if declaration.nil?
+
+  Spaceship::ConnectAPI.patch_age_rating_declaration(
+    age_rating_declaration_id: declaration.id,
+    attributes: AGE_RATING_ANSWERS,
+  )
+  UI.success("Answered the age rating's #{AGE_RATING_ANSWERS.keys.join(', ')}")
+end
+
 def latest_store_version(app)
   app.get_latest_app_store_version(
     platform: Spaceship::ConnectAPI::Platform::IOS,
@@ -226,6 +254,8 @@ platform :ios do
       build_number: build_number,
     )
     next if outcome == :already_submitted
+
+    answer_age_rating_questions(app_identifier: app_identifier)
 
     # Screenshots are slow to push and App Store Connect carries the previous
     # version's over, so only re-upload them when they actually changed.
