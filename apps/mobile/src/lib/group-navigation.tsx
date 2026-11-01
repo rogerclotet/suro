@@ -1,14 +1,20 @@
 import { useFocusEffect, usePathname, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { BackHandler } from "react-native";
+import { GroupTitle } from "@/components/group-header";
 import { headerBackAction } from "@/components/header-badges";
 import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 
-/** Only a section root leaves the group. Its nested stack keeps native Back. */
-export function useGroupRootOptions(
-  section: "home" | "lists" | "calendar" | "expenses",
-) {
+/** The tabs of a group, each the root of its own stack. */
+type GroupSection = "home" | "lists" | "calendar" | "expenses";
+
+/**
+ * Header options for a tab root: Back leaves the group for the Groups list,
+ * and the title names the group and opens its settings. Nested screens keep
+ * their own title and native Back.
+ */
+export function useGroupRootOptions(section: GroupSection) {
   const projectId = useProjectId();
   const router = useRouter();
   const pathname = usePathname();
@@ -27,5 +33,8 @@ export function useGroupRootOptions(
       return () => subscription.remove();
     }, [pathname, projectId, section, backToGroups]),
   );
-  return headerBackAction(backToGroups, tNav("groups"));
+  return {
+    ...headerBackAction(backToGroups, tNav("groups")),
+    headerTitle: () => <GroupTitle />,
+  };
 }

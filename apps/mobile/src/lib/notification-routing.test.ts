@@ -28,6 +28,7 @@ describe("notification visits", () => {
       "/",
       "/groups",
       "/group/home",
+      "/group/home/tasks",
       "/profile",
       "/preferences",
       "/create-group",
@@ -100,7 +101,7 @@ describe("notification visits", () => {
 });
 
 describe("unread aggregation", () => {
-  it("aggregates Home badges without including Calendar, Lists or Expenses", () => {
+  it("aggregates Home's chip sections only, not members or the other tabs", () => {
     const rows = [
       receipt("notes", 2),
       receipt("files", 3),
@@ -110,7 +111,7 @@ describe("unread aggregation", () => {
       receipt("lists", 5),
       receipt("expenses", 6),
     ];
-    expect(unreadCount(rows, projectId, "home")).toBe(13);
+    expect(unreadCount(rows, projectId, "home")).toBe(12);
     expect(unreadCount(rows, projectId)).toBe(28);
     expect(unreadCount(rows, projectId, "calendar")).toBe(4);
     expect(unreadCount(rows, "other-group")).toBe(0);

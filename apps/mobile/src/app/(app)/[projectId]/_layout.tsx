@@ -8,9 +8,10 @@ import type {
   NativeTabTriggerProps,
 } from "expo-router/native-tabs";
 import { NativeTabs } from "expo-router/native-tabs";
-import type { FC, PropsWithChildren } from "react";
+import { type FC, type PropsWithChildren, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useTranslations } from "@/i18n";
+import { forgetGroup, rememberGroup } from "@/lib/last-group";
 import {
   type NotificationSection,
   unreadCount,
@@ -81,6 +82,16 @@ export default function ProjectTabs() {
       : undefined;
   }
 
+  const isMember = projects?.some((p) => p._id === projectId);
+  const confirmedGone =
+    liveProjects?.some((p) => p._id === projectId) === false;
+  // Launch reopens the last group the user had open.
+  useEffect(() => {
+    if (!projectId) return;
+    if (isMember && !confirmedGone) rememberGroup(projectId);
+    if (confirmedGone) forgetGroup(projectId);
+  }, [projectId, isMember, confirmedGone]);
+
   if (!projectId) {
     return <Loading />;
   }
@@ -96,7 +107,7 @@ export default function ProjectTabs() {
 
   // Membership gone while we're on this route: redirect before project-scoped
   // queries mount and throw. Return to the groups list.
-  if (!projects.some((p) => p._id === projectId)) {
+  if (!isMember) {
     // A cached list can predate a newly created or joined group. Keep this
     // query mounted until the server confirms membership before redirecting.
     if (liveProjects === undefined) return <Loading />;

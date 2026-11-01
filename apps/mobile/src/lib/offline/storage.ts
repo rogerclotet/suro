@@ -67,7 +67,8 @@ function ensureCacheVersion() {
   }
   cacheVersionChecked = true;
 }
-const QUERY_PREFIX = "q:";
+/** Keys cleared with the query cache, on sign-out and account switches. */
+export const QUERY_PREFIX = "q:";
 const INDEX_KEY = "q:__index__";
 /** Cap on distinct cached query keys; oldest-inserted are evicted past this. */
 const MAX_QUERY_KEYS = 500;

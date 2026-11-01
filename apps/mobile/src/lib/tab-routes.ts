@@ -30,3 +30,14 @@ export function attachedRoute(
 ) {
   return `/${projectId}/${tab}/${screen}/${id}`;
 }
+
+/**
+ * A list opened from a screen that several tabs host, such as My Tasks: inside
+ * Home or Calendar when that's where the user is, otherwise in Lists.
+ */
+export function listRoute(projectId: string, pathname: string, listId: string) {
+  const tab = pathname.split("/").filter(Boolean)[1];
+  return tab === "home" || tab === "calendar"
+    ? attachedRoute(projectId, tab, "list", listId)
+    : `/${projectId}/lists/${listId}`;
+}

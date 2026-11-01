@@ -274,7 +274,8 @@
     "chooseTheme": "Elegir tema",
     "themeLight": "Claro",
     "themeDark": "Oscuro",
-    "themeSystem": "Sistema"
+    "themeSystem": "Sistema",
+    "back": "Atrás"
   },
   "home": {
     "today": "Hoy",
@@ -286,7 +287,10 @@
     "tasksAssigned": "tareas asignadas",
     "noUpcoming": "Ningún evento próximo",
     "noFeaturedLists": "Aún no hay listas destacadas. Marca una lista con la estrella para que aparezca aquí.",
-    "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos"
+    "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos",
+    "balanceOwe": "Debes {amount} en {count, plural, one {# bote} other {# botes}}",
+    "balanceOwed": "Te deben {amount} en {count, plural, one {# bote} other {# botes}}",
+    "balanceSettled": "Lo tienes todo saldado"
   },
   "feedback": {
     "title": "Enviar comentarios",
@@ -472,6 +476,7 @@
     "repeat_weekly": "Cada semana",
     "repeat_monthly": "Cada mes",
     "repeat_yearly": "Cada año",
+    "myTasks": "Mis tareas",
     "myTasksEmpty": "No tienes ninguna tarea pendiente.",
     "taskBucket_overdue": "Atrasadas",
     "taskBucket_today": "Hoy",

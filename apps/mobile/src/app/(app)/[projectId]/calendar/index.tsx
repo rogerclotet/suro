@@ -3,7 +3,7 @@ import type { Id } from "backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { calendarQueryBounds, eventLocalStart } from "domain/events";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarSync } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
@@ -40,6 +40,19 @@ export default function CalendarScreen() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()));
+  // Home's "events today" opens today even when an earlier visit left the
+  // calendar on another day. Each tap sends its own time, so a repeat tap
+  // still moves the calendar.
+  const { today } = useLocalSearchParams<{ today?: string }>();
+  const [shownToday, setShownToday] = useState(today);
+  if (today !== shownToday) {
+    setShownToday(today);
+    const day = new Date(Number(today));
+    if (today && Number.isFinite(day.getTime())) {
+      setMonth(new Date(day.getFullYear(), day.getMonth(), 1));
+      setSelectedDay(startOfDay(day));
+    }
+  }
   const [creating, setCreating] = useState(false);
   const fab = useFabScroll();
   const [exporting, setExporting] = useState(false);

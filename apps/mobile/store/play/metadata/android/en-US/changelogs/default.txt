@@ -1,3 +1,3 @@
-• See what changed: lists, events, expenses, notes and templates with updates show a dot until you open them, and the calendar lists new events. The web app now shows unread counts too.
-• Tapping a tab with updates always opens that section instead of jumping to the latest changed item.
-• In the mobile app, events and lists opened from Home now go back to Home.
+• Every section shows which group you're in. Tap its name for the group's settings, or go back to switch groups. The mobile app opens in the last group you used.
+• Home shows your day: your next tasks and what you owe or are owed in open pots. The counts open today's calendar and your tasks.
+• On the web, the bottom bar has the app's four tabs, every page has a Back button, and the two groups pages are now one.

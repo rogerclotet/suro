@@ -833,7 +833,10 @@
       "tasksAssigned": "tasks assigned",
       "noUpcoming": "No upcoming events",
       "noFeaturedLists": "No featured lists yet. Star a list to show it here.",
-      "linkedListA11y": "Event with checklist, {done} of {total} items done"
+      "linkedListA11y": "Event with checklist, {done} of {total} items done",
+      "balanceOwe": "You owe {amount} in {count, plural, one {# pot} other {# pots}}",
+      "balanceOwed": "You're owed {amount} in {count, plural, one {# pot} other {# pots}}",
+      "balanceSettled": "You're all settled up"
     },
     "widget": {
       "label": "Suro",

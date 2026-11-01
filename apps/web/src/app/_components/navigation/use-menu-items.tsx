@@ -9,7 +9,6 @@ import {
   Home,
   LayoutTemplateIcon,
   ListTodo,
-  Users,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -205,33 +204,13 @@ const MAX_BOTTOM_NAV_ITEMS = 4;
 
 export type BottomNavItem = MenuItem;
 
+/**
+ * Home, Lists, Calendar and Expenses, the same four tabs as the native app.
+ * The header's group chip switches group.
+ */
 export function useBottomNavItems(): BottomNavItem[] {
   const menuItems = useMenuItems();
-  const { project } = useProjects();
-  const t = useTranslations("nav");
-
-  return useMemo(() => {
-    const visible = menuItems.slice(0, MAX_BOTTOM_NAV_ITEMS);
-    const truncatedName =
-      project && project.name.length > 10
-        ? `${project.name.slice(0, 9)}…`
-        : (project?.name ?? t("groups"));
-
-    const groupsItem: BottomNavItem = {
-      name: truncatedName,
-      href: project
-        ? {
-            pathname: "/groups/[projectId]/groups",
-            params: { projectId: project.id },
-          }
-        : "#",
-      path: "/groups/[projectId]/groups",
-      section: "groups",
-      icon: <Users />,
-    };
-
-    return [...visible, groupsItem];
-  }, [menuItems, project, t]);
+  return useMemo(() => menuItems.slice(0, MAX_BOTTOM_NAV_ITEMS), [menuItems]);
 }
 
 export function useSubsectionItems(): MenuItem[] {
@@ -277,9 +256,8 @@ export function mobileHeaderSectionKey(pathname: string): NavKey | null {
     expenses: "expenses",
     files: "files",
     notes: "notes",
-    groups: "groups",
     "secret-santa": "secretSanta",
-    settings: "groups",
+    settings: "settings",
   };
 
   return keyMap[section] ?? null;

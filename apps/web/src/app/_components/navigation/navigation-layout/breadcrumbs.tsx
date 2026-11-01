@@ -20,7 +20,13 @@ import UserAvatar from "@/components/user-avatar";
 import type { NavKey } from "@/i18n/message-keys";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import { mobileHeaderSectionKey, useMenuItems } from "../use-menu-items";
+import { GroupNestedHeader, GroupTabHeader } from "../group-header";
+import { groupHeaderRoute } from "../group-header-route";
+import {
+  mobileHeaderSectionKey,
+  useBottomNavItems,
+  useMenuItems,
+} from "../use-menu-items";
 
 const standaloneBreadcrumbs = ["groups", "profile"];
 
@@ -56,10 +62,6 @@ const breadcrumbHrefMap: Record<string, HrefFactory> = {
     pathname: "/groups/[projectId]/expenses",
     params: { projectId },
   }),
-  groups: (projectId) => ({
-    pathname: "/groups/[projectId]/groups",
-    params: { projectId },
-  }),
   "secret-santa": (projectId) => ({
     pathname: "/groups/[projectId]/secret-santa",
     params: { projectId },
@@ -91,6 +93,7 @@ function MobileHeader() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const tNav = useTranslations("nav");
+  const tabs = useBottomNavItems();
 
   const standaloneTitleKey = standalonePages[pathname];
   const sectionKey = mobileHeaderSectionKey(pathname);
@@ -100,6 +103,25 @@ function MobileHeader() {
       <div className="flex w-full items-center justify-between gap-2">
         <Skeleton className="h-6 w-32" />
       </div>
+    );
+  }
+
+  const groupRoute = project
+    ? groupHeaderRoute(
+        pathname,
+        tabs.map((tab) => tab.section),
+      )
+    : null;
+  if (project && groupRoute?.kind === "tab") {
+    return <GroupTabHeader project={project} />;
+  }
+  if (project && groupRoute?.kind === "nested") {
+    return (
+      <GroupNestedHeader
+        project={project}
+        parent={groupRoute.parent}
+        titleKey={groupRoute.titleKey}
+      />
     );
   }
 

@@ -833,7 +833,10 @@
       "tasksAssigned": "tareas asignadas",
       "noUpcoming": "Ningún evento próximo",
       "noFeaturedLists": "Aún no hay listas destacadas. Marca una lista con la estrella para que aparezca aquí.",
-      "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos"
+      "linkedListA11y": "Evento con lista, {done} de {total} elementos hechos",
+      "balanceOwe": "Debes {amount} en {count, plural, one {# bote} other {# botes}}",
+      "balanceOwed": "Te deben {amount} en {count, plural, one {# bote} other {# botes}}",
+      "balanceSettled": "Lo tienes todo saldado"
     },
     "widget": {
       "label": "Suro",

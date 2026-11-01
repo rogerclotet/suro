@@ -274,7 +274,8 @@
     "chooseTheme": "Triar tema",
     "themeLight": "Clar",
     "themeDark": "Fosc",
-    "themeSystem": "Sistema"
+    "themeSystem": "Sistema",
+    "back": "Enrere"
   },
   "home": {
     "today": "Avui",
@@ -286,7 +287,10 @@
     "tasksAssigned": "tasques assignades",
     "noUpcoming": "Cap esdeveniment proper",
     "noFeaturedLists": "Encara no hi ha llistes destacades. Marca una llista amb l'estrella perquè aparegui aquí.",
-    "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets"
+    "linkedListA11y": "Esdeveniment amb llista, {done} de {total} elements fets",
+    "balanceOwe": "Deus {amount} en {count, plural, one {# pot} other {# pots}}",
+    "balanceOwed": "Et deuen {amount} en {count, plural, one {# pot} other {# pots}}",
+    "balanceSettled": "Ho tens tot saldat"
   },
   "feedback": {
     "title": "Envia suggeriments",
@@ -472,6 +476,7 @@
     "repeat_weekly": "Cada setmana",
     "repeat_monthly": "Cada mes",
     "repeat_yearly": "Cada any",
+    "myTasks": "Les meves tasques",
     "myTasksEmpty": "No tens cap tasca pendent.",
     "taskBucket_overdue": "Endarrerides",
     "taskBucket_today": "Avui",

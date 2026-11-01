@@ -5,6 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
+import { SectionTitle } from "@/components/group-header";
 import {
   headerBackAction,
   headerCreateAction,
@@ -98,6 +99,7 @@ export default function NotesOverview() {
       <Stack.Screen
         options={{
           title: tNotes("title"),
+          headerTitle: () => <SectionTitle title={tNotes("title")} />,
           ...headerBackAction(() => router.back(), tc("back")),
           ...headerCreateAction({
             onPress: () => setCreating(true),

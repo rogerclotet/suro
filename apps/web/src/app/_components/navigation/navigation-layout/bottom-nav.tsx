@@ -8,27 +8,20 @@ import {
   menuSection,
   type UnreadSection,
   unreadCount,
-  unreadElsewhere,
 } from "@/lib/notifications";
 import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 import { cn } from "@/lib/utils";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
 
 /**
- * Home adds up the sections reached from its chips. The group switcher counts
- * every other group, plus this group's members, whose settings it links to.
+ * Home adds up the sections reached from its chips. Other groups' changes
+ * show on the groups list, and member changes on the group's avatar.
  */
 function itemUnread(
   unread: readonly UnreadSection[],
   projectId: string,
   item: BottomNavItem,
 ) {
-  if (item.section === "groups") {
-    return (
-      unreadElsewhere(unread, projectId) +
-      unreadCount(unread, projectId, "members")
-    );
-  }
   if (item.section === "home") return unreadCount(unread, projectId, "home");
   const section = menuSection(item.section);
   return section ? unreadCount(unread, projectId, section) : 0;

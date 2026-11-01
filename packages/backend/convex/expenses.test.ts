@@ -180,6 +180,85 @@ describe("expenses: listPotsOverview totalSpent", () => {
   });
 });
 
+describe("expenses: myBalance", () => {
+  it("adds up what the member owes and is owed across open shared pots", async () => {
+    const carolId = await t.run(async (ctx) => {
+      const carol = await ctx.db.insert("users", {
+        name: "Carol",
+        email: "carol@example.test",
+      });
+      await ctx.db.insert("projectMembers", {
+        projectId: ids.family,
+        userId: carol,
+      });
+      return carol;
+    });
+    // Bob paid 20€ for Alice and him: Alice owes 10€.
+    const dinner = await makePot("Dinner");
+    await alice.mutation(api.expenses.createSpending, {
+      potId: dinner,
+      amount: 2000,
+      from: ids.bob,
+    });
+    // Alice paid 30€ for the three of them: she's owed 20€.
+    const trip = await alice.mutation(api.expenses.createPot, {
+      projectId: ids.family,
+      name: "Trip",
+      memberIds: [ids.alice, ids.bob, carolId],
+    });
+    await alice.mutation(api.expenses.createSpending, {
+      potId: trip,
+      amount: 3000,
+      from: ids.alice,
+    });
+    // An open pot with nothing in it yet counts as open, and square.
+    await makePot("Groceries");
+    // A pot without Alice doesn't count.
+    const other = await alice.mutation(api.expenses.createPot, {
+      projectId: ids.family,
+      name: "Bob and Carol",
+      memberIds: [ids.bob, carolId],
+    });
+    await alice.mutation(api.expenses.createSpending, {
+      potId: other,
+      amount: 5000,
+      from: ids.bob,
+    });
+
+    expect(
+      await alice.query(api.expenses.myBalance, { projectId: ids.family }),
+    ).toEqual({
+      owe: 1000,
+      owed: 2000,
+      owingPots: 1,
+      owedPots: 1,
+      openPots: 3,
+    });
+  });
+
+  it("leaves settled pots out", async () => {
+    const potId = await makePot();
+    await alice.mutation(api.expenses.createSpending, {
+      potId,
+      amount: 1000,
+      from: ids.alice,
+    });
+    const pot = present(await alice.query(api.expenses.getPot, { potId }));
+    await alice.mutation(api.expenses.settlePayments, {
+      potId,
+      payments: pot.settlements.map((s) => ({
+        from: s.from,
+        to: s.to,
+        amount: s.amount,
+      })),
+    });
+
+    expect(
+      await alice.query(api.expenses.myBalance, { projectId: ids.family }),
+    ).toEqual({ owe: 0, owed: 0, owingPots: 0, owedPots: 0, openPots: 0 });
+  });
+});
+
 describe("expenses: solo groups", () => {
   async function seedSolo() {
     return t.run(async (ctx) => {

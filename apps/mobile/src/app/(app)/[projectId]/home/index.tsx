@@ -1,5 +1,6 @@
 import { api } from "backend/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
+import { dueBucket } from "domain/tasks";
 import { type Href, Stack, useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import {
@@ -7,14 +8,17 @@ import {
   CalendarDays,
   CheckSquare,
   ChevronRight,
-  Settings,
+  ListChecks,
   Star,
+  Wallet,
 } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { sectionHeaderBadges } from "@/components/header-badges";
 import { HomeSectionChips } from "@/components/home-section-chips";
+import { useFormatDue } from "@/components/task-fields";
+import { TaskRow } from "@/components/task-row";
 import { UnreadDot } from "@/components/unread-badge";
 import { useLocale, useTranslations } from "@/i18n";
 import {
@@ -27,11 +31,8 @@ import {
   isEventOnDay,
   pickUpcomingEvents,
 } from "@/lib/event-dates";
-import { unreadCount } from "@/lib/notification-routing";
-import {
-  useUnreadItemCount,
-  useUnreadNotifications,
-} from "@/lib/notifications";
+import { formatMoney } from "@/lib/money";
+import { useUnreadItemCount } from "@/lib/notifications";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { attachedRoute, eventRoute } from "@/lib/tab-routes";
@@ -46,6 +47,7 @@ type CalEvent = FunctionReturnType<typeof api.events.listByRange>[number];
 
 const UPCOMING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const PREVIEW_LIMIT = 5;
+const TASK_PREVIEW_LIMIT = 3;
 
 function Panel({
   icon: Icon,
@@ -115,27 +117,33 @@ function InlineStat({
   icon: Icon,
   count,
   label,
+  onPress,
 }: {
   icon: LucideIcon;
   count: number;
   label: string;
+  onPress: () => void;
 }) {
   const t = useTheme();
   return (
-    <View
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
       accessibilityLabel={`${count} ${label}`}
-      style={{
+      hitSlop={10}
+      style={({ pressed }) => ({
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
         flexShrink: 0,
-      }}
+        opacity: pressed ? 0.6 : 1,
+      })}
     >
       <Icon color={t.primary} size={14} />
       <Txt weight="700" size={14}>
         {count}
       </Txt>
-    </View>
+    </Pressable>
   );
 }
 
@@ -145,12 +153,16 @@ function HeroHeader({
   taskCount,
   eventsLabel,
   tasksLabel,
+  onEvents,
+  onTasks,
 }: {
   dateLabel: string;
   eventCount: number;
   taskCount: number;
   eventsLabel: string;
   tasksLabel: string;
+  onEvents: () => void;
+  onTasks: () => void;
 }) {
   const t = useTheme();
   return (
@@ -184,13 +196,82 @@ function HeroHeader({
           icon={CalendarDays}
           count={eventCount}
           label={eventsLabel}
+          onPress={onEvents}
         />
         <Txt muted size={14}>
           ·
         </Txt>
-        <InlineStat icon={CheckSquare} count={taskCount} label={tasksLabel} />
+        <InlineStat
+          icon={CheckSquare}
+          count={taskCount}
+          label={tasksLabel}
+          onPress={onTasks}
+        />
       </View>
     </View>
+  );
+}
+
+type Balance = FunctionReturnType<typeof api.expenses.myBalance>;
+
+/**
+ * What the user owes and is owed across the group's open shared pots. Hidden
+ * when they aren't in any, so solo groups and groups without pots skip it.
+ */
+function BalanceLine({
+  balance,
+  onPress,
+}: {
+  balance: Balance | undefined;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  const tHome = useTranslations("mobile.home");
+  if (!balance?.openPots) return null;
+  const lines = [
+    balance.owe
+      ? tHome("balanceOwe", {
+          amount: formatMoney(balance.owe),
+          count: balance.owingPots,
+        })
+      : null,
+    balance.owed
+      ? tHome("balanceOwed", {
+          amount: formatMoney(balance.owed),
+          count: balance.owedPots,
+        })
+      : null,
+  ].filter((line) => line !== null);
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: t.border,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Wallet color={t.primary} size={18} />
+      <View style={{ flex: 1, gap: 2 }}>
+        {lines.length === 0 ? (
+          <Txt size={14}>{tHome("balanceSettled")}</Txt>
+        ) : (
+          lines.map((line) => (
+            <Txt key={line} size={14} weight="700">
+              {line}
+            </Txt>
+          ))
+        )}
+      </View>
+      <ChevronRight color={t.muted} size={18} />
+    </Pressable>
   );
 }
 
@@ -376,12 +457,12 @@ function FeaturedListCard({ list }: { list: ActiveList }) {
 
 export default function HomeDashboard() {
   const pid = useProjectId();
-  const unread = useUnreadNotifications();
   const router = useRouter();
   const group = usePersistentQuery(api.projects.get, { projectId: pid });
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
-  const tGroups = useTranslations("mobile.groups");
+  const tLists = useTranslations("mobile.lists");
+  const formatDue = useFormatDue();
 
   const bounds = useTodayAnchor(UPCOMING_WINDOW_MS);
 
@@ -412,6 +493,11 @@ export default function HomeDashboard() {
   }, [listsOverview]);
 
   const rawTasks = usePersistentQuery(api.tasks.myTasks, { projectId: pid });
+  const balance = usePersistentQuery(api.expenses.myBalance, {
+    projectId: pid,
+  });
+  // Server-sorted by due date, so the first few are the most pressing.
+  const previewTasks = rawTasks?.slice(0, TASK_PREVIEW_LIMIT);
   const featuredLists = listsOverview?.active
     .filter((list) => list.favorite)
     .slice(0, PREVIEW_LIMIT);
@@ -428,14 +514,7 @@ export default function HomeDashboard() {
       <Stack.Screen
         options={{
           title: group?.name ?? tNav("home"),
-          ...sectionHeaderBadges("home", undefined, [
-            {
-              icon: Settings,
-              label: tGroups("manageGroup"),
-              count: unreadCount(unread, pid, "members"),
-              onPress: () => router.push(`/group-settings?projectId=${pid}`),
-            },
-          ]),
+          ...sectionHeaderBadges("home"),
         }}
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>
@@ -446,9 +525,47 @@ export default function HomeDashboard() {
             taskCount={taskCount}
             eventsLabel={tHome("eventsToday")}
             tasksLabel={tHome("tasksAssigned")}
+            onEvents={() =>
+              router.navigate({
+                pathname: `/${pid}/calendar`,
+                params: { today: String(Date.now()) },
+              })
+            }
+            onTasks={() => router.push(`/${pid}/home/tasks`)}
           />
           <HomeSectionChips />
+          <BalanceLine
+            balance={balance}
+            onPress={() => router.navigate(`/${pid}/expenses`)}
+          />
         </View>
+
+        {previewTasks?.length ? (
+          <Panel
+            icon={ListChecks}
+            title={tLists("myTasks")}
+            seeAllHref={`/${pid}/home/tasks`}
+            seeAllLabel={tHome("seeAll")}
+          >
+            {previewTasks.map((task, index) => (
+              <View key={task._id}>
+                {index > 0 ? <RowDivider /> : null}
+                <TaskRow
+                  task={task}
+                  overdue={dueBucket(task, bounds.today) === "overdue"}
+                  formatDue={formatDue}
+                  inset={0}
+                  onPress={() =>
+                    router.push({
+                      pathname: attachedRoute(pid, "home", "list", task.listId),
+                      params: { name: task.listName },
+                    })
+                  }
+                />
+              </View>
+            ))}
+          </Panel>
+        ) : null}
 
         <Panel
           icon={Star}

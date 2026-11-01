@@ -242,6 +242,49 @@ export const getPot = query({
 });
 
 /**
+ * The signed-in member's position across the group's open shared pots, for
+ * Home's balance line: what they owe and are owed, and in how many pots. Pots
+ * they aren't in and one-member pots (the solo tracker) can't owe anything,
+ * so they're left out of `openPots` too.
+ */
+export const myBalance = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const userId = await requireProjectMember(ctx, projectId);
+    const pots = await ctx.db
+      .query("pots")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+    const position = {
+      owe: 0,
+      owed: 0,
+      owingPots: 0,
+      owedPots: 0,
+      openPots: 0,
+    };
+    for (const pot of pots) {
+      if (pot.settledAt !== undefined) continue;
+      const memberIds = await potMemberIds(ctx, pot._id);
+      if (memberIds.length < 2 || !memberIds.includes(userId)) continue;
+      position.openPots += 1;
+      const spendings = await ctx.db
+        .query("spendings")
+        .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+        .collect();
+      const balance = calculateBalances(memberIds, spendings).get(userId) ?? 0;
+      if (balance < 0) {
+        position.owe -= balance;
+        position.owingPots += 1;
+      } else if (balance > 0) {
+        position.owed += balance;
+        position.owedPots += 1;
+      }
+    }
+    return position;
+  },
+});
+
+/**
  * Solo-group expense tracker: the implicit pot's spendings, newest first.
  * Returns null when the project has more than one member.
  */

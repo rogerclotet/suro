@@ -86,6 +86,10 @@ export function unreadItems(
     .flatMap((receipt) => receipt.targets);
 }
 
+/**
+ * Unread receipts in a group, optionally for one section. `home` adds up the
+ * sections opened from Home's chips; member changes show on the group title.
+ */
 export function unreadCount(
   receipts: readonly UnreadSection[],
   projectId: string,
@@ -97,7 +101,7 @@ export function unreadCount(
       section === undefined ||
       section === receipt.section ||
       (section === "home" &&
-        ["notes", "files", "members", "secretSanta"].includes(receipt.section));
+        ["notes", "files", "secretSanta"].includes(receipt.section));
     return count + (matches ? receipt.count : 0);
   }, 0);
 }
