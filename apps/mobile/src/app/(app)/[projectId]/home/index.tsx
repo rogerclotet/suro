@@ -9,7 +9,6 @@ import {
   CheckSquare,
   ChevronRight,
   ListChecks,
-  Settings,
   Star,
   Wallet,
 } from "lucide-react-native";
@@ -33,11 +32,7 @@ import {
   pickUpcomingEvents,
 } from "@/lib/event-dates";
 import { formatMoney } from "@/lib/money";
-import { unreadCount } from "@/lib/notification-routing";
-import {
-  useUnreadItemCount,
-  useUnreadNotifications,
-} from "@/lib/notifications";
+import { useUnreadItemCount } from "@/lib/notifications";
 import { useOfflineListsOverview, usePersistentQuery } from "@/lib/offline";
 import { useProjectId } from "@/lib/project-id";
 import { attachedRoute, eventRoute } from "@/lib/tab-routes";
@@ -462,12 +457,10 @@ function FeaturedListCard({ list }: { list: ActiveList }) {
 
 export default function HomeDashboard() {
   const pid = useProjectId();
-  const unread = useUnreadNotifications();
   const router = useRouter();
   const group = usePersistentQuery(api.projects.get, { projectId: pid });
   const tNav = useTranslations("nav");
   const tHome = useTranslations("mobile.home");
-  const tGroups = useTranslations("mobile.groups");
   const tLists = useTranslations("mobile.lists");
   const formatDue = useFormatDue();
 
@@ -521,14 +514,7 @@ export default function HomeDashboard() {
       <Stack.Screen
         options={{
           title: group?.name ?? tNav("home"),
-          ...sectionHeaderBadges("home", undefined, [
-            {
-              icon: Settings,
-              label: tGroups("manageGroup"),
-              count: unreadCount(unread, pid, "members"),
-              onPress: () => router.push(`/group-settings?projectId=${pid}`),
-            },
-          ]),
+          ...sectionHeaderBadges("home"),
         }}
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 28 }}>

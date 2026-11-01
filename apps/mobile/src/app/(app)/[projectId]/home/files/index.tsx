@@ -2,6 +2,7 @@ import { api } from "backend/convex/_generated/api";
 import { Stack, useRouter } from "expo-router";
 import { ScrollView, View } from "react-native";
 import { FileGallery } from "@/components/file-gallery";
+import { SectionTitle } from "@/components/group-header";
 import {
   headerBackAction,
   headerCreateAction,
@@ -38,6 +39,7 @@ export default function Files() {
       <Stack.Screen
         options={{
           title: tFiles("title"),
+          headerTitle: () => <SectionTitle title={tFiles("title")} />,
           ...headerBackAction(() => router.back(), tc("back")),
           ...headerCreateAction({
             onPress: onCreate,

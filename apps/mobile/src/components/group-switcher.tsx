@@ -1,6 +1,5 @@
 import { api } from "backend/convex/_generated/api";
 import type { Id } from "backend/convex/_generated/dataModel";
-import { matchesGroupSearch } from "domain/group-search";
 import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
 import { useState } from "react";
@@ -8,15 +7,14 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  type StyleProp,
   StyleSheet,
   View,
-  type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/avatar";
 import { UnreadBadge } from "@/components/unread-badge";
 import { useTranslations } from "@/i18n";
+import { matchesGroupSearch } from "@/lib/group-search";
 import { unreadCount } from "@/lib/notification-routing";
 import { useUnreadNotifications } from "@/lib/notifications";
 import { usePersistentQuery } from "@/lib/offline";
@@ -52,7 +50,38 @@ export function GroupsScreenContent() {
 
   return (
     <View style={{ flex: 1 }}>
-      <GroupSearchField value={search} onChangeText={setSearch} />
+      <View
+        style={[
+          styles.search,
+          { backgroundColor: t.inputBg, borderColor: t.border },
+        ]}
+      >
+        <Search size={19} color={t.muted} />
+        <Field
+          value={search}
+          onChangeText={setSearch}
+          placeholder={tr("searchPlaceholder")}
+          accessibilityLabel={tr("searchPlaceholder")}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          style={styles.searchInput}
+        />
+        {search.length > 0 ? (
+          <Pressable
+            onPress={() => setSearch("")}
+            accessibilityRole="button"
+            accessibilityLabel={tr("clearSearch")}
+            hitSlop={4}
+            style={({ pressed }) => [
+              styles.clearSearch,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <X size={18} color={t.muted} />
+          </Pressable>
+        ) : null}
+      </View>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
@@ -184,55 +213,6 @@ export function GroupsScreenContent() {
         extended={fab.extended}
         bottomInset={insets.bottom}
       />
-    </View>
-  );
-}
-
-/** The groups search box, shared by the Groups list and the group switcher. */
-export function GroupSearchField({
-  value,
-  onChangeText,
-  style,
-}: {
-  value: string;
-  onChangeText: (value: string) => void;
-  style?: StyleProp<ViewStyle>;
-}) {
-  const t = useTheme();
-  const tr = useTranslations("mobile.groups");
-  return (
-    <View
-      style={[
-        styles.search,
-        { backgroundColor: t.inputBg, borderColor: t.border },
-        style,
-      ]}
-    >
-      <Search size={19} color={t.muted} />
-      <Field
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={tr("searchPlaceholder")}
-        accessibilityLabel={tr("searchPlaceholder")}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        style={styles.searchInput}
-      />
-      {value.length > 0 ? (
-        <Pressable
-          onPress={() => onChangeText("")}
-          accessibilityRole="button"
-          accessibilityLabel={tr("clearSearch")}
-          hitSlop={4}
-          style={({ pressed }) => [
-            styles.clearSearch,
-            { opacity: pressed ? 0.6 : 1 },
-          ]}
-        >
-          <X size={18} color={t.muted} />
-        </Pressable>
-      ) : null}
     </View>
   );
 }

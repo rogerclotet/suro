@@ -1,3 +1,3 @@
-• El grup surt a dalt de cada secció: toca'l per canviar de grup sense sortir de la secció. L'app mòbil s'obre a l'últim grup que has fet servir.
+• Cada secció mostra en quin grup ets. Toca'n el nom per obrir-ne els ajustos, o torna enrere per canviar de grup. L'app mòbil s'obre a l'últim grup que has fet servir.
 • Inici mostra el teu dia: les properes tasques i quant deus o et deuen als pots oberts. Els comptadors obren el calendari d'avui i les teves tasques.
-• Al web, la barra inferior té les quatre pestanyes de l'app, i les dues pàgines de grups ara són una.
+• Al web, la barra inferior té les quatre pestanyes de l'app, cada pàgina té un botó per tornar enrere, i les dues pàgines de grups ara són una.

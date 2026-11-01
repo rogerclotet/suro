@@ -16,6 +16,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
+import { SectionTitle } from "@/components/group-header";
 import {
   headerBackAction,
   headerCreateAction,
@@ -82,6 +83,7 @@ export default function SecretSantaScreen() {
       <Stack.Screen
         options={{
           title: tNav("secretSanta"),
+          headerTitle: () => <SectionTitle title={tNav("secretSanta")} />,
           ...headerBackAction(() => router.back(), tc("back")),
           ...headerCreateAction(
             undefined,

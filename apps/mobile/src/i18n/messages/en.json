@@ -917,9 +917,7 @@
       "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
       "searchPlaceholder": "Search groups or people",
       "clearSearch": "Clear search",
-      "noSearchResults": "No groups match your search.",
-      "switchGroupFrom": "{name}. Switch group",
-      "allGroups": "All groups"
+      "noSearchResults": "No groups match your search."
     },
     "profile": {
       "title": "Profile",

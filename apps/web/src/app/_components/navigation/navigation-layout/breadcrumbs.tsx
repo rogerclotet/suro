@@ -20,13 +20,13 @@ import UserAvatar from "@/components/user-avatar";
 import type { NavKey } from "@/i18n/message-keys";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSession } from "@/lib/session";
-import { GroupChip } from "../group-chip";
+import { GroupNestedHeader, GroupTabHeader } from "../group-header";
+import { groupHeaderRoute } from "../group-header-route";
 import {
   mobileHeaderSectionKey,
   useBottomNavItems,
   useMenuItems,
 } from "../use-menu-items";
-import { currentSection } from "../use-switch-group";
 
 const standaloneBreadcrumbs = ["groups", "profile"];
 
@@ -106,25 +106,22 @@ function MobileHeader() {
     );
   }
 
-  if (project && pathname.startsWith("/groups/[projectId]")) {
-    // The bottom bar already names its own sections; other pages say where
-    // they are next to the group.
-    const section = currentSection(pathname);
-    const onTab = tabs.some((tab) => tab.section === section);
+  const groupRoute = project
+    ? groupHeaderRoute(
+        pathname,
+        tabs.map((tab) => tab.section),
+      )
+    : null;
+  if (project && groupRoute?.kind === "tab") {
+    return <GroupTabHeader project={project} />;
+  }
+  if (project && groupRoute?.kind === "nested") {
     return (
-      <div className="flex w-full min-w-0 items-center gap-2">
-        <GroupChip project={project} />
-        {sectionKey && !onTab ? (
-          <>
-            <span className="shrink-0 text-muted-foreground" aria-hidden>
-              /
-            </span>
-            <span className="min-w-0 shrink-[2] truncate text-lg leading-tight font-semibold">
-              {tNav(sectionKey)}
-            </span>
-          </>
-        ) : null}
-      </div>
+      <GroupNestedHeader
+        project={project}
+        parent={groupRoute.parent}
+        titleKey={groupRoute.titleKey}
+      />
     );
   }
 

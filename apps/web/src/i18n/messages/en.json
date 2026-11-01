@@ -275,7 +275,7 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
-    "allGroups": "All groups"
+    "back": "Back"
   },
   "home": {
     "today": "Today",
@@ -400,10 +400,7 @@
     "deleteDataWarning": "Deleting this group permanently removes all its lists, calendar events, files, notes and expenses for every member. This cannot be undone.",
     "groupUnavailable": "This group is no longer available.",
     "backToGroups": "Back to groups",
-    "working": "Please wait…",
-    "switchGroupFrom": "{name}. Switch group",
-    "searchPlaceholder": "Search groups or people",
-    "noSearchResults": "No groups match your search."
+    "working": "Please wait…"
   },
   "groupSettings": {
     "title": "Group settings",

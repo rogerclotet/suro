@@ -275,7 +275,7 @@
     "themeLight": "Clar",
     "themeDark": "Fosc",
     "themeSystem": "Sistema",
-    "allGroups": "Tots els grups"
+    "back": "Enrere"
   },
   "home": {
     "today": "Avui",
@@ -400,10 +400,7 @@
     "deleteDataWarning": "Eliminar el grup esborra permanentment totes les llistes, els esdeveniments, els fitxers, les notes i les despeses per a tots els membres. Aquesta acció no es pot desfer.",
     "groupUnavailable": "Aquest grup ja no està disponible.",
     "backToGroups": "Torna als grups",
-    "working": "Espera un moment…",
-    "switchGroupFrom": "{name}. Canvia de grup",
-    "searchPlaceholder": "Cerca grups o persones",
-    "noSearchResults": "Cap grup coincideix amb la cerca."
+    "working": "Espera un moment…"
   },
   "groupSettings": {
     "title": "Configuració del grup",

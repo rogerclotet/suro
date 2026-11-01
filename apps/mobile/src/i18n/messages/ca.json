@@ -917,9 +917,7 @@
       "unreadCount": "{count, plural, one {# notificació no llegida} other {# notificacions no llegides}}",
       "searchPlaceholder": "Cerca grups o persones",
       "clearSearch": "Esborra la cerca",
-      "noSearchResults": "Cap grup coincideix amb la cerca.",
-      "switchGroupFrom": "{name}. Canviar de grup",
-      "allGroups": "Tots els grups"
+      "noSearchResults": "Cap grup coincideix amb la cerca."
     },
     "profile": {
       "title": "Perfil",

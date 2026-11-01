@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
 
 /**
- * Home adds up the sections reached from its chips. Other groups and this
- * group's members show on the header's group chip.
+ * Home adds up the sections reached from its chips. Other groups' changes
+ * show on the header's Back, and member changes on the group's avatar.
  */
 function itemUnread(
   unread: readonly UnreadSection[],

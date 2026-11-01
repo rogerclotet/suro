@@ -275,7 +275,7 @@
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "themeSystem": "Sistema",
-    "allGroups": "Todos los grupos"
+    "back": "Atrás"
   },
   "home": {
     "today": "Hoy",
@@ -400,10 +400,7 @@
     "deleteDataWarning": "Eliminar el grupo borra permanentemente todas sus listas, eventos, archivos, notas y gastos para todos los miembros. Esta acción no se puede deshacer.",
     "groupUnavailable": "Este grupo ya no está disponible.",
     "backToGroups": "Volver a los grupos",
-    "working": "Espera un momento…",
-    "switchGroupFrom": "{name}. Cambia de grupo",
-    "searchPlaceholder": "Buscar grupos o personas",
-    "noSearchResults": "Ningún grupo coincide con la búsqueda."
+    "working": "Espera un momento…"
   },
   "groupSettings": {
     "title": "Configuración del grupo",
