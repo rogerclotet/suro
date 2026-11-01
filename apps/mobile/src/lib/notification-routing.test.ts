@@ -4,7 +4,6 @@ import {
   notificationVisit,
   type UnreadSection,
   unreadCount,
-  unreadElsewhere,
   unreadItems,
 } from "./notification-routing";
 
@@ -116,15 +115,6 @@ describe("unread aggregation", () => {
     expect(unreadCount(rows, projectId)).toBe(28);
     expect(unreadCount(rows, projectId, "calendar")).toBe(4);
     expect(unreadCount(rows, "other-group")).toBe(0);
-  });
-
-  it("counts other groups' receipts for the group chip", () => {
-    const other = {
-      ...receipt("lists", 4),
-      projectId: "other" as Id<"projects">,
-    };
-    expect(unreadElsewhere([receipt("notes", 2), other], projectId)).toBe(4);
-    expect(unreadElsewhere([receipt("notes", 2)], projectId)).toBe(0);
   });
 
   it("lists one section's items within one group", () => {

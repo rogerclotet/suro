@@ -15,7 +15,7 @@ import { type BottomNavItem, useBottomNavItems } from "../use-menu-items";
 
 /**
  * Home adds up the sections reached from its chips. Other groups' changes
- * show on the header's Back, and member changes on the group's avatar.
+ * show on the groups list, and member changes on the group's avatar.
  */
 function itemUnread(
   unread: readonly UnreadSection[],

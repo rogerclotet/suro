@@ -1,7 +1,9 @@
 import { useFocusEffect, usePathname, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { BackHandler } from "react-native";
-import { GroupsBackButton, GroupTitle } from "@/components/group-header";
+import { GroupTitle } from "@/components/group-header";
+import { headerBackAction } from "@/components/header-badges";
+import { useTranslations } from "@/i18n";
 import { useProjectId } from "@/lib/project-id";
 
 /** The tabs of a group, each the root of its own stack. */
@@ -16,6 +18,7 @@ export function useGroupRootOptions(section: GroupSection) {
   const projectId = useProjectId();
   const router = useRouter();
   const pathname = usePathname();
+  const tNav = useTranslations("nav");
   const backToGroups = useCallback(() => router.dismissTo("/groups"), [router]);
   useFocusEffect(
     useCallback(() => {
@@ -31,7 +34,7 @@ export function useGroupRootOptions(section: GroupSection) {
     }, [pathname, projectId, section, backToGroups]),
   );
   return {
-    headerLeft: () => <GroupsBackButton onPress={backToGroups} />,
+    ...headerBackAction(backToGroups, tNav("groups")),
     headerTitle: () => <GroupTitle />,
   };
 }

@@ -8,39 +8,28 @@ import ProjectAvatar from "@/components/project-avatar";
 import { UnreadDot } from "@/components/unread-badge";
 import type { NavKey } from "@/i18n/message-keys";
 import { Link } from "@/i18n/navigation";
-import { unreadCount, unreadElsewhere } from "@/lib/notifications";
+import { unreadCount } from "@/lib/notifications";
 import { useUnreadNotifications } from "@/lib/queries/use-notifications";
 
 const BACK_CLASSES =
   "-ml-2 flex min-h-11 min-w-11 shrink-0 items-center text-primary transition-opacity active:opacity-60";
 
 /**
- * A bottom-bar section's header: Back to the groups list, carrying the other
- * groups' unread count, then the group's avatar and name, which open its
+ * A bottom-bar section's header: Back to the groups list, where other groups'
+ * unread counts show, then the group's avatar and name, which open its
  * settings. Member changes put a dot on the avatar.
  */
 export function GroupTabHeader({ project }: { project: Project }) {
   const unread = useUnreadNotifications();
   const tGroups = useTranslations("groups");
-  const tNotifications = useTranslations("notifications");
-  const elsewhere = unreadElsewhere(unread, project.id);
   return (
     <div className="flex w-full min-w-0 items-center gap-1">
       <Link
         href="/groups"
         className={BACK_CLASSES}
-        aria-label={
-          elsewhere
-            ? `${tGroups("backToGroups")}, ${tNotifications("unreadCount", { count: elsewhere })}`
-            : tGroups("backToGroups")
-        }
+        aria-label={tGroups("backToGroups")}
       >
         <ChevronLeftIcon className="size-7" aria-hidden />
-        {elsewhere ? (
-          <span className="text-base tabular-nums">
-            {elsewhere > 99 ? "99+" : elsewhere}
-          </span>
-        ) : null}
       </Link>
       <Link
         href={{
