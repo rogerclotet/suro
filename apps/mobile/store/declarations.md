@@ -85,7 +85,10 @@ instruments, diagnostics, usage analytics (no analytics SDK in the native app).
 ### Other App Store Connect answers
 
 - **Age rating questionnaire:** all "None" → **4+** (matches
-  `apple.advisory` in `store.config.json`).
+  `apple.advisory` in `store.config.json`). Social Media: **No**: groups are
+  private, with no feed or way to spread content beyond them. EAS Metadata
+  can't send that answer yet, so `fastlane ios submit_for_review` sets it
+  (`AGE_RATING_ANSWERS` in the Fastfile).
 - **Export compliance:** uses only standard HTTPS/TLS →
   `ITSAppUsesNonExemptEncryption=false` is set in `app.json`, so no per-build
   prompt.
